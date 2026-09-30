@@ -1,0 +1,1563 @@
+{
+  "status": "RAW_COUNTS_AND_STATE_SPACE_PREDICTIONS_PASS",
+  "conditions": 450,
+  "prediction_lock_unchanged": true,
+  "max_count_mean_error": 4.085620730620576e-14,
+  "max_SEM_error": 7.993605777301127e-15,
+  "max_state_space_prediction_error": 5.773159728050814e-15,
+  "summary": {
+    "real5_inside": {
+      "failures": 30,
+      "n": 126,
+      "median_error": 0.03983795076806852
+    },
+    "real3_pair_inside": {
+      "failures": 32,
+      "n": 126,
+      "median_error": 0.04167879224554245
+    },
+    "real5_above": {
+      "failures": 74,
+      "n": 126,
+      "median_error": 0.2410885218366416
+    },
+    "real3_pair_above": {
+      "failures": 66,
+      "n": 126,
+      "median_error": 0.1826167418103904
+    }
+  },
+  "workpoints_with_all_frequencies_passing": {
+    "real5_inside": [
+      42,
+      63
+    ],
+    "real3_pair_inside": [
+      41,
+      63
+    ],
+    "real5_above": [
+      22,
+      63
+    ],
+    "real3_pair_above": [
+      25,
+      63
+    ]
+  },
+  "precision": [
+    {
+      "point": 0,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.11021494195047599,
+      "DC_SNR": 17.229391268793577
+    },
+    {
+      "point": 0,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.15094923374399882,
+      "DC_SNR": 17.229391268793577
+    },
+    {
+      "point": 0,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.19320025949167763,
+      "DC_SNR": 17.229391268793577
+    },
+    {
+      "point": 0,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.24861595117301058,
+      "DC_SNR": 17.229391268793577
+    },
+    {
+      "point": 1,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.03458843489579793,
+      "DC_SNR": 54.198161879108106
+    },
+    {
+      "point": 1,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.048070779780654604,
+      "DC_SNR": 54.198161879108106
+    },
+    {
+      "point": 1,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.06079850505197093,
+      "DC_SNR": 54.198161879108106
+    },
+    {
+      "point": 1,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.07803507177379795,
+      "DC_SNR": 54.198161879108106
+    },
+    {
+      "point": 2,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.01540805243653168,
+      "DC_SNR": 117.08903700913162
+    },
+    {
+      "point": 2,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02117866125568547,
+      "DC_SNR": 117.08903700913162
+    },
+    {
+      "point": 2,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.027173635321085302,
+      "DC_SNR": 117.08903700913162
+    },
+    {
+      "point": 2,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.03455747724153275,
+      "DC_SNR": 117.08903700913162
+    },
+    {
+      "point": 3,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.008691392134908412,
+      "DC_SNR": 218.85730695727275
+    },
+    {
+      "point": 3,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.011700917657783434,
+      "DC_SNR": 218.85730695727275
+    },
+    {
+      "point": 3,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.016419533607070956,
+      "DC_SNR": 218.85730695727275
+    },
+    {
+      "point": 3,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.01952194942659988,
+      "DC_SNR": 218.85730695727275
+    },
+    {
+      "point": 4,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.006539055510624432,
+      "DC_SNR": 310.2338476269823
+    },
+    {
+      "point": 4,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.008688264650164248,
+      "DC_SNR": 310.2338476269823
+    },
+    {
+      "point": 4,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.01323034233356938,
+      "DC_SNR": 310.2338476269823
+    },
+    {
+      "point": 4,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.018643754689884457,
+      "DC_SNR": 310.2338476269823
+    },
+    {
+      "point": 5,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.006004032931482067,
+      "DC_SNR": 346.4455635367415
+    },
+    {
+      "point": 5,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.007686119967515248,
+      "DC_SNR": 346.4455635367415
+    },
+    {
+      "point": 5,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.011326580967099212,
+      "DC_SNR": 346.4455635367415
+    },
+    {
+      "point": 5,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.018292011673718238,
+      "DC_SNR": 346.4455635367415
+    },
+    {
+      "point": 7,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.234371354204239,
+      "DC_SNR": 7.948435173393968
+    },
+    {
+      "point": 7,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.26623973353806535,
+      "DC_SNR": 7.948435173393968
+    },
+    {
+      "point": 7,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.2885673140874383,
+      "DC_SNR": 7.948435173393968
+    },
+    {
+      "point": 7,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.33260295163242076,
+      "DC_SNR": 7.948435173393968
+    },
+    {
+      "point": 8,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.07480304302114933,
+      "DC_SNR": 23.83902700727524
+    },
+    {
+      "point": 8,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.08353758350728333,
+      "DC_SNR": 23.83902700727524
+    },
+    {
+      "point": 8,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.09440674673160326,
+      "DC_SNR": 23.83902700727524
+    },
+    {
+      "point": 8,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.11337476209517909,
+      "DC_SNR": 23.83902700727524
+    },
+    {
+      "point": 9,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.021278036444654994,
+      "DC_SNR": 73.40032162160078
+    },
+    {
+      "point": 9,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02669509002614781,
+      "DC_SNR": 73.40032162160078
+    },
+    {
+      "point": 9,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.03191164630150015,
+      "DC_SNR": 73.40032162160078
+    },
+    {
+      "point": 9,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.03982664369560257,
+      "DC_SNR": 73.40032162160078
+    },
+    {
+      "point": 10,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.010374783043493785,
+      "DC_SNR": 160.77906352938976
+    },
+    {
+      "point": 10,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.016041130992103286,
+      "DC_SNR": 160.77906352938976
+    },
+    {
+      "point": 10,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.020277018508695465,
+      "DC_SNR": 160.77906352938976
+    },
+    {
+      "point": 10,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.025997870126267007,
+      "DC_SNR": 160.77906352938976
+    },
+    {
+      "point": 11,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.006620928621380733,
+      "DC_SNR": 273.3353945998262
+    },
+    {
+      "point": 11,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.012393966908170722,
+      "DC_SNR": 273.3353945998262
+    },
+    {
+      "point": 11,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.01949634878120256,
+      "DC_SNR": 273.3353945998262
+    },
+    {
+      "point": 11,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.02275006233344267,
+      "DC_SNR": 273.3353945998262
+    },
+    {
+      "point": 12,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.005186153312768667,
+      "DC_SNR": 371.9086365413949
+    },
+    {
+      "point": 12,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.009565740073857075,
+      "DC_SNR": 371.9086365413949
+    },
+    {
+      "point": 12,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.018563735959092775,
+      "DC_SNR": 371.9086365413949
+    },
+    {
+      "point": 12,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.02708384087208784,
+      "DC_SNR": 371.9086365413949
+    },
+    {
+      "point": 13,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.1500672740205561,
+      "DC_SNR": 17.221369531384042
+    },
+    {
+      "point": 13,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.34904731923414534,
+      "DC_SNR": 17.221369531384042
+    },
+    {
+      "point": 13,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.41542698614875284,
+      "DC_SNR": 17.221369531384042
+    },
+    {
+      "point": 13,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.5409499950010889,
+      "DC_SNR": 17.221369531384042
+    },
+    {
+      "point": 14,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.04697001278555758,
+      "DC_SNR": 55.75535533020848
+    },
+    {
+      "point": 14,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.10844618506697443,
+      "DC_SNR": 55.75535533020848
+    },
+    {
+      "point": 14,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.13363824361648047,
+      "DC_SNR": 55.75535533020848
+    },
+    {
+      "point": 14,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.17275298869070654,
+      "DC_SNR": 55.75535533020848
+    },
+    {
+      "point": 15,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.022390662547456353,
+      "DC_SNR": 113.94068879456528
+    },
+    {
+      "point": 15,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.0495067311316857,
+      "DC_SNR": 113.94068879456528
+    },
+    {
+      "point": 15,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.06689482072156447,
+      "DC_SNR": 113.94068879456528
+    },
+    {
+      "point": 15,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.0809482234131395,
+      "DC_SNR": 113.94068879456528
+    },
+    {
+      "point": 16,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.012840422277002437,
+      "DC_SNR": 188.22089594130864
+    },
+    {
+      "point": 16,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.024090048600334608,
+      "DC_SNR": 188.22089594130864
+    },
+    {
+      "point": 16,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.03905992407672037,
+      "DC_SNR": 188.22089594130864
+    },
+    {
+      "point": 16,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.04476655736513708,
+      "DC_SNR": 188.22089594130864
+    },
+    {
+      "point": 17,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.00919320494009401,
+      "DC_SNR": 256.3576892421586
+    },
+    {
+      "point": 17,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.014758366371365713,
+      "DC_SNR": 256.3576892421586
+    },
+    {
+      "point": 17,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.024124336858352084,
+      "DC_SNR": 256.3576892421586
+    },
+    {
+      "point": 17,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.0365277043046529,
+      "DC_SNR": 256.3576892421586
+    },
+    {
+      "point": 18,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.008111311289384505,
+      "DC_SNR": 281.2116890159505
+    },
+    {
+      "point": 18,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.011607532968352128,
+      "DC_SNR": 281.2116890159505
+    },
+    {
+      "point": 18,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.017329672739189683,
+      "DC_SNR": 281.2116890159505
+    },
+    {
+      "point": 18,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.029092401703164076,
+      "DC_SNR": 281.2116890159505
+    },
+    {
+      "point": 21,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.16546569922642046,
+      "DC_SNR": 16.88640324443072
+    },
+    {
+      "point": 21,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.3269571294506807,
+      "DC_SNR": 16.88640324443072
+    },
+    {
+      "point": 21,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.3742743317482151,
+      "DC_SNR": 16.88640324443072
+    },
+    {
+      "point": 21,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.4379646216061055,
+      "DC_SNR": 16.88640324443072
+    },
+    {
+      "point": 22,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.04656098589735515,
+      "DC_SNR": 58.90077762145471
+    },
+    {
+      "point": 22,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.09894731104837762,
+      "DC_SNR": 58.90077762145471
+    },
+    {
+      "point": 22,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.11750875594702831,
+      "DC_SNR": 58.90077762145471
+    },
+    {
+      "point": 22,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.14288864658752262,
+      "DC_SNR": 58.90077762145471
+    },
+    {
+      "point": 23,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.01858226361034821,
+      "DC_SNR": 142.22756187781752
+    },
+    {
+      "point": 23,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.043876906300585834,
+      "DC_SNR": 142.22756187781752
+    },
+    {
+      "point": 23,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.05918130190738996,
+      "DC_SNR": 142.22756187781752
+    },
+    {
+      "point": 23,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.07097958543263891,
+      "DC_SNR": 142.22756187781752
+    },
+    {
+      "point": 24,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.009949398975509728,
+      "DC_SNR": 246.3773881971771
+    },
+    {
+      "point": 24,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02266299061968102,
+      "DC_SNR": 246.3773881971771
+    },
+    {
+      "point": 24,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.042484769448807976,
+      "DC_SNR": 246.3773881971771
+    },
+    {
+      "point": 24,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.045417935229057224,
+      "DC_SNR": 246.3773881971771
+    },
+    {
+      "point": 25,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.0069822118700494295,
+      "DC_SNR": 333.5151354749264
+    },
+    {
+      "point": 25,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.014020597401100711,
+      "DC_SNR": 333.5151354749264
+    },
+    {
+      "point": 25,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.02927450162563056,
+      "DC_SNR": 333.5151354749264
+    },
+    {
+      "point": 25,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.0448031020002604,
+      "DC_SNR": 333.5151354749264
+    },
+    {
+      "point": 26,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.2367159648167477,
+      "DC_SNR": 14.782983305624793
+    },
+    {
+      "point": 26,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 1.2567775056633164,
+      "DC_SNR": 14.782983305624793
+    },
+    {
+      "point": 26,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 2.5091313306945424,
+      "DC_SNR": 14.782983305624793
+    },
+    {
+      "point": 26,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 2.713773449356607,
+      "DC_SNR": 14.782983305624793
+    },
+    {
+      "point": 27,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.08146407141341165,
+      "DC_SNR": 39.355952056384886
+    },
+    {
+      "point": 27,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.38131922286711084,
+      "DC_SNR": 39.355952056384886
+    },
+    {
+      "point": 27,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.7787394408367089,
+      "DC_SNR": 39.355952056384886
+    },
+    {
+      "point": 27,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.7914887191767854,
+      "DC_SNR": 39.355952056384886
+    },
+    {
+      "point": 28,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.04993210649511597,
+      "DC_SNR": 58.632374689615894
+    },
+    {
+      "point": 28,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.1754970492760634,
+      "DC_SNR": 58.632374689615894
+    },
+    {
+      "point": 28,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.3734558535134631,
+      "DC_SNR": 58.632374689615894
+    },
+    {
+      "point": 28,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.3528936101725104,
+      "DC_SNR": 58.632374689615894
+    },
+    {
+      "point": 29,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.09053616874666363,
+      "DC_SNR": 29.651223908288667
+    },
+    {
+      "point": 29,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.22861064932212052,
+      "DC_SNR": 29.651223908288667
+    },
+    {
+      "point": 29,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.46661841554489586,
+      "DC_SNR": 29.651223908288667
+    },
+    {
+      "point": 29,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.5265398785802753,
+      "DC_SNR": 29.651223908288667
+    },
+    {
+      "point": 30,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.04430799914790797,
+      "DC_SNR": 55.42609713579596
+    },
+    {
+      "point": 30,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.08363015358353862,
+      "DC_SNR": 55.42609713579596
+    },
+    {
+      "point": 30,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.1451953660913563,
+      "DC_SNR": 55.42609713579596
+    },
+    {
+      "point": 30,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.24393285233715303,
+      "DC_SNR": 55.42609713579596
+    },
+    {
+      "point": 31,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.01849983931968032,
+      "DC_SNR": 127.31724752208159
+    },
+    {
+      "point": 31,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02978280767592619,
+      "DC_SNR": 127.31724752208159
+    },
+    {
+      "point": 31,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.04540259448161314,
+      "DC_SNR": 127.31724752208159
+    },
+    {
+      "point": 31,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.07906154836908803,
+      "DC_SNR": 127.31724752208159
+    },
+    {
+      "point": 35,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.12291147143209044,
+      "DC_SNR": 23.753315495179162
+    },
+    {
+      "point": 35,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.5535268651724606,
+      "DC_SNR": 23.753315495179162
+    },
+    {
+      "point": 35,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 1.049854122691291,
+      "DC_SNR": 23.753315495179162
+    },
+    {
+      "point": 35,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 1.044217179792373,
+      "DC_SNR": 23.753315495179162
+    },
+    {
+      "point": 36,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.08438289874388255,
+      "DC_SNR": 34.12604889048145
+    },
+    {
+      "point": 36,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.31185717891063636,
+      "DC_SNR": 34.12604889048145
+    },
+    {
+      "point": 36,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.6578601606238789,
+      "DC_SNR": 34.12604889048145
+    },
+    {
+      "point": 36,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.6125018477674214,
+      "DC_SNR": 34.12604889048145
+    },
+    {
+      "point": 37,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.09526749665046536,
+      "DC_SNR": 28.302726562123
+    },
+    {
+      "point": 37,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.27111835634692927,
+      "DC_SNR": 28.302726562123
+    },
+    {
+      "point": 37,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.6088201935918104,
+      "DC_SNR": 28.302726562123
+    },
+    {
+      "point": 37,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.6541517488347803,
+      "DC_SNR": 28.302726562123
+    },
+    {
+      "point": 38,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.01628151954082377,
+      "DC_SNR": 162.32972393483612
+    },
+    {
+      "point": 38,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.03523698089526721,
+      "DC_SNR": 162.32972393483612
+    },
+    {
+      "point": 38,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.07663117318756564,
+      "DC_SNR": 162.32972393483612
+    },
+    {
+      "point": 38,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.1327916811996473,
+      "DC_SNR": 162.32972393483612
+    },
+    {
+      "point": 39,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.08521063818748338,
+      "DC_SNR": 19.711362085034782
+    },
+    {
+      "point": 39,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.10960233574014439,
+      "DC_SNR": 19.711362085034782
+    },
+    {
+      "point": 39,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.1345421537681537,
+      "DC_SNR": 19.711362085034782
+    },
+    {
+      "point": 39,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.16287173583111828,
+      "DC_SNR": 19.711362085034782
+    },
+    {
+      "point": 40,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.02804558757720135,
+      "DC_SNR": 60.29032281711385
+    },
+    {
+      "point": 40,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.033457455461049855,
+      "DC_SNR": 60.29032281711385
+    },
+    {
+      "point": 40,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.04113166411046544,
+      "DC_SNR": 60.29032281711385
+    },
+    {
+      "point": 40,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.05158976357678622,
+      "DC_SNR": 60.29032281711385
+    },
+    {
+      "point": 41,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.01155893360801359,
+      "DC_SNR": 144.51314387958254
+    },
+    {
+      "point": 41,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.013026429752546895,
+      "DC_SNR": 144.51314387958254
+    },
+    {
+      "point": 41,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.016621364077752037,
+      "DC_SNR": 144.51314387958254
+    },
+    {
+      "point": 41,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.019823178945756498,
+      "DC_SNR": 144.51314387958254
+    },
+    {
+      "point": 42,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.005913447166057174,
+      "DC_SNR": 289.7726278906241
+    },
+    {
+      "point": 42,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.006575141857693731,
+      "DC_SNR": 289.7726278906241
+    },
+    {
+      "point": 42,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.00894059376289471,
+      "DC_SNR": 289.7726278906241
+    },
+    {
+      "point": 42,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.011695073998147025,
+      "DC_SNR": 289.7726278906241
+    },
+    {
+      "point": 43,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.004073094406767646,
+      "DC_SNR": 446.6673119713092
+    },
+    {
+      "point": 43,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.004782112672755266,
+      "DC_SNR": 446.6673119713092
+    },
+    {
+      "point": 43,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.006561580906239287,
+      "DC_SNR": 446.6673119713092
+    },
+    {
+      "point": 43,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.009634713322788837,
+      "DC_SNR": 446.6673119713092
+    },
+    {
+      "point": 46,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.0793168341494204,
+      "DC_SNR": 20.244393374006776
+    },
+    {
+      "point": 46,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.08188722263758007,
+      "DC_SNR": 20.244393374006776
+    },
+    {
+      "point": 46,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.09400395634750387,
+      "DC_SNR": 20.244393374006776
+    },
+    {
+      "point": 46,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.10544184199365857,
+      "DC_SNR": 20.244393374006776
+    },
+    {
+      "point": 47,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.021559935244989354,
+      "DC_SNR": 68.75558881003384
+    },
+    {
+      "point": 47,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02295767637924759,
+      "DC_SNR": 68.75558881003384
+    },
+    {
+      "point": 47,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.02684333201817061,
+      "DC_SNR": 68.75558881003384
+    },
+    {
+      "point": 47,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.03191057533040322,
+      "DC_SNR": 68.75558881003384
+    },
+    {
+      "point": 48,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.008667050825352601,
+      "DC_SNR": 169.8882265192253
+    },
+    {
+      "point": 48,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.0108291392367359,
+      "DC_SNR": 169.8882265192253
+    },
+    {
+      "point": 48,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.014346372837330207,
+      "DC_SNR": 169.8882265192253
+    },
+    {
+      "point": 48,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.017308244032242324,
+      "DC_SNR": 169.8882265192253
+    },
+    {
+      "point": 49,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.004596556705606967,
+      "DC_SNR": 328.25248998559397
+    },
+    {
+      "point": 49,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.0069226801061339095,
+      "DC_SNR": 328.25248998559397
+    },
+    {
+      "point": 49,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.011279549042674673,
+      "DC_SNR": 328.25248998559397
+    },
+    {
+      "point": 49,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.015437110894983792,
+      "DC_SNR": 328.25248998559397
+    },
+    {
+      "point": 50,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.003370045979188707,
+      "DC_SNR": 473.1631972828949
+    },
+    {
+      "point": 50,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.005188418912378409,
+      "DC_SNR": 473.1631972828949
+    },
+    {
+      "point": 50,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.009013936538778805,
+      "DC_SNR": 473.1631972828949
+    },
+    {
+      "point": 50,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.015390895871033084,
+      "DC_SNR": 473.1631972828949
+    },
+    {
+      "point": 51,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.07550264940192222,
+      "DC_SNR": 27.169792861708967
+    },
+    {
+      "point": 51,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.15995655208991527,
+      "DC_SNR": 27.169792861708967
+    },
+    {
+      "point": 51,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.26451684654152924,
+      "DC_SNR": 27.169792861708967
+    },
+    {
+      "point": 51,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.30149651337181954,
+      "DC_SNR": 27.169792861708967
+    },
+    {
+      "point": 52,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.02416214032762238,
+      "DC_SNR": 84.06662926680427
+    },
+    {
+      "point": 52,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.05070801580634456,
+      "DC_SNR": 84.06662926680427
+    },
+    {
+      "point": 52,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.08663517418457725,
+      "DC_SNR": 84.06662926680427
+    },
+    {
+      "point": 52,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.09965854383281351,
+      "DC_SNR": 84.06662926680427
+    },
+    {
+      "point": 53,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.011716218908325993,
+      "DC_SNR": 171.61812746629994
+    },
+    {
+      "point": 53,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.022339544240462833,
+      "DC_SNR": 171.61812746629994
+    },
+    {
+      "point": 53,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.039467080957808424,
+      "DC_SNR": 171.61812746629994
+    },
+    {
+      "point": 53,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.04818791808837456,
+      "DC_SNR": 171.61812746629994
+    },
+    {
+      "point": 54,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.007064071676181919,
+      "DC_SNR": 279.1616232130507
+    },
+    {
+      "point": 54,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.01198076469594347,
+      "DC_SNR": 279.1616232130507
+    },
+    {
+      "point": 54,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.019090469881283628,
+      "DC_SNR": 279.1616232130507
+    },
+    {
+      "point": 54,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.029246576841067656,
+      "DC_SNR": 279.1616232130507
+    },
+    {
+      "point": 55,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.005075936582739239,
+      "DC_SNR": 391.5866249397033
+    },
+    {
+      "point": 55,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.007667279803408469,
+      "DC_SNR": 391.5866249397033
+    },
+    {
+      "point": 55,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.011282634448426887,
+      "DC_SNR": 391.5866249397033
+    },
+    {
+      "point": 55,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.0174661949649819,
+      "DC_SNR": 391.5866249397033
+    },
+    {
+      "point": 58,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.11006570266457841,
+      "DC_SNR": 19.118230634311807
+    },
+    {
+      "point": 58,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.21404181547038262,
+      "DC_SNR": 19.118230634311807
+    },
+    {
+      "point": 58,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.30365131221156333,
+      "DC_SNR": 19.118230634311807
+    },
+    {
+      "point": 58,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.3262814862980996,
+      "DC_SNR": 19.118230634311807
+    },
+    {
+      "point": 59,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.031231130862048772,
+      "DC_SNR": 65.94851103545926
+    },
+    {
+      "point": 59,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.0628391348795732,
+      "DC_SNR": 65.94851103545926
+    },
+    {
+      "point": 59,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.09546629183359359,
+      "DC_SNR": 65.94851103545926
+    },
+    {
+      "point": 59,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.10769992697569308,
+      "DC_SNR": 65.94851103545926
+    },
+    {
+      "point": 60,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.011950810410093502,
+      "DC_SNR": 175.2265842312903
+    },
+    {
+      "point": 60,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.02447962975669519,
+      "DC_SNR": 175.2265842312903
+    },
+    {
+      "point": 60,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.042684187111499655,
+      "DC_SNR": 175.2265842312903
+    },
+    {
+      "point": 60,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.05186564021223426,
+      "DC_SNR": 175.2265842312903
+    },
+    {
+      "point": 61,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.00623136534261961,
+      "DC_SNR": 327.14802801230474
+    },
+    {
+      "point": 61,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.012028365540894044,
+      "DC_SNR": 327.14802801230474
+    },
+    {
+      "point": 61,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.022796727463483546,
+      "DC_SNR": 327.14802801230474
+    },
+    {
+      "point": 61,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.03661855199475979,
+      "DC_SNR": 327.14802801230474
+    },
+    {
+      "point": 62,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.004350950906572523,
+      "DC_SNR": 458.48350224075284
+    },
+    {
+      "point": 62,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.007573412902931271,
+      "DC_SNR": 458.48350224075284
+    },
+    {
+      "point": 62,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.014079636903796613,
+      "DC_SNR": 458.48350224075284
+    },
+    {
+      "point": 62,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.02604195158998095,
+      "DC_SNR": 458.48350224075284
+    },
+    {
+      "point": 63,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.12748966251483948,
+      "DC_SNR": 18.65962757065545
+    },
+    {
+      "point": 63,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.5094601933063811,
+      "DC_SNR": 18.65962757065545
+    },
+    {
+      "point": 63,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 2.1393573348722517,
+      "DC_SNR": 18.65962757065545
+    },
+    {
+      "point": 63,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 4.4727075196912685,
+      "DC_SNR": 18.65962757065545
+    },
+    {
+      "point": 64,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.03692474780559484,
+      "DC_SNR": 62.1342474531539
+    },
+    {
+      "point": 64,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.13236080425598168,
+      "DC_SNR": 62.1342474531539
+    },
+    {
+      "point": 64,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.48266500442442,
+      "DC_SNR": 62.1342474531539
+    },
+    {
+      "point": 64,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 1.0049130820558918,
+      "DC_SNR": 62.1342474531539
+    },
+    {
+      "point": 65,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.02054145713997732,
+      "DC_SNR": 105.81047533842121
+    },
+    {
+      "point": 65,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.05930284121039937,
+      "DC_SNR": 105.81047533842121
+    },
+    {
+      "point": 65,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.16127592340732522,
+      "DC_SNR": 105.81047533842121
+    },
+    {
+      "point": 65,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.3337159853705711,
+      "DC_SNR": 105.81047533842121
+    },
+    {
+      "point": 66,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.0330115535511056,
+      "DC_SNR": 64.95405809642789
+    },
+    {
+      "point": 66,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.07304117684274247,
+      "DC_SNR": 64.95405809642789
+    },
+    {
+      "point": 66,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.14232718646979695,
+      "DC_SNR": 64.95405809642789
+    },
+    {
+      "point": 66,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.27138896316622174,
+      "DC_SNR": 64.95405809642789
+    },
+    {
+      "point": 67,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.02354697295845503,
+      "DC_SNR": 87.22460125933736
+    },
+    {
+      "point": 67,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.04242719218014365,
+      "DC_SNR": 87.22460125933736
+    },
+    {
+      "point": 67,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.06673842382777254,
+      "DC_SNR": 87.22460125933736
+    },
+    {
+      "point": 67,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.11221446691545112,
+      "DC_SNR": 87.22460125933736
+    },
+    {
+      "point": 70,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.30200379700786617,
+      "DC_SNR": 7.502540229893647
+    },
+    {
+      "point": 70,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 1.0133751547045247,
+      "DC_SNR": 7.502540229893647
+    },
+    {
+      "point": 70,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 3.429444193206508,
+      "DC_SNR": 7.502540229893647
+    },
+    {
+      "point": 70,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 7.105094605570874,
+      "DC_SNR": 7.502540229893647
+    },
+    {
+      "point": 71,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.06463417577521925,
+      "DC_SNR": 33.10674091449858
+    },
+    {
+      "point": 71,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.21046257271895127,
+      "DC_SNR": 33.10674091449858
+    },
+    {
+      "point": 71,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.6863333272816324,
+      "DC_SNR": 33.10674091449858
+    },
+    {
+      "point": 71,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 1.4245149416056595,
+      "DC_SNR": 33.10674091449858
+    },
+    {
+      "point": 72,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.032020828246008264,
+      "DC_SNR": 62.588969794379835
+    },
+    {
+      "point": 72,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.09482515064707182,
+      "DC_SNR": 62.588969794379835
+    },
+    {
+      "point": 72,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.26149284665024536,
+      "DC_SNR": 62.588969794379835
+    },
+    {
+      "point": 72,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.5347250476272875,
+      "DC_SNR": 62.588969794379835
+    },
+    {
+      "point": 73,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.13753621133120392,
+      "DC_SNR": 14.309973501699794
+    },
+    {
+      "point": 73,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.31943408306579535,
+      "DC_SNR": 14.309973501699794
+    },
+    {
+      "point": 73,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.7498058808418304,
+      "DC_SNR": 14.309973501699794
+    },
+    {
+      "point": 73,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 1.5123761673174134,
+      "DC_SNR": 14.309973501699794
+    },
+    {
+      "point": 74,
+      "frequency_hz": 15,
+      "AC_SEM_over_DC": 0.013685123733929824,
+      "DC_SNR": 146.88145267690786
+    },
+    {
+      "point": 74,
+      "frequency_hz": 60,
+      "AC_SEM_over_DC": 0.025730724824089085,
+      "DC_SNR": 146.88145267690786
+    },
+    {
+      "point": 74,
+      "frequency_hz": 120,
+      "AC_SEM_over_DC": 0.05133132785776605,
+      "DC_SNR": 146.88145267690786
+    },
+    {
+      "point": 74,
+      "frequency_hz": 200,
+      "AC_SEM_over_DC": 0.10415305441599751,
+      "DC_SNR": 146.88145267690786
+    }
+  ],
+  "scope": "Independent implementation/provenance audit, not a response-accuracy or replacement-network pass."
+}

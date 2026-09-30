@@ -1,0 +1,8 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/exact_seed/node00.npz",
+  "dt_ms": 0.05,
+  "interval_ms": 10,
+  "method": "Transpose the entire exact cached tangent step in reverse order: reset/write of delayed history and M, refractory response, input-memory cascades, covariance, synaptic filters, and original spatial delay graph. Uses independent adjoint buffers/clock. Atomic transpose summation is checked by full-state bilinear products.",
+  "acceptance": "Three independent full-state vector/covector pairs, normalized coordinate bilinear relative defect<1e-9; all original nominal model arrays remain bitwise unchanged by adjoint evaluation. This is an implementation gate, no bifurcation/chaos/basin certificate.",
+  "model_promoted": false
+}

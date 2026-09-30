@@ -1,0 +1,5614 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/validation_result.json",
+  "original_prediction_reproduction_max_error": 0.0,
+  "n_counted": 146,
+  "original_failed": 65,
+  "empirical_DC_failed": 63,
+  "by_channel": {
+    "mean": {
+      "n": 58,
+      "original_failed": 11,
+      "empirical_DC_failed": 11,
+      "original_median_error": 0.04143471669059719,
+      "empirical_DC_median_error": 0.03958230051939367
+    },
+    "variance_E": {
+      "n": 56,
+      "original_failed": 40,
+      "empirical_DC_failed": 39,
+      "original_median_error": 0.16436190823475244,
+      "empirical_DC_median_error": 0.183585361129104
+    },
+    "variance_I": {
+      "n": 32,
+      "original_failed": 14,
+      "empirical_DC_failed": 13,
+      "original_median_error": 0.07967127670376967,
+      "empirical_DC_median_error": 0.07751902887035282
+    }
+  },
+  "rows": [
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.018516845479671536,
+      "empirical_DC_error": 0.014072694892113807,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 142.85548916715086
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.03749549189814654,
+      "empirical_DC_error": 0.030738843918833227,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 142.85548916715086
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.1638870302863098,
+      "empirical_DC_error": 0.15998958802212307,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 91.25086097130026
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.24218921973955942,
+      "empirical_DC_error": 0.2355469500172005,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 91.25086097130026
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.0659056935744809,
+      "empirical_DC_error": 0.06771585655003763,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 20.92047469756423
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.221142872756225,
+        "mu": 13.447283383825567,
+        "ve": 6.940914747584973,
+        "vi": 1.8388056111889581,
+        "dc": {
+          "0": 3.4197998046875,
+          "1": 0.6676049528071619,
+          "2": 0.26786611262243126
+        },
+        "snr": {
+          "0": 142.85548916715086,
+          "1": 91.25086097130026,
+          "2": 20.92047469756423
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.1477325105751044,
+      "empirical_DC_error": 0.14831547562369876,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 20.92047469756423
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.02168409469960348,
+      "empirical_DC_error": 0.022837104536246593,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 97.31104458861407
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.019405367537633098,
+      "empirical_DC_error": 0.019927936476356364,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 97.31104458861407
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07382562210251693,
+      "empirical_DC_error": 0.07678315382326743,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 85.06208390835498
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.15109758291106667,
+      "empirical_DC_error": 0.1537337720294793,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 85.06208390835498
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.025444670910723624,
+      "empirical_DC_error": 0.015834512930224174,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 14.659481021461623
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 13.180135575877063,
+        "ve": 12.011906551099472,
+        "vi": 1.918724999887881,
+        "dc": {
+          "0": 1.8613688151041665,
+          "1": 0.3530940729325173,
+          "2": 0.12596866083681793
+        },
+        "snr": {
+          "0": 97.31104458861407,
+          "1": 85.06208390835498,
+          "2": 14.659481021461623
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2753228474111604,
+      "empirical_DC_error": 0.27247278629880334,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 14.659481021461623
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.031177859935315414,
+      "empirical_DC_error": 0.006115578015668024,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 142.57843442444462
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.02254057063360508,
+      "empirical_DC_error": 0.02105811726690639,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 142.57843442444462
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.027015528009200852,
+      "empirical_DC_error": 0.015706016205722376,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 73.04166627035151
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.12688548079318243,
+      "empirical_DC_error": 0.07024508874480181,
+      "original_failed": true,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 73.04166627035151
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04011791453364943,
+      "empirical_DC_error": 0.028551484856347217,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 68.89976678220067
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 17.980718889470324,
+        "ve": 89.13895969889417,
+        "vi": 216.8877295334727,
+        "dc": {
+          "0": 3.312784830729167,
+          "1": 0.05165521566612047,
+          "2": 0.021812367952366712
+        },
+        "snr": {
+          "0": 142.57843442444462,
+          "1": 73.04166627035151,
+          "2": 68.89976678220067
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.12290971850314898,
+      "empirical_DC_error": 0.11185834798951282,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 68.89976678220067
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.013177181308132398,
+      "empirical_DC_error": 0.013305559810023989,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 293.11174037911434
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.05488669761532962,
+      "empirical_DC_error": 0.05500098058530032,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 293.11174037911434
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.09590629994049894,
+      "empirical_DC_error": 0.08995605847914684,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 118.50625310411023
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2673126822730498,
+      "empirical_DC_error": 0.28703320445271413,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 118.50625310411023
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04836542007449685,
+      "empirical_DC_error": 0.04766096189529462,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 44.75325787945427
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.05702991817847569,
+      "empirical_DC_error": 0.05762662416393131,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 44.75325787945427
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.03237109659157069,
+      "empirical_DC_error": 0.03630562454923054,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 178.5971285061426
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07949596273904272,
+      "empirical_DC_error": 0.08200210839120589,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 178.5971285061426
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.05679627174455405,
+      "empirical_DC_error": 0.03322145093215784,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 82.55603304781859
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.08772350766328758,
+      "empirical_DC_error": 0.1534138469550272,
+      "original_failed": false,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 82.55603304781859
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.1637319858200116,
+      "empirical_DC_error": 0.16527626543260493,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 33.43067294733351
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 40.08805077072325,
+        "ve": 98.66681052888013,
+        "vi": 228.9018416909252,
+        "dc": {
+          "0": 3.8850911458333335,
+          "1": -0.04975388979205526,
+          "2": -0.009567163767983
+        },
+        "snr": {
+          "0": 178.5971285061426,
+          "1": 82.55603304781859,
+          "2": 33.43067294733351
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2693757500450493,
+      "empirical_DC_error": 0.26886619766312947,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 33.43067294733351
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.0188731222239802,
+      "empirical_DC_error": 0.018439621879979558,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 347.953798316955
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07151065311585544,
+      "empirical_DC_error": 0.07210045141263113,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 347.953798316955
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04111135419308969,
+      "empirical_DC_error": 0.04290707800048825,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 142.10883395905063
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.14947206717715183,
+      "empirical_DC_error": 0.16346702713100586,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 142.10883395905063
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.06367733031855845,
+      "empirical_DC_error": 0.07151565089223608,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 54.94761244077756
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 43.96908550660186,
+        "ve": 134.2668354978332,
+        "vi": 329.1376911815971,
+        "dc": {
+          "0": 7.623494466145834,
+          "1": -0.07325573283393746,
+          "2": -0.013544507152905675
+        },
+        "snr": {
+          "0": 347.953798316955,
+          "1": 142.10883395905063,
+          "2": 54.94761244077756
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.0628892634458383,
+      "empirical_DC_error": 0.07056337766191546,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 54.94761244077756
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 38.105642595043854,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527,
+        "dc": {
+          "0": 3.891194661458333,
+          "1": -0.045081533571105926,
+          "2": -0.0077917927601920825
+        },
+        "snr": {
+          "0": 112.82565733094893,
+          "1": 50.20716303345119,
+          "2": 18.125895493673497
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07393614368736355,
+      "empirical_DC_error": 0.07788652161430325,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 112.82565733094893
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 38.105642595043854,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527,
+        "dc": {
+          "0": 3.891194661458333,
+          "1": -0.045081533571105926,
+          "2": -0.0077917927601920825
+        },
+        "snr": {
+          "0": 112.82565733094893,
+          "1": 50.20716303345119,
+          "2": 18.125895493673497
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.10596805540129686,
+      "empirical_DC_error": 0.1481830489210816,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 50.20716303345119
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 38.105642595043854,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527,
+        "dc": {
+          "0": 3.891194661458333,
+          "1": -0.045081533571105926,
+          "2": -0.0077917927601920825
+        },
+        "snr": {
+          "0": 112.82565733094893,
+          "1": 50.20716303345119,
+          "2": 18.125895493673497
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.3121039424275452,
+      "empirical_DC_error": 0.3074538108149459,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 18.125895493673497
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 40.52129073125151,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046,
+        "dc": {
+          "0": 7.805989583333334,
+          "1": -0.055091897393411124,
+          "2": -0.009725094483175708
+        },
+        "snr": {
+          "0": 179.14162403683832,
+          "1": 78.40003036324106,
+          "2": 31.610879094635944
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.050507531645791755,
+      "empirical_DC_error": 0.05049784845968302,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 179.14162403683832
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 40.52129073125151,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046,
+        "dc": {
+          "0": 7.805989583333334,
+          "1": -0.055091897393411124,
+          "2": -0.009725094483175708
+        },
+        "snr": {
+          "0": 179.14162403683832,
+          "1": 78.40003036324106,
+          "2": 31.610879094635944
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2358649671222494,
+      "empirical_DC_error": 0.2396222953711024,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 78.40003036324106
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 40.52129073125151,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046,
+        "dc": {
+          "0": 7.805989583333334,
+          "1": -0.055091897393411124,
+          "2": -0.009725094483175708
+        },
+        "snr": {
+          "0": 179.14162403683832,
+          "1": 78.40003036324106,
+          "2": 31.610879094635944
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.10560206464974202,
+      "empirical_DC_error": 0.09676228082762717,
+      "original_failed": true,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 31.610879094635944
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.025433718690771056,
+      "empirical_DC_error": 0.022025571566999153,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 123.86954299125482
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.03538638601958803,
+      "empirical_DC_error": 0.0405778507538567,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 123.86954299125482
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2684856644061613,
+      "empirical_DC_error": 0.26817329269766765,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 46.26536517824632
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 1.3488194640886233,
+      "empirical_DC_error": 1.326973940727005,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 46.26536517824632
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 1.986894052738105,
+      "empirical_DC_error": 1.9887389919833243,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 1.7641670832271368
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 2.0981579049606864,
+      "empirical_DC_error": 2.0996595370429043,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 1.7641670832271368
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.11017738092493883,
+      "empirical_DC_error": 0.11085310402900983,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 330.95656132882374
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.5173147640002067,
+      "empirical_DC_error": 0.5194498875656407,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 330.95656132882374
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.11335917580819904,
+      "empirical_DC_error": 0.0725258004238929,
+      "original_failed": true,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 25.52652616984715
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.4685981916089479,
+      "empirical_DC_error": 0.5013613999117988,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 25.52652616984715
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 4.270560638395608,
+      "empirical_DC_error": 4.18197201679686,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.41909700838205644
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 36.48738580361294,
+        "ve": 6.099296442572214,
+        "vi": 1.276460512925386,
+        "dc": {
+          "0": 4.248453776041666,
+          "1": -0.11948259483476835,
+          "2": -0.006694231265655671
+        },
+        "snr": {
+          "0": 330.95656132882374,
+          "1": 25.52652616984715,
+          "2": 0.41909700838205644
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 17.46079911415765,
+      "empirical_DC_error": 17.695357324420375,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.41909700838205644
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.037437136377182566,
+      "empirical_DC_error": 0.03345068230823943,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 125.62735634499492
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.023537710796496785,
+      "empirical_DC_error": 0.023074431199541792,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 125.62735634499492
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.18491544945266114,
+      "empirical_DC_error": 0.18256146385185726,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 62.88211516570644
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.5405212426553805,
+      "empirical_DC_error": 0.5390988580575059,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 62.88211516570644
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.22126369115509864,
+      "empirical_DC_error": 0.22015752052664936,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 35.63772747757378
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.252215856228062,
+        "mu": 15.437941820235595,
+        "ve": 26.164213600920657,
+        "vi": 36.6871083605443,
+        "dc": {
+          "0": 4.84130859375,
+          "1": 0.19114737325600414,
+          "2": 0.0751312321800307
+        },
+        "snr": {
+          "0": 125.62735634499492,
+          "1": 62.88211516570644,
+          "2": 35.63772747757378
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.21448259413032233,
+      "empirical_DC_error": 0.21139982727755163,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 35.63772747757378
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.026815009797501357,
+      "empirical_DC_error": 0.024483407384088596,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 68.14853513291446
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.02261500598411261,
+      "empirical_DC_error": 0.021641627307675354,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 68.14853513291446
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.10059851343466819,
+      "empirical_DC_error": 0.09907224336107867,
+      "original_failed": true,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 68.14853513291446
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.06258649252181922,
+      "empirical_DC_error": 0.06352423279595934,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 68.14853513291446
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07798127739006028,
+      "empirical_DC_error": 0.07478316243629206,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 28.75189013195545
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.12419516964298491,
+      "empirical_DC_error": 0.12535521656741988,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 28.75189013195545
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.013138489874448026,
+      "empirical_DC_error": 0.015279465019977519,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 106.59455603430804
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.05001781402334504,
+      "empirical_DC_error": 0.036591414468140133,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 106.59455603430804
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.16017886158007807,
+      "empirical_DC_error": 0.1931044733018207,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 67.28220937260238
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.3718736940943917,
+      "empirical_DC_error": 0.39856158511018586,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 67.28220937260238
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.36308066506273473,
+      "empirical_DC_error": 0.5553034948784739,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.698524910879651
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 16.89523023869987,
+        "mu": 21.289395403124335,
+        "ve": 286.46484333052854,
+        "vi": 1.571355297550446,
+        "dc": {
+          "0": 3.609619140625,
+          "1": 0.02318555263502793,
+          "2": 0.06214778424219802
+        },
+        "snr": {
+          "0": 106.59455603430804,
+          "1": 67.28220937260238,
+          "2": 2.698524910879651
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.9206461556712778,
+      "empirical_DC_error": 0.8554577879092563,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.698524910879651
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.030794089017247516,
+      "empirical_DC_error": 0.02604422077754676,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 129.82321244963305
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.035429595044063636,
+      "empirical_DC_error": 0.03536691201297601,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 129.82321244963305
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.22596318567005452,
+      "empirical_DC_error": 0.2188782323248206,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 88.50810710717893
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.5083608662259469,
+      "empirical_DC_error": 0.5020469884265347,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 88.50810710717893
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.7957127874057943,
+      "empirical_DC_error": 0.7828253019984239,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.377797262705738
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.795961499847179,
+        "mu": 14.675501518822827,
+        "ve": 31.563451919967022,
+        "vi": 1.3052231094021107,
+        "dc": {
+          "0": 5.266520182291667,
+          "1": 0.24604765349943108,
+          "2": 0.10100643832485517
+        },
+        "snr": {
+          "0": 129.82321244963305,
+          "1": 88.50810710717893,
+          "2": 3.377797262705738
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 1.143798327096868,
+      "empirical_DC_error": 1.150866243714208,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.377797262705738
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.06312051279822756,
+      "empirical_DC_error": 0.08145385783127862,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 42.21936955649788
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.0012514897044989392,
+      "empirical_DC_error": 0.010228032526124909,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 42.21936955649788
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.023638825975595027,
+      "empirical_DC_error": 0.013706225887512382,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 42.21936955649788
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.06477841982246549,
+      "empirical_DC_error": 0.06645421396967804,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 42.21936955649788
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.2614059290333657,
+      "empirical_DC_error": 0.2598348859919243,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 7.125380828725213
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 17.062200721079968,
+        "mu": 8.840634137737522,
+        "ve": 28.421666993411986,
+        "vi": 2.8396584835535372,
+        "dc": {
+          "0": 0.6884765625,
+          "1": 0.09534841633772419,
+          "2": 0.04384742724209093
+        },
+        "snr": {
+          "0": 42.21936955649788,
+          "1": 48.681931569878344,
+          "2": 7.125380828725213
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.4709079862457917,
+      "empirical_DC_error": 0.465568766327187,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 7.125380828725213
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.10273989887359627,
+      "empirical_DC_error": 0.10187659108873028,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 189.01550837541933
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.4907059542163507,
+      "empirical_DC_error": 0.4877856637960904,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 189.01550837541933
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.0874447392786751,
+      "empirical_DC_error": 0.11083786238561101,
+      "original_failed": false,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 59.32298038465569
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.8478544560388352,
+      "empirical_DC_error": 0.865003768390893,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 59.32298038465569
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 2.315681096511226,
+      "empirical_DC_error": 2.0292687164031054,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 1.862095345157513
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 35.35805078876287,
+        "ve": 31.940078086852697,
+        "vi": 1.4568563306711364,
+        "dc": {
+          "0": 4.490152994791667,
+          "1": -0.10842599558485452,
+          "2": -0.037705599013798705
+        },
+        "snr": {
+          "0": 189.01550837541933,
+          "1": 59.32298038465569,
+          "2": 1.862095345157513
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 5.798926796053609,
+      "empirical_DC_error": 5.836609457959832,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 1.862095345157513
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.11303661549096918,
+      "empirical_DC_error": 0.11281366504277411,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 472.52153183774385
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.5436084271882989,
+      "empirical_DC_error": 0.5424599291543061,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 472.52153183774385
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04734518745477095,
+      "empirical_DC_error": 0.0444203852471957,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 41.0362589976084
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 1.1705399861758305,
+      "empirical_DC_error": 1.1680537870365133,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 41.0362589976084
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.5539486813440182,
+      "empirical_DC_error": 1.0195227500968875,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.4999566737005936
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 14.867312891700525,
+        "mu": 24.56326726625096,
+        "ve": 3.6589598668519296,
+        "vi": 0.19089470774997097,
+        "dc": {
+          "0": 7.95166015625,
+          "1": -0.41569083813390495,
+          "2": -0.2877588450327709
+        },
+        "snr": {
+          "0": 472.52153183774385,
+          "1": 41.0362589976084,
+          "2": 2.4999566737005936
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 3.4379288554357847,
+      "empirical_DC_error": 3.223197875104283,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.4999566737005936
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04123437916795218,
+      "empirical_DC_error": 0.03614516445012884,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 93.2548820147539
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.07988297860738304,
+      "empirical_DC_error": 0.08676659817768535,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 93.2548820147539
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.1470672918125804,
+      "empirical_DC_error": 0.13348958785162462,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 30.655285535590817
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.16860145745968497,
+      "empirical_DC_error": 0.18680334409679605,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 30.655285535590817
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.02458539158175924,
+      "empirical_DC_error": 0.02101385950777933,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 89.97055114036401
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 16.101175581447386,
+        "ve": 38.21685251410392,
+        "vi": 392.2466311154414,
+        "dc": {
+          "0": 2.901611328125,
+          "1": 0.05506712481681577,
+          "2": 0.0228675681343459
+        },
+        "snr": {
+          "0": 93.2548820147539,
+          "1": 30.655285535590817,
+          "2": 89.97055114036401
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.07448211461595286,
+      "empirical_DC_error": 0.07665212668014663,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 89.97055114036401
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.03166335564150071,
+      "empirical_DC_error": 0.037722251022257944,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 80.25849115523066
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.10787844195467317,
+      "empirical_DC_error": 0.10506422026183133,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 80.25849115523066
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.260139760977252,
+      "empirical_DC_error": 0.18777025806636627,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 10.559068869327424
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.6997970399973428,
+      "empirical_DC_error": 0.6559196403999633,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 10.559068869327424
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.002162812155380693,
+      "empirical_DC_error": 0.005257398650027267,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 80.25849115523066
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.04471611264424463,
+      "empirical_DC_error": 0.044181735866827776,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 80.25849115523066
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.14489826580894,
+      "empirical_DC_error": 0.14456278444579967,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 337.7176215823586
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.869064496104765,
+      "empirical_DC_error": 0.8669946496307313,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 337.7176215823586
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.044072822456756706,
+      "empirical_DC_error": 0.034497831369985,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 30.436987906806973
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 1.735703451665011,
+      "empirical_DC_error": 1.7467203489885015,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 30.436987906806973
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 1.1310391944186768,
+      "empirical_DC_error": 1.3823864216872468,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.30771588373645
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 28.186397071156577,
+        "ve": 5.672502713046251,
+        "vi": 0.6299372050751283,
+        "dc": {
+          "0": 5.270589192708333,
+          "1": -0.17861315278347384,
+          "2": -0.09882867510194952
+        },
+        "snr": {
+          "0": 337.7176215823586,
+          "1": 30.436987906806973,
+          "2": 3.30771588373645
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 13.214736986680315,
+      "empirical_DC_error": 13.259501222520845,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.30771588373645
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07964415966584427,
+      "empirical_DC_error": 0.08027910443305229,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 350.1631039681735
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.3504189275649092,
+      "empirical_DC_error": 0.3525773537999427,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 350.1631039681735
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.11128131931312775,
+      "empirical_DC_error": 0.15727949247719197,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 37.10033819300772
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 1.295616025792272,
+      "empirical_DC_error": 1.3326109109774187,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 37.10033819300772
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.37904675894810336,
+      "empirical_DC_error": 0.40021103266384145,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.428995459837332
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.575867923340116,
+        "ve": 18.275029045441872,
+        "vi": 5.094586128517672,
+        "dc": {
+          "0": 11.781412760416668,
+          "1": -0.14434666268193708,
+          "2": -0.03570157831013478
+        },
+        "snr": {
+          "0": 350.1631039681735,
+          "1": 37.10033819300772,
+          "2": 3.428995459837332
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 1.8936914615631077,
+      "empirical_DC_error": 1.8628767457752997,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.428995459837332
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.01006040029343432,
+      "empirical_DC_error": 0.026561332515981483,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 88.98099217563555
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.10617587549596418,
+      "empirical_DC_error": 0.09519748264399674,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 88.98099217563555
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.05436836622843512,
+      "empirical_DC_error": 0.062324154145187834,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 19.150744849870122
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.33528376161004947,
+      "empirical_DC_error": 0.31522554399932795,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 19.150744849870122
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04661154292482501,
+      "empirical_DC_error": 0.03380699000720876,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 88.98099217563555
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.04343603880014,
+        "ve": 4.938679059333875,
+        "vi": 239.2504562471045,
+        "dc": {
+          "0": 2.833251953125,
+          "1": 0.16461654452185742,
+          "2": 0.053333272445031873
+        },
+        "snr": {
+          "0": 88.98099217563555,
+          "1": 19.150744849870122,
+          "2": 111.14649809205173
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.023074086958915406,
+      "empirical_DC_error": 0.019477507336304514,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 88.98099217563555
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.03193285772264259,
+      "empirical_DC_error": 0.03384918400432284,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 87.30802301913273
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.04163505421324219,
+      "empirical_DC_error": 0.045203894001369135,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 87.30802301913273
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.3004141747875421,
+      "empirical_DC_error": 0.3066691989429561,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 87.30802301913273
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.3972006958848454,
+      "empirical_DC_error": 0.40495209857412906,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 87.30802301913273
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.4069910567795761,
+      "empirical_DC_error": 0.5223112342976269,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 4.76353661562362
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 8.452102062048564,
+        "ve": 132.71876676636904,
+        "vi": 2.075349391951886,
+        "dc": {
+          "0": 2.817789713541667,
+          "1": 0.11706791551454579,
+          "2": 0.06528927003831522
+        },
+        "snr": {
+          "0": 87.30802301913273,
+          "1": 120.40022330458399,
+          "2": 4.76353661562362
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.3376349414878453,
+      "empirical_DC_error": 0.30859537132804044,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 4.76353661562362
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.016548709098112954,
+      "empirical_DC_error": 0.02682743939736512,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 162.50873315316846
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.05865356417381018,
+      "empirical_DC_error": 0.04936816454363178,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 162.50873315316846
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.4635807236199438,
+      "empirical_DC_error": 0.45774898417247895,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 64.51612875480663
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.7985433846822364,
+      "empirical_DC_error": 0.7853991490364677,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 64.51612875480663
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 12.790433606174073,
+      "empirical_DC_error": 6.776857810468376,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.21213436494650634
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 27.005568359101265,
+      "empirical_DC_error": 25.724546343169614,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.21213436494650634
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.36968000794249073,
+      "empirical_DC_error": 0.05616691726400944,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.0019559906875344
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.6062336504318334,
+      "empirical_DC_error": 0.4434757602656446,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.0019559906875344
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.4612844277703552,
+      "empirical_DC_error": 0.4345608921410274,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.0019559906875344
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.12203081821237227,
+      "empirical_DC_error": 0.0877288269174559,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 2.0019559906875344
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 58010011.082496054,
+      "empirical_DC_error": 37080850.83126902,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 10.655950585491928,
+        "ve": 6.7645892754432255,
+        "vi": 0.559433665079749,
+        "dc": {
+          "0": 0.0016276041666666667,
+          "1": 0.0007218195076123186,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 2.0019559906875344,
+          "1": 2.0019559906875344,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 177343892.3565844,
+      "empirical_DC_error": 163947618.68547046,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.03834221444446019,
+      "empirical_DC_error": 0.03858675028493064,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 242.17178717451196
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.1788258851056003,
+      "empirical_DC_error": 0.17923824953505457,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 242.17178717451196
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.0759816093743697,
+      "empirical_DC_error": 0.3272908583836452,
+      "original_failed": false,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 19.108188755610108
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.2823308726713496,
+      "empirical_DC_error": 0.4761699304188297,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 19.108188755610108
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.45158778578439107,
+      "empirical_DC_error": 0.3902990690139393,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 13.366167047753384
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 29.448911039367136,
+        "ve": 42.736257896751965,
+        "vi": 264.88299474387935,
+        "dc": {
+          "0": 9.590250651041668,
+          "1": -0.04070318831675727,
+          "2": -0.006350460164030101
+        },
+        "snr": {
+          "0": 242.17178717451196,
+          "1": 19.108188755610108,
+          "2": 13.366167047753384
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.31748036946640984,
+      "empirical_DC_error": 0.3255974457427711,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 13.366167047753384
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.006459959466425188,
+      "empirical_DC_error": 0.004181542257846498,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 132.55323192451186
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.09521929784399903,
+      "empirical_DC_error": 0.09402864093225796,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 132.55323192451186
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.10319940851632797,
+      "empirical_DC_error": 0.07147814946480337,
+      "original_failed": true,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 20.02529150748702
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.18861270616667147,
+      "empirical_DC_error": 0.15001463184383218,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 20.02529150748702
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.07012750189429927,
+      "empirical_DC_error": 0.07249169079236688,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 132.55323192451186
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.026788858979649742,
+      "empirical_DC_error": 0.02564624945704184,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 132.55323192451186
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.031787392372546734,
+      "empirical_DC_error": 0.022653546387340226,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 150.6335553311999
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.0260379642281616,
+      "empirical_DC_error": 0.021500348984822688,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 150.6335553311999
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04562316256321646,
+      "empirical_DC_error": 0.05222032830073066,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 107.34137131613703
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.14192290549524683,
+      "empirical_DC_error": 0.13401520791181143,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 107.34137131613703
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.2509059434732315,
+      "empirical_DC_error": 0.14396677277773037,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 9.791271783462154
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.924016154977817,
+        "ve": 32.84290746256412,
+        "vi": 4.980969510057993,
+        "dc": {
+          "0": 7.510986328125,
+          "1": 0.3763997009389578,
+          "2": 0.11395913024137164
+        },
+        "snr": {
+          "0": 150.6335553311999,
+          "1": 107.34137131613703,
+          "2": 9.791271783462154
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.3926775301203923,
+      "empirical_DC_error": 0.3866231067772493,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 9.791271783462154
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 644545.0755069696,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 433433.528329803,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 849990.6777569785,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 540876.1812426199,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 156011.16987683493,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 5.400458589361659,
+        "ve": 6.016119520225785,
+        "vi": 9.655638278832974,
+        "dc": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        },
+        "snr": {
+          "0": 0.0,
+          "1": 0.0,
+          "2": 0.0
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 32786.85732663703,
+      "empirical_DC_error": 0.0,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 0.0
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.04270325793446275,
+      "empirical_DC_error": 0.04208981494599072,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 228.3934229152621
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.12999848186857163,
+      "empirical_DC_error": 0.1288788704531182,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 228.3934229152621
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.12919759110036227,
+      "empirical_DC_error": 0.13423783096766118,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 74.13990851253253
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.17147816437580987,
+      "empirical_DC_error": 0.18460925840635078,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 74.13990851253253
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.6750516630596364,
+      "empirical_DC_error": 0.4291198404854704,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.6175188958680287
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 33.58287435954294,
+        "ve": 134.29281653507644,
+        "vi": 27.478023197945568,
+        "dc": {
+          "0": 9.051920572916666,
+          "1": -0.06128384735009547,
+          "2": -0.010350956692774946
+        },
+        "snr": {
+          "0": 228.3934229152621,
+          "1": 74.13990851253253,
+          "2": 3.6175188958680287
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 1.4867486809265151,
+      "empirical_DC_error": 1.503604963654567,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 3.6175188958680287
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.011697734854419472,
+      "empirical_DC_error": 0.008719341185899496,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 179.8500163323111
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.05731352351696043,
+      "empirical_DC_error": 0.05825267223603901,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 179.8500163323111
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": false,
+      "tol": 0.1,
+      "original_error": 0.4050232200252468,
+      "empirical_DC_error": 0.283173270604859,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 7.732422529200294
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": false,
+      "tol": 0.15,
+      "original_error": 0.4323787007821964,
+      "empirical_DC_error": 0.2692451800034857,
+      "original_failed": null,
+      "empirical_DC_failed": null,
+      "required_DC_snr_min": 7.732422529200294
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.24121727726657344,
+      "empirical_DC_error": 0.25760174673323,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 18.936754742050482
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 28.229768733972335,
+        "ve": 160.8971073330845,
+        "vi": 459.2251719178558,
+        "dc": {
+          "0": 8.042399088541666,
+          "1": 0.00613017935094465,
+          "2": 0.006143053766180779
+        },
+        "snr": {
+          "0": 179.8500163323111,
+          "1": 7.732422529200294,
+          "2": 18.936754742050482
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.08136127601747906,
+      "empirical_DC_error": 0.07838593106055901,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 18.936754742050482
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.08890324437032276,
+      "empirical_DC_error": 0.08891927265696438,
+      "original_failed": false,
+      "empirical_DC_failed": false,
+      "required_DC_snr_min": 577.0642186925536
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.39852710279576653,
+      "empirical_DC_error": 0.39858657587541274,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 577.0642186925536
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.16483678618319506,
+      "empirical_DC_error": 0.18741657650264865,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 39.38396219568581
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.862412061026615,
+      "empirical_DC_error": 0.8885501270720046,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 39.38396219568581
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.1,
+      "original_error": 0.2789434155243333,
+      "empirical_DC_error": 0.3022438828277948,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 10.12033076542098
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 25.914555521088353,
+        "ve": 8.544398118109607,
+        "vi": 12.883705349228896,
+        "dc": {
+          "0": 11.435953776041668,
+          "1": -0.2214421446186794,
+          "2": -0.038183375515060444
+        },
+        "snr": {
+          "0": 577.0642186925536,
+          "1": 39.38396219568581,
+          "2": 10.12033076542098
+        }
+      },
+      "counted": true,
+      "tol": 0.15,
+      "original_error": 0.7611498778433842,
+      "empirical_DC_error": 0.7649948925552118,
+      "original_failed": true,
+      "empirical_DC_failed": true,
+      "required_DC_snr_min": 10.12033076542098
+    }
+  ],
+  "scope": "Measured DC gains are an oracle diagnostic using held-out data. This is NOT a new model or a held-out validation pass; original FAIL is unchanged."
+}

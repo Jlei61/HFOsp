@@ -1,0 +1,81 @@
+{
+  "status": "PASS_MATCHED_K8_Z_CONTRAST",
+  "names": [
+    "z0.25_k8_high",
+    "z0.75_k8_high"
+  ],
+  "job_difference": {
+    "target_Z": [
+      0.25,
+      0.75
+    ],
+    "name": [
+      "z0.25_k8_high",
+      "z0.75_k8_high"
+    ]
+  },
+  "same_network_identity": true,
+  "full_held_K_fields_bitwise_equal": true,
+  "Z_field_monotone_increase_for_every_E": true,
+  "identical_future_input_records": true,
+  "observations": [
+    {
+      "name": "z0.25_k8_high",
+      "mean_rates_allE_A_B_other_Hz": [
+        137.11550624999984,
+        406.4068965517239,
+        0.0,
+        133.9877019041366
+      ],
+      "held_Z_allE_A_B_other": [
+        0.2499999999999999,
+        0.2353669546308319,
+        0.2325150738217426,
+        0.25081340998635787
+      ],
+      "mean_counterfactual_dZ_allE_A_B_other_per_s": [
+        0.07072904543749998,
+        -0.04707339092616628,
+        0.1239667231491375,
+        0.07227133770069294
+      ],
+      "recovery_eligible_fraction_allE_A_B_other": [
+        0.6036452271874998,
+        4.996003610813204e-16,
+        0.8523486895674302,
+        0.6121700984898226
+      ],
+      "brief_events": 0
+    },
+    {
+      "name": "z0.75_k8_high",
+      "mean_rates_allE_A_B_other_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "held_Z_allE_A_B_other": [
+        0.75,
+        0.7356161362662088,
+        0.7325100837040679,
+        0.7508073705667722
+      ],
+      "mean_counterfactual_dZ_allE_A_B_other_per_s": [
+        0.05000000000000044,
+        0.05287677274675779,
+        0.053497983259186914,
+        0.049838525886645606
+      ],
+      "recovery_eligible_fraction_allE_A_B_other": [
+        1.0000000000000022,
+        0.9999999999999978,
+        1.0000000000000024,
+        1.0000000000000002
+      ],
+      "brief_events": 0
+    }
+  ],
+  "interpretation": "Same high-state history, K8 spatial field and future input; increasing the prescribed Z field from mean0.25 to0.75 changes the30s response from a persistent coreA-containing patch to quiet. At lowZ mean dZ is positive but coreA dZ is negative. This is conditional regional recovery evidence, not autonomous recovery or a certified bifurcation.",
+  "human_review": "PENDING"
+}

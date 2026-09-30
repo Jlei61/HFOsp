@@ -1,0 +1,30 @@
+{
+  "created_local": "2026-09-19T18:34:23.959338",
+  "question": "Does the0.5mm model retain self-limited events at the two earlier actual native Z fields, before the now-persistent D=.219 field?",
+  "reason": "Both lifted and native-detail .219 arms are persistent at0.5mm; locate an earlier self-limited side without relabeling the1mm turn.",
+  "times_ms": [
+    8000,
+    9000
+  ],
+  "D": [
+    0.20146039727098197,
+    0.21646602103961032
+  ],
+  "grid": 40,
+  "dt_ms": 0.025,
+  "duration_ms": 12000,
+  "new_trajectories": 2,
+  "Z": "Exact projected original fields, held",
+  "M": "dynamic",
+  "initial": "Same exact fine full state; verified exact Fourier delay history at0.025ms, identical to the completed finer-step D.219 arm.",
+  "readout": "Existing canonical final4s/four1ssubwindows, originalhighentry andseparate75percentbroad criterion",
+  "interpretation": "An earlier SELF_LIMITED arm establishes a self-limited side on this fine native-detail path. A matched state bracket additionally requires the native-detail D=.219 arm at the same0.025ms step; the existing0.05ms native-detail and0.025ms lifted-Z arms cannot substitute. Neither early arm selflimited means no demonstrated selflimited side in these tested fields.",
+  "scope": "Original graph/closure/parameters unchanged; no fitting to outcomes. This follows the spatialrefinementcontract lower-bracket clause.",
+  "prelaunch_revision": {
+    "time": "2026-09-19T18:37:20.526103",
+    "previous_dt_ms": 0.05,
+    "new_dt_ms": 0.025,
+    "reason": "The firstfine.219 time-step check changedPERSISTENT toUNRESOLVED. Use the alreadyverified finer history/step forboth unlaunched earlierfield probes; do not claim the oldgate passed."
+  },
+  "matched_upper_dependency": "Not yet launched: native_g40_nativeZ_D0.2190000_dt0.025, needed only after a selflimited early side is found."
+}

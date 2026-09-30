@@ -1,0 +1,9 @@
+{
+  "status": "REGISTERED_BEFORE_COMPLETE_DC_ARRAY",
+  "created_epoch": 1790546348.9457693,
+  "task": "Collect every target/channel/amplitude, retain estimator uncertainty, construct the same graph DC selfconsistency derivative with implicit localM and stationaryG. At most one bounded GMRES correction proposal; no nonlinear iteration or eigenvalue interpretation.",
+  "units": "Source and target rates inHz; divide presynaptic rate by1000 in all current mean/variance actions. Physical appliedG derivative already includes voltage/current noise rescaling. I has no G or M feedback.",
+  "limits": "A measured local stationary near-root is not an exact equilibrium. Proposed correction must be tested with fresh direct local input-response arrays before acceptance. Static matrix is not full delayed dynamical stability.",
+  "producer_sha256": "d40c9efa3dcab7f7a70588e8024dff8e692956c37dad7aced306f3147a85a687",
+  "formal_bifurcation_allowed": false
+}

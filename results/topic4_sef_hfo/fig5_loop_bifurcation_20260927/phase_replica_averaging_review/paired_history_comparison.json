@@ -1,0 +1,41 @@
+{
+  "status": "COMPLETE_PAIRED_80_CELL_HISTORY_COMPARISON",
+  "rows": [
+    {
+      "region": "sampled_E",
+      "cells": 60,
+      "true_history_profile_RMS_from_native10s": 0.010287292951724984,
+      "reset_profile_RMS_from_native10s": 0.07146209390814688,
+      "paired_mean_rate_difference_Hz": -0.00013020833333333333,
+      "paired_per_cell_rate_difference_RMS_Hz": 0.009695385420589325
+    },
+    {
+      "region": "sampled_coreA",
+      "cells": 20,
+      "true_history_profile_RMS_from_native10s": 0.013663098007908464,
+      "reset_profile_RMS_from_native10s": 0.06762593976594262,
+      "paired_mean_rate_difference_Hz": -0.001171875,
+      "paired_per_cell_rate_difference_RMS_Hz": 0.010817385942224991
+    },
+    {
+      "region": "sampled_coreB",
+      "cells": 20,
+      "true_history_profile_RMS_from_native10s": 0.005479776506953015,
+      "reset_profile_RMS_from_native10s": 0.00547970934761219,
+      "paired_mean_rate_difference_Hz": 0.00185546875,
+      "paired_per_cell_rate_difference_RMS_Hz": 0.01194843274936155
+    },
+    {
+      "region": "sampled_I",
+      "cells": 20,
+      "true_history_profile_RMS_from_native10s": 0.00203057454137416,
+      "reset_profile_RMS_from_native10s": 0.0020313156001005744,
+      "paired_mean_rate_difference_Hz": 0.0,
+      "paired_per_cell_rate_difference_RMS_Hz": 0.0003088161777508183
+    }
+  ],
+  "paired_phase_exposure_exact": true,
+  "reference": "Completed native fixedexternalbackground72-82s same80cells",
+  "unit": "80fixedstratifiedcells,512 numericalreplicas,one developmentconditionalstate; notindependentseeds",
+  "formal_bifurcation_allowed": false
+}

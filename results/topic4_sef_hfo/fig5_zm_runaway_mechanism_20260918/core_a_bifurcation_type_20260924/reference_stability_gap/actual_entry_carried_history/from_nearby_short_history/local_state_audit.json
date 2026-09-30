@@ -1,0 +1,120 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "from_nearby_short_history",
+  "coordinates": {
+    "D_A": 0.3,
+    "Z_A": 0.7,
+    "native_interpolation_time_ms": 9594.906685976377
+  },
+  "window_ms": [
+    5000.0,
+    10000.0
+  ],
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_rate_hz": 40.81074542939031,
+      "quiet_fraction": 0.3138,
+      "duty_above50": 0.37,
+      "range_10ms_hz": [
+        0.00958954738654755,
+        179.5911998184063
+      ],
+      "complete_local_episodes": 10,
+      "episode_durations_ms": [
+        96,
+        157,
+        113,
+        116,
+        120,
+        822,
+        122,
+        114,
+        441,
+        104
+      ]
+    },
+    {
+      "region": "Core A",
+      "mean_rate_hz": 188.13990063851267,
+      "quiet_fraction": 0.4054,
+      "duty_above50": 0.5512,
+      "range_10ms_hz": [
+        1.9393885980693977e-05,
+        475.5855689820316
+      ],
+      "complete_local_episodes": 14,
+      "episode_durations_ms": [
+        103,
+        103,
+        97,
+        100,
+        101,
+        93,
+        553,
+        46,
+        116,
+        98,
+        93,
+        276,
+        54,
+        99
+      ]
+    },
+    {
+      "region": "Core B",
+      "mean_rate_hz": 123.52718851346857,
+      "quiet_fraction": 0.46,
+      "duty_above50": 0.4832,
+      "range_10ms_hz": [
+        1.5233312141144452e-05,
+        474.79215228442337
+      ],
+      "complete_local_episodes": 16,
+      "episode_durations_ms": [
+        85,
+        92,
+        92,
+        105,
+        97,
+        829,
+        87,
+        111,
+        383,
+        95,
+        288,
+        116,
+        32,
+        49,
+        51,
+        47
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_rate_hz": 35.02934991751362,
+      "quiet_fraction": 0.32,
+      "duty_above50": 0.2454,
+      "range_10ms_hz": [
+        0.010073037120085204,
+        166.4897471347994
+      ],
+      "complete_local_episodes": 10,
+      "episode_durations_ms": [
+        94,
+        154,
+        111,
+        113,
+        117,
+        819,
+        119,
+        111,
+        438,
+        101
+      ]
+    }
+  ],
+  "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+  "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+  "model_promoted": false
+}

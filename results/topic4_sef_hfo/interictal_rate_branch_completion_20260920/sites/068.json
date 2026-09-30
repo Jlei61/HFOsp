@@ -1,0 +1,114 @@
+{
+  "index": 68,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256_accuracy_N1024_accuracy_N4096.npz",
+  "memberships": [
+    {
+      "family": "single",
+      "index": 80
+    }
+  ],
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256_accuracy_N1024.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256_accuracy_N1024_accuracy_N4096.npz",
+    "N": 4096,
+    "check_N": 16384,
+    "J_EE_core": 0.9577861497084698,
+    "T_ms": 293.21955238175076,
+    "maximum_group_defect_Hz": 1.1379786002407855e-12,
+    "regional_defect_Hz": [
+      1.4338386799711744e-13,
+      1.9771433571489348e-13,
+      1.765793367491177e-14
+    ],
+    "minimum_rate_Hz": 2.1749507144294873e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -6.106226635438361e-13,
+        "phase_index": 7791,
+        "group": 553
+      },
+      "slow": {
+        "minimum_Hz": 2.9953606555180312e-05,
+        "phase_index": 6222,
+        "group": 360
+      },
+      "positive": true,
+      "N": 4096,
+      "check_N": 16384
+    }
+  },
+  "J_EE_core": 0.9577861497084698,
+  "T_ms": 293.21955238175076,
+  "relative_waveform_refinement_change": 0.0010996278655432971,
+  "relative_period_change": 1.235581730263391e-07,
+  "status": "NUMERICALLY_STABLE",
+  "attempts": [
+    {
+      "nev": 2,
+      "requested_steps_ms": [
+        0.1,
+        0.05
+      ],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_068_k2_arcSingleDown_0035_N256_accuracy_N1024_accuracy_N4096_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_068_k2_arcSingleDown_0035_N256_accuracy_N1024_accuracy_N4096_dt0.05.json"
+      ],
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.3488256529538373,
+            0.0
+          ],
+          [
+            -0.05205551640148403,
+            0.05327698876475901
+          ]
+        ],
+        "per_mode_margin": [
+          0.0013180777144602344,
+          0.0013180777144602344
+        ],
+        "paired_absolute_changes": [
+          7.435952289447378e-05,
+          0.0001837265875995987
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.3488256529538373,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "classification": {
+    "status": "NUMERICALLY_STABLE",
+    "multipliers": [
+      [
+        0.3488256529538373,
+        0.0
+      ],
+      [
+        -0.05205551640148403,
+        0.05327698876475901
+      ]
+    ],
+    "per_mode_margin": [
+      0.0013180777144602344,
+      0.0013180777144602344
+    ],
+    "paired_absolute_changes": [
+      7.435952289447378e-05,
+      0.0001837265875995987
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": 0,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.3488256529538373,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

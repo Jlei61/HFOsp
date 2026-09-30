@@ -1,0 +1,50 @@
+[
+  {
+    "dt_ms": 0.05,
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/held_short_field/checkpoint1000.npz",
+    "CPU_GPU_errors": {
+      "syn": 1.3877787807814457e-17,
+      "local": 3.552713678800501e-15,
+      "rate_hz": 2.0816681711721685e-12,
+      "mid_syn": 0.0,
+      "mid_local": 3.552713678800501e-15,
+      "mid_features": 1.1102230246251565e-16
+    },
+    "equilibrium_errors": {
+      "rate": 3.686287386450715e-16,
+      "syn": 5.861977570020827e-14,
+      "local": 3.375077994860476e-14
+    },
+    "hazard_per_ms_quantiles": [
+      1.0762943025353225e-08,
+      0.00017702317912401985,
+      0.0016648195429514031,
+      0.04738177566639325,
+      0.10069943553204322
+    ]
+  },
+  {
+    "dt_ms": 0.025,
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step_fine/held_short_field/checkpoint1000.npz",
+    "CPU_GPU_errors": {
+      "syn": 1.3877787807814457e-17,
+      "local": 4.547473508864641e-13,
+      "rate_hz": 7.549516567451064e-11,
+      "mid_syn": 2.7755575615628914e-17,
+      "mid_local": 2.2737367544323206e-13,
+      "mid_features": 4.440892098500626e-16
+    },
+    "equilibrium_errors": {
+      "rate": 7.572067972638763e-16,
+      "syn": 1.2079226507921703e-13,
+      "local": 6.927791673660977e-14
+    },
+    "hazard_per_ms_quantiles": [
+      1.0875347764985641e-08,
+      6.36484138371892e-05,
+      0.8397144376509381,
+      3.6362499504657353,
+      5.021866656058719
+    ]
+  }
+]

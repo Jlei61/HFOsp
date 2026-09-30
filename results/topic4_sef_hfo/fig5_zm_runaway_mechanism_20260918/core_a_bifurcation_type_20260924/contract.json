@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-24T10:27:09.898931+08:00",
+  "question": "Does the stronger Core A depletion endpoint remain locally active after long continuation and time-step refinement, and is its full-network invariant dynamics compatible with a stable equilibrium or periodic orbit?",
+  "equations": "Unchanged 3479-group spatial rate model, physical private variance and delays, original constant external mean, locked transient response. Entire Z fixed, all M dynamic. Only Core A Z differs from the native9s reference field.",
+  "coordinates": {
+    "coreA10370_background9000": {
+      "D_A": 0.40052149864164854,
+      "D_global": 0.2198778663041978,
+      "Z_A": 0.5994785013583515
+    }
+  },
+  "continuation": "Same exact complete state after10s exposure. Coarse adds20s; fine adds10s with physical-lag-preserving factor-two history interpolation. These are numerical controls, not independent replicates.",
+  "tangent": "Derivative of the actual complete delayed rate map, validated against centered nonlinear full-state differences separately at each step. Passive tangent renormalized every100ms in fixed cell-weighted coordinates; report finite-time growth after2s alignment and consecutive1s blocks. No chaos or crisis label solely from a positive finite-time exponent.",
+  "classification": "Use fixed-point residual/eigenvalue crossing for SN or Hopf; full periodic closure and Floquet crossing for cycle bifurcations; require invariant-set/basin evidence for crisis or global bifurcations. If only a rate threshold changes continuously, do not invent a bifurcation.",
+  "model_promoted": false
+}

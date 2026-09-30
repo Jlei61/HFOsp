@@ -1,0 +1,297 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/comparison.json",
+  "source_sha256": "ddb4e61690f11a534fa325c9c6e4b23761902dc13da94ff36bc59b9f2e72557b",
+  "producer_sha256": "dd728ee675d0c80323a3bc406caebc7a6454071b2c84147a17e97458e626b572",
+  "completed": 24,
+  "total": 24,
+  "new_completed": 16,
+  "new_total": 16,
+  "rows": [
+    {
+      "condition": "current",
+      "name": "z0.25_k0.02_high",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.50074673644954,
+      "mean_Hz": 476.21223437499947,
+      "brief": 0
+    },
+    {
+      "condition": "current",
+      "name": "z0.95_k0.02_high",
+      "state": "quiet",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": 0.007016438750000098,
+      "dK_per_s": -0.00572381036860313,
+      "mean_Hz": 1.126846875,
+      "brief": 5
+    },
+    {
+      "condition": "current",
+      "name": "z0.75_k2_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "current",
+      "name": "z0.75_k8_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "current",
+      "name": "z0.25_k0.02_interictal",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.51551249877345,
+      "mean_Hz": 476.2118531250014,
+      "brief": 0
+    },
+    {
+      "condition": "current",
+      "name": "z0.95_k0.02_interictal",
+      "state": "quiet",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": 0.007016438750000098,
+      "dK_per_s": -0.00572381036860313,
+      "mean_Hz": 1.126846875,
+      "brief": 5
+    },
+    {
+      "condition": "current",
+      "name": "z0.75_k2_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "current",
+      "name": "z0.75_k8_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.50047391909938,
+      "mean_Hz": 476.2126406249988,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high",
+      "state": "mixed_or_transient",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": -0.063911980625,
+      "dK_per_s": -0.039996000266651066,
+      "mean_Hz": 31.85703750000002,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.75_k2_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.75_k8_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.51566442797531,
+      "mean_Hz": 476.21230937500076,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_interictal",
+      "state": "mixed_or_transient",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": -0.06313988656249998,
+      "dK_per_s": -0.039996000266651066,
+      "mean_Hz": 31.637218749999978,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.75_k2_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.75_k8_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.50158437196494,
+      "mean_Hz": 476.2124312499996,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_high",
+      "state": "quiet",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": 0.005424693250000043,
+      "dK_per_s": -0.005371409134395012,
+      "mean_Hz": 1.9318406250000013,
+      "brief": 3
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.75_k2_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.75_k8_high",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal",
+      "state": "sustained_high",
+      "Z": 0.25,
+      "K": 0.02,
+      "dZ_per_s": -0.05000000000000044,
+      "dK_per_s": 70.51544326534032,
+      "mean_Hz": 476.2121187500004,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_interictal",
+      "state": "quiet",
+      "Z": 0.95,
+      "K": 0.02,
+      "dZ_per_s": 0.005424693250000043,
+      "dK_per_s": -0.005371409134395012,
+      "mean_Hz": 1.9318406250000013,
+      "brief": 3
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.75_k2_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 2.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -0.39999600002449387,
+      "mean_Hz": 0.0,
+      "brief": 0
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.75_k8_interictal",
+      "state": "quiet",
+      "Z": 0.75,
+      "K": 8.0,
+      "dZ_per_s": 0.05000000000000044,
+      "dK_per_s": -1.5999840000979755,
+      "mean_Hz": 0.0,
+      "brief": 0
+    }
+  ],
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/figures/axis_conditional_responses.png",
+      "sha256": "0a440330754e40aff3000fa0a4a59f20c0adb01320d73b7e6362847d4cc30009"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/figures/axis_conditional_responses.pdf",
+      "sha256": "ce4ccd012f131ba5ed55dc3a41f3ddddcfa65cfc601fc935d1d51dda4f25aa5e"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/figures/axis_conditional_responses.svg",
+      "sha256": "9300f9a07b8e99ca5c6f13c46cb237907309e6bcd2a8afc55be5e73265a34f4d"
+    }
+  ],
+  "finite_window_s": 30,
+  "tail_window_s": 10,
+  "interpretation": "Finite-window responses at four coordinates. A difference brackets conditional responses; agreement does not establish equal boundaries. Drift arrows retain direction only and do not define a planar autonomous vector field.",
+  "structural_limits": "Rotation also attenuates anisotropy; outgoing degree and low-threshold source output strength change.",
+  "formal_bifurcation": "NOT_ESTABLISHED",
+  "human_review": "PENDING",
+  "agent_latest_render_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "agent_reviewed_at": "2026-09-24T23:43:37.196915+00:00"
+}

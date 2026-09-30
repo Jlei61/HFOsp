@@ -1,0 +1,224 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native",
+      "high_onset_ms": 9868.5,
+      "D_at_native_checkpoints": {
+        "10370": 0.30871178728576065,
+        "12500": 0.5401727014041959,
+        "8000": 0.20146039727098164,
+        "9000": 0.21646602103961032,
+        "9300": 0.22333473704327822,
+        "9420": 0.22884476056519154,
+        "9870": 0.2563444253447549
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 11,
+          "median_duration_ms": 96.0,
+          "iqr_duration_ms": [
+            92.0,
+            105.5
+          ],
+          "median_gap_ms": 256.0,
+          "both_cores": 9,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.72075,
+          "median_surround_cells": 274.0,
+          "forward": 1,
+          "reverse": 9,
+          "undirected": 1,
+          "median_extent_mm": 12.659633743936364
+        },
+        "4000-8000": {
+          "n": 16,
+          "median_duration_ms": 101.5,
+          "iqr_duration_ms": [
+            65.5,
+            118.0
+          ],
+          "median_gap_ms": 253.0,
+          "both_cores": 13,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.752,
+          "median_surround_cells": 287.5,
+          "forward": 8,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 8.628925496258699
+        },
+        "8000-9420": {
+          "n": 5,
+          "median_duration_ms": 162.0,
+          "iqr_duration_ms": [
+            126.0,
+            184.0
+          ],
+          "median_gap_ms": 273.5,
+          "both_cores": 5,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.9162499999999998,
+          "median_surround_cells": 351.0,
+          "forward": 3,
+          "reverse": 1,
+          "undirected": 1,
+          "median_extent_mm": 9.49418726572921
+        },
+        "1000-9420": {
+          "n": 31,
+          "median_duration_ms": 104.0,
+          "iqr_duration_ms": [
+            85.0,
+            125.0
+          ],
+          "median_gap_ms": 266.0,
+          "both_cores": 26,
+          "coreA_only": 1,
+          "coreB_only": 1,
+          "median_area": 0.7592187499999999,
+          "median_surround_cells": 290.0,
+          "forward": 13,
+          "reverse": 17,
+          "undirected": 1,
+          "median_extent_mm": 10.105750851586855
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.552,
+        "4000-8000": 0.55225,
+        "8000-9420": 0.35845070422535213,
+        "1000-9420": 0.5176959619952494
+      },
+      "tail_global_mean_hz": 448.36449990490854,
+      "tail_spatial_persistence": 0.9728124999999999,
+      "total_complete_events": 38,
+      "qa": {
+        "source": "Original seed9108401 SNN, original recorded clock."
+      }
+    },
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "high_onset_ms": 7674.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.4429929286040286,
+        "12500": 0.6058625475042523,
+        "8000": 0.2376069675498501,
+        "9000": 0.32430435843985683,
+        "9300": 0.35066816616715957,
+        "9420": 0.3611110933529941,
+        "9870": 0.4003329945057541
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 11,
+          "median_duration_ms": 76.0,
+          "iqr_duration_ms": [
+            73.0,
+            78.0
+          ],
+          "median_gap_ms": 200.0,
+          "both_cores": 11,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.32803125,
+          "median_surround_cells": 117.0,
+          "forward": 11,
+          "reverse": 0,
+          "undirected": 0,
+          "median_extent_mm": 14.272071794021286
+        },
+        "4000-8000": {
+          "n": 10,
+          "median_duration_ms": 81.5,
+          "iqr_duration_ms": [
+            80.25,
+            86.75
+          ],
+          "median_gap_ms": 222.0,
+          "both_cores": 10,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.40140625,
+          "median_surround_cells": 146.0,
+          "forward": 10,
+          "reverse": 0,
+          "undirected": 0,
+          "median_extent_mm": 14.190677352206462
+        },
+        "8000-9420": {
+          "n": 0
+        },
+        "1000-9420": {
+          "n": 25,
+          "median_duration_ms": 79.0,
+          "iqr_duration_ms": [
+            76.0,
+            86.0
+          ],
+          "median_gap_ms": 213.0,
+          "both_cores": 25,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.37187499999999996,
+          "median_surround_cells": 134.0,
+          "forward": 24,
+          "reverse": 1,
+          "undirected": 0,
+          "median_extent_mm": 14.086839361967487
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.6212,
+        "4000-8000": 0.38675,
+        "8000-9420": 0.0,
+        "1000-9420": 0.3965558194774347
+      },
+      "tail_global_mean_hz": 396.9090311197727,
+      "tail_spatial_persistence": 0.8687812499999998,
+      "total_complete_events": 28,
+      "qa": {
+        "weighted_rate_error_hz": 2.31742848200156e-06,
+        "D_float32_error": 1.287698947471938e-09,
+        "Z_physical": true,
+        "M_dynamic_peak_mV": 0.23771776258945465,
+        "expected_emitted_global_mean_difference_hz": -0.005804486124728901,
+        "final_tick": 250000,
+        "Z_and_M_dynamic": true,
+        "conditional_mean_roundoff": {
+          "minimum_hz": -1.4559247904499806e-12,
+          "negative_values": 48,
+          "binary64_occupancy_bound_hz": 7.105427357601065e-10,
+          "raw_values_changed": false,
+          "emitted_rates_nonnegative": true
+        },
+        "emitted_refractory_bound": {
+          "E": {
+            "window_ms": 2,
+            "violations": 0,
+            "group_windows": 23560615,
+            "maximum_excess_spikes": 1.1901855430096475e-06,
+            "fraction": 0.0
+          },
+          "I": {
+            "window_ms": 1,
+            "violations": 0,
+            "group_windows": 19925000,
+            "maximum_excess_spikes": 0.0,
+            "fraction": 0.0
+          }
+        },
+        "same_actual_refractory_and_synaptic_counts": true
+      }
+    }
+  ],
+  "statistical_unit": "One native realization and the explicitly registered diagnostic trajectories. No population inference.",
+  "scope": "All Z/M dynamic, unchanged physical graph and frozen local response. Local validation remains FAIL; no accepted replacement or bifurcation claim.",
+  "completed": [
+    "recorded_drive_binomial_seed1"
+  ],
+  "model_promoted": false
+}

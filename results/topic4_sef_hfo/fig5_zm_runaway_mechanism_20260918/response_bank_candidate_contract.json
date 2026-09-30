@@ -1,0 +1,47 @@
+{
+  "created_local": "2026-09-19T19:32:28.877066",
+  "question": "Can a finite stable temporal-filter bank repair mean/variance response shape while preserving the static colored-LIF response, fixed spatial network and Z/M equations?",
+  "candidate_count": 1,
+  "filter_times_ms": [
+    0.25,
+    1,
+    4,
+    16,
+    64
+  ],
+  "all_training_frequencies_hz": [
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "selection_fit_frequencies_hz": [
+    2,
+    5,
+    20,
+    80
+  ],
+  "smoothing_candidates": [
+    0,
+    1,
+    10,
+    100,
+    1000
+  ],
+  "ridge": 0.0001,
+  "SEM_floor_fraction": 0.01,
+  "training_source": "Existing single-cell dynamic_assay/rows.json only. Previously reserved80Hz is explicitly training for this new candidate; it is not reported as independent validation.",
+  "parameters": "15 dimensionless coefficients per normalized operating point; 5 per mean/variance channel. Static derivatives determine DC gain; eta physical units handled by division by theta-reset. No native trajectory target used in fitting.",
+  "equations": "tau_j h_qj_dot=q-h_qj; mu_eff=mu+sum b_j(mu-h_muj)+sum e_j(vE-h_Ej)/gap+sum i_j(vI-h_Ij)/gap; r=Phi(mu_eff,vE,vI). Existing physical synaptic means/variance filters, delay operators and M/Z laws unchanged.",
+  "coefficient_operating_state": "Existing slowmean and variance-mixing filters (frozen v3 tau_s/tau_vE/tau_vI); no fitted new anchor times. At equilibrium anchors equal moments and coefficient-derivative contributions vanish.",
+  "validation": [
+    "CPU knot interpolation consistency",
+    "Original146eligible independent response observations with original tolerances and <=10percentfailure rule",
+    "Already observed4candidatewaveforms with same15percentwave/10percentmean gates; these are model-selection diagnostics, not new blindvalidation",
+    "Only if both response gates pass: preregister new held-out waveforms and then autonomous network/SNN comparison"
+  ],
+  "stop": "Do not integrate or continue network branches if local gates fail. Do not keep changing coefficients or smoothing based on independent-validation outcomes.",
+  "scope": "Isolated executable response candidate, not an accepted replacement. Preserve all frozen v3 artifacts and their failed acceptance status."
+}

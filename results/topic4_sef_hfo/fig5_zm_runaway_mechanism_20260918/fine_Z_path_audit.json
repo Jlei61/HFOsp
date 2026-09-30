@@ -1,0 +1,119 @@
+{
+  "status": "COMPLETE",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/runs/A4_det_meandrive/trajectory.npz",
+  "rows": [
+    {
+      "time_ms": 7700,
+      "D": 0.14298039305768917,
+      "affine_same_D_Z_rms": 1.533109233930248e-08,
+      "Z_A_B_surround": [
+        0.7415373404399154,
+        0.7349879832668159,
+        0.8630271737562225
+      ]
+    },
+    {
+      "time_ms": 7710,
+      "D": 0.14269471753761176,
+      "affine_same_D_Z_rms": 0.0001837693632660677,
+      "Z_A_B_surround": [
+        0.7420537494696103,
+        0.7355174807495136,
+        0.8633008460875647
+      ]
+    },
+    {
+      "time_ms": 7720,
+      "D": 0.14240990806743503,
+      "affine_same_D_Z_rms": 0.00036729349714512485,
+      "Z_A_B_surround": [
+        0.7425566271382238,
+        0.7360459151310472,
+        0.8635739709680517
+      ]
+    },
+    {
+      "time_ms": 7730,
+      "D": 0.14226274731941524,
+      "affine_same_D_Z_rms": 0.0006952883847751906,
+      "Z_A_B_surround": [
+        0.7412282638745852,
+        0.7365732974071842,
+        0.8637478451429819
+      ]
+    },
+    {
+      "time_ms": 7740,
+      "D": 0.14241063938103626,
+      "affine_same_D_Z_rms": 0.00122808336010208,
+      "Z_A_B_surround": [
+        0.7397472873448693,
+        0.7370996305354072,
+        0.863615554023243
+      ]
+    },
+    {
+      "time_ms": 7750,
+      "D": 0.14286168061196813,
+      "affine_same_D_Z_rms": 0.0016682872664404485,
+      "Z_A_B_surround": [
+        0.738269273814219,
+        0.7376248975291507,
+        0.8631647412509255
+      ]
+    },
+    {
+      "time_ms": 7760,
+      "D": 0.14362904075160632,
+      "affine_same_D_Z_rms": 0.0018065420543541127,
+      "Z_A_B_surround": [
+        0.7367942079466914,
+        0.7375800340381894,
+        0.8623962559554424
+      ]
+    },
+    {
+      "time_ms": 7770,
+      "D": 0.1446362846679986,
+      "affine_same_D_Z_rms": 0.0015395421387350214,
+      "Z_A_B_surround": [
+        0.7353220941691563,
+        0.7361063496908765,
+        0.8614125555076649
+      ]
+    },
+    {
+      "time_ms": 7780,
+      "D": 0.14570402884669598,
+      "affine_same_D_Z_rms": 0.0011133225709061346,
+      "Z_A_B_surround": [
+        0.7338529158808509,
+        0.7346356077351947,
+        0.86036514742783
+      ]
+    },
+    {
+      "time_ms": 7790,
+      "D": 0.14672388835996397,
+      "affine_same_D_Z_rms": 0.0006003347791790614,
+      "Z_A_B_surround": [
+        0.7323866835165403,
+        0.7331677994503623,
+        0.8593678963473965
+      ]
+    },
+    {
+      "time_ms": 7800,
+      "D": 0.14769196916371585,
+      "affine_same_D_Z_rms": 1.5463501825037846e-08,
+      "Z_A_B_surround": [
+        0.7309233679063124,
+        0.7317029318888375,
+        0.8584248937260377
+      ]
+    }
+  ],
+  "storage": "Actual Z sampled after every 10 ms, float32; endpoint checkpoints are float64",
+  "parameter_caution": "The actual D first decreases and then increases within 7700--7800 ms. The existing bifurcation path is the straight spatial endpoint interpolation, not this curved trajectory.",
+  "claim": "A conditional critical D on the affine slice must not be assigned directly as an autonomous trajectory onset time."
+}

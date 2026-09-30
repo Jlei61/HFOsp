@@ -1,0 +1,32 @@
+{
+  "status": "PREDICTOR_DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T264286_fine_tangent/point_with_tangent.npz",
+  "target_period_ms": 264.35,
+  "N": 8505,
+  "M": 65536,
+  "rows": [
+    {
+      "predictor": "constant",
+      "D": 0.2193355233904148,
+      "max_residual_hz": 5.84766466874409,
+      "residual_L2": 252.6594313974938,
+      "min_group_rate_hz": -0.037101425750985906
+    },
+    {
+      "predictor": "linear",
+      "D": 0.21933566560212892,
+      "max_residual_hz": 47.101576862459694,
+      "residual_L2": 598.1655222801999,
+      "min_group_rate_hz": -21.068638136042367
+    },
+    {
+      "predictor": "transport",
+      "D": 0.21933566560212892,
+      "max_residual_hz": 46.56479901286858,
+      "residual_L2": 452.44328179575865,
+      "min_group_rate_hz": -21.069031271906994
+    }
+  ],
+  "maximum_group_shift_ms": 0.1395134227663052,
+  "scope": "Initial guesses only. No branch point, stability, model change or bifurcation accepted."
+}

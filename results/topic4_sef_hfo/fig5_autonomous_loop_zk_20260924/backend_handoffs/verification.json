@@ -1,0 +1,51 @@
+{
+  "status": "PASS_FULL_STATE_TRANSFER_AND_RESUMED_PROGRESS",
+  "epoch": 1790271243.284557,
+  "rows": [
+    {
+      "name": "z0.25_k0.02_high",
+      "old_pid": 2571961,
+      "new_pid": 2717297,
+      "resume_s": 18.0,
+      "backup_sha_verified": true,
+      "persisted_observations_discarded": false,
+      "first_verified_continuation_s": 19.0,
+      "mean_Z_preserved": 0.2499999999999999,
+      "process_live": true
+    },
+    {
+      "name": "z0.25_k2_high",
+      "old_pid": 2593827,
+      "new_pid": 2718093,
+      "resume_s": 16.0,
+      "backup_sha_verified": true,
+      "persisted_observations_discarded": false,
+      "first_verified_continuation_s": 17.0,
+      "mean_Z_preserved": 0.2499999999999999,
+      "process_live": true
+    },
+    {
+      "name": "z0.25_k2_interictal",
+      "old_pid": 2593962,
+      "new_pid": 2718095,
+      "resume_s": 54.0,
+      "backup_sha_verified": true,
+      "persisted_observations_discarded": false,
+      "first_verified_continuation_s": 55.0,
+      "mean_Z_preserved": 0.2499999999999999,
+      "process_live": true
+    },
+    {
+      "name": "z0.25_k0.02_interictal",
+      "old_pid": 2571962,
+      "new_pid": 2717302,
+      "resume_s": 56.0,
+      "backup_sha_verified": true,
+      "persisted_observations_discarded": false,
+      "first_verified_continuation_s": 57.0,
+      "mean_Z_preserved": 0.2499999999999999,
+      "process_live": true
+    }
+  ],
+  "remaining_check": "Await next2s complete observation block and final30s per trajectory. This verifies continuation, not scientific completion or full-run speedup."
+}

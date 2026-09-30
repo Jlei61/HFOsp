@@ -1,0 +1,23 @@
+{
+  "pid": 560123,
+  "timestamp": 1789905122.1378741,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/solve_rate_sameJ_burst_pair.py",
+    "--device",
+    "1",
+    "--min-free-gib",
+    "6",
+    "--source-index",
+    "24",
+    "--output-name",
+    "sameJ_qualified_prefix24_adaptive",
+    "--maximum-J-step",
+    ".00025",
+    "--minimum-J-step",
+    ".00001"
+  ],
+  "replaces_terminal_pid": 527839,
+  "preserves_old_results": true
+}

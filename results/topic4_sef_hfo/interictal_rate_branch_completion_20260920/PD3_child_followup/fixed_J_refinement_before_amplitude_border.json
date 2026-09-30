@@ -1,0 +1,26 @@
+{
+  "timestamp": 1789854835.7789435,
+  "records": [
+    {
+      "worker": {
+        "status": "PROFILE_REFINEMENT",
+        "pid": 479479,
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a0.20000_N2048.npz",
+        "rows": []
+      },
+      "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u - "
+    },
+    {
+      "worker": {
+        "status": "WAITING_PROFILES",
+        "pid": 480174,
+        "timestamp": 1789854824.110483,
+        "dependencies": [
+          479479
+        ]
+      },
+      "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD3_child_physical_modes.py --device 1 --after-pid 479479 "
+    }
+  ],
+  "reason": "Near-neutral radial direction at J-PD about -9.7e-11 makes fixed-J Newton corrections require backtracking; successive residuals 2.612e-8, 2.284e-8, 1.997e-8. Replace with the existing full-space amplitude-bordered child continuation and recheck J, nonzero doubled component and all physical profiles. This is a solver-coordinate change, not a model change."
+}

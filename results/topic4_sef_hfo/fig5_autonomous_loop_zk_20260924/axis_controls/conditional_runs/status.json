@@ -1,0 +1,89 @@
+{
+  "stage": "COMPLETE",
+  "supervisor_pid": 3290602,
+  "updated_epoch": 1790293045.9499948,
+  "missing_prerequisites": [],
+  "completed": [
+    [
+      "rotated",
+      "z0.75_k2_high"
+    ],
+    [
+      "isotropic",
+      "z0.75_k2_high"
+    ],
+    [
+      "rotated",
+      "z0.75_k2_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k2_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.95_k0.02_high"
+    ],
+    [
+      "rotated",
+      "z0.95_k0.02_high"
+    ],
+    [
+      "rotated",
+      "z0.25_k0.02_high"
+    ],
+    [
+      "isotropic",
+      "z0.25_k0.02_high"
+    ],
+    [
+      "rotated",
+      "z0.75_k8_high"
+    ],
+    [
+      "isotropic",
+      "z0.95_k0.02_interictal"
+    ],
+    [
+      "rotated",
+      "z0.95_k0.02_interictal"
+    ],
+    [
+      "rotated",
+      "z0.25_k0.02_interictal"
+    ],
+    [
+      "rotated",
+      "z0.75_k8_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k8_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.25_k0.02_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k8_high"
+    ]
+  ],
+  "pending": [],
+  "active": [],
+  "failed": [],
+  "new_scientific_total": 16,
+  "max_workers": 6,
+  "max_CPU_workers": 4,
+  "max_GPU0_workers": 2,
+  "max_GPU1_workers": 1,
+  "available_memory_GiB": 179.21769332885742,
+  "CPU_busy_percent_at_dispatch": 13.5,
+  "GPU0_free_GiB": 11.7763671875,
+  "GPU0_pending_startup_reserved_GiB": 0,
+  "GPU0_effective_free_for_dispatch_GiB": 11.7763671875,
+  "GPU1_free_GiB": 17.8818359375,
+  "GPU1_pending_startup_reserved_GiB": 0,
+  "GPU1_effective_free_for_dispatch_GiB": 17.8818359375,
+  "execution_policy": "At most6conditional total,4CPU,2GPU0,1GPU1; GPU1 reserved for lowZ/lowK CPU checkpoint continuation. Existing nativeGPU1 worker is separate and preserved. Each GPU needsfree>=9.3GiB, host>=88GiB/CPU<=65percent before dispatch. Carry startup reservations across polls. Original16jobs and prerequisites unchanged."
+}

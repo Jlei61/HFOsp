@@ -1,0 +1,91 @@
+{
+  "status": "COMPLETE_NATIVE_DENSITY_K_BRACKET_COMPARISON",
+  "rows": [
+    {
+      "K": 9.35,
+      "native_name": "exit_z0.21_k9.35_fields16p7_high",
+      "density_name": "held_K9p35",
+      "native_complete30s": true,
+      "recorded_future_input_samples_bitwise": 300,
+      "native_tail20to30s_rate_Hz": [
+        98.40715625000004,
+        392.36604774535925,
+        132.06730279898247,
+        90.26198621142493
+      ],
+      "native_tail_Graw": 1.2588030673745421e-18,
+      "native_tail_counterfactual_dZ_per_s": [
+        0.08063848299999993,
+        -0.03483387722099196,
+        -0.014993027474018115,
+        0.0859645672691795
+      ],
+      "native_finite_window_state": "mixed_or_transient",
+      "native_tail_brief_events": 0,
+      "density_final3s_rate_Hz": [
+        200.44956269190124,
+        472.3095266315564,
+        475.0006668157331,
+        186.63539392460643
+      ],
+      "density_final3s_Graw": 0.11203524614145126,
+      "density_final3s_counterfactual_dZ_per_s": [
+        0.03817303913781588,
+        -0.03483387689533427,
+        -0.03307375779645745,
+        0.041818712055719215
+      ],
+      "field_difference_weighted_RMS_Hz": 203.41610858096908,
+      "native_both_core_tailmeans_above300": false,
+      "native_both_core_tailmeans_below5": false,
+      "density_both_core_active": true,
+      "density_both_core_low": false
+    },
+    {
+      "K": 9.5,
+      "native_name": "exit_z0.21_k9.5_fields16p7_high",
+      "density_name": "held_K9p5",
+      "native_complete30s": true,
+      "recorded_future_input_samples_bitwise": 300,
+      "native_tail20to30s_rate_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "native_tail_Graw": 1.1955386198036663e-18,
+      "native_tail_counterfactual_dZ_per_s": [
+        0.15800000000000117,
+        0.1651661227790085,
+        0.16692624224608293,
+        0.15759227567364462
+      ],
+      "native_finite_window_state": "quiet",
+      "native_tail_brief_events": 0,
+      "density_final3s_rate_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "density_final3s_Graw": 8.009240409308367e-07,
+      "density_final3s_counterfactual_dZ_per_s": [
+        0.15799999976530876,
+        0.16516612258687136,
+        0.16692624205092282,
+        0.15759227543686932
+      ],
+      "field_difference_weighted_RMS_Hz": 0.0,
+      "native_both_core_tailmeans_above300": false,
+      "native_both_core_tailmeans_below5": true,
+      "density_both_core_active": false,
+      "density_both_core_low": true
+    }
+  ],
+  "protocol_difference": "Native uses the original12s high history and immediateK clamp, with original timevarying matchedexternalinput; density carries its ownK9 highstate through a0.15/s ramp under constant expectedexternalmean. Similarity is conditional spatial-state correspondence, not identical trajectories or criticalK certification.",
+  "statistical_unit": "One shared nativehistory and futureinput; two heldK interventions, no independent native seed replication.",
+  "interpretation": "Retain field and core differences. Native anddensity disagreement requires resolving history/input/closure before promoting a branch; neither agreement nor a finite quiet endpoint certifies all equilibria or dynamical stability.",
+  "producer_sha256": "7da3eedc9e10c9ca3ff8281be34c25fc52e90f0817402c1e15e7216a41561cf4",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

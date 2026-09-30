@@ -1,0 +1,79 @@
+{
+  "status": "PASS_FULL_STATE_TRANSFER_AND_NEW_COMMITTED_BLOCK",
+  "epoch": 1790272879.0620065,
+  "rows": [
+    {
+      "name": "z0.25_k0.02_high",
+      "pid": 2806152,
+      "restored_time_s": 18.0,
+      "reported_time_s": 20.0,
+      "backup_bitwise": true,
+      "progressed": true,
+      "committed_observation_endpoints_s": {
+        "chunks": 20.0,
+        "actual_current_chunks": 20.0,
+        "conditional_drift_chunks": 20.0,
+        "feedback_chunks": 20.0,
+        "global_response_chunks": 20.0,
+        "intrinsic_adaptation_chunks": 20.0,
+        "mechanism_chunks": 20.0,
+        "regional_chunks": 20.0
+      }
+    },
+    {
+      "name": "z0.25_k0.02_interictal",
+      "pid": 2806153,
+      "restored_time_s": 58.0,
+      "reported_time_s": 60.0,
+      "backup_bitwise": true,
+      "progressed": true,
+      "committed_observation_endpoints_s": {
+        "chunks": 60.0,
+        "actual_current_chunks": 60.0,
+        "conditional_drift_chunks": 60.0,
+        "feedback_chunks": 60.0,
+        "global_response_chunks": 60.0,
+        "intrinsic_adaptation_chunks": 60.0,
+        "mechanism_chunks": 60.0,
+        "regional_chunks": 60.0
+      }
+    },
+    {
+      "name": "z0.25_k2_high",
+      "pid": 2806845,
+      "restored_time_s": 18.0,
+      "reported_time_s": 20.0,
+      "backup_bitwise": true,
+      "progressed": true,
+      "committed_observation_endpoints_s": {
+        "chunks": 20.0,
+        "actual_current_chunks": 20.0,
+        "conditional_drift_chunks": 20.0,
+        "feedback_chunks": 20.0,
+        "global_response_chunks": 20.0,
+        "intrinsic_adaptation_chunks": 20.0,
+        "mechanism_chunks": 20.0,
+        "regional_chunks": 20.0
+      }
+    },
+    {
+      "name": "z0.25_k2_interictal",
+      "pid": 2806960,
+      "restored_time_s": 56.0,
+      "reported_time_s": 58.0,
+      "backup_bitwise": true,
+      "progressed": true,
+      "committed_observation_endpoints_s": {
+        "chunks": 58.0,
+        "actual_current_chunks": 58.0,
+        "conditional_drift_chunks": 58.0,
+        "feedback_chunks": 58.0,
+        "global_response_chunks": 58.0,
+        "intrinsic_adaptation_chunks": 58.0,
+        "mechanism_chunks": 58.0,
+        "regional_chunks": 58.0
+      }
+    }
+  ],
+  "scope": "Full archived checkpoint hashes, live forward progress and all8 observation streams committed after restored checkpoint; final trajectories pending."
+}

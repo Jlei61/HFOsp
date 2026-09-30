@@ -1,0 +1,114 @@
+{
+  "index": 99,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024_accuracy_N2048_accuracy_N8192.npz",
+  "memberships": [
+    {
+      "family": "double",
+      "index": 148
+    }
+  ],
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024_accuracy_N2048.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024_accuracy_N2048_accuracy_N8192.npz",
+    "N": 8192,
+    "check_N": 32768,
+    "J_EE_core": 0.9447179976417638,
+    "T_ms": 761.9314252195768,
+    "maximum_group_defect_Hz": 1.3322676295501878e-12,
+    "regional_defect_Hz": [
+      2.529291247413611e-13,
+      3.1802380915312205e-13,
+      3.087366936622355e-14
+    ],
+    "minimum_rate_Hz": 2.4190873297580406e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -7.771561172376096e-13,
+        "phase_index": 2642,
+        "group": 739
+      },
+      "slow": {
+        "minimum_Hz": 3.330259310332928e-05,
+        "phase_index": 4314,
+        "group": 379
+      },
+      "positive": true,
+      "N": 8192,
+      "check_N": 32768
+    }
+  },
+  "J_EE_core": 0.9447179976417638,
+  "T_ms": 761.9314252195768,
+  "relative_waveform_refinement_change": 0.0001810931748347727,
+  "relative_period_change": 1.0491994140160443e-07,
+  "status": "NUMERICALLY_STABLE",
+  "attempts": [
+    {
+      "nev": 2,
+      "requested_steps_ms": [
+        0.1,
+        0.05
+      ],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_099_k2_arcDoubleRef_0002_N1024_accuracy_N2048_accuracy_N8192_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_099_k2_arcDoubleRef_0002_N1024_accuracy_N2048_accuracy_N8192_dt0.05.json"
+      ],
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.2688407692717041,
+            0.0
+          ],
+          [
+            -0.14505173477863265,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.007620095645332741,
+          0.007620095645332741
+        ],
+        "paired_absolute_changes": [
+          5.100031077942546e-05,
+          0.0004457317250878001
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.2688407692717041,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "classification": {
+    "status": "NUMERICALLY_STABLE",
+    "multipliers": [
+      [
+        0.2688407692717041,
+        0.0
+      ],
+      [
+        -0.14505173477863265,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.007620095645332741,
+      0.007620095645332741
+    ],
+    "paired_absolute_changes": [
+      5.100031077942546e-05,
+      0.0004457317250878001
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": 0,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.2688407692717041,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

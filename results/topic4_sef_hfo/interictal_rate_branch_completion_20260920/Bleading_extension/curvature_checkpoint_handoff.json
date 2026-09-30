@@ -1,0 +1,87 @@
+{
+  "timestamp": 1789871153.2972188,
+  "previous_parent": 481387,
+  "previous_child": 482706,
+  "previous_parent_cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/extend_rate_Bleading_connection.py --device 0 --stream-harmonics --min-free-gib 6.5 ",
+  "previous_child_cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u /home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/rate_periodic_continue.py /home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0058_N1024_accuracy_N2048.npz /home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0059_N1024_accuracy_N4096.npz --N 4096 --steps 80 --ds .5 --stop-after-turns 2 --tol 2e-11 --label arcBleadingConnection_20260920 --device 0 --low-memory --host-krylov --linear-normalize --require-filter-positivity --stream-harmonics ",
+  "saved_points": 17,
+  "last_accepted_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0016_N4096.npz",
+  "checkpoint": {
+    "status": "CONTINUED",
+    "rows": [
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0000_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0001_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0002_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0003_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0004_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0005_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0006_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0007_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0008_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0009_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0010_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0011_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0012_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0013_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0014_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0015_N4096.npz",
+        "ds": 0.5
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0016_N4096.npz",
+        "ds": 0.5
+      }
+    ],
+    "method": "pseudo-arclength",
+    "N": 4096,
+    "constituent_filter_check": "EACH_PROFILE_PASSED"
+  },
+  "original_budget": 80,
+  "scope": "Same full spatial model, continuation planes, temporal mesh and acceptance criteria. Preserve every accepted point; replace only the Newton initial guess after an accepted checkpoint. Full-equation same-orbit predictor and checkpoint recovery checks both passed."
+}

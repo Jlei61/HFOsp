@@ -1,0 +1,318 @@
+{
+  "status": "COMPLETE_AT_DT_0.05",
+  "rows": [
+    {
+      "label": "rate_tail_D144975_D0.1449750_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D144975_D0.1449750_dt0.05/trajectory.npz",
+      "D": 0.1449750000000004,
+      "category": "PERSISTENT",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 82.78568069228649,
+        "max_rate_hz": 138.2212287404542,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.16296875,
+          "20Hz_duty90": 0.09846875,
+          "50Hz_duty80": 0.14775,
+          "50Hz_duty90": 0.0809375,
+          "100Hz_duty80": 0.12315625,
+          "100Hz_duty90": 0.06346875
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.27691851562500003
+      },
+      "returns": [
+        {
+          "lag_ms": 226,
+          "relative_field_error": 0.8201478548709077,
+          "relative_global_error": 0.2708825415126224
+        },
+        {
+          "lag_ms": 335,
+          "relative_field_error": 0.8298044482051418,
+          "relative_global_error": 0.27606744397395827
+        },
+        {
+          "lag_ms": 452,
+          "relative_field_error": 0.8318429851295757,
+          "relative_global_error": 0.2997217117682746
+        },
+        {
+          "lag_ms": 1286,
+          "relative_field_error": 0.8348260996089412,
+          "relative_global_error": 0.3329189553589645
+        },
+        {
+          "lag_ms": 1173,
+          "relative_field_error": 0.8386392864437145,
+          "relative_global_error": 0.33584083091390876
+        },
+        {
+          "lag_ms": 580,
+          "relative_field_error": 0.8668967802027656,
+          "relative_global_error": 0.31969080701212127
+        },
+        {
+          "lag_ms": 818,
+          "relative_field_error": 0.8812496657115914,
+          "relative_global_error": 0.3413372368322339
+        },
+        {
+          "lag_ms": 697,
+          "relative_field_error": 0.8870337998851354,
+          "relative_global_error": 0.3328879864316777
+        },
+        {
+          "lag_ms": 938,
+          "relative_field_error": 0.8924941652633572,
+          "relative_global_error": 0.34714660143251946
+        },
+        {
+          "lag_ms": 1062,
+          "relative_field_error": 0.8960974075794794,
+          "relative_global_error": 0.35780579062177803
+        },
+        {
+          "lag_ms": 1616,
+          "relative_field_error": 0.8979413651337379,
+          "relative_global_error": 0.3610305845713993
+        },
+        {
+          "lag_ms": 1401,
+          "relative_field_error": 0.9024250780725338,
+          "relative_global_error": 0.3585216326444236
+        }
+      ],
+      "peak_rates_hz": [
+        107.913563805997,
+        69.44965014551337,
+        121.03584398842341,
+        56.92534076850308,
+        139.99253310470743,
+        133.3749113914202,
+        122.76382943111705,
+        127.12972394043382,
+        102.72162422625536,
+        109.13486375942028,
+        91.2953339678738,
+        125.09135761871634,
+        114.19776482811662,
+        121.8077645686,
+        94.6921688808456,
+        110.14571011101447,
+        99.88282168350045,
+        114.45939435894904,
+        83.96201256869969,
+        88.37952678185493,
+        118.89524761844798,
+        100.54942214322158
+      ],
+      "IEI_ms": [
+        174,
+        132,
+        123,
+        146,
+        145,
+        197,
+        255,
+        222,
+        232,
+        121,
+        247,
+        328,
+        130,
+        213,
+        227,
+        185,
+        228,
+        175,
+        123,
+        201,
+        121
+      ],
+      "regional_Z_A_B_surround": [
+        0.7370440035645771,
+        0.733597286532353,
+        0.8610788363131272
+      ]
+    },
+    {
+      "label": "rate_tail_D14497_D0.1449700_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D14497_D0.1449700_dt0.05/trajectory.npz",
+      "D": 0.14497000000000038,
+      "category": "SELF_LIMITED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.6725,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          80,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          80,
+          90,
+          90,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          167.8683875996855,
+          174.99976570226622,
+          175.80153599194483,
+          169.83798544863797,
+          173.90704408375223,
+          176.2222074072116,
+          171.58033366885132,
+          172.57348816028505,
+          176.35582835831488,
+          173.09248567682616,
+          171.04939029254336,
+          176.1433113013312,
+          174.37797255618653,
+          169.26117892885605
+        ],
+        "inter_onset_ms": [
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.3275,
+        "mean_rate_hz": 28.087063159910123,
+        "max_rate_hz": 176.35582835831488,
+        "trailing_activity_ms": 50,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09711390624999999
+      },
+      "returns": [
+        {
+          "lag_ms": 267,
+          "relative_field_error": 0.010474041683462202,
+          "relative_global_error": 0.004741497997838735
+        },
+        {
+          "lag_ms": 1868,
+          "relative_field_error": 0.020428290042461144,
+          "relative_global_error": 0.0092560551313139
+        },
+        {
+          "lag_ms": 534,
+          "relative_field_error": 0.020903211281980746,
+          "relative_global_error": 0.00947688831666781
+        },
+        {
+          "lag_ms": 1601,
+          "relative_field_error": 0.030801046263192647,
+          "relative_global_error": 0.013991655910840492
+        },
+        {
+          "lag_ms": 801,
+          "relative_field_error": 0.031269210221692524,
+          "relative_global_error": 0.014210339579560107
+        },
+        {
+          "lag_ms": 1334,
+          "relative_field_error": 0.041088925460392924,
+          "relative_global_error": 0.018728243751726815
+        },
+        {
+          "lag_ms": 1068,
+          "relative_field_error": 0.041550728091278175,
+          "relative_global_error": 0.018943616482305702
+        }
+      ],
+      "peak_rates_hz": [
+        178.34065801875443,
+        178.30731999014486,
+        178.37648618368692,
+        178.422128563089,
+        178.446688302448,
+        178.44986581776814,
+        178.44358985302816,
+        178.4201922906255,
+        178.38514063699336,
+        178.33756947025205,
+        178.31539038029902,
+        178.38219028383264,
+        178.4269931200921,
+        178.4490022970399,
+        178.45279335758494
+      ],
+      "IEI_ms": [
+        266,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        266,
+        267,
+        267,
+        267,
+        267
+      ],
+      "regional_Z_A_B_surround": [
+        0.7370552672790044,
+        0.7336007726849696,
+        0.8610837203263697
+      ]
+    }
+  ],
+  "claim": "At 20 s total duration D=0.144970 remains self-limited; D=0.144975 has escaped the earlier near-periodic transient into local persistent activity. This brackets a finite-history loss of the short cycle, not yet its bifurcation type.",
+  "time_step_refinement": {
+    "status": "COMPLETE",
+    "D": 0.1449750000000004,
+    "dt_ms": 0.025,
+    "category": "UNRESOLVED",
+    "tail_mean_hz": 68.40602228165808,
+    "best_field_return": {
+      "lag_ms": 270,
+      "relative_field_error": 0.7811623124536198,
+      "relative_global_error": 0.42109292791199066
+    },
+    "claim": "Loss of regular short cycle reproduced; exact finite-window persistence category differs and is not used as a monotone bifurcation label."
+  },
+  "Z": "held",
+  "M": "dynamic"
+}

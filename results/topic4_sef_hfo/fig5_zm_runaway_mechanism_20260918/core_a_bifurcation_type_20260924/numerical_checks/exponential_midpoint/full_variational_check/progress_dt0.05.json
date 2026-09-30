@@ -1,0 +1,41 @@
+{
+  "parity": {
+    "syn": true,
+    "local": true,
+    "history": true,
+    "clock": true,
+    "rate": true,
+    "physical": true,
+    "emitted": true,
+    "accumulator": true,
+    "output": true,
+    "arrivals": true,
+    "parameters": true
+  },
+  "tests": [
+    {
+      "epsilon": 2e-05,
+      "relative_errors": {
+        "syn": 4.0025870779706545e-07,
+        "local": 4.473403343398172e-07,
+        "history": 5.906436601888506e-07
+      }
+    },
+    {
+      "epsilon": 1e-05,
+      "relative_errors": {
+        "syn": 1.0022675902511645e-07,
+        "local": 1.1199426867964703e-07,
+        "history": 1.4775775935127676e-07
+      }
+    },
+    {
+      "epsilon": 5e-06,
+      "relative_errors": {
+        "syn": 2.4929079255389982e-08,
+        "local": 2.7866509114044767e-08,
+        "history": 3.7093611765115954e-08
+      }
+    }
+  ]
+}

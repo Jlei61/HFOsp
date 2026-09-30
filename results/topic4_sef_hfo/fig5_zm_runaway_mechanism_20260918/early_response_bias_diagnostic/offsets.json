@@ -1,0 +1,28 @@
+{
+  "status": "OFFSETS_LOCKED_BEFORE_TRANSFER",
+  "offsets": {
+    "E": 0.5477063461621052,
+    "I": 0.3863665459738692
+  },
+  "fit": [
+    {
+      "pop": "E",
+      "offset": 0.5477063461621052,
+      "hazard_multiplier": 1.729282091137458,
+      "objective": 0.002756208800519739,
+      "baseline_objective": 0.022428937831269227,
+      "evaluations": 11
+    },
+    {
+      "pop": "I",
+      "offset": 0.3863665459738692,
+      "hazard_multiplier": 1.4716239898146168,
+      "objective": 0.0005120887362378133,
+      "baseline_objective": 0.012718057659810916,
+      "evaluations": 10
+    }
+  ],
+  "parent_weights": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_rate/fit/locked_weights.json",
+  "native_outputs_used_in_fit": false,
+  "development_not_blind": true
+}

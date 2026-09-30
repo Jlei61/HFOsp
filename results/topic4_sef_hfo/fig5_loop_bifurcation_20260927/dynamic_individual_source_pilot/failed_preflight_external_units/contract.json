@@ -1,0 +1,27 @@
+{
+  "status": "REGISTERED_BEFORE_TWO_PHYSICAL_TIME_PILOTS",
+  "created_epoch": 1790568173.8243487,
+  "question": "Can retaining individual source identity and full physical delay preserve the native high-history state without imposing its period?",
+  "design": "Exactly two one-second physical-time density trajectories from the same full72s native high-history state, at held actual exit Z/K fields. Same exact individual thresholds, fixed per-cell external means,64 numerical replicas and RNG streams. Only group-averaged versus individual source feedback changes. M, synapses, membrane, refractory state and R/G evolve. No future neural forcing or phase-period prescription.",
+  "limitations": "Independent Gaussian recurrent/external increments remain an explicit approximation, with finite numerical replica error. Exact source operators alone do not validate this closure. One development high point, not independent native seeds, global correspondence, equilibrium, stability or bifurcation.",
+  "checks": "Complete initial physical state including pending pulses; exact Z/K/threshold/nu; CPU delayed-arrival projection; per-cell-to-group spike conservation; eager/captured bitwise equivalence; fixed-input new kernel versus established kernel on identical uniform drive.",
+  "decision": "Compare matched native first1s and time-resolved spatial/core/G behavior. Native correspondence guard: tail.8-1s fieldRMS<=10Hz, eachcore rate error<=10Hz, causalR remains below200 and negligibleGraw<0.1. These are relevance guards, not final certification. Stop after fixed pair regardless of outcome; no automatic parameter/period/root search.",
+  "modes": [
+    "group_source",
+    "individual_source"
+  ],
+  "duration_ms": 1000,
+  "replicas": 64,
+  "native_initial": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/runs/exit_z0.21_k9.35_fields16p7_held_K9_history/checkpoint.pkl",
+  "native_initial_sha256": "e6f898b416a18b43b881a1ae83a892b630b07be1d59ec156a0e8e1e5a6551f12",
+  "matched_native": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/runs/high_history_constant_background",
+  "parameters_sha256": "2bf18cc7fa8ae962e9114c36739ad00543776e1a2febe11507f6ce4efef2b7ff",
+  "dependencies": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_individual_source_pilot.py": "61814b4ce738f55796e0b73b5cd34cf2cd21d5b467c5fb9239af51acfaf7030f",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/density_spatial.py": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/target_density_exit.py": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/coupled_density_exit.py": "0520150892ebd97afdd778e5ccf7141bba8e92a13a1b0fcf2ceed1a3c2fc81b3",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/exit_branch_density.py": "8d05056443cc536b98773c2324707047e2aa41ebabb3ad7feb2d044aa23dc1fe"
+  },
+  "formal_bifurcation_allowed": false
+}

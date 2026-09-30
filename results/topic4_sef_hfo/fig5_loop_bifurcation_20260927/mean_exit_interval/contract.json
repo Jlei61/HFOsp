@@ -1,0 +1,51 @@
+{
+  "status": "REGISTERED_FOUR_RELEVANT_CONDITIONAL_PROBES",
+  "created_epoch": 1790574208.5177307,
+  "question": "Where within9.35-9.5 does the high spatial state cease to persist, and can the quiet history remain quiet when K is returned to9.35?",
+  "design": "Three interiorKvalues9.3875/9.425/9.4625 from the same completedR64highstate, plus quiet-to9.35 from the completedR64quietstate. All four10s. Exact fullparticlejointstates/ref/M/synapses, fullsourcehistory/delayclock andnumericalRNG retained. Change only heldKfield; Zheld/Gfree/originalgraph/nu/Poissonlaw unchanged.",
+  "pairing": "All sources end at modelclock100000 with identical main/externalnumericalRNG. Original pendingprefix is already past; the complete recurrent sourcehistory carries allfuture arrivals. The two histories differ endogenously. Future externalstreams paired; fixedpercellnu has no clockdependence.",
+  "prerequisite": "Both10shistories at9.35, native/modelupperexit9.5, single-replica identity andR64/R256upperexit resolution must all retain their originalguards before dispatch.",
+  "readouts": "Full0-10s and5-10s rates/core asymmetry, spatialfield, counterfactualcoreZdrift, R/G, first100msR<=5 and sustainedactivity/censoring. Plot actual measuredresponses with historylabels; no stability designation or curve between incompatible histories.",
+  "stop": "Exactly four10s trajectories, no automatic extension, seeds, points or formalroots. If highstate transitions to an asymmetricactive pattern, retain that outcome separately fromquiet. If quiet returns, do not claim coexistence. Review before selecting any further parameter or stability test.",
+  "unit": "Four conditional responses with paired numericalexternalstreams, not fourindependent nativeorpatientreplicates. No added autonomousloops.",
+  "jobs": {
+    "high_K9p3875": {
+      "history": "high",
+      "K": 9.3875,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/dynamic_mean_history_pair/high/final_state.npz"
+    },
+    "high_K9p425": {
+      "history": "high",
+      "K": 9.425,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/dynamic_mean_history_pair/high/final_state.npz"
+    },
+    "high_K9p4625": {
+      "history": "high",
+      "K": 9.4625,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/dynamic_mean_history_pair/high/final_state.npz"
+    },
+    "quiet_K9p35": {
+      "history": "quiet",
+      "K": 9.35,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_boundary_correspondence/model/upper/final_state.npz"
+    }
+  },
+  "sources": {
+    "high": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/dynamic_mean_history_pair/high/final_state.npz",
+      "sha256": "0b14e26a33f2311d4ea18b1a73614eb6527b3eec9572afb780967abd47925e46"
+    },
+    "quiet": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_boundary_correspondence/model/upper/final_state.npz",
+      "sha256": "cb8782ef0cef57e631280e4f1160d4aa6a414e9a44f7b1dced97d33118081ba5"
+    }
+  },
+  "dependencies": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/mean_exit_interval.py": "070b7e52051b2c84d9a70701b960a83cf6302765a035be7fc7d104aa2dd32d12",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_history_pair.py": "26d3da49c34293adcbda3d30ed43cf2f50f1d0660c22eda068a92c3d78049bb8",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_input_pilot.py": "2d0f1482f0761a02cddce83230dec6d919ac8203390fde751e15bca6fce8affa",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_individual_source_pilot.py": "e02b9ee463458fb0bfe053121f37c9e176369c3f197acd5640cd10a590f22fe1",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_poisson_external_pilot.py": "1858427dc7405fa4f54b3988a148c5f76a2c4f11aa212be8309c80d9b0411e1f"
+  },
+  "formal_bifurcation_allowed": false
+}

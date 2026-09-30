@@ -1,0 +1,94 @@
+{
+  "status": "UNSTABLE",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR2_exactJ_a0038_saddle_k8_20260920_dt0.1.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR2_exactJ_a0038_saddle_k8_20260920_dt0.05.json"
+  ],
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR2_saddle_matched_endpoint_further_TR2_a0.038000Hz_N64x64_N128.npz",
+  "J_EE_core": 0.945762867639569,
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.003222046450921,
+        0.0
+      ],
+      [
+        0.9959630531530748,
+        0.0
+      ],
+      [
+        0.5487233702753509,
+        0.0
+      ],
+      [
+        0.0182835701585018,
+        0.0
+      ],
+      [
+        0.016597090715564585,
+        0.0
+      ],
+      [
+        -0.00042312747266094486,
+        0.008464939790823644
+      ],
+      [
+        -0.00042312747266094486,
+        -0.008464939790823644
+      ],
+      [
+        0.002824032766288211,
+        0.0010040375687581987
+      ]
+    ],
+    "per_mode_margin": [
+      0.00011277362728323581,
+      0.00014650241462632607,
+      7.314148864367986e-05,
+      7.178052023150416e-05,
+      7.898513920506084e-05,
+      2.4037288772428682e-05,
+      2.4037288772428682e-05,
+      2.4037288772428682e-05
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      1.879560454720597e-05,
+      2.441706910438768e-05,
+      1.2190248107279977e-05,
+      1.1963420038584027e-05,
+      1.316418986751014e-05,
+      3.908906435617855e-07,
+      3.908906435617855e-07,
+      1.9739563481551685e-06
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.003222046450921,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "physical_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/TR2_saddle_directions/exactJ_spectrum/physical_check.json",
+  "scope": "Paired full-history spectrum at this exact-J saddle only. Does not prove torus stability or a global invariant-manifold connection."
+}

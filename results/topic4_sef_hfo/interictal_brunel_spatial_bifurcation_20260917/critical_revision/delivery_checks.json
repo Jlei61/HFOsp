@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "branch_points": 2370,
+  "spectral_points": 682,
+  "maximum_stored_eigenpair_residual": 9.460179334649782e-10,
+  "maximum_scaled_arc_step": 0.839211277176449,
+  "critical_case_modes": [
+    {
+      "J_EE_core": 0.948,
+      "growth_per_s": [
+        -1.0328928850565855,
+        -2.3839446843760634
+      ],
+      "frequency_hz": [
+        6.182214788940648,
+        5.739848555881977
+      ]
+    },
+    {
+      "J_EE_core": 0.955,
+      "growth_per_s": [
+        0.1778315242012153,
+        -1.1019596152393485
+      ],
+      "frequency_hz": [
+        6.0856526183807675,
+        5.624817827959671
+      ]
+    },
+    {
+      "J_EE_core": 0.963,
+      "growth_per_s": [
+        1.6738901881602013,
+        0.5112436503670272
+      ],
+      "frequency_hz": [
+        5.959660382534861,
+        5.471407814602544
+      ]
+    }
+  ],
+  "full_determinant_counts": [
+    0,
+    2,
+    4
+  ],
+  "stationary_folds": 12,
+  "same_J_unstable_equilibria": 9,
+  "native_cases": [
+    {
+      "J_EE_core": 0.948,
+      "maximum_field_count_error": 7.61413571126468e-06,
+      "burst_CV": [
+        0.44469515139555243,
+        0.4594379250616283
+      ]
+    },
+    {
+      "J_EE_core": 0.955,
+      "maximum_field_count_error": 9.006500249597593e-06,
+      "burst_CV": [
+        0.40122629009733013,
+        0.39319575772920395
+      ]
+    },
+    {
+      "J_EE_core": 0.963,
+      "maximum_field_count_error": 8.449554570688633e-06,
+      "burst_CV": [
+        0.3418573256218703,
+        0.39392092084970787
+      ]
+    }
+  ],
+  "meaning": "Numerical consistency of this spatial closure and native readout identity. Not acceptance of full nonlinear rate/SNN equivalence or mesh-converged fold multiplicity.",
+  "human_visual_acceptance": false
+}

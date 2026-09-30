@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "dt_ms": 0.025,
+  "exact_nominal_replay": true,
+  "passive_tangent_nominal_bitwise": true,
+  "full_state_FD": [
+    {
+      "epsilon": 5e-05,
+      "relative_errors": {
+        "syn": 7.035491793260274e-05,
+        "local": 9.162763226867632e-05,
+        "history": 0.0002833221252973818
+      }
+    },
+    {
+      "epsilon": 2.5e-05,
+      "relative_errors": {
+        "syn": 1.76086674125997e-05,
+        "local": 2.292623642358387e-05,
+        "history": 7.087765486434722e-05
+      }
+    },
+    {
+      "epsilon": 1.25e-05,
+      "relative_errors": {
+        "syn": 4.403395640887065e-06,
+        "local": 5.732822463695269e-06,
+        "history": 1.7723024927605945e-05
+      }
+    }
+  ],
+  "Z_held": true,
+  "M_dynamic": true,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/final_state.npz"
+}

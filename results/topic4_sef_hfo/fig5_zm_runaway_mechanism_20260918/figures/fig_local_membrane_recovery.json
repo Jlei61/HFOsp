@@ -1,0 +1,26 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/membrane_recovery_diagnostic/response.npz",
+  "audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/membrane_recovery_diagnostic/independent_audit.json",
+  "group": 39,
+  "population": "Previously selected surround E subgroup",
+  "rows": [
+    "Rate with history-conditioned response prediction",
+    "Mean post-update voltage relative to reset, all cells",
+    "Post-update refractory fraction"
+  ],
+  "columns": [
+    "Original strong input",
+    "Same mean waveform; both variance intensities fixed at their cycle means"
+  ],
+  "uncertainty": "Plus/minus 2 SEM across 8192 independent noise paths; repeated cycles combined within each path",
+  "voltage": "Model voltage relative to model reset; negative values are allowed LIF voltages, not a negative resource D.",
+  "scope": "Driven local population diagnostic, not an autonomous network, a native-network trajectory, or a bifurcation diagram.",
+  "agent_visual_review": {
+    "status": "PASS",
+    "PNG": true,
+    "same_state_PDF": true,
+    "updated_local": "2026-09-20T01:33:31.080894+08:00",
+    "panel_label_overlap_fixed": true
+  },
+  "human_visual_acceptance": "PENDING"
+}

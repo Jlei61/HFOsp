@@ -1,0 +1,12 @@
+{
+  "status": "LOCAL_FOLD_ORIENTATION_VERIFIED",
+  "D_A_critical": 0.3531576412548057,
+  "Z_A_critical": 0.6468423587451944,
+  "projected_static_equation": "0=a*(D_A-D_critical)+b*u^2+higher_order; u is the critical nullvector coordinate, not a firing rate",
+  "a": -51.20457346978472,
+  "b": 0.0007920077479425682,
+  "existing_pair_parameter_side": "D_A>D_critical, equivalently Z_A<Z_A_critical",
+  "evidence": "Nonzero same-sign-under-refinement coefficient ratio; both independently corrected side roots lie atD_critical+1e-5 with full temporal zero-mode signs opposite. Both have an additional positive-growth oscillatory mode.",
+  "interpretation": "Depleting Core-A Z creates this local pair of unstable high-activity equilibria. This is not certification that a stable low-activity attractor disappears or that the observed onset follows this fold.",
+  "model_promoted": false
+}

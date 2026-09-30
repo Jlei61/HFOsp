@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "normalized_matrix_max_errors": [
+    2.306595211858756e-16,
+    2.348263065663399e-16,
+    2.7651840455512426e-16,
+    2.237358185234739e-16
+  ],
+  "analytic_bound_checks": [
+    {
+      "lambda_per_ms": [
+        0.02,
+        0.03
+      ],
+      "actual_row_norm": 24.313241268735904,
+      "bound": 28.07316837071085
+    },
+    {
+      "lambda_per_ms": [
+        0.1,
+        0.2
+      ],
+      "actual_row_norm": 5.164796508151626,
+      "bound": 9.03399099256071
+    },
+    {
+      "lambda_per_ms": [
+        0.01,
+        1.0
+      ],
+      "actual_row_norm": 1.3791805271212483,
+      "bound": 2.093289737564023
+    },
+    {
+      "lambda_per_ms": [
+        1.0,
+        0.2
+      ],
+      "actual_row_norm": 0.04227494686463238,
+      "bound": 0.9252042821296452
+    }
+  ],
+  "LU_determinant_phase_errors": [
+    4.440892098500626e-16,
+    3.885780586188048e-16,
+    1.6653345369377348e-16,
+    5.117875266520903e-16,
+    1.216505063395608e-15,
+    7.550332863779066e-16
+  ],
+  "scope": "Operator identity and bound implementation, not contour completeness."
+}

@@ -1,0 +1,61 @@
+{
+  "label": "native_Z9000_held",
+  "duration_ms": 3500.0,
+  "n_events": 5,
+  "quiet_fraction": 0.12914285714285714,
+  "high_onset_ms": null,
+  "mean_allE_hz": 47.50466071428571,
+  "expansion_first_ms": {
+    "0.25": 9633.0,
+    "0.5": null,
+    "0.75": null
+  },
+  "status": "COMPLETE",
+  "complete_events": [
+    {
+      "start_ms": 9888.0,
+      "duration_ms": 118.0,
+      "peak_hz": 104.1,
+      "n_cells": 295,
+      "area_fraction": 0.7392187499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 281,
+      "direction_axis_mm": -10.897197934388323,
+      "extent_mm": 12.431965348728092
+    },
+    {
+      "start_ms": 10142.0,
+      "duration_ms": 654.0,
+      "peak_hz": 113.578125,
+      "n_cells": 319,
+      "area_fraction": 0.7985312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 305,
+      "direction_axis_mm": -2.9137323235208474,
+      "extent_mm": 8.736204130981037
+    },
+    {
+      "start_ms": 10914.0,
+      "duration_ms": 96.0,
+      "peak_hz": 107.821875,
+      "n_cells": 195,
+      "area_fraction": 0.4901249999999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 181,
+      "direction_axis_mm": -16.130601551942735,
+      "extent_mm": 16.663033458160545
+    }
+  ],
+  "M_dynamic": true,
+  "Z_dynamic": false,
+  "tail_global_hz": 54.85221875,
+  "tail_quiet_fraction": 0.0,
+  "tail_persistent_fraction": 0.063375,
+  "own_rate_history": "common saved9000ms state",
+  "initial_D": 0.2164660210396102,
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

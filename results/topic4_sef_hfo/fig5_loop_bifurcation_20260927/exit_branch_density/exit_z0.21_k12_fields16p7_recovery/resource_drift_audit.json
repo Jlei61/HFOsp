@@ -1,0 +1,63 @@
+{
+  "name": "exit_z0.21_k12_fields16p7_recovery",
+  "native": {
+    "interval_elapsed_s": [
+      5,
+      10
+    ],
+    "held_Z": [
+      0.21000000000000002,
+      0.17416938610496047,
+      0.16536878876958155,
+      0.21203862163177836
+    ],
+    "mean_counterfactual_dZ_per_s": [
+      0.15800000000000108,
+      0.16516612277900802,
+      0.16692624224608452,
+      0.15759227567364337
+    ],
+    "eligible_fraction": [
+      1.0000000000000053,
+      1.0000000000000004,
+      1.0000000000000042,
+      0.9999999999999952
+    ],
+    "sampled_Graw_min": 8.464635148054856e-20,
+    "conservative_interstep_Graw_lower_bound": 8.447722795748504e-20,
+    "allE_Z_recovery_blocked_throughout": false,
+    "observable": "Nativepreceding20msstep-budgetaverageoverelapsed5-10s;rawI_I nonnegative,globalG lowerboundvalidbetweenrecords."
+  },
+  "density": {
+    "endpoint_elapsed_s": 10.0,
+    "last_step_pre_R_Hz": 3.75e-322,
+    "last_step_pre_Graw": 8.449412509273375e-20,
+    "held_Z": [
+      0.2100000009108858,
+      0.1741693843095959,
+      0.16536875475271612,
+      0.21203862351094144
+    ],
+    "eligible_fraction": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "counterfactual_dZ_per_s": [
+      0.1579999998178228,
+      0.16516612313808082,
+      0.16692624904945677,
+      0.15759227529781172
+    ],
+    "negative_raw_I_I_fraction": [
+      0.1566022186279297,
+      0.15592167295258622,
+      0.15942507057092875,
+      0.15654622288965037
+    ],
+    "observable": "Instantaneous last-step particle-time predicate,not5secondaverage. No thresholdofmeanI isused."
+  },
+  "critical_question": "Does a visuallysimilar sustainedbranch imply the same Z-restorationdirection?",
+  "formal_bifurcation_allowed": false
+}

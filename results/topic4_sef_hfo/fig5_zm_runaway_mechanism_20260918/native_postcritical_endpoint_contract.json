@@ -1,0 +1,27 @@
+{
+  "created_local": "2026-09-19T13:41:57.915282",
+  "status": "COMPLETE",
+  "question": "After loss of regular short cycles, does recruitment become globally high through a distinct state change or a gradual change of a spatially active regime?",
+  "model": "frozen v3 20x20 spatial rate field; no parameter change",
+  "family": "native checkpoint spatial Z path",
+  "D": [
+    0.24,
+    0.25,
+    0.2563444253447549
+  ],
+  "Z": "held",
+  "M": "dynamic",
+  "initial": "initial_states/seed_N1024_dt0.05.npz; identical complete state and delay history",
+  "dt_ms": 0.05,
+  "duration_ms": 12000,
+  "readout": "Existing state metrics plus E-cell-count-weighted spatial-field temporal variation/recurrence, final 4 s",
+  "comparison": "Existing endpoint-consistent runs at D .219/.2196/.222/.22884476056519154",
+  "limits": [
+    "Finite trajectories are not continued periodic branches or bifurcations.",
+    "200 Hz crossing is an operational readout, not by itself a dynamical bifurcation.",
+    "Legacy .1 ms step-average-history high-Z runs are not spliced into this matched series."
+  ],
+  "followup": "Refine time step only if a prospective state boundary or numerical concern warrants it.",
+  "audit": "native_postcritical_endpoint_audit.json",
+  "figure": "figures/fig_native_path_postcritical_spatial.png"
+}

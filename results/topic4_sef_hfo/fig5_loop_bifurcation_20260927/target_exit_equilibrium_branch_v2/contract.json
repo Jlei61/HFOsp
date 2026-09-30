@@ -1,0 +1,19 @@
+{
+  "status": "REGISTERED_AFTER_ACTUAL_K9_ROOT",
+  "created_epoch": 1790533304.2480824,
+  "question": "How does the high equilibrium connected to the corresponding actual-field K9 state change as held K approaches the native K9-to12 exit interval?",
+  "design": "One connected static-surrogate branch at Zmean.21 with actual16.7s spatialshape. K scales eachcellheldK, G remains selfconsistent fromR andM_i fromindividualrate. Sourcegraph3479groups/40000targets andfrozenv3response unchanged. Externalmeanfixed to paired5-10smean.",
+  "algorithm": "Resume saved convergedprefix with weighted pseudo-arclength. Project predictor rates to nonnegative domain before originalequation Newton correction; no tolerancechange. Totalacceptedpointbudget60includingprefix, atmost5halvingsperpoint,minarcstep.00025,max18Newtonsteps. K8.5-12,stop6postturnpoints or90minwall.",
+  "resume": {
+    "point": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_exit_equilibrium_branch/point_013.npz",
+    "source_branch": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_exit_equilibrium_branch",
+    "accepted_prefix_points": 14,
+    "turn_seen": false,
+    "epoch": 1790533262.9536912
+  },
+  "validation": "AnalyticKderivative compared withsame-equation finite difference; tangent andequilibriumresiduals saved at every point. Accepted maxresidual<1e-6Hz. Numerical turning is NOT dynamicstability or nativebifurcation certification.",
+  "gate": "Do not draw stable/unstable labels or certifyfold until actual-domain independentresponse andfull dynamic stability are established. Not anewMLP fit orunrelatedcommonfieldrootsearch.",
+  "root_producer_sha256": "860bad9181e8247766e3056c666cfee037801b5d07bad58282a99ecdaafe9b11",
+  "producer_sha256": "5387f147de76ae23b3625f31297d238321a5e825b157c6ee7dec8ffee8be3997",
+  "formal_bifurcation_allowed": false
+}

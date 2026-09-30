@@ -1,0 +1,39 @@
+{
+  "created_local": "2026-09-20T07:42:49.463875+08:00",
+  "status": "REGISTERED_BEFORE_LOCAL_LIF_EXECUTION",
+  "groups": [
+    279,
+    141,
+    39,
+    594,
+    293,
+    130
+  ],
+  "question": "Does locked rate response agree with independent GaussianLIF under actual native groupcount-derived input? Does keeping original within-group threshold heterogeneity change that comparison?",
+  "input": "Reconstructed AMPA/GABA means plus observed pre-step groupZ/M; delayed privatePoisson raw variance forcing, exact two-pole OU noise, Z multiplies GABA current after filtering.",
+  "conditions": [
+    "group_mean_threshold",
+    "original_cell_threshold_mixture"
+  ],
+  "min_replicates_per_case": 8192,
+  "replicates": "Round up to multiple of originalgroupN for equal originalthreshold weights and exact finiteN synthetic batches.",
+  "seed": 920110,
+  "dt_ms": [
+    0.1,
+    0.05
+  ],
+  "history_ms": [
+    8000,
+    9000
+  ],
+  "primary_ms": [
+    9000,
+    10350
+  ],
+  "bin_ms": 50,
+  "initialization": "Reset voltage,zero noise currents,refractory0 at8s;1s preparation excluded. Native inputs are held on0.1ms intervals in both time steps.",
+  "comparisons": "Same-clock50ms totalcounts; MCmean and central95percent finiteN predictive range under conditional independentGaussianinput. Acrossgroup/time bins are descriptive repeated observations. No fitted shifts.",
+  "numerical_gate": "Matcheddt binnedmean relativeL2<=.05 or <=3timesMCsplitL2; exact constant-input counts vs originalLIF kernel required first.",
+  "interpretation": "LocalGaussianLIF vs lockedrate local discrepancy diagnoses response only within this assumed input law. Agreement between them with native mismatch supports missing input/heterogeneity closure. Predictive range is model-based, not a calibrated native confidence interval.",
+  "scope": "Fixed12conditions at2steps; no rate fitting or newwhole-network simulation, no model promotion or bifurcation."
+}

@@ -1,0 +1,30 @@
+{
+  "status": "JOINT_MOMENT_IMPLEMENTATION_PASS",
+  "affine_transition_max_error": 2.842170943040401e-14,
+  "independent_quadrature_max_error": 4.263256414560601e-14,
+  "current_partition_max_error": 4.440892098500626e-16,
+  "deterministic": [
+    {
+      "population": "E",
+      "grid": 32,
+      "stepwise_spikes_exact": true
+    },
+    {
+      "population": "E",
+      "grid": 128,
+      "stepwise_spikes_exact": true
+    },
+    {
+      "population": "I",
+      "grid": 32,
+      "stepwise_spikes_exact": true
+    },
+    {
+      "population": "I",
+      "grid": 128,
+      "stepwise_spikes_exact": true
+    }
+  ],
+  "model_promoted": false,
+  "scope": "Algebra and noiseless discrete-LIF invariance only; no noisy response, compact rate model, network or bifurcation acceptance."
+}

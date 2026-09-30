@@ -1,0 +1,99 @@
+{
+  "status": "REPLAY_AGREEMENT_PASS_RECURRENCE_ONLY",
+  "segments": 6,
+  "period_ms": 790.25,
+  "times_ms": [
+    18778.100000000002,
+    18909.8,
+    19041.5,
+    19173.2,
+    19304.95,
+    19436.65,
+    19568.350000000002
+  ],
+  "full_state_errors": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.912938860235663,
+        "difference_rms": 0.08601925471041429,
+        "relative_rms": 0.005405617118618175
+      },
+      "GABA": {
+        "reference_rms": 8.278252629112977,
+        "difference_rms": 0.14427652855652118,
+        "relative_rms": 0.01742837951684745
+      },
+      "M": {
+        "reference_rms": 0.02089098919356094,
+        "difference_rms": 0.00017106251714665835,
+        "relative_rms": 0.008188339745988838
+      },
+      "covariance": {
+        "reference_rms": 37.56850183753858,
+        "difference_rms": 0.052131247619388636,
+        "relative_rms": 0.0013876317944437942
+      },
+      "input_memory": {
+        "reference_rms": 0.08878083043926635,
+        "difference_rms": 0.00018058518997312456,
+        "relative_rms": 0.0020340561028730207
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0047007708425544905,
+        "difference_rms": 5.9820913029479644e-05,
+        "relative_rms": 0.01272576669510054
+      }
+    },
+    "combined_relative_rms": 0.009729902885921854
+  },
+  "all_original_1ms_group_rates_bitwise": false,
+  "original_checkpoint_comparison": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 12.748928473121827,
+        "difference_rms": 1.8878139773632254e-13,
+        "relative_rms": 1.4807628588890787e-14
+      },
+      "GABA": {
+        "reference_rms": 15.61095724615925,
+        "difference_rms": 5.6817431929312694e-11,
+        "relative_rms": 3.639586671937842e-12
+      },
+      "M": {
+        "reference_rms": 0.023246796963835407,
+        "difference_rms": 1.9736491198433162e-15,
+        "relative_rms": 8.489983041163408e-14
+      },
+      "covariance": {
+        "reference_rms": 36.751321331956916,
+        "difference_rms": 6.477286281005782e-13,
+        "relative_rms": 1.7624635104951973e-14
+      },
+      "input_memory": {
+        "reference_rms": 0.2870981107220009,
+        "difference_rms": 4.360071817882636e-13,
+        "relative_rms": 1.518669630711894e-12
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0015130641845227872,
+        "difference_rms": 5.328594569896602e-14,
+        "relative_rms": 3.5217240778038864e-11
+      }
+    },
+    "combined_relative_rms": 1.4467289163736402e-11
+  },
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "mean_global_A_B_surround_hz": [
+    34.08980153192544,
+    113.93602505667444,
+    88.05440749359515,
+    30.720785352558035
+  ],
+  "seconds": 444.2841351032257,
+  "model_promoted": false,
+  "diagnostic_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/replay_difference_diagnostic",
+  "original_failed_replay_retained": true,
+  "replay_discrepancy_cause": "UNRESOLVED",
+  "node_replay_checks": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/three_burst_verified_replay/node_replay_checks.json"
+}

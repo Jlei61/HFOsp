@@ -1,0 +1,289 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native",
+      "high_onset_ms": 9868.5,
+      "D_at_native_checkpoints": {
+        "10370": 0.30871178728576065,
+        "12500": 0.5401727014041959,
+        "8000": 0.20146039727098164,
+        "9000": 0.21646602103961032,
+        "9300": 0.22333473704327822,
+        "9420": 0.22884476056519154,
+        "9870": 0.2563444253447549
+      },
+      "complete_event_windows": {
+        "1000-4000": {
+          "n": 10,
+          "median_duration_ms": 103.0,
+          "iqr_duration_ms": [
+            94.5,
+            119.25
+          ],
+          "median_gap_ms": 261.0,
+          "both_cores": 8,
+          "coreA_only": 1,
+          "coreB_only": 1,
+          "median_area": 0.749203125,
+          "median_surround_cells": 285.5,
+          "forward": 2,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 12.423424324881182
+        },
+        "4000-8000": {
+          "n": 16,
+          "median_duration_ms": 101.5,
+          "iqr_duration_ms": [
+            65.5,
+            118.0
+          ],
+          "median_gap_ms": 253.0,
+          "both_cores": 13,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.752,
+          "median_surround_cells": 287.5,
+          "forward": 8,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 8.628925496258699
+        },
+        "8000-9420": {
+          "n": 5,
+          "median_duration_ms": 162.0,
+          "iqr_duration_ms": [
+            126.0,
+            184.0
+          ],
+          "median_gap_ms": 273.5,
+          "both_cores": 5,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.9162499999999998,
+          "median_surround_cells": 351.0,
+          "forward": 3,
+          "reverse": 1,
+          "undirected": 1,
+          "median_extent_mm": 9.49418726572921
+        },
+        "1000-9420": {
+          "n": 31,
+          "median_duration_ms": 104.0,
+          "iqr_duration_ms": [
+            85.0,
+            125.0
+          ],
+          "median_gap_ms": 266.0,
+          "both_cores": 26,
+          "coreA_only": 1,
+          "coreB_only": 1,
+          "median_area": 0.7592187499999999,
+          "median_surround_cells": 290.0,
+          "forward": 13,
+          "reverse": 17,
+          "undirected": 1,
+          "median_extent_mm": 10.105750851586855
+        }
+      },
+      "quiet_fraction_by_window": {
+        "1000-4000": 0.547,
+        "4000-8000": 0.55225,
+        "8000-9420": 0.35845070422535213,
+        "1000-9420": 0.5176959619952494
+      },
+      "qa": {
+        "source": "Original native reference, not mean-input replacement."
+      },
+      "tail_global_mean_Hz": 448.36449990490854
+    },
+    {
+      "label": "units_history",
+      "high_onset_ms": 8034.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.522973302629281,
+        "12500": 0.6884460683104813,
+        "8000": 0.26249254833345403,
+        "9000": 0.3748598204729886,
+        "9300": 0.40987726074025166,
+        "9420": 0.4235304822828413,
+        "9870": 0.47280396692372295
+      },
+      "complete_event_windows": {
+        "1000-4000": {
+          "n": 11,
+          "median_duration_ms": 84.0,
+          "iqr_duration_ms": [
+            77.5,
+            102.5
+          ],
+          "median_gap_ms": 248.0,
+          "both_cores": 9,
+          "coreA_only": 0,
+          "coreB_only": 1,
+          "median_area": 0.7312499999999998,
+          "median_surround_cells": 279.0,
+          "forward": 5,
+          "reverse": 6,
+          "undirected": 0,
+          "median_extent_mm": 11.52148587111058
+        },
+        "4000-8000": {
+          "n": 16,
+          "median_duration_ms": 97.5,
+          "iqr_duration_ms": [
+            74.75,
+            143.0
+          ],
+          "median_gap_ms": 177.0,
+          "both_cores": 13,
+          "coreA_only": 0,
+          "coreB_only": 1,
+          "median_area": 0.6915,
+          "median_surround_cells": 262.0,
+          "forward": 7,
+          "reverse": 6,
+          "undirected": 3,
+          "median_extent_mm": 8.203578378803638
+        },
+        "8000-9420": {
+          "n": 0
+        },
+        "1000-9420": {
+          "n": 27,
+          "median_duration_ms": 88.0,
+          "iqr_duration_ms": [
+            76.5,
+            108.5
+          ],
+          "median_gap_ms": 235.0,
+          "both_cores": 22,
+          "coreA_only": 0,
+          "coreB_only": 2,
+          "median_area": 0.71171875,
+          "median_surround_cells": 270.0,
+          "forward": 12,
+          "reverse": 12,
+          "undirected": 3,
+          "median_extent_mm": 8.841889636592338
+        }
+      },
+      "quiet_fraction_by_window": {
+        "1000-4000": 0.559,
+        "4000-8000": 0.37675,
+        "8000-9420": 0.0,
+        "1000-9420": 0.37814726840855106
+      },
+      "qa": {
+        "weighted_rate_error_Hz": 2.153873424504127e-06,
+        "D_float32_error": 2.7045080619458872e-09,
+        "Z_physical": true,
+        "M_dynamic_max_mV": 0.246055468916893
+      },
+      "tail_global_mean_Hz": 475.0986248036854
+    },
+    {
+      "label": "units_history_delay_covariance",
+      "high_onset_ms": 8931.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.42798848309571735,
+        "12500": 0.6264099303990593,
+        "8000": 0.21971430589427643,
+        "9000": 0.2674358515211862,
+        "9300": 0.3010053066835813,
+        "9420": 0.3143470131234233,
+        "9870": 0.3691641182177463
+      },
+      "complete_event_windows": {
+        "1000-4000": {
+          "n": 11,
+          "median_duration_ms": 93.0,
+          "iqr_duration_ms": [
+            83.5,
+            102.0
+          ],
+          "median_gap_ms": 239.5,
+          "both_cores": 9,
+          "coreA_only": 0,
+          "coreB_only": 1,
+          "median_area": 0.7222187499999999,
+          "median_surround_cells": 275.0,
+          "forward": 5,
+          "reverse": 6,
+          "undirected": 0,
+          "median_extent_mm": 11.796159059565602
+        },
+        "4000-8000": {
+          "n": 15,
+          "median_duration_ms": 126.0,
+          "iqr_duration_ms": [
+            98.0,
+            148.5
+          ],
+          "median_gap_ms": 267.5,
+          "both_cores": 14,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.7892812499999999,
+          "median_surround_cells": 303.0,
+          "forward": 8,
+          "reverse": 5,
+          "undirected": 2,
+          "median_extent_mm": 10.909857174291748
+        },
+        "8000-9420": {
+          "n": 1,
+          "median_duration_ms": 136.0,
+          "iqr_duration_ms": [
+            136.0,
+            136.0
+          ],
+          "median_gap_ms": null,
+          "both_cores": 1,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.9188749999999999,
+          "median_surround_cells": 353.0,
+          "forward": 0,
+          "reverse": 1,
+          "undirected": 0,
+          "median_extent_mm": 10.381678752172967
+        },
+        "1000-9420": {
+          "n": 27,
+          "median_duration_ms": 104.0,
+          "iqr_duration_ms": [
+            90.5,
+            131.0
+          ],
+          "median_gap_ms": 257.0,
+          "both_cores": 24,
+          "coreA_only": 0,
+          "coreB_only": 1,
+          "median_area": 0.7799375,
+          "median_surround_cells": 298.0,
+          "forward": 13,
+          "reverse": 12,
+          "undirected": 2,
+          "median_extent_mm": 11.19471228212832
+        }
+      },
+      "quiet_fraction_by_window": {
+        "1000-4000": 0.546,
+        "4000-8000": 0.49125,
+        "8000-9420": 0.19225352112676056,
+        "1000-9420": 0.460332541567696
+      },
+      "qa": {
+        "weighted_rate_error_Hz": 2.140045239684696e-06,
+        "D_float32_error": 2.443080071579118e-09,
+        "Z_physical": true,
+        "M_dynamic_max_mV": 0.24175705015659332
+      }
+    }
+  ],
+  "statistical_unit": "One original realization and one paired variance-partition sensitivity; no replicate inference.",
+  "scope": "One finite-time sensitivity diagnostic. The correction restores stationary Poisson variance but does not recover the time-dependent conditional covariance spectrum; no closure/network/bifurcation acceptance follows, no additional runs automatically authorized by this contract.",
+  "replacement_promoted": false
+}

@@ -1,0 +1,493 @@
+{
+  "created_local": "2026-09-20T03:02:51.456778+08:00",
+  "question": "Does voltage-grid refinement resolve the local gain error at the original E/I critical-mode workpoints?",
+  "selection": "All twelve conditions of the original two additional SN7 mode workpoints, including passing mean-channel controls and both variance channels. Selected after observing the 256-node failure; diagnostic, not a blind validation.",
+  "parent_contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditional_density_linear_response_contract.json",
+  "response_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/conditional_current_density.py",
+  "response_sha256": "570a8448645fa5afef6b21829c9739e64d929188b3b65d0fa883a61475cbaeb4",
+  "cases": [
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 0.075,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          3.891194661458333,
+          0.0
+        ],
+        "sem": 0.03448856185295141,
+        "dc_measured": 3.891194661458333,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 112.82565733094893
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 54
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 0.075,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 36,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 309,
+        "pop": "E",
+        "channel": "mean",
+        "frequency_hz": 25.0,
+        "measured": [
+          3.825474573507996,
+          0.2011126405329845
+        ],
+        "sem": 0.06010414985786418,
+        "predicted": [
+          3.784677342227531,
+          -0.08367997570525224
+        ],
+        "dc_measured": 3.891194661458333,
+        "dc_snr": 112.82565733094893,
+        "norm_error": 0.07393614368736355,
+        "counted": true,
+        "tol": 0.1,
+        "passed": true,
+        "dc_spline": 3.961148014787671,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 55
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 2.470160923041403,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.045081533571105926,
+          0.0
+        ],
+        "sem": 0.0008979103945998653,
+        "dc_measured": -0.045081533571105926,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 50.20716303345119
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 56
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 2.470160923041403,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 37,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 309,
+        "pop": "E",
+        "channel": "variance_E",
+        "frequency_hz": 25.0,
+        "measured": [
+          -0.007009142383306737,
+          0.041843246898152595
+        ],
+        "sem": 0.002782819514077454,
+        "predicted": [
+          -0.009466224255798154,
+          0.03774636858755274
+        ],
+        "dc_measured": -0.045081533571105926,
+        "dc_snr": 50.20716303345119,
+        "norm_error": 0.10596805540129686,
+        "counted": true,
+        "tol": 0.1,
+        "passed": false,
+        "dc_spline": -0.048323267370482245,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 57
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 5.702614933113882,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.0077917927601920825,
+          0.0
+        ],
+        "sem": 0.00042987077592451426,
+        "dc_measured": -0.0077917927601920825,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 18.125895493673497
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 58
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 5.702614933113882,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 38,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 309,
+        "pop": "E",
+        "channel": "variance_I",
+        "frequency_hz": 25.0,
+        "measured": [
+          0.00011892856826593531,
+          0.0015202837581453613
+        ],
+        "sem": 0.0013624186117907893,
+        "predicted": [
+          0.0024983997808422347,
+          0.001018280302068974
+        ],
+        "dc_measured": -0.0077917927601920825,
+        "dc_snr": 18.125895493673497,
+        "norm_error": 0.3121039424275452,
+        "counted": true,
+        "tol": 0.1,
+        "passed": false,
+        "dc_spline": -0.008020834464533552,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 59
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 0.075,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          7.805989583333334,
+          0.0
+        ],
+        "sem": 0.043574404470778524,
+        "dc_measured": 7.805989583333334,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 179.14162403683832
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 60
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 0.075,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 39,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 587,
+        "pop": "I",
+        "channel": "mean",
+        "frequency_hz": 25.0,
+        "measured": [
+          7.689762054553225,
+          0.27616754934881654
+        ],
+        "sem": 0.06811136163080664,
+        "predicted": [
+          7.712409079655827,
+          -0.11744273767190706
+        ],
+        "dc_measured": 7.805989583333334,
+        "dc_snr": 179.14162403683832,
+        "norm_error": 0.050507531645791755,
+        "counted": true,
+        "tol": 0.1,
+        "passed": true,
+        "dc_spline": 7.863297616388898,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 61
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 4.235421421002949,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.055091897393411124,
+          0.0
+        ],
+        "sem": 0.0007027025007281339,
+        "dc_measured": -0.055091897393411124,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 78.40003036324106
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 62
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 4.235421421002949,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 40,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 587,
+        "pop": "I",
+        "channel": "variance_E",
+        "frequency_hz": 25.0,
+        "measured": [
+          -0.03248355069099382,
+          0.033907822253694445
+        ],
+        "sem": 0.0016399272483698217,
+        "predicted": [
+          -0.02055548220943559,
+          0.03906259461827222
+        ],
+        "dc_measured": -0.055091897393411124,
+        "dc_snr": 78.40003036324106,
+        "norm_error": 0.2358649671222494,
+        "counted": true,
+        "tol": 0.1,
+        "passed": false,
+        "dc_spline": -0.055833908679034296,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 63
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 10.885804626245116,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.009725094483175708,
+          0.0
+        ],
+        "sem": 0.00030765023819998607,
+        "dc_measured": -0.009725094483175708,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 31.610879094635944
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 64
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "absolute_amplitude": 10.885804626245116,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": 41,
+      "reference": {
+        "kind": "v2_assayed",
+        "state": "SN7",
+        "group": 587,
+        "pop": "I",
+        "channel": "variance_I",
+        "frequency_hz": 25.0,
+        "measured": [
+          0.00011798552500591474,
+          0.004730187257135357
+        ],
+        "sem": 0.0007226807086953835,
+        "predicted": [
+          0.0002532674061330245,
+          0.0037121463009581824
+        ],
+        "dc_measured": -0.009725094483175708,
+        "dc_snr": 31.610879094635944,
+        "norm_error": 0.10560206464974202,
+        "counted": true,
+        "tol": 0.1,
+        "passed": false,
+        "dc_spline": -0.00953115338271863,
+        "sign_ok": null
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 65
+    }
+  ],
+  "grids": [
+    512,
+    1024
+  ],
+  "workers": 8,
+  "wave_samples": 4096,
+  "protocol": "Reuse original 256-node results and all original clocks, time steps, amplitudes, durations and initial state. Change voltage-node count only. No interpolation coefficient, moment closure, threshold or physical parameter change.",
+  "interpretation": {
+    "convergence_max_normalized_change": 0.02,
+    "original_error_gate_unchanged": true,
+    "final_grid_definition": "abs(g1024-g512)/abs(reference_DC); report every condition and both successive changes. Two levels do not prove the asymptotic limit.",
+    "stop": "At most these 24 paired predictions. Converged errors above the original gate do not support more voltage refinement as a repair. Any unresolved numerical change remains unresolved, not closure acceptance."
+  },
+  "model_promoted": false,
+  "scope": "Local numerical diagnosis only; no autonomous network, coefficient fitting or bifurcation launch."
+}

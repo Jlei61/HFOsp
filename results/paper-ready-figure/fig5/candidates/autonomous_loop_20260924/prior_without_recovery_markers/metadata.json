@@ -1,0 +1,210 @@
+{
+  "asset_id": "native_autonomous_loop_candidate",
+  "seed": 9108405,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_autonomous_loop.py",
+  "producer_sha256": "d3485f95cc491962a35dc6ae7672a00bd9033aae7342189d8230a6febd68eeef",
+  "accepted_raster_producer": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_clean_panels.py",
+  "time_window_s": [
+    0,
+    60
+  ],
+  "next_high_entry_s": 59.74,
+  "first_high_entry_s": 9.94,
+  "first_exit_s": 16.7,
+  "joint_low_activity_s": [
+    16.83,
+    49.31
+  ],
+  "first_return_event_s": 49.31,
+  "raster_zoom_windows_s": [
+    [
+      0.55,
+      0.85
+    ],
+    [
+      16.52,
+      16.82
+    ],
+    [
+      49.3,
+      49.6
+    ]
+  ],
+  "spatial_field_windows_s": [
+    [
+      0.595,
+      0.645
+    ],
+    [
+      10.375,
+      10.425
+    ],
+    [
+      16.825,
+      16.875
+    ],
+    [
+      34.975,
+      35.025
+    ],
+    [
+      49.315,
+      49.365
+    ]
+  ],
+  "sample_ids": [
+    25115,
+    2463,
+    388,
+    13821,
+    29176,
+    3525,
+    24047,
+    14680,
+    30486,
+    11018,
+    26013,
+    25581,
+    23448,
+    20193,
+    29128,
+    5848,
+    18959,
+    6389,
+    2637,
+    805,
+    28165,
+    7856,
+    11636,
+    21849,
+    29930,
+    7520,
+    31097,
+    13091,
+    19004,
+    14079,
+    20100,
+    16813,
+    400,
+    29431,
+    10361,
+    27008,
+    20834,
+    23182,
+    28935,
+    27315,
+    17930,
+    16209,
+    8005,
+    1033,
+    17437,
+    7124,
+    29345,
+    22686,
+    19121,
+    25489,
+    22581,
+    17651,
+    466,
+    16623,
+    7097,
+    26539,
+    23880,
+    20550,
+    3586,
+    7874,
+    36748,
+    39528,
+    38980,
+    36668,
+    32856,
+    36079,
+    38529,
+    37276,
+    32895,
+    37018,
+    39485,
+    34256,
+    38909,
+    38617,
+    36222,
+    34849,
+    37557,
+    37612,
+    35741,
+    38407
+  ],
+  "original_prefix_bitwise": true,
+  "regional_and_spatial_counts_conserved": true,
+  "original_state_coordinates": "Mean E Z; original recorded H_E=<Z*local inhibitory current>; global E rate.",
+  "new_state_coordinates": "Mean E Z; mean intrinsic K/gL; global E rate. G and M remain dynamic in simulation.",
+  "projection": "Successive 5-ms observations, Z/H/K interpolated from20ms; rate Gaussian sigma5ms as accepted producer; no closing line.",
+  "limitations": [
+    "Single selected successful seed; four full returns in240s; displayed first60s.",
+    "Projection is not proof of a limit cycle or bistability.",
+    "A/B core recruitment retained; direction distribution not claimed identical.",
+    "Old E etaM-tauM map and old F patient comparison have not been recomputed for this feedback model."
+  ],
+  "scientific_status": "AUTONOMOUS_RETURN_OBSERVED_BIFURCATION_NOT_ESTABLISHED",
+  "agent_visual_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "human_review": "PENDING",
+  "files": {
+    "fig5-panela-loop": [
+      {
+        "path": "figures/fig5-panela-loop.png",
+        "sha256": "98f2fbddf4e37462114af4198f6e6bbfad6b01b7ab6837d4b267adc527c2bce2"
+      },
+      {
+        "path": "figures/fig5-panela-loop.pdf",
+        "sha256": "4d758a36972f075bab27fbbaf81e2c85556d9ed532eef52b9a0b749e02d6362b"
+      },
+      {
+        "path": "figures/fig5-panela-loop.svg",
+        "sha256": "7852cc14720c02df2dd5c7a0bbc5c2425855c061d5e36c131fa6da27e102e0ec"
+      }
+    ],
+    "fig5-panelb-loop": [
+      {
+        "path": "figures/fig5-panelb-loop.png",
+        "sha256": "47fdcc73e4c1d9052c32eec73ffc313875b439416f2f3e97e05542dae0873b56"
+      },
+      {
+        "path": "figures/fig5-panelb-loop.pdf",
+        "sha256": "eb932456e79683abd3b1667d279e40188066d382de6bc3121673a18b0075c33e"
+      },
+      {
+        "path": "figures/fig5-panelb-loop.svg",
+        "sha256": "4db1e0678d2188c0734d631cce3e9f23b4cc4150cacbb0abc8f7294c600e775a"
+      }
+    ],
+    "fig5-panelc-loop": [
+      {
+        "path": "figures/fig5-panelc-loop.png",
+        "sha256": "63a1f15053f49d5c48da9c5f720e1546689165b66e5e001aebe7ab2b69de65dd"
+      },
+      {
+        "path": "figures/fig5-panelc-loop.pdf",
+        "sha256": "c44048ad82b91fa2f34efe0f6183b6af9bc182c784d4b18c087daa73cf7316b1"
+      },
+      {
+        "path": "figures/fig5-panelc-loop.svg",
+        "sha256": "d24949159efc8a5af2e45c6ec52add72251a9728831de562717eca72ad46db96"
+      }
+    ],
+    "fig5-state-return": [
+      {
+        "path": "figures/fig5-state-return.png",
+        "sha256": "5315952f672005307f26790c149036bae6d112afc8f1879fbec494714cbc0aee"
+      },
+      {
+        "path": "figures/fig5-state-return.pdf",
+        "sha256": "0863e408db6c2683dd530f4c2224ade2d94c48720a2842fc21e2f4f624888e5f"
+      },
+      {
+        "path": "figures/fig5-state-return.svg",
+        "sha256": "da2130bf0ca1dfc516a1e60ec61509c85064a7a789a83cce4c9658135bc1b27f"
+      }
+    ]
+  }
+}

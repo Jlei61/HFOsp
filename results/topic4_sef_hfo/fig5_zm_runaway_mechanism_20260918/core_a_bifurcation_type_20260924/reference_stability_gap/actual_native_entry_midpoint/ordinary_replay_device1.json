@@ -1,0 +1,36 @@
+{
+  "device": 1,
+  "initial_identity_except_A_Z": {
+    "syn": true,
+    "local": true,
+    "history": true,
+    "clock": true,
+    "rate": true,
+    "physical": true,
+    "emitted": true,
+    "accumulator": true,
+    "output": true,
+    "arrivals": true,
+    "parameters": true
+  },
+  "replay_bitwise": false,
+  "max_output_difference": 3.375077994860476e-14,
+  "expected_emitted_bitwise": true,
+  "finite": true,
+  "full_terminal_bitwise": {
+    "syn": false,
+    "local": false,
+    "history": false,
+    "clock": true,
+    "rate": false,
+    "physical": false,
+    "emitted": false,
+    "accumulator": true,
+    "output": false,
+    "arrivals": false,
+    "parameters": true
+  },
+  "Z_held": true,
+  "prior_failure": null,
+  "status": "FAIL"
+}

@@ -1,0 +1,12 @@
+{
+  "reference": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/held_short_field",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "dt_ms": 0.05,
+  "duration_ms": 5000,
+  "discard_ms": 2000,
+  "question": "Does the actual short-event flow have persistent transverse expansion, after removing local time-shift perturbations without resetting the nominal network?",
+  "method": "Original full delayed-state variational equations; project onto the plane perpendicular to the fourth-order forward numerical flow direction every100ms in fixed cell-weighted coordinates, then normalize. Recompute only the phase direction; no physical coordinate/state/parameter reduction. Compare second/fourth-order flow directions and exact original saved1s full checkpoints.",
+  "safeguards": "Every phase readout restores the complete nominal state bitwise. Tangent history is reinserted at the current actual ring-clock origin. Existing full derivative validation is retained. Full unprojected gain, removed phase component and projection precision are saved.",
+  "interpretation": "Finite-time phase-orthogonal growth only. A positive value alone proves neither asymptotic chaos nor a crisis. A negative value alone certifies neither a closed cycle nor complete stability. Numerical flow-direction error must be inspected.",
+  "model_promoted": false
+}

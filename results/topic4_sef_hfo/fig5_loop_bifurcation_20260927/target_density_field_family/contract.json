@@ -1,0 +1,38 @@
+{
+  "status": "REGISTERED_AFTER_K9_TARGET_REPAIR",
+  "created_epoch": 1790531975.3462853,
+  "question": "Does the target-resolved closure preserve recovery silence and high-state loss at the neighboring actual-exit fields?",
+  "evidence": "K9high targetprojection corrected native fieldRMS145to6.36Hz andZdriftdirection; this does notcertify otherconditions orstability.",
+  "jobs": [
+    {
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes",
+      "name": "exit_z0.21_k9_fields16p7_recovery",
+      "job_sha256": "58c232d0a7ae979278f0778180340bd637e297edaa637c533d3e7f24901b557f"
+    },
+    {
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes",
+      "name": "exit_z0.21_k12_fields16p7_high",
+      "job_sha256": "b6e7c7d4c6cbad5e074dd2f2460859f3441ff6cfd77824d7815b2f0a94d4aafb"
+    },
+    {
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes",
+      "name": "exit_z0.21_k12_fields16p7_recovery",
+      "job_sha256": "97415fb90469a7afdf2152ad9c98442ca76f30a4faf2fb454df51b1c5d3858b1"
+    },
+    {
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_midpoint_probes",
+      "name": "exit_z0.21_k10.5_fields16p7_high",
+      "job_sha256": "d7145ead56c27ec887a22f6032d437c327572d15d4be64f0f6b048f90c25e644"
+    },
+    {
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_midpoint_probes",
+      "name": "exit_z0.21_k10.5_fields16p7_recovery",
+      "job_sha256": "04803fe9cbe526815c6a968d50f62273fb05550942dc5bec7832bfa6b453f6ce"
+    }
+  ],
+  "design": "Five10s individualtarget runs,40000targets x128particles, numericalseed928751, exactsame50-60sexpectedexternaldrive andlocalGaussianphysics as completedK9high. Only completeinitialhistory andheldZ/K fields vary asnativejobs specify. No newnativeconditions beyondseparatelyregisteredmidpointpair.",
+  "acceptance_question": "Compare spatialrates, G, perparticleZeligibility, silence/exit transient; onecorrespondinghighpoint isnot a fullacceptance. No new fitting orautomaticextend.",
+  "formal_bifurcation_allowed": false,
+  "base_producer_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "producer_sha256": "eb6dc66d9b5e4a23d458561799aa8ea102e085539b8105d973e06580573fb476"
+}

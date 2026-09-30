@@ -1,0 +1,56 @@
+{
+  "status": "NUMERICAL_PROPOSAL_ONLY",
+  "rows": [
+    {
+      "alpha": 1.0,
+      "method": "rational",
+      "admissible": true,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false
+      },
+      "raw_norm_relative": 0.0038012838101296902,
+      "actual_norm_relative": 0.0037612538614879933,
+      "relative_direction_change": 0.028272188016858053
+    },
+    {
+      "alpha": 1.0,
+      "method": "positive_projection",
+      "admissible": true,
+      "diagnostic": {
+        "projected_negative_coordinates": 75,
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": true
+      },
+      "raw_norm_relative": 0.0038012838101296902,
+      "actual_norm_relative": 0.0038012838101146376,
+      "relative_direction_change": 1.925184546105487e-06
+    },
+    {
+      "alpha": 0.5,
+      "method": "rational",
+      "admissible": true,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false
+      },
+      "raw_norm_relative": 0.0019006419050648451,
+      "actual_norm_relative": 0.0018900906937990808,
+      "relative_direction_change": 0.015480703687619576
+    },
+    {
+      "alpha": 0.5,
+      "method": "positive_projection",
+      "admissible": true,
+      "diagnostic": {
+        "projected_negative_coordinates": 29,
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": true
+      },
+      "raw_norm_relative": 0.0019006419050648451,
+      "actual_norm_relative": 0.0019006419050612642,
+      "relative_direction_change": 1.003807912677976e-06
+    }
+  ],
+  "physical_flow_unchanged": true
+}

@@ -1,0 +1,24 @@
+{
+  "epoch": 1790266129.2685566,
+  "unchanged": "Physics, original frozen runner, jobs, checkpoints, RNG,18trajectories and30s horizons",
+  "policy": "Retain all4running serial workers; new workers use validated ordered locality CPU with8threads.80GiB dispatchguard and4worker maximum retained.",
+  "evidence": "qa/locality_native_gate.json; both complete0.2s histories bitwise against source, plus source/target accumulation parity across spike fractions.",
+  "prior_supervisor_pid": 2571957,
+  "adopted_worker_pids": [
+    2571961,
+    2571962,
+    2593827,
+    2593962
+  ],
+  "resource_update": {
+    "epoch": 1790266229.2350025,
+    "observed_available_memory_GiB": 136.06801223754883,
+    "max_total_workers": 8,
+    "max_locality_workers": 4,
+    "threads_per_locality_worker": 8,
+    "memory_dispatch_GiB": 88,
+    "reserve_GiB": 80,
+    "cpu_dispatch_limit_percent": 65,
+    "reason": "Available memory rose above100GiB and CPU use below30%; allow up to4parallel jobs alongside the4retained serial jobs. No new scientific conditions or changed horizons."
+  }
+}

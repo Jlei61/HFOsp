@@ -1,0 +1,26 @@
+{
+  "status": "PREPARED",
+  "source_Parseval_max_abs_error": 6.245004513516506e-17,
+  "prior_source_autovariance_max_abs_errors": [
+    8.673617379884035e-19,
+    4.336808689942018e-19
+  ],
+  "original_graph": [
+    {
+      "kind": "ampa",
+      "nnz": 32000000,
+      "delay_matrix_count": 359,
+      "repeated_source_target_across_delays": 0,
+      "units": "Native synaptic gate jump per source spike"
+    },
+    {
+      "kind": "gaba",
+      "nnz": 8000000,
+      "delay_matrix_count": 359,
+      "repeated_source_target_across_delays": 0,
+      "units": "Native synaptic gate jump per source spike"
+    }
+  ],
+  "individual_thresholds": true,
+  "producer_sha256": "471020a295bcdcf58e22bb3a51dd93781fbc841d9d95d0171df954e8e23c52a8"
+}

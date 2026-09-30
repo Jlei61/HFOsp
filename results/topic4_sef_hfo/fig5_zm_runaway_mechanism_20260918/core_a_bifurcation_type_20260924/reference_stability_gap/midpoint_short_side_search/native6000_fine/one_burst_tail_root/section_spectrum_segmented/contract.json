@@ -1,0 +1,18 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root",
+  "maximum_Krylov": 32,
+  "dt_ms": 0.025,
+  "cached_derivative": false,
+  "numerical_method": "exponential_midpoint",
+  "question": "Which numerical section-return eigenmodes can guide the next mesh-qualified continuation step?",
+  "cache_segments": 4,
+  "prior_physical_neutral_gate_failed": false,
+  "measure_neutral": true,
+  "initial_mode": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root/section_spectrum_segmented/mode01.npz",
+  "mode_random_fraction": 0.01,
+  "neutral_scope": "When requested, use the same original order2/order4 phase velocities and1e-3 neutral gate on the full fixed-time variational product. Record failures without reinterpreting the numerical Poincare spectrum as physical Floquet. This run is declared numerical before either result is observed.",
+  "prior_gate_result": null,
+  "method": "Two-pass Arnoldi of the full original delayed-state section derivative, including return time. Independently apply the actual derivative to at most four converged Ritz vectors. No reduced physical dynamics or low-dimensional fitted map.",
+  "scope": "Existing numerical Poincare-map diagnostic, not a physical Floquet certificate. A previous failed physical neutral-mode gate is retained and is not waived by this calculation. Its sole use is to nominate which parameter interval/mode to resolve on a finer mesh. No complete spectrum, physical stable branch, crossing or bifurcation label without existing independent phase/mesh and correspondence checks.",
+  "model_promoted": false
+}

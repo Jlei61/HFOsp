@@ -1,0 +1,136 @@
+{
+  "status": "COMPLETE_LEADING_MEAN_DIAGNOSTIC_COMPARISON",
+  "windows": [
+    {
+      "interval_s": [
+        0,
+        0.1
+      ],
+      "rate_Hz": [
+        196.51897472386142,
+        472.4612493539301,
+        473.76630252244234,
+        182.53417909941115
+      ],
+      "native_rate_Hz": [
+        196.53468749999996,
+        472.3474801061008,
+        473.7913486005088,
+        182.55285620485878
+      ],
+      "rate_difference_Hz": [
+        -0.015712776138542495,
+        0.113769247829282,
+        -0.025046078066452537,
+        -0.018677105447636677
+      ],
+      "weighted_field_RMS_Hz": 0.1705055961435286,
+      "counterfactual_Zdot_per_s": [
+        0.04026868752033496,
+        -0.034833877128536486,
+        -0.03307375768365442,
+        0.0440203124604395
+      ],
+      "causal_R_range": [
+        197.0234615134716,
+        197.34762683997565
+      ],
+      "Graw_range": [
+        4.240454966938688e-26,
+        5.168955137392397e-26
+      ]
+    },
+    {
+      "interval_s": [
+        0.1,
+        0.8
+      ],
+      "rate_Hz": [
+        196.49621310579852,
+        472.30035174087607,
+        474.15022540648357,
+        182.50434264620674
+      ],
+      "native_rate_Hz": [
+        196.52183035714287,
+        472.3304281924971,
+        474.16757542711713,
+        182.53006284588696
+      ],
+      "rate_difference_Hz": [
+        -0.025617251344357328,
+        -0.0300764516210279,
+        -0.017350020633557506,
+        -0.025720199680222322
+      ],
+      "weighted_field_RMS_Hz": 0.09797760121444263,
+      "counterfactual_Zdot_per_s": [
+        0.04025191966750981,
+        -0.034833877128536764,
+        -0.03307375768365495,
+        0.04400269685668383
+      ],
+      "causal_R_range": [
+        196.98506271571566,
+        197.42500977672063
+      ],
+      "Graw_range": [
+        1.0456833205782648e-26,
+        4.231982532263631e-26
+      ]
+    },
+    {
+      "interval_s": [
+        0.8,
+        1.0
+      ],
+      "rate_Hz": [
+        196.48271002619995,
+        472.3744211551048,
+        474.0179724161893,
+        182.49173607906513
+      ],
+      "native_rate_Hz": [
+        196.50984375,
+        472.3342175066312,
+        474.0458015267176,
+        182.52051871306628
+      ],
+      "rate_difference_Hz": [
+        -0.027133723800034204,
+        0.040203648473607245,
+        -0.027829110528273304,
+        -0.028782634001146334
+      ],
+      "weighted_field_RMS_Hz": 0.1750248444241138,
+      "counterfactual_Zdot_per_s": [
+        0.040249718775317495,
+        -0.03483387712853661,
+        -0.03307375768365441,
+        0.044000384691543964
+      ],
+      "causal_R_range": [
+        196.99322746572895,
+        197.37479317865078
+      ],
+      "Graw_range": [
+        7.009424915887395e-27,
+        1.0435940439102017e-26
+      ]
+    }
+  ],
+  "relevance_guards": {
+    "tail_field_RMS": true,
+    "tail_each_core_rate": true,
+    "whole_R_below200": true,
+    "whole_Graw_below_point1": true
+  },
+  "development_relevance_retained": true,
+  "both_RNGs_paired": true,
+  "interpretation": "One1s leading recurrent mean diagnostic: physical source probabilities generate the recurrent mean with full delays and exact Poisson external law. Added recurrent residual noise deliberately omitted. Agreement would require further independent state, longer physical-time and finite-native-noise correspondence before formal analysis.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PASS",
+  "human_visual": "PENDING",
+  "producer_sha256": "afcf6949855d11503179be40fd0dfe49878bf9bee59d58e4e9b9e358c6cc3a55",
+  "agent_visual_note": "PNG inspected in the preceding stage: aligned traces and shared spatial scale; human review pending."
+}

@@ -1,3 +1,5 @@
+> **2026-09-30 Figure 5整合入口**：[当前A–F版](current_figure5.md)，已纳入70点及19条长随访。下面任何旧seed1801 v5入口仅为历史。空间与六群体分岔分别见[模型版本表](topic4_model_versions.md)。其他图的路由不受本次整合影响。
+
 # Paper-ready figure 唯一登记表
 
 > 状态：v9，2026-08-31。本文是 `results/paper-ready-figure/` 的唯一指代入口。

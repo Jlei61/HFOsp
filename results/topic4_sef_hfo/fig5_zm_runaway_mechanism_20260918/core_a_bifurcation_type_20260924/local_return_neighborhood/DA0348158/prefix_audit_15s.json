@@ -1,0 +1,71 @@
+{
+  "status": "PREFIX_READOUT_PASS_FULL_70S_STILL_RUNNING",
+  "D_A": 0.34815764125480564,
+  "observed_new_field_ms": 15000,
+  "rows": [
+    {
+      "threshold_hz": 1.0,
+      "quiet_intervals_ms": [
+        [
+          10548,
+          10568
+        ],
+        [
+          10621,
+          10771
+        ]
+      ],
+      "time_fraction_below": 0.011333333333333334
+    },
+    {
+      "threshold_hz": 5.0,
+      "quiet_intervals_ms": [
+        [
+          10546,
+          10571
+        ],
+        [
+          10618,
+          10783
+        ]
+      ],
+      "time_fraction_below": 0.012666666666666666
+    },
+    {
+      "threshold_hz": 10.0,
+      "quiet_intervals_ms": [
+        [
+          10544,
+          10573
+        ],
+        [
+          10617,
+          10786
+        ]
+      ],
+      "time_fraction_below": 0.0132
+    },
+    {
+      "threshold_hz": 50.0,
+      "quiet_intervals_ms": [
+        [
+          10536,
+          10579
+        ],
+        [
+          10610,
+          10790
+        ]
+      ],
+      "time_fraction_below": 0.014866666666666667
+    }
+  ],
+  "sources": [
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block00.npz",
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block01.npz",
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block02.npz"
+  ],
+  "definition": "Independent original group-to-region reconstruction,10ms smoothed A E rate,quiet20ms. This clock starts at the newly imposed field, not at the prior60s under another field. Same entire fast/M/history initial state as the original D_A=.34315764 continuation; only A Z changed.",
+  "scope": "An observed prefix quiet interval refutes permanence of its preceding high episode. It is not a completed70s audit, a bifurcation value, or an independent population replicate.",
+  "model_promoted": false
+}

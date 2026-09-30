@@ -1,0 +1,21 @@
+{
+  "timestamp": 1789873157.7113307,
+  "old_failed_child": {
+    "status": "CHILD_POINCARE",
+    "pid": 461794,
+    "nev": 6,
+    "dt_ms": 0.025,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz"
+  },
+  "waiting_parent": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 468094,
+    "rows": [],
+    "free_mib": 7812.0
+  },
+  "parent_pid": 468094,
+  "reason": "Restore the original child-before-parent scheduling after the verified PD1 allocation failure. Pause only the confirmed sleeping parent coordinator; preserve its PID so PD2 continues to wait. Reuse all saved child profiles and coarse spectra. Checked bounded harmonic indices remove redundant allocations without changing the model or integration grid.",
+  "recovery_pid": 515093,
+  "status": "RECOVERY_FINISHED",
+  "returncode": 0
+}

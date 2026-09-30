@@ -1,0 +1,690 @@
+{
+  "status": "DEFINED_BEFORE_NEW_SINGLE_SEED_RUNS",
+  "seed": 9108401,
+  "seeds": [
+    9108401
+  ],
+  "eta_M": [
+    0.0001,
+    0.0005,
+    0.001,
+    0.01,
+    0.1,
+    1.0,
+    10.0
+  ],
+  "tau_M_s": [
+    1.0,
+    10.0,
+    100.0,
+    1000.0,
+    10000.0
+  ],
+  "jobs": [
+    {
+      "name": "eta0.0001_tau10000_s9108401",
+      "eta_m": 0.0001,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 0,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    },
+    {
+      "name": "eta0.0005_tau10000_s9108401",
+      "eta_m": 0.0005,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 1,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 1
+    },
+    {
+      "name": "eta0.001_tau10000_s9108401",
+      "eta_m": 0.001,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 2,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    },
+    {
+      "name": "eta0.01_tau10000_s9108401",
+      "eta_m": 0.01,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 3,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 1
+    },
+    {
+      "name": "eta0.1_tau10000_s9108401",
+      "eta_m": 0.1,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 4,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    },
+    {
+      "name": "eta1_tau10000_s9108401",
+      "eta_m": 1.0,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 5,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 1
+    },
+    {
+      "name": "eta10_tau1_s9108401",
+      "eta_m": 10.0,
+      "tau_M_s": 1.0,
+      "seed": 9108401,
+      "eta_index": 6,
+      "tau_index": 0,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    },
+    {
+      "name": "eta10_tau10_s9108401",
+      "eta_m": 10.0,
+      "tau_M_s": 10.0,
+      "seed": 9108401,
+      "eta_index": 6,
+      "tau_index": 1,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 1
+    },
+    {
+      "name": "eta10_tau100_s9108401",
+      "eta_m": 10.0,
+      "tau_M_s": 100.0,
+      "seed": 9108401,
+      "eta_index": 6,
+      "tau_index": 2,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    },
+    {
+      "name": "eta10_tau1000_s9108401",
+      "eta_m": 10.0,
+      "tau_M_s": 1000.0,
+      "seed": 9108401,
+      "eta_index": 6,
+      "tau_index": 3,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 1
+    },
+    {
+      "name": "eta10_tau10000_s9108401",
+      "eta_m": 10.0,
+      "tau_M_s": 10000.0,
+      "seed": 9108401,
+      "eta_index": 6,
+      "tau_index": 4,
+      "tau_z_ms": 5000.0,
+      "threshold": 95.19851312666987,
+      "horizon_s": 1000.0,
+      "device": 0
+    }
+  ],
+  "references": [
+    {
+      "job": {
+        "name": "eta0.0005_tau1_s9108401",
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/runs/eta0.0005_s9108401",
+      "first_entry": {
+        "onset_s": 9.870000000000001,
+        "confirmation_s": 10.07
+      },
+      "result_sha256": "58695c11603cec2ea2a37567e0fb2a25f774f48ae119e909d7ac442a14af9b63",
+      "event_observed": true,
+      "followup_s": 10.07
+    },
+    {
+      "job": {
+        "name": "eta0.001_tau1_s9108401",
+        "eta_m": 0.001,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/runs/eta0.001_s9108401",
+      "first_entry": {
+        "onset_s": 9.940000000000001,
+        "confirmation_s": 10.14
+      },
+      "result_sha256": "f837a0bd4bc046fd6961cab2bc8aac576ecbb5e70ef9c095d0d2091b80eeaf31",
+      "event_observed": true,
+      "followup_s": 10.14
+    },
+    {
+      "job": {
+        "name": "eta0.01_tau1_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 3,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t0_s9108401",
+      "first_entry": {
+        "onset_s": 11.320000000000002,
+        "confirmation_s": 11.520000000000001
+      },
+      "result_sha256": "1112581f174819a4438ffe3e3a7d13aa9dbb71e12310bd40654aabed108adafe",
+      "event_observed": true,
+      "followup_s": 11.520000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.0001_tau1_s9108401",
+        "eta_m": 0.0001,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1_s9108401",
+      "first_entry": {
+        "onset_s": 9.910000000000002,
+        "confirmation_s": 10.110000000000001
+      },
+      "result_sha256": "077c862f849e6279bea90c74abf7c210bb415f49dcd6858bdc2f73f35b285c72",
+      "event_observed": true,
+      "followup_s": 10.110000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.0001_tau10_s9108401",
+        "eta_m": 0.0001,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau10_s9108401",
+      "first_entry": {
+        "onset_s": 10.580000000000002,
+        "confirmation_s": 10.780000000000001
+      },
+      "result_sha256": "fa57cdfffc90a79a86e4b70647c54e96559c35678fe53982b9ea7012a75404f4",
+      "event_observed": true,
+      "followup_s": 10.780000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.0001_tau100_s9108401",
+        "eta_m": 0.0001,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau100_s9108401",
+      "first_entry": {
+        "onset_s": 10.530000000000001,
+        "confirmation_s": 10.73
+      },
+      "result_sha256": "52ba87bc9db2e831b120682e82e8c2efdc0c49d9b4df45f8bf6d5a31badf78e2",
+      "event_observed": true,
+      "followup_s": 10.73
+    },
+    {
+      "job": {
+        "name": "eta0.0001_tau1000_s9108401",
+        "eta_m": 0.0001,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 0,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1000_s9108401",
+      "first_entry": {
+        "onset_s": 10.010000000000002,
+        "confirmation_s": 10.21
+      },
+      "result_sha256": "a985a3949204dde8a3c3a69005c756308fefb5b71be0ef7731136a4f3590c4eb",
+      "event_observed": true,
+      "followup_s": 10.21
+    },
+    {
+      "job": {
+        "name": "eta0.0005_tau10_s9108401",
+        "eta_m": 0.0005,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau10_s9108401",
+      "first_entry": {
+        "onset_s": 11.440000000000001,
+        "confirmation_s": 11.64
+      },
+      "result_sha256": "5f43a99187596a3f919b54a67fe191fdce23423ed1b36e0a06d193b294f96be7",
+      "event_observed": true,
+      "followup_s": 11.64
+    },
+    {
+      "job": {
+        "name": "eta0.0005_tau100_s9108401",
+        "eta_m": 0.0005,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau100_s9108401",
+      "first_entry": {
+        "onset_s": 10.590000000000002,
+        "confirmation_s": 10.790000000000001
+      },
+      "result_sha256": "0aeba99399d65291f38a03f1901233306b7a09ae51d5775613abc63bcc97a56d",
+      "event_observed": true,
+      "followup_s": 10.790000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.0005_tau1000_s9108401",
+        "eta_m": 0.0005,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 1,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau1000_s9108401",
+      "first_entry": {
+        "onset_s": 10.320000000000002,
+        "confirmation_s": 10.520000000000001
+      },
+      "result_sha256": "58eade391d0b0a33b5b9ad74e4d33a3176f17a01233d97da8e659ac7628eb954",
+      "event_observed": true,
+      "followup_s": 10.520000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.001_tau10_s9108401",
+        "eta_m": 0.001,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau10_s9108401",
+      "first_entry": {
+        "onset_s": 10.420000000000002,
+        "confirmation_s": 10.620000000000001
+      },
+      "result_sha256": "8d514ef7aa0330e785b765211ea0d9e3861c2d7f9742764021dee6d54e9ee0fa",
+      "event_observed": true,
+      "followup_s": 10.620000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.001_tau100_s9108401",
+        "eta_m": 0.001,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau100_s9108401",
+      "first_entry": {
+        "onset_s": 10.870000000000001,
+        "confirmation_s": 11.07
+      },
+      "result_sha256": "d80029e0577ac5e31a6286660ac2bcde49ab947c23612dcd8f806706df2ae1c5",
+      "event_observed": true,
+      "followup_s": 11.07
+    },
+    {
+      "job": {
+        "name": "eta0.001_tau1000_s9108401",
+        "eta_m": 0.001,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 2,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 300.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau1000_s9108401",
+      "first_entry": {
+        "onset_s": 12.170000000000002,
+        "confirmation_s": 12.370000000000001
+      },
+      "result_sha256": "4418376d31486faab283789df1ce21e87a1554258b58aad7c458273a27b414b7",
+      "event_observed": true,
+      "followup_s": 12.370000000000001
+    },
+    {
+      "job": {
+        "name": "eta0.01_tau10_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 3,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau10_s9108401",
+      "result_sha256": "11ae91ed9269d7779f67068462342839002f99109a39224773c243575c7f5e39",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    },
+    {
+      "job": {
+        "name": "eta0.01_tau100_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 3,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau100_s9108401",
+      "result_sha256": "f54babe45c63140a665ec40a567fca73c11e746d7dcac1a7756ee1f39f89a2f3",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    },
+    {
+      "job": {
+        "name": "eta0.01_tau1000_s9108401",
+        "eta_m": 0.01,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 3,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau1000_s9108401",
+      "result_sha256": "e1e545c039511532504d5dbe26b793c49e19c12cbaf69dc07c0a93604aa4d060",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    },
+    {
+      "job": {
+        "name": "eta0.1_tau1_s9108401",
+        "eta_m": 0.1,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 4,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1_s9108401",
+      "result_sha256": "48f1b41e095efe18e561fdb092da0298c5116bfd24ac5d6ad96328f7c344e908",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    },
+    {
+      "job": {
+        "name": "eta0.1_tau10_s9108401",
+        "eta_m": 0.1,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 4,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau10_s9108401",
+      "result_sha256": "f4dd7212f45afdf513a13bdb860cea486f6bb7363b049906008f4bb53d4530e4",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    },
+    {
+      "job": {
+        "name": "eta0.1_tau100_s9108401",
+        "eta_m": 0.1,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 4,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau100_s9108401",
+      "result_sha256": "71a54a87a7f224b68d5627de0418c5336af8c69d6e16b70d9cc9d29bf2ee3a88",
+      "event_observed": false,
+      "first_entry": null,
+      "followup_s": 1000.0
+    }
+  ],
+  "adopted": [
+    {
+      "job": {
+        "name": "eta0.1_tau1000_s9108401",
+        "eta_m": 0.1,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 4,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1000_s9108401",
+      "pid": 165465,
+      "create_time": 1789480547.84
+    },
+    {
+      "job": {
+        "name": "eta1_tau1_s9108401",
+        "eta_m": 1.0,
+        "tau_M_s": 1.0,
+        "seed": 9108401,
+        "eta_index": 5,
+        "tau_index": 0,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1_s9108401",
+      "pid": 178068,
+      "create_time": 1789481180.71
+    },
+    {
+      "job": {
+        "name": "eta1_tau10_s9108401",
+        "eta_m": 1.0,
+        "tau_M_s": 10.0,
+        "seed": 9108401,
+        "eta_index": 5,
+        "tau_index": 1,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau10_s9108401",
+      "pid": 219606,
+      "create_time": 1789482436.45
+    },
+    {
+      "job": {
+        "name": "eta1_tau100_s9108401",
+        "eta_m": 1.0,
+        "tau_M_s": 100.0,
+        "seed": 9108401,
+        "eta_index": 5,
+        "tau_index": 2,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 1
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau100_s9108401",
+      "pid": 230988,
+      "create_time": 1789482764.27
+    },
+    {
+      "job": {
+        "name": "eta1_tau1000_s9108401",
+        "eta_m": 1.0,
+        "tau_M_s": 1000.0,
+        "seed": 9108401,
+        "eta_index": 5,
+        "tau_index": 3,
+        "tau_z_ms": 5000.0,
+        "threshold": 95.19851312666987,
+        "horizon_s": 1000.0,
+        "device": 0
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1000_s9108401",
+      "pid": 363710,
+      "create_time": 1789486613.3
+    }
+  ],
+  "new_jobs": 11,
+  "total_cells": 35,
+  "total_realizations": 35,
+  "horizon_s": 1000.0,
+  "identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py": "75804a78fd08daa88a3b1422931c490245666f377784ed4d1ad7d70d27e030cd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969",
+    "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+    "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+    "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+    "/home/honglab/leijiaxin/HFOsp/config/topic4_rate_model_dynamics_validation_v1.json": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+  },
+  "producer_sha256": "65174536ebfca3ce4cf564844b6c810d8ada1b2788df89c142b77b17763e6a2f",
+  "single_seed_producer_sha256": "16be93468e042f1610b890ba6d524c790c01dec914bc12fb00253d1a900a18e0",
+  "endpoint": "All-E10ms rate>=200Hz for20 consecutive bins; report first confirmation, preserve onset separately.",
+  "max_workers": 12,
+  "minimum_available_memory_GiB": 84,
+  "worker_budget_GiB": 4,
+  "topology_seed": 6101,
+  "approval": "2026-09-16 user requested stopping duplicate noise seeds and widening E parameter limits by another log decade.",
+  "intervention": "Retain seed9108401, same displayed trajectory and fixed topology. Raise tau_M maximum1000->10000s and eta_M maximum1->10. Only11 new parameter cells; retain1000s stopping horizon.",
+  "statistics": "One fixed noise realization per parameter cell. Display its first confirmation or audited censoring lower bound, never a multi-seed mean.",
+  "stop": "Complete the5 already-running retained-seed continuations and11 new single-seed cells to first confirmation or1000s. No additional seeds or automatic grid expansion.",
+  "interpretation": "Finite-time operational entry map; tau_M10000s exceeds the1000s horizon. No permanent-stability or exact-bifurcation claim.",
+  "inherited_checkpoint_qa": {
+    "seed": 9108401,
+    "entire_executor_state_exact": true,
+    "tracker_exact": true,
+    "end_step": 10200
+  },
+  "created_at": 1789522666.7480228
+}

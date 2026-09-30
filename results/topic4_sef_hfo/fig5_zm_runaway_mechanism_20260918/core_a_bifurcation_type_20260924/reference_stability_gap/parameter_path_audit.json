@@ -1,0 +1,39 @@
+{
+  "status": "FIRST_CROSSING_MEAN_COORDINATE_HAS_FIELD_JUMPS",
+  "source": "transient_native_Z_path_20260923/native_Z_path.npz",
+  "rows": [
+    {
+      "D_A": 0.25572169961406055,
+      "departure_time_ms": 9000.0,
+      "reentry_time_ms": 9015.709838521596,
+      "largest_mean_recovery": 0.0003713310551267668,
+      "zero_mean_field_jump_max_abs": 0.001352984305098337,
+      "zero_mean_field_jump_weighted_rms": 0.0004122174398926049,
+      "mean_jump": 1.1603068276558724e-16
+    },
+    {
+      "D_A": 0.2704351837447684,
+      "departure_time_ms": 9125.0,
+      "reentry_time_ms": 9288.69666764405,
+      "largest_mean_recovery": 0.0051913318148797405,
+      "zero_mean_field_jump_max_abs": 0.008619529631528233,
+      "zero_mean_field_jump_weighted_rms": 0.004015338201448595,
+      "mean_jump": -2.505320525174368e-16
+    },
+    {
+      "D_A": 0.27205854714538,
+      "departure_time_ms": 9315.0,
+      "reentry_time_ms": 9378.297414212959,
+      "largest_mean_recovery": 0.001591612495085326,
+      "zero_mean_field_jump_max_abs": 0.003588517424133686,
+      "zero_mean_field_jump_weighted_rms": 0.0019577097349404234,
+      "mean_jump": 1.9465586857084537e-16
+    }
+  ],
+  "reference_D_A": 0.2557216996140609,
+  "exact_reference_field_restored": true,
+  "continuous_time_path_knot_error": 0.0,
+  "decision": "Keep all already computed fixed-field trajectories/roots as point results. Parameterize subsequent continuous continuation by native path time with only A field changing and outside9s held; report and plotD_A as a display coordinate. A turn or jump in displayD alone is not an SN. This changes only the field-path parameterization, not network equations or resources during a physical orbit.",
+  "limitations": "The recorded native path is piecewise linear, continuous but with derivative corners at sample times. Critical derivative/nondegeneracy checks must identify their native time segment; a corner alone is not a dynamical bifurcation.",
+  "model_promoted": false
+}

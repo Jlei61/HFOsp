@@ -1,0 +1,155 @@
+{
+  "created_local": "2026-09-19T19:45:03.397162",
+  "question": "Can the fixed five-pole basis describe precise variance responses at the same operating point, or do coefficient interpolation and DC errors explain failures?",
+  "selection": "Six fixed counterexamples: 2E and2I varianceE,1E and1I varianceI with largest newbank-minus-unitcorrected error. This is explicitly error-selected diagnosis, not generalization validation.",
+  "points": [
+    {
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 21.474725185404026,
+        "ve": 70.37773809445717,
+        "vi": 0.605506911940546,
+        "dc": {
+          "0": 4.584147135416667,
+          "1": 0.053145134758097234,
+          "2": 0.0866880845451917
+        },
+        "snr": {
+          "0": 123.86954299125482,
+          "1": 46.26536517824632,
+          "2": 1.7641670832271368
+        }
+      },
+      "channel": "variance_E",
+      "selection_error_difference": 0.7240500763997111
+    },
+    {
+      "workpoint": {
+        "pop": "E",
+        "theta": 18.0,
+        "mu": 8.828882550343437,
+        "ve": 166.15666950220424,
+        "vi": 68.88296349418802,
+        "dc": {
+          "0": 1.834716796875,
+          "1": 0.05574675599992763,
+          "2": 0.025359335360511718
+        },
+        "snr": {
+          "0": 68.14853513291446,
+          "1": 90.39826514740662,
+          "2": 28.75189013195545
+        }
+      },
+      "channel": "variance_E",
+      "selection_error_difference": 0.4698971725450134
+    },
+    {
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 24.943723756341335,
+        "ve": 272.86893317625766,
+        "vi": 0.5977588336911517,
+        "dc": {
+          "0": 7.758382161458334,
+          "1": 0.030491974308506406,
+          "2": 0.012252798849952673
+        },
+        "snr": {
+          "0": 162.50873315316846,
+          "1": 64.51612875480663,
+          "2": 0.21213436494650634
+        }
+      },
+      "channel": "variance_E",
+      "selection_error_difference": 20.02970758022781
+    },
+    {
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 15.031396150020107,
+        "ve": 14.478390742374165,
+        "vi": 668.0212890552208,
+        "dc": {
+          "0": 5.74951171875,
+          "1": 0.09872943649679397,
+          "2": 0.03329416487452913
+        },
+        "snr": {
+          "0": 132.55323192451186,
+          "1": 20.02529150748702,
+          "2": 154.62873921341634
+        }
+      },
+      "channel": "variance_E",
+      "selection_error_difference": 2.7831779324901866
+    },
+    {
+      "workpoint": {
+        "pop": "E",
+        "theta": 15.31975818045007,
+        "mu": 7.044769259453089,
+        "ve": 3.5059746301113623,
+        "vi": 290.81645203229965,
+        "dc": {
+          "0": 2.2440592447916665,
+          "1": 0.10758699232601657,
+          "2": 0.04177775403771033
+        },
+        "snr": {
+          "0": 80.25849115523066,
+          "1": 10.559068869327424,
+          "2": 110.04153175065467
+        }
+      },
+      "channel": "variance_I",
+      "selection_error_difference": 1.8383827413512466
+    },
+    {
+      "workpoint": {
+        "pop": "I",
+        "theta": 18.0,
+        "mu": 41.525583143123654,
+        "ve": 175.61827689514723,
+        "vi": 452.58407618203887,
+        "dc": {
+          "0": 7.745157877604167,
+          "1": -0.054929399239419696,
+          "2": -0.009607374099262572
+        },
+        "snr": {
+          "0": 293.11174037911434,
+          "1": 118.50625310411023,
+          "2": 44.75325787945427
+        }
+      },
+      "channel": "variance_I",
+      "selection_error_difference": 1.792895696253073
+    }
+  ],
+  "frequencies_hz": [
+    0,
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "filter_times_ms": [
+    0.25,
+    1,
+    4,
+    16,
+    64
+  ],
+  "replicates": 8192,
+  "duration_ms": 8000,
+  "burn_ms": 300,
+  "seed": 919786,
+  "ridge": 0.0001,
+  "scope": "Fit perpoint diagnostic kernels using only the new six frequencies. Compare at previously measured6/25or15/60Hz without fitting those values. Report both fixedsplineDC and empiricalDCoracle variants. Do not modify or promote the responsebank; this separates local basis capacity from workpoint interpolation and DC accuracy."
+}

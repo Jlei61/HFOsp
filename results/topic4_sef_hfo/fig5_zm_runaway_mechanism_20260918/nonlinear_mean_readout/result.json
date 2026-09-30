@@ -1,0 +1,392 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "group": 279,
+      "label": "Core A E",
+      "rows": [
+        {
+          "variant": "input_mix_instantaneous",
+          "waveform_L2": 0.32850905504099004,
+          "mean_bias": 0.2149178234541469,
+          "mean_hz": 88.35538207528215,
+          "passed": false
+        },
+        {
+          "variant": "input_mix_history",
+          "waveform_L2": 0.1299347570977301,
+          "mean_bias": 0.050769725548377116,
+          "mean_hz": 76.4176463474776,
+          "passed": true
+        },
+        {
+          "variant": "output_mix_instantaneous",
+          "waveform_L2": 0.2938881521243636,
+          "mean_bias": 0.21373224879114694,
+          "mean_hz": 88.2691606862253,
+          "passed": false
+        },
+        {
+          "variant": "output_mix_history",
+          "waveform_L2": 0.13083154440396758,
+          "mean_bias": 0.05476654704296278,
+          "mean_hz": 76.7083167808381,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "group": 141,
+      "label": "Core B E",
+      "rows": [
+        {
+          "variant": "input_mix_instantaneous",
+          "waveform_L2": 0.3632962057829196,
+          "mean_bias": 0.2099118717740487,
+          "mean_hz": 65.55356244964176,
+          "passed": false
+        },
+        {
+          "variant": "input_mix_history",
+          "waveform_L2": 0.11381275168929988,
+          "mean_bias": 0.011904063848396755,
+          "mean_hz": 53.53547656473262,
+          "passed": true
+        },
+        {
+          "variant": "output_mix_instantaneous",
+          "waveform_L2": 0.34909588473149744,
+          "mean_bias": 0.22001332194271997,
+          "mean_hz": 66.10086350512525,
+          "passed": false
+        },
+        {
+          "variant": "output_mix_history",
+          "waveform_L2": 0.11503123388497147,
+          "mean_bias": 0.006901477082091114,
+          "mean_hz": 53.80651893702865,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "group": 39,
+      "label": "Surround E",
+      "rows": [
+        {
+          "variant": "input_mix_instantaneous",
+          "waveform_L2": 0.3844098434523068,
+          "mean_bias": 0.2332017388791039,
+          "mean_hz": 79.39309814885432,
+          "passed": false
+        },
+        {
+          "variant": "input_mix_history",
+          "waveform_L2": 0.21001586456011684,
+          "mean_bias": 0.0672733264841026,
+          "mean_hz": 68.71068478886848,
+          "passed": false
+        },
+        {
+          "variant": "output_mix_instantaneous",
+          "waveform_L2": 0.35155578966275774,
+          "mean_bias": 0.22690763240984177,
+          "mean_hz": 78.98788576800926,
+          "passed": false
+        },
+        {
+          "variant": "output_mix_history",
+          "waveform_L2": 0.21126243189398752,
+          "mean_bias": 0.06816082201307139,
+          "mean_hz": 68.76782144171015,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "group": 594,
+      "label": "I",
+      "rows": [
+        {
+          "variant": "input_mix_instantaneous",
+          "waveform_L2": 0.18221090460858724,
+          "mean_bias": 0.07712117076180175,
+          "mean_hz": 96.746026279053,
+          "passed": false
+        },
+        {
+          "variant": "input_mix_history",
+          "waveform_L2": 0.04217687557665185,
+          "mean_bias": 0.0033607141948167104,
+          "mean_hz": 89.51721788835559,
+          "passed": true
+        },
+        {
+          "variant": "output_mix_instantaneous",
+          "waveform_L2": 0.18641936316572869,
+          "mean_bias": 0.09775812175943088,
+          "mean_hz": 98.59961811043821,
+          "passed": false
+        },
+        {
+          "variant": "output_mix_history",
+          "waveform_L2": 0.044012775731530014,
+          "mean_bias": 0.001098761971298277,
+          "mean_hz": 89.72038434278866,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "steady_and_first_order_identity": [
+    {
+      "group": 279,
+      "history_lookup": false,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.3322676295501878e-10,
+        8.881784197001252e-11
+      ]
+    },
+    {
+      "group": 279,
+      "history_lookup": false,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        9.248598308145741e-11,
+        2.3121495785867857e-10
+      ]
+    },
+    {
+      "group": 279,
+      "history_lookup": false,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.8720776460913885e-10,
+        4.680194115666555e-11
+      ]
+    },
+    {
+      "group": 279,
+      "history_lookup": true,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.4676849515309612e-11,
+        4.8922831707646245e-11
+      ]
+    },
+    {
+      "group": 279,
+      "history_lookup": true,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        9.879998170913304e-11,
+        9.879998190110797e-10
+      ]
+    },
+    {
+      "group": 279,
+      "history_lookup": true,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        3.378668913770889e-10,
+        2.0272013496323817e-09
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": false,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        4.717444985497592e-11,
+        4.717444985683044e-11
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": false,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        2.368958612356024e-10,
+        2.6321762364361223e-11
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": false,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        3.4873977167251005e-09,
+        0.0
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": true,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        2.0597132884246557e-10,
+        6.740879851814426e-11
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": true,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        3.328307770478063e-11,
+        4.160384714049563e-11
+      ]
+    },
+    {
+      "group": 141,
+      "history_lookup": true,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.7329702094462426e-10,
+        1.5404179651979817e-10
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": false,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        7.110057520515862e-12,
+        1.4220115041941677e-11
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": false,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        1.592972423581163e-10,
+        3.185944847352643e-10
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": false,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        7.000286265428586e-10,
+        3.111238338980507e-10
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": true,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        9.815132257189125e-11,
+        7.852105806059578e-11
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": true,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 3.552713678800501e-15,
+      "derivative_relative_difference": [
+        1.9539925233402755e-09,
+        2.8421709430404007e-09
+      ]
+    },
+    {
+      "group": 39,
+      "history_lookup": true,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.5154910485980214e-10,
+        1.0103273652216336e-10
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": false,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.641010304274618e-11,
+        4.376027478233207e-11
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": false,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        6.322986853172841e-10,
+        1.0839406029115054e-09
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": false,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        0.0,
+        8.526512829121202e-09
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": true,
+      "x": -0.3,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        1.7417708308725345e-11,
+        6.967083322610346e-11
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": true,
+      "x": 1.0,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        4.294879434735484e-11,
+        1.8611144211591815e-10
+      ]
+    },
+    {
+      "group": 594,
+      "history_lookup": true,
+      "x": 2.5,
+      "equilibrium_difference_Hz": 0.0,
+      "derivative_relative_difference": [
+        3.8129917175986784e-10,
+        1.0167977924193722e-10
+      ]
+    }
+  ],
+  "all_selected_pass": {
+    "input_mix_instantaneous": false,
+    "input_mix_history": false,
+    "output_mix_instantaneous": false,
+    "output_mix_history": false
+  },
+  "physical_rate_bounds_pass": true,
+  "scope": "Four predetermined diagnostic readouts on already observed selected group waveforms. Check static/linear identity and physicalratebounds. Even all-selected pass requires fresh response/domain/native tests; none enters network automatically.",
+  "replacement_promoted": false
+}

@@ -1,0 +1,31 @@
+[
+  {
+    "status": "RETRACTION_EXCEEDS_RADIUS",
+    "actual_norm": 0.627552907426337,
+    "radius": 0.5528109984433982,
+    "step_norm": 0.5528109984434026,
+    "lagrange_multiplier": 2.3980567428351836,
+    "predicted_relative_residual": 0.8968700492034157,
+    "admissibility_diagnostic": {
+      "negative_steps_at_exact_zero": 2014,
+      "zero_boundary_projection": true
+    }
+  },
+  {
+    "status": "EVALUATED",
+    "radius": 0.2764054992216991,
+    "step_norm": 0.2764054992217016,
+    "lagrange_multiplier": 6.336391520147191,
+    "predicted_relative_residual": 0.9324013404177053,
+    "admissibility_diagnostic": {
+      "negative_steps_at_exact_zero": 1873,
+      "zero_boundary_projection": true
+    },
+    "actual_step_norm": 0.2846767690155288,
+    "retraction_relative_change": 0.3368230883668972,
+    "residual_ratio": 0.9902768290493261,
+    "predicted_gain": 0.08937444353980217,
+    "agreement": 0.2165250051531074,
+    "period_ms": 32.5492831477395
+  }
+]

@@ -1,0 +1,448 @@
+{
+  "status": "RECURRENCE_SEEDS_ONLY",
+  "label": "mid_lower",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block02.npz"
+  ],
+  "definition": "E/I original-cell weighted rate-history mismatch over nine lags0..128ms normalized by total rate temporal variance, plus M mismatch normalized by M temporal variance. Random64projection screens only; final scores use every original group. Recorded1ms rates and10ms M are not full-state closure.",
+  "candidates": [
+    {
+      "time1_ms": 2462.0,
+      "time2_ms": 2727.0,
+      "period_ms": 265.0,
+      "score": 0.0014420897915968566,
+      "rate_history_squared_error_over_variance": 6.670380937667919e-05,
+      "M_squared_error_over_variance": 0.0013753859822201774,
+      "regional_rates_A_B_S_1": [
+        1.3750171918886407,
+        1.9157042995701916,
+        0.065435490130718
+      ],
+      "regional_rates_A_B_S_2": [
+        1.5767784160549494,
+        11.857577957459384,
+        0.09201370826084598
+      ]
+    },
+    {
+      "time1_ms": 1643.0,
+      "time2_ms": 1909.0,
+      "period_ms": 266.0,
+      "score": 0.0020602819852925942,
+      "rate_history_squared_error_over_variance": 7.35731129327915e-05,
+      "M_squared_error_over_variance": 0.0019867088723598027,
+      "regional_rates_A_B_S_1": [
+        1.1343865988761264,
+        1.5571786490939652,
+        0.06326813706248316
+      ],
+      "regional_rates_A_B_S_2": [
+        1.4556793472494935,
+        9.049399896944296,
+        0.08368720300906173
+      ]
+    },
+    {
+      "time1_ms": 569.0,
+      "time2_ms": 841.0,
+      "period_ms": 272.0,
+      "score": 0.0023512308411494614,
+      "rate_history_squared_error_over_variance": 5.8299908167220564e-06,
+      "M_squared_error_over_variance": 0.002345400850332739,
+      "regional_rates_A_B_S_1": [
+        1.666016513644779,
+        1.2333837541877166,
+        0.07871931506075011
+      ],
+      "regional_rates_A_B_S_2": [
+        3.9673115235187653,
+        2.3737931821220393,
+        0.07523384888106313
+      ]
+    },
+    {
+      "time1_ms": 1914.0,
+      "time2_ms": 2731.0,
+      "period_ms": 817.0,
+      "score": 0.003228455190670334,
+      "rate_history_squared_error_over_variance": 4.213004542069846e-06,
+      "M_squared_error_over_variance": 0.0032242421861282643,
+      "regional_rates_A_B_S_1": [
+        2.9397326146773706,
+        45.94921690756432,
+        0.27595315099917717
+      ],
+      "regional_rates_A_B_S_2": [
+        2.7845387522042273,
+        43.89699800566559,
+        0.26078918399805406
+      ]
+    },
+    {
+      "time1_ms": 832.0,
+      "time2_ms": 1101.0,
+      "period_ms": 269.0,
+      "score": 0.003256237879641291,
+      "rate_history_squared_error_over_variance": 0.0004528258961218899,
+      "M_squared_error_over_variance": 0.0028034119835194013,
+      "regional_rates_A_B_S_1": [
+        1.1304557045096593,
+        0.9060617786839262,
+        0.06031032747471041
+      ],
+      "regional_rates_A_B_S_2": [
+        1.4585883502085109,
+        22.779604938269877,
+        0.1265921341006052
+      ]
+    },
+    {
+      "time1_ms": 1865.0,
+      "time2_ms": 2682.0,
+      "period_ms": 817.0,
+      "score": 0.004378705640938514,
+      "rate_history_squared_error_over_variance": 0.0007516890835123285,
+      "M_squared_error_over_variance": 0.0036270165574261853,
+      "regional_rates_A_B_S_1": [
+        0.010470253710644136,
+        0.12248950214442864,
+        0.028024994065797906
+      ],
+      "regional_rates_A_B_S_2": [
+        0.009786080513629293,
+        0.12030140961253041,
+        0.027753953036060985
+      ]
+    },
+    {
+      "time1_ms": 1917.0,
+      "time2_ms": 2477.0,
+      "period_ms": 560.0,
+      "score": 0.004877252686701744,
+      "rate_history_squared_error_over_variance": 0.0013714792770732486,
+      "M_squared_error_over_variance": 0.0035057734096284954,
+      "regional_rates_A_B_S_1": [
+        5.688677771456678,
+        120.07295816969933,
+        1.0435498135455377
+      ],
+      "regional_rates_A_B_S_2": [
+        45.60217953305345,
+        119.3723639665366,
+        1.1242790290036808
+      ]
+    },
+    {
+      "time1_ms": 1654.0,
+      "time2_ms": 2471.0,
+      "period_ms": 817.0,
+      "score": 0.005391296333019065,
+      "rate_history_squared_error_over_variance": 2.926387848500072e-06,
+      "M_squared_error_over_variance": 0.005388369945170565,
+      "regional_rates_A_B_S_1": [
+        6.571214560784932,
+        18.2075502155088,
+        0.12378869165017592
+      ],
+      "regional_rates_A_B_S_2": [
+        6.36702003031574,
+        16.339815647471653,
+        0.11637976220233343
+      ]
+    },
+    {
+      "time1_ms": 1660.0,
+      "time2_ms": 2734.0,
+      "period_ms": 1074.0,
+      "score": 0.009615707725631015,
+      "rate_history_squared_error_over_variance": 0.0016846799907559605,
+      "M_squared_error_over_variance": 0.007931027734875055,
+      "regional_rates_A_B_S_1": [
+        47.41361695970719,
+        130.96005529544433,
+        1.2965352675648192
+      ],
+      "regional_rates_A_B_S_2": [
+        5.25486452480289,
+        115.42311554586007,
+        0.9795761372173919
+      ]
+    },
+    {
+      "time1_ms": 1353.0,
+      "time2_ms": 2170.0,
+      "period_ms": 817.0,
+      "score": 0.010221491372121812,
+      "rate_history_squared_error_over_variance": 0.0011435057904100366,
+      "M_squared_error_over_variance": 0.009077985581711774,
+      "regional_rates_A_B_S_1": [
+        0.2644374693684595,
+        0.26069897637597655,
+        0.04784964605920846
+      ],
+      "regional_rates_A_B_S_2": [
+        0.31894589046853783,
+        0.24835038168823706,
+        0.051567218137757484
+      ]
+    },
+    {
+      "time1_ms": 1599.0,
+      "time2_ms": 2417.0,
+      "period_ms": 818.0,
+      "score": 0.011422050963915383,
+      "rate_history_squared_error_over_variance": 0.005291653393992482,
+      "M_squared_error_over_variance": 0.006130397569922901,
+      "regional_rates_A_B_S_1": [
+        0.006084140318550069,
+        0.021581759113859896,
+        0.02564752796704469
+      ],
+      "regional_rates_A_B_S_2": [
+        0.008895814615379881,
+        0.024221670562025677,
+        0.026443320495313637
+      ]
+    },
+    {
+      "time1_ms": 2190.0,
+      "time2_ms": 2463.0,
+      "period_ms": 273.0,
+      "score": 0.012425867042255786,
+      "rate_history_squared_error_over_variance": 0.008218486157554708,
+      "M_squared_error_over_variance": 0.004207380884701077,
+      "regional_rates_A_B_S_1": [
+        1.1654593807000377,
+        0.9273222673959252,
+        0.06580679977078363
+      ],
+      "regional_rates_A_B_S_2": [
+        1.5347693120215868,
+        2.207590877801256,
+        0.06703156460580768
+      ]
+    },
+    {
+      "time1_ms": 1911.0,
+      "time2_ms": 2190.0,
+      "period_ms": 279.0,
+      "score": 0.012675317287799349,
+      "rate_history_squared_error_over_variance": 0.008392856554255,
+      "M_squared_error_over_variance": 0.0042824607335443495,
+      "regional_rates_A_B_S_1": [
+        1.8543207029112936,
+        16.947464332818686,
+        0.11110618986250974
+      ],
+      "regional_rates_A_B_S_2": [
+        1.1654593807000377,
+        0.9273222673959252,
+        0.06580679977078363
+      ]
+    },
+    {
+      "time1_ms": 1376.0,
+      "time2_ms": 1645.0,
+      "period_ms": 269.0,
+      "score": 0.014203359431728579,
+      "rate_history_squared_error_over_variance": 0.010591948157424506,
+      "M_squared_error_over_variance": 0.0036114112743040726,
+      "regional_rates_A_B_S_1": [
+        1.223441820710265,
+        1.2795268735936043,
+        0.06643159839477901
+      ],
+      "regional_rates_A_B_S_2": [
+        1.3878781098467272,
+        2.008803272463438,
+        0.06602994362431185
+      ]
+    },
+    {
+      "time1_ms": 1111.0,
+      "time2_ms": 1922.0,
+      "period_ms": 811.0,
+      "score": 0.014573579481479033,
+      "rate_history_squared_error_over_variance": 0.00030393276128215166,
+      "M_squared_error_over_variance": 0.014269646720196882,
+      "regional_rates_A_B_S_1": [
+        10.278615126223247,
+        341.2241340811926,
+        7.963148835757215
+      ],
+      "regional_rates_A_B_S_2": [
+        27.985851453454153,
+        341.9594478849841,
+        8.099398879403099
+      ]
+    },
+    {
+      "time1_ms": 840.0,
+      "time2_ms": 1651.0,
+      "period_ms": 811.0,
+      "score": 0.014579157081605624,
+      "rate_history_squared_error_over_variance": 1.5753945482475945e-05,
+      "M_squared_error_over_variance": 0.014563403136123148,
+      "regional_rates_A_B_S_1": [
+        3.231758881864244,
+        2.0507174074156893,
+        0.07225662371636077
+      ],
+      "regional_rates_A_B_S_2": [
+        3.2464489299774315,
+        6.841823899033113,
+        0.08447963518991525
+      ]
+    },
+    {
+      "time1_ms": 1395.0,
+      "time2_ms": 2477.0,
+      "period_ms": 1082.0,
+      "score": 0.015623725166484857,
+      "rate_history_squared_error_over_variance": 0.0026373747994491476,
+      "M_squared_error_over_variance": 0.01298635036703571,
+      "regional_rates_A_B_S_1": [
+        66.53472707442327,
+        109.22769385985747,
+        1.3955728411604484
+      ],
+      "regional_rates_A_B_S_2": [
+        45.60217953305345,
+        119.3723639665366,
+        1.1242790290036808
+      ]
+    },
+    {
+      "time1_ms": 1651.0,
+      "time2_ms": 2191.0,
+      "period_ms": 540.0,
+      "score": 0.015949536891309936,
+      "rate_history_squared_error_over_variance": 0.008241968387993851,
+      "M_squared_error_over_variance": 0.0077075685033160864,
+      "regional_rates_A_B_S_1": [
+        3.2464489299774315,
+        6.841823899033113,
+        0.08447963518991525
+      ],
+      "regional_rates_A_B_S_2": [
+        1.2764227441870253,
+        1.01173810906348,
+        0.06676514683370832
+      ]
+    },
+    {
+      "time1_ms": 570.0,
+      "time2_ms": 1651.0,
+      "period_ms": 1081.0,
+      "score": 0.017936704082026956,
+      "rate_history_squared_error_over_variance": 2.337371889356896e-05,
+      "M_squared_error_over_variance": 0.017913330363133386,
+      "regional_rates_A_B_S_1": [
+        1.8912745347686248,
+        1.3603130680421232,
+        0.0798722690675782
+      ],
+      "regional_rates_A_B_S_2": [
+        3.2464489299774315,
+        6.841823899033113,
+        0.08447963518991525
+      ]
+    },
+    {
+      "time1_ms": 1393.0,
+      "time2_ms": 2732.0,
+      "period_ms": 1339.0,
+      "score": 0.018364539168694707,
+      "rate_history_squared_error_over_variance": 0.003441278937751342,
+      "M_squared_error_over_variance": 0.014923260230943364,
+      "regional_rates_A_B_S_1": [
+        34.38268489341205,
+        59.15638350621434,
+        0.573038404842457
+      ],
+      "regional_rates_A_B_S_2": [
+        3.3523215990246777,
+        61.391025687902015,
+        0.39625332758914655
+      ]
+    },
+    {
+      "time1_ms": 24791.0,
+      "time2_ms": 25060.0,
+      "period_ms": 269.0,
+      "score": 0.02006226847256792,
+      "rate_history_squared_error_over_variance": 0.0013848407258869621,
+      "M_squared_error_over_variance": 0.018677427746680957,
+      "regional_rates_A_B_S_1": [
+        0.7918651337471023,
+        0.7335587735015322,
+        0.06119034669812418
+      ],
+      "regional_rates_A_B_S_2": [
+        0.8802387460433831,
+        5.9620201934991615,
+        0.07242955023478076
+      ]
+    },
+    {
+      "time1_ms": 848.0,
+      "time2_ms": 1392.0,
+      "period_ms": 544.0,
+      "score": 0.02124877683537675,
+      "rate_history_squared_error_over_variance": 0.004265331460721803,
+      "M_squared_error_over_variance": 0.01698344537465495,
+      "regional_rates_A_B_S_1": [
+        33.03734328813198,
+        13.066980686351545,
+        0.21119782789520136
+      ],
+      "regional_rates_A_B_S_2": [
+        24.658299876777182,
+        42.90744735630413,
+        0.3788073590197446
+      ]
+    },
+    {
+      "time1_ms": 560.0,
+      "time2_ms": 1911.0,
+      "period_ms": 1351.0,
+      "score": 0.021903798427786867,
+      "rate_history_squared_error_over_variance": 0.0001872353254915636,
+      "M_squared_error_over_variance": 0.021716563102295302,
+      "regional_rates_A_B_S_1": [
+        0.7217945022859291,
+        0.6175220678572286,
+        0.07188426570303205
+      ],
+      "regional_rates_A_B_S_2": [
+        1.8543207029112936,
+        16.947464332818686,
+        0.11110618986250974
+      ]
+    },
+    {
+      "time1_ms": 560.0,
+      "time2_ms": 1389.0,
+      "period_ms": 829.0,
+      "score": 0.025676396159064935,
+      "rate_history_squared_error_over_variance": 0.006454752376415885,
+      "M_squared_error_over_variance": 0.01922164378264905,
+      "regional_rates_A_B_S_1": [
+        0.7217945022859291,
+        0.6175220678572286,
+        0.07188426570303205
+      ],
+      "regional_rates_A_B_S_2": [
+        10.2755397368094,
+        16.20882023165699,
+        0.14911306003768737
+      ]
+    }
+  ],
+  "model_promoted": false
+}

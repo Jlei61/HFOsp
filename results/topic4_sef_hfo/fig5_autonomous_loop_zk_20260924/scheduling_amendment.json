@@ -1,0 +1,5 @@
+{
+  "max_workers_before": 2,
+  "max_workers_after": 4,
+  "reason": "Both native high/interictal CPU repeats are bitwise exact; measured RSS under3GiB per worker, available memory over120GiB on80CPU machine. Four CPU workers with80GiB dispatch reserve; no new GPU processes. No physical or experiment changes."
+}

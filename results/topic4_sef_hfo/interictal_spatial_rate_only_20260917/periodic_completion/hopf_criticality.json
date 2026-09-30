@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "core": "A",
+      "J_EE_core": 0.938026348558721,
+      "omega_per_ms": 0.041142781056065024,
+      "frequency_hz": 6.548076977620339,
+      "eigenvector_max_rate_hz": 1.0,
+      "cubic": [
+        -0.00011979628489100687,
+        -0.000191115381700378
+      ],
+      "lambda_J": [
+        0.15042041412263096,
+        -0.09066506337111288
+      ],
+      "J_shift_per_amplitude_squared": 0.000796409753222341,
+      "omega_shift_per_amplitude_squared": -0.00026332192244565394,
+      "criticality": "supercritical",
+      "first_derivative_relative_error": 9.854652381454553e-10,
+      "cubic_taylor_checks": [
+        {
+          "epsilon": 0.04,
+          "relative_cubic_error": 2.0652791799874667e-06
+        },
+        {
+          "epsilon": 0.02,
+          "relative_cubic_error": 1.3252874061469178e-06
+        },
+        {
+          "epsilon": 0.01,
+          "relative_cubic_error": 8.480817000001926e-06
+        }
+      ],
+      "characteristic_residual": 2.886835230559207e-12,
+      "normalization": "max abs rate eigenvector 1 Hz; z is dimensionless; cubic per ms",
+      "interpretation": "Local Hopf center manifold; H2 has already unstable transverse modes"
+    },
+    {
+      "core": "B",
+      "J_EE_core": 0.9457572588319144,
+      "omega_per_ms": 0.037974465500694665,
+      "frequency_hz": 6.043823895708202,
+      "eigenvector_max_rate_hz": 1.0,
+      "cubic": [
+        -3.785063417023441e-05,
+        -0.00043144136997542054
+      ],
+      "lambda_J": [
+        0.1709712487091336,
+        -0.11820161922495491
+      ],
+      "J_shift_per_amplitude_squared": 0.00022138596083267863,
+      "omega_shift_per_amplitude_squared": -0.0004576095490195156,
+      "criticality": "supercritical",
+      "first_derivative_relative_error": 9.732868300095682e-10,
+      "cubic_taylor_checks": [
+        {
+          "epsilon": 0.04,
+          "relative_cubic_error": 3.2598343452867326e-06
+        },
+        {
+          "epsilon": 0.02,
+          "relative_cubic_error": 9.576194025882784e-07
+        },
+        {
+          "epsilon": 0.01,
+          "relative_cubic_error": 4.299510540345281e-06
+        }
+      ],
+      "characteristic_residual": 4.749660403994951e-12,
+      "normalization": "max abs rate eigenvector 1 Hz; z is dimensionless; cubic per ms",
+      "interpretation": "Local Hopf center manifold; H2 has already unstable transverse modes"
+    }
+  ]
+}

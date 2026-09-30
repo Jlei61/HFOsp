@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "transport": [
+    {
+      "tick": 0,
+      "max_error": 4.440892098500626e-14
+    },
+    {
+      "tick": 358,
+      "max_error": 6.927791673660977e-14
+    },
+    {
+      "tick": 376,
+      "max_error": 5.3290705182007514e-14
+    }
+  ],
+  "local_physics": [
+    {
+      "gain": 0.0,
+      "global_R": 0.0,
+      "max_state_error": 1.4210854715202004e-14,
+      "spikes_exact": true,
+      "ref_exact": true
+    },
+    {
+      "gain": 30.0,
+      "global_R": 350.0,
+      "max_state_error": 7.105427357601002e-15,
+      "spikes_exact": true,
+      "ref_exact": true
+    },
+    {
+      "gain": 30.0,
+      "global_R": 3.0,
+      "max_state_error": 7.105427357601002e-15,
+      "spikes_exact": true,
+      "ref_exact": true
+    }
+  ],
+  "graph_capture_bitwise": true,
+  "graph_identity_exact": true,
+  "source_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "note": "Implementation gate only; Gaussian arrival and spatial/noise correspondence unvalidated."
+}

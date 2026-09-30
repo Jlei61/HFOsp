@@ -1,0 +1,27 @@
+{
+  "created_local": "2026-09-19T22:24:35.848437+08:00",
+  "question": "Which spatial Z feedback recruits or prolongs activity from the actual native 9 s history?",
+  "arms": [
+    "cores_dynamic",
+    "surround_dynamic"
+  ],
+  "start_ms": 9000,
+  "stop_ms": 12500,
+  "new_full_trajectories_max": 2,
+  "region_definition": "Original native cell membership preserved by accepted projection: Core A 754 E cells, Core B 786, surround 30460. Membership includes original threshold-equal core cells; no reclassification by coarse thresholds.",
+  "intervention": "Suppress only held region Z update at each original .1 ms step; Z still multiplies inhibitory input. All M and unheld Z dynamic.",
+  "controls": "Reuse completed native_t9000_Zdynamic and native_t9000_Zheld, same complete checkpoint and original future innovations.",
+  "readouts": [
+    "All complete self-ending events and lengths, with boundary censoring retained",
+    "Original global E 200Hz for200ms entry; additional 75 percent spatial recruitment",
+    "Tail11.5-12.5s occupancy and common10.39s/12s50ms spatial snapshots",
+    "Region-specific Z and M endpoints"
+  ],
+  "validation": [
+    "Actual native positions exactly match membership geometry",
+    "Initial engine state bitwise identical; same final RNG/input state and future xi",
+    "Held regional Z exact every step; M update remains applied",
+    "Same readout code and thresholds as completed native controls"
+  ],
+  "scope": "One native history with paired counterfactuals. This tests finite-window spatial feedback, not a universal resource threshold, autonomous attractor or bifurcation type. No additional parameter selection or expansion in this batch."
+}

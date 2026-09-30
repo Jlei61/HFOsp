@@ -1,0 +1,112 @@
+{
+  "status": "PASS_K2_Z_PAIRED_CONTRAST",
+  "pairs": [
+    {
+      "history": "high",
+      "names": [
+        "z0.25_k2_high",
+        "z0.75_k2_high"
+      ],
+      "job_difference": {
+        "target_Z": [
+          0.25,
+          0.75
+        ],
+        "name": [
+          "z0.25_k2_high",
+          "z0.75_k2_high"
+        ]
+      },
+      "network_identity_equal": true,
+      "full_held_K_fields_bitwise_equal": true,
+      "Z_field_monotone_increase_for_all_E": true,
+      "common_future_input_records_exact": true,
+      "states": [
+        "sustained_high",
+        "quiet"
+      ],
+      "mean_rates_allE_A_B_other_Hz": [
+        [
+          470.5501906250006,
+          476.3864721485424,
+          476.2970737913477,
+          470.2574261326335
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "mean_native_dZ_allE_A_B_other_per_s": [
+        [
+          -0.05000000000000044,
+          -0.04707339092616628,
+          -0.04650301476434841,
+          -0.05016268199727137
+        ],
+        [
+          0.05000000000000044,
+          0.05287677274675779,
+          0.053497983259186914,
+          0.049838525886645606
+        ]
+      ]
+    },
+    {
+      "history": "interictal",
+      "names": [
+        "z0.25_k2_interictal",
+        "z0.75_k2_interictal"
+      ],
+      "job_difference": {
+        "target_Z": [
+          0.25,
+          0.75
+        ],
+        "name": [
+          "z0.25_k2_interictal",
+          "z0.75_k2_interictal"
+        ]
+      },
+      "network_identity_equal": true,
+      "full_held_K_fields_bitwise_equal": true,
+      "Z_field_monotone_increase_for_all_E": true,
+      "common_future_input_records_exact": true,
+      "states": [
+        "sustained_high",
+        "quiet"
+      ],
+      "mean_rates_allE_A_B_other_Hz": [
+        [
+          470.5766156249997,
+          476.38169761273156,
+          476.3045801526716,
+          470.28511162179853
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "mean_native_dZ_allE_A_B_other_per_s": [
+        [
+          -0.05000000000000044,
+          -0.04707339092616628,
+          -0.04650301476434841,
+          -0.05016268199727137
+        ],
+        [
+          0.05000000000000044,
+          0.05287677274675779,
+          0.053497983259186914,
+          0.049838525886645606
+        ]
+      ]
+    }
+  ],
+  "interpretation": "At heldK2 and the same endogenoushistory/input, increasing the fullZfield frommean0.25 to0.75 changes thelast10s response fromglobalhigh toquiet inboth testedhistories. One sharednoiseseed, two nonindependent historyconditions, no statisticalinteractiontest, attractorcertification or bifurcationboundary inferred."
+}

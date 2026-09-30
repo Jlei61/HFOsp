@@ -1,0 +1,11 @@
+{
+  "status": "STOPPED_AFTER_TWO_ACCEPTED_POINTS",
+  "pid": 3211292,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/period_path.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T264286_fine_tangent/point_with_tangent.npz --family native --N 8505 --M 65536 --periods 264.35 264.4 264.45 --device 0 --large-quadrature --gain-cache-gb 6 --host-krylov --eliminate-period --normalize-parameter --linear-tol-floor .0001 --restart 80 --harmonic-block 129 --fft-cache-plans 8 --log-linear-progress --check-predictors --label native_unstable_period_extension_G8505_M65536 ",
+  "at": "2026-09-19T13:12:12.800260",
+  "reason": "Fine T264.35 and264.4 now show opposite D step; prioritize derivative-bracket refinement on this interval over further T264.45 descent. No branch endpoint inferred.",
+  "accepted_paths": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_unstable_period_extension_G8505_M65536/point0000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_unstable_period_extension_G8505_M65536/point0001.npz"
+  ]
+}

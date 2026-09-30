@@ -1,0 +1,101 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "label": "low",
+      "global_E_hz": 0.12368770774896289,
+      "D": 1.1102230246251565e-16,
+      "zero_frequency_absolute_gain_bound": 4.232080658039185,
+      "Z": "dynamic",
+      "M": "dynamic",
+      "unstable_roots": 4,
+      "radius_per_ms": 0.5,
+      "refinements": [
+        {
+          "N": 128,
+          "winding": 2.8271597168564594e-16,
+          "max_phase_step": 3.0882413119129706,
+          "count": 0
+        },
+        {
+          "N": 256,
+          "winding": 4.000000000000001,
+          "max_phase_step": 1.9326929039486207,
+          "count": 4
+        },
+        {
+          "N": 512,
+          "winding": 4.000000000000001,
+          "max_phase_step": 1.026172638504053,
+          "count": 4
+        },
+        {
+          "N": 1024,
+          "winding": 4.000000000000001,
+          "max_phase_step": 0.5713883622792343,
+          "count": 4
+        }
+      ],
+      "status": "UNSTABLE",
+      "det_zero_sign": 1.0,
+      "dynamic_z": true,
+      "seconds": 144.75700545310974,
+      "positive_roots_found": [
+        {
+          "lambda_per_ms": [
+            0.01476998304424337,
+            0.03213565337560489
+          ],
+          "residual": 3.431338251672454e-15
+        }
+      ]
+    },
+    {
+      "label": "released_high",
+      "global_E_hz": 489.8110851925823,
+      "D": 1.0,
+      "zero_frequency_absolute_gain_bound": 5.089308383674898,
+      "Z": "dynamic",
+      "M": "dynamic",
+      "unstable_roots": 0,
+      "radius_per_ms": 0.5,
+      "refinements": [
+        {
+          "N": 128,
+          "winding": -17.999999999999996,
+          "max_phase_step": 2.9033405705859465,
+          "count": -18
+        },
+        {
+          "N": 256,
+          "winding": -10.000000000000002,
+          "max_phase_step": 3.1320473009286083,
+          "count": -10
+        },
+        {
+          "N": 512,
+          "winding": -8.481479150569378e-16,
+          "max_phase_step": 1.6885491076110206,
+          "count": 0
+        },
+        {
+          "N": 1024,
+          "winding": 1.1308638867425838e-15,
+          "max_phase_step": 0.8445325219351786,
+          "count": 0
+        },
+        {
+          "N": 2048,
+          "winding": 1.5549378442710527e-15,
+          "max_phase_step": 0.4222782328934826,
+          "count": 0
+        }
+      ],
+      "status": "STABLE_BY_CONTOUR",
+      "det_zero_sign": 1.0,
+      "dynamic_z": true,
+      "seconds": 259.4413089752197
+    }
+  ],
+  "scope": "Local stability in the frozen spatial rate equations with both Z and M autonomous. Does not establish native SNN equivalence or a basin boundary."
+}

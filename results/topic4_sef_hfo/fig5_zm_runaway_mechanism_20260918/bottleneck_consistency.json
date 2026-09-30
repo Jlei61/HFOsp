@@ -1,0 +1,138 @@
+{
+  "status": "CONDITIONAL_NORMAL_FORM_CONSISTENCY_ONLY",
+  "Dc": 0.14497264313301514,
+  "Dc_status": "largest observed D on the refined candidate turn, not a certified fold",
+  "initial_D": 0.14497,
+  "shared_complete_initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449700_dt0.05/trajectory.npz",
+  "transverse_multiplier": 0.9328952081612201,
+  "lambda_per_s": -0.26006140593857946,
+  "a_times_b": 22077.354066566797,
+  "spectrum_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.0015625_quotient_chainphase_streamed.json",
+  "spectrum_refinement_pending": false,
+  "formula": "[pi/2 + atan(sqrt((Dc-D0)/(D-Dc)))] / sqrt(a*b*(D-Dc))",
+  "coefficient_rule": "a*b=lambda(Db)^2/[4*(Dc-Db)]; no escape data fitted",
+  "assumptions": [
+    "Local quadratic cycle-fold normal form applies",
+    "The initial complete state is close to the old stable cycle",
+    "A scalar center coordinate captures the slow bottleneck"
+  ],
+  "limit": "Finite long-event onset differs from the normal form infinite-exit time; neither agreement nor disagreement alone establishes bifurcation type.",
+  "rows": [
+    {
+      "label": "rate_critical_finer_restart_D0.1449750_dt0.05",
+      "status": "COMPLETE",
+      "D": 0.1449750000000004,
+      "duration_ms": 20000,
+      "predicted_infinite_exit_s": 10.45484524582398,
+      "first_long_events_by_threshold_ms": {
+        "200": {
+          "start_ms": 9570,
+          "end_ms": 12670,
+          "duration_ms": 3100,
+          "right_censored": false
+        },
+        "500": {
+          "start_ms": 9570,
+          "end_ms": 12670,
+          "duration_ms": 3100,
+          "right_censored": false
+        },
+        "1000": {
+          "start_ms": 9570,
+          "end_ms": 12670,
+          "duration_ms": 3100,
+          "right_censored": false
+        }
+      }
+    },
+    {
+      "label": "rate_critical_finer_restart_D0.1449775_dt0.05",
+      "status": "COMPLETE",
+      "D": 0.14497750000000031,
+      "duration_ms": 8000,
+      "predicted_infinite_exit_s": 6.7379660814609466,
+      "first_long_events_by_threshold_ms": {
+        "200": {
+          "start_ms": 5570,
+          "end_ms": null,
+          "observed_duration_ms": 2430,
+          "right_censored": true
+        },
+        "500": {
+          "start_ms": 5570,
+          "end_ms": null,
+          "observed_duration_ms": 2430,
+          "right_censored": true
+        },
+        "1000": {
+          "start_ms": 5570,
+          "end_ms": null,
+          "observed_duration_ms": 2430,
+          "right_censored": true
+        }
+      }
+    },
+    {
+      "label": "rate_matched_bottleneck_check_D0.1449800_dt0.05",
+      "status": "COMPLETE",
+      "D": 0.14498000000000044,
+      "duration_ms": 8000,
+      "predicted_infinite_exit_s": 5.237464756213932,
+      "first_long_events_by_threshold_ms": {
+        "200": {
+          "start_ms": 4060,
+          "end_ms": null,
+          "observed_duration_ms": 3940,
+          "right_censored": true
+        },
+        "500": {
+          "start_ms": 4060,
+          "end_ms": null,
+          "observed_duration_ms": 3940,
+          "right_censored": true
+        },
+        "1000": {
+          "start_ms": 4060,
+          "end_ms": null,
+          "observed_duration_ms": 3940,
+          "right_censored": true
+        }
+      }
+    },
+    {
+      "label": "rate_matched_bottleneck_check_D0.1449900_dt0.05",
+      "status": "COMPLETE",
+      "D": 0.14499000000000029,
+      "duration_ms": 8000,
+      "predicted_infinite_exit_s": 3.1385648029447397,
+      "first_long_events_by_threshold_ms": {
+        "200": {
+          "start_ms": 2090,
+          "end_ms": 5960,
+          "duration_ms": 3870,
+          "right_censored": false
+        },
+        "500": {
+          "start_ms": 2090,
+          "end_ms": 5960,
+          "duration_ms": 3870,
+          "right_censored": false
+        },
+        "1000": {
+          "start_ms": 2090,
+          "end_ms": 5960,
+          "duration_ms": 3870,
+          "right_censored": false
+        }
+      }
+    }
+  ],
+  "opposite_branch_check": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.003125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json",
+    "D": 0.1449718771100008,
+    "multiplier": 1.0763387118044234,
+    "lambda_per_s": 0.27516371177358395,
+    "ratio_to_stable_decay_magnitude": 1.0580720764024913,
+    "limit": "Upper time-step refinement pending; not used to refit the escape prediction."
+  }
+}

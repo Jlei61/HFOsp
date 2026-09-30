@@ -1,0 +1,27 @@
+{
+  "created_local": "2026-09-20T01:50:11.642847+08:00",
+  "question": "Is a membrane-time-constant low-pass alone sufficient to reproduce recovery, or do reset/clamp impulses carry substantial missing voltage history?",
+  "source": "factorial_waveform",
+  "indices": [
+    6,
+    7
+  ],
+  "source_group": 39,
+  "inherited": {
+    "replicates": 8192,
+    "phase_bins": 128,
+    "dt_ms": 0.1,
+    "burn_cycles": 5,
+    "record_cycles": 20,
+    "seed": 919821,
+    "device": 0
+  },
+  "identity": "V_next=a V_previous+(1-a)I-current_step_reset_impulse-current_step_refractory_clamp_impulse; exact native membrane arithmetic, a=exp(-dt/tau_m).",
+  "budget": "Two recording-only repeats, exact count parity and ensemble conservation. No fitting, model promotion or network run.",
+  "acceptance": {
+    "spike_counts_bitwise": true,
+    "max_voltage_balance_error_mv": 1e-08
+  },
+  "statistical_unit": "Independent noise path; paired conditions use identical path seeds, cycles combined within paths.",
+  "scope": "Diagnostic identity using measured impulses and currents. The exact reconstruction is not a predictive rate closure and does not identify onset criticality."
+}

@@ -1,0 +1,63 @@
+{
+  "created_local": "2026-09-20T04:14:13.577441+08:00",
+  "status": "LOCKED_BEFORE_FIT_AND_VALIDATION_TARGET_ACCESS",
+  "seed": 920045,
+  "device": "cpu",
+  "threads": 2,
+  "steps_per_population": 12000,
+  "optimizer": "AdamW; weight_decay=1e-6; gradient_norm_clip=10",
+  "learning_rate": [
+    [
+      0,
+      0.001
+    ],
+    [
+      4000,
+      0.0003
+    ],
+    [
+      8000,
+      0.0001
+    ]
+  ],
+  "architecture": "Separate E/I,39 inputs,64 tanh,64 tanh,1 residual logit; last layer initially zero",
+  "history": {
+    "taus_ms": [
+      1.0,
+      4.0,
+      16.0,
+      64.0
+    ],
+    "orders": [
+      1,
+      2,
+      3
+    ],
+    "physical_states": 36,
+    "features": "[u,h-u],channel-major,then tau,then order; divide each channel by [3,2,2]",
+    "clocks": "Initialize all history states to zero at the actual local reset/current initialization. Integrate all burn and recording steps. Never replace finite burn or startup by an FFT steady state.",
+    "integration": "Exact exponential step for zero-order held normalized input at the native step endpoint; dt=0.1ms; timestep convergence assessed separately."
+  },
+  "baseline": "Original smooth static transfer Phi (Hz), smoothly capped by r/(1+(r/Rmax)^16)^(1/16), probability regularization 1e-8. Output Rmax*sigmoid(baseline_logit+MLP). Rmax=500Hz E,1000Hz I. The cap is differentiable; no state clipping.",
+  "training_data": "Original static table, original dynamic_assay calibration including all7frequencies,224 fresh train profiles only. No original validation workpoints or24waveforms, no64freshvalidationtargets, no SNN trajectory targets.",
+  "waveform_quadrature": "16 stratified recording times per phase bin, actual finite burn and8record cycles; equal-weight stratified quadrature. Original targets use complete per-bin exposure. Full-step prediction convergence required before acceptance.",
+  "batch": {
+    "waveform_bins": 96,
+    "static_points": 128,
+    "linear_conditions": 64
+  },
+  "losses": {
+    "waveform": "Mean squared error of bin-average prediction divided by max(profile RMS,1Hz), multiplied by100; each bin equally sampled. No fitting to individual noise paths.",
+    "static": "Squared asinh(rate/0.1Hz) error divided by0.1, all original static nodes eligible",
+    "linear": "Squared complex gain error normalized by max(tolerance*abs(measuredDC),2*SEM,1e-7), DC SNR>=10; tolerance0.10for0<f<=25Hz,0.15otherwise includingDC. Analytic derivative of SAME readout and history ODE.",
+    "weights": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "schedule": "All three losses at all12000steps. Final fixed-step weights only; no validation-selected checkpoint."
+  },
+  "runtime": "Save progress each1000steps. Resume only same source/contract and optimizer/RNG state; no schedule extension after validation.",
+  "interface": "Mean input already includes synaptic mean filtering,Z andM. Variance inputs are raw delayed variance intensities; do not add the old variance-response pole before this history model. Keep actual variance-moment state for Z target. Spatial integration and validation are later stages.",
+  "scope": "A local fit is not native propagation recovery or a bifurcation result. Original acceptance gates remain unchanged."
+}

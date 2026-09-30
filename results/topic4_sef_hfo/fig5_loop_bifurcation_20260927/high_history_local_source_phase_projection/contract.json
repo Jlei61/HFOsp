@@ -1,0 +1,11 @@
+{
+  "status": "REGISTERED_BEFORE_LOCAL_SOURCE_OPERATOR_RESPONSE",
+  "created_epoch": 1790561715.4770916,
+  "question": "Does the source-defined22step mean through originalweights/delays plus independent source residual spectra retain the successful local response?",
+  "design": "Same59developmenttargets and512numericalreplicas. Replace measured targetphasewave and measured jointresidual by originalgraph-projected sourcephasewave and squared-weight independent source residuals. Original local neuron/M/ref/ZK/G0/externalPoisson unchanged; no fittedmeans, gains, frequencies.",
+  "gate": "Source phase-specific causalR must staybelow200 forG0. This is a relevance check: if either selectedcore RMSerror exceeds2Hz or selected20error exceeds2Hz, do not launch the allcell self-generated phase map. Passing permits only a bounded endogenous test, not root or bifurcationacceptance.",
+  "unit": "59selectedcells from one conditional native developmentrecord; numericalreplicas are not independent biological/native seeds.",
+  "producer_sha256": "54847f332bd4c4d509adcb8c7da1c7fc89e457288652f1ae67135fd9c1dcbfa9",
+  "formal_bifurcation_allowed": false,
+  "autonomous_closure": false
+}

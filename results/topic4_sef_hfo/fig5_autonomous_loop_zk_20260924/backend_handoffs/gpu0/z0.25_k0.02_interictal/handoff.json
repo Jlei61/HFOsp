@@ -1,0 +1,30 @@
+{
+  "status": "RESUMED_FROM_VERIFIED_CHECKPOINT",
+  "old_pid": 2717302,
+  "step": 580000,
+  "time_s": 58.0,
+  "checkpoint_sha256": "7a603f20720602d21f0a2117f10a79f30cfcbca425053a329ffc54e54b5fcf9a",
+  "backup": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/gpu0/z0.25_k0.02_interictal/checkpoint_step580000.pkl",
+  "committed_observation_endpoints": {
+    "chunks": 580000,
+    "actual_current_chunks": 580000,
+    "conditional_drift_chunks": 580000,
+    "feedback_chunks": 580000,
+    "global_response_chunks": 580000,
+    "intrinsic_adaptation_chunks": 580000,
+    "mechanism_chunks": 580000,
+    "regional_chunks": 580000
+  },
+  "identical_job": true,
+  "identical_identity": true,
+  "complete_engine_unmodified": true,
+  "source_files_verified": 24,
+  "latest_reported_time_s": 58.0,
+  "maximum_uncommitted_time_to_recompute_s": 2.0,
+  "persisted_observations_discarded": false,
+  "new_backend": "cuda_ordered:0",
+  "actual_device": 0,
+  "planned_job_unchanged": true,
+  "epoch": 1790271989.3723197,
+  "new_pid": 2806153
+}

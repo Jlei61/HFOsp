@@ -1,0 +1,384 @@
+{
+  "status": "ASSOCIATION_SCREEN_COMPLETE",
+  "rows": [
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 24,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9455820663745905,
+          "T_ms": 165.2457728993363,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0015_N64.npz"
+        },
+        {
+          "index": 48,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9458381477591895,
+          "T_ms": 165.79636337513392,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0039_N64.npz"
+        }
+      ],
+      "continued_points": 25,
+      "J_range": [
+        0.9455820663745905,
+        0.9458381477591895
+      ],
+      "T_range_ms": [
+        165.2457728993363,
+        165.79636337513392
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "TR_A_B",
+          "display_label": "TR1",
+          "J_EE_core": 0.9458266272237216,
+          "T_ms": 165.7718637725918,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+          "validation_status": "LOCALLY_SUBCRITICAL_TORUS_SUPPORTED",
+          "nearest_segment": {
+            "left_index": 46,
+            "fraction": 0.4460769286336023,
+            "RMS_distance_Hz": 8.005370739031653e-05,
+            "distance_over_local_waveform_step": 0.025571008302595847
+          },
+          "within_sampled_polyline_neighborhood": true
+        },
+        {
+          "internal_label": "LPC_resonance_upper",
+          "display_label": "LPC1",
+          "J_EE_core": 0.9458472114142701,
+          "T_ms": 165.81578803670592,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+          "validation_status": "VALIDATED_CYCLE_FOLD",
+          "nearest_segment": {
+            "left_index": 47,
+            "fraction": 3.614331744275861,
+            "RMS_distance_Hz": 0.010101684946912161,
+            "distance_over_local_waveform_step": 2.8940041677023696
+          },
+          "within_sampled_polyline_neighborhood": false
+        },
+        {
+          "internal_label": "LPC_resonance_lower",
+          "display_label": "LPC2",
+          "J_EE_core": 0.945751951597284,
+          "T_ms": 165.61244373063624,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+          "validation_status": "VALIDATED_CYCLE_FOLD",
+          "nearest_segment": {
+            "left_index": 24,
+            "fraction": -11.704595532488677,
+            "RMS_distance_Hz": 0.010732987073554277,
+            "distance_over_local_waveform_step": 23.370701992071265
+          },
+          "within_sampled_polyline_neighborhood": false
+        },
+        {
+          "internal_label": "TR_A_return",
+          "display_label": "TR2",
+          "J_EE_core": 0.9457603915251053,
+          "T_ms": 165.63054658665283,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+          "validation_status": "VALIDATED_TORUS_CROSSING",
+          "nearest_segment": {
+            "left_index": 24,
+            "fraction": -10.557591197040795,
+            "RMS_distance_Hz": 0.009113120850746519,
+            "distance_over_local_waveform_step": 19.852759579844875
+          },
+          "within_sampled_polyline_neighborhood": false
+        }
+      ]
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 61,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.945755302478177,
+          "T_ms": 165.61976930708667,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0052_N64.npz"
+        },
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        }
+      ],
+      "continued_points": 5,
+      "J_range": [
+        0.9457519883459801,
+        0.945755302478177
+      ],
+      "T_range_ms": [
+        165.61253313904157,
+        165.61976930708667
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "LPC_resonance_lower",
+          "display_label": "LPC2",
+          "J_EE_core": 0.945751951597284,
+          "T_ms": 165.61244373063624,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+          "validation_status": "VALIDATED_CYCLE_FOLD",
+          "nearest_segment": {
+            "left_index": 63,
+            "fraction": 0.3084085419079301,
+            "RMS_distance_Hz": 2.8032603189812828e-06,
+            "distance_over_local_waveform_step": 0.00599095938570117
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        },
+        {
+          "index": 72,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9457716410128536,
+          "T_ms": 165.65482036589032,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0063_N64.npz"
+        }
+      ],
+      "continued_points": 8,
+      "J_range": [
+        0.9457530045115764,
+        0.9457716410128536
+      ],
+      "T_range_ms": [
+        165.61466555869438,
+        165.65482036589032
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "LPC_resonance_lower",
+          "display_label": "LPC2",
+          "J_EE_core": 0.945751951597284,
+          "T_ms": 165.61244373063624,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+          "validation_status": "VALIDATED_CYCLE_FOLD",
+          "nearest_segment": {
+            "left_index": 65,
+            "fraction": -2.1506281236080618,
+            "RMS_distance_Hz": 0.0007497348836795122,
+            "distance_over_local_waveform_step": 2.1530770897110605
+          },
+          "within_sampled_polyline_neighborhood": false
+        },
+        {
+          "internal_label": "TR_A_return",
+          "display_label": "TR2",
+          "J_EE_core": 0.9457603915251053,
+          "T_ms": 165.63054658665283,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+          "validation_status": "VALIDATED_TORUS_CROSSING",
+          "nearest_segment": {
+            "left_index": 68,
+            "fraction": 0.9838255040884749,
+            "RMS_distance_Hz": 7.147165479976468e-08,
+            "distance_over_local_waveform_step": 0.0002388577211236905
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    },
+    {
+      "family": "single",
+      "ends": [
+        {
+          "index": 76,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9575887984733535,
+          "T_ms": 293.99842850141806,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz"
+        },
+        {
+          "index": 80,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9577861497084698,
+          "T_ms": 293.2195886114274,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256.npz"
+        }
+      ],
+      "continued_points": 5,
+      "J_range": [
+        0.9568976964216581,
+        0.9577861497084698
+      ],
+      "T_range_ms": [
+        293.2195886114274,
+        296.7316090057053
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "LPC_burst_low",
+          "display_label": "LPC5",
+          "J_EE_core": 0.9568975725617355,
+          "T_ms": 296.7319263629114,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N512.npz",
+          "validation_status": "NOT_AVAILABLE",
+          "nearest_segment": {
+            "left_index": 77,
+            "fraction": 0.9640524588431515,
+            "RMS_distance_Hz": 0.10739654489599572,
+            "distance_over_local_waveform_step": 0.02103043143456568
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    },
+    {
+      "family": "single",
+      "ends": [
+        {
+          "index": 150,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 1.6251725691286658,
+          "T_ms": 241.1009511826622,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256.npz"
+        },
+        {
+          "index": 154,
+          "status": "UNSTABLE",
+          "J_EE_core": 1.6264477575618144,
+          "T_ms": 237.99630517469956,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0037_N256.npz"
+        }
+      ],
+      "continued_points": 5,
+      "J_range": [
+        1.6251725691286658,
+        1.6264980240856635
+      ],
+      "T_range_ms": [
+        237.99630517469956,
+        241.1009511826622
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "LPC_burst_high",
+          "display_label": "LPC6",
+          "J_EE_core": 1.6265015184765392,
+          "T_ms": 239.69812231617996,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N512.npz",
+          "validation_status": "VALIDATION_INCOMPLETE",
+          "nearest_segment": {
+            "left_index": 151,
+            "fraction": 0.5784056451262757,
+            "RMS_distance_Hz": 0.05761288183659023,
+            "distance_over_local_waveform_step": 0.038162056684096286
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    },
+    {
+      "family": "double",
+      "ends": [
+        {
+          "index": 148,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9447179976417638,
+          "T_ms": 761.9313452777848,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024.npz"
+        },
+        {
+          "index": 168,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9447720644904876,
+          "T_ms": 761.9427234452309,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024.npz"
+        }
+      ],
+      "continued_points": 21,
+      "J_range": [
+        0.9447179976417638,
+        0.9447720644904876
+      ],
+      "T_range_ms": [
+        761.9313452777848,
+        761.9840633128264
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "PD_double_upper",
+          "display_label": "PD2",
+          "J_EE_core": 0.944728374157131,
+          "T_ms": 761.9648707070426,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+          "validation_status": "VALIDATED_PD",
+          "nearest_segment": {
+            "left_index": 150,
+            "fraction": 0.9005642119180582,
+            "RMS_distance_Hz": 0.0015173192743160012,
+            "distance_over_local_waveform_step": 0.027397053309948186
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    },
+    {
+      "family": "Bleading",
+      "ends": [
+        {
+          "index": 72,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9488489167801094,
+          "T_ms": 317.8388709160101,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz"
+        },
+        {
+          "index": 75,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9488490067214715,
+          "T_ms": 317.8385772668172,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0074_N512.npz"
+        }
+      ],
+      "continued_points": 4,
+      "J_range": [
+        0.9488485625791604,
+        0.9488490067214715
+      ],
+      "T_range_ms": [
+        317.8385772668172,
+        317.8402943555936
+      ],
+      "nearby_roots": [
+        {
+          "internal_label": "LPC_Bleading_low",
+          "display_label": "LPC7",
+          "J_EE_core": 0.9488485317651113,
+          "T_ms": 317.8404242674791,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N1024.npz",
+          "validation_status": "VALIDATION_INCOMPLETE",
+          "nearest_segment": {
+            "left_index": 73,
+            "fraction": 0.3721604326116724,
+            "RMS_distance_Hz": 0.0019388690925072722,
+            "distance_over_local_waveform_step": 0.011886388509104609
+          },
+          "within_sampled_polyline_neighborhood": true
+        }
+      ]
+    }
+  ],
+  "phase_alignment_control_RMS_Hz": 2.0575457576983666e-09,
+  "phase_samples": 512,
+  "definition": "All 935 rate waveforms, one common temporal phase, neuron-count-weighted RMS. Root compared with adjacent branch-waveform line segments; 0<=fraction<=1 and residual <0.2 local step is a descriptive association screen.",
+  "scope": "Locations of sampled stability changes relative to existing roots. Does not count every crossing, establish unique root association, replace root validation, or certify a whole interval."
+}

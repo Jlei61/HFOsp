@@ -1,0 +1,38 @@
+{
+  "rows": [
+    {
+      "label": "PD1",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547325_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "minimum_rate_Hz": -7.80088168020332e-06,
+      "prior_status": "VALIDATED_PD",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_validation.json",
+      "status": "RESOLUTION_REVIEW_PENDING"
+    },
+    {
+      "label": "PD2",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "minimum_rate_Hz": 2.0279435035755466e-05,
+      "prior_status": "VALIDATED_PD",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_validation.json",
+      "status": "POSITIVE_PROFILE",
+      "scope": "Positivity only; existing root/mode acceptance is separate."
+    },
+    {
+      "label": "PD3",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024.npz",
+      "N": 1024,
+      "check_N": 4096,
+      "minimum_rate_Hz": 2.310230484152815e-08,
+      "prior_status": "VALIDATED_PD",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_validation.json",
+      "status": "POSITIVE_PROFILE",
+      "scope": "Positivity only; existing root/mode acceptance is separate."
+    }
+  ],
+  "child_status": "CRITICALITY_RESOLUTION_REVIEW_PENDING",
+  "scope": "A negative numerical interpolation is a resolution failure, not a new physical state. No equations changed and no clipping. Withdrawal does not prove absence of the candidate PD."
+}

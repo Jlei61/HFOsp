@@ -1,0 +1,133 @@
+{
+  "status": "SAME_J_PAIR_COMPLETE",
+  "pid": 515462,
+  "timestamp": 1789876970.2098703,
+  "result": {
+    "status": "TWO_PHYSICAL_SAME_J_PERIODIC_SOLUTIONS",
+    "rows": [
+      {
+        "family": "Bleading",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0016_N4096.npz",
+        "J_EE_core": 0.9646931641699911,
+        "T_ms": 275.6915604068981,
+        "regional_mean_Hz": [
+          10.205089633334484,
+          9.43101451230422,
+          5.73179070815089
+        ],
+        "regional_peak_Hz": [
+          73.2478587669122,
+          90.14021555129918,
+          24.31837930744131
+        ],
+        "B_minus_A_peak_lag_ms": -30.4903019688293
+      },
+      {
+        "family": "Aleading",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/Aleading_sameJ_Bleading0016_N2048.npz",
+        "J_EE_core": 0.9646931641699911,
+        "T_ms": 270.8516158024789,
+        "regional_mean_Hz": [
+          9.351353185027262,
+          9.31159584768881,
+          3.41318972081878
+        ],
+        "regional_peak_Hz": [
+          80.8045571893059,
+          88.1044093961452,
+          20.812073206419043
+        ],
+        "B_minus_A_peak_lag_ms": 8.397987111063202
+      }
+    ],
+    "seed": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256_accuracy_N2048.npz",
+    "seed_J_EE_core": 0.9645924161605287,
+    "relative_seed_waveform_change": 0.00442280089436479,
+    "relative_seed_period_change": 0.0001041116325918301,
+    "corrected_profile_check": {
+      "status": "RESOLUTION_CHECKED",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/Aleading_sameJ_Bleading0016_N2048.npz",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/Aleading_sameJ_Bleading0016_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "J_EE_core": 0.9646931641699911,
+      "T_ms": 270.8516158024789,
+      "maximum_group_defect_Hz": 9.758860386455126e-11,
+      "regional_defect_Hz": [
+        9.762183681803881e-14,
+        1.068344681168846e-13,
+        2.913904659706943e-14
+      ],
+      "minimum_rate_Hz": 4.602664973751039e-06,
+      "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+      "harmonic_chunk_size": 32,
+      "phase_chunk_size": 512,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -2.587886908890155e-11,
+          "phase_index": 1872,
+          "group": 647
+        },
+        "slow": {
+          "minimum_Hz": 6.473154672854688e-06,
+          "phase_index": 5092,
+          "group": 54
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    "source_profile_check": {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0016_N4096.npz",
+      "N": 4096,
+      "check_N": 16384,
+      "J_EE_core": 0.9646931641699911,
+      "T_ms": 275.6915604068981,
+      "maximum_group_defect_Hz": 1.3877787807814457e-12,
+      "regional_defect_Hz": [
+        3.417750351814093e-13,
+        2.3645704510187297e-13,
+        4.120543414731018e-14
+      ],
+      "minimum_rate_Hz": 4.2215981986693906e-05,
+      "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+      "harmonic_chunk_size": 64,
+      "phase_chunk_size": 512,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -6.661338147750939e-13,
+          "phase_index": 3442,
+          "group": 723
+        },
+        "slow": {
+          "minimum_Hz": 5.782528818210948e-05,
+          "phase_index": 3866,
+          "group": 16
+        },
+        "positive": true,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "proper_subperiod_relative_distances": {
+        "2": 1.5174792764090925,
+        "3": 1.5159568894282334,
+        "4": 1.5106311213173242
+      },
+      "index": 16
+    },
+    "full_group_RMS_difference_Hz": 40.207795088970585,
+    "relative_waveform_difference": 1.1291773860832592,
+    "common_phase_cycles": 0.7587386438008478,
+    "squared_distance_contributions": {
+      "Core_A_E": 0.011692984177561937,
+      "Core_B_E": 0.0004085302576634512,
+      "Surround_E": 0.39506954376658565,
+      "All_I": 0.592828941798189
+    },
+    "energy_definition": "Neuron-weighted squared waveform difference at one common optimal phase; Core/Surround groups here are E only. All I groups are aggregated without a spatial-region claim.",
+    "stability": "NOT_CLASSIFIED_FOR_THIS_EXACT_PAIR",
+    "global_connection_confirmed": false,
+    "scope": "Two phase-fixed, physically checked periodic solutions at identical J. Distinct solutions do not establish coexistence of stable attractors, an intervening bifurcation or exclusion of a connection elsewhere."
+  }
+}

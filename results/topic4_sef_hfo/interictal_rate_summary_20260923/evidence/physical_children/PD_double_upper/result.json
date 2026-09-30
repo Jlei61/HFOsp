@@ -1,0 +1,434 @@
+{
+  "parent": {
+    "label": "PD_double_upper",
+    "N": 8192,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+    "source_root_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837415671_N4096.npz",
+    "source_root_N": 4096,
+    "J_EE_core": 0.944728374156709,
+    "T_ms": 761.9648707025799,
+    "continuous_check": {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+      "N": 8192,
+      "check_N": 32768,
+      "J_EE_core": 0.944728374156709,
+      "T_ms": 761.9648707025799,
+      "maximum_group_defect_Hz": 1.7486012637846216e-12,
+      "regional_defect_Hz": [
+        2.431557755027013e-13,
+        2.5469095308870674e-13,
+        2.944976995548168e-14
+      ],
+      "minimum_rate_Hz": 2.415704078093106e-05,
+      "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+      "harmonic_chunk_size": 64,
+      "phase_chunk_size": 512,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -6.661338147750939e-13,
+          "phase_index": 2419,
+          "group": 741
+        },
+        "slow": {
+          "minimum_Hz": 3.325654068450645e-05,
+          "phase_index": 4312,
+          "group": 379
+        },
+        "positive": true,
+        "N": 8192,
+        "check_N": 32768
+      }
+    },
+    "relative_waveform_change": 7.608500584688679e-09,
+    "relative_period_change": 1.7045254097070028e-12,
+    "antiperiodic_relative_residual": 3.905855674973601e-08,
+    "status": "FILTER_AND_CRITICAL_MODE_RECHECKED",
+    "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_filter_mode_N8192.npz",
+    "monodromy_checks": [
+      {
+        "J_EE_core": 0.944728374156709,
+        "T_ms": 761.9648707025799,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_filter_mode_N8192.npz",
+        "dt_ms": 0.049997694927990805,
+        "recovered_multiplier": -1.000144067376237,
+        "minus_one_relative_defect": 0.00014780562115663436,
+        "rayleigh_eigen_residual": 3.303169311851889e-05,
+        "phase_relative_defect": 0.00048703637638429476,
+        "state_reconstruction": "exact harmonic blocks",
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      },
+      {
+        "J_EE_core": 0.944728374156709,
+        "T_ms": 761.9648707025799,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_filter_mode_N8192.npz",
+        "dt_ms": 0.024999667663065713,
+        "recovered_multiplier": -1.0000361167692438,
+        "minus_one_relative_defect": 3.7031554499750815e-05,
+        "rayleigh_eigen_residual": 8.180159423554015e-06,
+        "phase_relative_defect": 0.0001228376874455899,
+        "state_reconstruction": "exact harmonic blocks",
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      },
+      {
+        "J_EE_core": 0.944728374156709,
+        "T_ms": 761.9648707025799,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_filter_mode_N8192.npz",
+        "dt_ms": 0.012499833831532857,
+        "recovered_multiplier": -1.000009093824393,
+        "minus_one_relative_defect": 9.318136088496644e-06,
+        "rayleigh_eigen_residual": 2.0322445953909937e-06,
+        "phase_relative_defect": 3.096245161238462e-05,
+        "state_reconstruction": "exact harmonic blocks",
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      }
+    ],
+    "successive_error_reduction": [
+      3.9913426037145956,
+      3.9741375472576252
+    ],
+    "scope": "Same previously located J, refined physical parent, prolonged antiperiodic mode independently residual-checked on that parent, and full nine-state plus delay-history monodromy at three time steps. Root slope and inter-mesh J agreement remain sourced from the located roots; no new root or child criticality inferred."
+  },
+  "rows": [
+    {
+      "amplitude_hz": 5.0,
+      "J_EE_core": 0.9447284644170674,
+      "J_shift": 9.026035840964397e-08,
+      "J_shift_over_amplitude_squared": 3.610414336385759e-09,
+      "T_ms": 1523.9280338108938,
+      "parent_T_ms": 761.9648707025799,
+      "half_period_relative_mismatch": 0.002353836277427637,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a5.00000_N16384.npz",
+      "minimum_group_rate_hz": 2.415402489826467e-05,
+      "first_harmonic_relative_norm": 0.00020320818275204098,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a5.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9447284644170674,
+        "T_ms": 1523.9280338108938,
+        "maximum_group_defect_Hz": 1.609823385706477e-12,
+        "regional_defect_Hz": [
+          2.6738668750401134e-13,
+          2.1415668927218e-13,
+          2.000837848393129e-14
+        ],
+        "minimum_rate_Hz": 2.415339873182149e-05,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -6.675703826536372e-13,
+            "phase_index": 51518,
+            "group": 649
+          },
+          "slow": {
+            "minimum_Hz": 3.3251587370133065e-05,
+            "phase_index": 4313,
+            "group": 379
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    },
+    {
+      "amplitude_hz": 10.0,
+      "J_EE_core": 0.9447287449867366,
+      "J_shift": 3.708300276850096e-07,
+      "J_shift_over_amplitude_squared": 3.708300276850096e-09,
+      "T_ms": 1523.9232038281484,
+      "parent_T_ms": 761.9648707025799,
+      "half_period_relative_mismatch": 0.004713349456194908,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a10.00000_N16384.npz",
+      "minimum_group_rate_hz": 2.4148908317468816e-05,
+      "first_harmonic_relative_norm": 0.0004166587495302625,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a10.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9447287449867366,
+        "T_ms": 1523.9232038281484,
+        "maximum_group_defect_Hz": 1.3600232051658168e-12,
+        "regional_defect_Hz": [
+          1.154969011699357e-13,
+          1.5623256748070733e-13,
+          1.1931235573830566e-14
+        ],
+        "minimum_rate_Hz": 2.414839783911194e-05,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -7.774102271217859e-13,
+            "phase_index": 52499,
+            "group": 614
+          },
+          "slow": {
+            "minimum_Hz": 3.3244761186414175e-05,
+            "phase_index": 4313,
+            "group": 379
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    },
+    {
+      "amplitude_hz": 20.0,
+      "J_EE_core": 0.9447299638483305,
+      "J_shift": 1.5896916215618617e-06,
+      "J_shift_over_amplitude_squared": 3.974229053904654e-09,
+      "T_ms": 1523.9081384140497,
+      "parent_T_ms": 761.9648707025799,
+      "half_period_relative_mismatch": 0.009586991852617093,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a20.00000_N16384.npz",
+      "minimum_group_rate_hz": 2.413301854008976e-05,
+      "first_harmonic_relative_norm": 0.000916298189567632,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a20.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9447299638483305,
+        "T_ms": 1523.9081384140497,
+        "maximum_group_defect_Hz": 1.3877787807814457e-12,
+        "regional_defect_Hz": [
+          1.2836953722228372e-13,
+          1.4398646256072126e-13,
+          1.4520083704635648e-14
+        ],
+        "minimum_rate_Hz": 2.413301853671526e-05,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -7.216822354560309e-13,
+            "phase_index": 52363,
+            "group": 613
+          },
+          "slow": {
+            "minimum_Hz": 3.322383769535891e-05,
+            "phase_index": 4315,
+            "group": 379
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    }
+  ],
+  "branch_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD2_physical_20260920_branch_N16384.json",
+  "scope": "Fine-parent local branch switch, physical child waveforms, and exact child Poincare stability. No global branch connection or irregular-attractor claim.",
+  "status": "PHYSICAL_CHILD_BRANCH_CHECKED",
+  "full_physical_child_checks": true,
+  "coefficient_relative_spread": 0.0966483305617206,
+  "child_classification": {
+    "status": "NUMERICALLY_STABLE",
+    "multipliers": [
+      [
+        -0.10683856033635317,
+        0.14340105243168433
+      ],
+      [
+        -0.10683856033635317,
+        -0.14340105243168433
+      ]
+    ],
+    "per_mode_margin": [
+      0.011758757460112958,
+      0.011758757460112958
+    ],
+    "reliable_mode_mask": [
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0013677202034675633,
+      0.0013677202034675633
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": 0,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.1788248858891269,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "attempts": [
+    {
+      "steps_ms": [
+        0.1,
+        0.05
+      ],
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            -0.10683856033635317,
+            0.14340105243168433
+          ],
+          [
+            -0.10683856033635317,
+            -0.14340105243168433
+          ]
+        ],
+        "per_mode_margin": [
+          0.011758757460112958,
+          0.011758757460112958
+        ],
+        "reliable_mode_mask": [
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.0013677202034675633,
+          0.0013677202034675633
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.1788248858891269,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "spectra": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a20.00000_N16384.npz",
+          "J_EE_core": 0.9447299638483305,
+          "T_ms": 1523.9081384140497,
+          "dt_ms": 0.0999939723368799,
+          "history_dimension": 345015,
+          "minimum_occupied_delay_ms": 0.1,
+          "bounded_harmonic_indices": true,
+          "multipliers": [
+            [
+              -0.10623185414124241,
+              0.14462684448084584
+            ],
+            [
+              -0.10623185414124241,
+              -0.14462684448084584
+            ]
+          ],
+          "residuals": [
+            1.0240079725614267e-13,
+            1.0240079725614267e-13
+          ],
+          "phase_tangent_relative_defect": 0.0029396893650282395,
+          "phase_overlap": [
+            7.18348466436479e-14,
+            7.18348466436479e-14
+          ],
+          "section_time_shift_coefficients": [
+            [
+              2.9200823490217758,
+              -0.2731677115626898
+            ],
+            [
+              2.9200823490217758,
+              0.2731677115626898
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            1.0239704718462168e-13,
+            1.0239704718462168e-13
+          ],
+          "polynomial_filter_rho": 0.21785879870448982,
+          "transformed_eigenvalues": [
+            [
+              0.013511826817185449,
+              0.062236186294608316
+            ],
+            [
+              0.013511826817185449,
+              -0.062236186294608316
+            ]
+          ],
+          "filter_coverage_threshold": 0.7821412012955102,
+          "smallest_returned_transformed_modulus": 0.06368604516245928,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 220.35348892211914,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a20.00000_N16384.npz",
+          "J_EE_core": 0.9447299638483305,
+          "T_ms": 1523.9081384140497,
+          "dt_ms": 0.04999862654332654,
+          "history_dimension": 679745,
+          "minimum_occupied_delay_ms": 0.1,
+          "bounded_harmonic_indices": true,
+          "multipliers": [
+            [
+              -0.10683856033635317,
+              0.14340105243168433
+            ],
+            [
+              -0.10683856033635317,
+              -0.14340105243168433
+            ]
+          ],
+          "residuals": [
+            1.9223851649983167e-13,
+            1.9223851649983167e-13
+          ],
+          "phase_tangent_relative_defect": 0.0007505170497665263,
+          "phase_overlap": [
+            1.2871119892216233e-13,
+            1.2871119892216233e-13
+          ],
+          "section_time_shift_coefficients": [
+            [
+              2.917200512658939,
+              -0.26781137566757607
+            ],
+            [
+              2.917200512658939,
+              0.26781137566757607
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            1.9223106964416045e-13,
+            1.9223106964416045e-13
+          ],
+          "polynomial_filter_rho": 0.21785879870448982,
+          "transformed_eigenvalues": [
+            [
+              0.014126336546323493,
+              0.061882705000675886
+            ],
+            [
+              0.014126336546323493,
+              -0.061882705000675886
+            ]
+          ],
+          "filter_coverage_threshold": 0.7821412012955102,
+          "smallest_returned_transformed_modulus": 0.06347458201847943,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 441.58412313461304,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        }
+      ]
+    }
+  ],
+  "proposed_local_criticality": "SUPERCRITICAL_PD",
+  "promotion_requirement": "Parent-side witnesses and crossing direction must be matched to physical corrected cycles before updating the canonical criticality."
+}

@@ -1,0 +1,44 @@
+{
+  "status": "STATIC_VALIDATION_FAIL",
+  "pid": 4153538,
+  "elapsed_s": 1392.4307043552399,
+  "result": {
+    "status": "STATIC_VALIDATION_FAIL",
+    "rows": [
+      {
+        "label": "overall",
+        "passed": 503,
+        "total": 512,
+        "within_broad_cap": 511,
+        "maximum_error_Hz": 14.824623635785088,
+        "median_absolute_error_Hz": 0.7924788594716112,
+        "pass_gate": false
+      },
+      {
+        "label": "broad",
+        "passed": 251,
+        "total": 256,
+        "within_broad_cap": 256,
+        "maximum_error_Hz": 14.824623635785088,
+        "median_absolute_error_Hz": 1.1552995666486652,
+        "pass_gate": true
+      },
+      {
+        "label": "low_mean",
+        "passed": 252,
+        "total": 256,
+        "within_broad_cap": 255,
+        "maximum_error_Hz": 12.959195972650281,
+        "median_absolute_error_Hz": 0.5439467074225668,
+        "pass_gate": false
+      }
+    ],
+    "zero_conductance_parent_exact": true,
+    "transient_validated": false,
+    "spatial_validated": false,
+    "derivatives_validated": false,
+    "formal_bifurcation_allowed": false,
+    "elapsed_s": 1392.4294788837433,
+    "source_sha256": "3ec138def4057347b0c829d4daf198fd972e79a6e98e864f6c963f6504076bdb"
+  }
+}

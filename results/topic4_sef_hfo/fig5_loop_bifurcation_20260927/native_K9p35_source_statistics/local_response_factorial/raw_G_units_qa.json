@@ -1,0 +1,12 @@
+{
+  "status": "PASS_ALL_EXECUTED_PARAMETERS_BITWISE_UNCHANGED",
+  "issue": "The initial local assay read global_R_and_s[:,1] as G, though it is s. PhysicalGraw=30*s. At this late conditional state both are negligible; reconstruction with correct units reproduces every input parameter bit exactly.",
+  "stored_s_mean": 4.241290151181711e-28,
+  "correct_raw_G_mean": 1.2723870453545132e-26,
+  "conditions": 156,
+  "all_parameter_bits_equal": true,
+  "new_MC_required": false,
+  "original_executed_producer": "executed_producer.py",
+  "corrected_producer": "assay_observed_input_moments.py",
+  "verification_producer_sha256": "74776c858d94ee8faff3f024e1a43752d767645bcfd328539d4ccb6ba29c9336"
+}

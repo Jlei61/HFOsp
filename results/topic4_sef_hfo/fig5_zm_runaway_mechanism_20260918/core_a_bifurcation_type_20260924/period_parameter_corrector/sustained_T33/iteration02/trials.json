@@ -1,0 +1,38 @@
+[
+  {
+    "status": "EVALUATED",
+    "D_A": 0.34446070662282946,
+    "period_ms": 33.11823566922174,
+    "combined_relative_rms": 0.02299019260773911,
+    "residual_ratio": 1.1722642404374,
+    "predicted_gain": 0.1716815358515058,
+    "agreement": -2.1796371261027025,
+    "diagnostic": {
+      "projected_negative_coordinates": 26688,
+      "negative_steps_at_exact_zero": 9445,
+      "zero_boundary_projection": true
+    },
+    "radius": 1.105621996886795,
+    "step_norm": 1.105621996886829,
+    "lagrange_multiplier": 0.03823316089833521,
+    "predicted_relative_residual": 0.8830831989097496
+  },
+  {
+    "status": "EVALUATED",
+    "D_A": 0.3439421256000589,
+    "period_ms": 33.12421858175204,
+    "combined_relative_rms": 0.019677345438545074,
+    "residual_ratio": 0.9650030771974552,
+    "predicted_gain": 0.13811538035883875,
+    "agreement": 0.49791023143673696,
+    "diagnostic": {
+      "projected_negative_coordinates": 17120,
+      "negative_steps_at_exact_zero": 9973,
+      "zero_boundary_projection": true
+    },
+    "radius": 0.5528109984433975,
+    "step_norm": 0.5528109984433925,
+    "lagrange_multiplier": 0.10363787181660031,
+    "predicted_relative_residual": 0.926192983987982
+  }
+]

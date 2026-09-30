@@ -1,0 +1,21 @@
+{
+  "label": "LPC_resonance_upper",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+  "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_resonance_upper_tangent_N512.npz",
+  "J_EE_core": 0.9458472114142701,
+  "T_ms": 165.81578803670592,
+  "N": 512,
+  "dt_ms": 0.024998611192025618,
+  "dT_dcoordinate_ms": -0.9329346720826435,
+  "dJ_dcoordinate": 1.1961378336425235e-10,
+  "seed_method": "centered finite difference",
+  "analytic_vs_finite_difference_relative_change": null,
+  "derivative_step": 1.1675082182815172e-07,
+  "reconstruction_step_halving_relative_change": 2.257703748260605e-11,
+  "generalized_plus_one_relative_defect": 2.4144002963551397e-06,
+  "generalized_plus_one_defect_over_tangent": 2.4148374350847144e-06,
+  "phase_relative_defect": 4.007307586996845e-07,
+  "tangent_fraction_orthogonal_to_phase": 0.9990035685497124,
+  "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+  "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+}

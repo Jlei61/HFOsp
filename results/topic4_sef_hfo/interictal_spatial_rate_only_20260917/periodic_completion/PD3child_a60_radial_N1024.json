@@ -1,0 +1,27 @@
+{
+  "status": "EIGENPAIR_CONVERGED_CHECKS_PENDING",
+  "label": "PD3child_a60_radial",
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60.00000_N1024.npz",
+  "N": 1024,
+  "J_EE_core": 1.0757981672453432,
+  "T_ms": 210.73162774058582,
+  "lambda_per_ms": -3.9241102553567796e-05,
+  "multiplier": 0.9917647555370954,
+  "implementation_checks": {
+    "zero_growth_operator_difference": 2.2706160670770493e-16,
+    "growth_derivative_relative_errors": [
+      9.492344723869294e-10,
+      2.550167333527643e-10
+    ]
+  },
+  "residual": 4.1502623127161273e-10,
+  "history": [
+    0.14938275712867394,
+    1.3789539161315554e-06,
+    4.1502623127161273e-10
+  ],
+  "normalization_error": 1.1102230246251565e-16,
+  "covector_phase_overlap": 4.501237224411967e-18,
+  "mode_phase_overlap": 0.09318648221563401,
+  "scope": "One real Floquet eigenpair from a periodic BVP. No complete spectrum or stability classification; independently check the mode in full state/history and refine temporal resolution."
+}

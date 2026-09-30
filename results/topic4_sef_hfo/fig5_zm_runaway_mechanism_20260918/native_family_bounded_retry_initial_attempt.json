@@ -1,0 +1,15 @@
+{
+  "status": "STOPPED_EARLY_TO_ENFORCE_DISK_GAIN_STORAGE",
+  "at": "2026-09-20T00:10:04.012159+08:00",
+  "pid": 455329,
+  "previous_pid": 247078,
+  "requested_dt_max_ms": 0.000390625,
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "parity": "bounded_reconstruction_parity.json",
+  "model_changed": false,
+  "numerical_grid_changed": false,
+  "criteria_changed": false,
+  "scope": "Replace oversized anonymous-state preparation by checked component-major disk-backed states and bounded FFT rows; complete same previously registered two-map diagnostic.",
+  "stopped_local": "2026-09-20T00:11:12.377595+08:00",
+  "reason": "Bounded state layout increases MemAvailable; explicitly retain83GBgains on disk rather than letting automatic storage choose anonymous RAM. No numerical changes or result."
+}

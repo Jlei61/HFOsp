@@ -1,0 +1,15 @@
+{
+  "sources": [
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_fold_neighborhood/offset_-0.00100_refined.json",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_fold_neighborhood/offset_+0.00100_refined.json"
+  ],
+  "fold_validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_validation.json",
+  "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_neighborhood.json",
+  "checked_geometry_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_fold_neighborhood/dense_geometry_checks.json",
+  "actual_periodic_BVP_geometry_points": 31,
+  "numerical_unstable_dimensions": [
+    3,
+    4
+  ],
+  "scope": "Two physically checked neighboring cycles, paired valid time steps, numerical exterior-spectrum coverage, and direct eigenpair residual checks. No extrapolation of counts to the intervening interval or additional PD inferred from negative multipliers."
+}

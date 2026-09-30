@@ -1,0 +1,202 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE_NATIVE_EQUIVALENCE_FAIL",
+  "rows": [
+    {
+      "label": "native",
+      "grid": 20,
+      "high_entry_ms": 9868.5,
+      "D_at_native9870": 0.2563444253447549,
+      "events": {
+        "n": 31,
+        "median_duration_ms": 104.0,
+        "iqr_duration_ms": [
+          85.0,
+          125.0
+        ],
+        "median_gap_ms": 266.0,
+        "both_cores": 26,
+        "coreA_only": 1,
+        "coreB_only": 1,
+        "median_area": 0.7592187499999999,
+        "median_surround_cells": 290.0,
+        "forward": 13,
+        "reverse": 17,
+        "undirected": 1,
+        "median_extent_mm": 10.105750851586855
+      },
+      "quiet_fraction": 0.5176959619952494,
+      "tail_global_rate_hz": 448.36449990490854,
+      "tail_persistent_fraction": 0.9728124999999999,
+      "terminal_no_return_start_ms": 9323.5,
+      "terminal_no_return_duration_ms": 3177.0,
+      "terminal_at_least500ms": true,
+      "own_high_entry_D": 0.2563444253447549,
+      "own_high_entry_Z_regions": null,
+      "terminal_D_interpolated": 0.22331920292115282,
+      "terminal_D_time_bracket_ms": [
+        9320.0,
+        9325.0
+      ],
+      "own_high_entry_D_note": "9870ms actual checkpoint,1.5ms after readout9868.5ms,not interpolated."
+    },
+    {
+      "label": "expected_1mm",
+      "grid": 20,
+      "high_entry_ms": 10746.0,
+      "D_at_native9870": 0.15712425775801975,
+      "events": {
+        "n": 17,
+        "median_duration_ms": 89.0,
+        "iqr_duration_ms": [
+          65.0,
+          101.0
+        ],
+        "median_gap_ms": 209.5,
+        "both_cores": 16,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.47496874999999994,
+        "median_surround_cells": 175.0,
+        "forward": 4,
+        "reverse": 12,
+        "undirected": 1,
+        "median_extent_mm": 10.647709823703684
+      },
+      "quiet_fraction": 0.6467933491686461,
+      "tail_global_rate_hz": 292.03367942121554,
+      "tail_persistent_fraction": 0.625375,
+      "terminal_no_return_start_ms": 8944.0,
+      "terminal_no_return_duration_ms": 3557.0,
+      "terminal_at_least500ms": true,
+      "own_high_entry_D": 0.23309307898692777,
+      "own_high_entry_Z_regions": {
+        "Core A": 0.5517632010602824,
+        "Core B": 0.5917966851296315,
+        "Surround": 0.7767511432799398
+      },
+      "terminal_D_interpolated": 0.10626394898879703,
+      "own_high_entry_time_bracket_ms": [
+        10740.0,
+        10750.0
+      ]
+    },
+    {
+      "label": "expected_0p5mm",
+      "grid": 40,
+      "high_entry_ms": 9345.0,
+      "D_at_native9870": 0.2454167880974032,
+      "events": {
+        "n": 29,
+        "median_duration_ms": 97.0,
+        "iqr_duration_ms": [
+          92.0,
+          101.0
+        ],
+        "median_gap_ms": 230.0,
+        "both_cores": 29,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.41521874999999997,
+        "median_surround_cells": 150.0,
+        "forward": 0,
+        "reverse": 29,
+        "undirected": 0,
+        "median_extent_mm": 17.27072739323269
+      },
+      "quiet_fraction": 0.5104513064133016,
+      "tail_global_rate_hz": 346.21345576954883,
+      "tail_persistent_fraction": 0.7636874999999999,
+      "terminal_no_return_start_ms": 8399.0,
+      "terminal_no_return_duration_ms": 4102.0,
+      "terminal_at_least500ms": true,
+      "own_high_entry_D": 0.1976790824662894,
+      "own_high_entry_Z_regions": {
+        "Core A": 0.6000842221219597,
+        "Core B": 0.6392393037108065,
+        "Surround": 0.811535251637626
+      },
+      "terminal_D_interpolated": 0.13059343074196467,
+      "own_high_entry_time_bracket_ms": [
+        9340.0,
+        9350.0
+      ]
+    },
+    {
+      "label": "counts_1mm",
+      "grid": 20,
+      "high_entry_ms": null,
+      "D_at_native9870": 0.06482264138364724,
+      "events": {
+        "n": 0
+      },
+      "quiet_fraction": 0.8213776722090261,
+      "tail_global_rate_hz": 5.808937496142626,
+      "tail_persistent_fraction": 0.0,
+      "terminal_no_return_start_ms": null,
+      "terminal_no_return_duration_ms": 0.0,
+      "terminal_at_least500ms": false,
+      "own_high_entry_D": null,
+      "own_high_entry_Z_regions": null,
+      "terminal_D_interpolated": null
+    },
+    {
+      "label": "counts_0p5mm",
+      "grid": 40,
+      "high_entry_ms": 10462.0,
+      "D_at_native9870": 0.15860408361551404,
+      "events": {
+        "n": 22,
+        "median_duration_ms": 89.5,
+        "iqr_duration_ms": [
+          76.25,
+          97.5
+        ],
+        "median_gap_ms": 224.0,
+        "both_cores": 22,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.383703125,
+        "median_surround_cells": 138.0,
+        "forward": 0,
+        "reverse": 22,
+        "undirected": 0,
+        "median_extent_mm": 16.436146719653827
+      },
+      "quiet_fraction": 0.6447743467933492,
+      "tail_global_rate_hz": 289.556781207953,
+      "tail_persistent_fraction": 0.6503125000000001,
+      "terminal_no_return_start_ms": 8984.0,
+      "terminal_no_return_duration_ms": 3517.0,
+      "terminal_at_least500ms": true,
+      "own_high_entry_D": 0.20861038453280922,
+      "own_high_entry_Z_regions": {
+        "Core A": 0.5567005690592353,
+        "Core B": 0.5843174425396908,
+        "Surround": 0.8025424148405531
+      },
+      "terminal_D_interpolated": 0.10504831708698445,
+      "own_high_entry_time_bracket_ms": [
+        10460.0,
+        10470.0
+      ]
+    }
+  ],
+  "definitions": {
+    "high_entry": "10ms-smoothed globalE>=200Hz for200ms; finite-time readout, not a bifurcation.",
+    "terminal": "After last >=20ms quiet episode (globalE<5Hz), no qualifying return through12.5s; explicitly report duration and flag>=500ms. Right-censored observation, no asymptotic stability claim.",
+    "event": "All complete events satisfying existing onset/return andduration/peak rules. Same1-9.42s clock, original20x20 readout.",
+    "direction": "Original fixed centroid displacement along A-to-B axis; >1mmforward,<-1mmreverse,otherwiseundirected.",
+    "resource": "D=1-originalE-cellweightedZ. Entry-D differs from D sampled at native clock; rate10ms slow-state interpolation retained withbracket."
+  },
+  "same_Z_M_dynamic": true,
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "execution": {
+    "fine_runs_expected": 2,
+    "fine_runs_completed": 2,
+    "simulation_failures": 0,
+    "audit_attempt_failures": 1,
+    "audit_failure_resolution": "Strict nonnegative conditionalmean assertion found19values down to-1.03e-12Hz fromzero-available-mass cancellation. Corrected audit uses a derived binary64 refractorysummation bound7.11e-10Hz; raw files unchanged,actualemittedrates nonnegative and integer/refractory checks PASS."
+  },
+  "conclusion": "Finer mesh restores some temporal statistics and highentry but neither expected nor count arm restores bidirectional propagation or native resource entry. Does not resolve localresponse validationFAIL."
+}

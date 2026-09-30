@@ -1,0 +1,73 @@
+{
+  "status": "LOCAL_TRANSIENT_COMPARISON_COMPLETE",
+  "wall_s": 0.4657866954803467,
+  "rows": [
+    {
+      "population": 0,
+      "theta": 15.0,
+      "input": "pulse",
+      "native_mean_hz": 89.2586669921875,
+      "rate_mean_hz": 102.14429220656282,
+      "rmse_10ms_hz": 47.1905335559294,
+      "normalized_rmse": 0.2956716527552814,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 0.09148904973880505
+    },
+    {
+      "population": 0,
+      "theta": 18.0,
+      "input": "pulse",
+      "native_mean_hz": 64.831787109375,
+      "rate_mean_hz": 77.35804390814874,
+      "rmse_10ms_hz": 51.54492145868588,
+      "normalized_rmse": 0.4178938979215258,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 0.056755522292773766
+    },
+    {
+      "population": 1,
+      "theta": 18.0,
+      "input": "pulse",
+      "native_mean_hz": 129.2181396484375,
+      "rate_mean_hz": 136.85041219546932,
+      "rmse_10ms_hz": 36.28895690788904,
+      "normalized_rmse": 0.1465278663935302,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 6.070328835160684e-05
+    },
+    {
+      "population": 0,
+      "theta": 15.0,
+      "input": "multisine",
+      "native_mean_hz": 75.04248046875,
+      "rate_mean_hz": 89.44974990779816,
+      "rmse_10ms_hz": 22.477257047182245,
+      "normalized_rmse": 0.22216520078252702,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 6.058603461164047
+    },
+    {
+      "population": 0,
+      "theta": 18.0,
+      "input": "multisine",
+      "native_mean_hz": 41.3746337890625,
+      "rate_mean_hz": 54.41180753586914,
+      "rmse_10ms_hz": 20.363705103078374,
+      "normalized_rmse": 0.3333784066427286,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 4.149719821676947
+    },
+    {
+      "population": 1,
+      "theta": 18.0,
+      "input": "multisine",
+      "native_mean_hz": 80.23095703125,
+      "rate_mean_hz": 92.31817844053282,
+      "rmse_10ms_hz": 19.254690990876366,
+      "normalized_rmse": 0.16584450454375949,
+      "raw_negative_rate_fraction": 0.0,
+      "raw_min_rate_hz": 0.9760441448922624
+    }
+  ],
+  "acceptance": "Not assigned automatically; inspect waveform, negative-rate correction and low-activity return"
+}

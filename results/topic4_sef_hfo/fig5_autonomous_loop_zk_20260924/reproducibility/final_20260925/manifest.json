@@ -1,0 +1,1589 @@
+{
+  "status": "PASS_ARCHIVED_CODE_AND_CONFIGURATION",
+  "created_utc": "2026-09-24T23:46:36.634338+00:00",
+  "expected_frozen_sources_verified": 25,
+  "files": [
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_control_contract.json",
+      "snapshot": "campaign/axis_controls/conditional_control_contract.json",
+      "sha256": "4a2dc67e7b133d997005943c1b9bfae2c0cb16dfaaea7b254bfd79d53638b26c",
+      "bytes": 2198,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_high.json",
+      "sha256": "ad61b6c85f54443c502ce9949d99ff5678328e508da30dc759ca0fb50ca63d65",
+      "bytes": 2967,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_interictal.json",
+      "sha256": "48293725a65c6d2c75a4de45392b52de8aa79809187744c462bd05d939c71a25",
+      "bytes": 2966,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_high.json",
+      "sha256": "8fd8467a3764d5db73a10ff40d50180a4c9d20d51d3e15b26d6a0b2db1a20917",
+      "bytes": 2963,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_interictal.json",
+      "sha256": "b01a23b91cc822054dafdfd169add46bc8581c39d7f0577cdb48bed0a699cda0",
+      "bytes": 2962,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_high.json",
+      "sha256": "018a6052035da196a3c56bb6e4be1423afa5dda1a7ad22f50b9dc70fb905d9ce",
+      "bytes": 2963,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_interictal.json",
+      "sha256": "9c232fdee464a54efae48c415dddbb95eec9ee5433cb956eb67c0492c53c0a7e",
+      "bytes": 2962,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_high.json",
+      "sha256": "8be2a4793464ff36e2221a9c7d725d0fbfc5f90545e66a2c8479425a9125d6e2",
+      "bytes": 2967,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_interictal.json",
+      "sha256": "7c11a765bd224f718b9861b0aa54d5e52759c1d7a29f1931988d350cf833c6c7",
+      "bytes": 2966,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/protocol.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/protocol.json",
+      "sha256": "80ca23aae86290cbe4e03bd51684e006414bc8dd32fdc1bc4b27bad814d5c933",
+      "bytes": 14378,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/queue.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/isotropic/queue.json",
+      "sha256": "7320a3264eedf77d1110e7a67c0b4bbcd34d41843c8db4e6dc5e59ac60493e04",
+      "bytes": 284,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/reference/prepared_state_qa.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/reference/prepared_state_qa.json",
+      "sha256": "5e969aa357f460887258d000593036bf230663dcc4c99fef825e8e207c9aa158",
+      "bytes": 3832,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/reference/route_qa.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/reference/route_qa.json",
+      "sha256": "63cd4f240b4a6563ad7f2dec21c42abacf27cd3ee6fe3f5379c63f042c3b5d7c",
+      "bytes": 888,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_high.json",
+      "sha256": "a259108869ae5ca18d3fdd8faccf80c7fab7ce8eed9be446ff13d9945561fd38",
+      "bytes": 2965,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_interictal.json",
+      "sha256": "b4892fa240c52fe078a6cefcf01707876e410614c115b2cf4b375d446a9177bc",
+      "bytes": 2964,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_high.json",
+      "sha256": "485bf3a75035146a48de945b21b76031321460b965ad9d013b4b236dde88b803",
+      "bytes": 2961,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_interictal.json",
+      "sha256": "3554269ecc32f2a0b415a9e7807e43cbd15fcc3b0094a62cd8546197b30a516e",
+      "bytes": 2960,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_high.json",
+      "sha256": "5c87643795a72e781a991bc3fa8207c84c6b5bc41e08a6b3dade0c0db3eddb53",
+      "bytes": 2961,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_interictal.json",
+      "sha256": "248f55e80914f6721a5e81c99c7252815366268f595af68831d9245bf54b2215",
+      "bytes": 2960,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_high.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_high.json",
+      "sha256": "3f618571a289661be4ea0680fedf3bb67e07f9cca3a82de6723b35c839d74f46",
+      "bytes": 2965,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_interictal.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_interictal.json",
+      "sha256": "1ce3f443ac9b6b38452ef84340a33e79b5beb8bb04cebb84b0f9a5e1412185ac",
+      "bytes": 2964,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/protocol.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/protocol.json",
+      "sha256": "f202eba874d72d5569f8cbad59a924911d4aafef0ba404c0e7466cccb64f8df5",
+      "bytes": 14375,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/queue.json",
+      "snapshot": "campaign/axis_controls/conditional_runs/rotated/queue.json",
+      "sha256": "7320a3264eedf77d1110e7a67c0b4bbcd34d41843c8db4e6dc5e59ac60493e04",
+      "bytes": 284,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/isotropic/jobs/isotropic_s9108405.json",
+      "snapshot": "campaign/axis_controls/native_runs/isotropic/jobs/isotropic_s9108405.json",
+      "sha256": "42081f937b4e03155e73206389c876e65d409535f24c2bb13f0b8adec28eb07d",
+      "bytes": 1136,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/isotropic/protocol.json",
+      "snapshot": "campaign/axis_controls/native_runs/isotropic/protocol.json",
+      "sha256": "ca24285ffb4a0991726b3cc331318579205d694c491d00ff1e716bae5dba9621",
+      "bytes": 13668,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/rotated/jobs/rotated_s9108405.json",
+      "snapshot": "campaign/axis_controls/native_runs/rotated/jobs/rotated_s9108405.json",
+      "sha256": "e9fcd9eb60fb7ae72b59c53db4928d2362b2425fd8ebf56d1e62261f895f6760",
+      "bytes": 1132,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/rotated/protocol.json",
+      "snapshot": "campaign/axis_controls/native_runs/rotated/protocol.json",
+      "sha256": "8792f0290eaab62e3d71d7665f67a4c1b15b27ff6a15d1a409edc22cbbfb2edc",
+      "bytes": 13660,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/execution_contract.md",
+      "snapshot": "campaign/execution_contract.md",
+      "sha256": "d0520a49241dec91537fc6f594aaba9e19dd0185fb812459d2cb40269375397c",
+      "bytes": 6642,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/clamp_input_qa.json",
+      "snapshot": "campaign/jobs/clamp_input_qa.json",
+      "sha256": "3d1c00e4d15e63e808fe8949d8b7d34deb45e19e05e1bba4ad0c02d4e00c7347",
+      "bytes": 1263,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/clamp_mechanism_qa.json",
+      "snapshot": "campaign/jobs/clamp_mechanism_qa.json",
+      "sha256": "a02cd73f830b6a04b8647828ac9c43a64dc9e894b67f42649fa0dd39ae2115dd",
+      "bytes": 1280,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/resume_high_cpu.json",
+      "snapshot": "campaign/jobs/resume_high_cpu.json",
+      "sha256": "2eef3e8338293b465455a5b91d1a4292afbf70a0e917db2dc2fa4d347cfe668f",
+      "bytes": 1277,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/resume_high_cuda_shared.json",
+      "snapshot": "campaign/jobs/resume_high_cuda_shared.json",
+      "sha256": "e705ecbe3012d222a0021778c55a840ae025ca1fc8d93a082931fb3f67071f5a",
+      "bytes": 1294,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/resume_high_locality_cpu.json",
+      "snapshot": "campaign/jobs/resume_high_locality_cpu.json",
+      "sha256": "69c93e424067dc121114584e3f04093adb2e76979ec909f6b5d069ee5f04ade5",
+      "bytes": 1286,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/resume_interictal_cpu.json",
+      "snapshot": "campaign/jobs/resume_interictal_cpu.json",
+      "sha256": "8fe7e32a309d77d09ef13a8cc2e530113ab55a1805ee003a3f25742d27a87289",
+      "bytes": 1270,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/resume_interictal_locality_cpu.json",
+      "snapshot": "campaign/jobs/resume_interictal_locality_cpu.json",
+      "sha256": "7443e25c5f99ee1ef97592dbc78e1144c9ae62bcac57f13a727f54a88797c372",
+      "bytes": 1279,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k0.02_high.json",
+      "snapshot": "campaign/jobs/z0.25_k0.02_high.json",
+      "sha256": "eb3022b6e87563ffe7ac5b1855aa0bf4a5e5400397ae65ad994b225e367ff807",
+      "bytes": 1279,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k0.02_interictal.json",
+      "snapshot": "campaign/jobs/z0.25_k0.02_interictal.json",
+      "sha256": "1cdb289ae2fae57ec17c95d47a382df8b9bd05056b4d419a5b56ea38ec5ce9db",
+      "bytes": 1272,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k2_high.json",
+      "snapshot": "campaign/jobs/z0.25_k2_high.json",
+      "sha256": "97fbabd2213ddac1db514110667415bb16f9f840e1ce3a0a22da55d62576c060",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k2_interictal.json",
+      "snapshot": "campaign/jobs/z0.25_k2_interictal.json",
+      "sha256": "8adfdad973e214b89b74f99d6a131d3119ad7804dbbb07f0e165c00f8c5f611c",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k8_high.json",
+      "snapshot": "campaign/jobs/z0.25_k8_high.json",
+      "sha256": "54b1bfe7862a9a4645bcf9b97df952c33d1c256898e7ec13310aee298a42f35f",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.25_k8_interictal.json",
+      "snapshot": "campaign/jobs/z0.25_k8_interictal.json",
+      "sha256": "68bf93779978a4b4ed150da4c48f30f0adf5cf2743a4990ca0ea3c4eb7f5b94e",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k0.02_high.json",
+      "snapshot": "campaign/jobs/z0.75_k0.02_high.json",
+      "sha256": "761d40a3e42059079e495145418d1c2407ef8761aa83a9aeac007185ded5f284",
+      "bytes": 1279,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k0.02_interictal.json",
+      "snapshot": "campaign/jobs/z0.75_k0.02_interictal.json",
+      "sha256": "5790bfc44ecda1477bbdc30e9de4fc477bbd0c845a17b12997ca357c327ae728",
+      "bytes": 1272,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k2_high.json",
+      "snapshot": "campaign/jobs/z0.75_k2_high.json",
+      "sha256": "a52ff1ce3ca916ad4085146feff17df54f8a2fadfc2313eb0901209f388168c2",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k2_interictal.json",
+      "snapshot": "campaign/jobs/z0.75_k2_interictal.json",
+      "sha256": "89d405ee27169d2f40ce009c8d6074a7f71d853ece64798eab4075dd7a2afbdf",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k8_high.json",
+      "snapshot": "campaign/jobs/z0.75_k8_high.json",
+      "sha256": "388517e8cfa68c7748484b4e56d2fa900b3a15c088cf31c5e9f755adcb1610bb",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.75_k8_interictal.json",
+      "snapshot": "campaign/jobs/z0.75_k8_interictal.json",
+      "sha256": "74d6b893b71830b5be7c761a0b7bc44d62c751064ffe2b0430a004c61deb99f7",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k0.02_high.json",
+      "snapshot": "campaign/jobs/z0.95_k0.02_high.json",
+      "sha256": "0b7cd62f84afd37aa4d4d1919ffff17dc5c81c1dc2b12c46929b361ba088dc3b",
+      "bytes": 1279,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k0.02_interictal.json",
+      "snapshot": "campaign/jobs/z0.95_k0.02_interictal.json",
+      "sha256": "fa586345c3dd830d961bae4df9850a57eaaf36109acd4298676eb920c7971cae",
+      "bytes": 1272,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k2_high.json",
+      "snapshot": "campaign/jobs/z0.95_k2_high.json",
+      "sha256": "e48fca6c13dfcc055f129b4f8b6bbd61cc5217178f2101360afe8c2330b3229a",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k2_interictal.json",
+      "snapshot": "campaign/jobs/z0.95_k2_interictal.json",
+      "sha256": "24a0609a579c5c0680133cddc8a14f2f2aefd9a4a2988a8b5e78100c4fcdf896",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k8_high.json",
+      "snapshot": "campaign/jobs/z0.95_k8_high.json",
+      "sha256": "901e5cbfd2e357d67dc61741b9ff5e16ba434a58619f7b0160b63d41a396898e",
+      "bytes": 1275,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/jobs/z0.95_k8_interictal.json",
+      "snapshot": "campaign/jobs/z0.95_k8_interictal.json",
+      "sha256": "938276a37f2543d63c3e7f3cfa984b6a481df06779590c83a546cb269f39fbbf",
+      "bytes": 1268,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/protocol.json",
+      "snapshot": "campaign/protocol.json",
+      "sha256": "6a13a5f7f501978042edf45ee01f19a87f1126a65f82296746e9423a012b91c7",
+      "bytes": 10376,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/axis_cuda_device0_route/gate.json",
+      "snapshot": "campaign/qa/axis_cuda_device0_route/gate.json",
+      "sha256": "498b0d2a406a9071d8e18fb795fdbf20add36c31e445a09094299917a9f3b2cb",
+      "bytes": 1237,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/axis_cuda_device1_route/gate.json",
+      "snapshot": "campaign/qa/axis_cuda_device1_route/gate.json",
+      "sha256": "b248643137df9b897763c5b6506e1caf267f6d6bba2fd2fc05e154f9bf2f6e2d",
+      "bytes": 5451,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/cuda_device0_route/gate.json",
+      "snapshot": "campaign/qa/cuda_device0_route/gate.json",
+      "sha256": "23811fb0457100d8247cd2f8e01b72d91db7be40c1ad4e3611773ffa00dc6bd5",
+      "bytes": 673,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/locality_native_gate.json",
+      "snapshot": "campaign/qa/locality_native_gate.json",
+      "sha256": "5ed9073496e1235b6342fc040b209333acfc2227e3b7bfc8defae955e6d26634",
+      "bytes": 293,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/queue.json",
+      "snapshot": "campaign/queue.json",
+      "sha256": "f32858c0c5b48ed1b63be9a6b5d7c0d9647a945b5a66202b7e75a81a9c587ea6",
+      "bytes": 506,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z.py",
+      "snapshot": "repo/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z.py",
+      "sha256": "6d346517338f096c64af5775ac0439674343c27edb046ff5438b246d53b2b9ac",
+      "bytes": 25103,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z_delay.py",
+      "snapshot": "repo/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z_delay.py",
+      "sha256": "4d9fa81916a52f29db826327c2b1081947c27b63436d6ab1c32d196a017e5bf8",
+      "bytes": 25097,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_patient_zm_meanfield.py",
+      "snapshot": "repo/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_patient_zm_meanfield.py",
+      "sha256": "dd4a569336fa7b64a2c8baa44312d3fd602cc8eeea05147fdd42df6512af11fd",
+      "bytes": 32597,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/__init__.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/__init__.py",
+      "sha256": "20f5a5b165a3bd36ab1737f20efb1d7fd3fa6e096da94383d7e6304df4c1d74c",
+      "bytes": 13442,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_field.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_field.py",
+      "sha256": "3168a7cfeba2b3362cdef10a0ae602cf05ac9bd96aa819150da32a44bf6a071b",
+      "bytes": 4852,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_heterogeneity.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_heterogeneity.py",
+      "sha256": "493330aff1af058e530900db5823d73bc6e065af95bf89a397b746c5e48d9f7b",
+      "bytes": 26067,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_lif.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_lif.py",
+      "sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "bytes": 28001,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stability.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stability.py",
+      "sha256": "3f386204b3b8c738995964453a71803a4c451777c244e9fa02fa485519ac0451",
+      "bytes": 9853,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/__init__.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/__init__.py",
+      "sha256": "963ad75b460d16f9251ccf9532d82033dd65e76b818e69dca4fd19fbb83328b1",
+      "bytes": 539,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/anisotropy_front.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/anisotropy_front.py",
+      "sha256": "e4f8b7fd2ec2fd63db0e0b2bec79daadb7701d80bf8f0c41b6826255f7b76166",
+      "bytes": 21565,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/augment_substrate.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/augment_substrate.py",
+      "sha256": "541402fe945111382df7e529e4d8fcbedce71b7c1e2f665d10516d4639edd4b6",
+      "bytes": 1071,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py",
+      "sha256": "fa08221ca9050657379b9aa77aa88cc1344a1f6711eec10665c25102f1f21538",
+      "bytes": 11084,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity.py",
+      "sha256": "53d3bf765f7084cda924d3b23a6cb6e5f6a21293d9ae1e0e2d8f8cf89a1d3303",
+      "bytes": 7567,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity_rot.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity_rot.py",
+      "sha256": "3fa6c87df4c8756132b3fe6734fd9f73673a731914e9937befbaf073f00e2b9f",
+      "bytes": 17083,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/gen_figure_panels.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/gen_figure_panels.py",
+      "sha256": "3a1e06a8d72b8f15dccfe466a95206f4523cb2feb45341956e3af72a3dce0857",
+      "bytes": 3070,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_probe.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_probe.py",
+      "sha256": "dc1c12a7c250138c94716e3fb0da9633e8c54687735b781d52cf870167639a77",
+      "bytes": 45754,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_propagation.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_propagation.py",
+      "sha256": "f8e48e74e47654b6e8481ee6c953497d6d40f0bf8de001d7f30e5269fba634ce",
+      "bytes": 18044,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_timeseries.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/kick_timeseries.py",
+      "sha256": "6c266ded777e84b25dd1720665d6832ebec149369b21d30851d9263e0ed3d4f5",
+      "bytes": 2502,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/lfp.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/lfp.py",
+      "sha256": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47",
+      "bytes": 2742,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/model.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/model.py",
+      "sha256": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+      "bytes": 7905,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/mz_slow_vars.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/mz_slow_vars.py",
+      "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+      "bytes": 6526,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+      "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+      "bytes": 6408,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/run_smoke.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/run_smoke.py",
+      "sha256": "2d54706bd1c62798629d0820768315ea484b24c41fcbbcdbefdaa57d9ed1eda1",
+      "bytes": 4294,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/slow_field.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/slow_field.py",
+      "sha256": "d84c2efbd7bd536066d50fb7f37895436a7e6256945ed3a7941f5c1206211129",
+      "bytes": 24688,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/slow_vars.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/slow_vars.py",
+      "sha256": "1151c6cc92de21c55f0a59ede943df4dd15d5fd80766297a9bf96025d9c3d55a",
+      "bytes": 9066,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/sweep.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/sweep.py",
+      "sha256": "914631a0231618a315197d2d4ffdcaea8a844eba0e692c7f520d1749c5859696",
+      "bytes": 1822,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_connectivity.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_connectivity.py",
+      "sha256": "2ed2b10d939d6b5b22f635d3dcd76ec769b3d675b439260f1cdc0252160579e6",
+      "bytes": 14633,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field.py",
+      "sha256": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+      "bytes": 10943,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_runner.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_runner.py",
+      "sha256": "123bfebc82bfe37d71875175f1c2343aa702f5f9b8d9a33ee11d2046eb9258ba",
+      "bytes": 12200,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_graph_edge_flow.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_graph_edge_flow.py",
+      "sha256": "2386badb2da058c0128f4ec785b9e41187f3a03cf3b094400e537741aa8af8e0",
+      "bytes": 18932,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_multidimensional_parameters.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_multidimensional_parameters.py",
+      "sha256": "22c5256d29efb47e8d9f310f1eff5a124047ed14b5d5e93a5d69e525b79fa44a",
+      "bytes": 4047,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev20_dual_core_mechanism.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev20_dual_core_mechanism.py",
+      "sha256": "c006c4fbf9d422b0c1409648165303f82ab32995dc79be6665063bf860771ffb",
+      "bytes": 16043,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+      "snapshot": "repo/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+      "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18",
+      "bytes": 26429,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/config/topic4_rate_model_dynamics_validation_v1.json",
+      "snapshot": "repo/config/topic4_rate_model_dynamics_validation_v1.json",
+      "sha256": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+      "bytes": 75544,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "snapshot": "repo/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae",
+      "bytes": 2922,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fig5_early_spatial.py",
+      "snapshot": "repo/scripts/analyze_topic4_fig5_early_spatial.py",
+      "sha256": "8785461fdcef77d4927b330e2e16ee36a9918dac9a490a8ee8a0905549b92c6f",
+      "bytes": 14600,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fig5_preentry_events.py",
+      "snapshot": "repo/scripts/analyze_topic4_fig5_preentry_events.py",
+      "sha256": "3020af5fb68ad501cca0015c09d32dde693e52edb8a9dc05160711ab086fb81e",
+      "bytes": 10175,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fixed_zm_termination.py",
+      "snapshot": "repo/scripts/analyze_topic4_fixed_zm_termination.py",
+      "sha256": "25bb252b1516319b8bafd2a93a78caa7af9fb6b73f3e3fa16cf7c49ce82a438d",
+      "bytes": 28500,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_interictal_recurrence.py",
+      "snapshot": "repo/scripts/analyze_topic4_interictal_recurrence.py",
+      "sha256": "661fa7d7f0583335f6b835abcc14f1211095a7c7bef6bedb9761682569027648",
+      "bytes": 9603,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_loop_axis_bout_mechanism.py",
+      "snapshot": "repo/scripts/analyze_topic4_loop_axis_bout_mechanism.py",
+      "sha256": "0fe691fb7c9e91bf7ebae38b13b98d1a38e285706768d63f640dbd2c4da0bd83",
+      "bytes": 9293,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_loop_axis_conditional.py",
+      "snapshot": "repo/scripts/analyze_topic4_loop_axis_conditional.py",
+      "sha256": "1b4cdc54701afcf4df7e258d83784b6fca93de5f4db5c641bb637278befcf789",
+      "bytes": 3972,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_loop_axis_native.py",
+      "snapshot": "repo/scripts/analyze_topic4_loop_axis_native.py",
+      "sha256": "fa15fa19179968608a38ccbef817272761101915f0362106ea0252817b95e780",
+      "bytes": 9681,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_loop_recovery_budget.py",
+      "snapshot": "repo/scripts/analyze_topic4_loop_recovery_budget.py",
+      "sha256": "d789f06d48b7198991f8a2b03c627eeb71e2fb1fb6367aab6b9d119c308b808a",
+      "bytes": 15038,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_loop_zk_conditional.py",
+      "snapshot": "repo/scripts/analyze_topic4_loop_zk_conditional.py",
+      "sha256": "9c4a0374e2bdce7acc282d645140e1852c1bd8ac3f0626470f5b60600821f2f0",
+      "bytes": 11536,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_weaker_M_onset_pilot.py",
+      "snapshot": "repo/scripts/analyze_topic4_weaker_M_onset_pilot.py",
+      "sha256": "a77a65ea29680fade5bd1108e9d803873dcae3cb558267d5b84158ac6c168af6",
+      "bytes": 16471,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/audit_topic4_loop_axis_outgoing.py",
+      "snapshot": "repo/scripts/audit_topic4_loop_axis_outgoing.py",
+      "sha256": "84b5c69d28550579cf4bd73fd817b8e712492d68ed78faa70fc93bb2c307a48f",
+      "bytes": 3482,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/audit_topic4_loop_conductance_response.py",
+      "snapshot": "repo/scripts/audit_topic4_loop_conductance_response.py",
+      "sha256": "7ccc2ca58b46ec8d70dc25edcd6c1861bad0a217a587a781315e5070ce150bb6",
+      "bytes": 7531,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/audit_topic4_loop_delivery.py",
+      "snapshot": "repo/scripts/audit_topic4_loop_delivery.py",
+      "sha256": "7518e6baa120ecc9ffaa518990f01464a0382869a2943fef3323bbcbf86a0602",
+      "bytes": 11112,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/audit_topic4_loop_grid_coverage.py",
+      "snapshot": "repo/scripts/audit_topic4_loop_grid_coverage.py",
+      "sha256": "5a2aa035b59cea90a02f96b891363d287279fa8a824ee8c08de6afb3c24ff0fe",
+      "bytes": 3038,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/benchmark_topic4_loop_scatter_paths.py",
+      "snapshot": "repo/scripts/benchmark_topic4_loop_scatter_paths.py",
+      "sha256": "214843d6126a8137baccb7ed18ae30b140be57faf1ab30180e4308289c44f58d",
+      "bytes": 3317,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/calibrate_topic4_loop_conductance_static.py",
+      "snapshot": "repo/scripts/calibrate_topic4_loop_conductance_static.py",
+      "sha256": "84a99aaf5e72d2901787c8197ca2349ac8d0de8fc377d7c5bebee854a4d863eb",
+      "bytes": 7115,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_autonomous_loop.py",
+      "snapshot": "repo/scripts/paper_figures/build_fig5_autonomous_loop.py",
+      "sha256": "57ac6d188e8d8f4e3b860967b2906fed089bcb94d7a83342f7c7e874e2744b37",
+      "bytes": 16133,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_conditional_spatial_fields.py",
+      "snapshot": "repo/scripts/paper_figures/build_fig5_conditional_spatial_fields.py",
+      "sha256": "e31edddb6f41de75d6f1761d1152fa7b1b45589001ac89f93a3f6a8ce9a8c64d",
+      "bytes": 7868,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_conditional_zk.py",
+      "snapshot": "repo/scripts/paper_figures/build_fig5_conditional_zk.py",
+      "sha256": "c487cc5ec4ab4846b03978efa3c8a809bbccd35dfe8029f45b466f33e6ccd9e0",
+      "bytes": 6671,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release.py",
+      "sha256": "a36bca9bb43bd383cb6d9ee03ab6252506510e9ad7c40b183ae9a99500176647",
+      "bytes": 27541,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v2.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v2.py",
+      "sha256": "5599bb689489d952361b302ac6a3738bc60755b460b9d4dcfa453e5e69a405ab",
+      "bytes": 16525,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v3.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v3.py",
+      "sha256": "e381f27fbdbf7771eade008ad05b858f96813f8697b28a8111408ddda361055b",
+      "bytes": 16589,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v4.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v4.py",
+      "sha256": "e2a2bef75cd6ef50a8dc1e79f400e42ab510e18a92e9fac0d086cb07dad93026",
+      "bytes": 13118,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v6.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v6.py",
+      "sha256": "eed1294471955a3705efa1478d85bfe45642beca82319a38947117e409e62c03",
+      "bytes": 9628,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v7.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v7.py",
+      "sha256": "c2f0f4858d53b0e33b699e96dd9751c55e223900ec1ff2d53068ac684acd2f33",
+      "bytes": 9417,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v8.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v8.py",
+      "sha256": "09ecf0b67620e82eb0d24cb1fbbd036cda7fdb1500e9d6cf14f04a8dff55291d",
+      "bytes": 8778,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v9.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_manual_release_layout_v9.py",
+      "sha256": "07540b17829abf5e7e7718141f5947e4c9df12fb33cfbd5c9c90efc0b101954b",
+      "bytes": 5129,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_resting_recovery.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_resting_recovery.py",
+      "sha256": "81f4ea2471ccd5d0a2bdc81038ac6118304c5bfbc1f271759ce22d64dcdbfd1a",
+      "bytes": 10875,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_spatial_latency_layout_v10.py",
+      "snapshot": "repo/scripts/plot_topic4_fig5_spatial_latency_layout_v10.py",
+      "sha256": "8f5b7da50774ebd8d594723e0e38b1413dc3dbd72b6e42460ddc7038902b9a9a",
+      "bytes": 17231,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_loop_axis_controls.py",
+      "snapshot": "repo/scripts/plot_topic4_loop_axis_controls.py",
+      "sha256": "c5f822e72a38c9e7acff493efbb522d31aaebc60acae1dabb8d80e9af2321a72",
+      "bytes": 4195,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_loop_axis_event_comparison.py",
+      "snapshot": "repo/scripts/plot_topic4_loop_axis_event_comparison.py",
+      "sha256": "1467e659fbdf3cf30a6586f9068511febb7e4a0a4062a8b068760e3d2b428619",
+      "bytes": 10584,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_loop_axis_native_full.py",
+      "snapshot": "repo/scripts/plot_topic4_loop_axis_native_full.py",
+      "sha256": "46789ca6e3e2794ba5ddd385601f47ca281f42b35f63d4f41c2fb9756bd5732a",
+      "bytes": 8686,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_loop_axis_prefix.py",
+      "snapshot": "repo/scripts/plot_topic4_loop_axis_prefix.py",
+      "sha256": "47369b1b7ac57b2f04557e4d91cf37a71c5a9269b77f4c25348e8c315d27e27c",
+      "bytes": 8853,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_loop_axis_responses.py",
+      "snapshot": "repo/scripts/plot_topic4_loop_axis_responses.py",
+      "sha256": "dd728ee675d0c80323a3bc406caebc7a6454071b2c84147a17e97458e626b572",
+      "bytes": 5850,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_m_parameter_modes.py",
+      "snapshot": "repo/scripts/plot_topic4_m_parameter_modes.py",
+      "sha256": "9a43ffdb338b2d14f47627e4041fa22a6217311c53966a2561ede20524f32fdb",
+      "bytes": 43620,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_recovery_rhythm_exit.py",
+      "snapshot": "repo/scripts/plot_topic4_recovery_rhythm_exit.py",
+      "sha256": "a3048615735a38778b3e2ce940fbfe05c7ebc31bcefb202565e2c2d722290f24",
+      "bytes": 10068,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/prepare_topic4_loop_axis_controls.py",
+      "snapshot": "repo/scripts/prepare_topic4_loop_axis_controls.py",
+      "sha256": "a0253a95e0d360db67d522bfb406f4dae4974b59ff8b4a3124b5d297a47bb074",
+      "bytes": 8379,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/prepare_topic4_loop_axis_reassignment.py",
+      "snapshot": "repo/scripts/prepare_topic4_loop_axis_reassignment.py",
+      "sha256": "da0599acd188b23424fe93874b2765d474afed2b3448b7ce2e2949919de613cd",
+      "bytes": 8487,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/qa_topic4_global_feedback_response.py",
+      "snapshot": "repo/scripts/qa_topic4_global_feedback_response.py",
+      "sha256": "0eee9fcf79fcac4f169d42831a492baec32639401c5573a3f1c65553ea16ac69",
+      "bytes": 6487,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/report_topic4_global_feedback_response.py",
+      "snapshot": "repo/scripts/report_topic4_global_feedback_response.py",
+      "sha256": "5e2fd7c8c9ac8e95eced227ed2f01ccc63acb75be00d59aaa1cb518c303b916f",
+      "bytes": 9606,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/report_topic4_loop_conductance_gate.py",
+      "snapshot": "repo/scripts/report_topic4_loop_conductance_gate.py",
+      "sha256": "28844e31971301b0651767a57839c0e20cb6953dec69cbcf0614c2576338c958",
+      "bytes": 6228,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/review_topic4_loop_axis_halfway.py",
+      "snapshot": "repo/scripts/review_topic4_loop_axis_halfway.py",
+      "sha256": "e53d17a3e33e0b4e070ae5d0ef6c1bc68e0cfcce9c977dda3411d2eb50d6c89d",
+      "bytes": 7668,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/review_topic4_loop_axis_isotropic_tail.py",
+      "snapshot": "repo/scripts/review_topic4_loop_axis_isotropic_tail.py",
+      "sha256": "c5c0bb5b61f2b398f21a7c1f646b6b99eb6ef0974d41c5cd6c2d1ea4641cf326",
+      "bytes": 6134,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/review_topic4_loop_native_states.py",
+      "snapshot": "repo/scripts/review_topic4_loop_native_states.py",
+      "sha256": "1e0d0060ab5b3ff579475b2bacad13e85406f841a1bf6a6ad24f1d7b129067f9",
+      "bytes": 14616,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_activity_global_pool.py",
+      "snapshot": "repo/scripts/run_topic4_activity_global_pool.py",
+      "sha256": "f1281a0d015e7dd452ab937fbb331a61e19d5912a3a64a0cfcaeb476b8d7afed",
+      "bytes": 9893,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_autonomous_recovery.py",
+      "snapshot": "repo/scripts/run_topic4_autonomous_recovery.py",
+      "sha256": "405d125a7ae19ffde8ccf8cadd9315c89c28213f479a532b87df6ffb6f37f7d1",
+      "bytes": 19821,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_continuous_resource_recovery.py",
+      "snapshot": "repo/scripts/run_topic4_continuous_resource_recovery.py",
+      "sha256": "84b9c45ad7b2e41af96b83a09c82b485ca11853ec86a41b3ab5f4caeaf5c7bd2",
+      "bytes": 9639,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_early_z_refill_branches.py",
+      "snapshot": "repo/scripts/run_topic4_early_z_refill_branches.py",
+      "sha256": "7ff7d2c79dede3cb8f507736460a420d662de61a0d33646f708b9f10d126731a",
+      "bytes": 11779,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fixed_zm_termination.py",
+      "snapshot": "repo/scripts/run_topic4_fixed_zm_termination.py",
+      "sha256": "c84238240b47bc7c35b73592bfc4a369c61e146b225b630b95e84e2cd706eb47",
+      "bytes": 12788,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_global_feedback_response.py",
+      "snapshot": "repo/scripts/run_topic4_global_feedback_response.py",
+      "sha256": "5da3e55cfe18294a6f76eeb03b5cce8dcec9605ac59764bfcf71170771c31763",
+      "bytes": 30702,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_k100_recurrence.py",
+      "snapshot": "repo/scripts/run_topic4_k100_recurrence.py",
+      "sha256": "ab17e6081106876077182fca1e7a73b149878ed2a253df93e406d95cfd79c839",
+      "bytes": 29598,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+      "snapshot": "repo/scripts/run_topic4_loop_axis_conditional.py",
+      "sha256": "eef481d82aa1e6e6382c8869949c62c76f9892a95a4150584d63f7f7dd006a23",
+      "bytes": 8056,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_cuda_override.py",
+      "snapshot": "repo/scripts/run_topic4_loop_axis_cuda_override.py",
+      "sha256": "d67dd6c86de0dd83ed1b84aeaa8d4b85006f15b362064d3bebbb4083bc1bceaf",
+      "bytes": 2642,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_native.py",
+      "snapshot": "repo/scripts/run_topic4_loop_axis_native.py",
+      "sha256": "fd63e2af0c6999fa7aadf1482a939475c6af888234cf5b0b5ca33917c637c9ba",
+      "bytes": 6630,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_cuda_override.py",
+      "snapshot": "repo/scripts/run_topic4_loop_cuda_override.py",
+      "sha256": "d57d04263dbb548ae5957beaa9ac2b275f38a75526b9f0c3a10c8068a91e6beb",
+      "bytes": 3401,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_conditional.py",
+      "snapshot": "repo/scripts/run_topic4_loop_zk_conditional.py",
+      "sha256": "ea8bd2b35812e4d95fc6df80c6c68870f834acbe3652077878cb3b177f837566",
+      "bytes": 12977,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_cuda.py",
+      "snapshot": "repo/scripts/run_topic4_loop_zk_cuda.py",
+      "sha256": "0eecaa3f23228e2e73f205afbb48272c84e769dbd925a2c6a2feeccc9387d4c2",
+      "bytes": 898,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_locality_cpu.py",
+      "snapshot": "repo/scripts/run_topic4_loop_zk_locality_cpu.py",
+      "sha256": "5ced18a92f84dd1e1ab1b5c5c8d36c09c64fa5f83f95190e07408086a5742187",
+      "bytes": 2556,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_parallel_cpu.py",
+      "snapshot": "repo/scripts/run_topic4_loop_zk_parallel_cpu.py",
+      "sha256": "ad0248cac550c44a898ddcc5a62f68589ada1a54931691b776d33de2d9bf7e54",
+      "bytes": 2416,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py",
+      "snapshot": "repo/scripts/run_topic4_m_parameter_modes.py",
+      "sha256": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc",
+      "bytes": 19354,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_nativeZ_continuation.py",
+      "snapshot": "repo/scripts/run_topic4_nativeZ_continuation.py",
+      "sha256": "0a7a8da87abaa88e512dd7a6aba9716f7451601d842ac9c2c97fe9223d5cc308",
+      "bytes": 7011,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_quiet_tail_confirmation.py",
+      "snapshot": "repo/scripts/run_topic4_quiet_tail_confirmation.py",
+      "sha256": "ecb6f9ba3312f52f18e9e8dfed6051c345bda3c1c8b8b958ff0d62dd935fa416",
+      "bytes": 19509,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_quiet_tail_recovery.py",
+      "snapshot": "repo/scripts/run_topic4_quiet_tail_recovery.py",
+      "sha256": "60b50cc6d3fb43309bc2ace1cda08cec7bf944b526c62225c1c7362d7b5721f2",
+      "bytes": 19124,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_recovery_window.py",
+      "snapshot": "repo/scripts/run_topic4_recovery_window.py",
+      "sha256": "c92faf1ec5a23510f5d8545467c5401f5b42e95595763088509fdee00c0f34da",
+      "bytes": 26759,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py",
+      "snapshot": "repo/scripts/run_topic4_reset_state_diagnosis.py",
+      "sha256": "75804a78fd08daa88a3b1422931c490245666f377784ed4d1ad7d70d27e030cd",
+      "bytes": 24303,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_rhythm_preserving_feedback.py",
+      "snapshot": "repo/scripts/run_topic4_rhythm_preserving_feedback.py",
+      "sha256": "4359d21061aef8ae80801f64393814e1f4751655613aecad668e69822bf2326a",
+      "bytes": 33828,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py",
+      "snapshot": "repo/scripts/run_topic4_weak_fast_recurrence.py",
+      "sha256": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+      "bytes": 19805,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weaker_M_onset_pilot.py",
+      "snapshot": "repo/scripts/run_topic4_weaker_M_onset_pilot.py",
+      "sha256": "6406c36301e59e324d5344b1a8d56490833d9d98efc9c570a4aeb879426b3f07",
+      "bytes": 17954,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_z_recovery_exploration.py",
+      "snapshot": "repo/scripts/run_topic4_z_recovery_exploration.py",
+      "sha256": "a1153933707a34c0f6b9624eb291fcae809643e7fbb70c4797d60e9b86e6ca0e",
+      "bytes": 22345,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_zm_matched_spatial_termination.py",
+      "snapshot": "repo/scripts/run_topic4_zm_matched_spatial_termination.py",
+      "sha256": "1f5a1651f15c3dc59f4962c25987224434c54b6d88074f128fb156bef7cb207f",
+      "bytes": 13289,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/snapshot_topic4_loop_reproducibility.py",
+      "snapshot": "repo/scripts/snapshot_topic4_loop_reproducibility.py",
+      "sha256": "1d8b6f6f2df42dd7d346b7fe9bad340532bbe86ce9edce48ef383a657f83a3c5",
+      "bytes": 8159,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_axis_conditional.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_axis_conditional.py",
+      "sha256": "109b0ea216b1835690335f9217a7fd56d466c7fc6111758965c62941a28efb8d",
+      "bytes": 4944,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_axis_mixed_devices.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_axis_mixed_devices.py",
+      "sha256": "6242c5251a41d154382263ef3389af0d1be48bc346981d88e4b21fb007fcab2d",
+      "bytes": 10756,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_axis_native.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_axis_native.py",
+      "sha256": "864aeacb48539e40dddabadd3e7f28e5fe082da7cbd4ecd47e3aa839cc445b4c",
+      "bytes": 3017,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_zk_bounded.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_zk_bounded.py",
+      "sha256": "6bcd97154b3a6638555742d6ba982e742e0e407bb4085a95c95f4f07c0859161",
+      "bytes": 4617,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_zk_checkpoint_handoff.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_zk_checkpoint_handoff.py",
+      "sha256": "788058251556b69318410235a68b74f264a231e6f5198e71460d865c3528f032",
+      "bytes": 8495,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_zk_conditional.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_zk_conditional.py",
+      "sha256": "6c0d882165a8237ce59ba7e90226b25550485117676e6854796e1f1aa2a74888",
+      "bytes": 3915,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/supervise_topic4_loop_zk_mixed_devices.py",
+      "snapshot": "repo/scripts/supervise_topic4_loop_zk_mixed_devices.py",
+      "sha256": "f5f1d183e23563165b5e6dd31472cf3b822e89479d41de492e4c07134af02131",
+      "bytes": 11219,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py",
+      "snapshot": "repo/scripts/topic4_historical_manual_z_common.py",
+      "sha256": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969",
+      "bytes": 5025,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_axis_checkpoint_handoff.py",
+      "snapshot": "repo/scripts/topic4_loop_axis_checkpoint_handoff.py",
+      "sha256": "2eac0af593d2556629832ab44dde4b2964b3aba2e0ec86ef16f7ee4d2f442765",
+      "bytes": 5537,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_locality_cpu.py",
+      "snapshot": "repo/scripts/topic4_loop_locality_cpu.py",
+      "sha256": "929cb0154c0957132e39d8e98721029ccff903a4cf36dbd2131e26b4e69f47d9",
+      "bytes": 3686,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_ordered_cpu.py",
+      "snapshot": "repo/scripts/topic4_loop_ordered_cpu.py",
+      "sha256": "1f9c7e8aa53ba5a56cd52d5f63ddddaaabf07805bd29047150670a9191950e7a",
+      "bytes": 1626,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py",
+      "snapshot": "repo/scripts/validate_topic4_fixed_rate_base.py",
+      "sha256": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+      "bytes": 11848,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/verify_topic4_loop_axis_gpu1_route.py",
+      "snapshot": "repo/scripts/verify_topic4_loop_axis_gpu1_route.py",
+      "sha256": "f84642a9aed06be240fda7435f1e3497db5ad47b388bf2320141e7c1d37e6241",
+      "bytes": 2886,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/verify_topic4_loop_axis_handoff_blocks.py",
+      "snapshot": "repo/scripts/verify_topic4_loop_axis_handoff_blocks.py",
+      "sha256": "aff3ef44df68f8a1cb2da57ac8f30550fe22b5d4d14e1f4328dc0014f17c895a",
+      "bytes": 5686,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/scripts/watch_topic4_loop_analysis.py",
+      "snapshot": "repo/scripts/watch_topic4_loop_analysis.py",
+      "sha256": "28f9892bd7fc762661ee4e9dd6383088de18ce7c0d62c07f10d4b8e22c4f4bdc",
+      "bytes": 5912,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py",
+      "snapshot": "repo/src/snn_engine/mz_slow_vars.py",
+      "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+      "bytes": 6526,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/src/topic4_cuda_ordered_scatter.py",
+      "snapshot": "repo/src/topic4_cuda_ordered_scatter.py",
+      "sha256": "630260733fb93783f010a23c5e2ed5087b593552b76c7338d5c4572ee3250ec8",
+      "bytes": 5373,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py",
+      "snapshot": "repo/src/topic4_raster_protocol_engine.py",
+      "sha256": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+      "bytes": 47043,
+      "checked_against_frozen_protocol": true
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/src/topic4_rate_validation_engine.py",
+      "snapshot": "repo/src/topic4_rate_validation_engine.py",
+      "sha256": "8f6ed3d4a703f215e12e25b73ef330d0ca5feccc20a4045f5fd3d2ba5c568e68",
+      "bytes": 45985,
+      "checked_against_frozen_protocol": false
+    },
+    {
+      "original": "/home/honglab/leijiaxin/HFOsp/src/topic4_serial_spike_scatter.py",
+      "snapshot": "repo/src/topic4_serial_spike_scatter.py",
+      "sha256": "1432c363a0dad77e2f9805b2389db7a9182a2226a0633adf05875d6962f969fa",
+      "bytes": 389,
+      "checked_against_frozen_protocol": false
+    }
+  ],
+  "imported_project_modules": [
+    {
+      "module": "__main__",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/snapshot_topic4_loop_reproducibility.py"
+    },
+    {
+      "module": "src",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/__init__.py"
+    },
+    {
+      "module": "src.topic4_zm_ictal_transition",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py"
+    },
+    {
+      "module": "src.topic4_multidimensional_parameters",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_multidimensional_parameters.py"
+    },
+    {
+      "module": "src.topic4_core_connectivity",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_connectivity.py"
+    },
+    {
+      "module": "src.topic4_graph_edge_flow",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_graph_edge_flow.py"
+    },
+    {
+      "module": "src.topic4_patient_zm_meanfield",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_patient_zm_meanfield.py"
+    },
+    {
+      "module": "src.topic4_dual_core_spatial_z",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z.py"
+    },
+    {
+      "module": "src.topic4_dual_core_spatial_z_delay",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-z-bifurcation/src/topic4_dual_core_spatial_z_delay.py"
+    },
+    {
+      "module": "params",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py"
+    },
+    {
+      "module": "connectivity",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/connectivity.py"
+    },
+    {
+      "module": "model",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/model.py"
+    },
+    {
+      "module": "src.topic4_rate_validation_engine",
+      "path": "/home/honglab/leijiaxin/HFOsp/src/topic4_rate_validation_engine.py"
+    },
+    {
+      "module": "validate_topic4_fixed_rate_base",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py"
+    },
+    {
+      "module": "src.topic4_core_field_runner",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field_runner.py"
+    },
+    {
+      "module": "src.sef_hfo_stability",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_stability.py"
+    },
+    {
+      "module": "src.sef_hfo_field",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_field.py"
+    },
+    {
+      "module": "src.sef_hfo_lif",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_lif.py"
+    },
+    {
+      "module": "src.sef_hfo_heterogeneity",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/sef_hfo_heterogeneity.py"
+    },
+    {
+      "module": "src.topic4_core_field",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_core_field.py"
+    },
+    {
+      "module": "topic4_historical_manual_z_common",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py"
+    },
+    {
+      "module": "src.topic4_raster_protocol_engine",
+      "path": "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py"
+    },
+    {
+      "module": "src.snn_engine",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/__init__.py"
+    },
+    {
+      "module": "src.snn_engine.mz_slow_vars",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/mz_slow_vars.py"
+    },
+    {
+      "module": "lfp",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/lfp.py"
+    },
+    {
+      "module": "run_topic4_weak_fast_recurrence",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py"
+    },
+    {
+      "module": "run_topic4_reset_state_diagnosis",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py"
+    },
+    {
+      "module": "run_topic4_m_parameter_modes",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py"
+    },
+    {
+      "module": "__mp_main__",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/snapshot_topic4_loop_reproducibility.py"
+    },
+    {
+      "module": "src.topic4_cuda_ordered_scatter",
+      "path": "/home/honglab/leijiaxin/HFOsp/src/topic4_cuda_ordered_scatter.py"
+    },
+    {
+      "module": "run_topic4_autonomous_recovery",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_autonomous_recovery.py"
+    },
+    {
+      "module": "checkpoint",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py"
+    },
+    {
+      "module": "run_topic4_activity_global_pool",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_activity_global_pool.py"
+    },
+    {
+      "module": "run_topic4_continuous_resource_recovery",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_continuous_resource_recovery.py"
+    },
+    {
+      "module": "run_topic4_nativeZ_continuation",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_nativeZ_continuation.py"
+    },
+    {
+      "module": "run_topic4_fixed_zm_termination",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fixed_zm_termination.py"
+    },
+    {
+      "module": "plot_topic4_m_parameter_modes",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_m_parameter_modes.py"
+    },
+    {
+      "module": "analyze_topic4_fig5_early_spatial",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fig5_early_spatial.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v2",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v2.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v3",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v3.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v4",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v4.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v6",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v6.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v7",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v7.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v8",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v8.py"
+    },
+    {
+      "module": "plot_topic4_fig5_manual_release_layout_v9",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_manual_release_layout_v9.py"
+    },
+    {
+      "module": "plot_topic4_fig5_spatial_latency_layout_v10",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_spatial_latency_layout_v10.py"
+    },
+    {
+      "module": "plot_topic4_fig5_resting_recovery",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_resting_recovery.py"
+    },
+    {
+      "module": "run_topic4_early_z_refill_branches",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_early_z_refill_branches.py"
+    },
+    {
+      "module": "run_topic4_weaker_M_onset_pilot",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weaker_M_onset_pilot.py"
+    },
+    {
+      "module": "analyze_topic4_weaker_M_onset_pilot",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_weaker_M_onset_pilot.py"
+    },
+    {
+      "module": "analyze_topic4_fig5_preentry_events",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fig5_preentry_events.py"
+    },
+    {
+      "module": "analyze_topic4_fixed_zm_termination",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_fixed_zm_termination.py"
+    },
+    {
+      "module": "analyze_topic4_interictal_recurrence",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_interictal_recurrence.py"
+    },
+    {
+      "module": "run_topic4_zm_matched_spatial_termination",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_zm_matched_spatial_termination.py"
+    },
+    {
+      "module": "run_topic4_k100_recurrence",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_k100_recurrence.py"
+    },
+    {
+      "module": "run_topic4_z_recovery_exploration",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_z_recovery_exploration.py"
+    },
+    {
+      "module": "run_topic4_rhythm_preserving_feedback",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_rhythm_preserving_feedback.py"
+    },
+    {
+      "module": "run_topic4_recovery_window",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_recovery_window.py"
+    },
+    {
+      "module": "run_topic4_quiet_tail_recovery",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_quiet_tail_recovery.py"
+    },
+    {
+      "module": "run_topic4_global_feedback_response",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_global_feedback_response.py"
+    },
+    {
+      "module": "run_topic4_loop_zk_conditional",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_conditional.py"
+    },
+    {
+      "module": "src.topic4_rev20_dual_core_mechanism",
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_rev20_dual_core_mechanism.py"
+    },
+    {
+      "module": "run_topic4_loop_axis_native",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_native.py"
+    },
+    {
+      "module": "topic4_loop_locality_cpu",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_locality_cpu.py"
+    },
+    {
+      "module": "run_topic4_loop_axis_conditional",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py"
+    },
+    {
+      "module": "src.topic4_serial_spike_scatter",
+      "path": "/home/honglab/leijiaxin/HFOsp/src/topic4_serial_spike_scatter.py"
+    },
+    {
+      "module": "run_topic4_loop_zk_locality_cpu",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_zk_locality_cpu.py"
+    },
+    {
+      "module": "run_topic4_loop_cuda_override",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_cuda_override.py"
+    },
+    {
+      "module": "run_topic4_loop_axis_cuda_override",
+      "path": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_cuda_override.py"
+    }
+  ],
+  "engine_source_roots": [
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine"
+  ],
+  "environment_sha256": "c99acb5dff1150bb9fdd96a2a3e74fac11d9dfa4d63b8fe665f976ca0a198854",
+  "limits": "Code/configuration snapshot, not a standalone relocated data package. Large immutable source states, graphs and observations remain at their recorded campaign paths. Analysis producers may acquire later versions; take a final snapshot after final review. No simulation convergence or scientific validity is certified by this archive."
+}

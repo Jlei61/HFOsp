@@ -1,0 +1,337 @@
+{
+  "rows": [
+    {
+      "label": "reference",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/block01.npz",
+      "local_readout": {
+        "status": "AUDIT_PASS",
+        "label": "reference",
+        "coordinates": {
+          "D_A": 0.2557216996140609,
+          "D_global": 0.2164660210396102,
+          "Z_A": 0.7442783003859391
+        },
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "rows": [
+          {
+            "region": "Global E",
+            "mean_rate_hz": 34.38887126733126,
+            "quiet_fraction": 0.5488,
+            "duty_above50": 0.2512,
+            "range_10ms_hz": [
+              0.00926160193122346,
+              178.08508541868278
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              93,
+              155,
+              114,
+              117,
+              122,
+              119,
+              93,
+              157,
+              114,
+              117,
+              120,
+              122,
+              93,
+              126,
+              117,
+              92,
+              154,
+              114,
+              117
+            ]
+          },
+          {
+            "region": "Core A",
+            "mean_rate_hz": 103.03514866111585,
+            "quiet_fraction": 0.6636,
+            "duty_above50": 0.2892,
+            "range_10ms_hz": [
+              1.5061846892042494e-05,
+              473.035976015288
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              89,
+              90,
+              88,
+              89,
+              89,
+              86,
+              89,
+              89,
+              88,
+              89,
+              89,
+              87,
+              89,
+              89,
+              87,
+              89,
+              89,
+              88,
+              89
+            ]
+          },
+          {
+            "region": "Core B",
+            "mean_rate_hz": 91.04546808255446,
+            "quiet_fraction": 0.6274,
+            "duty_above50": 0.312,
+            "range_10ms_hz": [
+              1.5191951001837135e-05,
+              474.98053362120766
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              81,
+              90,
+              90,
+              99,
+              92,
+              139,
+              80,
+              92,
+              90,
+              101,
+              95,
+              138,
+              79,
+              94,
+              137,
+              81,
+              89,
+              91,
+              105
+            ]
+          },
+          {
+            "region": "Surround",
+            "mean_rate_hz": 31.227631009561115,
+            "quiet_fraction": 0.5598,
+            "duty_above50": 0.2406,
+            "range_10ms_hz": [
+              0.009728566866110351,
+              165.57520154331894
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              90,
+              153,
+              111,
+              115,
+              120,
+              113,
+              90,
+              155,
+              111,
+              115,
+              118,
+              116,
+              90,
+              125,
+              111,
+              90,
+              152,
+              111,
+              115
+            ]
+          }
+        ],
+        "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+        "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+        "model_promoted": false
+      },
+      "global_readout": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          34.38887126733119,
+          103.03514866111593,
+          91.04546808255469,
+          31.227631009560962
+        ],
+        "smoothed_global_range_hz": [
+          0.009261601950001924,
+          178.0850851296208
+        ],
+        "quiet_fraction": 0.5488,
+        "longest_quiet_ms": 171,
+        "complete_events": {
+          "n": 19,
+          "median_duration_ms": 117.0,
+          "iqr_duration_ms": [
+            114.0,
+            122.0
+          ],
+          "median_gap_ms": 264.0,
+          "both_cores": 19,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.65075,
+          "median_surround_cells": 246.0,
+          "forward": 4,
+          "reverse": 12,
+          "undirected": 3,
+          "median_extent_mm": 8.729356036085006
+        },
+        "persistent_spatial_fraction": 0.0,
+        "group_rate_relative_variation": 0.9147988989588838,
+        "M_mean_global_A_B_surround": [
+          0.017173062847975748,
+          0.051497967123723225,
+          0.045484630968319034,
+          0.015592830728261247
+        ]
+      },
+      "original_global_onset_ms": null
+    },
+    {
+      "label": "coreA_depleted",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/block01.npz",
+      "local_readout": {
+        "status": "AUDIT_PASS",
+        "label": "coreA_depleted",
+        "coordinates": {
+          "D_A": 0.40052149864164854,
+          "D_global": 0.2198778663041978,
+          "Z_A": 0.5994785013583515
+        },
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "rows": [
+          {
+            "region": "Global E",
+            "mean_rate_hz": 54.55282374757598,
+            "quiet_fraction": 0.0,
+            "duty_above50": 0.5758,
+            "range_10ms_hz": [
+              21.075729886675063,
+              98.55175539705523
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          },
+          {
+            "region": "Core A",
+            "mean_rate_hz": 423.18456638611525,
+            "quiet_fraction": 0.0,
+            "duty_above50": 1.0,
+            "range_10ms_hz": [
+              353.67283987431523,
+              435.8835474636576
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          },
+          {
+            "region": "Core B",
+            "mean_rate_hz": 125.20257718279322,
+            "quiet_fraction": 0.359,
+            "duty_above50": 0.5552,
+            "range_10ms_hz": [
+              2.6409678654951525e-05,
+              450.71221269990946
+            ],
+            "complete_local_episodes": 22,
+            "episode_durations_ms": [
+              39,
+              50,
+              46,
+              343,
+              143,
+              113,
+              46,
+              48,
+              47,
+              49,
+              314,
+              126,
+              39,
+              28,
+              47,
+              46,
+              168,
+              44,
+              33,
+              44,
+              346,
+              43
+            ]
+          },
+          {
+            "region": "Surround",
+            "mean_rate_hz": 43.60472656604153,
+            "quiet_fraction": 0.0,
+            "duty_above50": 0.3366,
+            "range_10ms_hz": [
+              12.299313054468893,
+              84.07161158430873
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          }
+        ],
+        "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+        "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+        "model_promoted": false
+      },
+      "global_readout": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          54.55282374757608,
+          423.18456638611536,
+          125.20257718279301,
+          43.604726566041506
+        ],
+        "smoothed_global_range_hz": [
+          21.075729896769943,
+          98.55175547442158
+        ],
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "complete_events": {
+          "n": 0
+        },
+        "persistent_spatial_fraction": 0.080625,
+        "group_rate_relative_variation": 0.5771603244041617,
+        "M_mean_global_A_B_surround": [
+          0.02682990579142513,
+          0.2118584771415254,
+          0.05431989258386402,
+          0.021540389297110187
+        ]
+      },
+      "original_global_onset_ms": null
+    }
+  ],
+  "core_centers_mm": [
+    [
+      4.199214315969863,
+      9.128901353649564
+    ],
+    [
+      16.47920304043638,
+      3.965511533006886
+    ]
+  ],
+  "definition": "Same complete initial state; only Core A Z differs. All Z held during each trajectory, all M dynamic. Final5s of10s paired continuation. Spatial means/duty are not equilibrium, period means or bifurcation branches.",
+  "model_promoted": false,
+  "human_visual_acceptance": "PENDING",
+  "agent_png_visual_review": "PASS: actual core geometry, shared scales and D_A labels, no narrative title or unverified branch symbols",
+  "agent_same_pdf_visual_review": "PASS: /tmp/hfosp_core_a_resource_pdf_review.png inspected; same panels and labels"
+}

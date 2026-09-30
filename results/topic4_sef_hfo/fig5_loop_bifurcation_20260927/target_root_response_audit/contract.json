@@ -1,0 +1,6791 @@
+{
+  "status": "FROZEN_BEFORE_FRESH_TARGETS",
+  "created_epoch": 1790533860.2960756,
+  "question": "Are the static values and local DC derivatives accurate at actual-exit K9 target inputs, especially partially recruited cells that control spatial recruitment?",
+  "selection": "One median physical target per nonempty prespecified rate stratum in coreA/coreB/surround/I, plus maximum absolute mean-current derivative in each. No target or network fit; selection precedes fresh Monte Carlo.",
+  "kernels": [
+    "Frozen surrogate training exact-colored-current discretisation",
+    "Same moments with the coupled density one-increment synaptic ordering; independent covariance algebra checked"
+  ],
+  "design": {
+    "physical_targets": 18,
+    "paired_tests": 260,
+    "conditions": 520,
+    "replicas": 8192,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "seed": 928811,
+    "device": 0,
+    "amplitudes": "mu .02*(threshold-11); variances1%; g1%*(1+g), each repeated at half amplitude"
+  },
+  "gate": "Report every channel. Estimable when paired gain abs/SEM>=10; error <=max(10%abs(measuredgain),2SEM,1e-7), unchanged from earlier DC rule. Nonestimable is not PASS. Half-amplitude difference uses paired covariance, max(10%fullgain,2SEM,1e-7). Static mean error <=max(2Hz,10%measured,3SEM).",
+  "limits": "Independent local Gaussian-current counts, not native network seeds, adaptation feedback or dynamic susceptibility. M is fixed at its root value for the local response. Passing values alone cannot certify stability or native bifurcation.",
+  "model_sha256": "a951a19ae1faf937c44b687bdd13ea9e6724bf508da00634cf5970f2e696bb63",
+  "root_sha256": "e3bb59921df922d94891f5ba34ac33b25edf916a23663dd780885b20fc99f721",
+  "producer_sha256": "bde848e8664dcb88e901376fa278fba7bffc60bdf705663b54a4b62ba61afbea",
+  "MC_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/lif_mc.py",
+  "MC_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f",
+  "formal_bifurcation_allowed": false,
+  "rows": [
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "mean_mV",
+      "amplitude": 0.13853485621150674,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        0,
+        1
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.5838695583898464
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "mean_mV",
+      "amplitude": 0.06926742810575337,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        2,
+        3
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.5838695583898464
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_E",
+      "amplitude": 0.02256134386998079,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        4,
+        5
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": -0.009270941428836657
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_E",
+      "amplitude": 0.011280671934990395,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        6,
+        7
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": -0.009270941428836657
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_I",
+      "amplitude": 0.002561974144261675,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        8,
+        9
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.02156382072306029
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_I",
+      "amplitude": 0.0012809870721308375,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        10,
+        11
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.02156382072306029
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "conductance",
+      "amplitude": 0.11739993111840574,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        12,
+        13
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 2.7611445068179417
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "conductance",
+      "amplitude": 0.05869996555920287,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        14,
+        15
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 2.7611445068179417
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        16,
+        17
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 1.189526800013825
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        18,
+        19
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 1.189526800013825
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.018463055467132828,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        20,
+        21
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": -0.04276111854963249
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.009231527733566414,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        22,
+        23
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": -0.04276111854963249
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0021755903361044106,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        24,
+        25
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 0.03343531734829399
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0010877951680522053,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        26,
+        27
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 0.03343531734829399
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11593683980281902,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        28,
+        29
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 3.951750448828596
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05796841990140951,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        30,
+        31
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 3.951750448828596
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "mean_mV",
+      "amplitude": 0.1384729061271495,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        32,
+        33
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.568215004587882
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "mean_mV",
+      "amplitude": 0.06923645306357475,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        34,
+        35
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.568215004587882
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_E",
+      "amplitude": 0.022237171658563277,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        36,
+        37
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": -0.008385019091423621
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_E",
+      "amplitude": 0.011118585829281638,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        38,
+        39
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": -0.008385019091423621
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_I",
+      "amplitude": 0.0022851766583553454,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        40,
+        41
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.02184934478702886
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_I",
+      "amplitude": 0.0011425883291776727,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        42,
+        43
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.02184934478702886
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "conductance",
+      "amplitude": 0.11823539308505972,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        44,
+        45
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 2.6935569187583956
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "conductance",
+      "amplitude": 0.05911769654252986,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        46,
+        47
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 2.6935569187583956
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        48,
+        49
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.6096838650640898
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        50,
+        51
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.6096838650640898
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.021992903599936033,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        52,
+        53
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": -0.011530859556997614
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010996451799968016,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        54,
+        55
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": -0.011530859556997614
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0023843919616943795,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        56,
+        57
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.0191190520554295
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0011921959808471898,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        58,
+        59
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.0191190520554295
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11782652465005095,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        60,
+        61
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 2.815321141328778
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05891326232502547,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        62,
+        63
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 2.815321141328778
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        64,
+        65
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -3.4718081499546474e-06
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        66,
+        67
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -3.4718081499546474e-06
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0005768382271928612,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        68,
+        69
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -2.723897090735878e-06
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0002884191135964306,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        70,
+        71
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -2.723897090735878e-06
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 2.5959709414919052e-06,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        72,
+        73
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -1.7706152626305603e-05
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.2979854707459526e-06,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        74,
+        75
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -1.7706152626305603e-05
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.1052748421944887,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        76,
+        77
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": 9.328271255661155e-05
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05263742109724435,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        78,
+        79
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": 9.328271255661155e-05
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        80,
+        81
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 4.28048971693045
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        82,
+        83
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 4.28048971693045
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010500219553454822,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        84,
+        85
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 7.267726469834433
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005250109776727411,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        86,
+        87
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 7.267726469834433
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0019141135671123537,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        88,
+        89
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 2.336418008765955
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0009570567835561768,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        90,
+        91
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 2.336418008765955
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11034819408858694,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        92,
+        93
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 0.048735529237721
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05517409704429347,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        94,
+        95
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 0.048735529237721
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        96,
+        97
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 63.27569039098687
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        98,
+        99
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 63.27569039098687
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010765823576706132,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        100,
+        101
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.180269137900528
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005382911788353066,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        102,
+        103
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.180269137900528
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.001892487874020006,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        104,
+        105
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.668598764260598
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.000946243937010003,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        106,
+        107
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.668598764260598
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11041996857036682,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        108,
+        109
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 2.797144791777585
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05520998428518341,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        110,
+        111
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 2.797144791777585
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        112,
+        113
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 25.092003744590382
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        114,
+        115
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 25.092003744590382
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010097018375633027,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        116,
+        117
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 0.7838706978486195
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005048509187816514,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        118,
+        119
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 0.7838706978486195
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0016907135053079545,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        120,
+        121
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": -0.10285391225320475
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0008453567526539772,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        122,
+        123
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": -0.10285391225320475
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11572599248456435,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        124,
+        125
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 9.483370317119851
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05786299624228217,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        126,
+        127
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 9.483370317119851
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        128,
+        129
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 2.738465236544806
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        130,
+        131
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 2.738465236544806
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0156666229366815,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        132,
+        133
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": -0.09984813204998555
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.00783331146834075,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        134,
+        135
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": -0.09984813204998555
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0018495287755226036,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        136,
+        137
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 0.06124168564267032
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0009247643877613018,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        138,
+        139
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 0.06124168564267032
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11553269651550183,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        140,
+        141
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 5.6981105478694705
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05776634825775091,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        142,
+        143
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 5.6981105478694705
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        144,
+        145
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.6134968648515305
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        146,
+        147
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.6134968648515305
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.022544587897758313,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        148,
+        149
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": -0.01166102806152051
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.011272293948879157,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        150,
+        151
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": -0.01166102806152051
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0025457874840704386,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        152,
+        153
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.019877653865385866
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0012728937420352193,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        154,
+        155
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.019877653865385866
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.1183004188039915,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        156,
+        157
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 2.8048901421167876
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05915020940199575,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        158,
+        159
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 2.8048901421167876
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        160,
+        161
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 72.85038116462157
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        162,
+        163
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 72.85038116462157
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.009433008184399762,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        164,
+        165
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 6.598860810884729
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.004716504092199881,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        166,
+        167
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 6.598860810884729
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0015043303909016224,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        168,
+        169
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 3.969785482478009
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0007521651954508112,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        170,
+        171
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 3.969785482478009
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11591292682631207,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        172,
+        173
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 1.550726907578554
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05795646341315604,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        174,
+        175
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 1.550726907578554
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        176,
+        177
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.19520949484952338
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        178,
+        179
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.19520949484952338
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.11023621269064796,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        180,
+        181
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.065166899097898
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.05511810634532398,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        182,
+        183
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.065166899097898
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0037469043747375007,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        184,
+        185
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.03160053912221229
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0018734521873687503,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        186,
+        187
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.03160053912221229
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        188,
+        189
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 1.739341409400767
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        190,
+        191
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 1.739341409400767
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.4159148643727135,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        192,
+        193
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.05488369853832299
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.7079574321863568,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        194,
+        195
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.05488369853832299
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.9183793590009977,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        196,
+        197
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.019862881584579464
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.9591896795004988,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        198,
+        199
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.019862881584579464
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        200,
+        201
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 8.113960649760957
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        202,
+        203
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 8.113960649760957
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.421713325340417,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        204,
+        205
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.023545941329398287
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.7108566626702085,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        206,
+        207
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.023545941329398287
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.7079000040560666,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        208,
+        209
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.011048111859322574
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.8539500020280333,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        210,
+        211
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.011048111859322574
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        212,
+        213
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": 6.759641483272234
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        214,
+        215
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": 6.759641483272234
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.8085665576912646,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        216,
+        217
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.04826081848930216
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.4042832788456323,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        218,
+        219
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.04826081848930216
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 7.522044777049224,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        220,
+        221
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.008760526657291299
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.761022388524612,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        222,
+        223
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.008760526657291299
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        224,
+        225
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": 2.8962675793893347
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        226,
+        227
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": 2.8962675793893347
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 4.396505465681815,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        228,
+        229
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.02245539895262713
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.1982527328409076,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        230,
+        231
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.02245539895262713
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 11.548141390462742,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        232,
+        233
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.004229586797721316
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 5.774070695231371,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        234,
+        235
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.004229586797721316
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        236,
+        237
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": 1.4905520149612357
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        238,
+        239
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": 1.4905520149612357
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 4.258766134584078,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        240,
+        241
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.00961244568551886
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.129383067292039,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        242,
+        243
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.00961244568551886
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 10.545082783174038,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        244,
+        245
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.0019831683329805815
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 5.272541391587019,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        246,
+        247
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.0019831683329805815
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        248,
+        249
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": 9.294015373957556
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        250,
+        251
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": 9.294015373957556
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.8277522099380553,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        252,
+        253
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.026420288950982956
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.41387610496902766,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        254,
+        255
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.026420288950982956
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.9318973918620592,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        256,
+        257
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.002279521533152388
+    },
+    {
+      "kernel": "exact_colored",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.9659486959310296,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        258,
+        259
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.002279521533152388
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "mean_mV",
+      "amplitude": 0.13853485621150674,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        260,
+        261
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.5838695583898464
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "mean_mV",
+      "amplitude": 0.06926742810575337,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        262,
+        263
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.5838695583898464
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_E",
+      "amplitude": 0.02256134386998079,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        264,
+        265
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": -0.009270941428836657
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_E",
+      "amplitude": 0.011280671934990395,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        266,
+        267
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": -0.009270941428836657
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_I",
+      "amplitude": 0.002561974144261675,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        268,
+        269
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.02156382072306029
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "variance_I",
+      "amplitude": 0.0012809870721308375,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        270,
+        271
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 0.02156382072306029
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "conductance",
+      "amplitude": 0.11739993111840574,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        272,
+        273
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 2.7611445068179417
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23177,
+      "group": 1016,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: median of [450,500.01) Hz; N=754"
+      ],
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "threshold_mV": 17.926742810575337,
+      "channel": "conductance",
+      "amplitude": 0.05869996555920287,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        274,
+        275
+      ],
+      "prediction_Hz": 465.74870607410014,
+      "predicted_gain_Hz": 2.7611445068179417
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        276,
+        277
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 1.189526800013825
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        278,
+        279
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 1.189526800013825
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.018463055467132828,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        280,
+        281
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": -0.04276111854963249
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.009231527733566414,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        282,
+        283
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": -0.04276111854963249
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0021755903361044106,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        284,
+        285
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 0.03343531734829399
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0010877951680522053,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        286,
+        287
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 0.03343531734829399
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11593683980281902,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        288,
+        289
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 3.951750448828596
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 26259,
+      "group": 709,
+      "population": "E",
+      "region": 0,
+      "selected_by": [
+        "coreA: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05796841990140951,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        290,
+        291
+      ],
+      "prediction_Hz": 450.08603598075985,
+      "predicted_gain_Hz": 3.951750448828596
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "mean_mV",
+      "amplitude": 0.1384729061271495,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        292,
+        293
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.568215004587882
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "mean_mV",
+      "amplitude": 0.06923645306357475,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        294,
+        295
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.568215004587882
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_E",
+      "amplitude": 0.022237171658563277,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        296,
+        297
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": -0.008385019091423621
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_E",
+      "amplitude": 0.011118585829281638,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        298,
+        299
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": -0.008385019091423621
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_I",
+      "amplitude": 0.0022851766583553454,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        300,
+        301
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.02184934478702886
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "variance_I",
+      "amplitude": 0.0011425883291776727,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        302,
+        303
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 0.02184934478702886
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "conductance",
+      "amplitude": 0.11823539308505972,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        304,
+        305
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 2.6935569187583956
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14074,
+      "group": 441,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: median of [450,500.01) Hz; N=786"
+      ],
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "threshold_mV": 17.923645306357475,
+      "channel": "conductance",
+      "amplitude": 0.05911769654252986,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        306,
+        307
+      ],
+      "prediction_Hz": 466.3442724815294,
+      "predicted_gain_Hz": 2.6935569187583956
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        308,
+        309
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.6096838650640898
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        310,
+        311
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.6096838650640898
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.021992903599936033,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        312,
+        313
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": -0.011530859556997614
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010996451799968016,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        314,
+        315
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": -0.011530859556997614
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0023843919616943795,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        316,
+        317
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.0191190520554295
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0011921959808471898,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        318,
+        319
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 0.0191190520554295
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11782652465005095,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        320,
+        321
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 2.815321141328778
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 23113,
+      "group": 615,
+      "population": "E",
+      "region": 1,
+      "selected_by": [
+        "coreB: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05891326232502547,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        322,
+        323
+      ],
+      "prediction_Hz": 464.8544915268166,
+      "predicted_gain_Hz": 2.815321141328778
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        324,
+        325
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -3.4718081499546474e-06
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        326,
+        327
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -3.4718081499546474e-06
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0005768382271928612,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        328,
+        329
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -2.723897090735878e-06
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0002884191135964306,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        330,
+        331
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -2.723897090735878e-06
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 2.5959709414919052e-06,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        332,
+        333
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -1.7706152626305603e-05
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.2979854707459526e-06,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        334,
+        335
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": -1.7706152626305603e-05
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.1052748421944887,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        336,
+        337
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": 9.328271255661155e-05
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 14150,
+      "group": 86,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0,0.1) Hz; N=14401"
+      ],
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05263742109724435,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        338,
+        339
+      ],
+      "prediction_Hz": 0.001548857134011845,
+      "predicted_gain_Hz": 9.328271255661155e-05
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        340,
+        341
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 4.28048971693045
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        342,
+        343
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 4.28048971693045
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010500219553454822,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        344,
+        345
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 7.267726469834433
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005250109776727411,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        346,
+        347
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 7.267726469834433
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0019141135671123537,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        348,
+        349
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 2.336418008765955
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0009570567835561768,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        350,
+        351
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 2.336418008765955
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11034819408858694,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        352,
+        353
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 0.048735529237721
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 5059,
+      "group": 1501,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [0.1,10) Hz; N=74"
+      ],
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05517409704429347,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        354,
+        355
+      ],
+      "prediction_Hz": 1.1098069043769985,
+      "predicted_gain_Hz": 0.048735529237721
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        356,
+        357
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 63.27569039098687
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        358,
+        359
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 63.27569039098687
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010765823576706132,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        360,
+        361
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.180269137900528
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005382911788353066,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        362,
+        363
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.180269137900528
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.001892487874020006,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        364,
+        365
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.668598764260598
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.000946243937010003,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        366,
+        367
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 4.668598764260598
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11041996857036682,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        368,
+        369
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 2.797144791777585
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 24021,
+      "group": 1540,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [10,100) Hz; N=85"
+      ],
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05520998428518341,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        370,
+        371
+      ],
+      "prediction_Hz": 48.387858487146744,
+      "predicted_gain_Hz": 2.797144791777585
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        372,
+        373
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 25.092003744590382
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        374,
+        375
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 25.092003744590382
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.010097018375633027,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        376,
+        377
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 0.7838706978486195
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.005048509187816514,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        378,
+        379
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 0.7838706978486195
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0016907135053079545,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        380,
+        381
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": -0.10285391225320475
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0008453567526539772,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        382,
+        383
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": -0.10285391225320475
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11572599248456435,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        384,
+        385
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 9.483370317119851
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 6080,
+      "group": 798,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [100,300) Hz; N=410"
+      ],
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05786299624228217,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        386,
+        387
+      ],
+      "prediction_Hz": 236.8687441155883,
+      "predicted_gain_Hz": 9.483370317119851
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        388,
+        389
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 2.738465236544806
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        390,
+        391
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 2.738465236544806
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.0156666229366815,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        392,
+        393
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": -0.09984813204998555
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.00783331146834075,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        394,
+        395
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": -0.09984813204998555
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0018495287755226036,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        396,
+        397
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 0.06124168564267032
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0009247643877613018,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        398,
+        399
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 0.06124168564267032
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11553269651550183,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        400,
+        401
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 5.6981105478694705
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 28605,
+      "group": 914,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [300,450) Hz; N=2243"
+      ],
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05776634825775091,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        402,
+        403
+      ],
+      "prediction_Hz": 423.8826959377622,
+      "predicted_gain_Hz": 5.6981105478694705
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        404,
+        405
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.6134968648515305
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        406,
+        407
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.6134968648515305
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.022544587897758313,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        408,
+        409
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": -0.01166102806152051
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.011272293948879157,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        410,
+        411
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": -0.01166102806152051
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0025457874840704386,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        412,
+        413
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.019877653865385866
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0012728937420352193,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        414,
+        415
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 0.019877653865385866
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.1183004188039915,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        416,
+        417
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 2.8048901421167876
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 7981,
+      "group": 1326,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: median of [450,500.01) Hz; N=13247"
+      ],
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05915020940199575,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        418,
+        419
+      ],
+      "prediction_Hz": 464.8143764403635,
+      "predicted_gain_Hz": 2.8048901421167876
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        420,
+        421
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 72.85038116462157
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        422,
+        423
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 72.85038116462157
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.009433008184399762,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        424,
+        425
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 6.598860810884729
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.004716504092199881,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        426,
+        427
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 6.598860810884729
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0015043303909016224,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        428,
+        429
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 3.969785482478009
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0007521651954508112,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        430,
+        431
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 3.969785482478009
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.11591292682631207,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        432,
+        433
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 1.550726907578554
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 12923,
+      "group": 745,
+      "population": "E",
+      "region": 2,
+      "selected_by": [
+        "surround: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "threshold_mV": 18.0,
+      "channel": "conductance",
+      "amplitude": 0.05795646341315604,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        434,
+        435
+      ],
+      "prediction_Hz": 29.173714942864304,
+      "predicted_gain_Hz": 1.550726907578554
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        436,
+        437
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.19520949484952338
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        438,
+        439
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.19520949484952338
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.11023621269064796,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        440,
+        441
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.065166899097898
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.05511810634532398,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        442,
+        443
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.065166899097898
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0037469043747375007,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        444,
+        445
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.03160053912221229
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 37293,
+      "group": 2916,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [0,1) Hz; N=3061"
+      ],
+      "physical": [
+        11.710482380990758,
+        11.023621269064796,
+        0.3746904374737501,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.0018734521873687503,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        446,
+        447
+      ],
+      "prediction_Hz": 0.16770790662601182,
+      "predicted_gain_Hz": 0.03160053912221229
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        448,
+        449
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 1.739341409400767
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        450,
+        451
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 1.739341409400767
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.4159148643727135,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        452,
+        453
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.05488369853832299
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.7079574321863568,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        454,
+        455
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.05488369853832299
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.9183793590009977,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        456,
+        457
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.019862881584579464
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34435,
+      "group": 2559,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [1,50) Hz; N=249"
+      ],
+      "physical": [
+        2.304081050416812,
+        141.59148643727136,
+        391.83793590009975,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.9591896795004988,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        458,
+        459
+      ],
+      "prediction_Hz": 10.178308348677524,
+      "predicted_gain_Hz": 0.019862881584579464
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        460,
+        461
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 8.113960649760957
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        462,
+        463
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 8.113960649760957
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.421713325340417,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        464,
+        465
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.023545941329398287
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.7108566626702085,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        466,
+        467
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.023545941329398287
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.7079000040560666,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        468,
+        469
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.011048111859322574
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35838,
+      "group": 2445,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [50,200) Hz; N=240"
+      ],
+      "physical": [
+        25.208479774799287,
+        142.1713325340417,
+        370.79000040560663,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.8539500020280333,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        470,
+        471
+      ],
+      "prediction_Hz": 126.43874518827089,
+      "predicted_gain_Hz": 0.011048111859322574
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        472,
+        473
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": 6.759641483272234
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        474,
+        475
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": 6.759641483272234
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.8085665576912646,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        476,
+        477
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.04826081848930216
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 1.4042832788456323,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        478,
+        479
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.04826081848930216
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 7.522044777049224,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        480,
+        481
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.008760526657291299
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 38688,
+      "group": 2183,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [200,400) Hz; N=395"
+      ],
+      "physical": [
+        49.84457539155062,
+        280.85665576912646,
+        752.2044777049224,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 3.761022388524612,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        482,
+        483
+      ],
+      "prediction_Hz": 310.04779503993876,
+      "predicted_gain_Hz": -0.008760526657291299
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        484,
+        485
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": 2.8962675793893347
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        486,
+        487
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": 2.8962675793893347
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 4.396505465681815,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        488,
+        489
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.02245539895262713
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.1982527328409076,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        490,
+        491
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.02245539895262713
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 11.548141390462742,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        492,
+        493
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.004229586797721316
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 33797,
+      "group": 1957,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [400,700) Hz; N=4049"
+      ],
+      "physical": [
+        112.39960958329061,
+        439.65054656818154,
+        1154.8141390462742,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 5.774070695231371,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        494,
+        495
+      ],
+      "prediction_Hz": 585.3683741988115,
+      "predicted_gain_Hz": -0.004229586797721316
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        496,
+        497
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": 1.4905520149612357
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        498,
+        499
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": 1.4905520149612357
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 4.258766134584078,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        500,
+        501
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.00961244568551886
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 2.129383067292039,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        502,
+        503
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.00961244568551886
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 10.545082783174038,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        504,
+        505
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.0019831683329805815
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 34723,
+      "group": 2396,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: median of [700,1000.01) Hz; N=6"
+      ],
+      "physical": [
+        172.81507262909918,
+        425.87661345840775,
+        1054.508278317404,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 5.272541391587019,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        506,
+        507
+      ],
+      "prediction_Hz": 712.3541424667903,
+      "predicted_gain_Hz": -0.0019831683329805815
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.14,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        508,
+        509
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": 9.294015373957556
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "mean_mV",
+      "amplitude": 0.07,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        510,
+        511
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": 9.294015373957556
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.8277522099380553,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        512,
+        513
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.026420288950982956
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_E",
+      "amplitude": 0.41387610496902766,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        514,
+        515
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.026420288950982956
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 1.9318973918620592,
+      "amplitude_factor": 1.0,
+      "count_indices": [
+        516,
+        517
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.002279521533152388
+    },
+    {
+      "kernel": "density_discrete",
+      "cell": 35908,
+      "group": 3023,
+      "population": "I",
+      "region": 2,
+      "selected_by": [
+        "I: maximum absolute mean-current derivative"
+      ],
+      "physical": [
+        29.00541527826016,
+        82.77522099380553,
+        193.1897391862059,
+        0.0
+      ],
+      "threshold_mV": 18.0,
+      "channel": "variance_I",
+      "amplitude": 0.9659486959310296,
+      "amplitude_factor": 0.5,
+      "count_indices": [
+        518,
+        519
+      ],
+      "prediction_Hz": 158.25345281662408,
+      "predicted_gain_Hz": -0.002279521533152388
+    }
+  ]
+}

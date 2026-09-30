@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-23T17:17:18.189934+08:00",
+  "question": "Does the candidate recurrence also close synapses, all local response memories, dynamic M and the complete delay/refractory history?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower_dt0025/final_state.npz",
+  "period_seed": {
+    "source": "native9420_from_lower_dt0025/block00.npz",
+    "period_ms": 288.12784000594047,
+    "tail_ms": 2000,
+    "relative_rate_MSE": 0.0005435504284296343,
+    "integer_candidate_ms": 288,
+    "definition": "Linear interpolation of1ms averaged full E/I group rates; period seed only, not full delayed-state closure or Floquet certificate."
+  },
+  "scope": "One proposed return at the declared trajectory step; time interpolation only locates a shooting seed. No stability, time-step convergence or bifurcation certificate.",
+  "budget": "One period plus1ms of actual unchanged conditional-drift integration."
+}

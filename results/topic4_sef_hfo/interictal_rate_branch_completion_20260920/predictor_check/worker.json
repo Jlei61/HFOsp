@@ -1,0 +1,48 @@
+{
+  "status": "FINISHED",
+  "pid": 489429,
+  "timestamp": 1789860892.8081496,
+  "result": {
+    "status": "PASS",
+    "target": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0003_N4096.npz",
+    "corrected_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/curvature_predictor_Bleading_known_point3_N4096.npz",
+    "J_difference": 7.549516567451064e-15,
+    "T_difference_ms": 9.890754881780595e-12,
+    "relative_full_waveform_difference": 1.4395253074150536e-13,
+    "initial_residual_screen": {
+      "method": "CURVATURE_INITIAL_GUESS",
+      "residuals": [
+        {
+          "maximum": 3.7068465182450994,
+          "L2": 46.530274322674984
+        },
+        {
+          "maximum": 1.3847703028012082,
+          "L2": 10.963381857820707
+        }
+      ],
+      "arc_plane_displacement": -6.820282186237314e-15,
+      "weighted_correction_norm": 0.028500744449648223,
+      "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+    },
+    "newton_residual_hz": 6.245004513516506e-13,
+    "newton_iterations": 3,
+    "original_newton_iterations": 4,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -6.106226635438361e-13,
+        "phase_index": 2998,
+        "group": 684
+      },
+      "slow": {
+        "minimum_Hz": 5.9396076919689285e-05,
+        "phase_index": 3758,
+        "group": 16
+      },
+      "positive": true,
+      "N": 4096,
+      "check_N": 16384
+    },
+    "scope": "Same full 935-population periodic equations, physical delays, temporal mesh, arc plane, phase plane and tolerance. Only the numerical initial guess changes. This does not modify or restart any live continuation batch."
+  }
+}

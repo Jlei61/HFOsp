@@ -1,0 +1,17 @@
+{
+  "model": "Spatial rate DDE",
+  "grid": 20,
+  "rate_groups": 935,
+  "particle_count": 0,
+  "Z_E": 1.0,
+  "private_input": "Original stationary Poisson statistics integrated in Phi",
+  "external_common_noise": "Zero fluctuation for autonomous skeleton",
+  "J_values": [
+    0.0,
+    0.5,
+    1.0
+  ],
+  "state_dependent_tau": false,
+  "validation": "Equilibrium residual and exact delay characteristic residual",
+  "limitation": "Zero-delay eigenvalues provide search seeds only. No stable label without a converged rightmost-spectrum audit; no SNN mechanism claim before correspondence."
+}

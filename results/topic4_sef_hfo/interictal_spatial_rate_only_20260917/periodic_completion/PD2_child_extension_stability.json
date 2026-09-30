@@ -1,0 +1,35 @@
+{
+  "status": "VALIDATED_ENDPOINT_INSTABILITY",
+  "checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperextension_a40.00000_N4096_dt0.1.json",
+      "J_EE_core": 0.9447347317030986,
+      "T_ms": 1523.8994707898878,
+      "multiplier": [
+        -4.386228988782903,
+        0.0
+      ],
+      "relative_eigenpair_residual": 1.8327792289994523e-14,
+      "phase_relative_defect": 0.0009140226611681073
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperextension_a40.00000_N4096_dt0.05.json",
+      "J_EE_core": 0.9447347317030986,
+      "T_ms": 1523.8994707898878,
+      "multiplier": [
+        -4.3856156504258905,
+        0.0
+      ],
+      "relative_eigenpair_residual": 1.4554063429889667e-14,
+      "phase_relative_defect": 0.00023451971171207896
+    }
+  ],
+  "multiplier_step_change": 0.0006133383570121609,
+  "margin": 0.0024533534280486435,
+  "continuous_accuracy_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD2_extended_child_accuracy.json",
+  "stable_child_J": 0.9447287467299924,
+  "unstable_child_J": 0.9447347317030986,
+  "stable_child_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperchild_a10.00000_N4096_dt0.05.json",
+  "candidate_type": "Possible subsequent period doubling; antiperiodic crossing not yet solved",
+  "scope": "Numerically stable smaller child and unstable larger child bound a stability change on the followed child family. A negative outside multiplier is a PD search seed, not proof of a unique -1 crossing, its location, or its criticality."
+}

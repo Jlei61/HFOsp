@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "N": 64,
+      "reference_vs_on_demand_relative_difference": 5.490958253938823e-12
+    },
+    {
+      "N": 128,
+      "reference_vs_on_demand_relative_difference": 2.752306517069111e-12
+    }
+  ],
+  "scope": "Compare the original full 2T antiperiodic extension against the odd-harmonic on-demand operator after releasing the temporary gain-computation cache. Same equation and 935 groups."
+}

@@ -1,0 +1,52 @@
+{
+  "status": "FORCING_DIAGNOSTIC_COMPLETE_NO_NETWORK_CHANGE",
+  "rows": [
+    {
+      "region": "Core A",
+      "cells": 754,
+      "RMS_difference_mV": 0.3277992219603589,
+      "mean_absolute_difference_mV": 0.2612672083382036,
+      "maximum_absolute_difference_mV": 1.5725997239567029,
+      "original_mean_mV": 12.771508131971748,
+      "original_temporal_SD_mV": 0.7812771785953401,
+      "filtered_temporal_SD_mV": 0.7259103984295292
+    },
+    {
+      "region": "Core B",
+      "cells": 786,
+      "RMS_difference_mV": 0.32916091865356534,
+      "mean_absolute_difference_mV": 0.26230753440422516,
+      "maximum_absolute_difference_mV": 1.565411560225984,
+      "original_mean_mV": 12.821459106678237,
+      "original_temporal_SD_mV": 0.7729057499229335,
+      "filtered_temporal_SD_mV": 0.7163936005797997
+    },
+    {
+      "region": "Surround",
+      "cells": 30460,
+      "RMS_difference_mV": 0.3290922559347057,
+      "mean_absolute_difference_mV": 0.262534673117773,
+      "maximum_absolute_difference_mV": 1.7648536212613664,
+      "original_mean_mV": 12.793301815620417,
+      "original_temporal_SD_mV": 0.7874628160738816,
+      "filtered_temporal_SD_mV": 0.7320719611794307
+    },
+    {
+      "region": "I",
+      "cells": 8000,
+      "RMS_difference_mV": 0.04488272130737767,
+      "mean_absolute_difference_mV": 0.03600700753451452,
+      "maximum_absolute_difference_mV": 0.1656235152999077,
+      "original_mean_mV": 11.949953766470381,
+      "original_temporal_SD_mV": 0.2734454468003615,
+      "filtered_temporal_SD_mV": 0.270562610177709
+    }
+  ],
+  "native_source": "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py",
+  "native_lines": "430-435: external Poisson counts increment s_E; I_E then low-pass follows s_E, sameAMPApath as recurrent excitation.",
+  "rate_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/refractory_spatial_diagnostic.py",
+  "rate_difference": "physical_step adds pm=tau_m*area_A*J_ext*nu directly after recurrentAMPAfilter; externalvariance is already passed through currentcovariance.",
+  "protocol": "Original recorded1ms external-rate averages held constant insideeach1ms; existing area_A maintainsnative discreteDCgain. Exactcontinuous two-pole mean update at.05ms,1ms outputmean.",
+  "limitation": "Not a reconstruction of sub-ms nativeexternalrates or realizedPoisson currents. Difference is measured within the current rate-input convention. Does not establish the contribution to onset or change any activebatch.",
+  "model_promoted": false
+}

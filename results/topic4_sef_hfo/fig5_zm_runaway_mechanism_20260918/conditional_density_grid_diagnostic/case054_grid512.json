@@ -1,0 +1,51 @@
+{
+  "status": "GRID_DIAGNOSTIC_CASE_COMPLETE",
+  "case_id": 54,
+  "grid_nodes": 512,
+  "workpoint": {
+    "pop": "E",
+    "mu": 38.105642595043854,
+    "theta": 18.0,
+    "ve": 98.8064369216561,
+    "vi": 228.10459732455527
+  },
+  "channel": 0,
+  "frequency_hz": 0.0,
+  "dt_ms": 0.05,
+  "predicted": [
+    3.863109379048031,
+    0.0
+  ],
+  "measured": [
+    3.891194661458333,
+    0.0
+  ],
+  "dc_measured": 3.891194661458333,
+  "normalized_error": 0.007217650324329041,
+  "tolerance": 0.15,
+  "counted": true,
+  "passed": true,
+  "numerical_pass": true,
+  "numerical": [
+    [
+      9.969802761133906e-14,
+      1.1888656807053413e-13,
+      3.3878214019904536e-21,
+      0.0,
+      0.0
+    ],
+    [
+      1.7008616737257398e-13,
+      1.9078399428759553e-13,
+      3.686743264642782e-21,
+      0.0,
+      0.0
+    ]
+  ],
+  "mean_rates_hz": [
+    114.36991708642748,
+    113.79045067957027
+  ],
+  "elapsed_seconds": 469.1953533840133,
+  "model_promoted": false
+}

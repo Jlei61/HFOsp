@@ -1,0 +1,135 @@
+{
+  "status": "COMPLETE_EXTERNAL_COUNT_LAW_COMPARISON",
+  "windows": [
+    {
+      "interval_s": [
+        0,
+        0.1
+      ],
+      "rate_Hz": [
+        197.01607921024032,
+        472.6170851001691,
+        474.5596786750303,
+        183.03208618265234
+      ],
+      "native_rate_Hz": [
+        196.53468749999996,
+        472.3474801061008,
+        473.7913486005088,
+        182.55285620485878
+      ],
+      "rate_difference_Hz": [
+        0.4813917102403593,
+        0.2696049940682883,
+        0.7683300745214865,
+        0.47922997779355114
+      ],
+      "weighted_field_RMS_Hz": 1.425684913811072,
+      "counterfactual_Zdot_per_s": [
+        0.04014198630196526,
+        -0.034833877128536486,
+        -0.03307375768365442,
+        0.0438872054680616
+      ],
+      "causal_R_range": [
+        197.0351506034925,
+        198.17944370768598
+      ],
+      "Graw_range": [
+        4.240454966938688e-26,
+        5.168955137392397e-26
+      ]
+    },
+    {
+      "interval_s": [
+        0.1,
+        0.8
+      ],
+      "rate_Hz": [
+        199.69078200499652,
+        472.97138572631513,
+        475.6650722537635,
+        185.80472267008489
+      ],
+      "native_rate_Hz": [
+        196.52183035714287,
+        472.3304281924971,
+        474.16757542711713,
+        182.53006284588696
+      ],
+      "rate_difference_Hz": [
+        3.168951647853646,
+        0.6409575338180389,
+        1.4974968266463975,
+        3.2746598241979257
+      ],
+      "weighted_field_RMS_Hz": 11.478360439437827,
+      "counterfactual_Zdot_per_s": [
+        0.03907037734125641,
+        -0.034833877128536764,
+        -0.03307375768365495,
+        0.04276141798471681
+      ],
+      "causal_R_range": [
+        198.08995059926056,
+        201.72409286307663
+      ],
+      "Graw_range": [
+        2.294857079878355e-26,
+        0.07661071998358908
+      ]
+    },
+    {
+      "interval_s": [
+        0.8,
+        1.0
+      ],
+      "rate_Hz": [
+        200.70040289457228,
+        472.8890717090346,
+        475.2892428272433,
+        186.87712369322014
+      ],
+      "native_rate_Hz": [
+        196.50984375,
+        472.3342175066312,
+        474.0458015267176,
+        182.52051871306628
+      ],
+      "rate_difference_Hz": [
+        4.1905591445722905,
+        0.5548542024034191,
+        1.243441300525717,
+        4.356604980153861
+      ],
+      "weighted_field_RMS_Hz": 18.89451016493254,
+      "counterfactual_Zdot_per_s": [
+        0.03831379977294636,
+        -0.03483387712853661,
+        -0.03307375768365441,
+        0.04196658928524471
+      ],
+      "causal_R_range": [
+        201.2005310345683,
+        201.5748840367924
+      ],
+      "Graw_range": [
+        0.0767692036352799,
+        0.09696244388188566
+      ]
+    }
+  ],
+  "relevance_guards": {
+    "tail_field_RMS": false,
+    "tail_each_core_rate": true,
+    "whole_R_below200": false,
+    "whole_Graw_below_point1": true
+  },
+  "development_relevance_retained": false,
+  "main_Gaussian_RNG_paired": true,
+  "interpretation": "One physical second at one conditional high-state development anchor. External Poisson law restored; realized counts differ from native. Bernoulli recurrent variance with independent Gaussian residuals still omits spatial and temporal source covariance. Not a formal branch or stability test.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PASS_LAYOUT_AND_DATA_SEMANTICS",
+  "human_visual": "PENDING",
+  "producer_sha256": "f272bed7f931a569671c1b7f4240b6cda2721e5011d79a8cffa7517291c91978"
+}

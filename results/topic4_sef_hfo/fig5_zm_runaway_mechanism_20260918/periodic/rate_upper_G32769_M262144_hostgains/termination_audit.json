@@ -1,0 +1,10 @@
+{
+  "status": "RESTARTED_FOR_MEMORY_SCHEDULING_AND_COLUMN_SCALING",
+  "time": "2026-09-19T09:47:31.320456",
+  "pid": 2776060,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/period_path.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz --periods 267.35066063917935 --family rate --N 32769 --M 262144 --large-quadrature --eliminate-period --host-krylov --harmonic-block 33 --restart 40 --fft-cache-mb 0 --log-linear-progress --device 0 --label rate_upper_G32769_M262144_hostgains ",
+  "initial_iterate_only": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G32769_restart_iterate_only.npz",
+  "residual_hz": 0.00015517399850534735,
+  "accepted_root": false,
+  "reason": "Host gain transfer dominated each Krylov action; exact partial GPU cache and right scaling passed parity/recovery checks. Root tolerance and model unchanged."
+}

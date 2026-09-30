@@ -1,0 +1,75 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.711066641465035,
+        "difference_rms": 6.058003332830681e-10,
+        "relative_rms": 3.625144619912535e-11
+      },
+      "GABA": {
+        "reference_rms": 10.941004875916846,
+        "difference_rms": 6.826057078814722e-10,
+        "relative_rms": 6.238967221228575e-11
+      },
+      "M": {
+        "reference_rms": 0.015831824320279846,
+        "difference_rms": 6.553538235080112e-13,
+        "relative_rms": 4.1394712968645866e-11
+      },
+      "covariance": {
+        "reference_rms": 37.72544545679614,
+        "difference_rms": 3.3098865216914854e-10,
+        "relative_rms": 8.773618128597122e-12
+      },
+      "input_memory": {
+        "reference_rms": 0.09787526612870423,
+        "difference_rms": 1.3150430331602905e-11,
+        "relative_rms": 1.343590761154133e-10
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.005495289954071745,
+        "difference_rms": 4.831169094103611e-13,
+        "relative_rms": 8.791472578301254e-11
+      }
+    },
+    "combined_relative_rms": 7.391267091552174e-11
+  },
+  "verified": [
+    {
+      "real": -0.3762445364538948,
+      "imag": 0.0,
+      "relative_residual": 4.9591609758024e-09,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.5904773227974716,
+      "imag": 0.0,
+      "relative_residual": 2.509959583716372e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    },
+    {
+      "real": 0.5588837310929738,
+      "imag": 0.0,
+      "relative_residual": 3.1678846503495504e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    }
+  ],
+  "seconds": 648.8029568195343,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 6.3733583210697e-05,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 1.7982268789552056e-05,
+      "pass_gate": true
+    }
+  ],
+  "prior_physical_neutral_gate_failed": false,
+  "model_promoted": false
+}

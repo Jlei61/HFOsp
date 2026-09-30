@@ -1,0 +1,11 @@
+{
+  "created_local": "2026-09-23T14:48:10.824798+08:00",
+  "question": "Can the numerically verified Z1 low equilibrium be tracked continuously to native preentry/entry fields, avoiding the failed large-jump initial guesses?",
+  "difference_from_failed_roots": "Use the previous converged equilibrium as the next seed and reduce only the Z-path step after failure. This changes the numerical route, not equations or parameters.",
+  "model": "Current corrected private-Q conditional drift; constant original mean input, full spatial Z prescribed, M dynamic. Transient correction and its derivative vanish at equilibrium.",
+  "parameter": "Original native observation time indexes a frozen spatial Z family; it is NOT integration time. Piecewise linear interpolation of the actual5/10ms native spatial fields. D is its cell-weighted display coordinate.",
+  "initial": "Independently flow-verified Z1 low equilibrium.",
+  "budget": "At most40 trial roots, each at most25 direct Newton iterations; initial path step250ms, maximum500ms, halve on failure until below2ms, terminate at9870ms. Every trial retained. No root-count, critical-type assignment or response fitting.",
+  "acceptance": "Each accepted point original residual<1e-11perms, physical positive rates. Natural continuation stops do not establish SN or other bifurcation.",
+  "scope": "Conditional mathematical seed construction only; autonomous Z/native correspondence failures retained; model not promoted."
+}

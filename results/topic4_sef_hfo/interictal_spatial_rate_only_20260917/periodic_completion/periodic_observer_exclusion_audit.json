@@ -1,0 +1,110 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/periodic_contact_observations.json",
+  "observer": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_surrogate_6101_20260916/observer_firing.json",
+  "rows": [
+    {
+      "case": "a",
+      "T_ms": null,
+      "qualified_events": 0,
+      "all_detected_events": 0,
+      "maximum_unique_contacts_in_observer_window": 0,
+      "required_unique_contacts": 8,
+      "exclusion_counts": {},
+      "observer_anchor_intervals_ms": [],
+      "observer_window_widths_ms": [],
+      "events_per_orbit": 0.0,
+      "status": "BELOW_FROZEN_GROUP_CONTACT_REQUIREMENT",
+      "meaning": "No qualified group; this does not imply zero field or contact activity."
+    },
+    {
+      "case": "b",
+      "T_ms": 158.3799421253318,
+      "qualified_events": 0,
+      "all_detected_events": 0,
+      "maximum_unique_contacts_in_observer_window": 0,
+      "required_unique_contacts": 8,
+      "exclusion_counts": {},
+      "observer_anchor_intervals_ms": [],
+      "observer_window_widths_ms": [],
+      "events_per_orbit": 0.0,
+      "status": "BELOW_FROZEN_GROUP_CONTACT_REQUIREMENT",
+      "meaning": "No qualified group; this does not imply zero field or contact activity."
+    },
+    {
+      "case": "c",
+      "T_ms": 784.9764952519879,
+      "qualified_events": 16,
+      "all_detected_events": 16,
+      "maximum_unique_contacts_in_observer_window": 11,
+      "required_unique_contacts": 8,
+      "exclusion_counts": {},
+      "observer_anchor_intervals_ms": [
+        376.0,
+        410.0,
+        376.0,
+        408.0,
+        376.0,
+        410.0,
+        376.0,
+        408.0,
+        376.0,
+        410.0,
+        376.0,
+        408.0,
+        376.0,
+        410.0,
+        376.0
+      ],
+      "observer_window_widths_ms": [
+        250.0
+      ],
+      "events_per_orbit": 2.0,
+      "status": "FROZEN_OBSERVER_APPLIED",
+      "meaning": "Repeated-orbit descriptors, not independent event samples or native-SNN equivalence."
+    },
+    {
+      "case": "d",
+      "T_ms": 312.74553082469765,
+      "qualified_events": 0,
+      "all_detected_events": 0,
+      "maximum_unique_contacts_in_observer_window": 7,
+      "required_unique_contacts": 8,
+      "exclusion_counts": {},
+      "observer_anchor_intervals_ms": [],
+      "observer_window_widths_ms": [],
+      "events_per_orbit": 0.0,
+      "status": "BELOW_FROZEN_GROUP_CONTACT_REQUIREMENT",
+      "meaning": "No qualified group; this does not imply zero field or contact activity."
+    },
+    {
+      "case": "e",
+      "T_ms": 249.33163760519673,
+      "qualified_events": 3,
+      "all_detected_events": 8,
+      "maximum_unique_contacts_in_observer_window": 8,
+      "required_unique_contacts": 8,
+      "exclusion_counts": {
+        "overlapping_window": 5
+      },
+      "observer_anchor_intervals_ms": [
+        250.0,
+        248.0,
+        250.0,
+        250.0,
+        248.0,
+        250.0,
+        250.0
+      ],
+      "observer_window_widths_ms": [
+        250.0
+      ],
+      "events_per_orbit": 1.0,
+      "status": "PERIODIC_WINDOW_OVERLAP_BIN_PHASE_SENSITIVE",
+      "continuous_anchor_overlap_ms": 0.6683623948032675,
+      "meaning": "One event per exact orbit. Continuous equally spaced windows overlap every cycle; bin-quantized anchors sometimes make windows touch instead. Selected fractions cannot be interpreted as irregular event generation."
+    }
+  ],
+  "equations_changed": false,
+  "observer_changed": false,
+  "scope": "Interpretation of existing exact-orbit readouts. Keeps the frozen observer results; does not recalibrate thresholds or infer absent propagation from excluded events."
+}

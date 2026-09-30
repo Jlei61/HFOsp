@@ -1,0 +1,11 @@
+{
+  "status": "REGISTERED_BEFORE_EXISTING_PAIRED_BUILDUP_AUDIT",
+  "created_epoch": 1790564148.284974,
+  "question": "Does changingG response time affect K accumulation before lowactivity, in addition to leaving a Gtail afterward?",
+  "design": "Read the two existingpairednative120s seeds8402/8403, G30 tauG0 versus0.5. Verifyjob differences are onlyname/tauG and20s exogenousstate plus recordedinputidentity. Compare firstentry-aligned0.5,1,2s windows (one,two,four feedbacktimeconstants), then the common window ending at delayedcondition firstsustainedR<=5. Original1ms causalR/G/K; no input reconstruction ornewnative simulation.",
+  "interpretation": "PairedtauG intervention establishes a total effect; temporalbuildup and Gtail are candidate mediators. Do not identify their individual necessity from this descriptive comparison or transfer conditionalKthresholds across spatialfields. Separate onsetovershoot, delayedqoffGcarryover and subsequentZrecovery.",
+  "unit": "Two reusednative seeds, not newreplicates. Windowmeans andpeaks are withintrajectory descriptions, not seed uncertainty.",
+  "prefix_QA": "Use R(t)<=R(nextsample)*exp(1ms/15ms), from nonnegativespikeincrements, to certify the entire prefeedbackprefix. The firstsample withq>0 canalreadycontain a feedbackeffect between0.1msupdates; the earlier assertion wronglyincluded it. Originalfailure andproducer preserved; no numericaltolerance is loosened.",
+  "producer_sha256": "ce59a6e97c5cc60a031b463f0ba4cfa71c610a8d44733685dd0ce5e09826663a",
+  "formal_bifurcation_allowed": false
+}

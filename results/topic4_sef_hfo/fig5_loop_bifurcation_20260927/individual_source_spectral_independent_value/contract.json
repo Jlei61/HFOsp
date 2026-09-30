@@ -1,0 +1,18 @@
+{
+  "status": "REGISTERED_BEFORE_INDEPENDENT_VALUE",
+  "created_epoch": 1790555063.864874,
+  "question": "At the fixed candidate produced by the bounded12-step numerical solver, do independent realizations support small rate AND source-spectrum residuals, or did common-stream iteration conceal an error?",
+  "design": "One unchanged F(X) evaluation of final mixed X12,40000individualtargets x64replicas, same2speriodic recurrent spectrum and3-4s burn. All Gaussian Fourier, external Poisson and burnphase streams receive a fresh seed offset1000000. Same original physical sampler, individual weights/thresholds/M/G and constant external expected drive. No correction step, newK or branch continuation.",
+  "selection": "FinalX12 from the preregistered bounded solver, used only if all12updates complete and its original relevance guards do not stop it. Initialnative42-44s reference is only a development spatial comparison.",
+  "precision": "Report F(X12)-X12 without multiplying by damping. Independent replica rateSEM, frequencywise periodogramSEM, and source-filtered varianceSEM describe this finite-window map only. ZeroSEM or weak channels remain explicitly unresolved; no ad hoc tolerance is added and no root certification follows automatically.",
+  "spectral_observer": "Read-only FFT of returned output spikes, before the unchanged worker records its standard means/PSDs; save variance overreplicas. Does not alter any physical input, state, spike or RNG.",
+  "dispatch": "Wait for bounded solver result and the separately authorized2s native high-history observer to finish; use two GPUs for this one value evaluation.",
+  "stopping": "One value assay only, no automatic newiterations/parameterpoints. Any failure or substantial independent residual is retained and reviewed.",
+  "replicas": 64,
+  "seed_offset": 1000000,
+  "unchanged_map_sha256": "84e1917e21a5159e3abcd09785e0a02c1c07faaa90ae7bfd41117267e83827d7",
+  "unchanged_sampler_sha256": "7de8f5cb04ac657aa40650426b60f4011b1212d1e2206d5401f1a7139a8ed3d2",
+  "producer_sha256": "0b28f1b4c9be5013e5a9968dd35b477f7959b1d801f3ee466bdcd5a1a5f470a7",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

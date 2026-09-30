@@ -1,0 +1,68 @@
+{
+  "status": "CONTROL_COMPLETE",
+  "rows": [
+    {
+      "bin_origin_ms": 0.0,
+      "qualified_events": 8,
+      "SCL7_excluded_rank_control": {
+        "mean_rank_difference": 0.0,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.0
+      },
+      "original_difference": {
+        "mean_rank_difference": 0.010044642857142844,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.046875
+      }
+    },
+    {
+      "bin_origin_ms": 0.5,
+      "qualified_events": 8,
+      "SCL7_excluded_rank_control": {
+        "mean_rank_difference": 0.0,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.0
+      },
+      "original_difference": {
+        "mean_rank_difference": 0.013392857142857137,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.0625
+      }
+    },
+    {
+      "bin_origin_ms": 1.0,
+      "qualified_events": 8,
+      "SCL7_excluded_rank_control": {
+        "mean_rank_difference": 0.0,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.0
+      },
+      "original_difference": {
+        "mean_rank_difference": 0.010044642857142844,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.046875
+      }
+    },
+    {
+      "bin_origin_ms": 1.5,
+      "qualified_events": 8,
+      "SCL7_excluded_rank_control": {
+        "mean_rank_difference": 0.0,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.0
+      },
+      "original_difference": {
+        "mean_rank_difference": 0.006696428571428575,
+        "within_shaft_order_difference": 0.0,
+        "participation_difference": 0.03125
+      }
+    }
+  ],
+  "source_indices": [
+    31,
+    32
+  ],
+  "observer_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_surrogate_6101_20260916/observer_firing.json",
+  "intervention": "Derived readout control only: omit the newly recruited SCL7 centroid from the right-hand rank calculation while holding its original qualified-event set fixed. Original observer outputs are unchanged.",
+  "scope": "Separates rank renormalization due to the added participant from reordering of the previously participating contacts. This is not a change to the model or an alternative primary detector."
+}

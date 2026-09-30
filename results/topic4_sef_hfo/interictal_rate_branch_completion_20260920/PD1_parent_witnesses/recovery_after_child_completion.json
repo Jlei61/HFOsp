@@ -1,0 +1,45 @@
+{
+  "timestamp": 1789883828.8299315,
+  "previous_PIDs_confirmed_absent": [
+    468094,
+    475542
+  ],
+  "previous_terminal_cause": "Not recoverable from the retained coordinator records; no numerical result inferred.",
+  "new_workers": [
+    {
+      "kind": "PD1_parent_sides",
+      "pid": 532738,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD1_parent_witnesses.py",
+        "--device",
+        "0",
+        "--min-free-gib",
+        "8",
+        "--stream-harmonics"
+      ],
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_parent_witnesses/recovered_worker.log"
+    },
+    {
+      "kind": "PD2_physical_children",
+      "pid": 532739,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "-u",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD_physical_children.py",
+        "--label",
+        "PD_double_upper",
+        "--device",
+        "0",
+        "--after-pid",
+        "532738",
+        "--min-free-gib",
+        "8"
+      ],
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_upper/recovered_worker.log"
+    }
+  ],
+  "PD1_child_result": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "scope": "Resume missing coordinators only. Reuse existing completed orbits and spectra, preserve GPU memory gates and physical model."
+}

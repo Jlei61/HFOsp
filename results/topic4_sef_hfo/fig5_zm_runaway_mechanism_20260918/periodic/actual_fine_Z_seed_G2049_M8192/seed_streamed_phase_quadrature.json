@@ -1,0 +1,31 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/actual_fine_Z_seed_G2049_M8192/seed.npz",
+  "rows": [
+    {
+      "N": 2049,
+      "M": 8192,
+      "D": 0.1428616806119679,
+      "T_ms": 263.5687043980689,
+      "retained_residual_max_hz": 4.773959005888173e-12,
+      "phase_JVP_relative": 0.01087745956659124,
+      "phase_JVP_max_hz_per_cycle_phase": 13252.976772780257,
+      "unprojected_rms_hz": 0.1348926631766377,
+      "unprojected_max_hz": 29.833707473642278,
+      "unprojected_relative_rate_L2": 0.0008931433434564918
+    },
+    {
+      "N": 2049,
+      "M": 32768,
+      "D": 0.1428616806119679,
+      "T_ms": 263.5687043980689,
+      "retained_residual_max_hz": 0.274397877657262,
+      "phase_JVP_relative": 0.0022971323876030364,
+      "phase_JVP_max_hz_per_cycle_phase": 3421.791000526216,
+      "unprojected_rms_hz": 0.13526792893970563,
+      "unprojected_max_hz": 31.955340646439456,
+      "unprojected_relative_rate_L2": 0.0008956280280129342
+    }
+  ],
+  "scope": "Same orbit evaluated on different quadrature grids; not re-corrected and not a stability result"
+}

@@ -1,0 +1,14 @@
+{
+  "status": "REGISTERED_ONE_EXTERNAL_INPUT_ASSAY",
+  "created_epoch": 1790569274.6448257,
+  "question": "Does restoring the native discrete Poisson external-input law remove the remaining free-dynamics error after recurrent Bernoulli variance correction?",
+  "evidence": "Recurrent Bernoulli variance delayed the excess recruitment but tail spatialRMS remained18.9Hz and R crossed200; the finite-step variance correction alone failed. The successful local spectral sampler already uses discrete Poisson external counts, whereas the free physical kernel still merges external and recurrent variance into a Gaussian increment.",
+  "design": "One1s physical trajectory at the same complete72s initial state, heldZ/K,64 replicas, exactgraph/thresholds/delays and percellfixednu. Preserve Bernoulli recurrent variance and its Gaussian residual, but replace only the external Gaussian component with independent Poisson(nu*dt) counts times the original jump. Same mainGaussian RNG stream, separate reproducible external numerical RNG. No native biological parameter fitting.",
+  "implementation": "Feed the unchanged membrane kernel an effective Gaussian coordinate whose synaptic increment is exactly recurrent Gaussian plus centered Poisson external count. Existing external mean remains, so its sum is the actual count. Handle zero total variance explicitly. Validate eachcell/replica against CPU using the saved actual normals/counts, including mixed recurrentandexternal variance.",
+  "limits": "External numerical replicas do not share realized counts with the native reference; they implement the same conditional law. Residual source correlations and numerical convergence remain unvalidated. No automatic stability or bifurcation claim.",
+  "stop": "One1s assay only; retain same native relevance guards and stop for analysis.",
+  "producer_sha256": "1858427dc7405fa4f54b3988a148c5f76a2c4f11aa212be8309c80d9b0411e1f",
+  "bernoulli_sha256": "0ef32284c63102d146b1983a6217a0ea07baffa85fc1d2f02acdf48e5640e27d",
+  "base_sha256": "e02b9ee463458fb0bfe053121f37c9e176369c3f197acd5640cd10a590f22fe1",
+  "formal_bifurcation_allowed": false
+}

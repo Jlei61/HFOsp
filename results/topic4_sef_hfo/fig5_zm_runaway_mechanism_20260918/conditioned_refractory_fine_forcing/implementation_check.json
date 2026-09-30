@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "label": "recorded_drive_expected",
+      "baseline_prefix_ms": 100,
+      "baseline_recorded_precision_bitwise": true,
+      "newforcing_exact": true,
+      "Iforcing_unchanged": true,
+      "newprefix_finite_ms": 10
+    },
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "baseline_prefix_ms": 100,
+      "baseline_recorded_precision_bitwise": true,
+      "newforcing_exact": true,
+      "Iforcing_unchanged": true,
+      "newprefix_finite_ms": 10
+    }
+  ],
+  "scope": "Only forcingprojection differs; no scientificpromotion."
+}

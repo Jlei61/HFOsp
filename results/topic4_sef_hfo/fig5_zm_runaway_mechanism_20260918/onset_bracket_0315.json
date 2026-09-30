@@ -1,0 +1,127 @@
+{
+  "status": "FINITE_TIME_BEHAVIOR_BRACKET",
+  "rows": [
+    {
+      "D": 0.14496,
+      "global_mean_Z": 0.85504,
+      "Z_A_B_surround": [
+        0.7370777947078604,
+        0.7336077449902034,
+        0.861093488352855
+      ],
+      "category": "SELF_LIMITED",
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.66,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          167.80281194942074,
+          165.45526569706396,
+          164.5666693865962,
+          168.073606823628,
+          162.14065613465283,
+          167.08571298088705,
+          166.72062298425,
+          162.73941229957572,
+          168.13192616715173,
+          164.03060058200697,
+          165.93209952973862,
+          167.6237594419395,
+          160.71447561532193,
+          167.75054509813083
+        ],
+        "inter_onset_ms": [
+          270,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          260
+        ],
+        "activity_duty": 0.34,
+        "mean_rate_hz": 28.62895614783809,
+        "max_rate_hz": 168.13192616715173,
+        "trailing_activity_ms": 70,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09857523437500001
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.1449600_dt0.05_rate/trajectory.npz"
+    },
+    {
+      "D": 0.1452,
+      "global_mean_Z": 0.8548,
+      "Z_A_B_surround": [
+        0.7365371364153449,
+        0.7334404096646027,
+        0.8608590557172175
+      ],
+      "category": "PERSISTENT",
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 86.16111905034963,
+        "max_rate_hz": 124.05638698075971,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.211625,
+          "20Hz_duty90": 0.15415625,
+          "50Hz_duty80": 0.19696875,
+          "50Hz_duty90": 0.14128125,
+          "100Hz_duty80": 0.17621875,
+          "100Hz_duty90": 0.124
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.281124296875
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.1452000_dt0.05_rate/trajectory.npz"
+    }
+  ],
+  "Z": "held spatial field along rate 7.7--7.8s path",
+  "M": "dynamic",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "claim": "Behavioral bracket, not yet a mathematically certified bifurcation interval."
+}

@@ -1,0 +1,137 @@
+{
+  "rows": [
+    {
+      "label": "LPC61",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn1_N2048.npz",
+      "validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn1_validation.json",
+      "J_EE_core": 1.2115992495880454,
+      "T_ms": 106.98543512379396,
+      "mean_rates_hz": [
+        48.793751963896554,
+        32.125294477318015,
+        10.42782676062052
+      ],
+      "min_rates_hz": [
+        1.0417470161853863,
+        16.796406528076297,
+        6.452913428068434
+      ],
+      "max_rates_hz": [
+        167.9806344377963,
+        58.27902166028602,
+        17.15695441813588
+      ],
+      "common_time_shift_grid": 270,
+      "snapshot_times_ms": [
+        0.0,
+        26.74635878094849,
+        53.49271756189698,
+        80.23907634284546
+      ],
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -7.91033905045424e-13,
+          "phase_index": 2574,
+          "group": 755
+        },
+        "slow": {
+          "minimum_Hz": 1.848746585894927e-15,
+          "phase_index": 2465,
+          "group": 15
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    {
+      "label": "LPC62",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N2048.npz",
+      "validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn2_validation.json",
+      "J_EE_core": 1.198713442456352,
+      "T_ms": 106.26514784898256,
+      "mean_rates_hz": [
+        37.79449667438085,
+        27.798587585000835,
+        9.826014289504306
+      ],
+      "min_rates_hz": [
+        0.8227343410051268,
+        14.719913264261017,
+        6.369307131833015
+      ],
+      "max_rates_hz": [
+        130.38130526986737,
+        52.396177544774666,
+        17.305765197855695
+      ],
+      "common_time_shift_grid": 314,
+      "snapshot_times_ms": [
+        0.0,
+        26.56628696224564,
+        53.13257392449128,
+        79.69886088673692
+      ],
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -8.881784197001252e-13,
+          "phase_index": 1183,
+          "group": 776
+        },
+        "slow": {
+          "minimum_Hz": 7.185041782091222e-15,
+          "phase_index": 5377,
+          "group": 16
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    {
+      "label": "LPC63",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn3_N2048.npz",
+      "validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn3_validation.json",
+      "J_EE_core": 1.3068816112324584,
+      "T_ms": 79.34223478072948,
+      "mean_rates_hz": [
+        2.8089979076738034,
+        186.84453630721356,
+        6.408168916526904
+      ],
+      "min_rates_hz": [
+        0.1768245167794198,
+        176.78822526182603,
+        5.0632028099038635
+      ],
+      "max_rates_hz": [
+        8.662914776786305,
+        203.01332910714183,
+        8.187354443695114
+      ],
+      "common_time_shift_grid": 464,
+      "snapshot_times_ms": [
+        0.0,
+        19.83555869518237,
+        39.67111739036474,
+        59.50667608554711
+      ],
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -7.771561172376096e-13,
+          "phase_index": 5942,
+          "group": 594
+        },
+        "slow": {
+          "minimum_Hz": 4.462044345932159e-58,
+          "phase_index": 3010,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    }
+  ],
+  "scope": "Actual periodic rate solutions at independently checked cycle folds. All columns share the same single common phase shift, with the Core A maximum at T/4. Shared rate scales across rows; readout is contact-weighted rate, not voltage. Existence of these cycles does not imply that an autonomous simulation approaches them or that they are interictal attractors."
+}

@@ -1,0 +1,22 @@
+{
+  "status": "REGISTERED_AFTER_COMPLETE_PAIRED_RAMPS",
+  "created_epoch": 1790542559.2040968,
+  "question": "Does the carried active state persist below the slow-ramp core collapse when K stops changing, and is the collapsing region already unable to sustain it?",
+  "selection": "The slow ramp first drops coreB below350Hz atK9.638 and coreA at9.659, both sustainedbelow5Hz beginsK9.687. Choose K9.5 before core loss and9.65 within the decline. These adaptive positions are selected after complete trajectories, not an independent confirmation of a prespecified boundary.",
+  "design": "From the SAME complete constant-input K9 control state, ramp K at0.15/s to9.5or9.65, then hold8s. Original40000x128target density, actualexit Zfield heldmean.21, same stationary expectedexternalmean and paired future numericalRNG, original R/G/M andrecurrence. No additional jobs or automatic extensions.",
+  "readouts": "Full1msgroupoutputs andglobalR/G; terminal3s rates/field/G/Zcounterfactualdrift; adjacent1s windows for residual drift; per-target meanM averaged at10ms during last3s, and fullfinalstate, for subsequent independent stationary-response checking.",
+  "interpretation": "A finite held-state persistence/silence does not prove an equilibrium or its stability. Subsequent stationary residual and measured local response are required at the actual relevant state. Kfixed and Zfixed are interventions, not an autonomous loop.",
+  "jobs": {
+    "held_K9p5": 9.5,
+    "held_K9p65": 9.65
+  },
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_high_state_continuation/control_K9",
+  "source_sha256": "5257e865aff05e6370dbeac00ea207c817ed589903a31310f2f6890e7cb8767b",
+  "producer_sha256": "532983fc20b4238f7bad089275e15283000d86f75641e26512211cff41a35cbe",
+  "carried_producer_sha256": "3282d13e39be5030712f9d20250dac24e7c616a67e98573aee5f32b5b4a09a64",
+  "formal_bifurcation_allowed": false,
+  "pre_dispatch_amendment": {
+    "previous_producer_sha256": "0091c06692cb6607fbf2129e460ff6e86f220960721c508b49fad69c773573d7",
+    "reason": "Synchronize per-target M observation on default CUDA stream before next nonblocking graph mutates cell states. No physics or scientific design change; no worker has run."
+  }
+}

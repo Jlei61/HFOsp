@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "all_saved_root_residuals": [
+    {
+      "index": 0,
+      "residual_per_ms": 2.862293735361732e-17
+    },
+    {
+      "index": 1,
+      "residual_per_ms": 4.2034951908132e-14
+    },
+    {
+      "index": 2,
+      "residual_per_ms": 4.575531793726828e-12
+    },
+    {
+      "index": 3,
+      "residual_per_ms": 1.3737160280830052e-12
+    },
+    {
+      "index": 4,
+      "residual_per_ms": 4.117253413205013e-13
+    },
+    {
+      "index": 5,
+      "residual_per_ms": 1.001282390333813e-14
+    }
+  ],
+  "flow_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_native_low_homotopy_20260923/point005.npz",
+  "flow_checks": [
+    {
+      "dt_ms": 0.05,
+      "one_step_errors": [
+        1.0126448291014611e-14,
+        3.552713678800501e-15,
+        1.4210854715202004e-14
+      ],
+      "ten_ms_rate_history_error_per_ms": 3.3948538424866115e-14,
+      "transient_correction_installed": true,
+      "Z_held": true,
+      "M_dynamic": true
+    },
+    {
+      "dt_ms": 0.025,
+      "one_step_errors": [
+        1.0117774673634727e-14,
+        3.552713678800501e-15,
+        1.4210854715202004e-14
+      ],
+      "ten_ms_rate_history_error_per_ms": 3.569020079474683e-14,
+      "transient_correction_installed": true,
+      "Z_held": true,
+      "M_dynamic": true
+    }
+  ],
+  "scope": "Static roots and stationary flow identity only; stability and any turning-point classification remain uncomputed.",
+  "model_promoted": false
+}

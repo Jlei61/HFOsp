@@ -1,0 +1,7 @@
+{
+  "status": "FROZEN_SINGLE_SOLVER_DIAGNOSTIC",
+  "source_sha256": "be381e4ded5aa7f5f0e13456a643fac52bdd08e5a911134b3ed994f25d383b90",
+  "reason": "FailedK9 solve had maximumI residual733Hz,E211Hz; initialization only suppliedglobalImean,not localI distribution. Smallfielddifference ofthatunconvergediterate isnot correspondence.",
+  "budget": "Only existingZ.21/K9high point. HoldEtemporarily tosolve localI equations<=40steps, then releaseallrates foroneoriginal80stepNewton solve. No parameterchange orfit to nativeoutput.",
+  "interpretation": "Initialization diagnostic of approximate stationaryequations only; no continuation,stability orbifurcation. Failure doesnot establish no equilibrium."
+}

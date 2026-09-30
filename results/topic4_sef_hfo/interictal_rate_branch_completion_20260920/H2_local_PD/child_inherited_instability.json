@@ -1,0 +1,77 @@
+{
+  "status": "PHYSICAL_CHILD_UNSTABLE",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+  "sources": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+      "J_EE_core": 0.9463114738407228,
+      "T_ms": 593.7948374736817,
+      "dt_ms": 0.04999956529754814,
+      "history_dimension": 679745,
+      "multipliers": [
+        [
+          -1087.757318955882,
+          0.0
+        ]
+      ],
+      "residuals": [
+        7.69388730204042e-10
+      ],
+      "phase_multiplier_error": 1088.757318955882,
+      "phase_tangent_relative_defect": 0.11769716681948035,
+      "raw_multipliers_above_1p001": 1,
+      "requested_multipliers": 1,
+      "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+      "seconds": 195.2677402496338,
+      "phase_eigenvector_overlaps": [
+        0.9998154379348728
+      ],
+      "identified_neutral_index": null,
+      "nontrivial_multipliers": [
+        [
+          -1087.757318955882,
+          0.0
+        ]
+      ],
+      "largest_computed_nontrivial_modulus": 1087.757318955882,
+      "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+      "J_EE_core": 0.9463114738407228,
+      "T_ms": 593.7948374736817,
+      "dt_ms": 0.02499978264877407,
+      "history_dimension": 1349205,
+      "multipliers": [
+        [
+          -1087.9118173480015,
+          0.0
+        ]
+      ],
+      "residuals": [
+        1.11735267434071e-09
+      ],
+      "phase_multiplier_error": 1088.9118173480015,
+      "phase_tangent_relative_defect": 0.02974107046765954,
+      "raw_multipliers_above_1p001": 1,
+      "requested_multipliers": 1,
+      "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+      "seconds": 479.69181871414185,
+      "phase_eigenvector_overlaps": [
+        0.9998153985639915
+      ],
+      "identified_neutral_index": null,
+      "nontrivial_multipliers": [
+        [
+          -1087.9118173480015,
+          0.0
+        ]
+      ],
+      "largest_computed_nontrivial_modulus": 1087.9118173480015,
+      "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+    }
+  ],
+  "paired_relative_change": 0.00014201370888311526,
+  "criticality": "RADIAL_MODE_CHECK_PENDING",
+  "scope": "Paired-step largest-modulus full-delay multiplier proves the specified physical child is unstable. This calculation does not track the mode back to a particular parent eigenvector and does not classify the local flip criticality."
+}

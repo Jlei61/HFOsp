@@ -1,0 +1,36 @@
+{
+  "status": "STABLE_WITH_STEP_REFINEMENT",
+  "D": 0.219,
+  "T_ms": 264.17351154071343,
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z219_stable_side_G8505_M65536/point0000.npz",
+  "gates": {
+    "phase": true,
+    "eigen_residual": true,
+    "refined_step": true,
+    "multiplier_agreement": true,
+    "same_stability_side": true
+  },
+  "evidence": [
+    "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/native_Z219_stable_side_G8505_M65536_point0000_endpoint_dt0.025_quotient_chainphase_rk4_cubic_streamed_fastgrid.json",
+    "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/native_Z219_stable_side_G8505_M65536_point0000_endpoint_dt0.0125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json"
+  ],
+  "multipliers": [
+    [
+      [
+        0.7685660881703894,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.7685655770357588,
+        0.0
+      ]
+    ]
+  ],
+  "phase_defects": [
+    0.00022826942774232807,
+    0.00011732430186144341
+  ],
+  "scope": "Sampled leading transverse Arnoldi multiplier of this held-Z, dynamic-M periodic solution. No branch completeness or onset type follows from one stable/unstable point."
+}

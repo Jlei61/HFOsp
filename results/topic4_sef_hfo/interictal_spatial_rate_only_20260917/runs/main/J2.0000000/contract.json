@@ -1,0 +1,17 @@
+{
+  "model_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/rate_field.py",
+  "closure_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/closure.json",
+  "model": "Autonomous positive two-filter spatial rate DDE",
+  "spatial_cells": 400,
+  "rate_groups": 935,
+  "continuous_states": 8415,
+  "J_EE_core": 2.0,
+  "duration_ms": 10000,
+  "dt_ms": 0.1,
+  "initial_state": "zero rates and recurrent states; constant private-input moments",
+  "Z": "fixed 1",
+  "M": "original gain .0005 per spike; tau 1000 ms in rate expectation",
+  "native_spikes_used": false,
+  "noise": "No sampled noise. Private Poisson variance enters Phi analytically.",
+  "scope": "Interictal rate-model simulation; nonlinear SNN equivalence remains to be validated"
+}

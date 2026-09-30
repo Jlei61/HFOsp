@@ -1,0 +1,54 @@
+{
+  "status": "VALIDATED_DOMINANT_INSTABILITY",
+  "orbit_stem": "LPC_single_upper1_N1024",
+  "J_EE_core": 1.569234886663887,
+  "T_ms": 137.40287021828732,
+  "checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_single_upper1_N1024_dt0.1.json",
+      "J_EE_core": 1.569234886663887,
+      "T_ms": 137.40287021828732,
+      "dt_ms": 0.09992936015875441,
+      "multiplier": [
+        128014.80617661402,
+        0.0
+      ],
+      "relative_eigenpair_residual": 5.998172129831512e-16,
+      "real_exponent_per_ms": 0.08558701278062356,
+      "phase_tangent_defect": 3.4281564744996023,
+      "neutral_identified": false
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_single_upper1_N1024_dt0.05.json",
+      "J_EE_core": 1.569234886663887,
+      "T_ms": 137.40287021828732,
+      "dt_ms": 0.049982855663254756,
+      "multiplier": [
+        127917.96526452826,
+        0.0
+      ],
+      "relative_eigenpair_residual": 1.210140688567441e-15,
+      "real_exponent_per_ms": 0.08558150511985414,
+      "phase_tangent_defect": 0.9196611233212327,
+      "neutral_identified": false
+    }
+  ],
+  "relative_multiplier_step_change": 0.0007570548193562311,
+  "continuous_orbit_check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper1_N1024.npz",
+    "N": 1024,
+    "check_N": 4096,
+    "J_EE_core": 1.569234886663887,
+    "T_ms": 137.40287021828732,
+    "maximum_group_defect_Hz": 6.621153850888684e-07,
+    "regional_defect_Hz": [
+      1.587663098543866e-13,
+      1.2621955864218474e-08,
+      7.902493346632412e-10
+    ],
+    "minimum_rate_Hz": 2.091304432833392e-06
+  },
+  "fine_e_folding_time_ms": 11.684767621222976,
+  "full_spectrum_validated": false,
+  "scope": "A residual-checked, step-converged multiplier outside the unit circle establishes instability of this orbit only. This leading-mode calculation does not classify near-unit modes, count all unstable modes, or locate another bifurcation. Large phase error, when present, further limits near-neutral inference."
+}

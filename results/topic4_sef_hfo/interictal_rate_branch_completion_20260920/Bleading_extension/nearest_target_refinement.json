@@ -1,0 +1,129 @@
+{
+  "status": "COMPLETE",
+  "screen": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcBleadingConnection_20260920_prefix17_encounter_N4096.json",
+  "rows": [
+    {
+      "family": "B",
+      "original_pair": {
+        "first_index": 0,
+        "second_index": 96,
+        "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0000_N4096.npz",
+        "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64.npz",
+        "first_J": 0.9598891260758464,
+        "second_J": 0.9600733875691013,
+        "first_T_ms": 280.2554385558495,
+        "second_T_ms": 282.80752682906973,
+        "metadata_shortlist_score": 1.1964385545570617,
+        "full_group_RMS_difference_Hz": 37.40917663713963,
+        "relative_waveform_difference": 1.0698272777043498,
+        "common_phase_cycles": 0.607837205975393
+      },
+      "corrected_target": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64_accuracy_N128_attempt_1789852759717667833.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64_accuracy_N128_attempt_1789852759717667833.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64_accuracy_N128_attempt_1789852759717667833.npz",
+        "N": 128,
+        "check_N": 512,
+        "J_EE_core": 0.9600733875691013,
+        "T_ms": 282.8074647560975,
+        "maximum_group_defect_Hz": 3.353726460604556e-06,
+        "regional_defect_Hz": [
+          2.272654553863846e-16,
+          3.9289587944401734e-09,
+          1.2959307378851112e-08
+        ],
+        "minimum_rate_Hz": 0.0059827612017426205,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 32,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": 0.00020728792724370625,
+            "phase_index": 184,
+            "group": 18
+          },
+          "slow": {
+            "minimum_Hz": 0.006904219442191815,
+            "phase_index": 223,
+            "group": 17
+          },
+          "positive": true,
+          "N": 128,
+          "check_N": 512
+        }
+      },
+      "relative_waveform_change": 0.00022999789011129792,
+      "relative_period_change": 2.19488402342094e-07,
+      "same_branch_refinement_pass": true,
+      "full_group_RMS_difference_Hz": 37.4091766374435,
+      "relative_waveform_difference": 1.06982727771304,
+      "common_phase_cycles": 0.6078394110706873,
+      "target_J_EE_core": 0.9600733875691013,
+      "target_T_ms": 282.8074647560975,
+      "status": "MATCHED_TARGET_RECHECKED"
+    },
+    {
+      "family": "single",
+      "original_pair": {
+        "first_index": 16,
+        "second_index": 49,
+        "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0016_N4096.npz",
+        "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256.npz",
+        "first_J": 0.9646931641699911,
+        "second_J": 0.9645924161605287,
+        "first_T_ms": 275.6915604068981,
+        "second_T_ms": 270.87976814483034,
+        "metadata_shortlist_score": 0.268968986804898,
+        "full_group_RMS_difference_Hz": 40.2007698158974,
+        "relative_waveform_difference": 1.1289800915171746,
+        "common_phase_cycles": 0.7588321352788382
+      },
+      "corrected_target": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256_accuracy_N2048.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256_accuracy_N2048.npz",
+        "N": 2048,
+        "check_N": 8192,
+        "J_EE_core": 0.9645924161605287,
+        "T_ms": 270.8798175425194,
+        "maximum_group_defect_Hz": 1.0147438445073931e-10,
+        "regional_defect_Hz": [
+          1.009219670514113e-13,
+          1.4541302984670664e-13,
+          3.085024035425917e-14
+        ],
+        "minimum_rate_Hz": 4.580913788237461e-06,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 32,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -2.5531971827551236e-11,
+            "phase_index": 1880,
+            "group": 647
+          },
+          "slow": {
+            "minimum_Hz": 6.442855416498571e-06,
+            "phase_index": 5091,
+            "group": 54
+          },
+          "positive": true,
+          "N": 2048,
+          "check_N": 8192
+        }
+      },
+      "relative_waveform_change": 0.0005602660641989905,
+      "relative_period_change": 1.823602013839576e-07,
+      "same_branch_refinement_pass": true,
+      "full_group_RMS_difference_Hz": 40.20077138446884,
+      "relative_waveform_difference": 1.1289801355682196,
+      "common_phase_cycles": 0.7588319436043551,
+      "target_J_EE_core": 0.9645924161605287,
+      "target_T_ms": 270.8798175425194,
+      "status": "MATCHED_TARGET_RECHECKED"
+    }
+  ],
+  "scope": "Two fixed nearest candidates from the earlier cached screen, corrected at their own unchanged J; source and target parameters are close but not identical. This tests numerical robustness of those distances only. It is not a new global search or an exclusion of unseen connections."
+}

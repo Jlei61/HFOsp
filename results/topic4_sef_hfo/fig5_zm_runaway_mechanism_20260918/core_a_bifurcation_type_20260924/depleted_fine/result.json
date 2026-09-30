@@ -1,0 +1,74 @@
+{
+  "status": "COMPLETE",
+  "label": "depleted_fine",
+  "D": 0.2198778663041978,
+  "conditions": {
+    "label": "depleted_fine",
+    "field": "coreA10370_background9000",
+    "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/final_state.npz",
+    "source_dt_ms": 0.05,
+    "dt_ms": 0.025,
+    "duration_ms": 10000,
+    "previous_elapsed_ms": 0,
+    "prior_same_field_elapsed_ms": 10000,
+    "tangent": true
+  },
+  "windows": [
+    {
+      "window_ms": [
+        0.0,
+        5000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        57.52244695768841,
+        422.00731956274194,
+        152.0620177515388,
+        46.06053965013166
+      ],
+      "global_range_hz": [
+        18.233229330530197,
+        91.90947549346544
+      ],
+      "quiet_fraction": 0.0,
+      "spatial_persistent_fraction": 0.075875,
+      "M_mean_global_A_B_surround": [
+        0.028707294518374084,
+        0.21065596234802914,
+        0.07891337324342279,
+        0.022907843650959523
+      ],
+      "M_start_end_weighted_abs_change": 0.0032672187940557644,
+      "group_rate_relative_variation": 0.5588555149377922
+    },
+    {
+      "window_ms": [
+        5000.0,
+        10000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        53.80159900603845,
+        423.12326133632257,
+        117.50025289351623,
+        43.01579219866493
+      ],
+      "global_range_hz": [
+        19.60258337707826,
+        91.6063380004471
+      ],
+      "quiet_fraction": 0.0,
+      "spatial_persistent_fraction": 0.080625,
+      "M_mean_global_A_B_surround": [
+        0.027487940092456406,
+        0.21161130422660077,
+        0.06290058315967026,
+        0.022016392029161082
+      ],
+      "M_start_end_weighted_abs_change": 0.0038255752594736573,
+      "group_rate_relative_variation": 0.5735550831274452
+    }
+  ],
+  "seconds": 2526.0024859905243,
+  "dt_ms": 0.025,
+  "scope": "Finite-duration state continuation; no certified branch, attractor or bifurcation yet.",
+  "model_promoted": false
+}

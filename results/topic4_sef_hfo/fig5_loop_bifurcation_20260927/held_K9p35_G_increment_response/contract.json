@@ -1,0 +1,10 @@
+{
+  "status": "REGISTERED_BEFORE_STATIC_G_INCREMENT_DECOMPOSITION",
+  "created_epoch": 1790549153.025528,
+  "question": "Does incremental globalG feedback materially change the localK susceptibility near the R200 activation corner even though its background value is small?",
+  "method": "At the actual measuredK9.35 input, retain all measured targetDC channels andimplicitM. Write the source response asL=A+u*wT. Solve(I-A)a=b and(I-A)v=u; the fullK derivative isa+v*(wTa)/(1-wTv). Compare with the independently assembled existing tangent and full/half modulation estimates. Eight block estimates are reported as sampling variability, not a certified totalerror.",
+  "comparison": "A holds the G perturbation fixed, not its background value atzero. The actualG0 side atR<200 has different coordinates and must be computed separately. This diagnostic cannot prove a fold, a boundaryequilibrium bifurcation, or dynamical stability.",
+  "scope": "Measuredpoint before the small independentlyverified nonlinearcorrection; no newequilibrium claimed andno newK, nativejob, orautomaticparameterextension.",
+  "producer_sha256": "c9f346e96cdc621e93059923f7d42aa5c44e9121e4e4045abb53d925d9021629",
+  "formal_bifurcation_allowed": false
+}

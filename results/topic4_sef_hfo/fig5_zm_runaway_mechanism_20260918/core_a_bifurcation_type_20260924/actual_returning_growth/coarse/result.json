@@ -1,0 +1,74 @@
+{
+  "status": "COMPLETE",
+  "label": "coarse",
+  "D": 0.21817194367190396,
+  "conditions": {
+    "label": "coarse",
+    "field": "returning",
+    "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/final_state.npz",
+    "source_dt_ms": 0.05,
+    "dt_ms": 0.05,
+    "duration_ms": 10000,
+    "previous_elapsed_ms": 0,
+    "prior_same_field_elapsed_ms": 30000,
+    "tangent": true
+  },
+  "windows": [
+    {
+      "window_ms": [
+        0.0,
+        5000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        49.5578157965171,
+        309.2427439540127,
+        136.5469126218791,
+        40.88493772903573
+      ],
+      "global_range_hz": [
+        0.011759958798265156,
+        170.04107876367226
+      ],
+      "quiet_fraction": 0.0794,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.025293766991988344,
+        0.15522047406364,
+        0.07208198947441266,
+        0.020870251561810722
+      ],
+      "M_start_end_weighted_abs_change": 0.003601306665247602,
+      "group_rate_relative_variation": 0.7126380025364693
+    },
+    {
+      "window_ms": [
+        5000.0,
+        10000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        51.92443645030667,
+        328.81613377266194,
+        145.9324070149649,
+        42.6445085236854
+      ],
+      "global_range_hz": [
+        0.012053237984926475,
+        160.96966851332317
+      ],
+      "quiet_fraction": 0.082,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.02558472566661376,
+        0.16456669521147277,
+        0.06989786288972917,
+        0.02100092622819641
+      ],
+      "M_start_end_weighted_abs_change": 0.002490573783503166,
+      "group_rate_relative_variation": 0.6927459487346922
+    }
+  ],
+  "seconds": 1892.314180612564,
+  "dt_ms": 0.05,
+  "scope": "Finite-duration state continuation; no certified branch, attractor or bifurcation yet.",
+  "model_promoted": false
+}

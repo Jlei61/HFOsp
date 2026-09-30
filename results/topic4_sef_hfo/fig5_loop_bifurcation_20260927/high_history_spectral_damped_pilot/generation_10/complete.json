@@ -1,0 +1,154 @@
+{
+  "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+  "generation": 10,
+  "rows": [
+    {
+      "region": "allE",
+      "targets": 32000,
+      "input_rate_Hz": 196.9341281506966,
+      "output_rate_Hz": 197.0873525390625,
+      "native_reference_rate_Hz": 196.78051928710937,
+      "individual_rate_RMS_change_Hz": 0.8747202376459285,
+      "mean_first_second_1s_Hz": [
+        197.087623046875,
+        197.08708203125
+      ],
+      "mean_M_start_end": [
+        197.08758809838574,
+        197.08725591854832
+      ],
+      "mean_M": 197.08751862898197,
+      "counterfactual_mean_Zdot_per_s": 0.040243911767578126,
+      "mean_PSD_L1_change": 0.0017974503321812542,
+      "mean_spike_variance": 0.018809617801135256,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.01764265883789069
+      ]
+    },
+    {
+      "region": "coreA",
+      "targets": 754,
+      "input_rate_Hz": 473.42272192577644,
+      "output_rate_Hz": 473.72724635278513,
+      "native_reference_rate_Hz": 473.0902271220159,
+      "individual_rate_RMS_change_Hz": 0.8018943859481633,
+      "mean_first_second_1s_Hz": [
+        473.7278265915119,
+        473.72666611405833
+      ],
+      "mean_M_start_end": [
+        473.7329981048373,
+        473.7266284832352
+      ],
+      "mean_M": 473.73043116358645,
+      "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+      "mean_PSD_L1_change": 0.00338807652952289,
+      "mean_spike_variance": 0.04512816698306947,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "coreB",
+      "targets": 786,
+      "input_rate_Hz": 475.93788435417093,
+      "output_rate_Hz": 476.11095539122135,
+      "native_reference_rate_Hz": 475.71195133587787,
+      "individual_rate_RMS_change_Hz": 0.9061024778979624,
+      "mean_first_second_1s_Hz": [
+        476.11019004452925,
+        476.11172073791346
+      ],
+      "mean_M_start_end": [
+        476.11589856884945,
+        476.11094707283775
+      ],
+      "mean_M": 476.11343113922726,
+      "counterfactual_mean_Zdot_per_s": -0.033073757753916314,
+      "mean_PSD_L1_change": 0.0023775763318512463,
+      "mean_spike_variance": 0.04534424409704001,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "surroundE",
+      "targets": 30460,
+      "input_rate_Hz": 182.89048560038992,
+      "output_rate_Hz": 183.03945261203216,
+      "native_reference_rate_Hz": 182.74317111580763,
+      "individual_rate_RMS_change_Hz": 0.8756231185847966,
+      "mean_first_second_1s_Hz": [
+        183.03974218237033,
+        183.03916304169402
+      ],
+      "mean_M_start_end": [
+        183.0394301478072,
+        183.03936661582148
+      ],
+      "mean_M": 183.0394843780251,
+      "counterfactual_mean_Zdot_per_s": 0.04399428409657604,
+      "mean_PSD_L1_change": 0.0017431065636803942,
+      "mean_spike_variance": 0.017473425997072238,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.018534638306385492
+      ]
+    },
+    {
+      "region": "I",
+      "targets": 8000,
+      "input_rate_Hz": 251.7165141211992,
+      "output_rate_Hz": 251.89602734375,
+      "native_reference_rate_Hz": 251.4752255859375,
+      "individual_rate_RMS_change_Hz": 0.8301991262948455,
+      "mean_first_second_1s_Hz": [
+        251.89515625,
+        251.8968984375
+      ],
+      "mean_M_start_end": [
+        0.0,
+        0.0
+      ],
+      "mean_M": 0.0,
+      "counterfactual_mean_Zdot_per_s": null,
+      "mean_PSD_L1_change": 0.0032030888401641307,
+      "mean_spike_variance": 0.023755748282607424,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.017860695800781232
+      ]
+    }
+  ],
+  "G_used": 0.0,
+  "G_implied_by_output": 0.0,
+  "output_causal_R_DC_Hz": 197.74504033347625,
+  "development_native_field_weighted_RMS_Hz": 1.2453808030051707,
+  "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+  "formal_bifurcation_allowed": false,
+  "root_established": false,
+  "physical_stability_established": false,
+  "elapsed_worker_s": [
+    149.28439092636108,
+    145.145836353302
+  ],
+  "numerical_alpha": 0.1,
+  "undamped_response_saved": true,
+  "initial_reference_is_predicted_generation1": true,
+  "actual_native_field_RMS_Hz": 2.133154126511198,
+  "core_mean_difference_from_native_Hz": [
+    1.3996601458885607,
+    1.9531945769720096
+  ],
+  "blend_float_identity_max_abs_error": 2.5556801119819283e-10,
+  "matched_native_field_RMS_Hz": 2.1656242163467865,
+  "matched_native_core_differences_Hz": [
+    1.3718086870020443,
+    1.9674439408419744
+  ],
+  "all_three_stream_seed_offset": 12000000,
+  "actual_native_field_reference": "The legacy actual_native_field_RMS_Hz is against variable-background72-74s, not the matchedconstantbackgroundtail. Primaryguardusesmatched_native_field_RMS_Hz."
+}

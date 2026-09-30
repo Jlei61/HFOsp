@@ -1,0 +1,94 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "pop": "E",
+      "theta_mV": 18.0,
+      "dt_ms": 0.1,
+      "rate_max_error_hz": 1.7763568394002505e-11,
+      "voltage_max_error_mV": 3.197442310920451e-13,
+      "independent_trace_error_mV": 3.552713678800501e-15,
+      "minimum_available_mass": 0.6943524782387455
+    },
+    {
+      "pop": "E",
+      "theta_mV": 16.5,
+      "dt_ms": 0.1,
+      "rate_max_error_hz": 1.993782916542841e-11,
+      "voltage_max_error_mV": 2.877698079828406e-13,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.5840023840268469
+    },
+    {
+      "pop": "E",
+      "theta_mV": 18.0,
+      "dt_ms": 0.05,
+      "rate_max_error_hz": 2.4442670110147446e-11,
+      "voltage_max_error_mV": 5.471179065352771e-13,
+      "independent_trace_error_mV": 7.105427357601002e-15,
+      "minimum_available_mass": 0.6946747723744214
+    },
+    {
+      "pop": "E",
+      "theta_mV": 16.5,
+      "dt_ms": 0.05,
+      "rate_max_error_hz": 2.6972202249453403e-11,
+      "voltage_max_error_mV": 5.471179065352771e-13,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.5847251828774892
+    },
+    {
+      "pop": "E",
+      "voltage_feature_derivative_error": 4.953681354002981e-10,
+      "derivative_min": -0.20095829526620082,
+      "derivative_max": 2.0822121707554384
+    },
+    {
+      "pop": "I",
+      "theta_mV": 18.0,
+      "dt_ms": 0.1,
+      "rate_max_error_hz": 1.2079226507921703e-13,
+      "voltage_max_error_mV": 4.973799150320701e-14,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.9922595451913234
+    },
+    {
+      "pop": "I",
+      "theta_mV": 16.5,
+      "dt_ms": 0.1,
+      "rate_max_error_hz": 8.455458555545192e-13,
+      "voltage_max_error_mV": 6.750155989720952e-14,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.9790222591620014
+    },
+    {
+      "pop": "I",
+      "theta_mV": 18.0,
+      "dt_ms": 0.05,
+      "rate_max_error_hz": 1.7053025658242404e-13,
+      "voltage_max_error_mV": 1.0125233984581428e-13,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.9922601352124366
+    },
+    {
+      "pop": "I",
+      "theta_mV": 16.5,
+      "dt_ms": 0.05,
+      "rate_max_error_hz": 5.151434834260726e-13,
+      "voltage_max_error_mV": 8.704148513061227e-14,
+      "independent_trace_error_mV": 0.0,
+      "minimum_available_mass": 0.9790067787928711
+    },
+    {
+      "pop": "I",
+      "voltage_feature_derivative_error": 3.537183879132044e-10,
+      "derivative_min": -0.1985004230247751,
+      "derivative_max": 1.7093742246821393
+    }
+  ],
+  "weights": {
+    "I_final.pt": "84442216e3f914eff0874b0a68c15868687aac6af0be99e4eebf11e288bf6617",
+    "E_final.pt": "ab100e1ee0867cc3bafd7a281bb0fed454d4e5e9cc14d7870b5b0bd190c25e37"
+  },
+  "scope": "Trained nonzero memory feedback, refractory bounds, units and independent implementation. No local response or spatial acceptance follows."
+}

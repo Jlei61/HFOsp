@@ -1,0 +1,27 @@
+{
+  "question": "Does the sustained-Core-A side contain a full periodic skeleton distinct from the short self-limited burst cycle?",
+  "candidate": {
+    "time1_ms": 10115.0,
+    "time2_ms": 10149.0,
+    "period_ms": 34.0,
+    "score": 0.16339967431438837,
+    "rate_history_squared_error_over_variance": 0.14549535553722578,
+    "M_squared_error_over_variance": 0.017904318777162594,
+    "regional_rates_A_B_S_1": [
+      408.68942240505055,
+      324.4017380869256,
+      65.99126530597772
+    ],
+    "regional_rates_A_B_S_2": [
+      408.3529871325909,
+      326.58261972041,
+      66.2611113951643
+    ]
+  },
+  "selection": "Lowest full-group recurrence score among periods<=150ms during continuously high Core A. Longer B-burst candidates remain separate; this short recurrence is not presumed periodic.",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/checkpoint10000.npz",
+  "source_time_ms": 10000,
+  "equations": "Same entire spatial delayed model, native Core-A-only resource field at D_A=.3431576413, all Z held and all M dynamic. Exact replay from actual trajectory checkpoint, no rate, M or history reset.",
+  "acceptance": "Every replayed1ms original group-rate record must match bitwise at its storedfloat32precision. Full-state recurrence residual is reported, not called a periodic orbit.",
+  "model_promoted": false
+}

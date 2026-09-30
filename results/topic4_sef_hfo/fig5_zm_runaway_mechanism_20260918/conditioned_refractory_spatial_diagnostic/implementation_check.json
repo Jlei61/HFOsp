@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "P": 935,
+  "delays": [
+    {
+      "tick": 0,
+      "delayed_bitwise": true
+    },
+    {
+      "tick": 715,
+      "delayed_bitwise": true
+    },
+    {
+      "tick": 724,
+      "delayed_bitwise": true
+    }
+  ],
+  "physical_moment_error": 1.7763568394002505e-15,
+  "local_state_error": 1.4210854715202004e-14,
+  "rate_error_hz": 3.851086116668512e-13,
+  "slow_synaptic_error": 1.3992984288641042e-18,
+  "initial_prefix_ms": 10,
+  "Z_and_M_dynamic": true,
+  "scope": "Implementation check only; no native correspondence or new bifurcation acceptance."
+}

@@ -1,0 +1,36 @@
+{
+  "created_local": "2026-09-19T17:39:09.109969",
+  "question": "Is continuing M feedback necessary for the observed native entry or for the effect of holding Z, under one identical complete initial history?",
+  "start_ms": 9000,
+  "stop_ms": 12500,
+  "new_arms": [
+    "Zdynamic_Mheld",
+    "Zheld_Mheld"
+  ],
+  "reused_arms": [
+    "native_same_history_feedback/runs/native_t9000_Zdynamic",
+    "native_same_history_feedback/runs/native_t9000_Zheld"
+  ],
+  "budget": {
+    "new_trajectories": 2,
+    "duration_ms_each": 3500,
+    "topologies": 1,
+    "original_histories": 1
+  },
+  "intervention": "Only state updates are held at their original9s values; current effects remain active. Complete fast/delay/Z/M/OU/RNG initial state and future input clock preserved.",
+  "primary_readouts": [
+    "Original globalE>=200Hz for200ms entry",
+    "Additional >=75percent E-space above50Hz jointly with globalE>=200Hz for200ms",
+    "Complete self-terminating events over9.0-12.5s",
+    "Mean rate and persistent E-space in common11.5-12.5s"
+  ],
+  "validity": [
+    "M-only actual application check",
+    "Same bitwise initial state",
+    "Frozen M and optionallyZ unchanged at every checkpoint",
+    "Same future xi records and final external-input RNG/OU state",
+    "Original dynamic arm bitwise replay PASS"
+  ],
+  "interpretation": "Paired one-history finite-window counterfactual. Entry with Mheld refutes necessity of continued M updates for this specific entry only. Difference with Zheld quantifies its dependence on M dynamics. No bifurcation type, asymptotic basin, all histories or population law inferred.",
+  "authorization": "Existing user authorization to autonomously complete Z/M onset mechanism and necessary decisive native controls; no model parameter retuning."
+}

@@ -1,0 +1,126 @@
+[
+  {
+    "iteration": 0,
+    "period_ms": 531.5655967511655,
+    "fraction": 0.3119350233092906,
+    "section_residual": 2.6888213877624092e-17,
+    "section_speed": 1.0888943964548299,
+    "initial_phase": 0.0,
+    "interpolation": "cubic_four_actual_steps",
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 354.9658538151581,
+        "difference_rms": 9.134229953741729,
+        "relative_rms": 0.02573270035854832
+      },
+      "GABA": {
+        "reference_rms": 475.4229802041267,
+        "difference_rms": 31.788912064964713,
+        "relative_rms": 0.06686448360429671
+      },
+      "M": {
+        "reference_rms": 0.05493593408914693,
+        "difference_rms": 0.0007993640569167103,
+        "relative_rms": 0.014550841269387492
+      },
+      "covariance": {
+        "reference_rms": 325.4513724564788,
+        "difference_rms": 17.374781621310888,
+        "relative_rms": 0.05338672100279541
+      },
+      "input_memory": {
+        "reference_rms": 0.4212728256086045,
+        "difference_rms": 0.029749320227423763,
+        "relative_rms": 0.07061770524705814
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.16413971145761552,
+        "difference_rms": 0.02377073603793934,
+        "relative_rms": 0.14482014027469195
+      }
+    },
+    "combined_relative_rms": 0.0754482530392312,
+    "coordinate_residual": 0.14132513531530808,
+    "trials": [
+      {
+        "status": "EVALUATED",
+        "radius": 1.1056219968867775,
+        "step_norm": 1.1056219968867318,
+        "lagrange_multiplier": 2.354487091902648,
+        "predicted_relative_residual": 0.6637168619754465,
+        "admissibility_diagnostic": {
+          "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+          "original_step_norm": 1.1056219968867318,
+          "projected_step_norm": 1.1043156065278534,
+          "phase_error": -6.999609225566502e-16
+        },
+        "actual_step_norm": 1.1043156065278534,
+        "retraction_relative_change": 0.03555376579869352,
+        "residual_ratio": 1.2160697864844365,
+        "predicted_gain": 0.5591727658058397,
+        "agreement": -0.8563108843655032,
+        "period_ms": 531.401749826814
+      },
+      {
+        "status": "SECTION_WINDOW_MISS",
+        "error": "Section crossing precedes the declared search window",
+        "radius": 0.5528109984433888,
+        "step_norm": 0.5528109984433665,
+        "lagrange_multiplier": 5.9769407482805565,
+        "predicted_relative_residual": 0.8085380919539811,
+        "admissibility_diagnostic": {
+          "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+          "original_step_norm": 0.5528109984433665,
+          "projected_step_norm": 0.5523461412796073,
+          "phase_error": 5.965822454101453e-16
+        }
+      },
+      {
+        "status": "SECTION_WINDOW_MISS",
+        "error": "Section crossing precedes the declared search window",
+        "radius": 0.2764054992216944,
+        "step_norm": 0.27640549922168334,
+        "lagrange_multiplier": 13.699327349140315,
+        "predicted_relative_residual": 0.8840260118071968,
+        "admissibility_diagnostic": {
+          "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+          "original_step_norm": 0.27640549922168334,
+          "projected_step_norm": 0.27613063764421397,
+          "phase_error": 2.873244177303834e-15
+        }
+      },
+      {
+        "status": "SECTION_WINDOW_MISS",
+        "error": "Section crossing precedes the declared search window",
+        "radius": 0.1382027496108472,
+        "step_norm": 0.1382027496108417,
+        "lagrange_multiplier": 30.480623422244626,
+        "predicted_relative_residual": 0.9238755555413981,
+        "admissibility_diagnostic": {
+          "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+          "original_step_norm": 0.1382027496108417,
+          "projected_step_norm": 0.13802243272358955,
+          "phase_error": 2.203153024599169e-15
+        }
+      },
+      {
+        "status": "SECTION_WINDOW_MISS",
+        "error": "Section crossing precedes the declared search window",
+        "radius": 0.0691013748054236,
+        "step_norm": 0.06910137480542072,
+        "lagrange_multiplier": 66.88702166181521,
+        "predicted_relative_residual": 0.9451658394415489,
+        "admissibility_diagnostic": {
+          "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+          "original_step_norm": 0.06910137480542072,
+          "projected_step_norm": 0.06900216620657909,
+          "phase_error": 4.235405293628522e-15
+        }
+      }
+    ],
+    "linear_last": {
+      "dimension": 11,
+      "relative_linear_residual": 0.0005938663053132441
+    }
+  }
+]

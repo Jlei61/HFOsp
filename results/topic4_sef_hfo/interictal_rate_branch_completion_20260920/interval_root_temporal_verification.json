@@ -1,0 +1,546 @@
+{
+  "status": "SELECTED_ASSOCIATIONS_RECHECKED",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/current_interval_root_associations.json",
+  "corrected_profile_map_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/SCL_branch_scan/manifest.json",
+  "rows": [
+    {
+      "family": "A",
+      "label": "TR1",
+      "internal_label": "TR_A_B",
+      "site_indices": [
+        22,
+        27
+      ],
+      "selected_left_continuation_index": 46,
+      "root_validation_status": "LOCALLY_SUBCRITICAL_TORUS_SUPPORTED",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0037_N64.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0038_N64.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+          "size": 859358,
+          "mtime_ns": 1789668317647998382
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0037_N64.npz",
+          "size": 431029,
+          "mtime_ns": 1789653129723791400
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0038_N64.npz",
+          "size": 431064,
+          "mtime_ns": 1789653130843785393
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json",
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json"
+      ],
+      "temporal_meshes": [
+        128,
+        64,
+        64
+      ],
+      "phase_samples": 1024,
+      "coarse": {
+        "fraction": 0.4460769286597397,
+        "RMS_distance_Hz": 8.005370009243079e-05,
+        "distance_over_local_waveform_step": 0.025571005965320855,
+        "local_waveform_step_Hz": 0.003130643362290824,
+        "common_phase_shifts_cycles": [
+          -8.421170178864092e-05,
+          1.7112029142724602e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.4460769286597395,
+        "RMS_distance_Hz": 8.005370009243077e-05,
+        "distance_over_local_waveform_step": 0.025571005965320845,
+        "local_waveform_step_Hz": 0.003130643362290824,
+        "common_phase_shifts_cycles": [
+          -8.421170178864086e-05,
+          1.7112029142724304e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "A",
+      "label": "LPC1",
+      "internal_label": "LPC_resonance_upper",
+      "site_indices": [
+        27,
+        28
+      ],
+      "selected_left_continuation_index": 50,
+      "root_validation_status": "VALIDATED_CYCLE_FOLD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0041_N64.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0042_N64.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp_interictal_rate_periodic_completion_20260918/orbits/LPC_resonance_upper_N512.npz",
+          "size": 3413905,
+          "mtime_ns": 1789696832807387804
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0041_N64.npz",
+          "size": 430891,
+          "mtime_ns": 1789653134863763838
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0042_N64.npz",
+          "size": 430795,
+          "mtime_ns": 1789653136231756504
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json",
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json"
+      ],
+      "temporal_meshes": [
+        512,
+        64,
+        64
+      ],
+      "phase_samples": 1024,
+      "coarse": {
+        "fraction": 0.4317544559525661,
+        "RMS_distance_Hz": 0.000169739825861291,
+        "distance_over_local_waveform_step": 0.03683985147572745,
+        "local_waveform_step_Hz": 0.0046075057054213945,
+        "common_phase_shifts_cycles": [
+          -8.160717676081556e-05,
+          0.0001406504924976713
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.431754455952566,
+        "RMS_distance_Hz": 0.00016973982586129149,
+        "distance_over_local_waveform_step": 0.036839851475727554,
+        "local_waveform_step_Hz": 0.0046075057054213945,
+        "common_phase_shifts_cycles": [
+          -8.160717676081582e-05,
+          0.00014065049249767204
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "A",
+      "label": "LPC2",
+      "internal_label": "LPC_resonance_lower",
+      "site_indices": [
+        25,
+        24
+      ],
+      "selected_left_continuation_index": 63,
+      "root_validation_status": "VALIDATED_CYCLE_FOLD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0055_N64.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp_interictal_rate_periodic_completion_20260918/orbits/LPC_resonance_lower_N512.npz",
+          "size": 3406714,
+          "mtime_ns": 1789697240301293688
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+          "size": 430525,
+          "mtime_ns": 1789653183203504954
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0055_N64.npz",
+          "size": 430432,
+          "mtime_ns": 1789653191599460045
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json",
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json"
+      ],
+      "temporal_meshes": [
+        512,
+        64,
+        64
+      ],
+      "phase_samples": 1024,
+      "coarse": {
+        "fraction": 0.30840854206610147,
+        "RMS_distance_Hz": 2.803255013031165e-06,
+        "distance_over_local_waveform_step": 0.005990948045382521,
+        "local_waveform_step_Hz": 0.0004679150932032791,
+        "common_phase_shifts_cycles": [
+          1.1098996774597828e-06,
+          2.1881383306314148e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.3084085420661009,
+        "RMS_distance_Hz": 2.8032550130306872e-06,
+        "distance_over_local_waveform_step": 0.005990948045381503,
+        "local_waveform_step_Hz": 0.00046791509320327887,
+        "common_phase_shifts_cycles": [
+          1.1098996774594137e-06,
+          2.1881383306314195e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "A",
+      "label": "TR2",
+      "internal_label": "TR_A_return",
+      "site_indices": [
+        24,
+        26
+      ],
+      "selected_left_continuation_index": 68,
+      "root_validation_status": "VALIDATED_TORUS_CROSSING",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0059_N64.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0060_N64.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+          "size": 857842,
+          "mtime_ns": 1789669698130912121
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0059_N64.npz",
+          "size": 430281,
+          "mtime_ns": 1789653196011436452
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0060_N64.npz",
+          "size": 430283,
+          "mtime_ns": 1789653197115430549
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json",
+        "/data/hfosp/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/displayed_H1_path_continuous_check.json"
+      ],
+      "temporal_meshes": [
+        128,
+        64,
+        64
+      ],
+      "phase_samples": 1024,
+      "coarse": {
+        "fraction": 0.9838255040888868,
+        "RMS_distance_Hz": 7.147077024108228e-08,
+        "distance_over_local_waveform_step": 0.00023885476493539358,
+        "local_waveform_step_Hz": 0.0002992227107565302,
+        "common_phase_shifts_cycles": [
+          7.906204315746604e-05,
+          0.00011152673135710204
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.9838255040888872,
+        "RMS_distance_Hz": 7.147077024014474e-08,
+        "distance_over_local_waveform_step": 0.00023885476493226048,
+        "local_waveform_step_Hz": 0.00029922271075653,
+        "common_phase_shifts_cycles": [
+          7.906204315746589e-05,
+          0.0001115267313571026
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "double",
+      "label": "PD2",
+      "internal_label": "PD_double_upper",
+      "site_indices": [
+        99,
+        100
+      ],
+      "selected_left_continuation_index": 150,
+      "root_validation_status": "VALIDATED_PD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0004_N1024.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp/rate_periodic_arrays/orbits/PD_double_upper_filter_parent_N8192.npz",
+          "size": 57031312,
+          "mtime_ns": 1789849867164752499
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0004_N1024.npz",
+          "size": 7154828,
+          "mtime_ns": 1789653639581081527
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz",
+          "size": 7154500,
+          "mtime_ns": 1789653667468934299
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        null,
+        null
+      ],
+      "temporal_meshes": [
+        8192,
+        1024,
+        1024
+      ],
+      "phase_samples": 16384,
+      "coarse": {
+        "fraction": 0.9005639336156575,
+        "RMS_distance_Hz": 0.0015173670301944192,
+        "distance_over_local_waveform_step": 0.02739791560072634,
+        "local_waveform_step_Hz": 0.05538257188273814,
+        "common_phase_shifts_cycles": [
+          -5.094446796906654e-07,
+          3.037769905937004e-08
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.9005187176549524,
+        "RMS_distance_Hz": 0.006874815380958362,
+        "distance_over_local_waveform_step": 0.12403554067373425,
+        "local_waveform_step_Hz": 0.05542617336624528,
+        "common_phase_shifts_cycles": [
+          -5.029055252255185e-07,
+          2.9261742001187426e-08
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "Bleading",
+      "label": "LPC7",
+      "internal_label": "LPC_Bleading_low",
+      "site_indices": [
+        91,
+        90
+      ],
+      "selected_left_continuation_index": 73,
+      "root_validation_status": "VALIDATED_CYCLE_FOLD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N4096.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0072_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0073_N512.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp/rate_periodic_arrays/orbits/LPC_Bleading_low_N4096.npz",
+          "size": 28884638,
+          "mtime_ns": 1789844108958753512
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0072_N512.npz",
+          "size": 3617460,
+          "mtime_ns": 1789654479643814921
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0073_N512.npz",
+          "size": 3617413,
+          "mtime_ns": 1789654482035799878
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        null,
+        null
+      ],
+      "temporal_meshes": [
+        4096,
+        512,
+        512
+      ],
+      "phase_samples": 8192,
+      "coarse": {
+        "fraction": 0.3721621332152564,
+        "RMS_distance_Hz": 0.0019388800696801647,
+        "distance_over_local_waveform_step": 0.011886455805423841,
+        "local_waveform_step_Hz": 0.1631167524970265,
+        "common_phase_shifts_cycles": [
+          8.419406596560869e-06,
+          -1.3710378091646361e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.3721621025837878,
+        "RMS_distance_Hz": 0.0024234267261192322,
+        "distance_over_local_waveform_step": 0.01485700697504057,
+        "local_waveform_step_Hz": 0.1631167522631263,
+        "common_phase_shifts_cycles": [
+          8.419421090151572e-06,
+          -1.3710363854450691e-05
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "single",
+      "label": "LPC5",
+      "internal_label": "LPC_burst_low",
+      "site_indices": [
+        69,
+        68
+      ],
+      "selected_left_continuation_index": 77,
+      "root_validation_status": "VALIDATED_CYCLE_FOLD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N4096.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0038_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0037_N256.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp/rate_periodic_arrays/orbits/LPC_burst_low_N4096.npz",
+          "size": 28220275,
+          "mtime_ns": 1789845062712910529
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0038_N256.npz",
+          "size": 1778397,
+          "mtime_ns": 1789652537823033791
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0037_N256.npz",
+          "size": 1778109,
+          "mtime_ns": 1789652531207071167
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        null,
+        null
+      ],
+      "temporal_meshes": [
+        4096,
+        256,
+        256
+      ],
+      "phase_samples": 8192,
+      "coarse": {
+        "fraction": 0.9640424321631831,
+        "RMS_distance_Hz": 0.10742228467817333,
+        "distance_over_local_waveform_step": 0.021035471697965095,
+        "local_waveform_step_Hz": 5.106720981615307,
+        "common_phase_shifts_cycles": [
+          0.9985631561058054,
+          -0.00020446437347371513
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.9640424321631833,
+        "RMS_distance_Hz": 0.10742353724493998,
+        "distance_over_local_waveform_step": 0.021035716976054723,
+        "local_waveform_step_Hz": 5.106720981615308,
+        "common_phase_shifts_cycles": [
+          0.9985631561058054,
+          0.9997955356265263
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    },
+    {
+      "family": "single",
+      "label": "LPC6",
+      "internal_label": "LPC_burst_high",
+      "site_indices": [
+        41,
+        40
+      ],
+      "selected_left_continuation_index": 151,
+      "root_validation_status": "VALIDATED_CYCLE_FOLD",
+      "orbits": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N2048.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0034_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0035_N256.npz"
+      ],
+      "profile_fingerprints": [
+        {
+          "path": "/data/hfosp/rate_periodic_arrays/orbits/LPC_burst_high_N2048.npz",
+          "size": 14365062,
+          "mtime_ns": 1789857839051935285
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0034_N256.npz",
+          "size": 1800684,
+          "mtime_ns": 1789652483863339707
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0035_N256.npz",
+          "size": 1800845,
+          "mtime_ns": 1789652490559301608
+        }
+      ],
+      "physical_branch_profile_evidence": [
+        null,
+        null
+      ],
+      "temporal_meshes": [
+        2048,
+        256,
+        256
+      ],
+      "phase_samples": 4096,
+      "coarse": {
+        "fraction": 0.5784046399916116,
+        "RMS_distance_Hz": 0.057610345763900506,
+        "distance_over_local_waveform_step": 0.0381603768305608,
+        "local_waveform_step_Hz": 1.509690169457739,
+        "common_phase_shifts_cycles": [
+          3.518161204183947e-05,
+          0.0001684096790964749
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "fine": {
+        "fraction": 0.5784046399916114,
+        "RMS_distance_Hz": 0.05761068994965878,
+        "distance_over_local_waveform_step": 0.038160604814928216,
+        "local_waveform_step_Hz": 1.509690169457739,
+        "common_phase_shifts_cycles": [
+          3.51816120418235e-05,
+          0.00016840967909647494
+        ],
+        "within_sampled_polyline_neighborhood": true
+      },
+      "association_retained": true,
+      "scope": "The previously selected adjacent segment is tested at preserved temporal bandwidth. A match neither validates unchecked branch profiles nor excludes additional roots in the bracket."
+    }
+  ],
+  "all_selected_associations_retained": true,
+  "temporal_downsampling_in_fine_check": false,
+  "scope": "All previously positive associations, one common phase per full spatial waveform, 935 populations and neuron-count-weighted RMS. This is not an exhaustive search, root count, physical validation of every interior sample, or interval completeness proof."
+}

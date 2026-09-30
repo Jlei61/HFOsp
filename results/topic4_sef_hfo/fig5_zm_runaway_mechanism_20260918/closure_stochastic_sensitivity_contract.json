@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-19T20:53:46.720633+08:00",
+  "question": "Does a closure change that delays deterministic entry also improve entry/resources/propagation under the already defined stochastic A4 input?",
+  "variants": [
+    "units",
+    "units_history"
+  ],
+  "dt_ms": 0.1,
+  "duration_ms": 12500,
+  "prefix_duration_ms": 500,
+  "baseline": "Unchanged stored A4_stoch_seed9108401 at dt .1 ms; rerun prefix required to match group rates and resource records bitwise at stored precision.",
+  "input": "Original recorded external drive seed9108401, same group Philox seed 1/cell/tick keys with shared/private variance split. Poisson counts depend on each arm rate and are not asserted equal. No native future recurrent spikes used.",
+  "changes": "Same two diagnosed response modifications as deterministic sensitivity. No fit to network target, no parameter tuning. Same physical initial state/history and graph.",
+  "readout": "Existing global200Hz >=200ms entry, E-weighted D at native checkpoints, complete early events with20msquiet on both sides, spatial propagation. Compare paired diagnostics and original native, not new acceptance thresholds.",
+  "scope": "Two fixed stochastic network diagnostics only; native equivalence remains NOT_ACCEPTED and onset type NOT_ESTABLISHED. Do not promote a model because entry time alone is closer."
+}

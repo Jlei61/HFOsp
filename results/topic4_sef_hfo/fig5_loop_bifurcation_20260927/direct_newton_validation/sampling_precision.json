@@ -1,0 +1,27 @@
+{
+  "status": "SAMPLING_PRECISION_DIAGNOSTIC",
+  "rows": [
+    {
+      "population": "E",
+      "groups": 1885,
+      "residual_weighted_RMS_Hz": 0.006972115686310096,
+      "combined_sampling_SEM_weighted_RMS_Hz": 0.006762841866888811,
+      "groups_outside_3combinedSEM_plus_1e_minus7_Hz": 0,
+      "zero_count_estimator_SEM_groups": 844
+    },
+    {
+      "population": "I",
+      "groups": 1594,
+      "residual_weighted_RMS_Hz": 0.1419641019847046,
+      "combined_sampling_SEM_weighted_RMS_Hz": 0.14239808548859287,
+      "groups_outside_3combinedSEM_plus_1e_minus7_Hz": 2,
+      "zero_count_estimator_SEM_groups": 100
+    }
+  ],
+  "definition": "First-order independent sampling errors from initial direct response, fresh validation, and eight-block measured-matrix action. Numerical absolute floor1e-7Hz only prevents interpreting solver roundoff at zero-count groups.",
+  "limits": "Not a posthoc replacement acceptance gate. Does not include finite-record/reset-phase bias, fixedM approximation, inherited source averaging, or native-network error. Zero counts do not prove zero true rate.",
+  "decision": "Fresh residual reduction is real, and remaining aggregate residual is at the estimated numerical sampling scale. Do not keep iterating the same noisy map merely to chase an arbitrary1e-6Hz residual. Retain finite precision when advancing the related branch and dynamic correspondence.",
+  "root_certified": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "d4cfa1afe41f849cde145daf1d36e44cce32737e4d3411cbf5870af6fc0bec9a"
+}

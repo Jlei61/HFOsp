@@ -1,0 +1,151 @@
+{
+  "status": "IN_PROGRESS",
+  "exact_site_results": [
+    {
+      "index": 68,
+      "status": "NUMERICALLY_STABLE",
+      "J_EE_core": 0.9577861497084698,
+      "T_ms": 293.21955238175076,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256_accuracy_N1024_accuracy_N4096.npz"
+    },
+    {
+      "index": 69,
+      "status": "UNSTABLE",
+      "J_EE_core": 0.9575887984733535,
+      "T_ms": 293.9984381260771,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256_accuracy_N1024_accuracy_N2048.npz"
+    },
+    {
+      "index": 85,
+      "status": "NUMERICALLY_STABLE",
+      "J_EE_core": 0.95,
+      "T_ms": 312.74553082469765,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096.npz"
+    },
+    {
+      "index": 90,
+      "status": "UNSTABLE",
+      "J_EE_core": 0.9488490067214715,
+      "T_ms": 317.83857737938746,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0074_N512_accuracy_N1024_accuracy_N4096.npz"
+    },
+    {
+      "index": 91,
+      "status": "NUMERICALLY_STABLE",
+      "J_EE_core": 0.9488489167801094,
+      "T_ms": 317.8388706167523,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512_accuracy_N1024_accuracy_N4096.npz"
+    },
+    {
+      "index": 99,
+      "status": "NUMERICALLY_STABLE",
+      "J_EE_core": 0.9447179976417638,
+      "T_ms": 761.9314252195768,
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024_accuracy_N2048_accuracy_N8192.npz"
+    }
+  ],
+  "workers": [
+    {
+      "status": "PROFILE_CHECK",
+      "pid": 457825,
+      "device": 0,
+      "requested_indices": [
+        85,
+        91,
+        90,
+        68,
+        69,
+        99,
+        100
+      ],
+      "completed": [
+        {
+          "index": 85,
+          "status": "NUMERICALLY_STABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/085.json"
+        },
+        {
+          "index": 91,
+          "status": "NUMERICALLY_STABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/091.json"
+        },
+        {
+          "index": 90,
+          "status": "UNSTABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/090.json"
+        },
+        {
+          "index": 68,
+          "status": "NUMERICALLY_STABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/068.json"
+        },
+        {
+          "index": 69,
+          "status": "UNSTABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/069.json"
+        },
+        {
+          "index": 99,
+          "status": "NUMERICALLY_STABLE",
+          "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/099.json"
+        }
+      ],
+      "timestamp": 1789837599.1710515,
+      "index": 100,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024_accuracy_N2048.npz",
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/worker_gpu0.json",
+      "pid_live": true
+    },
+    {
+      "status": "WAITING_DEPENDENCY",
+      "pid": 458724,
+      "rows": [],
+      "dependency": 457825,
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/worker.json",
+      "pid_live": true
+    },
+    {
+      "status": "RUNNING",
+      "pid": 458730,
+      "rows": [
+        {
+          "stage": "encounter_screen",
+          "returncode": 0,
+          "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_encounter_screen_1789836128640717053.log"
+        }
+      ],
+      "stage": "preceding_turns",
+      "child_pid": 458835,
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_preceding_turns_1789836163808932324.log",
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_checks_worker.json",
+      "pid_live": true
+    },
+    {
+      "status": "RUNNING",
+      "rows": [],
+      "pid": 458835,
+      "child_pid": 459135,
+      "label": "LPC_B_stage3_turn1",
+      "stage": "N2048",
+      "log": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/remaining_turn_refinements/LPC_B_stage3_turn1_N2048.log",
+      "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/remaining_turn_refinements/worker_BS1_BS2.json",
+      "pid_live": true
+    },
+    {
+      "status": "WAITING_DEPENDENCIES",
+      "pid": 458977,
+      "dependencies": [
+        458835
+      ],
+      "rows": [],
+      "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/remaining_turn_refinements/worker_B41_B42.json",
+      "pid_live": true
+    }
+  ],
+  "checked_H2_extension_points": 23,
+  "H2_extension_join_found": false,
+  "displayed_H1_checked_points": 548,
+  "figure_snapshot": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/figure_metadata.json",
+  "scientific_completeness": false,
+  "checked_at": 1789837607.4386308
+}

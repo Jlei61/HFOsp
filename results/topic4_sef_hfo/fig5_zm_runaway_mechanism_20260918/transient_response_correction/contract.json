@@ -1,0 +1,31 @@
+{
+  "created_local": "2026-09-20T14:53:30.083374+08:00",
+  "question": "Can a transient-only response correction recover the early LIF response without degrading the late response that constant bias spoiled?",
+  "evidence": "Constant E/Ibias restored early3s closed-loop recruitment/D but overpredictedlateI14-16percent. Uniformbias is stopped and remains an unaccepted counterfactual.",
+  "hypothesis": "Missing response is associated with nonlinear input transients; this is tested, not assumed proved byearly/latecomparison.",
+  "equation": "deltaell=b_population*H/(H+h_population); H=mean(f[3:39]**2), f are the unchanged normalizedinput-history differences. No new dynamic states.",
+  "invariants": "For historydifferences zero, deltaell=0 and full first derivative=0 exactly: same stationary response and infinitesimal localgain. This preserves their existing successes AND failures; it doesnot certify them.",
+  "scale": "h_population is the median H over the same early training groups and0.5-1.5s, weighting by the existing parent predicted flux. Input andparent output only, no LIF/native target orlate data.",
+  "training_groups": {
+    "E": [
+      833,
+      682,
+      549
+    ],
+    "I": [
+      2386
+    ]
+  },
+  "training_ms": [
+    500,
+    1500
+  ],
+  "fit": "One scalar b perE/I in[-log4,log4], atmost50boundedoptimizer evaluations, same pergroup normalized50ms waveformLS as constantbias diagnostic. Target independentGaussianLIF dt0.1 only. No native output/onset/D target.",
+  "transfer": "Same16early and6late profiles versusboth0.1and0.05LIF. Allfull/later earlywindows andlate9-10.35s use unchanged L2<=.15,relativecountbias<=.10. Developmental because sourceswereinspected; no blindclaim.",
+  "new_validation": "After weightslocked, 14newprescribedinputs: earlygroups531,185,945,2613,2237 andlategroups279,594 eachat timewarp0.8/1.25 and balancedmeanaboutreset/varianceamplitude0.9/1.1. Exactrecipe recorded beforeconstruction; predictionslockedbefore newLIFtargets. Localvalidation only, no native inference.",
+  "new_validation_recipe": "Variant0: index floor(k*0.8),mu=11+.9*(mu-11),rawvariances*1.1; variant1: floor(k*1.25),mu=11+1.1*(mu-11),rawvariances*.9; lastinputheldifindexexceedsrecord. Z samewarpedtime. Initialization allnoiseandhistoryzero/Vreset; burn500msearly/1000mslate.",
+  "new_validation_reference": "IndependentGaussianLIF8192replicates,minroundedtooriginalN,seed920141,dt.1/.05. Same50ms bins,2stepgate max(.05,3MCsplit). Ratefine/coarsebinL2<=.02.",
+  "stop": "One prescribed form andonefitperpopulation only. No scale/feature/weight tuning afterscoring. Ifdevelopmental ornewlocalchecks fail, retainfailure anddo notlaunch a network fromthiscandidate. Existingglobal/localfailurescannotbewaived.",
+  "budget": "Oneanalytic-invariantcheck, two scalarfits, fixedexistingtransfer and14newLIFinputsat2steps. No wholenetworkorbranch launch underthiscontract.",
+  "model_promoted": false
+}

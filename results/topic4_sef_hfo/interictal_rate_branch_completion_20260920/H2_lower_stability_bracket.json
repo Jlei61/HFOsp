@@ -1,0 +1,64 @@
+{
+  "status": "UNSTABLE_SAMPLES_CHECKED_MODE_TRACKING_REQUIRED",
+  "rows": [
+    {
+      "site": 66,
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/066.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64_accuracy_N128.npz",
+      "J_EE_core": 0.9600733875691013,
+      "T_ms": 282.8074647560975,
+      "multipliers": [
+        [
+          1369.6832593243169,
+          0.0
+        ],
+        [
+          -0.06744340948389306,
+          2.8166734307956554
+        ]
+      ],
+      "unstable_dimension": null
+    },
+    {
+      "site": 67,
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/067.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0100_N64_accuracy_N128.npz",
+      "J_EE_core": 0.947205893190792,
+      "T_ms": 290.86713171199204,
+      "multipliers": [
+        [
+          655.2249256510714,
+          0.0
+        ],
+        [
+          0.9945361294757267,
+          -1.1492201745804924
+        ]
+      ],
+      "unstable_dimension": null
+    },
+    {
+      "site": 70,
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/070.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64_accuracy_N128.npz",
+      "J_EE_core": 0.9465596459862857,
+      "T_ms": 299.72780069086076,
+      "multipliers": [
+        [
+          -1232.5726896823699,
+          0.0
+        ],
+        [
+          1.3269428456459167,
+          -0.6961676592028964
+        ]
+      ],
+      "unstable_dimension": null
+    }
+  ],
+  "intervening_known_fold": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_validation.json",
+  "root_spectrum_log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_LPC_B2_root_spectrum.log",
+  "scientific_question": "Does the leading-multiplier sign change around the known H2 fold reflect a connected eigenmode crossing, a switch of the dominant mode, or numerical contamination near the phase direction?",
+  "interpretation": "Opposite signs at different periodic solutions do not locate or classify a period-doubling. Root spectrum and continued mode identity must be resolved first.",
+  "global_connection_confirmed": false
+}

@@ -1,0 +1,20 @@
+{
+  "status": "REGISTERED_BEFORE_SPATIAL_DIAGNOSTIC",
+  "created_epoch": 1790517646.9658961,
+  "question": "Does a full local voltage/current/refractory/Z/M distribution recover the native spatial interictal substrate without a learned hazard?",
+  "scope": "First verify same graph grouping and native local updates. Then only 3s prefixes at512 and2048 particles/group, paired numerical streams, original recorded seed9108401 external forcing. One further2048 numerical seed only if needed for numerical-noise distinction. No automatic12.5s extension or continuation.",
+  "baseline": "Existing g20=935 projected native groups, same physical graph, thresholds, delays, E/I counts, reset and2/1ms refractory, dynamic original Z/M; addedG/K zero for this prerequisite interictal correspondence. Not a new autonomous-loop SNN seed.",
+  "remaining_approximation": "Recurrent arrivals are independent Gaussian increments with exact grouped first/squared-weight second moments; dt0.1ms decay-arrival-current ordering follows native. Group heterogeneity beyond declared thresholds/geometry and cross-cell synaptic noise correlations are omitted. External per1ms group mean drive is recorded; sub-ms and within-group forcing variation are omitted.",
+  "local_distribution": "Each numerical particle retainsV,sE,IE,sI,II,M,Z,K andref. Z eligibility uses its own raw inhibitory current; M uses its own spikes. This preserves their within-cell dependence. Native Euler Z/M and exponential K/R/G update orders are retained. No transfer function, neural weights or refitted network parameters.",
+  "discretization_note": "Earlier colored_population_local checks used the existing continuous-diffusion exact covariance assay. Here Gaussian arrivals approximate the actual native discrete shot-noise update, whose covariance differs by finite-dt terms. This distinct kernel receives its own independent CPU/transport/finite-window checks.",
+  "implementation_gate": "935-group delayed CSR aggregation against independent CPU at three wraparound clocks; complete particle/spike/ref state versus independent CPU with G0 andG30, high/lowglobalR; finite physical bounds; graph-capture prefix equals uncaptured steps; exact discrete Gaussian increment mean/covariance algebra.",
+  "numerical_gate": "512/2048 comparison is numerical resolution, not physiological seed replication. No correspondence acceptance until reduced dynamics remain qualitatively stable with resolution and native events/propagation/contacts match prespecified native-noise tolerance. A3s prefix can only reject obvious mismatch, not certify onset or closure.",
+  "stop": "If no core-led separated brief events, or persistent high firing before native onset, inspect the residual input/correlation/grouping approximation. Do not enlarge response MLP, fit onset or label bifurcation.",
+  "resources": "One extra GPU process, bounded<=2048*935 particles, estimated<1GiB states plus fixed operators. Leaves native12-worker queue unchanged. No broad parameter scan.",
+  "source_sha256": "d8d67e96a406d9ebc9fe6db8595292441233c50a8a852849223ad9fb545d6d8d",
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "operators": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/operators/g20",
+  "forcing": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_external_drive.npz",
+  "forcing_sha256": "6850e763b12ae53b4ce2b79ca2fbe39ee6a1092ab52023726cb2f5b9a5afaf92",
+  "human_review": "PENDING"
+}

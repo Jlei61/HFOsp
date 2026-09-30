@@ -1,0 +1,109 @@
+{
+  "status": "COMPLETE_SECOND_HISTORY_MOMENT_DESCRIPTION",
+  "rows": [
+    {
+      "region": "allE",
+      "targets": 32000,
+      "predicted_IE_II_variance_mean_mV2": [
+        20.688789862957222,
+        1.5199319352611889
+      ],
+      "native_IE_II_variance_mean_mV2": [
+        32.728288152615136,
+        2.066197574246629
+      ],
+      "native_IE_II_covariance_mean_mV2": 1.0457277989259073,
+      "native_E_minus_ZI_variance_mean_mV2": 32.415935122053654,
+      "independent_E_minus_ZI_variance_mean_mV2": 20.74263214097023,
+      "predicted_minus_native_IE_II_mean_RMS_mV": [
+        0.25263594627538855,
+        0.03779237320617573
+      ],
+      "response_minus_native_rate_RMS_Hz": 1.7867889798818772
+    },
+    {
+      "region": "coreA",
+      "targets": 754,
+      "predicted_IE_II_variance_mean_mV2": [
+        26.9468949984136,
+        1.664392160353414
+      ],
+      "native_IE_II_variance_mean_mV2": [
+        43.9605201695535,
+        2.814562615087757
+      ],
+      "native_IE_II_covariance_mean_mV2": 1.2509244391182066,
+      "native_E_minus_ZI_variance_mean_mV2": 43.609259712437584,
+      "independent_E_minus_ZI_variance_mean_mV2": 26.99760783061332,
+      "predicted_minus_native_IE_II_mean_RMS_mV": [
+        0.2488395102952839,
+        0.03504173570470345
+      ],
+      "response_minus_native_rate_RMS_Hz": 2.334043852613438
+    },
+    {
+      "region": "coreB",
+      "targets": 786,
+      "predicted_IE_II_variance_mean_mV2": [
+        26.67249662811026,
+        1.5210498393063105
+      ],
+      "native_IE_II_variance_mean_mV2": [
+        68.63864264935735,
+        1.26180946998092
+      ],
+      "native_IE_II_covariance_mean_mV2": 0.1150043210246939,
+      "native_E_minus_ZI_variance_mean_mV2": 68.6351961876269,
+      "independent_E_minus_ZI_variance_mean_mV2": 26.714123358424196,
+      "predicted_minus_native_IE_II_mean_RMS_mV": [
+        0.2685323161721254,
+        0.05488165506225126
+      ],
+      "response_minus_native_rate_RMS_Hz": 5.102378620854146
+    },
+    {
+      "region": "I",
+      "targets": 8000,
+      "predicted_IE_II_variance_mean_mV2": [
+        17.134916403557014,
+        0.7546746913020658
+      ],
+      "native_IE_II_variance_mean_mV2": [
+        23.048658277646222,
+        1.0398080126595453
+      ],
+      "native_IE_II_covariance_mean_mV2": 0.6223171139595215,
+      "native_E_minus_ZI_variance_mean_mV2": 22.843832062386703,
+      "independent_E_minus_ZI_variance_mean_mV2": 17.889591094859057,
+      "predicted_minus_native_IE_II_mean_RMS_mV": [
+        0.23670692562069512,
+        0.026860340067658375
+      ],
+      "response_minus_native_rate_RMS_Hz": 1.718973358622468
+    },
+    {
+      "region": "largest20_individual_E_rate_discrepancies",
+      "targets": 20,
+      "predicted_IE_II_variance_mean_mV2": [
+        27.052879936135923,
+        1.6020311348338647
+      ],
+      "native_IE_II_variance_mean_mV2": [
+        255.13333449668716,
+        1.9479840947547928
+      ],
+      "native_IE_II_covariance_mean_mV2": -0.2980523692909628,
+      "native_E_minus_ZI_variance_mean_mV2": 255.2881797255505,
+      "independent_E_minus_ZI_variance_mean_mV2": 27.09799611116953,
+      "predicted_minus_native_IE_II_mean_RMS_mV": [
+        0.21216876441654262,
+        0.03949375018044076
+      ],
+      "response_minus_native_rate_RMS_Hz": 21.13573000020585
+    }
+  ],
+  "protocol": "Native72-74s variable-background moments versus native-source diagonal2s periodic spectral prediction with fixed expected external mean. Finite-window filter boundary and background differences remain; not a matched intervention.",
+  "interpretation": "Moment differences describe remaining approximation error, not a causal allocation to cross-source or E/I covariance. The measured native E/I covariance is retained explicitly; changing it also changes the joint temporal statistics. No noise multiplier fit or model modification.",
+  "scope": "No new simulation, fixedpoint or stability claim. Original second-history response stays unchanged.",
+  "producer_sha256": "9885699a1a81a9b90a809c3210bc54bab2622c7f7f3cd1921e16d8229f149b5b"
+}

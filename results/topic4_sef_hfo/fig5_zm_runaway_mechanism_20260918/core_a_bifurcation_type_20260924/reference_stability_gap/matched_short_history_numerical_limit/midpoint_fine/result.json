@@ -1,0 +1,378 @@
+{
+  "status": "UNINTERRUPTED_CANDIDATE_FLOW_COMPLETE",
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_hz": 50.51122831858751,
+      "quiet_intervals_ms": [
+        [
+          85,
+          214
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 85,
+          "duration_ms": 85,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 214,
+          "end_ms": 5000,
+          "duration_ms": 4786,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ]
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 331.9460393883036,
+      "quiet_intervals_ms": [
+        [
+          50,
+          214
+        ],
+        [
+          307,
+          378
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 50,
+          "duration_ms": 50,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 214,
+          "end_ms": 307,
+          "duration_ms": 93,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 378,
+          "end_ms": 5000,
+          "duration_ms": 4622,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ]
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 129.1795659530786,
+      "quiet_intervals_ms": [
+        [
+          47,
+          203
+        ],
+        [
+          745,
+          857
+        ],
+        [
+          906,
+          972
+        ],
+        [
+          1286,
+          1307
+        ],
+        [
+          1315,
+          1364
+        ],
+        [
+          1409,
+          1475
+        ],
+        [
+          1847,
+          1910
+        ],
+        [
+          1954,
+          2019
+        ],
+        [
+          2053,
+          2117
+        ],
+        [
+          2161,
+          2199
+        ],
+        [
+          2469,
+          2498
+        ],
+        [
+          2779,
+          2883
+        ],
+        [
+          2932,
+          2995
+        ],
+        [
+          3266,
+          3296
+        ],
+        [
+          3336,
+          3370
+        ],
+        [
+          3415,
+          3493
+        ],
+        [
+          3544,
+          3651
+        ],
+        [
+          3699,
+          3743
+        ],
+        [
+          4018,
+          4052
+        ],
+        [
+          4090,
+          4158
+        ],
+        [
+          4204,
+          4274
+        ],
+        [
+          4313,
+          4358
+        ],
+        [
+          4694,
+          4768
+        ],
+        [
+          4813,
+          4886
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 47,
+          "duration_ms": 47,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 203,
+          "end_ms": 745,
+          "duration_ms": 542,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 857,
+          "end_ms": 906,
+          "duration_ms": 49,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 972,
+          "end_ms": 1286,
+          "duration_ms": 314,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1307,
+          "end_ms": 1315,
+          "duration_ms": 8,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1364,
+          "end_ms": 1409,
+          "duration_ms": 45,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1475,
+          "end_ms": 1847,
+          "duration_ms": 372,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1910,
+          "end_ms": 1954,
+          "duration_ms": 44,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2019,
+          "end_ms": 2053,
+          "duration_ms": 34,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2117,
+          "end_ms": 2161,
+          "duration_ms": 44,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2199,
+          "end_ms": 2469,
+          "duration_ms": 270,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2498,
+          "end_ms": 2779,
+          "duration_ms": 281,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2883,
+          "end_ms": 2932,
+          "duration_ms": 49,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2995,
+          "end_ms": 3266,
+          "duration_ms": 271,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3296,
+          "end_ms": 3336,
+          "duration_ms": 40,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3370,
+          "end_ms": 3415,
+          "duration_ms": 45,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3493,
+          "end_ms": 3544,
+          "duration_ms": 51,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3651,
+          "end_ms": 3699,
+          "duration_ms": 48,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3743,
+          "end_ms": 4018,
+          "duration_ms": 275,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4052,
+          "end_ms": 4090,
+          "duration_ms": 38,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4158,
+          "end_ms": 4204,
+          "duration_ms": 46,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4274,
+          "end_ms": 4313,
+          "duration_ms": 39,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4358,
+          "end_ms": 4694,
+          "duration_ms": 336,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4768,
+          "end_ms": 4813,
+          "duration_ms": 45,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4886,
+          "end_ms": 5000,
+          "duration_ms": 114,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 41.514670179149704,
+      "quiet_intervals_ms": [
+        [
+          85,
+          217
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 85,
+          "duration_ms": 85,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 217,
+          "end_ms": 5000,
+          "duration_ms": 4783,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ]
+    }
+  ],
+  "spatial_persistent_fraction_last1s": 0.0578125,
+  "seconds": 536.5027182102203,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "onset_bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 167.95686446713415,
+    "durations_ms": [
+      42.16462487916416,
+      43.13012615431174,
+      41.75795696367621,
+      40.90415646998204
+    ],
+    "max_combined_relative_rms": 0.011471251329803756,
+    "residual_ratio": 0.9775224797083631,
+    "predicted_gain": 0.4410025116228127,
+    "agreement": 0.10079262701077407,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.5104164790680267,
+        "projected_step_norm": 0.5103974832299307,
+        "phase_error": 2.4424906541753444e-15
+      },
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.5301842562701705,
+        "projected_step_norm": 0.5301373566701298,
+        "phase_error": 1.0484668688803822e-14
+      },
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.92829183028561,
+        "projected_step_norm": 0.9277799719548054,
+        "phase_error": 1.3877787807814457e-15
+      },
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.7853350808848367,
+        "projected_step_norm": 0.7851446528022018,
+        "phase_error": 5.440092820663267e-15
+      }
+    ],
+    "radius": 1.4213074836404391,
+    "step_norm": 1.4213074836403214,
+    "lagrange_multiplier": 0.04038525943102116,
+    "predicted_relative_residual": 0.7482234046156672
+  }
+]

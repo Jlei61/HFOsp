@@ -1,0 +1,230 @@
+{
+  "status": "VALIDATED_PD",
+  "label": "PD4",
+  "internal_label": "PD_H2_after_LPC13",
+  "N": 512,
+  "lower_mesh_N": 256,
+  "J_EE_core": 0.9463108827053242,
+  "T_ms": 296.8975940990832,
+  "mesh_J_difference": 1.2323475573339238e-14,
+  "antiperiodic_relative_residual": 2.025202946878579e-12,
+  "crossing_border_slope": 2437.703673098219,
+  "mesh_roots": [
+    {
+      "J_EE_core": 0.9463108827053365,
+      "T_ms": 296.8975941047915,
+      "border_scalar": 1.306622401009343e-10,
+      "linear_residual": 1.637787735971109e-14,
+      "half_period_relative_mismatch": 1.4936077505338599,
+      "cached_antiperiodic": false,
+      "streamed_harmonic_actions": true,
+      "antiperiodic_krylov": "gpu",
+      "antiperiodic_relative_residual": 1.3066557265574697e-10,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270534_N256.npz",
+      "orbit_residual_hz": 1.3981871216373065e-12,
+      "label": "PD_H2_after_LPC13",
+      "type": "period-doubling candidate verified by antiperiodic null mode",
+      "N": 256,
+      "dborder_dJ": 2439.2820751594118,
+      "multiplier": -1.0,
+      "criticality": "NOT_COMPUTED",
+      "root_stop_null_tolerance": 1e-09,
+      "slope_step_J": 2e-09,
+      "validation": "Requires mesh agreement and independent monodromy check before promotion"
+    },
+    {
+      "J_EE_core": 0.9463108827053242,
+      "T_ms": 296.8975940990832,
+      "border_scalar": 2.0210680947715813e-12,
+      "linear_residual": 1.9028500071269933e-14,
+      "half_period_relative_mismatch": 1.4936077505366903,
+      "cached_antiperiodic": false,
+      "streamed_harmonic_actions": true,
+      "antiperiodic_krylov": "gpu",
+      "antiperiodic_relative_residual": 2.025202946878579e-12,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+      "orbit_residual_hz": 2.42861286636753e-14,
+      "label": "PD_H2_after_LPC13",
+      "type": "period-doubling candidate verified by antiperiodic null mode",
+      "N": 512,
+      "dborder_dJ": 2437.703673098219,
+      "multiplier": -1.0,
+      "criticality": "NOT_COMPUTED",
+      "root_stop_null_tolerance": 1e-09,
+      "slope_step_J": 2e-09,
+      "validation": "Requires mesh agreement and independent monodromy check before promotion"
+    }
+  ],
+  "continuous_orbit_check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+    "N": 512,
+    "check_N": 2048,
+    "J_EE_core": 0.9463108827053242,
+    "T_ms": 296.8975940990832,
+    "maximum_group_defect_Hz": 2.7755575615628914e-14,
+    "regional_defect_Hz": [
+      2.315792571336744e-16,
+      1.760897440637001e-15,
+      1.8857611854658056e-16
+    ],
+    "minimum_rate_Hz": 0.004831472335898572,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 4.408577121012291e-05,
+        "phase_index": 703,
+        "group": 18
+      },
+      "slow": {
+        "minimum_Hz": 0.005693885723966577,
+        "phase_index": 871,
+        "group": 17
+      },
+      "positive": true,
+      "N": 512,
+      "check_N": 2048
+    },
+    "core_B_mean_Hz": 1.2133739317805887,
+    "offset_from_fold_core_B_mean_Hz": 0.0010896798223096749
+  },
+  "full_physical_profile_status": "PASS",
+  "full_acceptance": true,
+  "accepted_parent_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+  "accepted_mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+  "direct_monodromy_checks": [
+    {
+      "J_EE_core": 0.9463108827053242,
+      "T_ms": 296.8975940990832,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+      "dt_ms": 0.04999959482975467,
+      "recovered_multiplier": -0.9951264996111872,
+      "minus_one_relative_defect": 0.004873755480167055,
+      "rayleigh_eigen_residual": 4.986422264482076e-05,
+      "phase_relative_defect": 0.005167361581029234,
+      "state_reconstruction": "full harmonic bank",
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 0.9463108827053242,
+      "T_ms": 296.8975940990832,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+      "dt_ms": 0.024999797414877335,
+      "recovered_multiplier": -0.9987648419674894,
+      "minus_one_relative_defect": 0.0012352226902565403,
+      "rayleigh_eigen_residual": 1.2638403733147539e-05,
+      "phase_relative_defect": 0.0013071845705865798,
+      "state_reconstruction": "full harmonic bank",
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 0.9463108827053242,
+      "T_ms": 296.8975940990832,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+      "dt_ms": 0.012499898707438667,
+      "recovered_multiplier": -0.9996877755269082,
+      "minus_one_relative_defect": 0.0003122408242166678,
+      "rayleigh_eigen_residual": 3.195419798424194e-06,
+      "phase_relative_defect": 0.0003288902841941212,
+      "state_reconstruction": "full harmonic bank",
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 0.9463108827053242,
+      "T_ms": 296.8975940990832,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+      "dt_ms": 0.006249949353719334,
+      "recovered_multiplier": -0.9999208508093397,
+      "minus_one_relative_defect": 7.915333962074973e-05,
+      "rayleigh_eigen_residual": 8.10426223336796e-07,
+      "phase_relative_defect": 8.197723427453784e-05,
+      "state_reconstruction": "full harmonic bank",
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    }
+  ],
+  "minus_one_error_reduction": [
+    3.945649249006944,
+    3.955993561557485,
+    3.9447586888022492
+  ],
+  "simple_antiperiodic_nullspace_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/antiperiodic/PD_H2_after_LPC13_eval_J0.94631088270532_N512_N512.json",
+  "E_rate_mode_energy_A_B_surround": [
+    1.6434182785466557e-05,
+    0.09975917001775474,
+    0.9002243957994597
+  ],
+  "criticality": "SUBCRITICAL_PD",
+  "parent_stability": "ALREADY_UNSTABLE",
+  "scope": "Two meshes, positive constituent filters, off-grid equations, simple antiperiodic zero, nonzero border slope, and full-state/history minus-one propagation at successively halved steps. No child criticality or global connection claim.",
+  "root_spectrum": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        -16.533212773242848,
+        0.0
+      ],
+      [
+        1.223250902341647,
+        -0.8171029456083466
+      ],
+      [
+        1.223250902341647,
+        0.8171029456083466
+      ],
+      [
+        -0.9997671237927583,
+        0.0
+      ],
+      [
+        0.6753139085016991,
+        0.0
+      ],
+      [
+        -0.0031183091266751392,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.07106220506743455,
+      0.02066944138939682,
+      0.02066944138939682,
+      0.02066944138939682,
+      0.02066944138939682,
+      0.02066944138939682
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.011843700844572425,
+      1.8438283561691728e-05,
+      1.8438283561691728e-05,
+      0.0006920350886500115,
+      1.6522964039200616e-05,
+      1.7799552957118228e-07
+    ],
+    "reliable_outside_count": 3,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 16.533212773242848,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "child_stability": "UNSTABLE",
+  "child_classification_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_child_validation.json"
+}

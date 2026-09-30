@@ -1,0 +1,26 @@
+{
+  "J": 2.0,
+  "converged": false,
+  "residual_Hz": 628.9947476751063,
+  "late_regional_std_Hz": [
+    1.0962187521291817,
+    0.7903824882685073,
+    6.577225833965019
+  ],
+  "existing_branch_J_range": [
+    0.4,
+    2.0
+  ],
+  "existing_branch_maximum_regional_Hz": [
+    444.894384249884,
+    447.5492343091384,
+    14.626717846298119
+  ],
+  "meaning": "Independent rate simulation at J=2 has persistent high activity with temporal variation, especially outside cores. Newton from its endpoint failed; do not label it a newly established equilibrium or infer a bifurcation from failure.",
+  "status": "NOT_CONVERGED",
+  "failed_newton_trial_rates_A_B_surround_Hz": [
+    445.50215546929985,
+    447.00923942994353,
+    12.002668886548074
+  ]
+}

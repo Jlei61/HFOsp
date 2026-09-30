@@ -1,0 +1,177 @@
+{
+  "status": "AUDIT_PASS",
+  "coordinates": {
+    "D_A": 0.34815764125480564,
+    "Z_A": 0.6518423587451944,
+    "native_interpolation_time_ms": 9951.291472238374
+  },
+  "observed_ms": 70000,
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block02.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block03.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block04.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block05.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block06.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block07.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block08.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block09.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block10.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block11.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block12.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/local_return_neighborhood/DA0348158/block13.npz"
+  ],
+  "thresholds": [
+    {
+      "threshold_hz": 1.0,
+      "quiet_intervals_ms": [
+        [
+          10548,
+          10568
+        ],
+        [
+          10621,
+          10771
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 10548,
+          "duration_ms": 10548,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10568,
+          "end_ms": 10621,
+          "duration_ms": 53,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10771,
+          "end_ms": 70000,
+          "duration_ms": 59229,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ],
+      "time_fraction_below_after2s": 0.0025
+    },
+    {
+      "threshold_hz": 5.0,
+      "quiet_intervals_ms": [
+        [
+          10546,
+          10571
+        ],
+        [
+          10618,
+          10783
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 10546,
+          "duration_ms": 10546,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10571,
+          "end_ms": 10618,
+          "duration_ms": 47,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10783,
+          "end_ms": 70000,
+          "duration_ms": 59217,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ],
+      "time_fraction_below_after2s": 0.0027941176470588237
+    },
+    {
+      "threshold_hz": 10.0,
+      "quiet_intervals_ms": [
+        [
+          10544,
+          10573
+        ],
+        [
+          10617,
+          10786
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 10544,
+          "duration_ms": 10544,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10573,
+          "end_ms": 10617,
+          "duration_ms": 44,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10786,
+          "end_ms": 70000,
+          "duration_ms": 59214,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ],
+      "time_fraction_below_after2s": 0.002911764705882353
+    },
+    {
+      "threshold_hz": 50.0,
+      "quiet_intervals_ms": [
+        [
+          10536,
+          10579
+        ],
+        [
+          10610,
+          10790
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 10536,
+          "duration_ms": 10536,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10579,
+          "end_ms": 10610,
+          "duration_ms": 31,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 10790,
+          "end_ms": 70000,
+          "duration_ms": 59210,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ],
+      "time_fraction_below_after2s": 0.0032794117647058823
+    }
+  ],
+  "scope": "One matched-history deterministic intervention. Any no-return duration is censored. Finite observation does not certify an invariant set or bifurcation type.",
+  "model_promoted": false
+}

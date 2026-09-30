@@ -1,0 +1,17 @@
+{
+  "status": "REGISTERED_BEFORE_FREE_NETWORK_RUNS",
+  "created_epoch": 1790531068.0367076,
+  "question": "Does target-cell connection heterogeneity restore the K9 actual-exit-field spatial activity, G, and Z drift under autonomous coupling?",
+  "basis": "Local group531 failure was repaired by individual target input means: native55.54Hz, groupmean0, individual55.36-55.77. This did not certify other groups or autonomous coupling.",
+  "design": "Exactly two10s freely coupled runs: homogeneous target mean/variance control versus individual target mean/variance, both40000physical targets x128particles, pairednumericalseed928751. Actualexitfields Zmean.21/Kmean9; originalhigh12sfullstate and first10s existingpairedexternaldrive. Groupmeanthresholds andmembergroupexternalmean unchanged. Same frozenGaussianlocalcell andsourceg40grouping.",
+  "limits": "Z/K held, M/R/G andrecurrence dynamic. Still a sourcegroup closure; no formalcontinuation or stability, noautomaticgrid/seed/timeextension.",
+  "evaluation": "First10s andfixed5-10s tail: allE/core/surroundrates,400cellspatialfield,G, andevery1ms perparticleZeligibility. Compare native and homogeneouscontrol. Check CPU/GPUoperator/localupdate and capturedstateidentity beforelaunch.",
+  "replicas": 128,
+  "numerical_seed": 928751,
+  "conditions": [
+    "homogeneous",
+    "individual"
+  ],
+  "producer_sha256": "4c4f6950c213ab14202f28b43472e58337a5f7acd7421968c5b3c35053d9a240",
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,92 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M262144/point0000.npz",
+  "N": 16875,
+  "D": 0.21933559102934871,
+  "T_ms": 264.4,
+  "dt_ms": 0.0007650462962962962,
+  "multipliers": [
+    [
+      0.8200889831848943,
+      -0.24329991345408208
+    ]
+  ],
+  "eigen_residuals": [
+    1.5448838471035094e-08
+  ],
+  "phase_index": null,
+  "phase_defect": 0.0010487993923711937,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 0.8554184871909175,
+  "phase_projection": 0.9990546708918996,
+  "phase_quotient": true,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "RK4 with cubic delayed history",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "STABLE",
+  "calls": 10,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": null,
+  "branch_tangent_initial_guess": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/eval_001.npz",
+  "eigenvector_refined_orbit_check": {
+    "source_N": 8505,
+    "target_N": 16875,
+    "source_target_waveform_relative_error": 3.324036481239105e-05,
+    "source_dD_dlogT": -0.000888931575737593,
+    "state_perturbation": "zero",
+    "history_perturbation": "Fourier periodic-family rate tangent at -j*actual_dt",
+    "scope": "Krylov starting vector only. No multiplier, stability, or branch connection is inherited.",
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/eval_001.npz"
+  },
+  "time_grid": {
+    "requested_maximum_dt_ms": 0.00078125,
+    "steps": 345600,
+    "fft_friendly": true
+  },
+  "gain_cache": "host blocks, float64",
+  "delay_interpolation_cache": true,
+  "phase_component_diagnostics": {
+    "state_component_relative_defects": [
+      0.0010387467078740854,
+      0.0011661155863603987,
+      0.0011473405793615914,
+      0.001266843962921574,
+      0.0008957349006270927,
+      0.0009899255548315214,
+      0.0010382327726495813,
+      0.0011472464409313576,
+      0.0009763889134622318,
+      0.0011328452037902357,
+      0.002558019232775876,
+      0.0,
+      0.0010752531962262995,
+      0.0012445074198799391
+    ],
+    "state_component_phase_norms": [
+      713.6663701023457,
+      388.8414307537313,
+      227.85798349947567,
+      571.6431002376773,
+      1406.5410865065887,
+      1264.0678185031786,
+      3177.092747618399,
+      1023.3186998770826,
+      342.30544695800523,
+      1347.8879934833212,
+      0.002734201468760509,
+      0.0,
+      302.17496119901386,
+      722.5430305860076
+    ],
+    "state_relative_defect": 0.0010483665809254777,
+    "history_relative_defect": 0.0012424973663654128,
+    "propagated_phase_norm_ratio": 0.9990547741560301
+  },
+  "requested_eigenpairs": 1,
+  "arnoldi_basis_size": 6
+}

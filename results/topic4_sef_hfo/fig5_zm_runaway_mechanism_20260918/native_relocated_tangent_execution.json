@@ -1,0 +1,12 @@
+{
+  "registered_local": "2026-09-19T22:55:18.928144+08:00",
+  "parent_contract": "native_fine_turn_relocation_contract.json",
+  "target": "periodic/native_turn_relocated_G16875_M262144/point0000.npz",
+  "initial_guess": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "N": 16875,
+  "M": 262144,
+  "linear_tolerance": 1e-10,
+  "restart": 80,
+  "gain_cache_gb": 2,
+  "scope": "Complete previously registered relocated-root derivative. Initial guess only; no new branch scan or bifurcation classification."
+}

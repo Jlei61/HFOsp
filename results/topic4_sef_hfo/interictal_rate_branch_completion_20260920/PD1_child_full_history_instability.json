@@ -1,0 +1,113 @@
+{
+  "status": "PHYSICAL_CHILD_UNSTABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+  "J_EE_core": 0.9387268026049526,
+  "T_ms": 1650.6720668332723,
+  "paired_classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.017217126086245,
+        0.0
+      ],
+      [
+        0.19128119499872873,
+        0.0
+      ],
+      [
+        0.1902297078684823,
+        0.0
+      ],
+      [
+        0.1899424394760947,
+        0.0
+      ],
+      [
+        0.144688120697635,
+        0.0
+      ],
+      [
+        0.0023036242018664803,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006108536097427564,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343
+    ],
+    "reliable_mode_mask": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010180893495712606,
+      1.299894826556347e-06,
+      9.412130547170605e-08,
+      2.6865511537632614e-08,
+      3.991334707187377e-06,
+      3.91946666943822e-05
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.017217126086245,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "growing_multipliers": [
+    [
+      1.0182352154358163,
+      0.0
+    ],
+    [
+      1.017217126086245,
+      0.0
+    ]
+  ],
+  "requested_steps_ms": [
+    0.05,
+    0.025
+  ],
+  "mode_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_physical_20260920_child_k6_dt0.05.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_physical_20260920_child_k6_dt0.025.npz"
+  ],
+  "growing_mode_full_state_residuals": [
+    3.2262099366293766e-14,
+    6.801595325344536e-14
+  ],
+  "reference_phase_E_rate_mode_cosine_between_steps": 0.999999999818862,
+  "E_mode_energy_fractions_A_B_surround_at_reference_phase": [
+    0.6316128617889009,
+    1.0841423060003111e-05,
+    0.3683762967880392
+  ],
+  "mode_normalization": "Sign fixed by largest E component; max absolute population E-rate perturbation equals one. Neuron-count-weighted spatial E projection.",
+  "scope": "One physical doubled child. At least one growing Floquet direction; exact unstable dimension remains unresolved. The displayed eigenvector is phase-dependent and is not a spontaneous propagation snapshot or causal contribution. Parent-side witnesses and local PD criticality remain separate.",
+  "this_mode_growth_exponent_per_s": [
+    0.010947630496848085,
+    0.010341600409653524
+  ],
+  "this_mode_linear_e_folding_time_s": [
+    91.34396710666371,
+    96.69683224914925
+  ],
+  "growth_time_scope": "Linear growth along this returned mode near this exact cycle, not an observed transient lifetime or a claim that all unstable directions grow this slowly."
+}

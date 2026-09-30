@@ -1,0 +1,12 @@
+{
+  "question": "Can the same full equations support a cycle with tonic Core A and self-limited Core B, distinct from the already found low-A burst cycle?",
+  "source_cycle": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_below_SN_positive_cubic/latest_state.npz",
+  "source_tonic": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/below_high_A/exact_short/state10115.npz",
+  "phase_shift_ms": 115.80000000000001,
+  "phase_selection": "Unique descending Core B 50Hz crossing in the already recorded low-A cycle.",
+  "construction": "Artificial root-solver guess: retain all non-Core-A coordinates from the phase-shifted low-A periodic root; copy all five synaptic/M,42 local and canonical delay-history coordinates inside Core A from the actual sustained-A source. The complete Z fields must agree bitwise. No current equation, connection, delay, M law, or parameter is altered.",
+  "subsequent_flow": "All Z held, all M dynamic, same full3479-group autonomous conditional drift.",
+  "return_selection": "First descending crossing of the same B rate plane after50ms, scanned up to800ms. This only chooses a numerical period seed, never a periodicity or stability classification.",
+  "status": "ARTIFICIAL_SOLVER_GUESS_NOT_DATA",
+  "model_promoted": false
+}

@@ -1,0 +1,58 @@
+{
+  "status": "LOCKED_BEFORE_TARGET_GENERATION",
+  "created_epoch": 1790264128.7616346,
+  "question": "Does one independently calibrated static conductance correction repair the rejected time-compression approximation over the actual conductance scale?",
+  "source_failure": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/conductance_response/result.json",
+  "class_definition": "Original conditioned39 E stationary log hazard + log(1+g) + g/(1+g)*MLP(asinh(x)/3,log1p(sigmaE^2)/2,log1p(sigmaI^2)/2,log1p(g)/3). Fixed parent atg0.",
+  "data_definition": "Independent colored-LIF MonteCarlo with native filter/refractory/exponential membrane order; gconstant. These are local test conditions, not nativeSNN trajectories or training to onset times.",
+  "train": {
+    "sobol_points": 1024,
+    "design_seed": 929241,
+    "noise_seed": 929244,
+    "replicates": 512,
+    "duration_ms": 2000,
+    "burn_ms": 500
+  },
+  "validation": {
+    "sobol_points": 256,
+    "design_seed": 929242,
+    "noise_seed": 929245,
+    "replicates": 1024,
+    "duration_ms": 2000,
+    "burn_ms": 500
+  },
+  "domain": {
+    "normalized_mean_x": [
+      -10,
+      30
+    ],
+    "normalized_noise_sigma_EI": [
+      0,
+      12
+    ],
+    "g": [
+      0,
+      32
+    ],
+    "sampling": "asinh mean,log1p sigma,log1p g"
+  },
+  "fit": {
+    "architecture": [
+      4,
+      64,
+      64,
+      1
+    ],
+    "activation": "tanh",
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 1e-06,
+    "steps": 8000,
+    "batch": 256,
+    "seed": 929243,
+    "loss": "Squared asinh(rate/2Hz) error; final fixed-step model only."
+  },
+  "gate": "At least90% of256 independent validation points withinmax(2Hz,10%measured,3SEM), and every point withinmax(10Hz,25%measured,5SEM). Zero-conductance parent invariant exact. No validation-selected refit.",
+  "next_gate": "A static pass is only a candidate. Validate conductance transients and same spatial conditional dynamics before any formal branch or loop claim.",
+  "source_sha256": "84a99aaf5e72d2901787c8197ca2349ac8d0de8fc377d7c5bebee854a4d863eb"
+}

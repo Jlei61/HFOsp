@@ -1,0 +1,68 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93900217448_N1024.npz",
+  "J_EE_core": 0.9390021744838646,
+  "T_ms": 818.6951824993582,
+  "dt_ms": 0.09999941156704022,
+  "history_dimension": 345015,
+  "multipliers": [
+    [
+      1.0018185006810925,
+      0.0
+    ],
+    [
+      -0.19382564731927443,
+      0.0
+    ],
+    [
+      0.1908070333001316,
+      0.0
+    ]
+  ],
+  "residuals": [
+    1.3394777058111847e-13,
+    9.849829430988119e-15,
+    8.403237247258059e-14
+  ],
+  "phase_multiplier_error": 0.0018185006810924609,
+  "phase_tangent_relative_defect": 0.0005126358246029731,
+  "raw_multipliers_above_1p001": 1,
+  "requested_multipliers": 3,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 286.7383646965027,
+  "polynomial_filter_rho": 0.44100671252793205,
+  "transformed_eigenvalues": [
+    [
+      0.5618316247722273,
+      0.0
+    ],
+    [
+      0.12304679308664908,
+      0.0
+    ],
+    [
+      -0.047739858526118464,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.558993287472068,
+  "smallest_returned_transformed_modulus": 0.047739858526118464,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.9999999759987563,
+    0.8277550773019269,
+    0.31877785209114323
+  ],
+  "identified_neutral_index": 0,
+  "nontrivial_multipliers": [
+    [
+      -0.19382564731927443,
+      0.0
+    ],
+    [
+      0.1908070333001316,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 0.19382564731927443,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

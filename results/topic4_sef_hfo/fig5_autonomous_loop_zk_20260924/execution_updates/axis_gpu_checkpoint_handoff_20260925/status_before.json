@@ -1,0 +1,111 @@
+{
+  "stage": "RUNNING",
+  "supervisor_pid": 3238772,
+  "updated_epoch": 1790284439.116321,
+  "missing_prerequisites": [],
+  "completed": [
+    [
+      "isotropic",
+      "z0.75_k2_high"
+    ],
+    [
+      "rotated",
+      "z0.75_k2_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k2_interictal"
+    ],
+    [
+      "rotated",
+      "z0.75_k2_high"
+    ]
+  ],
+  "pending": [
+    [
+      "rotated",
+      "z0.95_k0.02_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.95_k0.02_interictal"
+    ],
+    [
+      "rotated",
+      "z0.75_k8_high"
+    ],
+    [
+      "isotropic",
+      "z0.75_k8_high"
+    ],
+    [
+      "rotated",
+      "z0.75_k8_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k8_interictal"
+    ]
+  ],
+  "active": [
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high",
+      "pid": 3209719,
+      "time_s": 18.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high",
+      "pid": 3218015,
+      "time_s": 13.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3218016,
+      "time_s": 51.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3238782,
+      "time_s": null,
+      "state": "BUILDING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high",
+      "pid": 3238783,
+      "time_s": 15.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_high",
+      "pid": 3252774,
+      "time_s": null,
+      "state": "BUILDING",
+      "backend": "cuda_ordered:0"
+    }
+  ],
+  "failed": [],
+  "new_scientific_total": 16,
+  "max_workers": 6,
+  "max_CPU_workers": 4,
+  "max_GPU0_workers": 2,
+  "available_memory_GiB": 151.7933578491211,
+  "CPU_busy_percent_at_dispatch": 36.3,
+  "GPU0_free_GiB": 9.3212890625,
+  "GPU0_pending_startup_reserved_GiB": 1.001953125,
+  "GPU0_effective_free_for_dispatch_GiB": 8.3193359375,
+  "execution_policy": "At most6total,4CPU,2GPU0; validated original CUDA onGPU0 whenfree>=9.3GiB, otherwise validated8threadCPU. Host>=88GiB/CPU<=65percent before dispatch. Carry startup reservations across polls. Original16jobs and prerequisites unchanged."
+}

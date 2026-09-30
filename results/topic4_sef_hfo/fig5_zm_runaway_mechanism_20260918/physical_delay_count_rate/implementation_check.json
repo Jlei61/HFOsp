@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "legacy100msbitwise": true,
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "physical_private_identical": true,
+      "delayed_arrival_max_error": 9.43689570931383e-16,
+      "maximum_final_refractory_occupancy": 0.5,
+      "finite_prefix_ms": 20,
+      "Z_bounds": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "dt_ms": 0.025,
+      "physical_private_identical": true,
+      "delayed_arrival_max_error": 9.159339953157541e-16,
+      "maximum_final_refractory_occupancy": 0.05263157894736842,
+      "finite_prefix_ms": 20,
+      "Z_bounds": [
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "scope": "Onlydelayunitsinprivatevariancechange; no scientificpromotion."
+}

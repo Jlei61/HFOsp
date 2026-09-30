@@ -1,0 +1,29 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/approx/coarse_20",
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "spatial_grid": 20,
+  "bin_mm": 1.0,
+  "E_groups": 490,
+  "I_groups": 400,
+  "rate_states": 1780,
+  "synaptic_states": 3200,
+  "slow_states": 980,
+  "total_continuous_states": 5960,
+  "delays_ms": [
+    0.1,
+    35.800000000000004
+  ],
+  "delay_history_scope": "Numerical DDE history, not individual-neuron or voltage-density coordinates",
+  "threshold_closure": "Eight equal-count empirical threshold chunks per spatial E cell; identical threshold chunks merged",
+  "only_population_rate_sources": true,
+  "mean_operator_source": "Same realized topology6101 projected to original1mm grid"
+}

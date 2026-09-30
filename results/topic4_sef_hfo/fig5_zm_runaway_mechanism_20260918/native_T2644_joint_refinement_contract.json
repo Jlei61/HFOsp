@@ -1,0 +1,39 @@
+{
+  "status": "PRESPECIFIED_BEFORE_JOINT_NATIVE_REFINEMENT",
+  "created_local": "2026-09-19T13:58:22.769617",
+  "question": "Is the native near-turn orbit and its local derivative sufficiently resolved to interpret failed phase invariance?",
+  "source": "periodic/native_unstable_period_extension_G8505_M65536/point0001.npz",
+  "target": "periodic/native_T2644_G16875_M131072/point0000.npz",
+  "period_ms": 264.4,
+  "coarse": {
+    "N": 8505,
+    "M": 65536
+  },
+  "fine": {
+    "N": 16875,
+    "M": 131072
+  },
+  "same_model": true,
+  "Z": "held native spatial path",
+  "M": "dynamic",
+  "orbit_criteria": {
+    "both_max_residual_hz": 2e-08,
+    "max_period_difference_ms": 1e-08,
+    "max_D_difference": 1e-08,
+    "max_Z_difference": 1e-06,
+    "max_phase_aligned_rate_relative_L2_difference": 0.001
+  },
+  "next": "Compare orbit and branch derivative. Any spectrum still requires unchanged phase and eigen-residual gates and time/refinement comparison. A converged periodic root does not certify Floquet stability or onset.",
+  "prior_phase_failures": [
+    {
+      "dtmax_ms": 0.0125,
+      "phase_defect": 0.07519242605082664,
+      "projection": 0.932213251992899
+    },
+    {
+      "dtmax_ms": 0.00625,
+      "phase_defect": 0.032139194569745295,
+      "projection": 0.9710301772138369
+    }
+  ]
+}

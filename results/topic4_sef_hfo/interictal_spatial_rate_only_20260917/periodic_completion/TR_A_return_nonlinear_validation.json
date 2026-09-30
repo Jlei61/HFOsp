@@ -1,0 +1,400 @@
+{
+  "status": "LOCALLY_SUPERCRITICAL_TORUS_SUPPORTED",
+  "label": "TR_A_return",
+  "critical_point": {
+    "label": "TR_A_return",
+    "type": "torus bifurcation of periodic orbit",
+    "J_EE_core": 0.9457603915251053,
+    "T_ms": 165.63054658665283,
+    "lambda_per_ms": [
+      -6.899125137991216e-14,
+      0.03796008884822572
+    ],
+    "multiplier": [
+      0.9999913265667475,
+      0.004164945188412696
+    ],
+    "distance_from_plus_one": 0.0041649542195474915,
+    "distance_from_minus_one": 1.9999956632729583,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+    "N": 128,
+    "orbit_residual_hz": 1.3877787807814457e-14,
+    "eigen_residual": 2.3074875537104554e-15,
+    "criticality": "NOT_COMPUTED",
+    "orbit_tolerance": 1e-11,
+    "eigen_tolerance": 2e-11,
+    "root_tolerance": 1e-11,
+    "transversal_slope": {
+      "step": 1e-07,
+      "real_exponents": [
+        -2.1597252958658846e-08,
+        2.1555679538025102e-08
+      ],
+      "derivative_per_ms_per_J": 0.21576466248341974
+    },
+    "local_gain_order": 4,
+    "local_gain_step": 5e-05,
+    "mode_seed": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_B_highorder_half_mode_N128.npz",
+    "interpretation": "A non-real conjugate pair crosses the unit circle away from +1 and -1; torus criticality requires additional normal-form analysis"
+  },
+  "fits": [
+    {
+      "mesh": [
+        64,
+        8
+      ],
+      "extrapolated_J_minus_TR": 1.4017059118715279e-12,
+      "quadratic_J_per_Hz2": 0.0003445333075625791,
+      "quartic_J_per_Hz4": 0.009137007200225958,
+      "amplitudes_hz": [
+        0.005,
+        0.01,
+        0.02
+      ]
+    },
+    {
+      "mesh": [
+        128,
+        8
+      ],
+      "extrapolated_J_minus_TR": 1.4009040841402423e-12,
+      "quadratic_J_per_Hz2": 0.0003445333417327766,
+      "quartic_J_per_Hz4": 0.009136923316708786,
+      "amplitudes_hz": [
+        0.005,
+        0.01,
+        0.02
+      ]
+    },
+    {
+      "mesh": [
+        64,
+        16
+      ],
+      "extrapolated_J_minus_TR": 1.1539164685838586e-12,
+      "quadratic_J_per_Hz2": 0.00034454614334439944,
+      "quartic_J_per_Hz4": 0.00901257833795051,
+      "amplitudes_hz": [
+        0.005,
+        0.01,
+        0.02
+      ]
+    }
+  ],
+  "torus_solutions": [
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457605308017506,
+      "T_ms": 165.6308509250198,
+      "modulation_period_ms": 253572.94673771824,
+      "modulation_frequency_per_ms": 2.477861060501286e-05,
+      "amplitude_hz": 0.02,
+      "N_theta": 128,
+      "N_psi": 8,
+      "residual": 1.734723475976807e-14,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.020000Hz_N128x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604260712096,
+      "T_ms": 165.63062206495724,
+      "modulation_period_ms": 250767.5873112434,
+      "modulation_frequency_per_ms": 2.5055811137908865e-05,
+      "amplitude_hz": 0.01,
+      "N_theta": 128,
+      "N_psi": 8,
+      "residual": 1.0304257447302234e-12,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.010000Hz_N128x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604260712078,
+      "T_ms": 165.6306220649534,
+      "modulation_period_ms": 250767.58732912398,
+      "modulation_frequency_per_ms": 2.50558111361223e-05,
+      "amplitude_hz": 0.01,
+      "N_theta": 64,
+      "N_psi": 8,
+      "residual": 1.0269562977782698e-12,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.010000Hz_N64x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604001455503,
+      "T_ms": 165.63056542050563,
+      "modulation_period_ms": 250090.95106959046,
+      "modulation_frequency_per_ms": 2.5123601155130253e-05,
+      "amplitude_hz": 0.005,
+      "N_theta": 64,
+      "N_psi": 8,
+      "residual": 5.898059818321144e-14,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.005000Hz_N64x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457605307867291,
+      "T_ms": 165.63085089265635,
+      "modulation_period_ms": 253573.02360091973,
+      "modulation_frequency_per_ms": 2.477860309410609e-05,
+      "amplitude_hz": 0.02,
+      "N_theta": 64,
+      "N_psi": 16,
+      "residual": 2.0816681711721685e-14,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.020000Hz_N64x16.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604260709993,
+      "T_ms": 165.63062206450442,
+      "modulation_period_ms": 250767.5883145029,
+      "modulation_frequency_per_ms": 2.505581103766672e-05,
+      "amplitude_hz": 0.01,
+      "N_theta": 64,
+      "N_psi": 16,
+      "residual": 3.7383290907300193e-13,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.010000Hz_N64x16.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457605308017512,
+      "T_ms": 165.6308509250202,
+      "modulation_period_ms": 253572.94673557277,
+      "modulation_frequency_per_ms": 2.477861060522251e-05,
+      "amplitude_hz": 0.02,
+      "N_theta": 64,
+      "N_psi": 8,
+      "residual": 1.734723475976807e-14,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.020000Hz_N64x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604001455503,
+      "T_ms": 165.63056542050563,
+      "modulation_period_ms": 250090.95106959046,
+      "modulation_frequency_per_ms": 2.5123601155130253e-05,
+      "amplitude_hz": 0.005,
+      "N_theta": 128,
+      "N_psi": 8,
+      "residual": 4.969982758673552e-13,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.005000Hz_N128x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457609705985118,
+      "T_ms": 165.6318126654131,
+      "modulation_period_ms": 266792.43371485814,
+      "modulation_frequency_per_ms": 2.3550837704396505e-05,
+      "amplitude_hz": 0.04,
+      "N_theta": 64,
+      "N_psi": 8,
+      "residual": 2.42861286636753e-14,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.040000Hz_N64x8.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457604001455456,
+      "T_ms": 165.6305654204955,
+      "modulation_period_ms": 250090.95109461425,
+      "modulation_frequency_per_ms": 2.5123601152616415e-05,
+      "amplitude_hz": 0.005,
+      "N_theta": 64,
+      "N_psi": 16,
+      "residual": 1.0234868508263162e-13,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.005000Hz_N64x16.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    },
+    {
+      "status": "CONVERGED",
+      "J_EE_core": 0.9457609690247544,
+      "T_ms": 165.63180927872202,
+      "modulation_period_ms": 266803.5108504009,
+      "modulation_frequency_per_ms": 2.3549859921830728e-05,
+      "amplitude_hz": 0.04,
+      "N_theta": 64,
+      "N_psi": 16,
+      "residual": 1.7026310916712362e-12,
+      "parent_critical_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_N128.json",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.040000Hz_N64x16.npz",
+      "stability": "NOT_COMPUTED",
+      "amplitude_reference": "Critical mode normalized on a common Ntheta=64 mesh",
+      "requested_tolerance": 1e-10,
+      "limitation": "Two-angle collocation solution; mesh convergence and small-amplitude approach to TR required before classifying criticality."
+    }
+  ],
+  "continuous_defects": [
+    {
+      "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/strict_TR2_a0.020000Hz_N64x16.npz",
+      "J_EE_core": 0.9457605307867291,
+      "T_ms": 165.63085089265635,
+      "modulation_period_ms": 253573.02360091973,
+      "original_mesh": [
+        64,
+        16
+      ],
+      "check_mesh": [
+        128,
+        32
+      ],
+      "maximum_group_defect_Hz": 7.615436059538183e-13,
+      "regional_defect_Hz": [
+        1.2390825737775846e-13,
+        1.5303424004147894e-13,
+        2.972069205325889e-15
+      ],
+      "minimum_rate_Hz": 0.030629318355887024,
+      "method": "Independent two-angle Fourier interpolation with both Nyquist splits, exact physical frequencies/delays, denser nonlinear transfer evaluation."
+    }
+  ],
+  "radial_normal_form": {
+    "beta_per_ms_per_J": 0.21576466248341974,
+    "c_inferred_per_ms_per_Hz2": -7.434088232866831e-05,
+    "meaning": "Positive J(a)-J_TR curvature and beta>0 imply local radial stability. Inferred from branch direction, not an independently calculated adjoint cubic coefficient."
+  },
+  "parent_noncritical_spectrum_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR_A_return_eval_J0.9457603915254_N64_dt0.05.json",
+  "parent_noncritical_modes_numerically_stable": true,
+  "largest_other_returned_multiplier_modulus": 0.5490459031639299,
+  "parent_spectrum_step_checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR_A_return_eval_J0.9457603915254_N64_dt0.1.json",
+      "dt_ms": 0.0999580848444088,
+      "critical_multipliers": [
+        [
+          0.9999622657050905,
+          0.004181792752363704
+        ],
+        [
+          0.9999622657050905,
+          -0.004181792752363704
+        ]
+      ],
+      "other_returned_multipliers": [
+        [
+          0.5490582254024664,
+          0.0
+        ],
+        [
+          0.017868022389034923,
+          0.0
+        ],
+        [
+          0.01696879249068324,
+          0.0
+        ],
+        [
+          -0.000432488465288707,
+          0.008425108685756496
+        ],
+        [
+          -0.000432488465288707,
+          -0.008425108685756496
+        ],
+        [
+          0.0028218974551004077,
+          0.0010021081706722084
+        ]
+      ],
+      "largest_other_returned_modulus": 0.5490582254024664,
+      "unreturned_radius_from_numerical_LM_coverage": 0.8503334865311015,
+      "maximum_eigen_residual": 9.296700108605819e-07,
+      "phase_defect": 6.076607665038781e-06,
+      "coverage_scope": "Radius bound assumes numerically converged largest-modulus transformed eigenpairs; not a rigorous Arnoldi enclosure."
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR_A_return_eval_J0.9457603915254_N64_dt0.05.json",
+      "dt_ms": 0.04999412815791891,
+      "critical_multipliers": [
+        [
+          0.9999841435989995,
+          0.0041691185859960836
+        ],
+        [
+          0.9999841435989995,
+          -0.0041691185859960836
+        ]
+      ],
+      "other_returned_multipliers": [
+        [
+          0.5490459031639299,
+          0.0
+        ],
+        [
+          0.017844326413314543,
+          0.0
+        ],
+        [
+          0.016993694322593123,
+          0.0
+        ],
+        [
+          -0.0004328019675326719,
+          0.008425340791467475
+        ],
+        [
+          -0.0004328019675326719,
+          -0.008425340791467475
+        ],
+        [
+          0.002821938317514455,
+          0.0010040830242166049
+        ]
+      ],
+      "largest_other_returned_modulus": 0.5490459031639299,
+      "unreturned_radius_from_numerical_LM_coverage": 0.8503341773972952,
+      "maximum_eigen_residual": 9.043498731031664e-07,
+      "phase_defect": 1.4430123536193435e-06,
+      "coverage_scope": "Radius bound assumes numerically converged largest-modulus transformed eigenpairs; not a rigorous Arnoldi enclosure."
+    }
+  ],
+  "matched_noncritical_step_change": 2.4901831909882044e-05,
+  "stability_scope": "Local torus stability supported when parent noncritical modes are stable; no full torus Lyapunov spectrum or global stability continuation.",
+  "interpretation": "Unlike TR1, TR2 has a supercritical small-amplitude torus branch. It is weak two-frequency activity, not a demonstrated irregular-burst state."
+}

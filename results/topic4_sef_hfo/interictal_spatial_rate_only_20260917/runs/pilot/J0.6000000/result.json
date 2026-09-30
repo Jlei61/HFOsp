@@ -1,0 +1,49 @@
+{
+  "status": "COMPLETE",
+  "J_EE_core": 0.6,
+  "duration_ms": 3000,
+  "dt_ms": 0.1,
+  "seconds": 15.577377319335938,
+  "dynamics": [
+    {
+      "mean_rate_hz": 0.4060189256641523,
+      "minimum_hz": 0.40596461243092197,
+      "maximum_hz": 0.4061310941180028,
+      "quiet_fraction": 1.0,
+      "self_limited_bursts": 0,
+      "peak_times_ms": [],
+      "burst_windows_ms": [],
+      "IEI_CV": null,
+      "median_IEI_ms": null,
+      "oscillatory_peaks": 0
+    },
+    {
+      "mean_rate_hz": 0.37242435378115535,
+      "minimum_hz": 0.37237714220237256,
+      "maximum_hz": 0.3725218450557745,
+      "quiet_fraction": 1.0,
+      "self_limited_bursts": 0,
+      "peak_times_ms": [],
+      "burst_windows_ms": [],
+      "IEI_CV": null,
+      "median_IEI_ms": null,
+      "oscillatory_peaks": 0
+    },
+    {
+      "mean_rate_hz": 0.07452944395531752,
+      "minimum_hz": 0.07452796598885014,
+      "maximum_hz": 0.07453249414576717,
+      "quiet_fraction": 1.0,
+      "self_limited_bursts": 0,
+      "peak_times_ms": [],
+      "burst_windows_ms": [],
+      "IEI_CV": null,
+      "median_IEI_ms": null,
+      "oscillatory_peaks": 0
+    }
+  ],
+  "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.6000000/trajectory.npz",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.6000000/contract.json",
+  "observation": "Rates in Hz/cell; fields and readouts are functions of this rate trajectory, not sampled spikes",
+  "native_equivalence": "NOT_VALIDATED"
+}

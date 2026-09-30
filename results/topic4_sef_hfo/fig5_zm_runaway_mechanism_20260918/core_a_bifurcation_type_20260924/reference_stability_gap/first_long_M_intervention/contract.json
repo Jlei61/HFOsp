@@ -1,0 +1,19 @@
+{
+  "created_local": "2026-09-25T00:29:04.162952+08:00",
+  "question": "Does ongoing M accumulation help terminate the first prolonged Core-A activity, or does the fast network end it even when every M is held at its current value?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0300/from_interictal_history/checkpoint5000.npz",
+  "source_elapsed_ms": 5000,
+  "selection": "Existing exact 5s checkpoint lies inside the first complete long activity (2.853--6.143s). Selected before intervention; no event-aligned state reconstruction.",
+  "arms": [
+    "dynamic_M",
+    "held_M"
+  ],
+  "duration_ms": 3000,
+  "dt_ms": 0.05,
+  "intervention": "Hold all original Z in both arms. Same complete fast/M/history initial state. Dynamic arm keeps every M law; held arm changes only existing dynamic-M switches to zero, preserving the exact spatial M field. No rate, threshold, connectivity, delay, gain or input changes.",
+  "observations": "Full group rates every1ms and original group M every10ms. Original 10ms smoothing, Core-A quiet<5Hz sustained20ms. Report first complete quiet interval, not permanent-state or attractor membership.",
+  "decision": "If dynamic M ends the activity while held M does not in this matched3s window, ongoing M evolution contributes to this termination. Equal termination would weaken that hypothesis. Neither outcome establishes a fold, Hopf, crisis or other onset type.",
+  "baseline": "New matched dynamic control; independently compare it with old5--8s recorded rates at original storage precision. Preserve any discrepancy instead of attributing it to physiology.",
+  "budget": "Two3s continuations and condition-specific10ms repeat checks only. No automatic broad clamp campaign.",
+  "model_promoted": false
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "previous_failures": [
+    {
+      "name": "asymmetric_history_constant_background",
+      "failed_engine_exact_initial": true,
+      "step": 420000
+    },
+    {
+      "name": "high_history_constant_background",
+      "failed_engine_exact_initial": true,
+      "step": 720000
+    }
+  ],
+  "new_job_and_checkpoint_job_exact": true,
+  "new_full_initial_engines_unchanged": true,
+  "correction": "Synchronize the already declared external-rate metadata in the saved job and JSON before execution. No physical equation, parameter, random stream or initial engine changed.",
+  "wrapper_sha256": "cd06bab88f96d73c964250e4257dfad12d8424b0ad35b1bbd346810f8fa94f66"
+}

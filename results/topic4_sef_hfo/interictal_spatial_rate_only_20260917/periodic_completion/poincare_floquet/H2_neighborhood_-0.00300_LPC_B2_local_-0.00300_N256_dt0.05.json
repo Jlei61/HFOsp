@@ -1,0 +1,117 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_local_-0.00300_N256.npz",
+  "J_EE_core": 0.9463157070410471,
+  "T_ms": 296.2620332265083,
+  "dt_ms": 0.04999359318705844,
+  "history_dimension": 679745,
+  "minimum_occupied_delay_ms": 0.1,
+  "multipliers": [
+    [
+      124.01170067511367,
+      0.0
+    ],
+    [
+      1.201152866663519,
+      -0.8463036865536461
+    ],
+    [
+      1.201152866663519,
+      0.8463036865536461
+    ],
+    [
+      0.7653342482075531,
+      0.0
+    ],
+    [
+      0.047121665899042854,
+      0.0
+    ],
+    [
+      -0.007061205455729209,
+      0.0
+    ]
+  ],
+  "residuals": [
+    5.128218201197843e-11,
+    3.4538628773039606e-09,
+    3.4538628773039606e-09,
+    1.4698482841090114e-07,
+    9.189231638054502e-10,
+    7.269756104972006e-10
+  ],
+  "phase_tangent_relative_defect": 0.004889222958766605,
+  "phase_overlap": [
+    2.2149627690539366e-12,
+    2.3355564936368195e-09,
+    2.3355564936368195e-09,
+    1.891345630977792e-07,
+    9.548965128544523e-09,
+    1.3474629006258997e-08
+  ],
+  "section_time_shift_coefficients": [
+    [
+      -7285.176433304261,
+      0.0
+    ],
+    [
+      0.013742341990144874,
+      -0.008911408934167652
+    ],
+    [
+      0.013742341990144874,
+      0.008911408934167652
+    ],
+    [
+      37.70182262095922,
+      0.0
+    ],
+    [
+      -4.253087674207821,
+      0.0
+    ],
+    [
+      -0.25677145354711606,
+      0.0
+    ]
+  ],
+  "full_state_generalized_eigen_residuals": [
+    5.1257974293483396e-11,
+    3.4538628773015457e-09,
+    3.4538628773015457e-09,
+    1.469848284497982e-07,
+    9.189231450086577e-10,
+    7.269756100600994e-10
+  ],
+  "polynomial_filter_rho": 0.7435925565330964,
+  "transformed_eigenvalues": [
+    [
+      15286.68772678848,
+      0.0
+    ],
+    [
+      -0.16663005216401072,
+      1.403775076460035
+    ],
+    [
+      -0.16663005216401072,
+      -1.403775076460035
+    ],
+    [
+      -0.032818868474873836,
+      0.0
+    ],
+    [
+      0.01663965674201106,
+      0.0
+    ],
+    [
+      0.005300520384782227,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.2564074434669036,
+  "smallest_returned_transformed_modulus": 0.005300520384782227,
+  "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+  "seconds": 465.84715366363525,
+  "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+}

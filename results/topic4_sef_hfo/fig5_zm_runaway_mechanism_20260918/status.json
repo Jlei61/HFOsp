@@ -1,0 +1,1041 @@
+{
+  "execution": "LOCAL_EQUILIBRIUM_SN_CERTIFIED_ACTUAL_PERIODIC_STRUCTURE_IN_PROGRESS",
+  "updated_local": "2026-09-24T11:57:04.306464+08:00",
+  "goal_window_end": "2026-09-19 07:30",
+  "model": "Same native g40 spatial graph, physical-delay private-Q repaired, conditioned39 plus locked transient correction; no particles or physical Z/M parameter retuning. Candidate remains unaccepted.",
+  "paired_Z_feedback": "SUPPORTED",
+  "native_correspondence": "CONDITIONAL_NATIVE_Z_PATH_5_APPLICABLE_A4_PASS; AUTONOMOUS_Z_PATH_FAIL; LOCAL_RESPONSE_FAILURES_RETAINED",
+  "bifurcation_type": "NATIVE_ONSET_NOT_ESTABLISHED",
+  "main_bifurcation_figure": "NOT_COMPLETE; current figures are correspondence and matched spatial-Z diagnostics, not certified branches.",
+  "human_visual_acceptance": "PENDING",
+  "regional_Z_controls": "COMPLETE; surround-only persistent, cores-only retains complete events",
+  "native_30s_extensions": "COMPLETE W1 unresolved / W2 persistent",
+  "native_Galerkin_old_turn": "DERIVATIVE_SIGN_BRACKET_MISSING; candidate is not accepted",
+  "rate_direct_boundary": "20s D=.144970 remains regular; .144975 leaves the short cycle at dt=.05 and .025; late category depends on step/history",
+  "main_figure": "No accepted complete onset bifurcation figure. Historical affine-rate-path figure is partial and is not the current native-Z-path result.",
+  "rate_equilibrium_branch": "85/85 unstable; 4 verified equilibrium SN; none established as onset",
+  "response_domain": "55--57% E rate mass outside dynamic-response calibration; SNN mechanism correspondence incomplete",
+  "baseline_cycle_stability": "STABLE_WITH_STEP_REFINEMENT; transverse modulus .768588",
+  "periodic_mesh_refinement": "N4097/N8193 at T266.55,267.1,267.35 accepted; max D difference 7.3e-10",
+  "matched_critical_history": "same full initial history, 12s: D .144970 regular; .144975 loses regular short cycle and remains UNRESOLVED",
+  "rate_D020_equilibrium": "UNSTABLE by positive complex roots; total RHP count still NEEDS_REFINEMENT",
+  "same_Z_pair": "TWO_DISTINCT_CONVERGED_CYCLES_AT_IDENTICAL_Z; phase-aligned E trajectory separation .12827",
+  "cycle_turn": "Fine curvature step comparison passes (0.835 percent); relocated derivative remains outside 1e-9 gate. Independent fine physical-flow phase check FAIL. No critical symbol.",
+  "near_turn_stability": "Lower STABLE_WITH_STEP_REFINEMENT; upper stability refinement unresolved because phase invariance failed",
+  "upper_periodic_refinement": "N8193/M65536 and N16385/M65536 converge to D=.144971877110; residuals <1e-9, group undershoot reduces to .001727Hz",
+  "spatial_recruitment": "Matched 12s pair: low D no persistent cells; high D persistence first near Core A, later B and surround; max 20--25% E recruitment across threshold sensitivity",
+  "overnight_window": "Original window retained as history. Goal incomplete; latest bounded response work has current timestamps; elapsed time does not imply scientific completion.",
+  "bottleneck_control": "COMPLETE; same history four D, first long event times9.57/5.57/4.06/2.09s. Conditional normal-form infinite-exit10.45/6.74/5.24/3.14s, no escape data fitted; not bifurcation certification",
+  "fine_Z_path_control": "COMPLETE fouractualfields:7750 regular selflimited;7760 irregular selflimited,80--890ms events;7770/7780 persistent. Affine Dc is not actualpaththreshold.",
+  "near_lower_cycle_stability": "STABLE_WITH_STEP_REFINEMENT; transverse multiplier .932870/.932895, difference2.56e-5",
+  "cycle_turn_mesh": "N16385/M65536 center and both side periods COMPLETE; fine_turn_geometry.json supports fold geometry, not standalone type certification",
+  "near_upper_cycle_stability": "Finer RK4 phase gate FAILED: defect.0161099, projection1.0161064. No refined eigenvalue accepted. Coarse1.076339 is not yet converged evidence.",
+  "cycle_turn_center_refinement": "N16385/M65536 at sameT267.2571586 converged D .144972643028248, difference-8.54e-11 fromN4097, residual1.99e-9",
+  "bifurcation_candidate": "GEOMETRIC_CYCLE_TURN_ONLY; old native-Z-path conditional family near D=.219335652. Two allowed physical-flow checks both fail phase invariance; no certified LPC or onset assignment.",
+  "cycle_curvature": "N4097 directional h1e-4/5e-5: both negative, 7.2% difference; original <5% convergence gate NOT passed; fine-grid derivative test prepared",
+  "quasistatic_correspondence": "NOT_ESTABLISHED: baseline relaxation1.001s, constant initial drift would reach affine critical D in.149s; actual curved Z fields have a shifted state boundary",
+  "large_grid_index_fix": "PASS actual large-array cached-RHS bitwise parity; fine RK4 needs 2,244,000,000 double offset exceeding int32. Existing accepted streamed spectra below overflow threshold.",
+  "upper_phase_diagnostic": "COMPLETE N32769 atM262144/300000/524288: phaseJVP.000939/.000811/.000506; RMSrate residual.000211Hz. Finerquadrature derivative still matters.",
+  "actual_fine_Z_periodic": "Seed+5fixedD roots+1fixedT root accepted; latest D.1432680363894801,T263.625,residual7.9e-12Hz. Further finepath fixedD corrector restarted from this closer accepted root.",
+  "upper_joint_refinement": "COMPLETE_NEGATIVE: N32769/M262144 at dt.00178234 phase defect.01611158, no spectrum accepted. Joint-refinement contract failed.",
+  "large_quadrature_solver": "PASS F/JVP parity: residual2.55e-12Hz, relativeJacobian1.76e-15; hostmemory scheduling only",
+  "actual_fine_Z_coarse_continuation": "STOPPED_FOR_SOURCE_RESOLUTION_FAILURE; no bifurcation inferred from Newton failure",
+  "actual_fine_Z_continuation": "Paused after6 additional accepted roots; latestD.14326803638948,T263.625. Secondary additional corrector stopped with no acceptednewroot; no branch end inferred.",
+  "resource_coordinate_comparison": "COMPLETE: affine cycle-turn global Z .8550, core A/B .7370/.7336; native9420 global Z .7712, core A/B .7249/.7163. These are not the same threshold.",
+  "upper_joint_refinement_contract": "Prespecified joint orbit/quadrature/time acceptance in upper_joint_refinement_contract.json; not same-orbit timestep certification. Old finer-time phase failure retained.",
+  "equal_mean_Z_control": "COMPLETE: identicalglobalZ .855363715332 and full history; affine field SELF_LIMITED28.37Hz,15events,quiet65%; recorded7770field localPERSISTENT87.60Hz,noquiet. SpatialZ RMSdifference.00154.",
+  "local_model_validation": "Existing frozen response validation reverified: overallFAIL65/146 eligible tests, variance_E40/56 failures; A4networkPARTIAL, D_track fails inall3arms. These apply to same frozen closure; no claim of SNN mechanism certification.",
+  "equal_mean_Z_figure": "fig_equal_mean_Z_spatial_control PNG/PDF self-reviewed and shown; human pending",
+  "full_autonomous_equilibria": "COMPLETE: low .123688Hz,Z1 UNSTABLE4 RHP roots; high489.811Hz,Z0 STABLE_BY_CONTOUR0 RHP roots. Both Z/M dynamic; two roots do not establish bistability or separatrix.",
+  "upper_finer_phase_method": "dtmax.0009 COMPLETE_NEGATIVE:phase.0091697,projection1.0091677. dt.00045 retry stopped during setup to prioritize nativeZ.78; no phase result at.00045, old failures retained.",
+  "actual_fine_Z_stability": "STABLE_WITH_STEP_REFINEMENT atD.143221680612: real multipliers .769720452686/.769718814514, phase and independent eigen-residual gates PASS. This earlier-cycle result does not locate onset.",
+  "spatial_path_derivatives": "Exact segment slopes now used forfuturejobs. PASS finite-difference comparisonall3families. Interior knots explicitly nonsmooth/rightderivative; no smoothbiflabel fromjoin alone.",
+  "native_Z_irregular_extension": "COMPLETE continuous72s, heldglobalZ.7804/dynamicM;40completeevents,26>=1s,max4.49s,lastreturn68.99s; no operationalglobalhighentry. Finite-time censoring, all6 block categories UNRESOLVED.",
+  "native_Z_release_figure": "fig_native_Z_release_spatial_control PNG/PDF self-reviewed and shown; same complete state/globalZ.7804, held vs dynamicZ, M dynamic; human visual pending",
+  "native_Z78_refinement": "TWO NEW ROOTS ACCEPTED: N8193/M65536 D.2193352638617445,T264.18052228456,F3.58e-9; N8505/M65536 D.2193355233904148,T264.28605076104,F2.57e-10.",
+  "execution_priority": "Full-state periodic Newton correction of actual Core A interictal recurrence; two transverse section choices, unchanged model. No additional global midpoint or unrelated fold search.",
+  "native_Z78_stability": "NOT_ACCEPTED: phase defect .999914/projection.09007 atdt.02446, defect4.45675/projection-3.05554 atdt.01223. No accepted Floquet spectrum or bifurcation type.",
+  "native_Z78_spectrum_diagnostic": "COMPLETE, PHASE_CHECK_FAILED: UNVALIDATED multipliers12.92337,1.20269,.83354 atdt.02446; eigenresiduals small but NOT stability evidence. Used only to motivate forward-map and regular-side recheck.",
+  "native_Z78_forward_closure": "COMPLETE throughdt.003125: EweightedRMS3.944/2.262/.733/.194/.0365Hz understeprefinement. Graphparity PASS. Supports nonlinear periodic closure, not Floquet validity.",
+  "native_Z78_late_event_figure": "PNG/PDF self-reviewed; humanpending. Lastcomplete72s event returnsquietaround69s. All-Zheld,Mdynamic, exact50mswindows.",
+  "native_local_tangent": "COMPLETE: analytic rate directional derivative vs nonlinear finite differences,257times; best phase1.08e-8,randomscaled3.94e-7 relativeL2. Local derivative consistent; monodromy still unresolved.",
+  "native_regular_side_root": "STABLE_WITH_STEP_REFINEMENT atD.219(globalZ.781):mu.768566088/.768565577,phase.000228269/.000117324,independentres3.63e-8/2.55e-7; certificatefloquet/native_D219_stability_acceptance.json.",
+  "native_Z78_finer_phase": "COMPLETE_NEGATIVE:dt.00305764493, phase defect.169344,projection.845898; allstatecomponents affected. Not acceptedstability.",
+  "native_regular_branch": "FixedD .2192/.2193 stopped after0acceptedroots; residualstagnation notbranch endpoint. Alternate prescribedperiod bridge started.",
+  "native_Z78_nonlinear_direction": "COMPLETE:independent nonlinear centraldifference gain15.3849/15.4797 atdt.00625/.003125 forsmallperturbation;directionres~.003. Smallerperturbation atfinedtchangesgain.18%. Supportsstronggrowth butnotphase/Floquetcertification.",
+  "native_extended_turn": "Historical fine roots retained; subsequent relocation and family checks collected. No live extension or accepted onset type.",
+  "native_fine_tangent": "COMPLETE T264.286050761,D.2193355233904: exactfine dD/dT +2.2240908762e-6,linearrelative6.78e-10. Positive slopealoneisnotfold.",
+  "native_long_period_stability": "STABLE_WITH_STEP_REFINEMENT on same T264.552850251/D.219321933797 root: mu .767939614907/.767938412082, phase/eigenres gates pass. This does not connect independently refined roots or identify onset.",
+  "native_transport_predictor": "COMPLETE_NEGATIVE: transport L2res452, linear598, constant253; not used in continuation.",
+  "native_cycle_morphology": "DESCRIPTIVE_COMPLETE: four fine roots retain A-before-B primary peaks about32ms apart; no branch connectivity or same-Z coexistence inferred.",
+  "full_ZM_endpoint_input_balance": "COMPLETE: effective E-target inhibition near zero at high-ZM root despite large raw GABA; M remains .245mV-equivalent. Endpoint balance only, not transient trigger/type proof.",
+  "native_turn_derivative_bracket": "Coarse numerical turn retained; fine relocated slope still outside target and family phase gate fails. No current fine-turn worker or LPC certificate.",
+  "native_same_history_feedback": "COMPLETE: native9s-to12.5s paired Z-held/dynamic, Mdynamic. Dynamic 7x16 common arrays and final engine state bitwise reference replay PASS; future-input parity PASS. Held:7 complete events, one2050ms, no global entry. Dynamic:global entry9.87s,broad10.39s. One paired history,finite window.",
+  "native_same_history_feedback_figure": "fig_native_SNN_same_history_Z_feedback.png/pdf/svg; PNG and same-state PDF self-reviewed; human pending.",
+  "native_post_transition_geometry": "DESCRIPTIVE_COMPLETE: existing endpoint runs .219/.2196/.222/.22884 and historical high-D runs have different history schemes; do not connect as accepted branches.",
+  "native_postcritical_endpoint": "COMPLETE: matched12s nativepath D.24/.25/.256344425345 canonicalPERSISTENT; last4smean181.93/199.93/205.997Hz,persistent50Hz80%space48.9/52.1/52.6%,no75%+200Hz200msbroadentry. Sameinitialhistory/dt.05/Mdynamic.",
+  "native_T2644_stability": "Onecoarsetime stablecomplexsamplemod.8554, finerphasePASS2.8e-5; genericnev3spectrum10847pending. No nativeLPCstar.",
+  "native_high_Z9870_equilibrium": "Existing conditional native9870 root206.95195Hz is UNSTABLE: refined right-half-plane count12 and positive complex roots~29.69/32.82Hz, concentrated in surround; not a stable endpoint or an onset Hopf crossing.",
+  "native_postcritical_spatial_figure": "fig_native_path_postcritical_spatial.png/pdf/svg; PNG and PDF self-reviewed,humanpending. Meanrate and fractiontime>50Hz,final4s,not snapshots or branches.",
+  "native_T2644_joint_refinement": "ORBIT_MESH_CHECK_PASS N8505/M65536 vsN16875/M131072: deltaD4.5901e-10,maxdeltaZ1.1541e-9,relativewaveform3.3240e-5; fineBVP5.44e-12Hz. Orbit agreement only, Floquet/turn derivative separate.",
+  "native_current_balance": "COMPLETE existing5ms records: paired10.07-12.5s effectiveI/E ratio held1.0663 vsdynamic.6378; rawI and effectiveI both increase in dynamic arm, Mfeedback also increases. Supports relative imbalance, not disappearance of absolute inhibition; no type claim.",
+  "native_near_turn_matched": "COMPLETE two30s steps.05/.025: lowD.21932 SELF_LIMITED113eventsboth, spatialcorr.999955; highD.21934 UNRESOLVED17/18events,max5710/5120ms,corr.332/.266. Qualitativecontrast replicated; distributions/attractors/type not established.",
+  "native_late_clamps": "COMPLETE+independentlyaudited:9.42fieldZ.771155 nohighentry/4completeevents;9.87fieldZ.743656 highentry9.96,last1s213Hz/54.3percentpersistent. Dynamicreference448Hz/98.1percent. Bothheldno75percentbroadentry; do NOT equateno75percententrywithnooriginalonset.",
+  "native_turn_spatial_deformation": "DESCRIPTIVE_COMPLETE: Eweightedphase-removed periodic-family tangent~82percent surround,8-10percent eachcore. Not certifiedFloquetmode orcausalablation.",
+  "native_late_clamp_figure": "fig_native_SNN_late_Z_clamps PNG/PDF/SVG, PNG+samePDFself-reviewed,humanpending",
+  "native_T2644_quadrature": "COMPLETE samefineN16875/M131072root sampledM131072/262144: phaseJVP.0011435/.000592905; finergridretainedmaxF.00461953Hz. Not recorrected, not stability. Sourcequadrature error remains relevant.",
+  "native_T2644_quadrature_correction": "COMPLETE: N16875/M262144,T264.4,F2.445e-9,D.21933559102934871; same-orbit quadrature comparison PASS.",
+  "native_9420_matched_extension": "COMPLETE72s: heldZ.771155/Mdynamic, exactrestartPASS, six12sblocksPERSISTENT, zero completeevents, no200Hz200msentry; last4smean114.656Hz,persistent50Hz80fraction.25090625.",
+  "native_persistence_threshold_sensitivity": "COMPLETE exploratory existing-trajectory check: atnative9420Z,4-72s minimumglobal10msrate52.116Hz; noquiet at1,2.5,5,10,20Hz. Does not certify infinite-time attractor or type.",
+  "native_9420_extension_figure": "fig_native9420_Z_held_72s_spatial PNG/PDF/SVG generated; PNG and samePDF self-reviewed, human pending; window means/duty, not snapshots.",
+  "native_high_equilibrium_extension": "COMPLETE TARGET_D_REACHED .20976554: connectedhighbranch4758savedpoints, eightindependentauditedpathjoins. Includesstagnationrepeats; no all-family completeness or stability inheritance.",
+  "native_high_equilibrium_near_D1": "STABLE_BY_CONTOUR0RHP atD.99999,heldZ/Mdynamic, independent frompreviousfullZM stability.",
+  "preinterpolated_RK4": "PASS fullmapbitwise+27arrivalchecks; testtimings19.36/4.62s. Arithmeticreuse only; same frozen equations, interpolation, RK4, dt and phase/eigen gates.",
+  "native_high_path_join9870": "PASS: one-sided physical equilibria meet atsameknotD.2563444253,rate240.697449Hz, neareststaticzero distance.1549; tangentcos.74164 explains anglecriterionstop. No SNatpathjoin.",
+  "native_high_stability": "Two pointsD.99999/.4001367 STABLE0RHP; firstSNneighbors118/119 UNSTABLE byindependentpositivecomplexroots. TotalRHPcountsnearSNremainunresolved.",
+  "native_high_complex_crossing": "OnecomplexmodecrossingrefinedD.3919123825/globalZ.6080876175/f30.236Hz; nonzerocrossingslopeverifiedtwoh. NonlinearHopfcriticality/othercriticalmodes not established; outsideobservednativeZpath,notonset.",
+  "native_high_path_join9420": "PASS: identicalknotphysicalequilibrium201.795951Hz, staticclosestzero.09706,onesidedderivativeandreturnchecksPASS. NumericalcornernotSN; nextbranchreturnsatanotherroot197.877708Hz, thenindependentauditedpositiveDcrossing.",
+  "native_high_observed_stability": "COMPLETE selectedD .210065/.219319/.228845/.256344/.300019 all UNSTABLE_BY_POSITIVE_ROOT; mostlysurround modes, notlocatedHopfpoints orstability ofentiresegments.",
+  "actual_onset_coordinates": "COMPLETE independent reproduction oforiginalreadout: det8505msglobalZ.811-.812, stochasticnativeinput6421msZ.736-.737, stochasticmeandrive8297msZ.793-.794. BothZMdynamic; distinctspatialpaths. Saved10msstateclock audited; notbifurcationcoordinates.",
+  "native_fine_turn_curvature": "LOCAL_CURVATURE_CONVERGED; relocationroot COMPLETE atT264.362356956 D.219335652008, derivativecheckpending. Fixed1mmgrid only.",
+  "native_turn_center_joint_mesh": "TEMPORAL_ORBIT_MESH_CHECK_PASS only. Finecenterderivative -4.424e-8; relocating. Not spatialmesh convergence.",
+  "native_T2644_spectrum": "First valid sample COMPLETE: mu .820088983-.243299913i modulus.855418487, independent eigenres1.545e-8, phasePASS. STEP_REFINEMENT_REQUIRED. Halfdt genericnev3/ncv10 live10847, no type promotion.",
+  "native_turn_center_fine_tangent": "Defect correctionCOMPLETE: targetnormalized8.407e-9; derivative -4.42406776e-8. Finecenter stillneeds relocation.",
+  "host_gain_disk_backing": "disk_host_gain_check PASS gain andfullmap bitwise equality; auto cache backing prevents excessive peak anonymous RAM. Same model and solver arithmetic.",
+  "native_low_equilibrium": "D0 conditional UNSTABLE4RHP; connected low-family1007+677points maxD.207989. Three selected SNs locally validated, bothneighborsUNSTABLE; otherturnsunclassified.",
+  "native_selected_SN_figure": "PNG/PDF/SVG generated and PNG+samePDF self-reviewed; human pending; diagnostic not onset bifurcation.",
+  "current_scientific_review": "progress_20260923.md",
+  "physical_family_tangent": "Reconstruction/derivative/historychain PASS; optionalindependenttimemapdiagnosticimplemented, NOT_YET_RUN.",
+  "native_T2644_halfdt_phase": "PHASE_PASS defect2.79971571e-5; generic3 spectrum INCOMPLETE_CONTROLLED_STOP without final eigen-residuals.",
+  "native_ZM_factorial": "COMPLETE2newarms+2reused; input/initial/frozenvalueauditPASS. ZdynamicbothMconditionsenterandexpand; Zheldbothnoentrywithin3.5s. Mupdatesnotnecessaryforthisspecificnativeentry; nobiftypeinferred.",
+  "native_candidate_response_domain": "COMPLETE two sampling grids:54.0845percentE-rate-mass outside response table;16.6187percentphase-removedfamilydeformationenergy outside. Not a calibration pass or Floquet critical mode.",
+  "native_ZM_factorial_figure": "fig_native_SNN_ZM_factorial PNG/PDF/SVG; PNG+samePDFself-reviewed,humanpending.",
+  "native_long_cycle_connection": "COMPLETE INDEPENDENT_ENDPOINT_NOT_MATCHED: explicit3parentsteps accepted toT264.552850251D.219330944113; independentstablepoint atsameT D.219321933797 differs9.01e-6 andwaveL2.003535. Do notjoinorinheritstability.",
+  "native_spatial_refinement": "COMPLETE4finearms+independentcanonical/common400audit. dt.05 D.219 coarseSELF_LIMITED vsfinePERSISTENT, D.228845 bothPERSISTENT. Notasymptotic certification.",
+  "native_spatial_time_refinement": "COMPLETE STEP_SENSITIVITY_UNRESOLVED: fine D.219 liftedZ .05 PERSISTENT -> .025 UNRESOLVED; nooriginalhighentryboth. No convergedfinepersistentattractor.",
+  "native_spatial_resolution_figure": "fig_native_Z_spatial_resolution_D0219 PNG/PDF/SVG; PNG+samePDFself-reviewed, humanpending; spatialwindowstatistics, notbifurcation.",
+  "response_error_decomposition": "DIAGNOSTIC_COMPLETE: originalpredictions reproducedexactly; replacingstaticDCgainsbyempiricaloraclereduces65/146failures to63/146; varianceE39/56stillfail. Dynamicshapeerrornotfixedbyscalargain. No model/validationpromotion.",
+  "spatial_projection_diagnostic": "COMPLETE two identicalliftedstates: projectedmean/variancedelayedinputs agree; finerwithinparentinputforcingvariationnonzero. Initialglobaloutputdifference.000206Hz; doesnotprove causal source ofattractorchange.",
+  "current_priority": "Only the actual self-limited/interictal to sustained spatial-recruitment transition. Suspend unrelated D0.02 low-root continuation and broad calibration. See onset_priority_20260923.md.",
+  "native_spatial_early_fields": "COMPLETE dt.02512s actualnative8000/9000fields SELF_LIMITED/UNRESOLVED. No matcheduppernativeD.219dt.025run orcriticalpoint.",
+  "native_turn_relocated": "ROOT_ACCEPTED_NO_DERIVATIVE_CERTIFICATE; F4.30e-10Hz. Newexpensivefine-v3tangent deferred behind targetedlocalclosurefailure.",
+  "native_cycle_waveform_response": "FAIL_SELECTED_OPEN_LOOP_GROUPS all4; EwaveRMSE.329/.363/.384 andmeanbias.215/.210/.233; Iwave.182. Implementation, independentaggregation, doubledwavesamplingPASS.",
+  "native_cycle_static_phase_response": "STATIC_SELECTED_PHASES_PASS fourgroups x32phasepoints; normL2.00240/.00420/.00394/.00101. These areconstantphaseassays, notactualcyclemeans.",
+  "native_cycle_response_components": "DIAGNOSTIC_COMPLETE fullresponse reproduced<5e-8; removingslowmeanmixing improvesselectedwaveforms(.137/.114/.209/.042), surroundstillfail; no newclosureadopted.",
+  "mean_filter_removal_countercheck": "DIAGNOSTIC_COMPLETE mean smallsignal failures11/58->41/58; variancefailuresunchanged. Simpledeletionrejectedasrepair.",
+  "response_filter_capacity": "TRAINING_ONLY_DIAGNOSTIC_COMPLETE fixedrealpolebank improvesinteriorfrequency LOO; endpointvarianceIpoor, largeweights. No newclosure or validationpass.",
+  "native_cycle_response_figure": "fig_native_cycle_local_response_validation PNG/PDF/SVG; PNG+samePDFselfreviewedhumanpending.",
+  "native_spatial_time_resolution_figure": "fig_native_Z_spatial_time_resolution_D0219 PNG/PDF/SVG; PNG+samePDFselfreviewedhumanpending.",
+  "history_conditioned_response_diagnostic": "COMPLETE twozero-fitvariants preserveoldstatic+linearresponse; candidatewaveforms3/4groups pass, surroundstill~.21waveerror. Existing65/146smallsignalFAILunchanged. No modeladopted.",
+  "response_voltage_units": "IMPLEMENTED_IN_ISOLATED_FACADE_AND_AUDITED: eta coefficients require7/(theta-11); CPU/CUDA parity<1.2e-15, derivatives and nonlinearLIFsamepathscalingPASS. Originalvalidation65->63/146FAIL. Frozenv3notmodified.",
+  "response_bank_candidate": "ONE_PREREGISTERED_CANDIDATE_REJECTED: fivepole finite filters, same staticPhi andnetworkZM. Training-only selection. Mean failures1/58, variance44/56 and24/32; waveformsA/surroundFAIL,B/IPASS. Someinstantaneousmeanfactorsnegative. No networkintegrationorpromotion.",
+  "response_variance_precision": "COMPLETE134conditions8192paths8s newseed; all88originallyeligiblevariance testsreaggregated. MedianSEM/DC.0185/.0251; unitcorrectedfail34/56and15/32; bank41/56and26/32. Genuinebiaspersists, olddecisionsretained.",
+  "response_local_capacity": "COMPLETE6error-selectedworkpoints,newfrequenciesandseed: perpointfivepole kernels predict11/12out-of-fitfrequencieswithoriginalgates; interpolatedbankfailed12/12. Identifiesoperatingpointtabletransferasmajorissueinthesecounterexamples; no generalization/modelpass. StaticDCoraclealso11/12.",
+  "response_workpoint_transfer": "TRAINING_TRANSFER_DIAGNOSTIC_COMPLETE: leave-coordinate-plane-out source separation; cubic error large along ownvariance axes, linear lower but insufficient; absolutegaininterpolation doesnotfix. Foureligible-source coverage reported, not replacement validation.",
+  "response_midpoint_assay": "COMPLETE1104conditions8192paths8s, 12fixedlines63heldoutmidpoints/55eligible. 330frequencyreadouts: cubic234fail, linear110, PCHIP116/logPCHIP109. Independentcountandno-midpoint-fitPASS, predictionagreement2.5e-14. Allcandidates insufficient, no network.",
+  "response_basis_high_mean": "Freshcalibrationknots demonstratebasislimitation: EvarianceE atnormalizedmeanx2.5 fails24/36 evenin-sample; x-.3 fails0/36. Sixerror-selectedcounterexamplelocalcapacity11/12cannotgeneralize.",
+  "response_repair_design": "response_repair_design.md",
+  "closure_network_sensitivity": "COMPLETE 3x12.5s; entry8.497/8.486/10.163s; historylookup timingcloserbutD9870worse .16291 vsnative.25634; NOTacceptedmodel",
+  "history_lookup_identity": "PASS conditional equilibrium and localJacobian equality; nonlineartrajectorydiffers. Notonsettypeevidence.",
+  "response_oscillatory_capacity": "COMPLETE fresh450conditions; noacceptedcandidate. Band15/60 nominalfails30vs32/126, allwithin3ACSEM;120/200fails74vs66/126,25vs19beyond3ACSEM. No gatechange.",
+  "closure_sensitivity_figure": "PNG and same-state PDF self-reviewed; human pending; diagnostic not bifurcation figure",
+  "history_step_refinement": "COMPLETE PASS: sameinitial/history, .05->.025 entry10163->10159ms; maxDdifference.000433636. Diagnostic only.",
+  "stochastic_closure_sensitivity": "COMPLETE 2x12.5s; baseline500msbitwisePASS, actualinputRHS/readoutauditPASS. Original6421,units6457,history8034 vsnative9868.5ms. Earlyhistory11vsnative10completeevents, bidirectional. D/time/spatial mismatch remains, no modelpromotion.",
+  "goal_turn_disposition": {
+    "disposition": "PROGRESS",
+    "reason": "New completed matched spatial-Z interventions and autonomous/static diagnostics; requested full verified onset mechanism remains incomplete.",
+    "updated_local": "2026-09-23T14:55:32.898592+08:00"
+  },
+  "native_Z_target_reaudit": "COMPLETE 19nativefiles1110samples; targetreproduction3.3e-16; timeweightedwindows. Sameforcedcurrents maxdeltaD.001467 stationaryvariance/.000109 actualvariance; no autonomous moment validation or exclusionoflocalfeedback.",
+  "stochastic_sensitivity_figure": "PNG+samePDF self-reviewed, humanPENDING; diagnostic not bifurcation",
+  "nonlinear_mean_readout": "COMPLETE_NEGATIVE: input/output-space convex mixing preserves steady and first-order response; all selected-group gates not passed. No coefficient fit or network deployment.",
+  "rate_coordinate_mean_memory": "COMPLETE_NEGATIVE: fixed-variance identity PASS, physical bounds PASS on four selected waves; surround waveform error .219 with history lookup. No candidate promotion.",
+  "parameter_forced_variation": "LOCAL_FORCED_VARIATION_PASS and ZERO_PARAMETER_WHOLE_MAP_PARITY_PASS; retains held spatial-Z tangent, does not enable Z dynamics.",
+  "native_family_flow_consistency": {
+    "status": "FLOW_CONSISTENCY_FAIL",
+    "completed": true,
+    "source": "periodic/native_family_flow_consistency/dt0.000390625.json",
+    "allowed_steps_exhausted": true,
+    "phase_error": 0.005190681476920569,
+    "phase_projection": 1.004687424607117,
+    "family_return_relative": 0.0019922968907236326,
+    "history_relative": 0.002960821923039378,
+    "next_automatic_refinement": false,
+    "bifurcation_type": "NOT_ESTABLISHED"
+  },
+  "shared_variance_delay_audit": "COMPLETE: delay-summed common-noise subtraction undercounts stationary recurrent AMPA variance about9.7-12.3percent andGABAabout2percent acrossfixedprofiles. Independent double-sum andHeunfilterDC checks PASS. StationaryPoisson diagnostic only.",
+  "shared_variance_network_sensitivity": "COMPLETE one12.5s: entry8034->8931ms vsnative9868.5; D8 .26249->.21971 vsnative.20146; D9870 .47280->.36916 vsnative.25634. Early11vsnative10completeevents, quiet.546vs.547, bidirectional. Better butnotaccepted.",
+  "shared_variance_network_audit": "READOUT_AUDIT_PASS; pairwisestationarycovariance identity1.4e-15; no fraction clipping/roundoffcleanupactuallyneeded; remainingHeunpairvarianceerror<=.000185. Dynamicnoise spectrum notvalidated.",
+  "shared_variance_figure": "fig_variance_split_stochastic_sensitivity PNG/PDF/SVG generated; PNG+samePDF self-reviewed. Humanpending. Diagnosticnotbifurcation.",
+  "native_regional_Z_feedback": {
+    "status": "COMPLETE_AUDIT_PASS",
+    "new_trajectories": 2,
+    "final_execution_failures": 0,
+    "reference_arms_reused": 2,
+    "result": "native_regional_Z_feedback/result.json",
+    "figure": "figures/fig_native_regional_Z_feedback.png",
+    "all_M_dynamic": true,
+    "scope": "One native9s history to12.5s; no mathematical bifurcation assignment."
+  },
+  "entry_resource_comparison": "COMPLETE: candidate own-entry globalZ0.738-0.739 vsnative0.744; E-weighted fieldRMS0.027. Originalsame-clockDcriterion stillFAIL; fiveofsixnetworkcriteriaPASS; no modelpromotion.",
+  "shared_variance_dynamic_audit": {
+    "status": "DYNAMIC_POISSON_SPLIT_DIAGNOSTIC_COMPLETE",
+    "result": "shared_variance_dynamic_audit/result.json",
+    "review": "shared_variance_dynamic_audit/review.md",
+    "network_runs": 0,
+    "model_promoted": false
+  },
+  "native_turn_relocated_tangent": {
+    "updated_local": "2026-09-20T00:31:27.480485+08:00",
+    "status": "GEOMETRIC_TURN_REFINEMENT_REQUIRED",
+    "result": "periodic/native_turn_relocated_fine_tangent/result.json",
+    "left_T_ms": 264.3623569561784,
+    "right_T_ms": 264.36293204907884,
+    "left_dD_dT": 3.8241489653019626e-08,
+    "right_dD_dT": -4.424067755509798e-08,
+    "bracket_width_ms": 0.0005750929004193495,
+    "secant_curvature": -0.0001434240748720299,
+    "derivative_gate": 1e-09,
+    "root_and_augmented_gates_pass": true,
+    "derivative_gate_pass": false,
+    "scope": "Same discretized old-v3 branch only. Opposite derivative signs do not certify a physical LPC. No new correction launched while independent physical-flow check remains pending."
+  },
+  "pending_results_collector": {
+    "session": 69104,
+    "scope": "At most6h, completed-output checks only; no launches or scientific promotion",
+    "output": "pending_critical_checks_completion.json",
+    "validation": "Actual coarse/old results correctly rejected by corresponding fine-target gates"
+  },
+  "memory_scheduling": {
+    "status": "HISTORICAL_JOBS_CLOSED",
+    "fine_spectrum": "INCOMPLETE_CONTROLLED_STOP",
+    "fine_family": "COMPLETE_FLOW_CONSISTENCY_FAIL",
+    "derivative": "COMPLETE_GEOMETRIC_TURN_REFINEMENT_REQUIRED",
+    "historical_snapshot": "audit_history/state_before_refractory_closeout_20260920_053855"
+  },
+  "bounded_reconstruction": {
+    "status": "COMPLETED_PREVIOUSLY",
+    "scope": "Old native-family consistency and relocated derivative collected; no corresponding live worker."
+  },
+  "cycle_input_bandwidth": {
+    "status": "READ_ONLY_BANDWIDTH_COMPLETE",
+    "result": "cycle_input_bandwidth/result.json",
+    "max_AC_fraction_above_40Hz": 0.013494900803645547,
+    "max_AC_fraction_above_80Hz": 0.0009943544461072382,
+    "model_changed": false
+  },
+  "cycle_error_domain": {
+    "status": "READ_ONLY_ERROR_DOMAIN_COMPLETE",
+    "result": "cycle_error_domain/result.json",
+    "surround_history_in_domain_error_energy_fraction": 0.8286357985256412,
+    "scope": "Current lookup domain only; earlier out-of-domain memory may remain."
+  },
+  "in_domain_waveform": {
+    "status": "IN_DOMAIN_WAVEFORM_ASSAY_COMPLETE",
+    "all_cases_pass": {
+      "units_instantaneous": true,
+      "units_history": true
+    },
+    "audit": "in_domain_waveform/independent_audit.json",
+    "scope": "Twelve moderate in-domain local waveforms only; no model acceptance."
+  },
+  "factorial_waveform": {
+    "status": "FACTORIAL_WAVEFORM_ASSAY_COMPLETE",
+    "all_cases_pass": {
+      "units_instantaneous": false,
+      "units_history": false
+    },
+    "audit": "factorial_waveform/independent_audit.json",
+    "review": "local_strong_response_review.md"
+  },
+  "weighted_mean_memory": {
+    "status": "COMPLETE_NO_ALL_CASE_PASS",
+    "source": "weighted_mean_memory/result.json"
+  },
+  "weighted_all_memory": {
+    "status": "COMPLETE_NO_ALL_CASE_PASS_ROUTE_PARKED",
+    "source": "weighted_all_memory/result.json",
+    "network_launched": false
+  },
+  "local_counterfactual_figure": "figures/fig_local_mean_variance_counterfactual.png; PNG/PDF self-reviewed, human pending",
+  "membrane_recovery_diagnostic": {
+    "status": "COMPLETE_AUDIT_PASS",
+    "source": "membrane_recovery_diagnostic/result.json",
+    "audit": "membrane_recovery_diagnostic/independent_audit.json",
+    "scope": "Two old-cycle imposed local inputs; not native network or accepted model",
+    "figure": "figures/fig_local_membrane_recovery.png",
+    "result": "Rate recovery is premature while membrane voltage remains below reset; refractory fraction around1percent at peak overprediction; association, not sufficient closure"
+  },
+  "native_voltage_observation": {
+    "status": "COMPLETE_AUDIT_PASS",
+    "session": 44034,
+    "pid": 461818,
+    "window_ms": [
+      9000,
+      10370
+    ],
+    "audit": "native_voltage_observation/replay_audit.json",
+    "result": "native_voltage_observation/result.json",
+    "whole_final_engine_bitwise": true,
+    "common_chunk_keys": 32,
+    "all_1370ms_global_counts_bitwise": true,
+    "voltage_samples": 1370,
+    "spike_steps": 13700,
+    "scope": "One unchanged native trajectory; observation only, no closure or bifurcation acceptance"
+  },
+  "historical_affine_bifurcation_figure": {
+    "path": "figures/fig_actual_rate_conditional_branch_current.png",
+    "coordinate": "Affine rate-entry spatial Z path, turn D about .144973; not native-path turn D about .219336",
+    "status": "PARTIAL_HISTORICAL_NOT_CURRENT_ONSET_FIGURE"
+  },
+  "membrane_balance_diagnostic": {
+    "status": "COMPLETE_INDEPENDENT_AUDIT_PASS",
+    "source": "membrane_balance_diagnostic/result.json",
+    "audit": "membrane_balance_diagnostic/independent_audit.json",
+    "interpretation": "Earlier refractory clamping dominates missing accumulated voltage; instantaneous small refractory fraction does not exclude its history. Measured impulses supplied, not predictive closure."
+  },
+  "threshold_bounded_mean_memory": {
+    "status": "COMPLETE_FAIL_ROUTE_PARKED",
+    "source": "threshold_bounded_mean_memory/result.json",
+    "audit": "threshold_bounded_mean_memory/independent_audit.json",
+    "passes": 22,
+    "cases": 24,
+    "old_linear_response_failures_unchanged": true,
+    "network_launched": false
+  },
+  "refractory_current_closure": {
+    "status": "COMPLETE_INDEPENDENT_AUDIT_PASS",
+    "source": "refractory_current_closure/result.json",
+    "audit": "refractory_current_closure/independent_audit.json",
+    "scope": "Measured rate supplied. Factorized clamp voltage RMS error .523/.347mV; ignoring finite-step reset overshoot gives 2.66/2.62mV. No autonomous response or model acceptance."
+  },
+  "inhibitory_M_spectral_subspace": {
+    "status": "EXACT_STABLE_AUXILIARY_BLOCK_AUDITED",
+    "source": "inhibitory_M_subspace_audit.json",
+    "auxiliary_multiplier": 0.7676664116705358,
+    "multiplicity_at_least": 400,
+    "current_worker_changed": false,
+    "scope": "Physical m_I=0 invariant subspace. Does not classify arbitrary Ritz vectors or infer a critical multiplier."
+  },
+  "conditional_current_density": {
+    "status": "LOCAL_WAVEFORM_PASS_MODEL_NOT_ACCEPTED",
+    "conditions": 24,
+    "fitted_parameters": 0,
+    "waveform_error_max": 0.04074746307449353,
+    "mean_error_max": 0.04455365592318716,
+    "strong_grid_check": "128to256fourgroupsallrelativechangebelow2percent",
+    "audit": "conditional_current_density/independent_audit.json",
+    "figure": "figures/fig_population_response_local_validation.png",
+    "scope": "Deterministic population-density response; no particle network, observed future spikes, autonomous spatial validation or bifurcation promotion."
+  },
+  "conditional_density_linear_response": {
+    "status": "COMPLETE_FAIL",
+    "conditions": 282,
+    "execution_failures": 0,
+    "AC_counted": 146,
+    "AC_failed": 47,
+    "DC_counted": 76,
+    "DC_failed": 13,
+    "original_gates_unchanged": true,
+    "model_promoted": false
+  },
+  "conditional_density_grid_diagnostic": {
+    "status": "COMPLETE",
+    "completed_runs": 24,
+    "execution_failures": 0,
+    "finest_failed": 6,
+    "finest_counted": 12,
+    "converged_rows": 10,
+    "report": "conditional_density_grid_diagnostic/independent_audit.json",
+    "model_promoted": false
+  },
+  "joint_voltage_current_density": {
+    "status": "LOCAL_PILOT_FAIL",
+    "conditions": 16,
+    "waveforms_passed": 4,
+    "linear_passed": 7,
+    "linear_failed": 5,
+    "implementation": "PASS including exact noiseless spike timing",
+    "model_promoted": false
+  },
+  "conditional_gaussian_flux_diagnostic": {
+    "status": "COMPLETE",
+    "exact_per_path_replay": true,
+    "E_gain_sign_mismatch": true,
+    "I_gaussian_gain_difference_uncertain": true,
+    "scope": "Actual-state reconstruction,not autonomous closure"
+  },
+  "current_response_review": "refractory_rate_response_review_20260920.md",
+  "nonlinear_rate_response": {
+    "status": "LOCAL_CANDIDATE_FAIL",
+    "acquisition": "288/288 COMPLETE",
+    "train_profiles": 224,
+    "validation_profiles": 64,
+    "steps_per_population": 12000,
+    "fresh_passed": 48,
+    "fresh_required": 58,
+    "old_passed": 15,
+    "old_required": 24,
+    "numerical_failures": 0,
+    "analytic_AC_failed": 69,
+    "analytic_AC_counted": 146,
+    "analytic_DC_failed": 8,
+    "analytic_DC_counted": 76,
+    "analytic_scope": "Infinitesimal diagnostic only; matched finite-amplitude rerun not performed after waveform rejection",
+    "training_waveform_failed": 41,
+    "model_promoted": false,
+    "validation_targets_used_for_fitting": false,
+    "report": "finite_state_rate_response_review_20260920.md",
+    "figure": "figures/fig_finite_state_rate_response_validation.png",
+    "input_support": "Original four strong inputs have75to91percent ofrateweightedphases outside newtraininginputbox; not a causal allocation of error."
+  },
+  "lif_waveform_time_step_audit": {
+    "status": "COMPLETE",
+    "additional_local_LIF_runs": 20,
+    "execution_failures": 0,
+    "finest_supra_stationary_cap": 5,
+    "last_step_waveform_within2percent": 4,
+    "original_four_last_step_L2": [
+      0.0173,
+      0.0158,
+      0.032,
+      0.0148
+    ],
+    "interpretation": "Transient stationary-rate cap is invalid; source fine waveform not universally converged. Does not explain all original strong response failures or establish onset type.",
+    "report": "lif_waveform_time_step_audit/result.json",
+    "audit": "lif_waveform_time_step_audit/independent_audit.json"
+  },
+  "instantaneous_rate_cap": {
+    "status": "REJECTED_AS_GENERAL_TRANSIENT_CONSTRAINT",
+    "profiles_over_cap": 38,
+    "mathematically_unavoidable_fit_failures": 19,
+    "training_failures_from_cap": 16,
+    "validation_failures_from_cap": 3,
+    "source": "nonlinear_rate_response/validation/output_bound_diagnostic.json"
+  },
+  "refractory_rate_candidate": {
+    "stage": "EXECUTION_COMPLETE_SCIENTIFIC_VALIDATION_FAIL",
+    "status": "LOCAL_CANDIDATE_FAIL",
+    "groups": {
+      "fresh": {
+        "count": 64,
+        "passed": 50,
+        "numerical_failed": 0
+      },
+      "reused": {
+        "count": 64,
+        "passed": 47,
+        "numerical_failed": 0
+      },
+      "factorial_waveform": {
+        "count": 12,
+        "passed": 9,
+        "numerical_failed": 0
+      },
+      "in_domain_waveform": {
+        "count": 12,
+        "passed": 12,
+        "numerical_failed": 0
+      }
+    },
+    "numerical_failures": 0,
+    "matched_linear": {
+      "conditions": 282,
+      "AC_counted": 146,
+      "AC_failed": 61,
+      "DC_counted": 76,
+      "DC_failed": 5,
+      "low_frequency_sign_failed": 4,
+      "independent_demodulation_max_difference": 2.1177997505230652e-13
+    },
+    "preliminary_analytic_comparison_scope": "Historical infinitesimal comparison; some originaldt=.05cases used .1factors. Completed matched protocol uses originaldt,amplitude,burn andclock and supersedes it for formal response judgments.",
+    "independent_audit": "PASS",
+    "figure": "figures/fig_refractory_rate_response_validation.png",
+    "review": "refractory_rate_response_review_20260920.md",
+    "spatial_model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED"
+  },
+  "conditioned_refractory_candidate": {
+    "stage": "LOCAL_VALIDATION_COMPLETE_FAIL",
+    "same_physical_equations": true,
+    "same_function_class_proof": "PASS",
+    "states_added": 0,
+    "training_profiles_added": 0,
+    "original_waveform_pass": "23/24",
+    "parent_broad_pass": "52/64",
+    "legacy_pass": "47/64",
+    "independent_new_pass": "50/64",
+    "independent_new_step_failures": 3,
+    "matched_AC_fail": "40/146",
+    "matched_DC_fail": "2/76",
+    "matched_low_frequency_sign_failures": 5,
+    "independent_audit": "PASS",
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED"
+  },
+  "conditioned_refractory_spatial_diagnostic": {
+    "status": "COMPLETE",
+    "expected": 4,
+    "completed": [
+      "mean_drive_expected",
+      "recorded_drive_expected",
+      "recorded_drive_poisson_seed1",
+      "recorded_drive_poisson_seed2"
+    ],
+    "independent_readout": "PASS",
+    "native_equivalence": "FAIL",
+    "Z_and_M_dynamic": true,
+    "model_promoted": false
+  },
+  "conditioned_refractory_external_filter_pair": {
+    "status": "COMPLETE",
+    "expected": 2,
+    "completed": [
+      "recorded_drive_expected",
+      "recorded_drive_poisson_seed1"
+    ],
+    "independent_readout": "PASS",
+    "native_equivalence": "FAIL",
+    "Z_and_M_dynamic": true,
+    "model_promoted": false
+  },
+  "external_mean_filter_audit": {
+    "status": "COMPLETE_NO_NETWORK_CHANGE",
+    "E_RMS_difference_mV": 0.329,
+    "largest_difference_mV": 1.765,
+    "native_AMPA_external_mean_filter_bypassed": true,
+    "source": "external_mean_filter_audit/result.json"
+  },
+  "conditioned_refractory_count_consistency": {
+    "status": "COMPLETE",
+    "expected": 1,
+    "completed": [
+      "recorded_drive_binomial_seed1"
+    ],
+    "independent_readout": "PASS",
+    "native_equivalence": "FAIL",
+    "Z_and_M_dynamic": true,
+    "model_promoted": false
+  },
+  "emitted_refractory_bounds": {
+    "status": "VIOLATIONS_CONFIRMED_IN_POISSON_OUTPUT",
+    "filtered_E_violations": 4906,
+    "filtered_I_violations": 2018,
+    "source": "conditioned_refractory_spatial_diagnostic/emitted_refractory_bound_audit.json",
+    "cause_of_onset_error": "NOT_ESTABLISHED"
+  },
+  "current_model_acceptance": "NOT_ACCEPTED: native-Z-driven fast/M correspondence improved, but autonomous depletion spatial pattern and entry timing remain mismatched; no model promotion.",
+  "native_input_bridge": {
+    "status": "COMPLETE",
+    "native_replay": "PASS4chunks64arraysAndFullFinalEngineBitwise",
+    "native_samples": 23700,
+    "groups": 935,
+    "global_and_spatial_count_parity": "PASS",
+    "input_reconstruction": "PASS_IMPLEMENTATION",
+    "local_LIF_cases": 24,
+    "local_LIF_numerical": "PASS",
+    "paired_actual_mean_cases": 12,
+    "spatial_subdivision_controls": 10,
+    "rate_response": "LOCAL_ERRORS_REMAIN_BEFORE_ENTRY",
+    "native_closed_loop_equivalence": "NOT_TESTED_IN_THIS_ASSAY_PREVIOUS_FAIL_REMAINS",
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "model_promoted": false,
+    "source": "native_input_bridge/scientific_review.md"
+  },
+  "native_input_support": "COMPLETE; mainly within old feature bounds, response discrepancies remain",
+  "conditioned_refractory_spatial_resolution": {
+    "status": "COMPLETE",
+    "expected": 2,
+    "completed": [
+      "recorded_drive_expected",
+      "recorded_drive_binomial_seed1"
+    ],
+    "implementation": "PASS",
+    "expected_arm_independent_readout": "PASS",
+    "expected_arm_native_equivalence": "NOT_ACCEPTED",
+    "expected_onset_ms": 9345,
+    "expected_D_at_native9870": 0.2454167880974032,
+    "expected_D_ownentry": 0.1976790824662894,
+    "complete_events_1to9p42": 29,
+    "forward_reverse_undirected": [
+      0,
+      29,
+      0
+    ],
+    "median_area": 0.41521875,
+    "model_promoted": false,
+    "review": "conditioned_refractory_spatial_resolution/scientific_review.md",
+    "independent_readout": "PASS",
+    "native_equivalence": "FAIL",
+    "simulation_failures": 0,
+    "live_processes": []
+  },
+  "reset_memory_rate": {
+    "status": "LOCAL_CANDIDATE_FAIL_STOPPED",
+    "extra_fast_states": 1,
+    "training_profiles": 480,
+    "independent_implementation": "PASS",
+    "original_strong_pass": "23/24",
+    "parent_pass": "53/64",
+    "legacy_pass": "49/64",
+    "conditioned_pass": "51/64",
+    "time_step_failures": 5,
+    "native_input_diagnostic": "Core B improves, selected Core A worsens; not a closed network",
+    "model_promoted": false,
+    "review": "reset_memory_rate/scientific_review.md"
+  },
+  "terminal_activity_readout": {
+    "native_start_ms": 9323.5,
+    "native_Z_interpolated": 0.7766807970788472,
+    "definition": "Right-censored noqualifyingquietthrough12.5s; not bifurcationpoint",
+    "source": "conditioned_refractory_spatial_resolution/consolidated_comparison.json"
+  },
+  "conditioned_refractory_fine_forcing": {
+    "status": "COMPLETE_AUDIT_PASS",
+    "expected": 2,
+    "completed": [
+      "recorded_drive_expected",
+      "recorded_drive_binomial_seed1"
+    ],
+    "expected_rate_failed_gate": "propagation",
+    "finite_count_failed_gate": "D_track",
+    "finite_count_propagation": "PASS:forward11/reverse9;physicalcoreA11/B9",
+    "finite_count_high_entry_ms": 10839.0,
+    "finite_count_D_at_native9870": 0.1399198702,
+    "Z_and_M_dynamic": true,
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "review": "conditioned_refractory_fine_forcing/scientific_review.md"
+  },
+  "native_current_memory": {
+    "status": "DIAGNOSTICS_COMPLETE",
+    "read_only_current_decomposition": "COMPLETE",
+    "core_order": "nativeA16B10;fineexpectedB29;finecountsB22",
+    "finebin_reference_runs": 2,
+    "original_threshold_control_runs": 2,
+    "independent_count_audit": "PASS864rows432paired",
+    "conclusion": "1mscoincidencebiaspersistswithactualthresholds;5to50mseventagreementismuchcloser.Notprovedcauseofglobalfailure.",
+    "report": "native_current_memory/scientific_review.md",
+    "figure": "figures/fig_native_input_threshold_phase.png",
+    "model_promoted": false
+  },
+  "native_fine_external_drive": {
+    "status": "FORCING_RECONSTRUCTION_COMPLETE",
+    "spatial_checkpoint_parity": 7,
+    "source": "native_fine_external_drive/result.json",
+    "native_future_spikes_used": false
+  },
+  "live": [
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/lower_endpoint/jobs.json",
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/upper_endpoint/jobs.json"
+  ],
+  "fine_forcing_collection": {
+    "status": "COMPLETE",
+    "source": "conditioned_refractory_fine_forcing/collector.json",
+    "worker_exit": 0,
+    "collector_exit": 0
+  },
+  "original_A4_gate_review": {
+    "status": "BASELINE_RECOMPUTATION_COMPLETE",
+    "old_fine_expected_passed": 5,
+    "old_fine_expected_failed": [
+      "propagation"
+    ],
+    "old_fine_count_passed": 4,
+    "old_fine_count_failed": [
+      "propagation",
+      "D_track"
+    ],
+    "original_events_retained": true,
+    "strict_complete_events_diagnostic_only": true,
+    "spike_coincidence_not_required": true,
+    "report": "conditioned_refractory_fine_forcing/readout_basis_review.md"
+  },
+  "current_rate_definition": "rate_candidate_definition_current.md, latest20260923 section",
+  "voltage_memory_candidate": {
+    "status": "COMPLETE_LOCAL_CANDIDATE_FAIL_STOPPED",
+    "groups": {
+      "conditioned": {
+        "count": 64,
+        "passed": 52,
+        "numerical_failed": 3
+      },
+      "parent": {
+        "count": 64,
+        "passed": 55,
+        "numerical_failed": 1
+      },
+      "legacy": {
+        "count": 64,
+        "passed": 50,
+        "numerical_failed": 2
+      },
+      "factorial_waveform": {
+        "count": 12,
+        "passed": 11,
+        "numerical_failed": 0
+      },
+      "in_domain_waveform": {
+        "count": 12,
+        "passed": 12,
+        "numerical_failed": 0
+      }
+    },
+    "numerical_implementation": "PASS",
+    "independent_score": "PASS",
+    "source": "voltage_memory_rate/scientific_review.md",
+    "model_promoted": false,
+    "new_spatial_runs": 0
+  },
+  "fine_rate_frozen_Z_fields": {
+    "status": "COMPLETE_INDEPENDENT_AUDIT_AND_AGENT_VISUAL_PASS",
+    "stage": "all_fixed_arms_complete",
+    "expected": 5,
+    "completed_arms": [
+      "dynamic_reference",
+      "own_Z9000_held",
+      "native_Z9000_held",
+      "native_Z9420_held",
+      "native_Z9870_held"
+    ],
+    "worker_exit": 0,
+    "collector_exit": 0,
+    "replay9000": "PASS",
+    "dynamic_reference": "COMPLETE_BITWISE_PASS",
+    "independent_readout": "PASS",
+    "scientific_review": "fine_rate_frozen_Z_fields/scientific_review.md",
+    "Z": "Four whole fields held; one dynamic reference",
+    "M": "Dynamic in all five arms",
+    "rows": [
+      {
+        "label": "dynamic_reference",
+        "initial_D": 0.08811251143364052,
+        "high_onset_ms": 10839.0,
+        "tail_global_hz": 263.034125,
+        "tail_persistent_fraction": 0.5839375
+      },
+      {
+        "label": "own_Z9000_held",
+        "initial_D": 0.08811251143364052,
+        "high_onset_ms": null,
+        "tail_global_hz": 28.563125,
+        "tail_persistent_fraction": 0.0
+      },
+      {
+        "label": "native_Z9000_held",
+        "initial_D": 0.2164660210396102,
+        "high_onset_ms": null,
+        "tail_global_hz": 54.85221875,
+        "tail_persistent_fraction": 0.063375
+      },
+      {
+        "label": "native_Z9420_held",
+        "initial_D": 0.22884476056519176,
+        "high_onset_ms": null,
+        "tail_global_hz": 87.6083125,
+        "tail_persistent_fraction": 0.14796875
+      },
+      {
+        "label": "native_Z9870_held",
+        "initial_D": 0.25634442534475455,
+        "high_onset_ms": 9305.0,
+        "tail_global_hz": 199.17590625,
+        "tail_persistent_fraction": 0.5137812499999999
+      }
+    ],
+    "native_Z9420_quiet": "134ms quiet precedes final2963ms right-censored episode",
+    "initial_jump_audit": "fine_rate_frozen_Z_fields/initial_transplant_input_shift.json",
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "human_visual_acceptance": "PENDING"
+  },
+  "rate_deterministic_object_audit": {
+    "status": "READ_ONLY_OBJECT_AUDIT_COMPLETE",
+    "review": "rate_deterministic_object_audit/review.md",
+    "result": "rate_deterministic_object_audit/result.json",
+    "network_runs": 0,
+    "model_modified": false,
+    "conclusion": "Current expectation arm uses full diffusion; count arm uses private diffusion and actual counts. Removing only count innovations defines another drift, not the existing expectation arm or exact ensemble average."
+  },
+  "current_activity": "Two onset-relevant fixed-spatial-Z deterministic conditional-drift endpoints, M dynamic. Lower D.20 evolves20s from interictal history; upper native9870 resumes5s checkpoint for15s to reach20s. No low-static-root continuation or parameter refit.",
+  "current_rate_analysis_interface": {
+    "status": "STATIC_AND_LOCAL_TEMPORAL_IMPLEMENTATION_PASS_ROOT_UNRESOLVED",
+    "static": "PASS",
+    "temporal_local_state_matrix": "PASS atdt0.05and0.025",
+    "temporal_DC_network": "PASS",
+    "direct_root": "FAIL",
+    "logit_root": "FAIL",
+    "trust_root": "ROOT_FAIL",
+    "trust_root_residual_per_ms": 0.04435569715830745,
+    "actual_equilibrium_flow": "NOT_RUN_NO_CONVERGED_ROOT",
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "model_promoted": false,
+    "review": "current_rate_analysis_interface/definition_and_review.md"
+  },
+  "conditional_drift_Z_fields": {
+    "status": "COMPLETE_INDEPENDENT_AND_AGENT_VISUAL_PASS",
+    "completed": 3,
+    "worker_exit": 0,
+    "review": "conditional_drift_Z_fields/scientific_review.md",
+    "count_sampling_only_removed": true,
+    "physical_version": "LegacyprivateQdelaysplit",
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED"
+  },
+  "physical_delay_variance_split": {
+    "status": "UNIT_ERROR_CONFIRMED",
+    "review": "physical_delay_variance_split/scientific_review.md",
+    "independent_integral": "PASS",
+    "physical_delay_ms": 0.1,
+    "legacy_erroneous_delay_ms": 0.05,
+    "model_promoted": false
+  },
+  "physical_delay_count_rate": {
+    "status": "COMPLETE_INDEPENDENT_AND_AGENT_VISUAL_PASS",
+    "trajectory_exit": 0,
+    "collector_exit": 0,
+    "original_A4_passed": 5,
+    "failed_original_gate": "D_track",
+    "D_at_native9870": 0.1283331003060486,
+    "high_entry_ms": 10971.0,
+    "early_complete_events_500_3000": 0,
+    "native_early_complete_events": 11,
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "review": "physical_delay_count_rate/scientific_review.md"
+  },
+  "physical_delay_conditional_drift_interface": {
+    "status": "BASELINE_ROOT_AND_ACTUAL_FLOW_PASS",
+    "D": 0.0,
+    "global_rate_hz": 0.09702911695912818,
+    "actual_steps_ms": [
+      0.05,
+      0.025
+    ],
+    "stability": "NOT_COMPUTED",
+    "review": "physical_delay_conditional_drift_interface/numerical_identity_review.md",
+    "model_promoted": false
+  },
+  "native_early_surround_inputs": {
+    "status": "RUNNING",
+    "progress": {
+      "status": "RUNNING",
+      "pid": 531843,
+      "time_ms": 3000.0,
+      "closed_chunks": 6
+    },
+    "active_processes": [
+      {
+        "pid": 531843,
+        "session": 58949,
+        "command": [
+          "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+          "-u",
+          "scripts/topic4_zm_runaway_mechanism/native_early_surround_inputs.py",
+          "run",
+          "--device",
+          "1"
+        ],
+        "verified_local": "2026-09-20T14:01:51.788859+08:00"
+      },
+      {
+        "pid": 532724,
+        "session": 37328,
+        "command": [
+          "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+          "-u",
+          "scripts/topic4_zm_runaway_mechanism/collect_native_early_surround_inputs.py",
+          "--worker-pid",
+          "531843",
+          "--device",
+          "1"
+        ],
+        "verified_local": "2026-09-20T14:01:51.788859+08:00"
+      }
+    ],
+    "contract": "native_early_surround_inputs/contract.json",
+    "model_changed": false,
+    "model_promoted": false
+  },
+  "native_early_input_response": {
+    "status": "COMPLETE_AUDIT_AND_AGENT_FIGURE_PASS",
+    "result": "native_early_surround_inputs/local_lif_reference/result.json",
+    "review": "native_early_surround_inputs/scientific_review.md",
+    "native_replay_identity": "PASS six500mschunks, originalarrays plus projectedcounts",
+    "scope": "16 selectedgroups, one native0-3sinput history; not autonomousequivalence",
+    "local_response": "Fixed response underestimates E about13percent andI about8percent whileconditionalGaussianLIF close tonative",
+    "model_promoted": false,
+    "bifurcation_type": "NOT_ESTABLISHED"
+  },
+  "onset_type": "NOT_ESTABLISHED",
+  "early_response_bias": {
+    "status": "COMPLETE_REVIEWED",
+    "local_gate": "62/64 developmentchecks; FAIL",
+    "independent_local_audit": "PASS",
+    "network": "One separatelyregistered3s causal sensitivity COMPLETE; independentreadoutPASS",
+    "network_result": "Early self-limited events andsurroundrecruitment return; D3000 .10346 versusnative .10054, parent .02059",
+    "late_transfer": "10/12; FAIL dueI14-16percentexcess; no retuning or extension",
+    "figure": "figures/fig_early_response_bias_counterfactual.png",
+    "figure_agent_QA": "PNG+samePDF PASS",
+    "human_QA": "PENDING",
+    "review": "early_response_bias_diagnostic/scientific_review.md",
+    "model_promoted": false
+  },
+  "pending": [
+    "Establish relevant autonomous interictal/sustained states near the actual fullZ path, keepingMdynamic; do not presume9420/9870bracket self-limited loss.",
+    "Continue only the state/branch or basin boundary connected to onset and certify its type and spatial mode.",
+    "Relate conditional boundary to the actual dynamicZM trajectory; complete requested figure."
+  ],
+  "current_progress_20260923": {
+    "status": "COMPLETE",
+    "review": "progress_20260923.md",
+    "batches": [
+      "transient_response_network_20260923",
+      "transient_native_Z_path_20260923",
+      "transient_equal_D_fields_20260923",
+      "transient_autonomous_Z_probe_20260923",
+      "transient_conditional_root_probe_20260923",
+      "transient_native_low_homotopy_20260923"
+    ],
+    "free_entry_s": 7.674,
+    "native_entry_s": 9.8685,
+    "prescribed_Z_entry_s": 9.844,
+    "prescribed_D_validation": "NOT_APPLICABLE_SUPPLIED_INPUT",
+    "M_dynamic_all_new_network_conditions": true,
+    "equal_D": 0.2,
+    "equal_D_complete_self_limited_events": [
+      13,
+      0
+    ],
+    "equal_D_tail_persistent_fraction": [
+      0.0,
+      0.47475
+    ],
+    "equal_D_global_high_entry": [
+      null,
+      null
+    ],
+    "autonomous_probe_status": "COMPLETE_AUDITED_NO_CERTIFIED_ATTRACTOR",
+    "direct_static_roots": "FOUR_FAILED_NO_BIFURCATION_INFERENCE",
+    "low_homotopy": "SIX_ACCEPTED_ROOTS_UP_TO_D0.02138958_NATURAL_STEP_STOP_NO_TYPE_OR_STABILITY",
+    "numerical_identity": "Last low root actual correctedGPU flowPASS atdt0.05/0.025ms",
+    "agent_latest_PNG_PDF": "PASS",
+    "human_visual_acceptance": "PENDING",
+    "model_promoted": false
+  },
+  "goal_system_status_observed": "paused; user continuation executed ordinary work; goal not marked complete or blocked",
+  "onset_priority": "onset_priority_20260923.md",
+  "onset_endpoints": "COMPLETE+READOUT_AUDIT_PASS;20s each: D.20 autonomous selflimited periodic candidate versus D.256344 sustained spatial recruitment; both M dynamic.",
+  "onset_low_period_return": "D.20,T234.17453066ms; all persistent states close, combinedrelative3.99e-5, history9.62e-5; interpolated return atdt.05 only, not solvedBVP/Floquet/timestep certificate.",
+  "onset_neighbor_pair": "RUNNING actualnativepathmidpointD.242594593,originaltime9681.657ms. Lowseed fromnative9420 final; highfromnative9870 endpoint20s;each10s.",
+  "current_onset_result_directory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923",
+  "onset_workers": {
+    "native_mid9420_9870_from_lower": {
+      "status": "RUNNING",
+      "pid": 686536,
+      "condition": {
+        "label": "native_mid9420_9870_from_lower",
+        "field": "native_mid9420_9870",
+        "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/final_state.npz",
+        "previous_elapsed_ms": 0,
+        "duration_ms": 10000
+      },
+      "completed_blocks": [
+        0
+      ],
+      "new_elapsed_ms": 8000
+    },
+    "native_mid9420_9870_from_upper": {
+      "status": "RUNNING",
+      "pid": 686541,
+      "condition": {
+        "label": "native_mid9420_9870_from_upper",
+        "field": "native_mid9420_9870",
+        "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/upper_endpoint/final_state.npz",
+        "previous_elapsed_ms": 0,
+        "duration_ms": 10000
+      },
+      "completed_blocks": [
+        0
+      ],
+      "new_elapsed_ms": 5000
+    },
+    "native9420_from_lower/variational_return": {
+      "status": "RUNNING",
+      "pid": 686547,
+      "stage": "Arnoldi",
+      "completed_returns": 3
+    }
+  },
+  "onset_native9000_pair": "COMPLETE+AUDIT_PASS; both full histories show selflimited irregular events atsameD.216466 inlast5s:18/19events,quiet.533/.560,persistent0. No close fullrate recurrence. Not a certified same attractor or chaos.",
+  "onset_tangent_implementation": "PASS fullstate two-phase checks;nominaltrajectorybitwise. FinestFDerror syn1.72e-7/local8.50e-7/history2.57e-6. No modelpromotion.",
+  "onset_native9420_pair": "COMPLETE+AUDIT_PASS;selflimited17events/quiet.599 inlast5s. Highhistorystart hasnoquiet0-5s butreturns10completeevents/quiet.312 in5-10s. Shortprefixdifferenceisnotbistability/separatrix.",
+  "onset_periodic_seed": "native9420 lower,T568.785515ms(twoevents),full-stateinterpolatedreturnrelative5.14e-6 atdt.05. Phasevariationalidentityprojection.999722,defect.000806 passesdiagnosticgate;8dimArnoldirunning,notFloquetcertified.",
+  "onset_numerical_controls": "Step-refinementandM-swaptools prepared NOT_RUN. M-swapcoexistenceprerequisiteatnative9420failed(highreturnedquiet);do notauto-launchthatcontrol.",
+  "onset_state_continuation": "Endpoints20s and all four neighboring pair conditions COMPLETE / independent audit PASS. Current finite state bracket D .228844761-.235719677; all M dynamic.",
+  "onset_step_refinement": "Two5s dt.025 continuations COMPLETE / audit PASS. Selflimited versus sustained categories persist; native9420 two-event vs single-event rhythm differs, so no same-branch convergence certification.",
+  "onset_variational_return": "Actual full-state derivative two FD checks PASS; coarse9420 8D Arnoldi COMPLETE_NOT_CERTIFIED. Phase defect .000806, leading Ritz .575/.566 with residual .018/.011; not Floquet acceptance.",
+  "onset_periodic_corrector": "Coarse native9420 numerical root T568.785864 residual8.96e-8 and independent samephase PASS; shiftedphase error retained. Sameorbit dt.025 and native9425 eight-return correctors COMPLETE_NEGATIVE, neither failure is a bifurcation.",
+  "onset_bifurcation_type": "NOT_ESTABLISHED",
+  "onset_separatrix": "NOT_ESTABLISHED: high-history9420 prefix returned to selflimited activity during5-10s.",
+  "onset_same_model_limits": "Conditional native Z input correspondence only; autonomous Z and local response failures retained; no model promotion.",
+  "onset_newton": "COMPLETE: section derivative PASS, linearresidual1.03e-4; quarterstep reduces combined nonlinear residual.01634 to.01466 only. Not a periodic root or bifurcation.",
+  "historical_bifurcation_scope": "Old v3 branch/stability/fold entries retained below are historical and do not apply to current conditioned39+transient-response equations.",
+  "onset_next_state_pair": "DEFERRED_NOT_RUN after explicit user steering to Core A resource. native_mid9420_q implementation passed, neither10s worker launched.",
+  "current_scientific_priority": "Core A resource bifurcation first: D_A=1-mean CoreA Z; retain whole spatial model, hold CoreB/surround Z at native9s, allM dynamic. Two10s matched-history screen registered.",
+  "core_a_resource_status": "See core_a_resource_bifurcation_20260923/contract.json and implementation.log; local transition and bifurcation type not yet established.",
+  "core_a_resource_screen": {
+    "directory": "core_a_resource_bifurcation_20260923",
+    "implementation_check": "PASS",
+    "reference_pid": 699918,
+    "coreA_depleted_pid": 699936,
+    "scope": "Two10s same-state rate trajectories; only Core A Z differs. Not bifurcation certification.",
+    "status": "COMPLETE_BOTH_AUDIT_PASS",
+    "result": "Only Core A Z decrease .7443 to .5995: A quiet66.36% to0, B remains selflimited, no original global200Hz200ms onset. No bifurcation type.",
+    "active_pids": [],
+    "figure": "core_a_resource_bifurcation_20260923/figures/fig_core_a_resource_spatial_control.png; PNG/PDF agent reviewed, human pending"
+  },
+  "core_a_transition_20260924": {
+    "directory": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924",
+    "rate_pids": {},
+    "implementation": "PASS",
+    "native_directory": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_native_clamp_20260924",
+    "bifurcation_type": "NOT_ESTABLISHED",
+    "mid1_10s": "Both initially return quiet then late high segments; lower last5s sustained, upper last5s one completed local episode. Extend to15s; not bistability.",
+    "native_correspondence": "Single paired native A-only resource control AUDIT_PASS: A quiet56.7% to0, mean110.9 to433.4Hz; B still quiet43.5%, no global high onset. Local qualitative agreement only.",
+    "mid1_15s": "Lower-source history sustains, upper-source history returns to self-limited. Distinct finite-time histories, not certified bistability. Extend both exact paths to30s.",
+    "native_figure": "core_a_native_clamp_20260924/figures/fig_core_a_native_rate_resource_control.png/pdf/svg; agent visual review PASS, human pending",
+    "status": "COMPLETE_ALL_AUDIT_PASS",
+    "result": "FixedZA.671878: completed local events up to16.206s and9.348s; bothhistories return low. No certified bistability, persistent-attractor threshold or bifurcation.",
+    "periodic_seed": "No close full spatial-rate recurrence through15s lag in30s records; no chaos or longer-period exclusion.",
+    "native_local_effect": "Supported in one matched native history; CoreB quantitative mismatch retained.",
+    "review": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/scientific_review.md"
+  },
+  "core_a_type_analysis": {
+    "folder": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924",
+    "coarse_pid": 1209169,
+    "fine_pid": 1209174,
+    "static_pid": 1211730,
+    "type": "NOT_ESTABLISHED",
+    "model_promoted": false,
+    "equilibrium_type": "GENERIC_SN_CERTIFIED",
+    "actual_onset_type": "NOT_ESTABLISHED",
+    "active_conditions": [
+      "fold_attractor_contrast/below",
+      "fold_attractor_contrast/above"
+    ]
+  },
+  "current_core_A_analysis": {
+    "root": "core_a_bifurcation_type_20260924",
+    "equilibrium_type": "GENERIC_SN_CERTIFIED",
+    "D_A": 0.3531576412548057,
+    "Z_A": 0.6468423587451944,
+    "critical_mode": "Peripheral recruitment edge; both equilibrium sheets already unstable",
+    "actual_onset_type": "NOT_ESTABLISHED",
+    "fold_crossing_test": "20s each, both AUDIT_PASS; both late Core A sustained",
+    "all_M_dynamic": true,
+    "regional_native_correspondence": "PARTIAL_ONLY",
+    "periodic_work": "Complete-state Newton at D_A=.328121599, flow-normal and Core-A-rate sections; no closed orbit yet",
+    "historical_result_warning": "Other top-level pre-20260923 phase/Floquet/frozen-response results are historical and do not apply to this current conditional-response resource family."
+  }
+}

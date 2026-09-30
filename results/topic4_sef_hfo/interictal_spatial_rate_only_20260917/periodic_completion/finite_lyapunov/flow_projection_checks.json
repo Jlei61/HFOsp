@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "dt_ms": 0.1,
+      "history_flow_relative_defect": 0.00017478766087278982,
+      "analytic_flow_remaining_after_projection": 0.00016763511804381682,
+      "current_rate_derivative_max_error": 3.5849123375457776e-06
+    },
+    {
+      "dt_ms": 0.05,
+      "history_flow_relative_defect": 4.523566985720175e-05,
+      "analytic_flow_remaining_after_projection": 4.3290090251842e-05,
+      "current_rate_derivative_max_error": 3.5849123375457776e-06
+    }
+  ],
+  "step_halving_error_reduction": 3.863934400099587,
+  "scope": "Exact Fourier history-flow derivative versus numerical full-history flow; local flow from the unchanged RHS. A periodic Lyapunov control is still required."
+}

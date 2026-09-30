@@ -1,0 +1,9 @@
+{
+  "status": "REGISTERED_BEFORE_EXISTING_RASTER_PHASE_AUDIT",
+  "created_epoch": 1790562755.2115693,
+  "question": "Is the reduced phase structure of the phase-map output comparable to native temporalvariation after matching the external protocol?",
+  "design": "Read the80originallyfixedraster samplecells at0.1ms in the completed72-82s highhistory fixedbackgroundcontrol. Compute22step sourcephaseprobabilities in each2s block andthefull10s, aligned to72s phase0. Compare the samecells in the variable-background native72-74s initialguess andphase-map generations1-3. No newneural simulation, periodsearch, or phasefit.",
+  "limitations": "80stratifiedrastercells are not the40000cellnetwork or independentseeds. Nativephase probabilities use onepath; mapoutputs average64 numericalreplicas. Withinpathpersistence can expose finitewindow/phase-drift effects but is not an ensemble equivalence or formalstabilitytest.",
+  "producer_sha256": "00956d140552bbcd746b5e3425afa894006625f6ad36e594fed475b04d6bd1e5",
+  "formal_bifurcation_allowed": false
+}

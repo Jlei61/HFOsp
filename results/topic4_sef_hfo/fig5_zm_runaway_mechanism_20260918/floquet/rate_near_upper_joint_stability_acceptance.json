@@ -1,0 +1,19 @@
+{
+  "status": "FINE_PHASE_CHECK_FAILED",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.003125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G32769_M262144_cached6_point0000_endpoint_dt0.0018_quotient_chainphase_rk4_cubic_streamed_fastgrid.json"
+  ],
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G32769_M262144_cached6/point0000.npz",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/upper_joint_refinement_contract.json",
+  "scope": "Upper periodic solution only; joint orbit/quadrature/time refinement, not a same-orbit time-step test",
+  "bifurcation_type": "NOT_CERTIFIED_BY_THIS_TEST_ALONE",
+  "phase_check": {
+    "status": "PHASE_CHECK_FAILED",
+    "phase_defect": 0.016111581477621657,
+    "phase_projection": 1.0161080385168426,
+    "phase_valid": false,
+    "dt_ms": 0.001782337737594529,
+    "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G32769_M262144_cached6/point0000.npz"
+  }
+}

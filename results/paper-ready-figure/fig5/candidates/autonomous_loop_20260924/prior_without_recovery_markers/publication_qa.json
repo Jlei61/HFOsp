@@ -1,0 +1,19 @@
+{
+  "status": "PASS_TECHNICAL_AND_AGENT_VISUAL",
+  "human_review": "PENDING",
+  "file_hash_checks": {
+    "fig5-panela-loop": true,
+    "fig5-panelb-loop": true,
+    "fig5-panelc-loop": true,
+    "fig5-state-return": true
+  },
+  "observed_original_prefix_bitwise": true,
+  "spatial_region_counts_conserved": true,
+  "local_inhibition_coordinate": "Cell-count weighted explicitly recorded Z*local_II; excludes new G.",
+  "pdf_review": "A/B/C and3D projections inspected after final render; explicit3D label bounds prevent clipping.",
+  "source_dependency_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_autonomous_loop.py": "d3485f95cc491962a35dc6ae7672a00bd9033aae7342189d8230a6febd68eeef",
+    "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_clean_panels.py": "39cc7013f6c93c697dba5a78f626c07bbfcd2ea97df23a6c8de9b9123bd407dd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/zoom_topic4_return_core_propagation.py": "e99ddc60d890c0f34d4bc07c990eda56e46ff040b23acb60443a975c5b1cfa2a"
+  }
+}

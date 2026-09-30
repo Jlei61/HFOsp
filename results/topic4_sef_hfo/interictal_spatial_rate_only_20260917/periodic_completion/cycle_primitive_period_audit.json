@@ -1,0 +1,3239 @@
+{
+  "status": "AUDIT_COMPLETE",
+  "rows": [
+    {
+      "label": "LPC1",
+      "internal_label": "LPC_resonance_upper",
+      "J_EE_core": 0.9458472114142701,
+      "T_ms": 165.81578803670592,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.1342296115911637,
+          "first_harmonic_RMS_fraction": 0.9577914910209719,
+          "nyquist_energy_fraction": 1.6076772782564456e-32,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.92384451460012
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7252572546238072
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4648359137188418
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.2507005441547312
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.0829637508531391
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.13422961159059865,
+          "first_harmonic_RMS_fraction": 0.9577914910205935,
+          "nyquist_energy_fraction": 6.130570695319423e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.9238445145994454
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7252572546237424
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4648359137192728
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.2507005441553691
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.0829637508538414
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.7847502909471586e-13,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC2",
+      "internal_label": "LPC_resonance_lower",
+      "J_EE_core": 0.945751951597284,
+      "T_ms": 165.61244373063624,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.13210698846272415,
+          "first_harmonic_RMS_fraction": 0.957765259047775,
+          "nyquist_energy_fraction": 7.443287916882647e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.9237057252186163
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.725326759071299
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.464954924461614
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.2507698905059503
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.0829781508498184
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.1321069884627308,
+          "first_harmonic_RMS_fraction": 0.9577652590477799,
+          "nyquist_energy_fraction": 8.75817555588185e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.923705725218625
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7253267590712997
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.464954924461608
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.2507698905059421
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.0829781508498093
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 4.884981308350689e-15,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC3",
+      "internal_label": "LPC_A1",
+      "J_EE_core": 0.9614345887728242,
+      "T_ms": 164.6106857336651,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A1_N64.npz",
+          "N": 64,
+          "temporal_RMS_Hz": 0.22288844055802015,
+          "first_harmonic_RMS_fraction": 0.8980764978186108,
+          "nyquist_energy_fraction": 3.596220514673481e-15,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8346657922169398
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7029552392172351
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5116976971373184
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3372363447747242
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.1889135962864592
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A1_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.22288844055819143,
+          "first_harmonic_RMS_fraction": 0.8980764978187691,
+          "nyquist_energy_fraction": 7.619217775875005e-28,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8346657922170588
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7029552392173406
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5116976971373721
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.337236344774699
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.1889135962863342
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.5831780331154732e-13,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC4",
+      "internal_label": "LPC_B1",
+      "J_EE_core": 0.971261892416582,
+      "T_ms": 255.6910340229652,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B1_N64.npz",
+          "N": 64,
+          "temporal_RMS_Hz": 0.18931824749433498,
+          "first_harmonic_RMS_fraction": 0.8104309840726267,
+          "nyquist_energy_fraction": 7.491505275173495e-11,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.7332753429037069
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6569307037966663
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5405970683252024
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4226828106955327
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3116687838105514
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B1_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.1893182468130985,
+          "first_harmonic_RMS_fraction": 0.8104309938089231,
+          "nyquist_energy_fraction": 1.6794130169870458e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.7332753540653874
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6569307091133378
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5405970649449818
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4226828006193708
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3116687691150168
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.73629643574725e-09,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC5",
+      "internal_label": "LPC_burst_low",
+      "J_EE_core": 0.956897572805052,
+      "T_ms": 296.73192547271503,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 28.913939201477273,
+          "first_harmonic_RMS_fraction": 0.5138130249138281,
+          "nyquist_energy_fraction": 1.1672047704349787e-12,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.512568318348743
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.511157005547258
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.507031509084349
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4985415771444333
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4850272872932433
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 28.913928107591694,
+          "first_harmonic_RMS_fraction": 0.5138130066206836,
+          "nyquist_energy_fraction": 8.966880902182146e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5125683119022488
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5111569987162918
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5070315018074065
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.498541569789405
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4850272805367757
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.8293144443681797e-08,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC6",
+      "internal_label": "LPC_burst_high",
+      "J_EE_core": 1.626501518560538,
+      "T_ms": 239.69812295401096,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 54.750396883587435,
+          "first_harmonic_RMS_fraction": 0.6123073189091334,
+          "nyquist_energy_fraction": 3.588925152129712e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5616608780556978
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.555788580976029
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5381881389843866
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5102614933698515
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4737147960505197
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 54.75039688194092,
+          "first_harmonic_RMS_fraction": 0.612307318468532,
+          "nyquist_energy_fraction": 5.5620044290670386e-21,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5616608775023255
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.55578858092525
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5381881392225871
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5102614936976368
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4737147964291448
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 4.406013331959002e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC7",
+      "internal_label": "LPC_Bleading_low",
+      "J_EE_core": 0.9488485317657943,
+      "T_ms": 317.84042426483336,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 39.19405485585969,
+          "first_harmonic_RMS_fraction": 0.48943528653548113,
+          "nyquist_energy_fraction": 2.873340900631316e-17,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5026622068386388
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5016973279693353
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.49879617569503
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4923238613000127
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4817833276799053
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 39.194054844182304,
+          "first_harmonic_RMS_fraction": 0.48943528653759655,
+          "nyquist_energy_fraction": 8.735595008840524e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5026622068421867
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5016973279722918
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.498796175692569
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4923238612750844
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.481783327659278
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 2.1154189511207733e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC8",
+      "internal_label": "LPC_double_high",
+      "J_EE_core": 0.9449471475478515,
+      "T_ms": 760.6705300055709,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_high_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 37.03227516521516,
+          "first_harmonic_RMS_fraction": 0.2322104950550089,
+          "nyquist_energy_fraction": 2.4311645461824992e-11,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3744810578687954
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4657541648471244
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.468686642901292
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4685655658030115
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4687527103623828
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_high_N1536.npz",
+          "N": 1536,
+          "temporal_RMS_Hz": 37.03236518708971,
+          "first_harmonic_RMS_fraction": 0.23221144569495433,
+          "nyquist_energy_fraction": 5.980051355120593e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3744827689394352
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4657540093248629
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4686865251765877
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4685654150914533
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4687525870618208
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.506399454295433e-07,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC9",
+      "internal_label": "LPC_A2",
+      "J_EE_core": 0.939333107388464,
+      "T_ms": 136.67317551384602,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A2_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.3825560690972005,
+          "first_harmonic_RMS_fraction": 0.8924435939537739,
+          "nyquist_energy_fraction": 4.4416675232900425e-28,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8257070549993413
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7012519047579873
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5173176295841708
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3458204491348347
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.198206873695941
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A2_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.38255606907758316,
+          "first_harmonic_RMS_fraction": 0.8924435939552372,
+          "nyquist_energy_fraction": 3.0088471791157198e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8257070550018217
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7012519047583479
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.517317629582592
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3458204491324361
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.1982068736933917
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.4632739464559563e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC10",
+      "internal_label": "LPC_A3",
+      "J_EE_core": 0.9394710284040595,
+      "T_ms": 135.84855186173525,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A3_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.4051967551214079,
+          "first_harmonic_RMS_fraction": 0.8897236718016054,
+          "nyquist_energy_fraction": 1.3222610715970081e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8216961660349618
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.7002230980256594
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5194049856560221
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3496358236582147
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.202765116743207
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A3_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.4051967551216228,
+          "first_harmonic_RMS_fraction": 0.8897236718015741,
+          "nyquist_energy_fraction": 1.967480398884676e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8216961660349147
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.700223098025648
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5194049856560476
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3496358236582593
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2027651167432591
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.1308289294429414e-14,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC11",
+      "internal_label": "LPC_A4",
+      "J_EE_core": 0.9382319284104846,
+      "T_ms": 134.71776774727965,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A4_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.5158391650489667,
+          "first_harmonic_RMS_fraction": 0.8766619299252175,
+          "nyquist_energy_fraction": 1.0148756918901212e-28,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8035202712191862
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6946114254376348
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5279447685668748
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.366865523713166
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2242284159949364
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A4_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.5158391650510787,
+          "first_harmonic_RMS_fraction": 0.8766619299253224,
+          "nyquist_energy_fraction": 2.0117777619601738e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.8035202712192215
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6946114254377582
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5279447685669254
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3668655237130845
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2242284159947499
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.0491607582707729e-13,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC12",
+      "internal_label": "LPC_A5",
+      "J_EE_core": 0.9406839080905371,
+      "T_ms": 133.80024380913872,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A5_N192.npz",
+          "N": 192,
+          "temporal_RMS_Hz": 0.6685657987313665,
+          "first_harmonic_RMS_fraction": 0.8701720352102402,
+          "nyquist_energy_fraction": 1.1844152483348871e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.797450365490008
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6903220690178677
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5276002072261923
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3714423655375503
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2332854918799647
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A5_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.6685657983112937,
+          "first_harmonic_RMS_fraction": 0.8701720353181139,
+          "nyquist_energy_fraction": 1.6208809695061243e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.7974503656156426
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6903220690743146
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5276002071950385
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3714423654359063
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2332854917266514
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.0787370996467871e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC13",
+      "internal_label": "LPC_B2",
+      "J_EE_core": 0.9463101206889282,
+      "T_ms": 296.72680168084366,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.29216987265288014,
+          "first_harmonic_RMS_fraction": 0.625983406849478,
+          "nyquist_energy_fraction": 2.0727850960668274e-13,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5551298600461017
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5584704144649408
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6028070513892776
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5719374761288216
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5051642185093574
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.2921698726560687,
+          "first_harmonic_RMS_fraction": 0.6259834068455329,
+          "nyquist_energy_fraction": 4.712569979691616e-25,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.555129860042493
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5584704144620172
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6028070513906947
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5719374761328164
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5051642185158731
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.945066495703031e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC14",
+      "internal_label": "LPC_B3",
+      "J_EE_core": 0.9476814192142715,
+      "T_ms": 303.38590573874313,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B3_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.364277607286116,
+          "first_harmonic_RMS_fraction": 0.5928449724277527,
+          "nyquist_energy_fraction": 3.139221738981782e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5291072975665598
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5444852100793205
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5997243236645058
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5779447559722986
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5216421337573223
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B3_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.3642776073784813,
+          "first_harmonic_RMS_fraction": 0.5928449723753981,
+          "nyquist_energy_fraction": 1.8601670424684734e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5291072974709783
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.544485210093526
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5997243237024494
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5779447560062425
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5216421337863648
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 5.235456512764358e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC15",
+      "internal_label": "LPC_B4",
+      "J_EE_core": 0.9476505250084494,
+      "T_ms": 303.3061029830933,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B4_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.41190957887581336,
+          "first_harmonic_RMS_fraction": 0.5602031386855224,
+          "nyquist_energy_fraction": 1.0882716795848736e-13,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4620625785302963
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5572788439828917
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6263199633687615
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6019690342082002
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.541940989095892
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B4_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.41190957891950514,
+          "first_harmonic_RMS_fraction": 0.5602031386449288,
+          "nyquist_energy_fraction": 2.776415361766581e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4620625784679704
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5572788439808118
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6263199633964545
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6019690342442712
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5419409891348719
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 4.059363956088191e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC16",
+      "internal_label": "LPC_B5",
+      "J_EE_core": 0.9476981541529192,
+      "T_ms": 303.39002709922977,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B5_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.4167576978076132,
+          "first_harmonic_RMS_fraction": 0.5791138775243889,
+          "nyquist_energy_fraction": 9.729407700057931e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.478508877514931
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5635304191087287
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6215265180727814
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5932036964667036
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5308279181455537
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B5_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.41675769782498634,
+          "first_harmonic_RMS_fraction": 0.5791138775119656,
+          "nyquist_energy_fraction": 3.4548184736298774e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4785088775520616
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.563530419080891
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.621526518015917
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5932036964266696
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5308279181312738
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.2423284623253039e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC17",
+      "internal_label": "LPC_B6",
+      "J_EE_core": 0.9476486217000467,
+      "T_ms": 303.2568068538829,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B6_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.42032420689980793,
+          "first_harmonic_RMS_fraction": 0.5736526857110199,
+          "nyquist_energy_fraction": 1.241520389529879e-13,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4641470217133286
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.567360957983755
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.631531009898306
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6015660309125148
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5362370935742333
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B6_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.4203242067446318,
+          "first_harmonic_RMS_fraction": 0.5736526858389752,
+          "nyquist_energy_fraction": 1.3851379417013864e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4641470219157615
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5673609579639831
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6315310098039693
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.60156603081964
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5362370934924867
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.2795531301179608e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC18",
+      "internal_label": "LPC_B7",
+      "J_EE_core": 0.9477081392136185,
+      "T_ms": 303.30366400377056,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B7_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.44081944084453417,
+          "first_harmonic_RMS_fraction": 0.5262595793562242,
+          "nyquist_energy_fraction": 2.317136528525232e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3933063852519256
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5735816383287882
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6585501441261061
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6310003791717342
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5657413527691944
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B7_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.4408194405455961,
+          "first_harmonic_RMS_fraction": 0.5262595764096774,
+          "nyquist_energy_fraction": 1.2783407386782872e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3933063795519443
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5735816392529534
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6585501458630618
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6310003809805271
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5657413545175598
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 2.946546895365998e-09,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC19",
+      "internal_label": "LPC_B8",
+      "J_EE_core": 0.9476334668030755,
+      "T_ms": 303.2727650228376,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B8_N128.npz",
+          "N": 128,
+          "temporal_RMS_Hz": 0.43761297018067247,
+          "first_harmonic_RMS_fraction": 0.48990779326598277,
+          "nyquist_energy_fraction": 2.498340740177511e-14,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3096784462662383
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5874234620029892
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6782624020697912
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6511976409320597
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5854760425297934
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B8_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.43761296994473625,
+          "first_harmonic_RMS_fraction": 0.4899077941271791,
+          "nyquist_energy_fraction": 1.2478683389652709e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3096784485981672
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5874234616378722
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6782624017415086
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.6511976406046913
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5854760421702487
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 8.611963364657527e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC20",
+      "internal_label": "LPC_double_low",
+      "J_EE_core": 0.9381101414526141,
+      "T_ms": 852.7425253105705,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_low_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 35.38402945665909,
+          "first_harmonic_RMS_fraction": 0.2371212425128604,
+          "nyquist_energy_fraction": 9.073236572331277e-11,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4029753469568516
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4549247082269139
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.457168961767402
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.457788054994473
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.45774747879754
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_low_N1536.npz",
+          "N": 1536,
+          "temporal_RMS_Hz": 35.3841650729402,
+          "first_harmonic_RMS_fraction": 0.2371204787568873,
+          "nyquist_energy_fraction": 4.705745659915572e-13,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.402974254331368
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4549250080165488
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4571692251806785
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.457788330640433
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4577477567498882
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 7.637559731044075e-07,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC21",
+      "internal_label": "LPC_double_secondary1",
+      "J_EE_core": 0.9391433309651367,
+      "T_ms": 875.8164641079585,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 34.186928488592564,
+          "first_harmonic_RMS_fraction": 0.23109132148275163,
+          "nyquist_energy_fraction": 1.2615175614339427e-10,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.383943910014439
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4500095850746892
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4570154385295133
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.457332760741284
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4573862442111605
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 34.18791897462166,
+          "first_harmonic_RMS_fraction": 0.2310958333093049,
+          "nyquist_energy_fraction": 7.712569374374965e-15,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3839129373280015
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4500138744975397
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4570157153961882
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4573327722936977
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.45738649616956
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 4.511826553255105e-06,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC22",
+      "internal_label": "LPC_double_secondary2",
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 33.69073292648716,
+          "first_harmonic_RMS_fraction": 0.22732110711354958,
+          "nyquist_energy_fraction": 1.428189137545023e-10,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3984137200829503
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4476572165990584
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4573855878793207
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4577867665331181
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4577888086376112
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 33.69080184499346,
+          "first_harmonic_RMS_fraction": 0.22732201284612152,
+          "nyquist_energy_fraction": 8.040805135415416e-15,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.3984139011627896
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.447657243362316
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4573856747735445
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.457786853288349
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4577888968221122
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.057325719430409e-07,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC23",
+      "internal_label": "LPC_double_secondary3",
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 30.93256275168402,
+          "first_harmonic_RMS_fraction": 0.23258396570723466,
+          "nyquist_energy_fraction": 8.665189851191163e-11,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.412539373372526
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.432491199899942
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4603082503732616
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4610187566183006
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.460796931901863
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 30.9324348698019,
+          "first_harmonic_RMS_fraction": 0.2325832434190791,
+          "nyquist_energy_fraction": 4.855334348480644e-15,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4125318722709883
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4324947228997325
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4603082312744653
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4610186991414298
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4607968648173664
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 7.222881555635219e-07,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC24",
+      "internal_label": "LPC_double_secondary4",
+      "J_EE_core": 0.940343489690564,
+      "T_ms": 856.8099149281564,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 31.615323238628367,
+          "first_harmonic_RMS_fraction": 0.23195850822233288,
+          "nyquist_energy_fraction": 3.869699388168437e-15,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4135170242209687
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.433222806455479
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4598595639640721
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4606035849229195
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4604412642977718
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N4096.npz",
+          "N": 4096,
+          "temporal_RMS_Hz": 31.61532330285931,
+          "first_harmonic_RMS_fraction": 0.23195850831964523,
+          "nyquist_energy_fraction": 3.397190604136865e-22,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.413517024230891
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.4332228064308699
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.459859563947119
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4606035849042605
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4604412642828346
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.73123526204489e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC25",
+      "internal_label": "LPC_A_low_extension",
+      "J_EE_core": 0.7057755003569962,
+      "T_ms": 115.45814851312022,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_low_extension_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 1.7039621191260135,
+          "first_harmonic_RMS_fraction": 0.8092169794107957,
+          "nyquist_energy_fraction": 2.422327883993551e-30,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.7216368608300237
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6623108246132263
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5541967049450631
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4340745856458272
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3173511276890986
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_low_extension_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 1.7039621421122024,
+          "first_harmonic_RMS_fraction": 0.8092169783217241,
+          "nyquist_energy_fraction": 2.3099804167914348e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.721636859678314
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6623108239965734
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5541967051989598
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.434074586611281
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3173511291109588
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.0890716106715104e-09,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC26",
+      "internal_label": "LPC_A_return_exchange",
+      "J_EE_core": 0.9459767886094599,
+      "T_ms": 122.72015595663247,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_exchange_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 3.0563782639314403,
+          "first_harmonic_RMS_fraction": 0.7459954951079472,
+          "nyquist_energy_fraction": 2.2360407242582174e-21,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.659814230610893
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6261750074912313
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5608608378263193
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4802383301832798
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.39142493427508
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_exchange_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 3.056378244214693,
+          "first_harmonic_RMS_fraction": 0.7459954953441064,
+          "nyquist_energy_fraction": 1.2664884842419063e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6598142308237147
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6261750076260557
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.560860837826796
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4802383300419506
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3914249340182374
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 2.361592033039983e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC27",
+      "internal_label": "LPC_A_return_recruitment",
+      "J_EE_core": 0.9438163372922354,
+      "T_ms": 118.53333633226788,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 24.276738768720705,
+          "first_harmonic_RMS_fraction": 0.725876414885945,
+          "nyquist_energy_fraction": 1.6596560202034837e-13,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6419306528795454
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6143238677389544
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5599428781556242
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4940593567822054
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4187374334521332
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 24.276739744938858,
+          "first_harmonic_RMS_fraction": 0.7258764280191404,
+          "nyquist_energy_fraction": 1.2080109918661648e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6419306625014034
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6143238754068312
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5599428819643582
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4940593559137891
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4187374212742918
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.3133195420067523e-08,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC28",
+      "internal_label": "LPC_A_large_return1",
+      "J_EE_core": 1.0761836153250073,
+      "T_ms": 110.67709588969598,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 45.688632854926894,
+          "first_harmonic_RMS_fraction": 0.7501259562901795,
+          "nyquist_energy_fraction": 8.428484878657474e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6618952289021511
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.627852887088418
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5634581386632957
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4868635864010937
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3971007990448154
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 45.68863286986742,
+          "first_harmonic_RMS_fraction": 0.7501259562587753,
+          "nyquist_energy_fraction": 5.572105605870213e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6618952288729043
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6278528870715856
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5634581386630935
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4868635864179742
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3971007990798918
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.140421256375703e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC29",
+      "internal_label": "LPC_A_large_return2",
+      "J_EE_core": 1.0717683543624708,
+      "T_ms": 101.20897953462885,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return2_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 34.84034052304987,
+          "first_harmonic_RMS_fraction": 0.7590351922112644,
+          "nyquist_energy_fraction": 1.0176036919167163e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.671313420562107
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6322327197707829
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5614911443635777
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4801131033944734
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.386810953625621
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return2_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 34.840340503178,
+          "first_harmonic_RMS_fraction": 0.7590351922189356,
+          "nyquist_energy_fraction": 6.79747209498694e-29,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6713134205707416
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6322327197743625
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.561491144359889
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.48011310338568
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3868109536151387
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 7.671197010949982e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC30",
+      "internal_label": "LPC_A_large_return3",
+      "J_EE_core": 1.0866976587440011,
+      "T_ms": 101.41226624841781,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return3_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 33.05238185635581,
+          "first_harmonic_RMS_fraction": 0.7592188756131483,
+          "nyquist_energy_fraction": 1.3072435245914967e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6715838105469276
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6323604793730335
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.561445248810861
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.479663968544028
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3861408546712062
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return3_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 33.05238185634297,
+          "first_harmonic_RMS_fraction": 0.7592188756150657,
+          "nyquist_energy_fraction": 2.8646573888431573e-29,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6715838105488272
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6323604793740283
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5614452488105675
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4796639685428001
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3861408546691423
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.917466185830108e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC31",
+      "internal_label": "LPC_single_upper1",
+      "J_EE_core": 1.569234886663887,
+      "T_ms": 137.40287021828732,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 61.54714864423733,
+          "first_harmonic_RMS_fraction": 0.7638490804448435,
+          "nyquist_energy_fraction": 4.116140571651986e-18,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6763944102106723
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6355891012553583
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5607662523840142
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.471991641463534
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3765479059606422
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 61.54714864393162,
+          "first_harmonic_RMS_fraction": 0.7638490804371466,
+          "nyquist_energy_fraction": 5.514424760786009e-26,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6763944102031307
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6355891012522026
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5607662523822763
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4719916414639884
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.376547905967087
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 7.696843162818823e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC32",
+      "internal_label": "LPC_single_upper2",
+      "J_EE_core": 1.5757028697657414,
+      "T_ms": 141.79218622554177,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper2_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 61.606516092764835,
+          "first_harmonic_RMS_fraction": 0.7550489915241175,
+          "nyquist_energy_fraction": 2.5302823420390863e-18,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6675158839869682
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6311909636349597
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.561533772784242
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4772007219058143
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3857828394491385
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper2_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 61.60651609390294,
+          "first_harmonic_RMS_fraction": 0.7550489915358672,
+          "nyquist_energy_fraction": 1.2954221338713512e-26,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.667515883997555
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.631190963642697
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5615337727804164
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4772007218954872
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.385782839433988
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.1749712314212957e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC33",
+      "internal_label": "LPC_single_upper3",
+      "J_EE_core": 1.5585735213787404,
+      "T_ms": 131.0465094577135,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper3_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 61.34939694269464,
+          "first_harmonic_RMS_fraction": 0.7749618282134902,
+          "nyquist_energy_fraction": 1.902299916959681e-18,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6855746645044885
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6427782757242662
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.56162936385753
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4657149396622604
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3637638933725322
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper3_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 61.34939694873376,
+          "first_harmonic_RMS_fraction": 0.7749618282951959,
+          "nyquist_energy_fraction": 4.359447136914312e-26,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.685574664577275
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6427782757772893
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5616293638589365
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.465714939600178
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3637638932646876
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 8.170564225196131e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC34",
+      "internal_label": "LPC_single_upper4",
+      "J_EE_core": 1.580897229627566,
+      "T_ms": 145.66741011786976,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper4_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 61.54805103916976,
+          "first_harmonic_RMS_fraction": 0.7499798541260351,
+          "nyquist_energy_fraction": 3.2438037070821058e-18,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.662659632496139
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.628589819877841
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5616667728021243
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4796421625980054
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3904785941194098
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper4_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 61.5480510476114,
+          "first_harmonic_RMS_fraction": 0.7499798540441092,
+          "nyquist_energy_fraction": 1.888960458370413e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6626596324408052
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6285898198191633
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.561666772776522
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.479642162640873
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3904785942291418
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 8.192591050004694e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC35",
+      "internal_label": "LPC_A_global_turn1",
+      "J_EE_core": 1.0387480258884794,
+      "T_ms": 122.57781285229113,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_global_turn1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 33.67128027922582,
+          "first_harmonic_RMS_fraction": 0.7272291573611639,
+          "nyquist_energy_fraction": 7.3241620569734595e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.642087343551049
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.615376296894384
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5616863293894911
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.495475632875623
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4185849528910752
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_global_turn1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 33.67128027988513,
+          "first_harmonic_RMS_fraction": 0.7272291573754553,
+          "nyquist_energy_fraction": 3.354621266961755e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6420873435621317
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.615376296902558
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5616863293926184
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4954756328727614
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4185849528767527
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.429145690678979e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC40",
+      "internal_label": "LPC_B_burst_turn1",
+      "J_EE_core": 0.9476496937693254,
+      "T_ms": 303.4221561823126,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn1_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.443461535109627,
+          "first_harmonic_RMS_fraction": 0.5865538977783097,
+          "nyquist_energy_fraction": 2.1095680817487428e-24,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4949616511420987
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.560837940415411
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6225527266383013
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.593339412526907
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5284495548930623
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.4434615351155481,
+          "first_harmonic_RMS_fraction": 0.5865538977859031,
+          "nyquist_energy_fraction": 1.9277752877046877e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.4949616511543222
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5608379404149169
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.6225527266335062
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5933394125211504
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.5284495548870767
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 7.593370376923758e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC41",
+      "internal_label": "LPC_B_burst_turn2",
+      "J_EE_core": 0.9475846096212432,
+      "T_ms": 303.4683135402992,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn2_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.5712832953281654,
+          "first_harmonic_RMS_fraction": 0.6229276950532175,
+          "nyquist_energy_fraction": 8.792237820813365e-22,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5578647293026513
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5651509441838674
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.57144858537739
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5290591714742827
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4743646792472926
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn2_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.5712833526928633,
+          "first_harmonic_RMS_fraction": 0.6229276920078741,
+          "nyquist_energy_fraction": 2.046629970811296e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5578647339793779
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.565150941317439
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5714485714529975
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5290591589604674
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4743646745550052
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.0453434218813413e-09,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC56",
+      "internal_label": "LPC_A_connection1",
+      "J_EE_core": 1.068621108088585,
+      "T_ms": 121.1754355865831,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 16.66776658418781,
+          "first_harmonic_RMS_fraction": 0.7179156188798189,
+          "nyquist_energy_fraction": 1.729400268739096e-21,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6361409020958853
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6099459836425067
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5578452184114933
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4941004273172158
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4229685639606149
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 16.667766584755242,
+          "first_harmonic_RMS_fraction": 0.7179156188801193,
+          "nyquist_energy_fraction": 1.2356159722385222e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6361409020960898
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.609945983642667
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5578452184115874
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4941004273172682
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.422968563960564
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.0042635046356736e-13,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC57",
+      "internal_label": "LPC_A_connection2",
+      "J_EE_core": 1.0669734719268986,
+      "T_ms": 122.7072774188867,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection2_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 8.193997545188642,
+          "first_harmonic_RMS_fraction": 0.7390941341340916,
+          "nyquist_energy_fraction": 2.904625283081722e-28,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.65260183661395
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6223990041817125
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5622475092300885
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4870991330571028
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.401969869118132
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection2_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 8.19399753202379,
+          "first_harmonic_RMS_fraction": 0.7390941342843588,
+          "nyquist_energy_fraction": 1.7476288665789904e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6526018367342503
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6223990042696914
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5622475092557488
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4870991330015404
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4019698689741766
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.5026713207078046e-10,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC58",
+      "internal_label": "LPC_B_connection1",
+      "J_EE_core": 0.9837713307806173,
+      "T_ms": 377.3847429639683,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection1_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.4532911215951237,
+          "first_harmonic_RMS_fraction": 0.6118120062005314,
+          "nyquist_energy_fraction": 9.691775213827814e-22,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6256171679581048
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5113112761143705
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4700250647098938
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4776389556447984
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4770486289124996
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.45329112157656054,
+          "first_harmonic_RMS_fraction": 0.6118120062563616,
+          "nyquist_energy_fraction": 2.5528154489579887e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6256171679948126
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5113112761280163
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.4700250647615503
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4776389557014866
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.477048628936015
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 5.5830118306232634e-11,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC59",
+      "internal_label": "LPC_B_connection2",
+      "J_EE_core": 0.9688715736052305,
+      "T_ms": 323.29572632231583,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection2_N256.npz",
+          "N": 256,
+          "temporal_RMS_Hz": 0.5766405537005497,
+          "first_harmonic_RMS_fraction": 0.6033137805027634,
+          "nyquist_energy_fraction": 2.323114451173603e-19,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.588338003248505
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.530542669724828
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5163261920753954
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5071411550942775
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4875171975690133
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection2_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 0.5766405538259096,
+          "first_harmonic_RMS_fraction": 0.603313780492824,
+          "nyquist_energy_fraction": 2.352281779387715e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.5883380032089467
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.5305426697362192
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5163261921129294
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.5071411551309206
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.4875171975915191
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.939382650259176e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC60",
+      "internal_label": "LPC_A_next1",
+      "J_EE_core": 1.1041306472658425,
+      "T_ms": 119.5271138929016,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_next1_N512.npz",
+          "N": 512,
+          "temporal_RMS_Hz": 13.487837045837333,
+          "first_harmonic_RMS_fraction": 0.7450185229331729,
+          "nyquist_energy_fraction": 8.427670602176197e-23,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6572531495831673
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6254779507315067
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5632874242294246
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4869140802138114
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3996823324750631
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_next1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 13.487837045800271,
+          "first_harmonic_RMS_fraction": 0.7450185229346225,
+          "nyquist_energy_fraction": 9.98810629391578e-34,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6572531495844545
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6254779507323032
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5632874242294852
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4869140802131358
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3996823324736356
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 1.4495071809506044e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC61",
+      "internal_label": "LPC_A_stage4_turn1",
+      "J_EE_core": 1.2115992495880454,
+      "T_ms": 106.98543512379396,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn1_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 44.137559349967546,
+          "first_harmonic_RMS_fraction": 0.764947531739937,
+          "nyquist_energy_fraction": 2.9808220856509874e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6752563644326686
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6363448737088053
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5642022319293498
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4785187988614172
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.379505382056303
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn1_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 44.137559352059064,
+          "first_harmonic_RMS_fraction": 0.7649475317365387,
+          "nyquist_energy_fraction": 8.801199108359834e-34,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.67525636442899
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.636344873707156
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.564202231930137
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.478518798864006
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.3795053820601557
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 3.3982816560751417e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC62",
+      "internal_label": "LPC_A_stage4_turn2",
+      "J_EE_core": 1.198713442456352,
+      "T_ms": 106.26514784898256,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 41.83721170639652,
+          "first_harmonic_RMS_fraction": 0.7628008893987543,
+          "nyquist_energy_fraction": 1.0869691275553538e-27,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6735069392637454
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6349966280630839
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5637166763092238
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4796423559628855
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.382357815638043
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 41.83721170632085,
+          "first_harmonic_RMS_fraction": 0.7628008893988476,
+          "nyquist_energy_fraction": 9.959627931973083e-34,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.6735069392638457
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6349966280631298
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.563716676309201
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.4796423559628133
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.382357815637941
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 9.325873406851315e-14,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    },
+    {
+      "label": "LPC63",
+      "internal_label": "LPC_A_stage4_turn3",
+      "J_EE_core": 1.3068816112324584,
+      "T_ms": 79.34223478072948,
+      "checks": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn3_N1024.npz",
+          "N": 1024,
+          "temporal_RMS_Hz": 24.952264945282877,
+          "first_harmonic_RMS_fraction": 0.862072787040534,
+          "nyquist_energy_fraction": 5.8809262187774186e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.790263582898835
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.684142581746741
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.5283624456669744
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.3801345673311276
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.2462664690538727
+            }
+          ]
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn3_N2048.npz",
+          "N": 2048,
+          "temporal_RMS_Hz": 24.952264944566558,
+          "first_harmonic_RMS_fraction": 0.8620727870453913,
+          "nyquist_energy_fraction": 4.335108768504883e-33,
+          "period_divisor_mismatches": [
+            {
+              "divisor": 2,
+              "relative_difference": 1.790263582905483
+            },
+            {
+              "divisor": 3,
+              "relative_difference": 1.6841425817487232
+            },
+            {
+              "divisor": 4,
+              "relative_difference": 1.528362445664225
+            },
+            {
+              "divisor": 5,
+              "relative_difference": 1.38013456732537
+            },
+            {
+              "divisor": 6,
+              "relative_difference": 1.24626646904655
+            }
+          ]
+        }
+      ],
+      "first_harmonic_mesh_drift": 4.85722573273506e-12,
+      "status": "PRIMITIVE_PERIOD_SUPPORTED"
+    }
+  ],
+  "dense_H2_pair_comparisons": [
+    {
+      "labels": [
+        "LPC14",
+        "LPC15"
+      ],
+      "J_difference": 3.089420582214064e-05,
+      "period_difference_ms": 0.07980275564983685,
+      "common_phase_shift_cycles": 0.9901220296343273,
+      "full_group_RMS_difference_Hz": 0.14761741147565838,
+      "relative_waveform_difference": 0.4052332849608435
+    },
+    {
+      "labels": [
+        "LPC14",
+        "LPC16"
+      ],
+      "J_difference": 1.6734938647733344e-05,
+      "period_difference_ms": 0.0041213604866356945,
+      "common_phase_shift_cycles": 0.9889076719902073,
+      "full_group_RMS_difference_Hz": 0.21719035042322535,
+      "relative_waveform_difference": 0.5962220735615145
+    },
+    {
+      "labels": [
+        "LPC14",
+        "LPC17"
+      ],
+      "J_difference": 3.2797514224802704e-05,
+      "period_difference_ms": 0.12909888486024101,
+      "common_phase_shift_cycles": 0.9926151804368298,
+      "full_group_RMS_difference_Hz": 0.2564040375012959,
+      "relative_waveform_difference": 0.7038698846917986
+    },
+    {
+      "labels": [
+        "LPC14",
+        "LPC18"
+      ],
+      "J_difference": 2.671999934700242e-05,
+      "period_difference_ms": 0.0822417349725697,
+      "common_phase_shift_cycles": 0.9946976999927805,
+      "full_group_RMS_difference_Hz": 0.29308502673917813,
+      "relative_waveform_difference": 0.8045650372208174
+    },
+    {
+      "labels": [
+        "LPC14",
+        "LPC19"
+      ],
+      "J_difference": 4.7952411196039435e-05,
+      "period_difference_ms": 0.11314071590555841,
+      "common_phase_shift_cycles": 0.9484671435588886,
+      "full_group_RMS_difference_Hz": 0.34281763294810397,
+      "relative_waveform_difference": 0.9410889552481314
+    },
+    {
+      "labels": [
+        "LPC15",
+        "LPC16"
+      ],
+      "J_difference": 4.7629144469873985e-05,
+      "period_difference_ms": 0.08392411613647255,
+      "common_phase_shift_cycles": 0.9983410100966503,
+      "full_group_RMS_difference_Hz": 0.19300151869786836,
+      "relative_waveform_difference": 0.4685531208187427
+    },
+    {
+      "labels": [
+        "LPC15",
+        "LPC17"
+      ],
+      "J_difference": 1.9033084026620628e-06,
+      "period_difference_ms": 0.04929612921040416,
+      "common_phase_shift_cycles": 0.001553521791797942,
+      "full_group_RMS_difference_Hz": 0.24875099710226564,
+      "relative_waveform_difference": 0.6038970925482561
+    },
+    {
+      "labels": [
+        "LPC15",
+        "LPC18"
+      ],
+      "J_difference": 5.761420516914306e-05,
+      "period_difference_ms": 0.0024389793227328482,
+      "common_phase_shift_cycles": 0.0041858555206720684,
+      "full_group_RMS_difference_Hz": 0.2691149513031521,
+      "relative_waveform_difference": 0.6533350159252843
+    },
+    {
+      "labels": [
+        "LPC15",
+        "LPC19"
+      ],
+      "J_difference": 1.7058205373898794e-05,
+      "period_difference_ms": 0.033337960255721555,
+      "common_phase_shift_cycles": 0.9643674485407804,
+      "full_group_RMS_difference_Hz": 0.3452603283910543,
+      "relative_waveform_difference": 0.8381944632040824
+    },
+    {
+      "labels": [
+        "LPC16",
+        "LPC17"
+      ],
+      "J_difference": 4.953245287253605e-05,
+      "period_difference_ms": 0.1332202453468767,
+      "common_phase_shift_cycles": -8.064276325443336e-05,
+      "full_group_RMS_difference_Hz": 0.08748214193811073,
+      "relative_waveform_difference": 0.20991128033068285
+    },
+    {
+      "labels": [
+        "LPC16",
+        "LPC18"
+      ],
+      "J_difference": 9.985060699269077e-06,
+      "period_difference_ms": 0.0863630954592054,
+      "common_phase_shift_cycles": 0.0001279444967128211,
+      "full_group_RMS_difference_Hz": 0.1552880144037789,
+      "relative_waveform_difference": 0.3726098287187264
+    },
+    {
+      "labels": [
+        "LPC16",
+        "LPC19"
+      ],
+      "J_difference": 6.468734984377278e-05,
+      "period_difference_ms": 0.1172620763921941,
+      "common_phase_shift_cycles": 0.9743190983212447,
+      "full_group_RMS_difference_Hz": 0.29004614154378366,
+      "relative_waveform_difference": 0.6959586902833548
+    },
+    {
+      "labels": [
+        "LPC17",
+        "LPC18"
+      ],
+      "J_difference": 5.9517513571805125e-05,
+      "period_difference_ms": 0.04685714988767131,
+      "common_phase_shift_cycles": -0.0005740700604419632,
+      "full_group_RMS_difference_Hz": 0.10589907803636928,
+      "relative_waveform_difference": 0.2519461794897489
+    },
+    {
+      "labels": [
+        "LPC17",
+        "LPC19"
+      ],
+      "J_difference": 1.5154896971236731e-05,
+      "period_difference_ms": 0.015958168954682606,
+      "common_phase_shift_cycles": 0.9746227355778644,
+      "full_group_RMS_difference_Hz": 0.30668111189732356,
+      "relative_waveform_difference": 0.7296299070485084
+    },
+    {
+      "labels": [
+        "LPC18",
+        "LPC19"
+      ],
+      "J_difference": 7.467241054304186e-05,
+      "period_difference_ms": 0.030898980932988707,
+      "common_phase_shift_cycles": 0.9791175120947191,
+      "full_group_RMS_difference_Hz": 0.31804650636699694,
+      "relative_waveform_difference": 0.7214892926985145
+    }
+  ],
+  "observable": "Neuron-weighted full 935-group rate field, including E and I groups; temporal RMS around each group mean.",
+  "criteria": {
+    "minimum_first_harmonic_RMS_fraction": 0.001,
+    "mesh_drift_safety_factor": 10,
+    "maximum_nyquist_energy_fraction": 1e-08
+  },
+  "scope": "Resolved first-harmonic content excludes simple repeated-period representations at these stored roots. It does not validate a fold, its adjacent stability, or an entire connecting branch. Pair distances compare different parameters and cannot establish or rule out a global branch connection."
+}

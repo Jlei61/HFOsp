@@ -1,0 +1,20 @@
+{
+  "status": "DEFINED_BEFORE_RUN",
+  "created_local": "2026-09-19T14:59:25.240982",
+  "question": "Does correcting the near-turn orbit on doubled nonlinear quadrature reduce its autonomy defect before further Floquet time refinement?",
+  "source": "periodic/native_T2644_G16875_M131072/point0000.npz",
+  "target": "periodic/native_T2644_G16875_M262144/point0000.npz",
+  "period_ms": 264.4,
+  "N": 16875,
+  "old_M": 131072,
+  "new_M": 262144,
+  "model": "Samefrozenv3/native spatialZ path; heldZ,dynamicM",
+  "reason": "Sameoldroot evaluated atnewM gives retainedF.00461953Hz,phaseJVP relative.0005929; correction required, time-step refinement alone does not address quadrature error",
+  "gates": {
+    "root_maxF_hz": 2e-08,
+    "max_D_difference": 1e-08,
+    "max_Z_difference": 1e-06,
+    "max_phase_aligned_rate_relative_L2_difference": 0.001
+  },
+  "next": "Compare source/target, then independently phase-gated monodromy. No stability inference from BVPagreement."
+}

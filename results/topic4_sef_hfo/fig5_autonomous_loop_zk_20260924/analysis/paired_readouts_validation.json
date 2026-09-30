@@ -1,0 +1,25 @@
+{
+  "status": "PASS_EXISTING_NATIVE_READOUT_CONSISTENCY",
+  "checked_completed_trajectories": [
+    "z0.75_k0.02_high",
+    "z0.75_k2_high",
+    "z0.75_k2_interictal"
+  ],
+  "observations": "400bin cell-weighted rate reconstructs the independently aggregated all-E rate;5000 contact samples and500 drift bins per last10s; existing event/rate classifications unchanged.",
+  "correction": "Drift bins are preceding20ms means recorded at right endpoints. The former >= horizon-10 selection included one preceding bin (501 bins); corrected to > horizon-10 and <=horizon (500 bins). No simulation or event change.",
+  "old_new_mean_dZ": {
+    "z0.75_k0.02_high": [
+      -0.08496515500249498,
+      -0.08493233187499999
+    ],
+    "z0.75_k2_high": [
+      0.05000000000000044,
+      0.05000000000000044
+    ],
+    "z0.75_k2_interictal": [
+      0.05000000000000044,
+      0.05000000000000044
+    ]
+  },
+  "scope": "Descriptive paired tail readouts, no equivalence or attractor test; full spatial event sequences remain required for propagation interpretation."
+}

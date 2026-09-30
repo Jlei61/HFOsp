@@ -1,0 +1,10 @@
+{
+  "status": "REGISTERED_BEFORE_CURRENT_REPLAY",
+  "created_epoch": 1790551231.621439,
+  "question": "Does fixing native M to its mean account for remaining local response errors, or must temporal/non-Gaussian current structure be retained?",
+  "design": "Replay39targets with all recorded native0.1ms IE/II/M and global s, initialV/ref, heldZ/K. Original membrane arithmetic/order. First verify every selected native spike and pre-stepV, then only replace M(t) with its observed2smean. No source response to changed targetspikes, no noise alteration.",
+  "limits": "Conditional local readout at unchanged recorded inputs; counterfactual M is supplied rather than internally updated. Not a coupled-network causal lesion or autonomous closure.",
+  "global_conversion": "Recorded slow.global_state is s; physical raw conductance is30*s.",
+  "producer_sha256": "e46e09dac5fc827390190f8002bab30b1fe992ae520ddd8fa15a9fe91f6054a2",
+  "formal_bifurcation_allowed": false
+}

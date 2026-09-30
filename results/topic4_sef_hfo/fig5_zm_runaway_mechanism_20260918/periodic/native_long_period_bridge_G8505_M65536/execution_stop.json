@@ -1,0 +1,8 @@
+{
+  "status": "STOPPED_AFTER_ACCEPTED_SOURCE_REFINEMENT",
+  "pid": 3202816,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/period_path.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/galerkin_near_N2049_M8192.npz --family native --N 8505 --M 65536 --periods 264.5528502512292 264.45 264.35 --device 1 --large-quadrature --gain-cache-gb 3 --host-krylov --eliminate-period --normalize-parameter --linear-tol-floor .0001 --restart 60 --harmonic-block 129 --fft-cache-plans 8 --log-linear-progress --check-predictors --label native_long_period_bridge_G8505_M65536 ",
+  "at": "2026-09-19T12:37:09.743781",
+  "reason": "One accepted long-period root provides independent near-critical-side stability test. Further prescribedTdescent is ill-conditioned and does not yet identify which side of the nonmonotone period branch it follows; prioritize Floquet of accepted root while extending the independently known other branch fromT264.286.",
+  "discarded_scientific_results": 0
+}

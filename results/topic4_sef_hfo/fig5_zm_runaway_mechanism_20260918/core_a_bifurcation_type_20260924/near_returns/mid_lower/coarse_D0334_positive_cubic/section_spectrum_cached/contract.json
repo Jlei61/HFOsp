@@ -1,0 +1,10 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_D0334_positive_cubic",
+  "maximum_Krylov": 32,
+  "dt_ms": 0.05,
+  "cached_derivative": true,
+  "question": "Are there near-unit return eigenmodes, beyond the already found large negative unstable direction?",
+  "method": "Two-pass Arnoldi of the full original delayed-state section derivative, including return time. Independently apply the actual derivative to at most four converged Ritz vectors. No reduced physical dynamics or low-dimensional fitted map.",
+  "scope": "Candidate or verified numerical eigenpairs only. No complete Floquet spectrum, stability, crossing or bifurcation label without additional checks.",
+  "model_promoted": false
+}

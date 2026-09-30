@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "period_ms": 32.822865979962614,
+  "dt_ms": 0.05,
+  "cache_bytes": 805792064,
+  "cache_construction_seconds": 6.465067625045776,
+  "nominal_terminal_bitwise": true,
+  "rows": [
+    {
+      "direction": 0,
+      "relative_full_state_error": 1.5616796839437567e-14,
+      "relative_return_time_error": 2.7755575615628914e-16,
+      "original_seconds": 4.313068151473999,
+      "cached_seconds": 0.5709173679351807,
+      "speedup": 7.554627681187806
+    },
+    {
+      "direction": 1,
+      "relative_full_state_error": 1.1925675025777712e-14,
+      "relative_return_time_error": 1.1102230246251565e-15,
+      "original_seconds": 3.9705822467803955,
+      "cached_seconds": 0.5594596862792969,
+      "speedup": 7.09717311927669
+    },
+    {
+      "direction": 2,
+      "relative_full_state_error": 7.582794967747221e-15,
+      "relative_return_time_error": 1.8735013540549517e-16,
+      "original_seconds": 4.203993558883667,
+      "cached_seconds": 0.6132602691650391,
+      "speedup": 6.855153953813856
+    }
+  ],
+  "scope": "Derivative evaluation implementation only. No new orbit, stability or bifurcation evidence.",
+  "model_promoted": false
+}

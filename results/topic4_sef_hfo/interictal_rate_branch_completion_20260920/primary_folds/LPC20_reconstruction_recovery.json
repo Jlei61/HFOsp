@@ -1,0 +1,26 @@
+{
+  "timestamp": 1789879608.0472379,
+  "failed_child_pid": 521657,
+  "failed_child_absent": true,
+  "failure_log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/LPC_double_low_full_validation_1789877641354157899.log",
+  "cause": "The second Periodic object used for state reconstruction allocated an unbounded repeated CSR-index bank despite streamed harmonic actions.",
+  "fix": "Match its harmonic index capacity to the independently verified bounded Monodromy implementation; all harmonics retained.",
+  "reused_mesh": 8192,
+  "reused_requested_steps_ms": [
+    0.05,
+    0.025
+  ],
+  "remaining_requested_step_ms": 0.0125,
+  "validation_thresholds_changed": false,
+  "new_worker": 524949,
+  "recovery_status": "VALIDATION_COMPLETED",
+  "validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_low_validation.json",
+  "status": "VALIDATED_CYCLE_FOLD",
+  "root_N": 8192,
+  "bounded_third_reconstruction": true,
+  "mode_defects": [
+    0.0010507860775676552,
+    0.00026771885658980106,
+    6.877168352316673e-05
+  ]
+}

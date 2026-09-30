@@ -1,0 +1,350 @@
+{
+  "status": "PARTIAL_READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "dynamic_reference",
+      "initial_D": 0.08811251143364052,
+      "high_onset_ms": 10839.0,
+      "complete_events": [],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 3500,
+          "peak_hz": 288.840625,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "quiet_intervals_ms": [],
+      "core_order": {
+        "eligible": 0,
+        "A_first": 0,
+        "B_first": 0,
+        "ties": 0
+      },
+      "tail_global_hz": 263.034125,
+      "tail_quiet_fraction": 0.0,
+      "tail_persistent_fraction": 0.5839375,
+      "regions": {
+        "Core A": {
+          "final_Z": 0.37949125646596255,
+          "final_m_mV": 0.22002081001864188
+        },
+        "Core B": {
+          "final_Z": 0.38287624159387046,
+          "final_m_mV": 0.2187950954068708
+        },
+        "Surround E": {
+          "final_Z": 0.6567642240923873,
+          "final_m_mV": 0.1113814007666756
+        }
+      },
+      "Z_held": false,
+      "M_dynamic": true,
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 5.1420028967186227e-05,
+          "global_from_field": 1.2336968779891322e-06,
+          "global_from_groups": 8.86440432168456e-07
+        },
+        "D_float32_error": 1.2035419327816044e-09,
+        "count_float32_error": 1.0986328113915533e-06,
+        "near_quiet_threshold_bins": 0,
+        "complete_event_roundoff_agreement": true
+      }
+    },
+    {
+      "label": "own_Z9000_held",
+      "initial_D": 0.08811251143364052,
+      "high_onset_ms": null,
+      "complete_events": [
+        {
+          "start_ms": 12246.0,
+          "duration_ms": 89,
+          "peak_hz": 60.3625,
+          "core_halfpeak_ms": [
+            12291.0,
+            12252.0
+          ],
+          "lag_B_minus_A_ms": -39.0
+        }
+      ],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 3144,
+          "peak_hz": 68.78125,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": false
+        },
+        {
+          "start_ms": 12246.0,
+          "duration_ms": 89,
+          "peak_hz": 60.3625,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 12477.0,
+          "duration_ms": 24,
+          "peak_hz": 48.75,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "quiet_intervals_ms": [
+        [
+          12145.0,
+          12246.0
+        ],
+        [
+          12335.0,
+          12477.0
+        ]
+      ],
+      "core_order": {
+        "eligible": 1,
+        "A_first": 0,
+        "B_first": 1,
+        "ties": 0
+      },
+      "tail_global_hz": 28.563125,
+      "tail_quiet_fraction": 0.243,
+      "tail_persistent_fraction": 0.0,
+      "regions": {
+        "Core A": {
+          "final_Z": 0.7642015444821326,
+          "final_m_mV": 0.0927155629947253
+        },
+        "Core B": {
+          "final_Z": 0.7598164695819827,
+          "final_m_mV": 0.050385046578498224
+        },
+        "Surround E": {
+          "final_Z": 0.9194673640490831,
+          "final_m_mV": 0.012232040818704009
+        }
+      },
+      "Z_held": true,
+      "M_dynamic": true,
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 4.0938214510788384e-05,
+          "global_from_field": 4.7537685077259084e-07,
+          "global_from_groups": 4.016160701780791e-07
+        },
+        "D_float32_error": 4.861718805315718e-10,
+        "count_float32_error": 8.544921890063506e-07,
+        "near_quiet_threshold_bins": 0,
+        "complete_event_roundoff_agreement": true
+      }
+    },
+    {
+      "label": "native_Z9000_held",
+      "initial_D": 0.2164660210396102,
+      "high_onset_ms": null,
+      "complete_events": [
+        {
+          "start_ms": 9888.0,
+          "duration_ms": 118,
+          "peak_hz": 104.1,
+          "core_halfpeak_ms": [
+            9938.0,
+            9892.0
+          ],
+          "lag_B_minus_A_ms": -46.0
+        },
+        {
+          "start_ms": 10142.0,
+          "duration_ms": 654,
+          "peak_hz": 113.578125,
+          "core_halfpeak_ms": [
+            10191.0,
+            10146.0
+          ],
+          "lag_B_minus_A_ms": -45.0
+        },
+        {
+          "start_ms": 10914.0,
+          "duration_ms": 96,
+          "peak_hz": 107.821875,
+          "core_halfpeak_ms": [
+            10958.0,
+            10917.0
+          ],
+          "lag_B_minus_A_ms": -41.0
+        }
+      ],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 779,
+          "peak_hz": 94.034375,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": false
+        },
+        {
+          "start_ms": 9888.0,
+          "duration_ms": 118,
+          "peak_hz": 104.1,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10142.0,
+          "duration_ms": 654,
+          "peak_hz": 113.578125,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10914.0,
+          "duration_ms": 96,
+          "peak_hz": 107.821875,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11100.0,
+          "duration_ms": 1401,
+          "peak_hz": 134.978125,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "quiet_intervals_ms": [
+        [
+          9780.0,
+          9888.0
+        ],
+        [
+          10006.0,
+          10142.0
+        ],
+        [
+          10796.0,
+          10914.0
+        ],
+        [
+          11010.0,
+          11100.0
+        ]
+      ],
+      "core_order": {
+        "eligible": 3,
+        "A_first": 0,
+        "B_first": 3,
+        "ties": 0
+      },
+      "tail_global_hz": 54.85221875,
+      "tail_quiet_fraction": 0.0,
+      "tail_persistent_fraction": 0.063375,
+      "regions": {
+        "Core A": {
+          "final_Z": 0.7442783016899222,
+          "final_m_mV": 0.12349212288718164
+        },
+        "Core B": {
+          "final_Z": 0.7399002946818449,
+          "final_m_mV": 0.07064091286067459
+        },
+        "Surround E": {
+          "final_Z": 0.78563164355758,
+          "final_m_mV": 0.021054413824745672
+        }
+      },
+      "Z_held": true,
+      "M_dynamic": true,
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 4.6892863906577986e-05,
+          "global_from_field": 6.579458755595624e-07,
+          "global_from_groups": 4.546642173863802e-07
+        },
+        "D_float32_error": 2.22673435246179e-10,
+        "count_float32_error": 9.76562500198952e-07,
+        "near_quiet_threshold_bins": 0,
+        "complete_event_roundoff_agreement": true
+      }
+    },
+    {
+      "label": "native_Z9420_held",
+      "initial_D": 0.22884476056519176,
+      "high_onset_ms": null,
+      "complete_events": [],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 403,
+          "peak_hz": 115.721875,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": false
+        },
+        {
+          "start_ms": 9538.0,
+          "duration_ms": 2963,
+          "peak_hz": 178.384375,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "quiet_intervals_ms": [
+        [
+          9404.0,
+          9538.0
+        ]
+      ],
+      "core_order": {
+        "eligible": 0,
+        "A_first": 0,
+        "B_first": 0,
+        "ties": 0
+      },
+      "tail_global_hz": 87.6083125,
+      "tail_quiet_fraction": 0.0,
+      "tail_persistent_fraction": 0.14796875,
+      "regions": {
+        "Core A": {
+          "final_Z": 0.724878617797037,
+          "final_m_mV": 0.14083537215302733
+        },
+        "Core B": {
+          "final_Z": 0.716325335451058,
+          "final_m_mV": 0.17251784924142838
+        },
+        "Surround E": {
+          "final_Z": 0.7737156100713026,
+          "final_m_mV": 0.036104568058399115
+        }
+      },
+      "Z_held": true,
+      "M_dynamic": true,
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 5.177701461889228e-05,
+          "global_from_field": 8.724331905796134e-07,
+          "global_from_groups": 6.294251306826482e-07
+        },
+        "D_float32_error": 3.856716057626386e-10,
+        "count_float32_error": 1.0986328113915533e-06,
+        "near_quiet_threshold_bins": 0,
+        "complete_event_roundoff_agreement": true
+      }
+    }
+  ],
+  "statistical_unit": "One fixed rate-model9s history, one common forcing and innovation realization, five prescribed interventions.",
+  "interpretation": "Finite-time conditional comparison, not bifurcation or basin certification; native late clamp histories differ. No parameter fitting or acceptance waiver.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

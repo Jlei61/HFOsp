@@ -1,0 +1,93 @@
+{
+  "condition": "rotated",
+  "name": "z0.25_k0.02_interictal",
+  "handoff": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/rotated/z0.25_k0.02_interictal/1790286690768687332/handoff.json",
+  "checkpoint_start_step": 540000,
+  "status": "PASS_FIRST_RESUMED_BLOCK_CONTINUITY",
+  "first_committed_end_step": 560000,
+  "streams": {
+    "chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/chunks/0000540000_0000560000.npz",
+      "sha256": "c05a3221a2fbed8ae2ef8785fc94b6b4c994ae248044680a7d9cf6acba35cbae",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms",
+        "field_time_ms",
+        "slow_time_ms",
+        "lfp_time_ms"
+      ]
+    },
+    "actual_current_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/actual_current_chunks/0000540000_0000560000.npz",
+      "sha256": "e9cefd4c97038a14e81c96f1e53a24ede416c11de849f5bafc0c093fcd47cee7",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "conditional_drift_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/conditional_drift_chunks/0000540200_0000560000.npz",
+      "sha256": "509263cf76cb6719b84083f538cf0e935bb29a57d3e0ea7edf499132926911ec",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "feedback_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/feedback_chunks/0000540000_0000560000.npz",
+      "sha256": "23fe0041648fd6fff4becda921b6494d658db31ef9b98e3bef0fbf18f9284328",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "global_response_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/global_response_chunks/0000540000_0000560000.npz",
+      "sha256": "01dd3c24c751f164480a0ed964ac557d6105f7243d1b05524b65ea2205acfb7a",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "intrinsic_adaptation_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/intrinsic_adaptation_chunks/0000540000_0000560000.npz",
+      "sha256": "0d14b02202470477afbc3d3d52f668203e7aee7ad3626736dc5302d7fd7567cf",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "mechanism_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/mechanism_chunks/0000540000_0000560000.npz",
+      "sha256": "41a8504c4f40d4d5e2707f68140c192c3ceaa05107bedfc3049b89ec9f590a08",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    },
+    "regional_chunks": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.25_k0.02_interictal/regional_chunks/0000540000_0000560000.npz",
+      "sha256": "5d7fe360aa36a9b19aa970a2522a48755b3b57c71d7149f79c96467d88cf99de",
+      "filename_matches_reference_stream": true,
+      "all_array_shapes_match": true,
+      "timestamp_arrays_exact": [
+        "time_ms"
+      ]
+    }
+  },
+  "saved_checkpoint_backup_intact": true,
+  "future_input_records_exact_to_original_graph": true,
+  "held_Z_summary_columns0_to7_exact": true,
+  "held_K_mean_exact": true,
+  "native_spike_field_conservation": true,
+  "native_sample_times_exact": true,
+  "stream_definition": "Eight clamped-branch streams; conditional drift replaces autonomous Zbudget.",
+  "scope": "First resumed block only. Whole30s analysis remains required; different graphs need not have matching spikes."
+}

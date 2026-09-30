@@ -1,0 +1,22 @@
+{
+  "created_local": "2026-09-20T00:39:26.357876+08:00",
+  "question": "Does selected-cycle output mismatch primarily occur outside the calibrated response-table input domain, or inside it despite temporal history effects?",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "prediction_source": "native_cycle_waveform_response/history_weights_response.npz",
+  "reference_source": "native_cycle_waveform_response/response.npz",
+  "variants": [
+    "frozen_response",
+    "all_weights_at_filtered_mean_and_variance"
+  ],
+  "support": "Response lookup workpoint: original instantaneous mu/vE/vI or existing history mus/vEv/vIv; x within recorded calibration range and normalized sigma within reflected evaluator range [0,max]. This is not the separate static-transfer domain.",
+  "sampling": "Use the same actual local LIF clock and 128 phase bins as the saved response; reconstruct linear input filters analytically on the saved Fourier grid, sample exactly as the assay.",
+  "observable": "Fraction of squared binned prediction error in bins wholly inside, wholly outside, or mixing response-table domains; also proportional allocation by outside-time fraction, explicitly descriptive.",
+  "statistical_unit": "One deterministic periodic waveform per previously selected local population. MC paths were already used; not a new held-out validation.",
+  "scope": "Read-only error localization, no fitting, model edits, new simulations, acceptance changes or bifurcation certification. In-domain status alone never means response validation.",
+  "voltage_corrected_prediction_source": "nonlinear_mean_readout/response.npz",
+  "voltage_corrected_variants": [
+    "input_mix_instantaneous",
+    "input_mix_history"
+  ],
+  "pre_execution_addition": "Include the already computed voltage-corrected predictions, so old-model error localization is not silently used as evidence for the corrected candidate. No results of this localization have been computed."
+}

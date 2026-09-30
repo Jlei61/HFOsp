@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-19T17:42:38.284965",
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "samples": [
+    65536,
+    131072
+  ],
+  "question": "Does the native-Z-path candidate and its local family deformation rely on operating inputs beyond the independently calibrated response domain?",
+  "observable": [
+    "E-cell-time support",
+    "E-rate-mass support",
+    "Squared phase-removed BVP family-deformation support"
+  ],
+  "scope": "Descriptive domain audit; no model changes, no Floquet-mode or validity inference from coverage alone. Prior affine-path coverage is not automatically inherited."
+}

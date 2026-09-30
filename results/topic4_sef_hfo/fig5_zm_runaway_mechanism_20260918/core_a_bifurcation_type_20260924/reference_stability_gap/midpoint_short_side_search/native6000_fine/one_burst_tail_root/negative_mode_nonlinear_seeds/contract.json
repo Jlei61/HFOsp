@@ -1,0 +1,15 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root",
+  "mode_source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root/section_spectrum_segmented/mode00.npz",
+  "dt_ms": 0.025,
+  "amplitude_in_saved_invertible_coordinates": 0.0001,
+  "numerical_method": "exponential_midpoint",
+  "question": "Does the verified negative numerical mode grow by alternating sign in the original nonlinear return, and does it nominate a nontrivial doubled-period state?",
+  "method": "Use the original cubic full-state Poincare map with the exact saved spectrum coordinates and phase plane. Test both signs and half-amplitudes against the full verified eigenpair. Then follow both signed initial perturbations for a bounded number of returns. No scalar-map fit, physical-state clipping, parameter change, M clamp, or model change.",
+  "number_of_returns_each_sign": 0,
+  "halfwidth_ms": 20.0,
+  "acceptance": "Initial physical states must be admissible without any retraction. Both signed half-amplitude nonlinear derivative errors must be below1%. Every subsequent input remains admissible. One-/two-return full-state residuals only nominate roots for subsequent correction; they do not certify them.",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "scope": "Numerical return map only, phase and mesh qualification pending. Alternating growth does not itself establish a nonlinear criticality or onset mechanism.",
+  "model_promoted": false
+}

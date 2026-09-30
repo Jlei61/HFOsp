@@ -1,0 +1,58 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/closure_network_sensitivity/independent_comparison.json",
+  "snapshots": [
+    {
+      "label": "native",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "sample_count": 50,
+      "sample_times_range": [
+        9845.5,
+        9894.5
+      ]
+    },
+    {
+      "label": "frozen",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "sample_count": 50,
+      "sample_times_range": [
+        9845.0,
+        9894.0
+      ]
+    },
+    {
+      "label": "units",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "sample_count": 50,
+      "sample_times_range": [
+        9845.0,
+        9894.0
+      ]
+    },
+    {
+      "label": "units_history",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "sample_count": 50,
+      "sample_times_range": [
+        9845.0,
+        9894.0
+      ]
+    }
+  ],
+  "resource": "E-cell count weighted D, measured native checkpoints shown as separate dots without interpolation",
+  "rate_conditions": "All Z/M dynamic; common deterministic meaninput and .05ms step. Native reference has its original stochastic input.",
+  "scope": "Closure sensitivity diagnostic, no accepted replacement or bifurcation point.",
+  "human_visual_acceptance": "PENDING",
+  "agent_PNG_PDF_check": "PASS: corrected PNG and same-state PDF visually inspected; common colorbar label fully visible."
+}

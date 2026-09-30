@@ -1,0 +1,19 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/below_high_A/periodic_fast_newton/hookstep_source.npz",
+  "period_seed_ms": 34.02173379972669,
+  "dt_ms": 0.05,
+  "source_dt_ms": 0.05,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "section": "flow",
+  "interpolation": "cubic",
+  "method": "Full-state Newton-GMRES hookstep. Actual update norm is bounded, including any right preconditioning. Nonnegative proposals use an explicitly recorded retraction; the predicted residual is recomputed from the actual retracted step with the full variational derivative. Only an actual residual decrease with adequate prediction agreement is accepted.",
+  "reference": "https://arxiv.org/pdf/1207.4682 section3.3; positivity and physical M preconditioning are explicit solver additions.",
+  "M_right_precondition": true,
+  "initial_radius_fraction": 0.02,
+  "maximum_iterations": 10,
+  "Krylov_per_iteration": 24,
+  "maximum_trial_returns": 5,
+  "closure_gate": "combined<1e-7 and every block<1e-6; nontrivial amplitude, independent phase/mesh, stability and bifurcation checks remain separate.",
+  "model_promoted": false
+}

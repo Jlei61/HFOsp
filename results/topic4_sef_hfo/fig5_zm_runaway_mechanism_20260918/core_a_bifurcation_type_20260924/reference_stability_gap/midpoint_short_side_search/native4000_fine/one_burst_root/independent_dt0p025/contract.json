@@ -1,0 +1,15 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root/latest_state.npz",
+  "source_dt_ms": 0.025,
+  "dt_ms": 0.025,
+  "numerical_method": "exponential_midpoint",
+  "seed_period_ms": 233.24589150399794,
+  "phases": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "method": "Existing core_a_periodic_validate procedure. Generate each phase by original integer-step flow, then find its positively oriented full-state Poincare return with the existing cubic actual-step interpolant. Report return-period drift as well as whole-state closure. This is distinct from an additional fixed-T interpolation diagnostic.",
+  "acceptance": "Historical independent-phase gates: combined<1e-6 and each physical block<1e-5. Root-correction tolerances and neutral/stability gates are unchanged. Uncorrected refined-mesh returns are diagnostics, not absence of a cycle.",
+  "model_promoted": false
+}

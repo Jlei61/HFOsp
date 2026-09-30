@@ -1,0 +1,129 @@
+{
+  "epoch": 1790286294.1758661,
+  "manager_pid": 3282780,
+  "active": [
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high",
+      "pid": 3209719,
+      "time_s": 29.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0",
+      "create_time": 1790283352.37,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_cuda_override.py",
+        "worker",
+        "--condition",
+        "rotated",
+        "--name",
+        "z0.25_k0.02_high",
+        "--device",
+        "0"
+      ]
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high",
+      "pid": 3265375,
+      "time_s": 20.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0",
+      "create_time": 1790284676.74,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_cuda_override.py",
+        "worker",
+        "--condition",
+        "isotropic",
+        "--name",
+        "z0.25_k0.02_high",
+        "--device",
+        "0"
+      ]
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3218016,
+      "time_s": 54.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu",
+      "create_time": 1790283539.8,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+        "worker",
+        "rotated",
+        "z0.25_k0.02_interictal"
+      ]
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3238782,
+      "time_s": 53.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu",
+      "create_time": 1790284040.85,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+        "worker",
+        "isotropic",
+        "z0.25_k0.02_interictal"
+      ]
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high",
+      "pid": 3238783,
+      "time_s": 27.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu",
+      "create_time": 1790284040.85,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+        "worker",
+        "rotated",
+        "z0.95_k0.02_high"
+      ]
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_high",
+      "pid": 3265376,
+      "time_s": 28.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu",
+      "create_time": 1790284676.75,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+        "worker",
+        "isotropic",
+        "z0.95_k0.02_high"
+      ]
+    }
+  ],
+  "manager_sha256": "be648e82554cf47219997ed8d8199af53ac5704c164dee783a063c1584647be9",
+  "job_hashes": {
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_high.json": "a259108869ae5ca18d3fdd8faccf80c7fab7ce8eed9be446ff13d9945561fd38",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.25_k0.02_interictal.json": "b4892fa240c52fe078a6cefcf01707876e410614c115b2cf4b375d446a9177bc",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_high.json": "485bf3a75035146a48de945b21b76031321460b965ad9d013b4b236dde88b803",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k2_interictal.json": "3554269ecc32f2a0b415a9e7807e43cbd15fcc3b0094a62cd8546197b30a516e",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_high.json": "5c87643795a72e781a991bc3fa8207c84c6b5bc41e08a6b3dade0c0db3eddb53",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.75_k8_interictal.json": "248f55e80914f6721a5e81c99c7252815366268f595af68831d9245bf54b2215",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_high.json": "3f618571a289661be4ea0680fedf3bb67e07f9cca3a82de6723b35c839d74f46",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/jobs/z0.95_k0.02_interictal.json": "1ce3f443ac9b6b38452ef84340a33e79b5beb8bb04cebb84b0f9a5e1412185ac",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_high.json": "ad61b6c85f54443c502ce9949d99ff5678328e508da30dc759ca0fb50ca63d65",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.25_k0.02_interictal.json": "48293725a65c6d2c75a4de45392b52de8aa79809187744c462bd05d939c71a25",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_high.json": "8fd8467a3764d5db73a10ff40d50180a4c9d20d51d3e15b26d6a0b2db1a20917",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k2_interictal.json": "b01a23b91cc822054dafdfd169add46bc8581c39d7f0577cdb48bed0a699cda0",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_high.json": "018a6052035da196a3c56bb6e4be1423afa5dda1a7ad22f50b9dc70fb905d9ce",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.75_k8_interictal.json": "9c232fdee464a54efae48c415dddbb95eec9ee5433cb956eb67c0492c53c0a7e",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_high.json": "8be2a4793464ff36e2221a9c7d725d0fbfc5f90545e66a2c8479425a9125d6e2",
+    "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/jobs/z0.95_k0.02_interictal.json": "7c11a765bd224f718b9861b0aa54d5e52759c1d7a29f1931988d350cf833c6c7"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native_Z9000_held",
+      "D": 0.2164660210396102,
+      "high_onset_ms": null,
+      "quiet_intervals_ms": [
+        [
+          9866.0,
+          10048.0
+        ],
+        [
+          10165.0,
+          10328.0
+        ],
+        [
+          10450.0,
+          10587.0
+        ],
+        [
+          11492.0,
+          11608.0
+        ],
+        [
+          11712.0,
+          11895.0
+        ],
+        [
+          12014.0,
+          12148.0
+        ]
+      ],
+      "complete_events": [
+        {
+          "start_ms": 10048.0,
+          "duration_ms": 117,
+          "peak_hz": 122.40921200013175,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10328.0,
+          "duration_ms": 122,
+          "peak_hz": 139.475893767253,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10587.0,
+          "duration_ms": 905,
+          "peak_hz": 118.30807408925993,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11608.0,
+          "duration_ms": 104,
+          "peak_hz": 103.46122536848861,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11895.0,
+          "duration_ms": 119,
+          "peak_hz": 138.6822247375918,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        }
+      ],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 865,
+          "peak_hz": 69.11842464184853,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": false
+        },
+        {
+          "start_ms": 10048.0,
+          "duration_ms": 117,
+          "peak_hz": 122.40921200013175,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10328.0,
+          "duration_ms": 122,
+          "peak_hz": 139.475893767253,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 10587.0,
+          "duration_ms": 905,
+          "peak_hz": 118.30807408925993,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11608.0,
+          "duration_ms": 104,
+          "peak_hz": 103.46122536848861,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11895.0,
+          "duration_ms": 119,
+          "peak_hz": 138.6822247375918,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 12148.0,
+          "duration_ms": 353,
+          "peak_hz": 113.51026973844606,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "tail_global_hz": 30.03457580749296,
+      "tail_quiet_fraction": 0.424,
+      "tail_persistent_fraction": 0.0,
+      "count_control": {
+        "initial_D": 0.2164660210396102,
+        "high_onset_ms": null,
+        "complete_events": [
+          {
+            "start_ms": 9888.0,
+            "duration_ms": 118,
+            "peak_hz": 104.1,
+            "core_halfpeak_ms": [
+              9938.0,
+              9892.0
+            ],
+            "lag_B_minus_A_ms": -46.0
+          },
+          {
+            "start_ms": 10142.0,
+            "duration_ms": 654,
+            "peak_hz": 113.578125,
+            "core_halfpeak_ms": [
+              10191.0,
+              10146.0
+            ],
+            "lag_B_minus_A_ms": -45.0
+          },
+          {
+            "start_ms": 10914.0,
+            "duration_ms": 96,
+            "peak_hz": 107.821875,
+            "core_halfpeak_ms": [
+              10958.0,
+              10917.0
+            ],
+            "lag_B_minus_A_ms": -41.0
+          }
+        ],
+        "quiet_intervals_ms": [
+          [
+            9780.0,
+            9888.0
+          ],
+          [
+            10006.0,
+            10142.0
+          ],
+          [
+            10796.0,
+            10914.0
+          ],
+          [
+            11010.0,
+            11100.0
+          ]
+        ],
+        "tail_global_hz": 54.85221875,
+        "tail_persistent_fraction": 0.063375
+      },
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 2.8656750259870023e-05,
+          "global_rate": 2.978317610313752e-07,
+          "field_global": 6.431913419646662e-07
+        },
+        "maximum_refractory_occupancy_E_I": [
+          0.9244325648933043,
+          0.8553029666331979
+        ],
+        "near_quiet_threshold_bins": 0
+      },
+      "M_dynamic": true,
+      "Z_held": true,
+      "private_diffusion_unchanged": true
+    },
+    {
+      "label": "native_Z9420_held",
+      "D": 0.22884476056519176,
+      "high_onset_ms": null,
+      "quiet_intervals_ms": [
+        [
+          10719.0,
+          10895.0
+        ],
+        [
+          11013.0,
+          11185.0
+        ]
+      ],
+      "complete_events": [
+        {
+          "start_ms": 10895.0,
+          "duration_ms": 118,
+          "peak_hz": 144.11840876590884,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        }
+      ],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 1718,
+          "peak_hz": 113.32551545631027,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": false
+        },
+        {
+          "start_ms": 10895.0,
+          "duration_ms": 118,
+          "peak_hz": 144.11840876590884,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": false,
+          "complete_with_20ms_quiet": true
+        },
+        {
+          "start_ms": 11185.0,
+          "duration_ms": 1316,
+          "peak_hz": 153.47209474601658,
+          "reaches_left_boundary": false,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "tail_global_hz": 78.48077013997862,
+      "tail_quiet_fraction": 0.0,
+      "tail_persistent_fraction": 0.1646875,
+      "count_control": {
+        "initial_D": 0.22884476056519176,
+        "high_onset_ms": null,
+        "complete_events": [],
+        "quiet_intervals_ms": [
+          [
+            9404.0,
+            9538.0
+          ]
+        ],
+        "tail_global_hz": 87.6083125,
+        "tail_persistent_fraction": 0.14796875
+      },
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 3.6554022130985686e-05,
+          "global_rate": 3.7107133721292485e-07,
+          "field_global": 7.67247399835469e-07
+        },
+        "maximum_refractory_occupancy_E_I": [
+          0.9277902648893879,
+          0.8846206207736442
+        ],
+        "near_quiet_threshold_bins": 0
+      },
+      "M_dynamic": true,
+      "Z_held": true,
+      "private_diffusion_unchanged": true
+    },
+    {
+      "label": "native_Z9870_held",
+      "D": 0.25634442534475455,
+      "high_onset_ms": 9310.0,
+      "quiet_intervals_ms": [],
+      "complete_events": [],
+      "active_episodes": [
+        {
+          "start_ms": 9001.0,
+          "duration_ms": 3500,
+          "peak_hz": 208.49926256522045,
+          "reaches_left_boundary": true,
+          "reaches_right_boundary": true,
+          "complete_with_20ms_quiet": false
+        }
+      ],
+      "tail_global_hz": 198.7123754577946,
+      "tail_quiet_fraction": 0.0,
+      "tail_persistent_fraction": 0.5162812499999999,
+      "count_control": {
+        "initial_D": 0.25634442534475455,
+        "high_onset_ms": 9305.0,
+        "complete_events": [],
+        "quiet_intervals_ms": [],
+        "tail_global_hz": 199.17590625,
+        "tail_persistent_fraction": 0.5137812499999999
+      },
+      "numerical": {
+        "weighted_errors_hz": {
+          "field": 3.0517578125e-05,
+          "global_rate": 5.336684125722968e-07,
+          "field_global": 1.4199312090568128e-06
+        },
+        "maximum_refractory_occupancy_E_I": [
+          0.9082042922422104,
+          0.8367073974291254
+        ],
+        "near_quiet_threshold_bins": 0
+      },
+      "M_dynamic": true,
+      "Z_held": true,
+      "private_diffusion_unchanged": true
+    }
+  ],
+  "unit": "One common own-model9000ms history and future external realization; matched interventions in count innovations at three full native Z fields.",
+  "scope": "Finite-time noise-removal diagnostic; recorded external OU remains. Not deterministic ensemble average, constant-input bifurcation or native acceptance.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

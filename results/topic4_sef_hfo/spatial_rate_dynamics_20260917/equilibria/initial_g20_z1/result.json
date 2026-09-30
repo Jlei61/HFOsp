@@ -1,0 +1,69 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "J_EE_core": 0.0,
+      "success": true,
+      "residual_per_ms": 1.5254290886002053e-14,
+      "newton_iterations": 5,
+      "newton_trace": [
+        0.006338681287567407,
+        0.0002053419977322842,
+        2.1558783797783268e-05,
+        3.706295214483957e-08,
+        1.5254290886002053e-14
+      ],
+      "core_rates_hz": [
+        0.24134841548113609,
+        0.22457885278372536,
+        0.07526041020736188
+      ],
+      "zero_delay_seed_eigenvalues_per_ms": [],
+      "exact_delay_roots": []
+    },
+    {
+      "J_EE_core": 0.5,
+      "success": true,
+      "residual_per_ms": 4.624772786954168e-15,
+      "newton_iterations": 4,
+      "newton_trace": [
+        0.0012069102799076572,
+        3.801180766067804e-06,
+        8.003757117139298e-09,
+        4.624772786954168e-15
+      ],
+      "core_rates_hz": [
+        0.31688409895085484,
+        0.2922561658563076,
+        0.07566233803708765
+      ],
+      "zero_delay_seed_eigenvalues_per_ms": [],
+      "exact_delay_roots": []
+    },
+    {
+      "J_EE_core": 1.0,
+      "success": true,
+      "residual_per_ms": 1.0861916401039284e-11,
+      "newton_iterations": 4,
+      "newton_trace": [
+        0.0018575046858039807,
+        9.342684392720305e-05,
+        5.462712689072169e-07,
+        1.0861916401039284e-11
+      ],
+      "core_rates_hz": [
+        0.5690097139129976,
+        0.5117947401945941,
+        0.07702374877392833
+      ],
+      "zero_delay_seed_eigenvalues_per_ms": [
+        [
+          -0.0010000000000001048,
+          0.0
+        ]
+      ],
+      "exact_delay_roots": []
+    }
+  ],
+  "stability_complete": false
+}

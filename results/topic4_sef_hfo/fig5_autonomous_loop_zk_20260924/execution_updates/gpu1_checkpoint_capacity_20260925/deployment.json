@@ -1,0 +1,43 @@
+{
+  "status": "PASS_RESUME_AND_FIRST_BLOCK",
+  "epoch": 1790286688.7720647,
+  "old_manager_pid": 3282780,
+  "new_manager_pid": 3290602,
+  "workers_retained_during_manager_replacement": {
+    "3209719": 1790283352.37,
+    "3265375": 1790284676.74,
+    "3218016": 1790283539.8,
+    "3238782": 1790284040.85,
+    "3238783": 1790284040.85,
+    "3265376": 1790284676.75
+  },
+  "resources": {
+    "memory_available_GiB": 97.32102584838867,
+    "cpu_percent": 32.6,
+    "gpu1": [
+      11.02734375,
+      0,
+      11.02734375
+    ]
+  },
+  "manager_sha256": "6242c5251a41d154382263ef3389af0d1be48bc346981d88e4b21fb007fcab2d",
+  "GPU1_gate_sha256": "b248643137df9b897763c5b6506e1caf267f6d6bba2fd2fc05e154f9bf2f6e2d",
+  "conditional_capacity": {
+    "total": 6,
+    "CPU": 4,
+    "GPU0": 2,
+    "GPU1": 1
+  },
+  "scientific_jobs": 16,
+  "scientific_horizon_s": 30,
+  "existing_nativeGPU1_worker_preserved": true,
+  "verified_epoch": 1790287269.8450165,
+  "all16_job_hashes_unchanged": true,
+  "other5_conditional_workers_retained": true,
+  "native_worker_retained": true,
+  "transfer_record": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/rotated/z0.25_k0.02_interictal/1790286690768687332/handoff.json",
+  "resumed_step": 540000,
+  "first_resumed_block": "PASS_540000_TO_560000_ALL8_STREAMS",
+  "scientific_runs_added": 0,
+  "first_block_verification": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/rotated/z0.25_k0.02_interictal/1790286690768687332/first_block_verification.json"
+}

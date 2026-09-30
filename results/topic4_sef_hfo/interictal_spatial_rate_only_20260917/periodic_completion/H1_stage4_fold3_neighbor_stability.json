@@ -1,0 +1,39 @@
+{
+  "status": "BOUNDED_CHECK_FINISHED",
+  "rows": [
+    {
+      "index": "fold",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn3_N2048.npz",
+      "J_EE_core": 1.3068816112324584,
+      "T_ms": 79.34223478072948,
+      "checks": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_A_stage4_turn3_N2048_dt0.05.json",
+          "dt_ms": 0.04999510698218619,
+          "multiplier": [
+            -7.1890120278714775,
+            0.0
+          ],
+          "relative_eigenpair_residual": 1.8682121057509344e-14,
+          "phase_tangent_relative_defect": 0.0010728350561138964
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_A_stage4_turn3_N2048_dt0.025.json",
+          "dt_ms": 0.024997553491093095,
+          "multiplier": [
+            -7.188994308743384,
+            0.0
+          ],
+          "relative_eigenpair_residual": 1.845962667616565e-14,
+          "phase_tangent_relative_defect": 0.0002625740139693376
+        }
+      ],
+      "relative_leading_multiplier_change": 2.4647575631161104e-06,
+      "status": "DOMINANT_INSTABILITY_VERIFIED",
+      "profile_check_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn3_validation.json"
+    }
+  ],
+  "critical_point_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn3_validation.json",
+  "exact_root_included": true,
+  "scope": "Paired time-step leading Floquet evidence at the listed points, including the exact validated root when requested. Instability is point-specific; neither all unstable multipliers nor intervening crossings are counted."
+}

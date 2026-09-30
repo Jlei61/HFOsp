@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "qa_high",
+      "checks": {
+        "spikes_1ms": true,
+        "regions_1ms": true,
+        "field_5ms": true,
+        "raster": true,
+        "Z": true,
+        "M": true,
+        "currents": true,
+        "inputs": true
+      },
+      "full_engine_bitwise": true
+    },
+    {
+      "name": "qa_interictal",
+      "checks": {
+        "spikes_1ms": true,
+        "regions_1ms": true,
+        "field_5ms": true,
+        "raster": true,
+        "Z": true,
+        "M": true,
+        "currents": true,
+        "inputs": true
+      },
+      "full_engine_bitwise": true
+    }
+  ],
+  "producer_sha256": "eef481d82aa1e6e6382c8869949c62c76f9892a95a4150584d63f7f7dd006a23",
+  "mechanism": "Same cached reference graph plus same clamped initial states and new dispatch route reproduces both original full engine states and observations."
+}

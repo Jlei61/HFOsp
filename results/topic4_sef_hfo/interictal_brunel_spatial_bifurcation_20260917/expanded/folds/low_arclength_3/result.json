@@ -1,0 +1,54 @@
+{
+  "J_EE_core": 1.0172797102503686,
+  "rates_hz": [
+    2.48913602173013,
+    1.7551334746458107,
+    0.12923802744327217
+  ],
+  "equilibrium_residual": 3.642919299551295e-17,
+  "eigenvector_residual": 3.540327639738622e-11,
+  "transversality": -0.2132642236592811,
+  "quadratic_coefficient": -17.498361400137057,
+  "regional_energy": [
+    2.0589455558147658e-07,
+    0.6103333006050589,
+    0.24681259138513603
+  ],
+  "inhibitory_energy": 0.1428539021152495,
+  "grid": 20,
+  "space_cells": 400,
+  "rate_groups": 935,
+  "trace": [
+    {
+      "iteration": 0,
+      "J": 1.0143861749392846,
+      "error": 0.050253586533648066
+    },
+    {
+      "iteration": 1,
+      "J": 1.0183067119842795,
+      "error": 0.024658110632010982
+    },
+    {
+      "iteration": 2,
+      "J": 1.0173345283207884,
+      "error": 0.005438703146533053
+    },
+    {
+      "iteration": 3,
+      "J": 1.0172814823770708,
+      "error": 5.615448027440628e-05
+    },
+    {
+      "iteration": 4,
+      "J": 1.017279710246014,
+      "error": 2.776814556071372e-09
+    },
+    {
+      "iteration": 5,
+      "J": 1.0172797102503686,
+      "error": 1.005771547724901e-11
+    }
+  ],
+  "classification": "Nondegenerate stationary saddle-node of the spatial Brunel diffusion closure; not a certified native-SNN onset"
+}

@@ -1,0 +1,81 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_fine_forcing/partial_comparison.json",
+  "trajectory_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/recorded_drive_expected",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_fine_forcing/recorded_drive_expected"
+  ],
+  "labels": [
+    "native",
+    "expected_parent_input",
+    "expected_fine_input"
+  ],
+  "snapshots": [
+    {
+      "label": "native",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_parent_input",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_parent_input",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_fine_input",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_fine_input",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    }
+  ],
+  "Z_and_M": "Both dynamic in every trajectory; native slow variables are exact checkpoint observations shown as unconnected dots, no interpolation.",
+  "scope": "Same0.5mmratefield,originalgraph,thresholdmembers,response,Z/Mandcountnoise. OnlyexternalspatialOUprojectionchanges:lifted1mmcellmeans versusactual0.5mmgroupmeans. Same1msinputclockandcommon20x20readout; no phase/onset alignment. Scientificacceptancepending,notabifurcationfigure.",
+  "conventions": "All curves are time courses; no branch stability encoding. No overall title, no narrative gray annotations, same0-500Hz spatial scale.",
+  "agent_PNG_PDF_check": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "runs": "Completedexpectedfluxpaironly; fineinputcountarmnotincluded.",
+  "agent_visual_review_local": "2026-09-20T10:31:36.916500+08:00",
+  "visual_notes": "PNG and rasterized same PDF inspected: labels, common axes, common 0-500Hz spatial scale, source columns and slow-state dots readable; no overall title or bifurcation labels.",
+  "artifact_sha256": {
+    "png": "3fb9671e6e6d1a60fefd8de35632d87fc1d99e8defe906a353a8c9c5149438da",
+    "pdf": "230c5251f4188033612df7f37cbbb407ae2249a120d6e20c667909f25edbbd25"
+  }
+}

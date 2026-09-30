@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "pathway": "ampa",
+      "moment": "mean",
+      "nnz": 22469750,
+      "group_projection_error": 8.881784197001252e-16
+    },
+    {
+      "pathway": "ampa",
+      "moment": "variance",
+      "nnz": 22469750,
+      "group_projection_error": 3.3306690738754696e-16
+    },
+    {
+      "pathway": "gaba",
+      "moment": "mean",
+      "nnz": 7156328,
+      "group_projection_error": 6.661338147750939e-16
+    },
+    {
+      "pathway": "gaba",
+      "moment": "variance",
+      "nnz": 7156328,
+      "group_projection_error": 6.661338147750939e-16
+    }
+  ],
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "physical_targets": 40000,
+  "source_groups": 3479,
+  "elapsed_s": 104.84720349311829,
+  "interpretation": "Individual physical weights and delays retained at target; source members still share a group rate. Group aggregation exactly recovers prior first and second moment operators."
+}

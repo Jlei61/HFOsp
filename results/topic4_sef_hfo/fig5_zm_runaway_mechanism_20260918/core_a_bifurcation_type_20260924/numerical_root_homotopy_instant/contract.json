@@ -1,0 +1,8 @@
+{
+  "question": "Construct a stationary root at the SAME local Z endpoint after direct Newton stalls.",
+  "method": "Auxiliary H(q,a)=(1-a)*(q0-q)+a*F(q), F the exact physical logit equilibrium residual. Start at a=0,q=q0; pseudo-arclength continuation follows H=0 through numerical turning points toward a=1. No auxiliary point is a physical equilibrium.",
+  "unchanged": "Original physical graph, response, Z field and M equilibrium law. At a=1 independently require original rate residual<1e-11/ms, then verify actual flow before any dynamics claim.",
+  "numerical_initial_guess": "instant",
+  "limits": "At most160 accepted points/250trials, 14Newton corrections per point. This is solver construction, not a physical parameter campaign; auxiliary folds never receive SN labels.",
+  "model_promoted": false
+}

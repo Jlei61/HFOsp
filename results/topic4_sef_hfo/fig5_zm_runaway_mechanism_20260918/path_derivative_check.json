@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "family": "rate",
+      "segment": 0,
+      "relative_FD_error": 6.8533383046557956e-12
+    },
+    {
+      "family": "native",
+      "segment": 0,
+      "relative_FD_error": 1.5715652931451662e-13
+    },
+    {
+      "family": "native",
+      "segment": 1,
+      "relative_FD_error": 2.707751479373683e-12
+    },
+    {
+      "family": "native",
+      "segment": 2,
+      "relative_FD_error": 2.174186082963966e-12
+    },
+    {
+      "family": "native",
+      "segment": 3,
+      "relative_FD_error": 9.775602700268335e-13
+    },
+    {
+      "family": "native",
+      "segment": 4,
+      "relative_FD_error": 7.671586927594661e-13
+    },
+    {
+      "family": "native",
+      "segment": 5,
+      "relative_FD_error": 1.5692658429528974e-14
+    },
+    {
+      "family": "fine",
+      "segment": 0,
+      "relative_FD_error": 4.426740952367521e-11
+    },
+    {
+      "family": "fine",
+      "segment": 1,
+      "relative_FD_error": 2.7364519857028602e-11
+    },
+    {
+      "family": "fine",
+      "segment": 2,
+      "relative_FD_error": 3.648516983741619e-11
+    }
+  ],
+  "change": "Analytic segment slopes replace finite differences; the spatial parameter paths and nonlinear equations are unchanged.",
+  "knot_rule": "Right derivative at interior knots; left derivative at final endpoint. A join is not by itself a smooth bifurcation."
+}

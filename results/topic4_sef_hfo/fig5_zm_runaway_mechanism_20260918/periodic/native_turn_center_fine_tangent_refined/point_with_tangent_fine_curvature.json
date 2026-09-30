@@ -1,0 +1,32 @@
+{
+  "status": "LOCAL_CURVATURE_CONVERGED",
+  "D": 0.21933565200693736,
+  "T_ms": 264.36293204907884,
+  "N": 16875,
+  "M": 262144,
+  "tangent_relative_residual": 8.408137137512742e-09,
+  "relative_step_difference": 0.008351038938736824,
+  "rows": [
+    {
+      "h_logT": 2.5e-05,
+      "d2D_dT2": -7.757030758343724e-05,
+      "linear_relative_residual": 7.455953377887864e-10,
+      "symmetric_remainder_before": 32.85428286203061,
+      "symmetric_remainder_after": 0.20242676139870672
+    },
+    {
+      "h_logT": 1.25e-05,
+      "d2D_dT2": -7.692787986322498e-05,
+      "linear_relative_residual": 7.035905060253827e-10,
+      "symmetric_remainder_before": 8.473415881465177,
+      "symmetric_remainder_after": 0.02047866931736433
+    }
+  ],
+  "d2D_dT2": -7.692787986322498e-05,
+  "directional_steps_logT": [
+    2.5e-05,
+    1.25e-05
+  ],
+  "quadrature_time_step_ms": 0.0010084645540202287,
+  "exact_log_period_elimination": true
+}

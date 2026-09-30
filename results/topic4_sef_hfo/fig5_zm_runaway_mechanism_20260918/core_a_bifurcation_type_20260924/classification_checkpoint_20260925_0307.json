@@ -1,0 +1,358 @@
+{
+  "updated_local": "2026-09-25T03:08:08.665346+08:00",
+  "question": "Core A resource depletion and entry to prolonged local activity; retain original full spatial model and all dynamic M",
+  "onset_type": "NOT_ESTABLISHED",
+  "roots": [
+    {
+      "label": "nine",
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/multiple_nine_burst_fixed_grid_retry",
+      "status": "NUMERICAL_MULTIPLE_SHOOTING_ROOT",
+      "period_ms": 2369.0337184833256,
+      "whole_closure": 7.11708803712732e-11,
+      "profile": [
+        {
+          "region": "Global E",
+          "mean_hz": 34.60244376170995,
+          "complete_1ms_bins_mean_hz": 34.60289005280458,
+          "min_10ms_hz": 0.009410059934550647,
+          "max_10ms_hz": 178.6650689675831,
+          "quiet_intervals_relative_ms": [
+            [
+              94,
+              264
+            ],
+            [
+              419,
+              524
+            ],
+            [
+              638,
+              790
+            ],
+            [
+              906,
+              1055
+            ],
+            [
+              1176,
+              1310
+            ],
+            [
+              1432,
+              1580
+            ],
+            [
+              1674,
+              1844
+            ],
+            [
+              1971,
+              2100
+            ],
+            [
+              2219,
+              2369
+            ]
+          ]
+        },
+        {
+          "region": "Core A",
+          "mean_hz": 108.69193382730501,
+          "complete_1ms_bins_mean_hz": 108.6920172797636,
+          "min_10ms_hz": 1.529155931704014e-05,
+          "max_10ms_hz": 473.93819421528406,
+          "quiet_intervals_relative_ms": [
+            [
+              82,
+              253
+            ],
+            [
+              346,
+              517
+            ],
+            [
+              608,
+              780
+            ],
+            [
+              873,
+              1044
+            ],
+            [
+              1137,
+              1308
+            ],
+            [
+              1397,
+              1569
+            ],
+            [
+              1662,
+              1833
+            ],
+            [
+              1926,
+              2097
+            ],
+            [
+              2187,
+              2359
+            ]
+          ]
+        },
+        {
+          "region": "Core B",
+          "mean_hz": 90.66067005009035,
+          "complete_1ms_bins_mean_hz": 90.66194795610235,
+          "min_10ms_hz": 1.5288003987269272e-05,
+          "max_10ms_hz": 474.7763151482919,
+          "quiet_intervals_relative_ms": [
+            [
+              93,
+              262
+            ],
+            [
+              352,
+              514
+            ],
+            [
+              605,
+              782
+            ],
+            [
+              884,
+              1048
+            ],
+            [
+              1142,
+              1299
+            ],
+            [
+              1436,
+              1591
+            ],
+            [
+              1672,
+              1841
+            ],
+            [
+              1934,
+              2089
+            ],
+            [
+              2226,
+              2369
+            ]
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_hz": 31.321903992434645,
+          "complete_1ms_bins_mean_hz": 31.322337805886676,
+          "min_10ms_hz": 0.0098845392232535,
+          "max_10ms_hz": 165.79579958133235,
+          "quiet_intervals_relative_ms": [
+            [
+              94,
+              267
+            ],
+            [
+              419,
+              527
+            ],
+            [
+              639,
+              793
+            ],
+            [
+              907,
+              1058
+            ],
+            [
+              1176,
+              1313
+            ],
+            [
+              1430,
+              1583
+            ],
+            [
+              1674,
+              1847
+            ],
+            [
+              1971,
+              2103
+            ],
+            [
+              2216,
+              2369
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "three",
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/whole_three_burst",
+      "status": "NUMERICAL_SEGMENTED_SINGLE_SHOOTING_ROOT",
+      "period_ms": 790.2861378603747,
+      "whole_closure": 1.587209914489616e-11,
+      "profile": [
+        {
+          "region": "Global E",
+          "mean_hz": 34.080387663559804,
+          "complete_1ms_bins_mean_hz": 34.091555201568625,
+          "min_10ms_hz": 0.012431893754675587,
+          "max_10ms_hz": 178.12646647750222,
+          "quiet_intervals_relative_ms": [
+            [
+              127,
+              257
+            ],
+            [
+              377,
+              527
+            ],
+            [
+              621,
+              790
+            ]
+          ]
+        },
+        {
+          "region": "Core A",
+          "mean_hz": 113.92929176057488,
+          "complete_1ms_bins_mean_hz": 113.9350495282598,
+          "min_10ms_hz": 1.797419864517942e-05,
+          "max_10ms_hz": 474.8880271132425,
+          "quiet_intervals_relative_ms": [
+            [
+              89,
+              255
+            ],
+            [
+              347,
+              515
+            ],
+            [
+              614,
+              780
+            ]
+          ]
+        },
+        {
+          "region": "Core B",
+          "mean_hz": 88.06697412013197,
+          "complete_1ms_bins_mean_hz": 88.09596154846433,
+          "min_10ms_hz": 2.2007055394022185e-05,
+          "max_10ms_hz": 474.6875300811794,
+          "quiet_intervals_relative_ms": [
+            [
+              92,
+              246
+            ],
+            [
+              380,
+              537
+            ],
+            [
+              619,
+              789
+            ]
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_hz": 30.7107379378863,
+          "complete_1ms_bins_mean_hz": 30.72157955774114,
+          "min_10ms_hz": 0.013058289875569595,
+          "max_10ms_hz": 165.03507082818913,
+          "quiet_intervals_relative_ms": [
+            [
+              128,
+              259
+            ],
+            [
+              376,
+              529
+            ],
+            [
+              621,
+              790
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "preentry_fine_growth": {
+    "status": "MATCHED_DURATION_NUMERICAL_CONTROL_COMPLETE",
+    "rows": [
+      {
+        "label": "coarse",
+        "dt_ms": 0.05,
+        "growth_2_5_s": -2.0528457101608053,
+        "growth_2_10_s": 1.2899451350992859,
+        "one_second_blocks_per_s": [
+          7.713329772077533,
+          3.0587958911792574,
+          5.204380228485142,
+          -9.076803409285795,
+          -2.2861139496817646,
+          14.750007426016753,
+          5.3952918589632235,
+          -1.1220441316091065,
+          -7.569213846503299,
+          5.024056904409118
+        ]
+      },
+      {
+        "label": "fine",
+        "dt_ms": 0.025,
+        "growth_2_5_s": 3.496371098346058,
+        "growth_2_10_s": 7.240540351210592,
+        "one_second_blocks_per_s": [
+          10.400545576709133,
+          -0.2321986051388003,
+          8.527796335632976,
+          -3.576140135717212,
+          5.537457095122411,
+          9.747285990629354,
+          14.502660382413856,
+          1.8723361916459351,
+          7.293385330851042,
+          14.01954161910637
+        ]
+      }
+    ],
+    "full_fine_activity_audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/preentry_fine_growth/fine/whole_record_audit.json",
+    "interpretation": "Same physical10s initial checkpoint and matched10s duration. These are numerical controls, not independent realizations. Positive finite-time growth, especially with phase-dependent block variation, does not establish an asymptotic attractor or name the prolonged-event bifurcation.",
+    "model_promoted": false
+  },
+  "full10s_fine_long_activities": [
+    {
+      "start_ms": 1885,
+      "end_ms": 3564,
+      "duration_ms": 1679,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 5251,
+      "end_ms": 6970,
+      "duration_ms": 1719,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 7822,
+      "end_ms": 10000,
+      "duration_ms": 2178,
+      "left_censored": false,
+      "right_censored": true
+    }
+  ],
+  "interpretation": "Two exact numerical periodic roots now exist. Neither root existence nor the provisional nine-cycle negative multiplier establishes the prolonged-entry bifurcation. The old coarse-step finite-window interval is not mesh-qualified. Full10s finer integration gives complete1.679s and1.719s local activities at Z_A=.712351 plus2.178s right-censoring. Same slow field, original full coarse initial checkpoint; only mesh/history representation differs.",
+  "model_promoted": false
+}

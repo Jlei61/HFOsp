@@ -1,0 +1,36 @@
+{
+  "created_local": "2026-09-20T09:53:35.385638+08:00",
+  "status": "REGISTERED_BEFORE_FORCING_PAIR",
+  "question": "Does restoring original0.5mm group external spatial variation recover both core lead directions and improve recruitment in the same ratefield?",
+  "reason": "Previous finegrid keptcoarseexternalforcing. ExactspatialOU replay nowpasses7checkpoints; lostfinegroupforcing pooledRMSabout.044-.046perms, roughlyhalf theconfigured.1perms spatialfieldscale.",
+  "graph": "Original nativegraph projectedg40,3479groups; all40000originalcells,samephysicalweights,delays,thresholdmembers,externalinputandZMparameters.",
+  "response": "Frozen conditioned_refractory_rate weights, unchanged42localstates andownrate refractory integral. BothZandMdynamic; externalmeanAMPAfilter restored.",
+  "external_drive": "OriginalSpatialOU replay at actualg40groupresolution; E/Ioriginalmembership. Exogenousonly, nofutureSNNspikes.1msholdingremainsanapproximation.",
+  "output": "Primarymetrics use original20x20cellfields after originalcell-count-weighted restriction; fine40x40fields also stored. No changed participation threshold or spatialmetricresolution.",
+  "noise": "Expectedrate arm andoneactual-count Binomial/refractory/M arm, with same originalcellN pernewgroup. StationaryPoisson privatevariance splitting remains approximate.",
+  "initialization": "Zero synapses/covariance/history,Z1,M0 at0s; no nativefuture spikes or state transplant.",
+  "runs": [
+    {
+      "label": "recorded_drive_expected",
+      "noise": false,
+      "seed": 1
+    },
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "noise": true,
+      "seed": 1
+    }
+  ],
+  "dt_ms": 0.05,
+  "duration_ms": 12500.0,
+  "coarse_sources": [
+    "conditioned_refractory_external_filter_pair/recorded_drive_expected",
+    "conditioned_refractory_count_consistency/recorded_drive_binomial_seed1"
+  ],
+  "verification": "Exactnestedmembership andweightedthresholdmean; delayedoperators commute under parent-constant history; externalforcing invariant; count/conservation checks before fullruns.",
+  "acceptance": "Sameoriginalunconditionalnativeevent,quiet,duration,spatialparticipation,coreorder,entryandDreadouts. Inputrepair alone cannot waive localresponse orcontinuationfailures.",
+  "budget": "Two12.5s pairedruns matching completedfineexpected andBinomialseed1. No furtherseed,parametersearch,responsefit orcontinuation.",
+  "only_change": "Use original-member means of the reconstructed original spatialOU field instead of lifted1mmcell means. Same1ms forcingclock and originalstoredglobalrateprecision; allgraph,response,Z/M,countnoise andinitialization fixed.",
+  "baseline": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution",
+  "native_drive_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_fine_external_drive/drive.npz"
+}

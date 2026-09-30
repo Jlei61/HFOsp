@@ -1,0 +1,34 @@
+{
+  "created_local": "2026-09-20T00:50:51.977051+08:00",
+  "question": "For the unchanged actual strong cycle input, does local response error arise under time-varying mean alone, time-varying variances alone, or only their joint time dependence?",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "conditions": [
+    "full",
+    "mean_only",
+    "variances_only"
+  ],
+  "counterfactuals": "full is unchanged. mean_only keeps the original mean waveform and replaces each raw variance-intensity waveform with its own time average. variances_only keeps both original variance waveforms and fixes the mean at its own time average. Original group threshold and source period retained.",
+  "variants": [
+    "units_instantaneous",
+    "units_history"
+  ],
+  "prediction": "No fit: same voltage-corrected response tables, poles and static spline as existing nonlinear_mean_readout diagnostics. All 12 predictions locked before new targets; full-input binned predictions must reproduce saved references.",
+  "dt_ms": 0.1,
+  "replicates": 8192,
+  "burn_cycles": 5,
+  "record_cycles": 20,
+  "phase_bins": 128,
+  "seed": 919821,
+  "device": 0,
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1,
+    "original_gates_unchanged": true
+  },
+  "statistical_unit": "Independent noise path; common random numbers pair the 12 input conditions. Three conditions per source population are paired counterfactual assays, not independent biological replicates.",
+  "budget": "One preparation, one 12-condition local LIF batch and independent readout audit. No coefficient fitting, network launches or bifurcation scans.",
+  "trigger": "The fresh bounded-input assay passed all 12 conditions for both closures. This follow-up retains original strong amplitudes while separating time-dependent mean and variance input.",
+  "scope": "Local strong-input diagnostic, not an autonomous reduced network or native SNN validation. Full-input condition repeats a previously seen waveform with new noise; eight channel-clamped waveforms have new targets. A conditional failure identifies an input context, not by itself the unique correct closure or onset bifurcation.",
+  "result_status": "FACTORIAL_WAVEFORM_ASSAY_COMPLETE",
+  "log_label": "FACTORIAL"
+}

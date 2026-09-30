@@ -1,0 +1,50 @@
+{
+  "status": "INHIBITORY_M_INVARIANT_SUBSPACE_AUDIT_PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M262144/point0000.npz",
+  "groups": 935,
+  "inhibitory_groups": 400,
+  "excitatory_groups": 535,
+  "equation": "m_I_dot=-m_I/tau_M, independent of all other states and delay history; physical initial m_I=0.",
+  "tau_M_ms": 1000.0,
+  "period_ms": 264.4,
+  "auxiliary_multiplier": 0.7676664116705358,
+  "multiplicity_at_least": 400,
+  "proof": "Ordering physical variables first and m_I last gives a block-upper-triangular monodromy with lower block exp(-T/tau_M) times identity. The physical subspace m_I=0 is invariant. Extra stable eigenvalues do not change physical stability but can cluster in a generic full-space Arnoldi solve.",
+  "numerical_checks": [
+    {
+      "source_rate_index": 0,
+      "invariant_M_I_zero": true,
+      "finite_difference_errors": [
+        4.336808689942018e-19,
+        4.336808689942018e-19
+      ]
+    },
+    {
+      "source_rate_index": 4218,
+      "invariant_M_I_zero": true,
+      "finite_difference_errors": [
+        4.336808689942018e-19,
+        4.336808689942018e-19
+      ]
+    },
+    {
+      "source_rate_index": 8437,
+      "invariant_M_I_zero": true,
+      "finite_difference_errors": [
+        4.336808689942018e-19,
+        4.336808689942018e-19
+      ]
+    },
+    {
+      "source_rate_index": 12656,
+      "invariant_M_I_zero": true,
+      "finite_difference_errors": [
+        4.336808689942018e-19,
+        4.336808689942018e-19
+      ]
+    }
+  ],
+  "qualification": "Matching a Ritz cluster is not proof that every computed Ritz vector belongs to this auxiliary block. No physical multiplier or criticality is inferred; no running job or acceptance gate changed.",
+  "model_changed": false,
+  "onset_type": "NOT_ESTABLISHED"
+}

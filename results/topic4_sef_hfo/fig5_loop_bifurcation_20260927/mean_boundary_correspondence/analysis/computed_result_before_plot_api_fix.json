@@ -1,0 +1,112 @@
+{
+  "status": "COMPLETE_MATCHED_UPPER_EXIT_COMPARISON",
+  "windows": [
+    {
+      "interval_s": [
+        0,
+        5
+      ],
+      "model_rate": [
+        55.61696514508401,
+        161.48663825110296,
+        145.3364230099711,
+        50.681140213904236
+      ],
+      "native_rate": [
+        55.01408750000004,
+        160.00026525198933,
+        143.7513994910945,
+        50.12547603414312
+      ],
+      "rate_difference": [
+        0.6028776450839715,
+        1.4863729991136267,
+        1.5850235188765964,
+        0.5556641797611164
+      ],
+      "weighted_field_RMS_Hz": 0.9364953041301226,
+      "model_Zdot": [
+        0.12010032497764404,
+        0.087685380170293,
+        0.09045484283703942,
+        0.12166769915186723
+      ],
+      "native_Zdot": [
+        0.1204486272500007,
+        0.08825049943683314,
+        0.09106247125371765,
+        0.12200394264672312
+      ],
+      "Zdot_difference": [
+        -0.0003483022723566598,
+        -0.00056511926654014,
+        -0.0006076284166782325,
+        -0.00033624349485589233
+      ]
+    },
+    {
+      "interval_s": [
+        5,
+        10
+      ],
+      "model_rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "native_rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rate_difference": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "weighted_field_RMS_Hz": 0.0,
+      "model_Zdot": [
+        0.1579999999703068,
+        0.16516612287147586,
+        0.16692624231633008,
+        0.15759227563831668
+      ],
+      "native_Zdot": [
+        0.15800000000000108,
+        0.16516612277900802,
+        0.16692624224608452,
+        0.15759227567364337
+      ],
+      "Zdot_difference": [
+        -2.969427481680498e-11,
+        9.24678389413458e-11,
+        7.024555936929744e-11,
+        -3.532668602090894e-11
+      ]
+    }
+  ],
+  "guards": {
+    "tail_spatial": true,
+    "tail_core_rate": true,
+    "tail_core_drift": true,
+    "tail_core_drift_sign": true,
+    "both_quiet": true,
+    "first_low_time": true
+  },
+  "retained": true,
+  "first100ms_causal_R_le5_s": {
+    "native": 2.0160000000000053,
+    "model": 2.031
+  },
+  "native_sparse_inputs_paired_exact": true,
+  "model_both_RNG_paired": true,
+  "core_Z_held_not_actual_recovery": true,
+  "interpretation": "Conditional fixed-spatial-field response from the same highhistory, comparingK9.35 with9.5. A transition and positive counterfactual coreZ drift do not certify a fold or prove that the natural trajectory exits by crossing it.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PENDING",
+  "human_visual": "PENDING",
+  "producer_sha256": "eae7c008b76d3ccb12b6b424730dcd3254b22ca42c6765dec8036ae8145a11e8"
+}

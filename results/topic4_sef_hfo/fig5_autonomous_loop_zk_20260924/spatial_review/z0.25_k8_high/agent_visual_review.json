@@ -1,0 +1,16 @@
+{
+  "status": "AGENT_VISUAL_REVIEWED",
+  "human_review": "PENDING",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.25_k8_high/figures/full_rate_context.png",
+      "sha256": "569c7b4a5750bdb99d7d02a0306a885fdc22a00f01b40161fd15198152f3121d"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.25_k8_high/figures/conditional_tail_fixed_window.png",
+      "sha256": "6074c04566ed62f91a7e83bed9f8e54a95ac1d1b26ac1055f80ec194109b60a0"
+    }
+  ],
+  "observation": "Full30s rate curve settles to a persistent patch containing coreA, coreB silent. Fixedfinal300ms nativefield occupies a southwest triangular territory rather than separated traveling brief events; coreA remains around406Hz. MeanallE dZpositive does not imply coreA recovery: its nativecounterfactual dZnegative.",
+  "selection": "Prespecified last10s and fixedfinal300ms because no complete brief event; not selected by morphology."
+}

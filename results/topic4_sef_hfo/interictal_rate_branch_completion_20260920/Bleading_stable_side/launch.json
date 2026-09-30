@@ -1,0 +1,22 @@
+{
+  "pid": 535032,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/extend_rate_Bleading_stable_side.py",
+    "--device",
+    "0",
+    "--after-pids",
+    "508683",
+    "--min-free-gib",
+    "8",
+    "--steps",
+    "80",
+    "--ds",
+    ".24"
+  ],
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_stable_side/worker.log",
+  "queued_at": 1789885437.8280888,
+  "status": "LAUNCHED_WITH_DEPENDENCY_GATE",
+  "scope": "Missing increasing-J side of the original stable B-leading seed; no result is claimed at launch."
+}

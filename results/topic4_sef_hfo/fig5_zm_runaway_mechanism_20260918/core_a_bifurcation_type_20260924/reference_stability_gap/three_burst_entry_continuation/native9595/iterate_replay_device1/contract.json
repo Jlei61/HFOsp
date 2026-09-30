@@ -1,0 +1,10 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/whole_cycle/iteration01",
+  "dt_ms": 0.05,
+  "period_ms": 791.565608331269,
+  "device": 1,
+  "question": "Do repeated original full-period flows and the segmented-prefix readout agree at this saved nonconverged iterate?",
+  "method": "Two independent fixed_time evaluations and one fixed_times evaluation with the actual saved shooting partition. Each starts from the identical full state. No Newton update or physical state clipping. Full dynamical states compared in original physical blocks.",
+  "acceptance": "Repeated fixed_time full canonical endpoints bitwise equal; shared-prefix versus independent endpoint relativeL2<1e-10. This tests reproducibility, not periodicity, stability or a bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,77 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "D": 0.21933565200693736,
+  "T_ms": 264.36293204907884,
+  "N": 16875,
+  "rows": [
+    {
+      "M": 65536,
+      "response_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.2558547739982605,
+        "E_rate_mass_fraction": 0.5408471964388347,
+        "E_family_deformation_energy_fraction": 0.16618525914310436
+      },
+      "components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.2242850584983826,
+          "E_rate_mass_fraction": 0.1030836436586277,
+          "E_family_deformation_energy_fraction": 0.15587078670248766
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.03149917221069336,
+          "E_rate_mass_fraction": 0.43701466689516116,
+          "E_family_deformation_energy_fraction": 0.008706894288605235
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 4.16994094848633e-06,
+          "E_rate_mass_fraction": 5.87334318238533e-05,
+          "E_family_deformation_energy_fraction": 1.3927110789994787e-05
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 0.00020252227783203126,
+          "E_rate_mass_fraction": 0.0025234819927749006,
+          "E_family_deformation_energy_fraction": 0.001962358948574361
+        }
+      }
+    },
+    {
+      "M": 131072,
+      "response_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.2558546235561371,
+        "E_rate_mass_fraction": 0.5408449978890165,
+        "E_family_deformation_energy_fraction": 0.16618666460844908
+      },
+      "components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.2242851750850678,
+          "E_rate_mass_fraction": 0.10308490907338344,
+          "E_family_deformation_energy_fraction": 0.15587280003174467
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.03149890661239623,
+          "E_rate_mass_fraction": 0.43701122062266323,
+          "E_family_deformation_energy_fraction": 0.00870632713283378
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 4.169702529907229e-06,
+          "E_rate_mass_fraction": 5.8729982000771795e-05,
+          "E_family_deformation_energy_fraction": 1.3940045825489484e-05
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 0.00020252323150634767,
+          "E_rate_mass_fraction": 0.002523494883840778,
+          "E_family_deformation_energy_fraction": 0.0019623220854437643
+        }
+      }
+    }
+  ],
+  "absolute_sampling_differences": {
+    "E_cell_time_fraction": 1.5044212342552044e-07,
+    "E_rate_mass_fraction": 2.19854981819978e-06,
+    "E_family_deformation_energy_fraction": 1.4054653447170828e-06
+  },
+  "phase_projection_removed": -0.07406805210326751,
+  "observable": "E-count weighted operating-domain support; family deformation is squared rate derivative with one common phase projected out",
+  "limitation": "Domain coverage does not validate response accuracy. Family deformation is not a Floquet mode or proof of critical causality. Frozen equations unchanged."
+}

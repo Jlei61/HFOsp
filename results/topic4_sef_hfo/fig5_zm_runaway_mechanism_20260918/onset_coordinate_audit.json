@@ -1,0 +1,132 @@
+{
+  "status": "COMPLETE",
+  "rate_autonomous_rows": [
+    {
+      "label": "A4_det_meandrive",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/runs/A4_det_meandrive/trajectory.npz",
+      "onset_ms": 8505.0,
+      "endpoint_records": [
+        {
+          "index": 849,
+          "time_ms": 8500.0,
+          "D": 0.18806017289216326,
+          "global_Z": 0.8119398271078367,
+          "Z_coreA_coreB_surround": [
+            0.665438305477881,
+            0.6668826381062126,
+            0.8193093967629512
+          ],
+          "global_M_current_mV_equiv": 0.03755659609128949
+        },
+        {
+          "index": 850,
+          "time_ms": 8510.0,
+          "D": 0.18899364705927546,
+          "global_Z": 0.8110063529407245,
+          "Z_coreA_coreB_surround": [
+            0.6641087628485985,
+            0.6655502091078964,
+            0.8183960223561905
+          ],
+          "global_M_current_mV_equiv": 0.038181162589007674
+        }
+      ],
+      "reconstructed_D_max_error": 2.3264267179357034e-09,
+      "Z": "dynamic",
+      "M": "dynamic",
+      "dt_ms": 0.1,
+      "numerical_scheme": "Original stored A4 simulation; not a new endpoint-RK4 run",
+      "onset_definition": "First 1-ms bin of >=200 ms with 10-ms smoothed global E rate >=200 Hz"
+    },
+    {
+      "label": "A4_stoch_seed9108401",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/runs/A4_stoch_seed9108401/trajectory.npz",
+      "onset_ms": 6421.0,
+      "endpoint_records": [
+        {
+          "index": 641,
+          "time_ms": 6420.0,
+          "D": 0.2631208069051568,
+          "global_Z": 0.7368791930948432,
+          "Z_coreA_coreB_surround": [
+            0.6980967432339564,
+            0.7022240453094016,
+            0.7387334570983328
+          ],
+          "global_M_current_mV_equiv": 0.03501040835143067
+        },
+        {
+          "index": 642,
+          "time_ms": 6430.0,
+          "D": 0.26441277091998816,
+          "global_Z": 0.7355872290800118,
+          "Z_coreA_coreB_surround": [
+            0.6967019532814582,
+            0.7008209948169669,
+            0.7374469052684675
+          ],
+          "global_M_current_mV_equiv": 0.03571707681816769
+        }
+      ],
+      "reconstructed_D_max_error": 3.5811775767058407e-09,
+      "Z": "dynamic",
+      "M": "dynamic",
+      "dt_ms": 0.1,
+      "numerical_scheme": "Original stored A4 simulation; not a new endpoint-RK4 run",
+      "onset_definition": "First 1-ms bin of >=200 ms with 10-ms smoothed global E rate >=200 Hz"
+    },
+    {
+      "label": "A4_stoch_meandrive",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/runs/A4_stoch_meandrive/trajectory.npz",
+      "onset_ms": 8297.0,
+      "endpoint_records": [
+        {
+          "index": 828,
+          "time_ms": 8290.0,
+          "D": 0.2058372388251556,
+          "global_Z": 0.7941627611748444,
+          "Z_coreA_coreB_surround": [
+            0.6807681649369965,
+            0.7005815251941293,
+            0.7993845068480886
+          ],
+          "global_M_current_mV_equiv": 0.02987100736648549
+        },
+        {
+          "index": 829,
+          "time_ms": 8300.0,
+          "D": 0.20682169516231808,
+          "global_Z": 0.7931783048376819,
+          "Z_coreA_coreB_surround": [
+            0.6794079908167335,
+            0.6991817654695827,
+            0.7984200673947112
+          ],
+          "global_M_current_mV_equiv": 0.03056544140601022
+        }
+      ],
+      "reconstructed_D_max_error": 2.964596013121934e-09,
+      "Z": "dynamic",
+      "M": "dynamic",
+      "dt_ms": 0.1,
+      "numerical_scheme": "Original stored A4 simulation; not a new endpoint-RK4 run",
+      "onset_definition": "First 1-ms bin of >=200 ms with 10-ms smoothed global E rate >=200 Hz"
+    }
+  ],
+  "native_context": {
+    "checkpoint_ms": 9870,
+    "global_Z": 0.7436555746552451,
+    "held_Z_high_entry_s": 9.959999999999999,
+    "interpretation": "A native checkpoint and a paired finite continuation; not an exact global-Z coordinate for the separately binned native onset"
+  },
+  "native_conditional_periodic_turn": {
+    "D": 0.21933565217973455,
+    "global_Z": 0.7806643478202655,
+    "Z": "held native-checkpoint spatial path",
+    "M": "dynamic",
+    "type": "NOT_YET_ESTABLISHED; requires resolution and transverse Floquet checks"
+  },
+  "state_time_convention": "Z/M/D index j is the state at t=10*(j+1) ms. No independent regional time shift or interpolation is applied.",
+  "scope": "Coordinates of existing onset readouts only. Different paths, mean Z values, or core means are not identified as the same bifurcation.",
+  "lineage_note": "Original a4_acceptance.py used indices t/10 for some checkpoint D comparisons, a +10 ms offset. This audit uses saved-state endpoint times and does not overwrite the original acceptance decisions."
+}

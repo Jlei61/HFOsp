@@ -1,0 +1,85 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_3_20260920_a60.00822_N4096.npz",
+  "classification": "SUPERCRITICAL_PD",
+  "child_stability": "UNSTABLE",
+  "peaks": [
+    {
+      "core": "A",
+      "peak_times_ms": [
+        26.14118463651736,
+        129.33322564335762
+      ],
+      "peak_rates_Hz": [
+        105.95179961763031,
+        122.35942463282457
+      ],
+      "cyclic_peak_intervals_ms": [
+        103.19204100684027,
+        107.53958673376502
+      ],
+      "peak_definition": "Regional E-rate peaks above 20 Hz, prominence 10 Hz, distance 60 ms; periodic cubic interpolation."
+    },
+    {
+      "core": "B",
+      "peak_times_ms": [
+        48.121656445473036,
+        153.48314257622062
+      ],
+      "peak_rates_Hz": [
+        63.82609297695637,
+        63.865900576338156
+      ],
+      "cyclic_peak_intervals_ms": [
+        105.36148613074758,
+        105.37014160985771
+      ],
+      "peak_definition": "Regional E-rate peaks above 20 Hz, prominence 10 Hz, distance 60 ms; periodic cubic interpolation."
+    }
+  ],
+  "period_ms": 210.7316277406053,
+  "core_A_B_peaks_per_full_period": [
+    2,
+    2
+  ],
+  "max_regional_half_difference_Hz": [
+    17.859214281394856,
+    0.044989018716414364,
+    0.8207868132094394
+  ],
+  "contact_names": [
+    "SCL9",
+    "ICL11",
+    "SCL8",
+    "ICL10",
+    "SCL7",
+    "ICL9",
+    "ICL8",
+    "SCL6",
+    "ICL7",
+    "ICL6",
+    "ICL5",
+    "ICL4",
+    "ICL3",
+    "ICL2",
+    "ICL1"
+  ],
+  "max_contact_half_difference_Hz": [
+    0.7121464201438645,
+    0.0284033560345385,
+    0.05860488511996023,
+    0.01953265463773321,
+    0.0029861152155304348,
+    0.024924010979419948,
+    0.04150220712087731,
+    0.0006115611119741592,
+    0.1004514950098645,
+    0.19805465250759724,
+    0.19273294390671225,
+    0.10346427914561218,
+    0.045015631026174674,
+    0.06499524693211356,
+    0.03388427761294466
+  ],
+  "phase_shift_samples": 1969,
+  "readout": "Same nonlinear 2T orbit; physical rate and field differences, no arbitrary linear mode normalization. Contact-weighted firing rate, not SEEG voltage."
+}

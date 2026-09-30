@@ -1,0 +1,9 @@
+{
+  "question": "Does eliminating the return time as an independent Newton variable improve the closed-orbit correction at the actual D_A=.300 field?",
+  "reason": "Two whole-state correction updates lowered closure to.003845, then4smaller numerical proposals increased it. Identical full-state replays on both GPUs and both readout partitions are bitwise equal. This does not indicate a bifurcation.",
+  "change": "Use the existing nonlinear cubic Poincare return, which solves its section-crossing time exactly for each candidate; compose original segment derivatives and include the implicit return-time derivative. Only numerical storage and state/period parameterization change.",
+  "unchanged": "Full3479group model, allE Mdynamic,allZheld,onlyCoreA native9594.906685976 field versus outside9s,originalcoefficients and physical rate closure1e-7/block1e-6.",
+  "gates": "EverynewcomposedPoincarederivative compared with one original uncached unsegmented derivative at1e-10. Original nonlinearPoincare finite difference<1e-3 beforefirstupdate. Root still requires originalwholeflow,shift,mesh,stability,parametercrossing andonsetcorrespondence.",
+  "budget": "One3iteration,24Krylovperiteration correction from the saved accepted whole-state iterate,maximum5trialreturns each. No model refit.",
+  "model_promoted": false
+}

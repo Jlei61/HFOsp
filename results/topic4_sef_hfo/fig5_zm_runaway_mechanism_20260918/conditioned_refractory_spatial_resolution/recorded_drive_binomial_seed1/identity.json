@@ -1,0 +1,51 @@
+{
+  "graph": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "groups": 3479,
+  "grid": 40,
+  "input_grid": 20,
+  "readout_grid": 20,
+  "original_cells": 40000,
+  "native_future_spikes_used": false,
+  "response": "conditioned_refractory_rate/fit/locked_weights.json",
+  "noise_split": [
+    {
+      "synapse": "ampa",
+      "stationary_pairwise_relative_error": 8.883924858577115e-16,
+      "removed_fraction_range": [
+        0.0008403361344537816,
+        1.0
+      ],
+      "private_operator_minimum": 0.0,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 4.9639992158328995e-05,
+      "previous_Heun_fraction_max": 1.00001450111236,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 6790588
+    },
+    {
+      "synapse": "gaba",
+      "stationary_pairwise_relative_error": 7.979850840862656e-16,
+      "removed_fraction_range": [
+        0.0026041666666666665,
+        1.0
+      ],
+      "private_operator_minimum": 0.0,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 5.21886866792403e-06,
+      "previous_Heun_fraction_max": 1.0000008867395271,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 3125847
+    }
+  ]
+}

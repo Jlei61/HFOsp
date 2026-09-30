@@ -1,0 +1,12 @@
+{
+  "method": "exponential_midpoint",
+  "dt_ms": 0.025,
+  "source_dt_ms": 0.025,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/final_state.npz",
+  "duration_ms": 5000,
+  "common_initial_history": "Original source values are flux-bin averages. Subdivide each parent bin conservatively as a common piecewise-constant history, preserving every original integral and initial refractory occupancy. All continuous fast/M states unchanged.",
+  "physical_model": "Locked3479group spatial renewalrate, originalgraph/thresholds/physicaldelays/privateQ/conditioned39+locked transientcorrection. AllZheld, allE Mdynamic, constantoriginalinput.",
+  "numerical_checks": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/numerical_checks/exponential_midpoint",
+  "interpretation": "Longer finite-time numerical control. A120ms convergence pass does not certify a long-time attractor, a critical parameter or a bifurcation type. Old tangent/Floquet operators cannot be applied to the new integrator.",
+  "model_promoted": false
+}

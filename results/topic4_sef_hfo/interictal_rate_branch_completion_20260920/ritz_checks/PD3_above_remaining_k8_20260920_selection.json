@@ -1,0 +1,194 @@
+{
+  "lock_rule": "all-reliable",
+  "quotient_modes_requested": 8,
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD3_parent_above_full_k16_20260920_dt0.0125.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD3_parent_above_full_k16_20260920_dt0.00625.json"
+  ],
+  "selected_source_indices": [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      14,
+      13,
+      15
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  ],
+  "source_paired_classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        -312.64373832066934,
+        0.0
+      ],
+      [
+        -5.845093825505565,
+        0.0
+      ],
+      [
+        1.055500682052821,
+        0.0
+      ],
+      [
+        -0.9831117060268943,
+        0.0
+      ],
+      [
+        -0.6590474071719064,
+        0.025844362287923053
+      ],
+      [
+        -0.6590474071719064,
+        -0.025844362287923053
+      ],
+      [
+        -0.5399066002038211,
+        0.0
+      ],
+      [
+        0.5153015510097588,
+        0.0
+      ],
+      [
+        -0.32368975593998517,
+        0.10675355442091328
+      ],
+      [
+        -0.32368975593998517,
+        -0.10675355442091328
+      ],
+      [
+        -0.21975385118779783,
+        -0.22168160103746093
+      ],
+      [
+        -0.21975385118779783,
+        0.22168160103746093
+      ],
+      [
+        -0.2706541781760909,
+        0.0
+      ],
+      [
+        -0.0905138509067399,
+        0.2442883922702744
+      ],
+      [
+        -0.0905138509067399,
+        -0.2442883922702744
+      ],
+      [
+        -0.18252996302865082,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006506029670163116,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915,
+      0.00038053928192220915
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010843382783605193,
+      1.3014958419432787e-05,
+      3.628873074035255e-06,
+      6.760829098784171e-07,
+      2.39155398740059e-06,
+      2.39155398740059e-06,
+      7.974174567326742e-07,
+      1.1771957088013707e-06,
+      3.0913939557131896e-07,
+      3.0913939557131896e-07,
+      4.4757080262620376e-07,
+      4.4757080262620376e-07,
+      2.5733963160412543e-07,
+      3.014216902718785e-08,
+      3.014216902718785e-08,
+      5.286582346608615e-07
+    ],
+    "reliable_outside_count": 3,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": false,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 312.64373832066934,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "scope": "Selection for invariant-block checks only. All selected eigenvalues are retained in the final spectrum, including stable ones; no classification is assumed from the selection."
+}

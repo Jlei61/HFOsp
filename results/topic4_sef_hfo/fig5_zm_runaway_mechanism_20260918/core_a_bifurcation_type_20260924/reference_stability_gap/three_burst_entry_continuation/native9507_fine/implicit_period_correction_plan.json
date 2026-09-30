@@ -1,0 +1,10 @@
+{
+  "time": "2026-09-25T04:54:18.441387+08:00",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9507_fine/small_step_correction/iteration02/accepted_node00.npz",
+  "period_guess_ms": 797.6515810998221,
+  "method": "Same existing cubic Poincare return with new exact segmented derivative storage. Period is implicit at each nonlinear return. Complete spatial delay/M state preserved.",
+  "reason": "Three accepted updates reduced whole closure only.02944to.02699, about2-3percent each. The original nonlinear Poincare formulation with complete segmented variational storage has now passed unsegmented-original derivative parity and nonlinear return FD on the corresponding coarse problem. Continue from this exact saved fine state with implicit return time; no model or physical threshold changes.",
+  "budget": "At most4iterations24Krylov/5trialreturns each;dt.025,source_dt.025,K6,cycleRMS,initialradius.001,existingMprecondition and positive/phase/refractory proposalprojection.",
+  "gates": "At every derivative construction comparewith original full unsegmented uncached Poincarederivative<1e-10;actualnonlinearFD<1e-3 beforefirstupdate.Originalphysicalroot<1e-7/block1e-6. Allphase/mesh/stability/onsetlink gates retained.",
+  "model_promoted": false
+}

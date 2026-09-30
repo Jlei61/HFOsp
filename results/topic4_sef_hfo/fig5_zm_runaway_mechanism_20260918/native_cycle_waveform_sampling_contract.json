@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-19T18:56:58.869548",
+  "question": "Exclude input waveform interpolation and response aggregation errors from the new nonstationary local-closure failure.",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "wave_samples": [
+    32768,
+    65536
+  ],
+  "same_noise_seed": true,
+  "acceptance": {
+    "MC_relative_wave_difference_max": 0.01,
+    "MC_relative_mean_difference_max": 0.005,
+    "model_relative_wave_difference_max": 0.001
+  },
+  "scope": "Independent source-sampling/numeric check only; does not relax primary validation gates."
+}

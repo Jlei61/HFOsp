@@ -1,0 +1,38 @@
+{
+  "status": "DESCRIPTIVE_FINITE_RECORD_NONRETURN",
+  "definition": "After final >=20ms interval of10ms smoothed global E rate below5Hz; no subsequent qualifyingquiet through12.5s. Shorter dips allowed. Startofright-censored terminalepisode, not stabilityloss or attractorproof; distinct from200Hz200ms operationalhighentry.",
+  "rows": [
+    {
+      "label": "native",
+      "last_qualifying_quiet_window_ms": [
+        9296.5,
+        9323.5
+      ],
+      "terminal_no_return_start_ms": 9323.5,
+      "terminal_no_return_observed_ms": 3177.0,
+      "right_censored": true
+    },
+    {
+      "label": "rate_1mm",
+      "last_qualifying_quiet_window_ms": [
+        8905.0,
+        8944.0
+      ],
+      "terminal_no_return_start_ms": 8944.0,
+      "terminal_no_return_observed_ms": 3557.0,
+      "right_censored": true,
+      "D_at_terminal_start_interpolated": 0.10626394898879703
+    },
+    {
+      "label": "rate_0p5mm",
+      "last_qualifying_quiet_window_ms": [
+        8274.0,
+        8399.0
+      ],
+      "terminal_no_return_start_ms": 8399.0,
+      "terminal_no_return_observed_ms": 4102.0,
+      "right_censored": true,
+      "D_at_terminal_start_interpolated": 0.13059343074196467
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "status": "COMPLETE_FRESH_HELD_STATE_RESPONSE",
+  "K": 9.35,
+  "rows": [
+    {
+      "region": "allE",
+      "observed_density_rate_Hz": 200.44956269190197,
+      "direct_rate_Hz": 200.44501860046387,
+      "group_residual_weighted_RMS_Hz": 0.030762384862909185,
+      "maximum_group_residual_Hz": 0.33334641520184505,
+      "group_MC_SEM_weighted_RMS_Hz": 0.004636354974694407,
+      "groups_outside6MC_SEM": 297,
+      "groups": 1885
+    },
+    {
+      "region": "coreA",
+      "observed_density_rate_Hz": 472.3095266315567,
+      "direct_rate_Hz": 472.24319644189325,
+      "group_residual_weighted_RMS_Hz": 0.12395111021226413,
+      "maximum_group_residual_Hz": 0.33334060668943266,
+      "group_MC_SEM_weighted_RMS_Hz": 0.003945772896339447,
+      "groups_outside6MC_SEM": 106,
+      "groups": 172
+    },
+    {
+      "region": "coreB",
+      "observed_density_rate_Hz": 475.0006668157329,
+      "direct_rate_Hz": 474.9320823145277,
+      "group_residual_weighted_RMS_Hz": 0.13135888996489714,
+      "maximum_group_residual_Hz": 0.33334641520184505,
+      "group_MC_SEM_weighted_RMS_Hz": 0.0030421874921214747,
+      "groups_outside6MC_SEM": 105,
+      "groups": 171
+    },
+    {
+      "region": "surround",
+      "observed_density_rate_Hz": 186.63539392460615,
+      "direct_rate_Hz": 186.63403179246347,
+      "group_residual_weighted_RMS_Hz": 0.012984485349012913,
+      "maximum_group_residual_Hz": 0.11773840684156767,
+      "group_MC_SEM_weighted_RMS_Hz": 0.004685975093223056,
+      "groups_outside6MC_SEM": 86,
+      "groups": 1542
+    },
+    {
+      "region": "I",
+      "observed_density_rate_Hz": 255.20435025708943,
+      "direct_rate_Hz": 255.19759197998047,
+      "group_residual_weighted_RMS_Hz": 0.22367244169560446,
+      "maximum_group_residual_Hz": 1.5511067708333712,
+      "group_MC_SEM_weighted_RMS_Hz": 0.09147518946001279,
+      "groups_outside6MC_SEM": 29,
+      "groups": 1594
+    }
+  ],
+  "stationary_Graw": 0.11184703061128687,
+  "implied_Graw": 0.11139110508733267,
+  "individual_E_M_residual_RMS_Hz": 0.21517281020459433,
+  "field_RMS_Hz": 0.01752612429536804,
+  "root_certified": false,
+  "dynamic_stability_established": false,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "Finite nonlinear response residual at the actual near-exit held state. SEM measures fresh count uncertainty only; finite observation, fixedM, upstream mean and closure errors remain explicit.",
+  "producer_sha256": "6740cadb648a15bef4025dd11d35fdb468360ebcaaaff8066c4aa60c93fa57c2"
+}

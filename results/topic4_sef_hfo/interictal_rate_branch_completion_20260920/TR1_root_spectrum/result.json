@@ -1,0 +1,312 @@
+{
+  "status": "NONCRITICAL_SPECTRUM_RESOLVED",
+  "source_validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_B_validation.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+  "J_EE_core": 0.9458266272237216,
+  "physical": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+    "N": 128,
+    "check_N": 512,
+    "J_EE_core": 0.9458266272237216,
+    "T_ms": 165.7718637725918,
+    "maximum_group_defect_Hz": 2.2551405187698492e-14,
+    "regional_defect_Hz": [
+      7.027902013292976e-16,
+      2.6494673318085657e-16,
+      2.1531210453055143e-17
+    ],
+    "minimum_rate_Hz": 0.030426183490995365,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 0.02146394142051402,
+        "phase_index": 181,
+        "group": 337
+      },
+      "slow": {
+        "minimum_Hz": 0.0318530413219161,
+        "phase_index": 220,
+        "group": 208
+      },
+      "positive": true,
+      "N": 128,
+      "check_N": 512
+    }
+  },
+  "relative_root_waveform_change": 5.35641802344463e-16,
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR1_root_noncritical_k6_20260920_dt0.05.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR1_root_noncritical_k6_20260920_dt0.025.json"
+  ],
+  "critical_mode_target": [
+    [
+      0.9999848060749282,
+      0.005512497347705152
+    ],
+    [
+      0.9999848060749282,
+      -0.005512497347705152
+    ]
+  ],
+  "matched_critical_indices": [
+    1,
+    0
+  ],
+  "critical_matching_error": 2.939121283222673e-06,
+  "matched_critical_multipliers": [
+    [
+      0.9999831073344563,
+      0.0055100988659507015
+    ],
+    [
+      0.9999831073344563,
+      -0.0055100988659507015
+    ]
+  ],
+  "noncritical_multipliers": [
+    [
+      0.5409783517681443,
+      0.0
+    ],
+    [
+      0.021626838889525952,
+      0.0
+    ],
+    [
+      0.01425801716143931,
+      0.0
+    ],
+    [
+      -0.000442945258880922,
+      -0.008562938935281672
+    ]
+  ],
+  "noncritical_unstable_dimension": 0,
+  "other_modes_numerically_stable": true,
+  "paired_spectrum": {
+    "status": "UNRESOLVED",
+    "multipliers": [
+      [
+        0.9999831073344563,
+        -0.0055100988659507015
+      ],
+      [
+        0.9999831073344563,
+        0.0055100988659507015
+      ],
+      [
+        0.5409783517681443,
+        0.0
+      ],
+      [
+        0.021626838889525952,
+        0.0
+      ],
+      [
+        0.01425801716143931,
+        0.0
+      ],
+      [
+        -0.000442945258880922,
+        -0.008562938935281672
+      ]
+    ],
+    "per_mode_margin": [
+      5.39559804022717e-05,
+      5.39559804022717e-05,
+      2e-05,
+      2e-05,
+      2e-05,
+      2e-05
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      8.992663400378617e-06,
+      8.992663400378617e-06,
+      2.5943455433941054e-06,
+      6.616136067998102e-07,
+      9.428337665994685e-07,
+      9.817479337623193e-08
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.9999982880704282,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "scope": "At the validated TR1 root, exclude only its separately checked non-real conjugate pair. Numerical count of all other full-history Poincare multipliers, conditional on numerical Arnoldi coverage; no rigorous enclosure, finite-torus Lyapunov spectrum or interval-wide completeness claim.",
+  "attempts": [
+    {
+      "status": "NONCRITICAL_SPECTRUM_RESOLVED",
+      "source_validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_B_validation.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+      "J_EE_core": 0.9458266272237216,
+      "physical": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+        "N": 128,
+        "check_N": 512,
+        "J_EE_core": 0.9458266272237216,
+        "T_ms": 165.7718637725918,
+        "maximum_group_defect_Hz": 2.2551405187698492e-14,
+        "regional_defect_Hz": [
+          7.027902013292976e-16,
+          2.6494673318085657e-16,
+          2.1531210453055143e-17
+        ],
+        "minimum_rate_Hz": 0.030426183490995365,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": 0.02146394142051402,
+            "phase_index": 181,
+            "group": 337
+          },
+          "slow": {
+            "minimum_Hz": 0.0318530413219161,
+            "phase_index": 220,
+            "group": 208
+          },
+          "positive": true,
+          "N": 128,
+          "check_N": 512
+        }
+      },
+      "relative_root_waveform_change": 5.35641802344463e-16,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR1_root_noncritical_k6_20260920_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR1_root_noncritical_k6_20260920_dt0.025.json"
+      ],
+      "critical_mode_target": [
+        [
+          0.9999848060749282,
+          0.005512497347705152
+        ],
+        [
+          0.9999848060749282,
+          -0.005512497347705152
+        ]
+      ],
+      "matched_critical_indices": [
+        1,
+        0
+      ],
+      "critical_matching_error": 2.939121283222673e-06,
+      "matched_critical_multipliers": [
+        [
+          0.9999831073344563,
+          0.0055100988659507015
+        ],
+        [
+          0.9999831073344563,
+          -0.0055100988659507015
+        ]
+      ],
+      "noncritical_multipliers": [
+        [
+          0.5409783517681443,
+          0.0
+        ],
+        [
+          0.021626838889525952,
+          0.0
+        ],
+        [
+          0.01425801716143931,
+          0.0
+        ],
+        [
+          -0.000442945258880922,
+          -0.008562938935281672
+        ]
+      ],
+      "noncritical_unstable_dimension": 0,
+      "other_modes_numerically_stable": true,
+      "paired_spectrum": {
+        "status": "UNRESOLVED",
+        "multipliers": [
+          [
+            0.9999831073344563,
+            -0.0055100988659507015
+          ],
+          [
+            0.9999831073344563,
+            0.0055100988659507015
+          ],
+          [
+            0.5409783517681443,
+            0.0
+          ],
+          [
+            0.021626838889525952,
+            0.0
+          ],
+          [
+            0.01425801716143931,
+            0.0
+          ],
+          [
+            -0.000442945258880922,
+            -0.008562938935281672
+          ]
+        ],
+        "per_mode_margin": [
+          5.39559804022717e-05,
+          5.39559804022717e-05,
+          2e-05,
+          2e-05,
+          2e-05,
+          2e-05
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          8.992663400378617e-06,
+          8.992663400378617e-06,
+          2.5943455433941054e-06,
+          6.616136067998102e-07,
+          9.428337665994685e-07,
+          9.817479337623193e-08
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.9999982880704282,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "scope": "At the validated TR1 root, exclude only its separately checked non-real conjugate pair. Numerical count of all other full-history Poincare multipliers, conditional on numerical Arnoldi coverage; no rigorous enclosure, finite-torus Lyapunov spectrum or interval-wide completeness claim."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "status": "PASS_TECHNICAL_AND_AGENT_VISUAL",
+  "human_review": "PENDING",
+  "file_hash_checks": {
+    "fig5-panela-loop": true,
+    "fig5-panelb-loop": true,
+    "fig5-panelc-loop": true,
+    "fig5-state-return": true
+  },
+  "observed_original_prefix_bitwise": true,
+  "spatial_region_counts_conserved": true,
+  "local_inhibition_coordinate": "Cell-count weighted explicitly recorded Z*local_II; excludes new G.",
+  "pdf_review": "A/C unchanged PNG hashes and refreshedPDFs inspected; B recovery-reference vsreturned-brief markers and D matching observation markers inspected inPNG andPDF. All remain human-review candidates.",
+  "source_dependency_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_autonomous_loop.py": "57ac6d188e8d8f4e3b860967b2906fed089bcb94d7a83342f7c7e874e2744b37",
+    "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_clean_panels.py": "39cc7013f6c93c697dba5a78f626c07bbfcd2ea97df23a6c8de9b9123bd407dd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/zoom_topic4_return_core_propagation.py": "e99ddc60d890c0f34d4bc07c990eda56e46ff040b23acb60443a975c5b1cfa2a"
+  },
+  "recovery_landmark_check": {
+    "first_both_core_Z_at_reference_s": 23.9,
+    "core_Z_reference": [
+      0.7603118191859897,
+      0.7344912026970221
+    ],
+    "first_returned_brief_s": 49.31,
+    "reference_to_brief_s": 25.410000000000004,
+    "meaning": "Observed landmarks, not intervention times or a certified bifurcation threshold."
+  },
+  "trajectory_landmarks": [
+    {
+      "label": "Start",
+      "observed_landmark_s": 0.0,
+      "plotted_sample_s": 0.0025
+    },
+    {
+      "label": "Low activity",
+      "observed_landmark_s": 16.83,
+      "plotted_sample_s": 16.8325
+    },
+    {
+      "label": "Z at reference",
+      "observed_landmark_s": 23.9,
+      "plotted_sample_s": 23.9025
+    },
+    {
+      "label": "Returned brief",
+      "observed_landmark_s": 49.31,
+      "plotted_sample_s": 49.3125
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "created_local": "2026-09-20T03:55:14.865387+08:00",
+  "question": "Can one fixed36state causal filter bank represent local LIF frequency responses before a nonlinear finite-dimensional rate closure is trained?",
+  "equations": "For each of3input channels and tau in[1,4,16,64]ms, tau*h1dot=u-h1; tau*h2dot=h1-h2; tau*h3dot=h2-h3. Constant inputs imply every h=u. Linear output correction is a weighted sum of h-u. Poles strictly negative; continuous finite-dimensional system.",
+  "taus_ms": [
+    1.0,
+    4.0,
+    16.0,
+    64.0
+  ],
+  "orders": [
+    1,
+    2,
+    3
+  ],
+  "states_per_population": 36,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/rows.json",
+  "fit_frequencies_hz": [
+    2.0,
+    5.0,
+    20.0,
+    80.0
+  ],
+  "heldout_frequencies_hz": [
+    10.0,
+    40.0
+  ],
+  "qualification": "Original source DC absolute gain/SEM>=10. Frequencies and DC belong to the same fixed workpoint, not independent subjects.",
+  "fitting": "DC fixed to measured calibration DC. Normalize residual by absolute DC. Weighted ridge with SEM floor0.02in normalized units and ridge coefficient1; single fixed choice, no tuning on held-out frequencies.",
+  "readout": "Error/absoluteDC<=0.10at10Hz and<=0.15at40Hz; report noise precision separately. This is frequency interpolation at known calibration workpoints, not parameter interpolation, a new blind dataset, nonlinear waveform or network validation.",
+  "stop": "One basis and one regularization, all eligible calibration workpoints. No nonlinear spatial model or bifurcation launched by this screen."
+}

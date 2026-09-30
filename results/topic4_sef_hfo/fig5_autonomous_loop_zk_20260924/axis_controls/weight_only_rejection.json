@@ -1,0 +1,22 @@
+{
+  "status": "AXIS_INTERVENTION_NOT_ACHIEVED",
+  "rows": [
+    {
+      "label": "reference",
+      "axis_deg_mod180": 148.4145559164006,
+      "aspect": 1.935712656149318
+    },
+    {
+      "label": "rotated",
+      "axis_deg_mod180": 154.22289483054,
+      "aspect": 1.7327015826169938
+    },
+    {
+      "label": "isotropic",
+      "axis_deg_mod180": 153.2135859837317,
+      "aspect": 1.7351726953888438
+    }
+  ],
+  "decision": "Do not run these as rotated/isotropic controls; matched-weight reallocation insufficient on fixed topology. Proceed to delay/source-region constrained partner reassignment.",
+  "solver_note": "Initial numerical bracketing could not realize the old second moment in nearly tied-score strata; new solver widens bracket and preserves unachievable strata exactly. First and second moments now match, but scientific angle goal fails."
+}

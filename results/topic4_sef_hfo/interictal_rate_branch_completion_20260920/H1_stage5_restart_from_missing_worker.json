@@ -1,0 +1,63 @@
+{
+  "timestamp": 1789862158.0157685,
+  "old_worker": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 675111,
+    "N": 2048,
+    "seed_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcAconnectionStage4_accuracy.json",
+    "rows": [],
+    "dependencies": [
+      675110
+    ]
+  },
+  "old_pid_missing": true,
+  "no_existing_segment": true,
+  "seed_profiles": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0158_N2048.npz",
+      "N": 2048,
+      "J_EE_core": 1.2656268648529019,
+      "T_ms": 82.17299174714368,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -6.661338147750939e-13,
+          "phase_index": 6531,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 5.69146935316222e-50,
+          "phase_index": 3250,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0159_N2048.npz",
+      "N": 2048,
+      "J_EE_core": 1.2634666122157996,
+      "T_ms": 82.38712557291505,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -5.551115123125783e-13,
+          "phase_index": 4316,
+          "group": 835
+        },
+        "slow": {
+          "minimum_Hz": 1.124281446024221e-49,
+          "phase_index": 3265,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      }
+    }
+  ],
+  "new_dependency": 489002,
+  "new_device": 0,
+  "reason": "Restore the absent H1 global-endpoint worker after verifying it is not running. Keep its accepted Stage4 endpoints, full spatial equations and 160-step continuation bound. Queue after the current PD3 parent spectra, use already checked streamed operators and curvature initial guess, then check every new orbit before plotting. No active numerical task is restarted.",
+  "global_connection_confirmed": false
+}

@@ -1,0 +1,141 @@
+[
+  {
+    "return_index": 0,
+    "period_ms": 262.2770093953541,
+    "fraction": 0.08037581416541185,
+    "section_residual": 1.517887073774076e-18,
+    "section_speed": 2.3089547738147234,
+    "initial_phase": 0.0,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 680.7029058281887,
+        "difference_rms": 30.62307475398445,
+        "relative_rms": 0.04498743062764859
+      },
+      "GABA": {
+        "reference_rms": 801.500914520962,
+        "difference_rms": 47.472930973562185,
+        "relative_rms": 0.059230039683654784
+      },
+      "M": {
+        "reference_rms": 0.024981286893463836,
+        "difference_rms": 8.612008208672477e-05,
+        "relative_rms": 0.0034473837338322806
+      },
+      "covariance": {
+        "reference_rms": 610.094484153785,
+        "difference_rms": 37.46243084598976,
+        "relative_rms": 0.06140431001921122
+      },
+      "input_memory": {
+        "reference_rms": 0.5005471295469738,
+        "difference_rms": 0.041698512656310235,
+        "relative_rms": 0.08330586710995622
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.3013199311897959,
+        "difference_rms": 0.022208822311384557,
+        "relative_rms": 0.07370512207304211
+      }
+    },
+    "combined_relative_rms": 0.060120369223877625,
+    "coordinate_residual": 0.07885370582118466,
+    "next_method": "CONVEX_RELAXATION",
+    "mixing_coefficients": [
+      1.0
+    ]
+  },
+  {
+    "return_index": 1,
+    "period_ms": 259.9105122936824,
+    "fraction": 0.42049174729590433,
+    "section_residual": 3.2677851847874833e-16,
+    "section_speed": 2.0028843973125445,
+    "initial_phase": 8.382238106512971e-17,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 681.6957490406613,
+        "difference_rms": 51.6291287618825,
+        "relative_rms": 0.07573632200954646
+      },
+      "GABA": {
+        "reference_rms": 801.4087151372174,
+        "difference_rms": 106.62141845300557,
+        "relative_rms": 0.13304249933786885
+      },
+      "M": {
+        "reference_rms": 0.024984442038271763,
+        "difference_rms": 0.00017690694509606486,
+        "relative_rms": 0.0070806842444219725
+      },
+      "covariance": {
+        "reference_rms": 610.071975239655,
+        "difference_rms": 94.2703489522304,
+        "relative_rms": 0.1545233231131427
+      },
+      "input_memory": {
+        "reference_rms": 0.5005699060798826,
+        "difference_rms": 0.06396889340941224,
+        "relative_rms": 0.12779212779763846
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.3014505962779565,
+        "difference_rms": 0.042410904219340385,
+        "relative_rms": 0.1406894023199571
+      }
+    },
+    "combined_relative_rms": 0.11796060530892871,
+    "coordinate_residual": 0.14833715054253663,
+    "next_method": "ANDERSON6_ON_RELAXED_MAP",
+    "mixing_coefficients": [
+      0.6844198518033289,
+      0.3155801481966712
+    ]
+  },
+  {
+    "return_index": 2,
+    "period_ms": 259.9980043704332,
+    "fraction": 0.9201748173283923,
+    "section_residual": -2.885062126145002e-16,
+    "section_speed": 2.0525852415414034,
+    "initial_phase": 1.0562839645862264e-16,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 681.6294130606003,
+        "difference_rms": 46.29004727137179,
+        "relative_rms": 0.06791087119249117
+      },
+      "GABA": {
+        "reference_rms": 801.7023249662188,
+        "difference_rms": 95.27873856146854,
+        "relative_rms": 0.11884553105853009
+      },
+      "M": {
+        "reference_rms": 0.024983316679314128,
+        "difference_rms": 0.00016145258119438298,
+        "relative_rms": 0.0064624158300032155
+      },
+      "covariance": {
+        "reference_rms": 610.4675529091184,
+        "difference_rms": 83.93077635265918,
+        "relative_rms": 0.13748605630667177
+      },
+      "input_memory": {
+        "reference_rms": 0.5003300320269848,
+        "difference_rms": 0.05737014778688447,
+        "relative_rms": 0.1146646095867183
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.30121389956805145,
+        "difference_rms": 0.038338778126651867,
+        "relative_rms": 0.12728090629825076
+      }
+    },
+    "combined_relative_rms": 0.10569510157019812,
+    "coordinate_residual": 0.13402291553568615,
+    "next_method": "CONVEX_RELAXATION",
+    "mixing_coefficients": [
+      1.0
+    ]
+  }
+]

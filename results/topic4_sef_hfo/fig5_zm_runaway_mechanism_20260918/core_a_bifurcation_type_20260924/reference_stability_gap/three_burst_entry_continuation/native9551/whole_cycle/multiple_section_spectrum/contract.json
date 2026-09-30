@@ -1,0 +1,12 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9551/whole_cycle",
+  "dt_ms": 0.05,
+  "maximum_Krylov": 24,
+  "cache_segments": 12,
+  "cache_partition": "Optional finer storage partition uses actual uninterrupted integer-step states and keeps the original root cycle-RMS coordinates. Only peak GPU cache memory changes; total full-state monodromy and all M/delay variables are retained.",
+  "equation": "Same complete spatial delayed rate model with every Z held and every E M dynamic. Compose full segment variational maps in one common invertible cycle-RMS coordinate system.",
+  "prerequisites": "Numerically closed multiple-shooting root; independent unsegmented original-flow whole-period closure combined<1e-7 and eachblock<1e-6. Cached/original derivatives checked at every root node. Full-period neutral direction residual<1e-3 required before Arnoldi.",
+  "method": "Second/fourth order phase velocities from original forward steps; full fixed-time monodromy is product of all segment derivatives. Return derivative projects endpoint along the autonomous phase velocity onto the original local transverse plane. Two-pass full-state Arnoldi and independent full-state Ritz residuals.",
+  "limits": "A finite Krylov spectrum gives verified numerical eigenpairs, not a completeness proof. Independent mesh, shifted orbit, critical crossing and nondegeneracy remain required for a physical bifurcation label.",
+  "model_promoted": false
+}

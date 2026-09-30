@@ -1,0 +1,31 @@
+{
+  "status": "SECTION_MODE_DESCRIPTIVE_COMPLETE",
+  "multiplier": {
+    "real": -1.1886199329585603,
+    "imag": 0.0,
+    "relative_residual": 1.5384915690574542e-13,
+    "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+  },
+  "rows": [
+    {
+      "block": "instantaneous E rate",
+      "E_fraction_of_total": 0.9248859543855291,
+      "within_E_A_B_surround": [
+        0.005645305059795088,
+        0.978616795662806,
+        0.015737899277399006
+      ]
+    },
+    {
+      "block": "M",
+      "E_fraction_of_total": 0.9999999999999999,
+      "within_E_A_B_surround": [
+        0.00011395811735194467,
+        0.08819911838970086,
+        0.9116869234929473
+      ]
+    }
+  ],
+  "scope": "Cell-weighted squared physical perturbations at only the chosen Poincare phase. This is not a phase-independent Floquet-mode localization or proof of which core causes onset. Physical phase/mesh and critical crossing remain pending.",
+  "model_promoted": false
+}

@@ -1,0 +1,32 @@
+{
+  "created_local": "2026-09-23T13:59:36.813350+08:00",
+  "question": "Does the locked transient correction improve early self-limited events, spatial recruitment and the Z/M onset path simultaneously in the same whole network?",
+  "authorization": "User continued the autonomous model/onset investigation after being told the remaining local failure and missing whole-network validation. This new diagnostic extends the previous local-only batch; its failed acceptance and no-promotion decision remain unchanged.",
+  "design_revision": "The local-only contract has ended in FAIL. A distinct whole-network sensitivity test now measures the consequence of its residual error. It is not an automatic gate-conditioned launch or model acceptance.",
+  "local_failure": "Early weak surround E group531 fails the original waveform gate; 13/14 fresh local inputs pass. All numerical convergence checks pass. No refit or tolerance change.",
+  "parameters": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_response_correction/locked.json",
+  "parameter_sha256": "f5cf0f3128658c02ffca2d92c08cbcb2a4be33c040eae767164a84021cf37044",
+  "changed": "Only delta_log_hazard=b_population*H/(H+h_population), H=mean(f[3:39]^2), using locked coefficients. No new dynamic state.",
+  "unchanged": "Same g40 physical graph, thresholds, cell counts, synaptic and delay operators including repaired private variance, original fine external input, seed1, zero initialization and Z/M laws. Both Z and M dynamic. No native future spikes supplied.",
+  "stationary": "Correction and first derivative vanish at stationary input histories. This does not certify the parent stationary approximation.",
+  "runs": [
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "seed": 1
+    }
+  ],
+  "dt_ms": 0.05,
+  "duration_ms": 12500,
+  "checkpoints_ms": [
+    3000,
+    8000,
+    9000,
+    9420,
+    9870
+  ],
+  "readouts": "Unchanged original A4 six gates plus separate early0.5-3s,4-8s,8-9.42s complete-event, quiet, core-order and spatial diagnostics. D=1-cell-weighted mean Z_E; y=Hz per neuron.",
+  "interpretation": "Improved early and late correspondence supports transient response error as a contributor. Early improvement but late failure rejects it as a sufficient repair. New persistent activity in the early interval is a failed regime. No outcome alone proves a bifurcation.",
+  "budget": "One full12.5s trajectory, prefix implementation verification, raw readout audit and comparison figure. No coefficient tuning or branch launch in this batch.",
+  "local_failure_retained": true,
+  "model_promoted": false
+}

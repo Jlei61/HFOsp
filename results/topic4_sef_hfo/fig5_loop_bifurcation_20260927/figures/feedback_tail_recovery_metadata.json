@@ -1,0 +1,33 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/feedback_tail_mechanism/analysis.json",
+  "producer_sha256": "224885e1ff8577c23f348b1ee074f3660d9f6efaf2b360b140f813304c7f72ab",
+  "records": [
+    {
+      "seed": 9108402,
+      "absolute_alignment_s": 17.416,
+      "G_unblocking_relative_s": 0.6879999999999988,
+      "paired_same_absolute_time": true,
+      "displayed_relative_window_s": [
+        -2,
+        3
+      ]
+    },
+    {
+      "seed": 9108403,
+      "absolute_alignment_s": 14.236,
+      "G_unblocking_relative_s": 0.35799999999999876,
+      "paired_same_absolute_time": true,
+      "displayed_relative_window_s": [
+        -2,
+        3
+      ]
+    }
+  ],
+  "statistical_unit": "Two native paired noise seeds; reused original runs, not additional simulations.",
+  "interpretation": "The delayed G tail coexists with low activity and later decays below the necessary threshold for Z recovery. The response-time intervention is paired; this trace alone does not identify a unique mediator or formal bifurcation. First low activity and first net recovery are not sufficient/full recovery; the8403rate rises again near+2.9s in this view.",
+  "formal_bifurcation": false,
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS",
+  "agent_visual_review_epoch": 1790522249.876292,
+  "visual_check": "PNG reopened after splitting overlapping y labels; traces, limits, paired absolute-time alignment and8403earlyrebound retained. SVG uses the same saved figure."
+}

@@ -1,0 +1,36 @@
+{
+  "status": "STABLE_WITH_STEP_REFINEMENT",
+  "D": 0.143221680612,
+  "T_ms": 263.61661273543376,
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/actual_fine_Z_fixedD_G8193_M65536/point0004.npz",
+  "gates": {
+    "phase": true,
+    "eigen_residual": true,
+    "refined_step": true,
+    "multiplier_agreement": true,
+    "stable": true
+  },
+  "evidence": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/actual_fine_Z_fixedD_G8193_M65536_point0004_endpoint_dt0.025_quotient_chainphase_rk4_cubic_streamed_fastgrid_dominant_ncv12.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/actual_fine_Z_fixedD_G8193_M65536_point0004_endpoint_dt0.0125_quotient_chainphase_rk4_cubic_streamed_fastgrid_dominant_ncv12.json"
+  ],
+  "multipliers": [
+    [
+      [
+        0.7697204526857327,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.7697188145139239,
+        0.0
+      ]
+    ]
+  ],
+  "phase_defects": [
+    0.0002436141445724274,
+    0.0001310590775677476
+  ],
+  "scope": "Leading transverse Arnoldi multiplier on this periodic solution and this actual fine spatial-Z slice; held Z, dynamic M. Not onset certification or complete branch coverage."
+}

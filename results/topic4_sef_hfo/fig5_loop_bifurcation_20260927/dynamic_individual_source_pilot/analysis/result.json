@@ -1,0 +1,307 @@
+{
+  "status": "COMPLETE_TWO_PHYSICAL_TIME_COMPARISONS",
+  "rows": [
+    {
+      "mode": "group_source",
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            0.1
+          ],
+          "native_rate_Hz": [
+            196.53468749999996,
+            472.3474801061008,
+            473.7913486005088,
+            182.55285620485878
+          ],
+          "density_rate_Hz": [
+            197.30574223168745,
+            472.1106193483034,
+            474.46743935908967,
+            183.351311132276
+          ],
+          "rate_difference_Hz": [
+            0.7710547316874852,
+            -0.23686075779744442,
+            0.6760907585808695,
+            0.7984549274172252
+          ],
+          "weighted_field_RMS_Hz": 3.39623874395858,
+          "native_counterfactual_Zdot_per_s": [
+            0.04025985000000001,
+            -0.03483387722099198,
+            -0.03307375775391639,
+            0.044011028135889904
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.03983170309900483,
+            -0.034833877128536486,
+            -0.03307375768365442,
+            0.043561234933106464
+          ],
+          "density_causal_R_range": [
+            197.06622373094223,
+            198.34955130451746
+          ],
+          "density_Graw_range": [
+            4.240454966938688e-26,
+            5.168955137392397e-26
+          ]
+        },
+        {
+          "interval_s": [
+            0.1,
+            0.8
+          ],
+          "native_rate_Hz": [
+            196.52183035714287,
+            472.3304281924971,
+            474.16757542711713,
+            182.53006284588696
+          ],
+          "density_rate_Hz": [
+            200.15733404251733,
+            472.31029817726,
+            474.9304811440894,
+            186.33018274312712
+          ],
+          "rate_difference_Hz": [
+            3.6355036853744593,
+            -0.02013001523710045,
+            0.7629057169722842,
+            3.8001198972401653
+          ],
+          "weighted_field_RMS_Hz": 13.813596770523024,
+          "native_counterfactual_Zdot_per_s": [
+            0.04024284642857143,
+            -0.03483387722099197,
+            -0.033073757753916404,
+            0.04399316489604373
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.03863341012671904,
+            -0.034833877128536764,
+            -0.03307375768365495,
+            0.04230235853411944
+          ],
+          "density_causal_R_range": [
+            198.25227569854312,
+            201.9600018799317
+          ],
+          "density_Graw_range": [
+            2.7529431259477533e-26,
+            0.09968677719885705
+          ]
+        },
+        {
+          "interval_s": [
+            0.8,
+            1.0
+          ],
+          "native_rate_Hz": [
+            196.50984375,
+            472.3342175066312,
+            474.0458015267176,
+            182.52051871306628
+          ],
+          "density_rate_Hz": [
+            200.72802249479594,
+            472.2249052029103,
+            474.73948521728175,
+            186.93676644549222
+          ],
+          "rate_difference_Hz": [
+            4.218178744795949,
+            -0.1093123037209125,
+            0.6936836905641712,
+            4.416247732425944
+          ],
+          "weighted_field_RMS_Hz": 19.03003377601344,
+          "native_counterfactual_Zdot_per_s": [
+            0.04024281562500001,
+            -0.034833877220991974,
+            -0.0330737577539164,
+            0.04399313253510199
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.0380739145211733,
+            -0.03483387712853661,
+            -0.03307375768365441,
+            0.04171457588876608
+          ],
+          "density_causal_R_range": [
+            201.19853423975147,
+            201.61816503050935
+          ],
+          "density_Graw_range": [
+            0.0998121257749777,
+            0.11347650484244234
+          ]
+        }
+      ],
+      "relevance_guards": {
+        "tail_field_RMS": false,
+        "tail_each_core_rate": true,
+        "whole_R_below200": false,
+        "whole_Graw_below_point1": false
+      },
+      "development_relevance_retained": false,
+      "formal_correspondence_certified": false
+    },
+    {
+      "mode": "individual_source",
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            0.1
+          ],
+          "native_rate_Hz": [
+            196.53468749999996,
+            472.3474801061008,
+            473.7913486005088,
+            182.55285620485878
+          ],
+          "density_rate_Hz": [
+            197.21313483228866,
+            472.081399965027,
+            474.3131773561499,
+            183.25872559611537
+          ],
+          "rate_difference_Hz": [
+            0.6784473322886981,
+            -0.2660801410738145,
+            0.5218287556410814,
+            0.7058693912565843
+          ],
+          "weighted_field_RMS_Hz": 2.861065292729982,
+          "native_counterfactual_Zdot_per_s": [
+            0.04025985000000001,
+            -0.03483387722099198,
+            -0.03307375775391639,
+            0.044011028135889904
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.04005032419348529,
+            -0.034833877128536486,
+            -0.03307375768365442,
+            0.04379090909671038
+          ],
+          "density_causal_R_range": [
+            197.04295854054482,
+            198.38400985143858
+          ],
+          "density_Graw_range": [
+            4.240454966938688e-26,
+            5.168955137392397e-26
+          ]
+        },
+        {
+          "interval_s": [
+            0.1,
+            0.8
+          ],
+          "native_rate_Hz": [
+            196.52183035714287,
+            472.3304281924971,
+            474.16757542711713,
+            182.53006284588696
+          ],
+          "density_rate_Hz": [
+            200.17408346474633,
+            472.5718792615777,
+            475.0067885830238,
+            186.3393348024425
+          ],
+          "rate_difference_Hz": [
+            3.652253107603457,
+            0.24145106908059688,
+            0.8392131559066911,
+            3.809271956555534
+          ],
+          "weighted_field_RMS_Hz": 14.284821844509118,
+          "native_counterfactual_Zdot_per_s": [
+            0.04024284642857143,
+            -0.03483387722099197,
+            -0.033073757753916404,
+            0.04399316489604373
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.03874792463668941,
+            -0.034833877128536764,
+            -0.03307375768365495,
+            0.042422662681166415
+          ],
+          "density_causal_R_range": [
+            198.31999828988708,
+            201.7716354100048
+          ],
+          "density_Graw_range": [
+            2.8883071435215954e-26,
+            0.09443496103141863
+          ]
+        },
+        {
+          "interval_s": [
+            0.8,
+            1.0
+          ],
+          "native_rate_Hz": [
+            196.50984375,
+            472.3342175066312,
+            474.0458015267176,
+            182.52051871306628
+          ],
+          "density_rate_Hz": [
+            200.63147464393714,
+            472.494819935247,
+            474.8255617300488,
+            186.8264347621467
+          ],
+          "rate_difference_Hz": [
+            4.1216308939371515,
+            0.160602428615789,
+            0.7797602033311932,
+            4.305916049080423
+          ],
+          "weighted_field_RMS_Hz": 18.835779644334046,
+          "native_counterfactual_Zdot_per_s": [
+            0.04024281562500001,
+            -0.034833877220991974,
+            -0.0330737577539164,
+            0.04399313253510199
+          ],
+          "density_counterfactual_Zdot_per_s": [
+            0.03826445993080378,
+            -0.03483387712853661,
+            -0.03307375768365441,
+            0.04191475491398521
+          ],
+          "density_causal_R_range": [
+            201.14718408801528,
+            201.45453175345074
+          ],
+          "density_Graw_range": [
+            0.09453648109028008,
+            0.10660286303162174
+          ]
+        }
+      ],
+      "relevance_guards": {
+        "tail_field_RMS": false,
+        "tail_each_core_rate": true,
+        "whole_R_below200": false,
+        "whole_Graw_below_point1": false
+      },
+      "development_relevance_retained": false,
+      "formal_correspondence_certified": false
+    }
+  ],
+  "interpretation": "One-second physical dynamics at one native conditional high-state anchor. Replicas are numerical particles, not native seeds. Independent Gaussian source fluctuations remain approximate; retaining source identity does not alone certify covariance, autonomous loop, periodic solution or stability.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "14e12763f228fa687a48cb9dc3fc3cda72af6a9069f6a1f55fd20d80a12bae0d",
+  "agent_visual": "PASS_LAYOUT_AND_DATA_SEMANTICS",
+  "human_visual": "PENDING",
+  "SVG_XML": "PASS"
+}

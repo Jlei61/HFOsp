@@ -1,0 +1,544 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/unstable_cycle_departure/J0.9460000/trajectory.npz",
+  "initial_condition": {
+    "J_EE_core": 0.946,
+    "T_ms": 166.1496245420176,
+    "dt_ms": 0.05,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/weak_unstable_J0.9460000_N128.npz",
+    "spectral_mode_seed": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_return_evalmode_J0.9460343175648_N128.npz",
+    "exponent_per_ms": [
+      4.2016919486418285e-05,
+      0.03794454377980462
+    ],
+    "predicted_linear_efolding_ms": 23799.93612628465,
+    "mode_residual": 5.88987156532249e-16,
+    "rate_mode_amplitude_hz": 0.01,
+    "amplitude_definition": "Coefficient after max absolute complex rate eigenfunction normalization; initial phase takes the real component.",
+    "initial_checkpoint": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/unstable_cycle_departure/J0.9460000_dt0.05_a0.01/initial.npz",
+    "purpose": "Follow the unstable periodic orbit into its nonlinear outcome at fixed J. An initial-condition experiment, not a proof of global invariant-manifold connection.",
+    "no_noise": true,
+    "no_native_spikes": true
+  },
+  "duration_ms": 180684,
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        10000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9607338760506902,
+          "minimum_Hz": 0.27116887769921233,
+          "maximum_Hz": 2.0278330731356333,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438648401563783,
+          "minimum_Hz": 0.7354283157650751,
+          "maximum_Hz": 0.7523333856281433,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        10000,
+        20000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9571573608173878,
+          "minimum_Hz": 0.27116838498757434,
+          "maximum_Hz": 2.027838116486999,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438587786989016,
+          "minimum_Hz": 0.7363502762396523,
+          "maximum_Hz": 0.7514008671310718,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        20000,
+        30000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9559047009135638,
+          "minimum_Hz": 0.2711677462929756,
+          "maximum_Hz": 2.0278405764335345,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438929155507199,
+          "minimum_Hz": 0.7314800625576925,
+          "maximum_Hz": 0.7563891407794322,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        30000,
+        40000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9566524380428119,
+          "minimum_Hz": 0.27116776256271163,
+          "maximum_Hz": 2.027840893626687,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438617036877964,
+          "minimum_Hz": 0.7284632650305903,
+          "maximum_Hz": 0.7594692526674302,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        40000,
+        50000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9585212714974987,
+          "minimum_Hz": 0.27116956976328827,
+          "maximum_Hz": 2.027828656384025,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438742028120734,
+          "minimum_Hz": 0.7284417117900824,
+          "maximum_Hz": 0.7594998409312796,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        50000,
+        60000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9608392581088158,
+          "minimum_Hz": 0.2711705943317565,
+          "maximum_Hz": 2.0278222246357394,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7439147711666495,
+          "minimum_Hz": 0.731198626629648,
+          "maximum_Hz": 0.7567066464563665,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        60000,
+        70000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9584910732266995,
+          "minimum_Hz": 0.2711647640696334,
+          "maximum_Hz": 2.027859757390041,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7438304406911475,
+          "minimum_Hz": 0.7196833750768624,
+          "maximum_Hz": 0.7684738451268989,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        70000,
+        80000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9560163062709306,
+          "minimum_Hz": 0.2711609137993039,
+          "maximum_Hz": 2.027890580106003,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7444038587938264,
+          "minimum_Hz": 0.6979632789397058,
+          "maximum_Hz": 0.7923653048697774,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        80000,
+        90000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9562560552525321,
+          "minimum_Hz": 0.27116154998402536,
+          "maximum_Hz": 2.027887898282363,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7448830174132869,
+          "minimum_Hz": 0.6774120196491555,
+          "maximum_Hz": 0.8157413649460439,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        90000,
+        100000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9577220827424662,
+          "minimum_Hz": 0.27117028425321654,
+          "maximum_Hz": 2.027816105268362,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7455793024779513,
+          "minimum_Hz": 0.6571014792144146,
+          "maximum_Hz": 0.8396177559181024,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        100000,
+        110000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9601902968360125,
+          "minimum_Hz": 0.27118582004281033,
+          "maximum_Hz": 2.0277124475539523,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7476693948037553,
+          "minimum_Hz": 0.6324080331653887,
+          "maximum_Hz": 0.8713468135768221,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        110000,
+        120000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9598754164976278,
+          "minimum_Hz": 0.27119416512292005,
+          "maximum_Hz": 2.027651841201343,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7500435176211526,
+          "minimum_Hz": 0.600486454693719,
+          "maximum_Hz": 0.9148115607277127,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        120000,
+        130000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9563528116205467,
+          "minimum_Hz": 0.27119940554905947,
+          "maximum_Hz": 2.027619281087061,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7535439526189394,
+          "minimum_Hz": 0.5678868074036433,
+          "maximum_Hz": 0.9632109227109198,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        130000,
+        140000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9559412601466797,
+          "minimum_Hz": 0.2711866746906102,
+          "maximum_Hz": 2.0277263081635026,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7583055636762256,
+          "minimum_Hz": 0.5418448976357171,
+          "maximum_Hz": 1.0052266463485686,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        140000,
+        150000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9571771800628424,
+          "minimum_Hz": 0.2711041244809128,
+          "maximum_Hz": 2.0283119500335554,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7634523515671672,
+          "minimum_Hz": 0.516060795815088,
+          "maximum_Hz": 1.050305508797557,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        150000,
+        160000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9593325587373882,
+          "minimum_Hz": 0.2711051882538618,
+          "maximum_Hz": 2.02827874683733,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7671069288742565,
+          "minimum_Hz": 0.5031489811212052,
+          "maximum_Hz": 1.0737113388060917,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        160000,
+        170000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9608060611567211,
+          "minimum_Hz": 0.2710998852290114,
+          "maximum_Hz": 2.0283564837446897,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7682364502028655,
+          "minimum_Hz": 0.49959934367288766,
+          "maximum_Hz": 1.0803902555285518,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        170000,
+        180000
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9573035298079947,
+          "minimum_Hz": 0.27109557708394305,
+          "maximum_Hz": 2.0283636340688647,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.771877519754052,
+          "minimum_Hz": 0.4946185010971155,
+          "maximum_Hz": 1.090132039030848,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    },
+    {
+      "window_ms": [
+        180000,
+        180684
+      ],
+      "core": [
+        {
+          "core": "A",
+          "mean_Hz": 0.9388976680033033,
+          "minimum_Hz": 0.27122637007474426,
+          "maximum_Hz": 2.027432599260573,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        },
+        {
+          "core": "B",
+          "mean_Hz": 0.7657584273186445,
+          "minimum_Hz": 0.4968374622725045,
+          "maximum_Hz": 1.0855932401791784,
+          "burst_peak_count": 0,
+          "median_interval_ms": null,
+          "interval_CV": null
+        }
+      ]
+    }
+  ],
+  "first_smoothed_core_rate_above_10Hz_ms": null,
+  "final_20s_max_rates_Hz": [
+    2.0283636340688647,
+    1.090132039030848,
+    0.10119626371890737
+  ],
+  "weak_rhythm": {
+    "window_ms": [
+      150684,
+      180684
+    ],
+    "mean_peak_intervals_ms": [
+      166.15,
+      167.54494382022472
+    ],
+    "core_B_peak_phase_in_A_cycle_range": [
+      0.006024096385542169,
+      1.0
+    ],
+    "definition": "Small-oscillation timing only: raw 1ms averaged rates, A/B prominences .2/.05Hz, separation 80ms. These peaks are not burst events.",
+    "interpretation": "Different mean frequencies and a drifting relative phase describe finite-time weak modulation; no quasiperiodic-attractor proof."
+  },
+  "event_definition": "Core E rate averaged per neuron, 5ms Gaussian smoothing; peaks with height and prominence >=10Hz, separation >=60ms. Descriptive assay, not a bifurcation criterion.",
+  "attractor_class": "NOT_ESTABLISHED",
+  "scope": "One 180s deterministic initial-condition experiment at fixed J=.946, no injected noise or native spikes. A finite departure does not prove a global invariant-manifold connection or stable irregular attractor."
+}

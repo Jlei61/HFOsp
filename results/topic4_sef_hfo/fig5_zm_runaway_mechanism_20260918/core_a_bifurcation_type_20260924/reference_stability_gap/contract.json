@@ -1,0 +1,10 @@
+{
+  "created_local": "2026-09-24T20:48:35.118938+08:00",
+  "question": "Did the short interictal-burst periodic branch already lose stability between the actual late-interictal reference D_A=.25572170 and the long-activity D_A=.32812160?",
+  "reason": "Persistence of a numerical periodic root at D_A=.328--.363 does not rule out an earlier loss of stability. The verified negative multiplier -33 at D_A=.334 is already far outside the unit circle. No inference about a period-doubling crossing is justified without connecting to the reference regime and checking the actual full operator.",
+  "locked_model": "Same full3479-group spatial graph, delays, private variance and locked response. Same audited within-Core-A native Z family, outside-A Z native9s, each complete Z field held, all E M dynamic. No parameter other than the existing D_A changes.",
+  "first_condition": "Correct the existing D_A=.330 numerical short-burst root at D_A=.300. Then evaluate its actual Poincare spectrum. Adapt subsequent local continuation toward the original reference or an identified unit-circle bracket; no additional unrelated high-D short-cycle range expansion.",
+  "gates": "Full-state original equation closure, complete operator eigen-residuals, independent phase and mesh at any candidate crossing, nondegeneracy and corresponding actual-state change. Negative multiplier alone is not a period-doubling certificate. Any unstable branch fold or secondary event needs correspondence before being called entry into long activity.",
+  "scope": "This restores the missing stability link to the actual interictal reference. It does not presume stable periodicity of all observed reference events and does not replace the simultaneous actual-state/high-activity orbit work.",
+  "model_promoted": false
+}

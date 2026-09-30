@@ -1,0 +1,93 @@
+{
+  "timestamp": 1789881109.43313,
+  "status": "QUEUED_EXACT_PARAMETER_COMPARISON",
+  "solve_pid": 527839,
+  "delivery_pid": 527840,
+  "commands": [
+    [
+      "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+      "-u",
+      "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/solve_rate_sameJ_burst_pair.py",
+      "--device",
+      "1",
+      "--min-free-gib",
+      "6",
+      "--source-index",
+      "24",
+      "--output-name",
+      "sameJ_qualified_prefix24_pair",
+      "--after-pids",
+      "522390"
+    ],
+    [
+      "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+      "-u",
+      "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/finish_rate_sameJ_burst_readouts.py",
+      "--after-pid",
+      "527839",
+      "--pair-source",
+      "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/sameJ_qualified_prefix24_pair.json",
+      "--output-prefix",
+      "sameJ_qualified_burst"
+    ]
+  ],
+  "selection": "Last point of the independently checked 25-point B-leading prefix; all eight cycles form eligible events at all four frozen bin origins.",
+  "source": {
+    "family": "Bleading",
+    "index": 255,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0024_N4096.npz",
+    "J_EE_core": 0.9693444148956987,
+    "T_ms": 273.2687810787253,
+    "profile_evidence": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcBleadingConnection_20260920_accuracy.json",
+    "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/SCL_branch_scan/points/Bleading_0255.json",
+    "SCL_contacts": [
+      [
+        "SCL9",
+        "SCL8"
+      ],
+      [
+        "SCL9",
+        "SCL8"
+      ],
+      [
+        "SCL9",
+        "SCL8"
+      ],
+      [
+        "SCL9",
+        "SCL8"
+      ]
+    ],
+    "SCL_count": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "SCL_peak_threshold_ratio_min": [
+      4.142860528569136,
+      1.804212216262651,
+      0.9371608645097046,
+      0.1071327678581322
+    ],
+    "SCL_peak_threshold_ratio_max": [
+      4.143413638039417,
+      1.8043569770403665,
+      0.9373644458528854,
+      0.1071546956188004
+    ],
+    "qualified_groups": [
+      8,
+      8,
+      8,
+      8
+    ],
+    "SCL_fraction": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "purpose": "Retain both branches and original observer while comparing the three contact observables where B-leading group events are available. No stable-bistability or switching-bifurcation claim."
+}

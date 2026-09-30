@@ -1,0 +1,11 @@
+{
+  "status": "BOUNDED_DIAGNOSTIC_NO_STABILITY",
+  "created_epoch": 1790515074.756861,
+  "source_sha256": "b4cadb7a1e99f63f911a70df960ce409ded991ad6b84e3eae122f8ff30d643d7",
+  "question": "Before more generic dynamic fitting, can the statically validated response even reproduce spatial steady activity near the actual native termination cuts?",
+  "scope": "Only Z.21,K6/9/12, two existing native histories each; at most six Newton solves,80iterations each. No continuation,no stability or bifurcation type.",
+  "response": "Frozen staticv3 E response; same conditioned parent I. Native graphg20 and same Z/K field family projected to original935groups. Native stationary G=30clip((globalEHz-200)/300),etaM*M=.5r_per_ms,E-onlyG/K. Mean externaldrive nu from originaloperator; colored-private-current moment closure approximate.",
+  "distinction": "A deterministic mean-input stationary candidate is compared descriptively to noisy finite-window native responses. A residual root only establishes the approximate equation has a solution; it does not certify native correspondence or stability.",
+  "reflection": "Dynamicv4 passes means but fails independent gains includingDC. Stop genericMLP expansion. Diagnose actual spatial/domain correspondence before choosing any further local calibration; failures remain and no tolerances are relaxed.",
+  "readouts": "WholeE,matched1.75mm coreobserver and400nativecells; high/quiet history, completedshortevents,censoring retained. Report allEinputdomain extrapolation. No networktarget fitting."
+}

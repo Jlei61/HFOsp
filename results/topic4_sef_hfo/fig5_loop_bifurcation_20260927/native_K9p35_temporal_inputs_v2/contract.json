@@ -1,0 +1,13 @@
+{
+  "status": "REGISTERED_BEFORE_TEMPORAL_OBSERVATION",
+  "created_epoch": 1790551126.6136022,
+  "question": "Are the excessive white-source variances explained by source temporal regularity, or do cross-source dependencies remain necessary? Does remaining local rate error coincide with colored input or time-varying adaptation?",
+  "design": "Replay exactly the completed unchanged42-44s native continuation. Readonly all-source spike indices at0.1ms and raw IE/II/V/M for the39 previously assayed targets. No new parameter, input, seed, or physical model. Compare whole final engine bitwise against the existing44s reference.",
+  "limits": "One conditional2s trajectory selected for diagnosis. Periodic source-autospectrum estimates are finite-window approximations; they omit cross-source spectra. Neither observed spectra nor measured moments are an autonomous closure or new biological samples.",
+  "source_sha256": "e23265ca72727d4872c60b9687495360c6c834f8828c92e922e1ddf5acfa3580",
+  "reference_final_sha256": "9d4b7ddb7635b00586f6493a04243fa8eb3d7766b8332b51957fa07d742591af",
+  "prior_observer_sha256": "c0798ed42fd0c95bf56f82135a6afcd52cebf08c53430ac17ac68a01d9cdc197",
+  "producer_sha256": "a6199c6f3187bb1a70cc644ee56634d2f488f2ed82e1e056754f6b89bd3705d6",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

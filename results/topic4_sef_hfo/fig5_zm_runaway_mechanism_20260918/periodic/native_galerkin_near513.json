@@ -1,0 +1,27 @@
+{
+  "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_galerkin_near513.npz",
+  "D": 0.2193228214189369,
+  "T_ms": 264.5556067471188,
+  "N": 513,
+  "mean_hz": 31.285566781098712,
+  "min_hz": 0.013916840848390009,
+  "max_hz": 186.77251620629957,
+  "residual": 6.767919558114954e-10,
+  "iterations": [
+    31.42604468726773,
+    34.093604715797944,
+    53.10738092650853,
+    1.8502664951531438,
+    0.0035035229700441928,
+    6.774580896262705e-10
+  ],
+  "minimum_group_rate_hz": -2.0530182799393644,
+  "stability": "NOT_ESTABLISHED",
+  "Z": "held",
+  "M": "dynamic",
+  "Z_path": "native-checkpoint piecewise linear spatial Z path",
+  "method": "dealiased Fourier-Galerkin",
+  "nonlinear_samples": 2048,
+  "offgrid_rms_hz": 0.31226520122675583,
+  "offgrid_max_hz": 40.47825512894687
+}

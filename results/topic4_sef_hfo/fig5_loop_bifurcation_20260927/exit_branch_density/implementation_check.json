@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "local_checks": [
+    {
+      "tick": 0,
+      "max_error": 7.105427357601002e-15,
+      "ref_spikes_exact": true,
+      "Z_K_fixed_bitwise": true
+    },
+    {
+      "tick": 17,
+      "max_error": 7.105427357601002e-15,
+      "ref_spikes_exact": true,
+      "Z_K_fixed_bitwise": true
+    },
+    {
+      "tick": 358,
+      "max_error": 7.105427357601002e-15,
+      "ref_spikes_exact": true,
+      "Z_K_fixed_bitwise": true
+    },
+    {
+      "tick": 359,
+      "max_error": 7.105427357601002e-15,
+      "ref_spikes_exact": true,
+      "Z_K_fixed_bitwise": true
+    }
+  ],
+  "captured100steps_bitwise": {
+    "state": true,
+    "ref": true,
+    "rng": true,
+    "history": true,
+    "clock": true,
+    "global_state": true,
+    "output": true,
+    "global_output": true
+  },
+  "scope": "Implementationonly;no nativecorrespondenceorstability implied."
+}

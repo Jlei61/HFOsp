@@ -1,0 +1,92 @@
+{
+  "status": "VALIDATED_TORUS_CROSSING",
+  "label": "TR_A_return",
+  "critical_point": {
+    "label": "TR_A_return",
+    "type": "torus bifurcation of periodic orbit",
+    "J_EE_core": 0.9457603915251053,
+    "T_ms": 165.63054658665283,
+    "lambda_per_ms": [
+      -6.899125137991216e-14,
+      0.03796008884822572
+    ],
+    "multiplier": [
+      0.9999913265667475,
+      0.004164945188412696
+    ],
+    "distance_from_plus_one": 0.0041649542195474915,
+    "distance_from_minus_one": 1.9999956632729583,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+    "N": 128,
+    "orbit_residual_hz": 1.3877787807814457e-14,
+    "eigen_residual": 2.3074875537104554e-15,
+    "criticality": "NOT_COMPUTED",
+    "orbit_tolerance": 1e-11,
+    "eigen_tolerance": 2e-11,
+    "root_tolerance": 1e-11,
+    "transversal_slope": {
+      "step": 1e-07,
+      "real_exponents": [
+        -2.1597252958658846e-08,
+        2.1555679538025102e-08
+      ],
+      "derivative_per_ms_per_J": 0.21576466248341974
+    },
+    "local_gain_order": 4,
+    "local_gain_step": 5e-05,
+    "mode_seed": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_B_highorder_half_mode_N128.npz",
+    "interpretation": "A non-real conjugate pair crosses the unit circle away from +1 and -1; torus criticality requires additional normal-form analysis"
+  },
+  "temporal_mesh_J_difference": 2.4713564528155985e-13,
+  "T_ms_difference": 5.325375695974799e-10,
+  "independent_full_state_mode_checks": [
+    {
+      "label": "TR_A_return",
+      "N": 64,
+      "dt_ms": 0.0999580848444088,
+      "J_EE_core": 0.9457603915253524,
+      "T_ms": 165.63054658718536,
+      "complex_multiplier": [
+        0.999991326577569,
+        0.004164945233200143
+      ],
+      "independent_rayleigh_multiplier": [
+        0.9999591075086406,
+        0.004179189546674596
+      ],
+      "full_state_mode_relative_defect": 3.5872913270935464e-05,
+      "output_reconstruction_error": 2.237726045655905e-16,
+      "method": "Complex Floquet harmonic reconstruction of all nine local states and entire physical delay history, independently advanced by variational Heun.",
+      "scope": "Validation of this eigenpair only; not all other multipliers or torus nonlinear stability."
+    },
+    {
+      "label": "TR_A_return",
+      "N": 64,
+      "dt_ms": 0.04999412815791891,
+      "J_EE_core": 0.9457603915253524,
+      "T_ms": 165.63054658718536,
+      "complex_multiplier": [
+        0.999991326577569,
+        0.004164945233200143
+      ],
+      "independent_rayleigh_multiplier": [
+        0.9999833777346866,
+        0.004168471857033815
+      ],
+      "full_state_mode_relative_defect": 8.857171484535165e-06,
+      "output_reconstruction_error": 2.237726045655905e-16,
+      "method": "Complex Floquet harmonic reconstruction of all nine local states and entire physical delay history, independently advanced by variational Heun.",
+      "scope": "Validation of this eigenpair only; not all other multipliers or torus nonlinear stability."
+    }
+  ],
+  "step_halving_defect_reduction": 4.050154536758201,
+  "nonresonance_distances": [
+    0.0041649542195474915,
+    0.008329890376825392,
+    0.012494790409690034,
+    0.016659636256154416
+  ],
+  "criticality": "NOT_COMPUTED",
+  "meaning": "A second non-real unit-circle crossing on the returned H1 periodic branch after LPC2. Nonlinear torus direction/stability requires a separate calculation.",
+  "complete_inventory": false
+}

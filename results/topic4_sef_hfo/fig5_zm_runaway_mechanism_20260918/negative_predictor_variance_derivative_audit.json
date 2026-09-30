@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "input": "vE",
+      "fd_max": 0.0,
+      "raw_derivative_max": 0.9669413768763422,
+      "corrected_max_error": 0.0
+    },
+    {
+      "input": "vI",
+      "fd_max": 0.0,
+      "raw_derivative_max": 1.765278554757578,
+      "corrected_max_error": 0.0
+    }
+  ],
+  "scope": "Correct only response-weight derivatives through sqrt(max(v,0)) for off-physical Newton predictors. All accepted near-critical cycles checked so far have positive instantaneous variances; no model output or accepted root is altered."
+}

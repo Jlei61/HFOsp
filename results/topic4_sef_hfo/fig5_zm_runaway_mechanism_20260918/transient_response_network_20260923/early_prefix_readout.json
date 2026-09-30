@@ -1,0 +1,65 @@
+{
+  "status": "PREFIX_ONLY",
+  "rows": [
+    {
+      "label": "native",
+      "strict": {
+        "n": 10,
+        "median_duration_ms": 96.0,
+        "iqr_duration_ms": [
+          91.0,
+          99.25
+        ],
+        "median_gap_ms": 251.0,
+        "both_cores": 8,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.714984375,
+        "median_surround_cells": 271.0,
+        "forward": 1,
+        "reverse": 8,
+        "undirected": 1,
+        "median_extent_mm": 12.77652060667611
+      },
+      "quiet": 0.552,
+      "high": null
+    },
+    {
+      "label": "parent",
+      "strict": {
+        "n": 0
+      },
+      "quiet": 0.898,
+      "high": null
+    },
+    {
+      "label": "transient",
+      "strict": {
+        "n": 11,
+        "median_duration_ms": 76.0,
+        "iqr_duration_ms": [
+          73.0,
+          78.0
+        ],
+        "median_gap_ms": 200.0,
+        "both_cores": 11,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.32803125,
+        "median_surround_cells": 117.0,
+        "forward": 11,
+        "reverse": 0,
+        "undirected": 0,
+        "median_extent_mm": 14.272071794021286
+      },
+      "quiet": 0.6212,
+      "high": null
+    }
+  ],
+  "window_ms": [
+    500,
+    3000
+  ],
+  "same3s_horizon": true,
+  "not_full_network_acceptance": true
+}

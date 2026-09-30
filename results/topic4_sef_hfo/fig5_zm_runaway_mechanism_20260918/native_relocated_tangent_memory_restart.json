@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-19T23:17:45.968434+08:00",
+  "status": "STOPPED_PRECOMPUTATION_FOR_MEMORY_BUDGET",
+  "pid": 396788,
+  "session": 56779,
+  "reason": "After pausing competing jobs, memory full-stall remains70percent. Derivative owns28GB anonymous RAM that pausing cannot release. No tangent result exists; preserve source root and initial tangent, retry identical command after family job exits.",
+  "scientific_failure": false,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/fixed_period_tangent.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_relocated_G16875_M262144/point0000.npz --label native_turn_relocated_fine_tangent --M 262144 --device 0 --gain-cache-gb 2 --restart 80 --linear-tol 1e-10 --initial-tangent results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz --nearby-tangent-guess "
+}

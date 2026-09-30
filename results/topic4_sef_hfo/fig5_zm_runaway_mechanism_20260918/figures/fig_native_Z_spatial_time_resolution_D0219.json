@@ -1,0 +1,44 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/spatial_refinement/partial_audit.json",
+  "D": 0.219,
+  "Z_mean": 0.781,
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2190000_dt0.05/trajectory.npz",
+      "grid": 20,
+      "Z_detail": "coarse",
+      "category": "SELF_LIMITED"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.05/trajectory.npz",
+      "grid": 40,
+      "Z_detail": "lifted",
+      "category": "PERSISTENT"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.025/trajectory.npz",
+      "grid": 40,
+      "Z_detail": "lifted",
+      "category": "UNRESOLVED"
+    }
+  ],
+  "Z": "held identical physical field",
+  "M": "dynamic",
+  "window_ms": [
+    8000,
+    12000
+  ],
+  "same_physical_graph": true,
+  "same_lifted_full_initial_history": true,
+  "time_refinement_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/spatial_refinement/time_refinement_result.json",
+  "panels": "Mean E rate and fraction of 10-ms bins at least50Hz; NOT snapshots",
+  "scope": "Finite-window spatial-resolution sensitivity, not a bifurcation or asymptotic certificate.",
+  "human_visual_acceptance": "PENDING",
+  "agent_visual_review": {
+    "status": "PASS",
+    "PNG": true,
+    "same_state_PDF": true,
+    "checked": "Labels, axes, group identity, no data occlusion, no title or gray explanatory annotation",
+    "updated_local": "2026-09-19T19:10:30.135029"
+  }
+}

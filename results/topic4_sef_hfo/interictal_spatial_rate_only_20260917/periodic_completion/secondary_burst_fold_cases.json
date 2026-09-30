@@ -1,0 +1,139 @@
+{
+  "rows": [
+    {
+      "label": "LPC21",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N2048.npz",
+      "J_EE_core": 0.9391433309651367,
+      "T_ms": 875.8164641079585,
+      "peaks_A_B_ms": [
+        [
+          70.98902980562555,
+          485.80444493488324
+        ],
+        [
+          90.23304390956018,
+          423.79595504442716
+        ]
+      ],
+      "peak_rates_A_B_Hz": [
+        [
+          180.37170256518053,
+          242.39945904404422
+        ],
+        [
+          174.7530882965777,
+          124.26278136167119
+        ]
+      ],
+      "snapshot_times_ms": [
+        70.98902980562555,
+        90.23304390956018,
+        423.79595504442716,
+        485.80444493488324
+      ],
+      "cycle_stability": "Not inferred from the fold marker; pending full Floquet coverage"
+    },
+    {
+      "label": "LPC22",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "peaks_A_B_ms": [
+        [
+          73.73534476292627,
+          487.25695662050697
+        ],
+        [
+          95.2953870912673,
+          425.59523556145166
+        ]
+      ],
+      "peak_rates_A_B_Hz": [
+        [
+          175.41900762981507,
+          242.3743320559612
+        ],
+        [
+          144.72733890728227,
+          124.87561643809153
+        ]
+      ],
+      "snapshot_times_ms": [
+        73.73534476292627,
+        95.2953870912673,
+        425.59523556145166,
+        487.25695662050697
+      ],
+      "cycle_stability": "Not inferred from the fold marker; pending full Floquet coverage"
+    },
+    {
+      "label": "LPC23",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "peaks_A_B_ms": [
+        [
+          77.31143867733444,
+          460.9590617912037
+        ],
+        [
+          106.82279430147823,
+          412.74332584189835
+        ]
+      ],
+      "peak_rates_A_B_Hz": [
+        [
+          174.62476014148808,
+          201.08926680430665
+        ],
+        [
+          117.96828926596311,
+          108.57102219844575
+        ]
+      ],
+      "snapshot_times_ms": [
+        77.31143867733444,
+        106.82279430147823,
+        412.74332584189835,
+        460.9590617912037
+      ],
+      "cycle_stability": "Not inferred from the fold marker; pending full Floquet coverage"
+    },
+    {
+      "label": "LPC24",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N4096.npz",
+      "J_EE_core": 0.940343489690564,
+      "T_ms": 856.8099149281564,
+      "peaks_A_B_ms": [
+        [
+          75.3055589292325,
+          463.1291874147799
+        ],
+        [
+          116.51443423217361,
+          416.6907594084198
+        ]
+      ],
+      "peak_rates_A_B_Hz": [
+        [
+          174.14843095862273,
+          202.68317381426596
+        ],
+        [
+          58.622433592712426,
+          101.12145722108235
+        ]
+      ],
+      "snapshot_times_ms": [
+        75.3055589292325,
+        116.51443423217361,
+        416.6907594084198,
+        463.1291874147799
+      ],
+      "cycle_stability": "Not inferred from the fold marker; pending full Floquet coverage"
+    }
+  ],
+  "model": "Unchanged 935-group rate DDE, N=2048 for LPC21-23 and N=4096 for LPC24",
+  "interpretation": "Each refined fold orbit still has two bursts per core and alternating A-first/B-first order. Amplitudes and phase lags change; these folds are not period-doubling labels.",
+  "limitation": "BVP fold orbits are not presented as stable attractors; full branch stability is still being computed."
+}

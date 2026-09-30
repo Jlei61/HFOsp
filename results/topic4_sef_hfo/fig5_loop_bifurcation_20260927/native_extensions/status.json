@@ -1,0 +1,25 @@
+{
+  "stage": "COMPLETE",
+  "supervisor_pid": 4172089,
+  "updated_epoch": 1790526418.9471653,
+  "completed": [
+    "exit_z0.21_k6_recovery",
+    "exit_z0.21_k9_recovery",
+    "exit_z0.21_k9_high",
+    "entry_z0.74_k0.0002_high",
+    "exit_z0.21_k6_high",
+    "entry_z0.74_k0.0002_interictal"
+  ],
+  "pending": [],
+  "active": [],
+  "failed": [],
+  "total": 6,
+  "available_memory_GiB": 176.1548957824707,
+  "GPU_effective_free_GiB": {
+    "0": 16.4873046875,
+    "1": 20.3330078125
+  },
+  "max_workers": 6,
+  "max_workers_per_GPU": 3,
+  "execution_override": "Six120s extensions;3GiB reservation perworker; frozen physics unchanged"
+}

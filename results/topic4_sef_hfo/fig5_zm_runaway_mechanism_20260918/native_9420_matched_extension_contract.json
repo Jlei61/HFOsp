@@ -1,0 +1,26 @@
+{
+  "status": "DEFINED_BEFORE_RUN",
+  "created_local": "2026-09-19T15:23:00.263396",
+  "question": "Does the matched native9420 spatialZ condition lose self-termination beyond the existing12s window, or does it produce a later complete long event?",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2288448_dt0.05/trajectory.npz",
+  "extension": "runs/native_9420_matched_extend60_D0.2288448_dt0.05/trajectory.npz",
+  "D": 0.22884476056519165,
+  "global_Z": 0.7711552394348083,
+  "source_duration_ms": 12000,
+  "extension_duration_ms": 60000,
+  "total_duration_ms": 72000,
+  "dt_ms": 0.05,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "Complete stored endpoint state and instantaneous delayed-rate history; same Z, no new initial history",
+  "readouts": [
+    "Canonical complete events on concatenated72s record and6nonoverlapping12sblocks",
+    "Global200Hz200ms and additional75percent-space recruitment entries separately",
+    "Final4s spatial temporal variation/recurrence"
+  ],
+  "limits": [
+    "Finite-window survival is censoring, not an asymptotic proof",
+    "Original high-rate entry and broader spatial recruitment are different observables",
+    "No bifurcation type inferred from this extension"
+  ]
+}

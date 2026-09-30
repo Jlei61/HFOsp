@@ -1,0 +1,216 @@
+{
+  "status": "NEWTON_STEP_NOT_ACCEPTED",
+  "iterations": [
+    {
+      "iteration": 0,
+      "period_ms": 536.8308103187521,
+      "fraction": 0.6162063750427696,
+      "section_residual": -4.510281037545374e-17,
+      "section_speed": 2.0404177051520773,
+      "initial_phase": 0.0,
+      "interpolation": "cubic_four_actual_steps",
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 355.5523757097691,
+          "difference_rms": 11.919657346507451,
+          "relative_rms": 0.03352433610579289
+        },
+        "GABA": {
+          "reference_rms": 476.6433767916651,
+          "difference_rms": 32.802726418348264,
+          "relative_rms": 0.06882027111998648
+        },
+        "M": {
+          "reference_rms": 0.054936995059558374,
+          "difference_rms": 0.0009301094096887461,
+          "relative_rms": 0.01693047478626005
+        },
+        "covariance": {
+          "reference_rms": 326.2360476505795,
+          "difference_rms": 17.92091843991744,
+          "relative_rms": 0.05493236743449006
+        },
+        "input_memory": {
+          "reference_rms": 0.4208218031918002,
+          "difference_rms": 0.04033983051363194,
+          "relative_rms": 0.0958596493995014
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.16363952917188015,
+          "difference_rms": 0.027729850273803525,
+          "relative_rms": 0.16945691798390133
+        }
+      },
+      "combined_relative_rms": 0.08857109783709226,
+      "coordinate_residual": 0.16483959325707812,
+      "line_search": [
+        {
+          "alpha": 1.0,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.5,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.25,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.125,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.0625,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.03125,
+          "status": "EVALUATED",
+          "residual_ratio": 0.8605501012236524,
+          "period_ms": 531.5758710427137
+        }
+      ],
+      "linear_last": {
+        "dimension": 11,
+        "relative_linear_residual": 0.0003612378672091493
+      }
+    },
+    {
+      "iteration": 1,
+      "period_ms": 531.5758710427137,
+      "fraction": 0.5174208542740845,
+      "section_residual": 3.804465423251301e-16,
+      "section_speed": 2.0887093238870715,
+      "initial_phase": 8.023096076392087e-18,
+      "interpolation": "cubic_four_actual_steps",
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 354.9658538151581,
+          "difference_rms": 9.159527907570233,
+          "relative_rms": 0.025803969055400715
+        },
+        "GABA": {
+          "reference_rms": 475.4229802041267,
+          "difference_rms": 31.710035843897636,
+          "relative_rms": 0.06669857614009882
+        },
+        "M": {
+          "reference_rms": 0.05493593408914693,
+          "difference_rms": 0.0007994228006993635,
+          "relative_rms": 0.014551910583737511
+        },
+        "covariance": {
+          "reference_rms": 325.4513724564788,
+          "difference_rms": 17.376856691416965,
+          "relative_rms": 0.05339309697869133
+        },
+        "input_memory": {
+          "reference_rms": 0.4212728256086045,
+          "difference_rms": 0.029735838807396126,
+          "relative_rms": 0.07058570361009484
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.16413971145761552,
+          "difference_rms": 0.02376738877689187,
+          "relative_rms": 0.14479974751892466
+        }
+      },
+      "combined_relative_rms": 0.07541710042647064,
+      "coordinate_residual": 0.14145162656557914,
+      "line_search": [
+        {
+          "alpha": 1.0,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.5,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.25,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.125,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.0625,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.03125,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.015625,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.0078125,
+          "status": "SECTION_WINDOW_MISS",
+          "error": "Section crossing precedes the declared search window"
+        },
+        {
+          "alpha": 0.00390625,
+          "status": "SECTION_WINDOW_MISS",
+          "error": "Section crossing precedes the declared search window"
+        },
+        {
+          "alpha": 0.001953125,
+          "status": "EVALUATED",
+          "residual_ratio": 1.0177732317038366,
+          "period_ms": 531.1739902839071
+        },
+        {
+          "alpha": 0.0009765625,
+          "status": "EVALUATED",
+          "residual_ratio": 1.004288221937819,
+          "period_ms": 531.3533347636375
+        }
+      ],
+      "linear_last": {
+        "dimension": 12,
+        "relative_linear_residual": 0.0004948528154489893
+      }
+    }
+  ],
+  "derivative_checks": [
+    {
+      "epsilon": 0.001,
+      "relative_error": 0.08608140113575628,
+      "phase_leakage": 4.817032189796678e-13,
+      "period_ms": 536.8210645833987
+    },
+    {
+      "epsilon": 0.0005,
+      "relative_error": 0.04329423425152639,
+      "phase_leakage": 4.817032189796678e-13,
+      "period_ms": 536.8260126327679
+    },
+    {
+      "epsilon": 0.0001,
+      "relative_error": 0.008665160598746408,
+      "phase_leakage": 4.817032189796678e-13,
+      "period_ms": 536.8298624942971
+    },
+    {
+      "epsilon": 3e-05,
+      "relative_error": 0.002598533018645122,
+      "phase_leakage": 4.817032189796678e-13,
+      "period_ms": 536.8305266691482
+    },
+    {
+      "epsilon": 1e-05,
+      "relative_error": 0.0008660644098822894,
+      "phase_leakage": 4.817032189796678e-13,
+      "period_ms": 536.8307158368167
+    }
+  ],
+  "dt_ms": 0.05,
+  "period_ms": 531.5758710427137,
+  "elapsed_seconds": 597.6988480091095,
+  "scope": "Numerical full-state section root at most. No stability, period fold, crisis or native correspondence claimed.",
+  "model_promoted": false
+}

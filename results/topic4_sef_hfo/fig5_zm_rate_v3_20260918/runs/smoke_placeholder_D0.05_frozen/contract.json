@@ -1,0 +1,33 @@
+{
+  "model": "v3 colored-noise MC transfer spatial rate DDE + Z/M",
+  "response_closure": "PLACEHOLDER_CONSTANTS",
+  "drive": "mean",
+  "finite_size_noise": false,
+  "seed": 1,
+  "dynamic_Z": false,
+  "dynamic_M": true,
+  "D_initial": 0.05,
+  "z_source": "prescribed native 9.420 s power path",
+  "dt_ms": 0.1,
+  "duration_ms": 2500.0,
+  "initial": "zero state (no synaptic activity, Z=1, M=0)",
+  "native_future_activity_used": false,
+  "identity": {
+    "operators": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/operators/g20",
+    "graph_identity": {
+      "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+      "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+      "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+      "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+      "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+      "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+      "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+      "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+    },
+    "tables": {
+      "E": "be1d6256d02948edd643d105f9f9a961c39027adc531de0aaf03a25dc4d18555",
+      "I": "13d3629d4a4d0ece614bd06294a1d8f33318079d204aa765e5218edae578b22a"
+    },
+    "z_path_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t9420ms.npz"
+  }
+}

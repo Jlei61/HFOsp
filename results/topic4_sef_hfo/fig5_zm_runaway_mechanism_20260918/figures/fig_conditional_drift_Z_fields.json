@@ -1,0 +1,71 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditional_drift_Z_fields/independent_comparison.json",
+  "snapshots": [
+    {
+      "condition": "native_Z9000_held",
+      "sampling": "Count sampling",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    },
+    {
+      "condition": "native_Z9000_held",
+      "sampling": "Sampling off",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    },
+    {
+      "condition": "native_Z9420_held",
+      "sampling": "Count sampling",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    },
+    {
+      "condition": "native_Z9420_held",
+      "sampling": "Sampling off",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    },
+    {
+      "condition": "native_Z9870_held",
+      "sampling": "Count sampling",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    },
+    {
+      "condition": "native_Z9870_held",
+      "sampling": "Sampling off",
+      "snapshot_time_ms": 12000,
+      "window_ms": [
+        11975,
+        12025
+      ]
+    }
+  ],
+  "states": "Both modes use the same9000ms fullrate history, heldfullZfield, dynamicM andfutureexogenousinput. OnlyBinomial samplingremoved; privateQretained.",
+  "lineage": "Legacy-private variance version for a pairednoise-removal diagnostic. Physical-delay unit repair is a separate version; these data not overwritten.",
+  "scientific_scope": "Finite-window conditionalnoisecomparison, no bifurcation orstability claim.",
+  "agent_PNG_PDF_check": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "agent_checked_local": "2026-09-20T13:19:45.048259+08:00",
+  "visual_check": "Final PNG andsamePDF inspected aftermoving overlappinglegend; columnZsource andsnapshotclock distinct, allpanels readable.",
+  "artifact_sha256": {
+    "png": "be201aaf941e3b991f659e7b1558e99f1388e8fe1cffa4a37fd466f8e69ec392",
+    "pdf": "59ea916b456930fbd521f6841632492a21fee328d8ff712624424f46e909d59b",
+    "svg": "94012a7ce6ccdeddb670c8daa2bc6e8897530002120795ef7d6ed03f81584d50"
+  }
+}

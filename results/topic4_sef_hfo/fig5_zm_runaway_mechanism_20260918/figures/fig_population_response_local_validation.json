@@ -1,0 +1,35 @@
+{
+  "source": "conditional_current_density",
+  "rows": [
+    {
+      "label": "Core A E",
+      "source_index": 0,
+      "waveform_L2": 0.008274722337059814,
+      "relative_mean_error": 0.0012484041304412356
+    },
+    {
+      "label": "Core B E",
+      "source_index": 3,
+      "waveform_L2": 0.005784642235324141,
+      "relative_mean_error": 0.0005097386406469541
+    },
+    {
+      "label": "Surround E",
+      "source_index": 6,
+      "waveform_L2": 0.006735889699254642,
+      "relative_mean_error": 0.0001549530688622698
+    },
+    {
+      "label": "I",
+      "source_index": 9,
+      "waveform_L2": 0.004639583840493903,
+      "relative_mean_error": 0.0005801524279561026
+    }
+  ],
+  "reference": "8192 independent colored-LIF paths per input, original factorial assay",
+  "prediction": "Own computed threshold flux, 256 requested voltage nodes; no fitted coefficients or observed spikes supplied",
+  "uncertainty": "LIF plus/minus2SEM, repeated cycles aggregated within paths",
+  "scope": "Four local imposed-input responses, not autonomous spatial dynamics or a bifurcation figure",
+  "human_visual_acceptance": "PENDING",
+  "agent_PNG_same_PDF_review": "PASS: no overall title/gray notes, four identities and units legible, same-source curves; human check pending"
+}

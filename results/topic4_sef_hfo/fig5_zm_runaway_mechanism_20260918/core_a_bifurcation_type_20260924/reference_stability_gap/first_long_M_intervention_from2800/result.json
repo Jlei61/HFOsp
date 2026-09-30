@@ -1,0 +1,123 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "label": "dynamic_M",
+      "status": "COMPLETE",
+      "quiet_intervals": [
+        {
+          "start_ms": 2800,
+          "end_ms": 2853,
+          "duration_ms": 53,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 6143,
+          "end_ms": 6301,
+          "duration_ms": 158,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 6392,
+          "end_ms": 6567,
+          "duration_ms": 175,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 6662,
+          "end_ms": 6730,
+          "duration_ms": 68,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 6994,
+          "end_ms": 7014,
+          "duration_ms": 20,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 7072,
+          "end_ms": 7236,
+          "duration_ms": 164,
+          "left_censored": false,
+          "right_censored": false
+        }
+      ],
+      "mean_rates_global_A_B_surround_hz": [
+        47.7567087047186,
+        294.7341401530438,
+        133.52616882479734,
+        39.429861069576795
+      ],
+      "M_initial_global_A_B_surround": [
+        0.019831202363988897,
+        0.06128392929944654,
+        0.05060037611607485,
+        0.018011112847295695
+      ],
+      "M_final_global_A_B_surround": [
+        0.023582928497326315,
+        0.13714416925550094,
+        0.061151528663316634,
+        0.01980242635477436
+      ],
+      "original_replay_comparison": {
+        "status": "STORED_PRECISION_PASS",
+        "maximum_rate_difference_hz": 0.0,
+        "outside_bound": 0
+      },
+      "M_held_bitwise": false,
+      "original_Z_held_bitwise": true,
+      "bifurcation_type": "NOT_ESTABLISHED"
+    },
+    {
+      "label": "held_M",
+      "status": "COMPLETE",
+      "quiet_intervals": [
+        {
+          "start_ms": 2800,
+          "end_ms": 2853,
+          "duration_ms": 53,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 7676,
+          "end_ms": 7800,
+          "duration_ms": 124,
+          "left_censored": false,
+          "right_censored": true
+        }
+      ],
+      "mean_rates_global_A_B_surround_hz": [
+        46.160501864518444,
+        328.87566897702703,
+        120.95031262080381,
+        37.23233288036654
+      ],
+      "M_initial_global_A_B_surround": [
+        0.019831202363988897,
+        0.06128392929944654,
+        0.05060037611607485,
+        0.018011112847295695
+      ],
+      "M_final_global_A_B_surround": [
+        0.019831202363988897,
+        0.06128392929944654,
+        0.05060037611607485,
+        0.018011112847295695
+      ],
+      "original_replay_comparison": null,
+      "M_held_bitwise": true,
+      "original_Z_held_bitwise": true,
+      "bifurcation_type": "NOT_ESTABLISHED"
+    }
+  ],
+  "scope": "Finite paired intervention before or inside one long activity, as declared; no fast-subsystem or full-system bifurcation certificate.",
+  "model_promoted": false
+}

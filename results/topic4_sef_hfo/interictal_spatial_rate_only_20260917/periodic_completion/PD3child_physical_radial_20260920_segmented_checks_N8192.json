@@ -1,0 +1,386 @@
+{
+  "status": "COMPLETE",
+  "label": "PD3child_physical_radial_20260920",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_3_20260920_a60.00822_N4096.npz",
+  "N": 8192,
+  "growth_per_ms": -3.924110149894426e-05,
+  "multiplier": 0.9917647557575069,
+  "checks": [
+    {
+      "dt_ms": 0.09996756534184312,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 13.095751059781449,
+          "mode_relative_defect": 0.00010120854534452148,
+          "phase_relative_defect": 9.21283762698687e-05,
+          "permuted_group_negative_control": 0.20044736877648966
+        },
+        {
+          "segment": 1,
+          "start_ms": 13.095751059781449,
+          "end_ms": 26.29146968490474,
+          "mode_relative_defect": 3.550036270607881e-05,
+          "phase_relative_defect": 8.607453345496068e-05
+        },
+        {
+          "segment": 2,
+          "start_ms": 26.29146968490474,
+          "end_ms": 39.48718831002803,
+          "mode_relative_defect": 2.337791101548269e-05,
+          "phase_relative_defect": 8.512940772913299e-05
+        },
+        {
+          "segment": 3,
+          "start_ms": 39.48718831002803,
+          "end_ms": 52.68290693515132,
+          "mode_relative_defect": 2.543969052077597e-05,
+          "phase_relative_defect": 8.255436916144648e-05
+        },
+        {
+          "segment": 4,
+          "start_ms": 52.68290693515132,
+          "end_ms": 65.77865799493277,
+          "mode_relative_defect": 2.994299890905451e-05,
+          "phase_relative_defect": 9.371801983092766e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 65.77865799493277,
+          "end_ms": 78.97437662005606,
+          "mode_relative_defect": 1.918317026410074e-05,
+          "phase_relative_defect": 0.00010438864124929512
+        },
+        {
+          "segment": 6,
+          "start_ms": 78.97437662005606,
+          "end_ms": 92.17009524517935,
+          "mode_relative_defect": 6.5116605354573406e-06,
+          "phase_relative_defect": 6.300357634240367e-05
+        },
+        {
+          "segment": 7,
+          "start_ms": 92.17009524517935,
+          "end_ms": 105.36581387030265,
+          "mode_relative_defect": 4.1484528303160284e-05,
+          "phase_relative_defect": 0.00010021772310028179
+        },
+        {
+          "segment": 8,
+          "start_ms": 105.36581387030265,
+          "end_ms": 118.4615649300841,
+          "mode_relative_defect": 7.928154394700848e-05,
+          "phase_relative_defect": 0.00010101791099200111,
+          "permuted_group_negative_control": 0.15659707252049218
+        },
+        {
+          "segment": 9,
+          "start_ms": 118.4615649300841,
+          "end_ms": 131.65728355520739,
+          "mode_relative_defect": 4.5143714395610964e-05,
+          "phase_relative_defect": 8.363345771317559e-05
+        },
+        {
+          "segment": 10,
+          "start_ms": 131.65728355520739,
+          "end_ms": 144.8530021803307,
+          "mode_relative_defect": 3.553559612036388e-05,
+          "phase_relative_defect": 0.00010119741924287115
+        },
+        {
+          "segment": 11,
+          "start_ms": 144.8530021803307,
+          "end_ms": 158.04872080545397,
+          "mode_relative_defect": 1.9952800081341895e-05,
+          "phase_relative_defect": 7.737083555687262e-05
+        },
+        {
+          "segment": 12,
+          "start_ms": 158.04872080545397,
+          "end_ms": 171.14447186523543,
+          "mode_relative_defect": 2.5538315383361467e-05,
+          "phase_relative_defect": 9.588908235019833e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 171.14447186523543,
+          "end_ms": 184.3401904903587,
+          "mode_relative_defect": 1.2162672175944245e-05,
+          "phase_relative_defect": 0.00010454717724850293
+        },
+        {
+          "segment": 14,
+          "start_ms": 184.3401904903587,
+          "end_ms": 197.535909115482,
+          "mode_relative_defect": 9.29111626628926e-06,
+          "phase_relative_defect": 6.14417764608082e-05
+        },
+        {
+          "segment": 15,
+          "start_ms": 197.535909115482,
+          "end_ms": 210.7316277406053,
+          "mode_relative_defect": 6.0761429709967136e-05,
+          "phase_relative_defect": 0.00010081871271650656
+        }
+      ],
+      "maximum_mode_relative_defect": 0.00010120854534452148,
+      "maximum_phase_relative_defect": 0.00010454717724850293,
+      "minimum_negative_control_defect": 0.15659707252049218,
+      "boundary_relative_error": 4.87973342381708e-15,
+      "phase_reconstruction_error": 4.075945523630793e-15
+    },
+    {
+      "dt_ms": 0.04999564121959793,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 13.148853640754256,
+          "mode_relative_defect": 2.4443844372437305e-05,
+          "phase_relative_defect": 2.204323172364592e-05,
+          "permuted_group_negative_control": 0.20089219763294042
+        },
+        {
+          "segment": 1,
+          "start_ms": 13.148853640754256,
+          "end_ms": 26.29770728150851,
+          "mode_relative_defect": 8.521767883513723e-06,
+          "phase_relative_defect": 2.060404599986054e-05
+        },
+        {
+          "segment": 2,
+          "start_ms": 26.29770728150851,
+          "end_ms": 39.496556563482365,
+          "mode_relative_defect": 5.5282728952259085e-06,
+          "phase_relative_defect": 2.0364395404235172e-05
+        },
+        {
+          "segment": 3,
+          "start_ms": 39.496556563482365,
+          "end_ms": 52.64541020423662,
+          "mode_relative_defect": 6.085673221888976e-06,
+          "phase_relative_defect": 1.991969500446334e-05
+        },
+        {
+          "segment": 4,
+          "start_ms": 52.64541020423662,
+          "end_ms": 65.84425948621048,
+          "mode_relative_defect": 7.10967467379799e-06,
+          "phase_relative_defect": 2.2432381684369618e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 65.84425948621048,
+          "end_ms": 78.99311312696473,
+          "mode_relative_defect": 4.633327911434516e-06,
+          "phase_relative_defect": 2.4967186572577934e-05
+        },
+        {
+          "segment": 6,
+          "start_ms": 78.99311312696473,
+          "end_ms": 92.19196240893858,
+          "mode_relative_defect": 1.5779781944071703e-06,
+          "phase_relative_defect": 1.5147189603598802e-05
+        },
+        {
+          "segment": 7,
+          "start_ms": 92.19196240893858,
+          "end_ms": 105.34081604969283,
+          "mode_relative_defect": 1.0030585417926596e-05,
+          "phase_relative_defect": 2.425999375254627e-05
+        },
+        {
+          "segment": 8,
+          "start_ms": 105.34081604969283,
+          "end_ms": 118.4896696904471,
+          "mode_relative_defect": 1.9260644645591413e-05,
+          "phase_relative_defect": 2.424224221665084e-05,
+          "permuted_group_negative_control": 0.156379527507382
+        },
+        {
+          "segment": 9,
+          "start_ms": 118.4896696904471,
+          "end_ms": 131.68851897242095,
+          "mode_relative_defect": 1.078241176762646e-05,
+          "phase_relative_defect": 2.0185989763928152e-05
+        },
+        {
+          "segment": 10,
+          "start_ms": 131.68851897242095,
+          "end_ms": 144.8373726131752,
+          "mode_relative_defect": 9.18224467158844e-06,
+          "phase_relative_defect": 2.487702126011017e-05
+        },
+        {
+          "segment": 11,
+          "start_ms": 144.8373726131752,
+          "end_ms": 158.03622189514905,
+          "mode_relative_defect": 4.7947757319321195e-06,
+          "phase_relative_defect": 1.862097680448083e-05
+        },
+        {
+          "segment": 12,
+          "start_ms": 158.03622189514905,
+          "end_ms": 171.1850755359033,
+          "mode_relative_defect": 6.062782654482658e-06,
+          "phase_relative_defect": 2.2927311791388368e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 171.1850755359033,
+          "end_ms": 184.38392481787716,
+          "mode_relative_defect": 2.9039699841159427e-06,
+          "phase_relative_defect": 2.5212871591440496e-05
+        },
+        {
+          "segment": 14,
+          "start_ms": 184.38392481787716,
+          "end_ms": 197.5327784586314,
+          "mode_relative_defect": 2.22728155679242e-06,
+          "phase_relative_defect": 1.4666772620008561e-05
+        },
+        {
+          "segment": 15,
+          "start_ms": 197.5327784586314,
+          "end_ms": 210.7316277406053,
+          "mode_relative_defect": 1.4743052987136466e-05,
+          "phase_relative_defect": 2.4343012620310888e-05
+        }
+      ],
+      "maximum_mode_relative_defect": 2.4443844372437305e-05,
+      "maximum_phase_relative_defect": 2.5212871591440496e-05,
+      "minimum_negative_control_defect": 0.156379527507382,
+      "boundary_relative_error": 4.880232009801868e-15,
+      "phase_reconstruction_error": 5.361231755152773e-15
+    },
+    {
+      "dt_ms": 0.024997820609798965,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 13.148853640754256,
+          "mode_relative_defect": 6.063198600378349e-06,
+          "phase_relative_defect": 5.456507534588971e-06,
+          "permuted_group_negative_control": 0.20088725598330737
+        },
+        {
+          "segment": 1,
+          "start_ms": 13.148853640754256,
+          "end_ms": 26.32270510211831,
+          "mode_relative_defect": 2.115148267690841e-06,
+          "phase_relative_defect": 5.127974132905927e-06
+        },
+        {
+          "segment": 2,
+          "start_ms": 26.32270510211831,
+          "end_ms": 39.496556563482365,
+          "mode_relative_defect": 1.356776953953656e-06,
+          "phase_relative_defect": 5.011954402037507e-06
+        },
+        {
+          "segment": 3,
+          "start_ms": 39.496556563482365,
+          "end_ms": 52.67040802484642,
+          "mode_relative_defect": 1.5060126772405415e-06,
+          "phase_relative_defect": 4.949097529682653e-06
+        },
+        {
+          "segment": 4,
+          "start_ms": 52.67040802484642,
+          "end_ms": 65.84425948621048,
+          "mode_relative_defect": 1.7748578064558877e-06,
+          "phase_relative_defect": 5.601281188409841e-06
+        },
+        {
+          "segment": 5,
+          "start_ms": 65.84425948621048,
+          "end_ms": 79.01811094757453,
+          "mode_relative_defect": 1.1571841290954416e-06,
+          "phase_relative_defect": 6.224438657970983e-06
+        },
+        {
+          "segment": 6,
+          "start_ms": 79.01811094757453,
+          "end_ms": 92.19196240893858,
+          "mode_relative_defect": 3.923119277403733e-07,
+          "phase_relative_defect": 3.7437516005408566e-06
+        },
+        {
+          "segment": 7,
+          "start_ms": 92.19196240893858,
+          "end_ms": 105.36581387030265,
+          "mode_relative_defect": 2.501466163945678e-06,
+          "phase_relative_defect": 6.022923386080425e-06
+        },
+        {
+          "segment": 8,
+          "start_ms": 105.36581387030265,
+          "end_ms": 118.5146675110569,
+          "mode_relative_defect": 4.793803597869432e-06,
+          "phase_relative_defect": 6.014931290301764e-06,
+          "permuted_group_negative_control": 0.15690108722921736
+        },
+        {
+          "segment": 9,
+          "start_ms": 118.5146675110569,
+          "end_ms": 131.68851897242095,
+          "mode_relative_defect": 2.63833182178534e-06,
+          "phase_relative_defect": 4.991476106415958e-06
+        },
+        {
+          "segment": 10,
+          "start_ms": 131.68851897242095,
+          "end_ms": 144.862370433785,
+          "mode_relative_defect": 2.2944534024494323e-06,
+          "phase_relative_defect": 6.167878584316648e-06
+        },
+        {
+          "segment": 11,
+          "start_ms": 144.862370433785,
+          "end_ms": 158.03622189514905,
+          "mode_relative_defect": 1.188412588365339e-06,
+          "phase_relative_defect": 4.635224579923661e-06
+        },
+        {
+          "segment": 12,
+          "start_ms": 158.03622189514905,
+          "end_ms": 171.2100733565131,
+          "mode_relative_defect": 1.4989111919164623e-06,
+          "phase_relative_defect": 5.683146882801445e-06
+        },
+        {
+          "segment": 13,
+          "start_ms": 171.2100733565131,
+          "end_ms": 184.38392481787716,
+          "mode_relative_defect": 7.184524994133381e-07,
+          "phase_relative_defect": 6.2443723981477834e-06
+        },
+        {
+          "segment": 14,
+          "start_ms": 184.38392481787716,
+          "end_ms": 197.5577762792412,
+          "mode_relative_defect": 5.532678204096614e-07,
+          "phase_relative_defect": 3.6477569361627736e-06
+        },
+        {
+          "segment": 15,
+          "start_ms": 197.5577762792412,
+          "end_ms": 210.7316277406053,
+          "mode_relative_defect": 3.6377038712226812e-06,
+          "phase_relative_defect": 6.064705828438321e-06
+        }
+      ],
+      "maximum_mode_relative_defect": 6.063198600378349e-06,
+      "maximum_phase_relative_defect": 6.2443723981477834e-06,
+      "minimum_negative_control_defect": 0.15690108722921736,
+      "boundary_relative_error": 4.881248306865765e-15,
+      "phase_reconstruction_error": 7.324327780862382e-15
+    }
+  ],
+  "scope": "Each section integrates the independently reconstructed exponential-periodic mode in all nine states and the complete history; exact Floquet boundary checked separately. No complete spectrum is claimed."
+}

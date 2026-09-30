@@ -1,0 +1,83 @@
+{
+  "status": "PROBE_FINISHED",
+  "pid": 411647,
+  "rows": [
+    {
+      "index": 0,
+      "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0000_N256.npz",
+      "refined_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0000_N256_accuracy_N1024.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0000_N256.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0000_N256_accuracy_N1024.npz",
+        "N": 1024,
+        "check_N": 4096,
+        "J_EE_core": 0.9720662803586713,
+        "T_ms": 340.8450889090311,
+        "maximum_group_defect_Hz": 1.1102230246251565e-13,
+        "regional_defect_Hz": [
+          2.80490579278362e-15,
+          5.566157393724962e-15,
+          4.621002425847052e-16
+        ],
+        "minimum_rate_Hz": 0.00023087028144401283,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.4338573731120796e-14,
+            "phase_index": 3816,
+            "group": 395
+          },
+          "slow": {
+            "minimum_Hz": 0.0003018963154738369,
+            "phase_index": 1938,
+            "group": 151
+          },
+          "positive": true,
+          "N": 1024,
+          "check_N": 4096
+        }
+      },
+      "relative_waveform_change": 1.1895527773573026e-05,
+      "relative_period_change": 6.914468997365475e-12
+    },
+    {
+      "index": 99,
+      "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0099_N256.npz",
+      "refined_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0099_N256_accuracy_N2048.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0099_N256.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage3_0099_N256_accuracy_N2048.npz",
+        "N": 2048,
+        "check_N": 8192,
+        "J_EE_core": 0.9503999136540123,
+        "T_ms": 327.43030904321284,
+        "maximum_group_defect_Hz": 3.885780586188048e-13,
+        "regional_defect_Hz": [
+          4.034824593457785e-15,
+          8.152034750785967e-15,
+          1.7132869240973716e-15
+        ],
+        "minimum_rate_Hz": 4.918871777445232e-05,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.942890293094024e-13,
+            "phase_index": 549,
+            "group": 795
+          },
+          "slow": {
+            "minimum_Hz": 6.689176052918544e-05,
+            "phase_index": 4502,
+            "group": 151
+          },
+          "positive": true,
+          "N": 2048,
+          "check_N": 8192
+        }
+      },
+      "relative_waveform_change": 0.0004405556695495878,
+      "relative_period_change": 9.191560823573752e-08
+    }
+  ],
+  "scope": "Fixed-parameter temporal refinement at two endpoints of the withheld H2 segment. Does not accept the intervening continuation or its two apparent turns."
+}

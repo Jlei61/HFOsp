@@ -1,0 +1,13 @@
+{
+  "timestamp": 1789855818.6097374,
+  "worker": {
+    "status": "WAITING_PHYSICAL_CHILDREN",
+    "pid": 481943,
+    "timestamp": 1789855816.6615865,
+    "dependencies": [
+      480071
+    ]
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD4_child_modes.py --device 0 --after-pid 480071 ",
+  "reason": "Before numerical child-mode work starts, require child J to stay inside the actual two physical crossing witnesses and explicitly recheck their negative multipliers; remove an unrelated hardcoded J-radius that was narrower than this verified window."
+}

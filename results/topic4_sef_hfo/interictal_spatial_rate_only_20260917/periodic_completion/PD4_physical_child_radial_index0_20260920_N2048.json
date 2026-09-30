@@ -1,0 +1,26 @@
+{
+  "status": "EIGENPAIR_CONVERGED_CHECKS_PENDING",
+  "label": "PD4_physical_child_radial_index0_20260920",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.02000_N1024.npz",
+  "N": 2048,
+  "J_EE_core": 0.9463109196512791,
+  "T_ms": 593.7951662930823,
+  "streamed_harmonic_actions": true,
+  "lambda_per_ms": 0.0005518272872296028,
+  "multiplier": 1.387734242462194,
+  "implementation_checks": {
+    "zero_growth_operator_difference": 1.7829934222441657e-16,
+    "growth_derivative_relative_errors": [
+      1.74384603598027e-09,
+      4.3065226236611896e-10
+    ]
+  },
+  "residual": 5.826879069766037e-12,
+  "history": [
+    5.826878943337949e-12
+  ],
+  "normalization_error": 1.1102230246251565e-16,
+  "covector_phase_overlap": 7.192127488507184e-17,
+  "mode_phase_overlap": 0.9081378425750182,
+  "scope": "One real Floquet eigenpair from a periodic BVP. No complete spectrum or stability classification; independently check the mode in full state/history and refine temporal resolution."
+}

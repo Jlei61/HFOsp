@@ -1,0 +1,284 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "label": "endpoint_D0.1429804_dt0.05_rate",
+      "category": "SELF_LIMITED",
+      "D": 0.14298039269556018,
+      "Z_A_B_surround": [
+        0.7415373409789844,
+        0.7349879876270826,
+        0.8630271740108022
+      ],
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.6475,
+        "longest_quiet_ms": 170,
+        "quiet_runs_ge20ms": 16,
+        "n_events": 15,
+        "event_durations_ms": [
+          90,
+          90,
+          100,
+          90,
+          90,
+          100,
+          90,
+          90,
+          100,
+          90,
+          90,
+          100,
+          90,
+          100,
+          100
+        ],
+        "event_peaks_hz": [
+          149.22168270621947,
+          147.92882781768537,
+          150.30389173105442,
+          148.784685968083,
+          148.57102465765217,
+          150.34108720438536,
+          148.26058349793055,
+          149.06174720589465,
+          150.29015319418312,
+          147.65124475106074,
+          149.45357672095452,
+          150.14883000812569,
+          146.9748117237737,
+          149.77662599286077,
+          149.9212091533529
+        ],
+        "inter_onset_ms": [
+          260,
+          260,
+          270,
+          260,
+          260,
+          270,
+          260,
+          260,
+          270,
+          260,
+          260,
+          270,
+          260,
+          260
+        ],
+        "activity_duty": 0.3525,
+        "mean_rate_hz": 27.631747992611334,
+        "max_rate_hz": 150.34108720438536,
+        "trailing_activity_ms": 0,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09359671875
+      },
+      "matched_spatial_windows": [
+        {
+          "window_ms": [
+            10777,
+            10827
+          ],
+          "global_mean_hz": 120.28659205839145
+        },
+        {
+          "window_ms": [
+            10863,
+            10913
+          ],
+          "global_mean_hz": 0.01542410835025496
+        }
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.1429804_dt0.05_rate/trajectory.npz"
+    },
+    {
+      "label": "rate_spatial_Z_cores",
+      "category": "UNRESOLVED",
+      "D": 0.1433111735311864,
+      "Z_A_B_surround": [
+        0.7309233707009926,
+        0.731702932728312,
+        0.8630271740108023
+      ],
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.1775,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 5,
+        "n_events": 4,
+        "event_durations_ms": [
+          100,
+          90,
+          80,
+          90
+        ],
+        "event_peaks_hz": [
+          146.1671402394465,
+          170.6575061948834,
+          181.63131782956202,
+          190.49436914426173
+        ],
+        "inter_onset_ms": [
+          270,
+          280,
+          270
+        ],
+        "activity_duty": 0.8225,
+        "mean_rate_hz": 64.28181441074638,
+        "max_rate_hz": 190.49436914426173,
+        "trailing_activity_ms": 760,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.21659984375
+      },
+      "matched_spatial_windows": [
+        {
+          "window_ms": [
+            10777,
+            10827
+          ],
+          "global_mean_hz": 0.035941787737465085
+        },
+        {
+          "window_ms": [
+            10863,
+            10913
+          ],
+          "global_mean_hz": 128.05183742660304
+        }
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_spatial_Z_cores/trajectory.npz"
+    },
+    {
+      "label": "rate_spatial_Z_surround",
+      "category": "PERSISTENT",
+      "D": 0.1473611882881175,
+      "Z_A_B_surround": [
+        0.7415373409789847,
+        0.7349879876270827,
+        0.8584248936771899
+      ],
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 106.88772971731258,
+        "max_rate_hz": 136.64275577776124,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.291375,
+          "20Hz_duty90": 0.2624375,
+          "50Hz_duty80": 0.282125,
+          "50Hz_duty90": 0.2311875,
+          "100Hz_duty80": 0.2649375,
+          "100Hz_duty90": 0.21503125
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.33470015625000005
+      },
+      "matched_spatial_windows": [
+        {
+          "window_ms": [
+            10777,
+            10827
+          ],
+          "global_mean_hz": 105.29026922543873
+        },
+        {
+          "window_ms": [
+            10863,
+            10913
+          ],
+          "global_mean_hz": 95.38563307183215
+        }
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_spatial_Z_surround/trajectory.npz"
+    },
+    {
+      "label": "rate_spatial_Z_both",
+      "category": "PERSISTENT",
+      "D": 0.14769196912374372,
+      "Z_A_B_surround": [
+        0.7309233707009926,
+        0.731702932728312,
+        0.8584248936771899
+      ],
+      "tail4s": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 106.59414678493302,
+        "max_rate_hz": 146.03424043909183,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.2873125,
+          "20Hz_duty90": 0.24225,
+          "50Hz_duty80": 0.27728125,
+          "50Hz_duty90": 0.22203125,
+          "100Hz_duty80": 0.26075,
+          "100Hz_duty90": 0.1975625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.3334646875
+      },
+      "matched_spatial_windows": [
+        {
+          "window_ms": [
+            10777,
+            10827
+          ],
+          "global_mean_hz": 81.67221071968517
+        },
+        {
+          "window_ms": [
+            10863,
+            10913
+          ],
+          "global_mean_hz": 109.39036534489874
+        }
+      ],
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_spatial_Z_both/trajectory.npz"
+    }
+  ],
+  "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/rate_seed_N1024_dt0.05.npz",
+  "M": "dynamic in all four conditions",
+  "Z": "held at the specified spatial field",
+  "finite_time_conclusion": "Surround-only depletion is sufficient for sustained local activity over the assessed 4-s tail; core-only depletion does not remove all complete self-terminating events.",
+  "limits": "These are local persistent states, not yet the final broadly saturated runaway; regional intervention is not a bifurcation classification.",
+  "windows_selection": "baseline 50-ms average maximum within 10--11 s, then minimum 70--230 ms later; same clocks in all conditions"
+}

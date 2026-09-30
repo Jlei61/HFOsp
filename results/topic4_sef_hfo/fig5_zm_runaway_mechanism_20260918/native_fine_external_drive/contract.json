@@ -1,0 +1,28 @@
+{
+  "created_local": "2026-09-20T09:50:47.838148+08:00",
+  "question": "How much original spatial external forcing was lost by lifting1mm cell means to0.5mm groups?",
+  "fixed": "Same native SpatialOUDrive,positions,seed andconfiguration. Reconstruct spatial field from its own RNG; use stored global rate per1ms at its original float32precision. No future native firing, neuronstate transplantation, fitting or physicalparameter changes.",
+  "config_source": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/config/topic4_rev22_dci_transition_execution.json",
+  "spatial_ou": {
+    "ell_mm": 0.38,
+    "grid_spacing_mm": 0.4,
+    "mode": "local",
+    "role": "frozen accessibility process; not optimized",
+    "seed_offset": 500000,
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "update_interval_ms": 1.0
+  },
+  "groups": [
+    935,
+    3479
+  ],
+  "interval_ms": [
+    0,
+    12500
+  ],
+  "sampling_ms": 1,
+  "audit": "Reconstructed20x20 spatialcell means agree with originalrecording within float32roundoff; spatialOU field andcachedvalues andRNG must match everyavailablecheckpoint.",
+  "contrasts": "Original1mm spatialcell means lifted tofinegroups versus actual mean externalrate oforiginalmembers ofeach finegroup. Bothholdsampledforcingon1msintervals.",
+  "scope": "Exogenous forcing recovery and read-only diagnosis. No newnetwork orscientificacceptance inthisscript."
+}

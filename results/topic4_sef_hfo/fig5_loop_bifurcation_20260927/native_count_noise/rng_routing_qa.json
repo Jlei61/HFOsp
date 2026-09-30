@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "tests": [
+    {
+      "seed": null,
+      "original_rng_after_counts_bitwise": true,
+      "subsequent_normals_bitwise": true,
+      "changed_count_arrays": 0,
+      "total_count_standardized_error": 0.8347811232949173
+    },
+    {
+      "seed": 928701,
+      "original_rng_after_counts_bitwise": true,
+      "subsequent_normals_bitwise": true,
+      "changed_count_arrays": 250,
+      "total_count_standardized_error": -1.2316493393974177
+    }
+  ],
+  "scope": "RNG routing and count mean only; no dynamical acceptance."
+}

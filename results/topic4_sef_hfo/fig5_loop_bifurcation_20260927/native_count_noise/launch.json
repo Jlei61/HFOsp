@@ -1,0 +1,39 @@
+{
+  "status": "LAUNCHED_FIXED_TWO",
+  "created_epoch": 1790527359.025269,
+  "rows": [
+    {
+      "seed": 928701,
+      "device": 1,
+      "pid": 8848,
+      "created_epoch": 1790527358.97,
+      "log": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_count_noise/count928701.log",
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/native_count_noise.py",
+        "worker",
+        "--seed",
+        "928701",
+        "--device",
+        "1"
+      ]
+    },
+    {
+      "seed": 928702,
+      "device": 0,
+      "pid": 8849,
+      "created_epoch": 1790527358.97,
+      "log": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_count_noise/count928702.log",
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/native_count_noise.py",
+        "worker",
+        "--seed",
+        "928702",
+        "--device",
+        "0"
+      ]
+    }
+  ],
+  "automatic_restart": false
+}

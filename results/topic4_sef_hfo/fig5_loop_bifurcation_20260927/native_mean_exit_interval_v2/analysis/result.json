@@ -1,0 +1,264 @@
+{
+  "status": "COMPLETE_SAME_HISTORY_UPPER_INTERVAL_COMPARISON",
+  "rows": [
+    {
+      "name": "high_K9p4625",
+      "K": 9.4625,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "model_rate_Hz": [
+            186.9495865518654,
+            464.62566426400906,
+            470.35841438638914,
+            172.7628793531491
+          ],
+          "native_rate_Hz": [
+            186.9618437499998,
+            464.6376657824943,
+            470.3101781170468,
+            172.7767038739326
+          ],
+          "rate_difference_Hz": [
+            -0.01225719813439241,
+            -0.012001518485249107,
+            0.04823626934233971,
+            -0.013824520783515482
+          ],
+          "weighted_field_RMS_Hz": 0.3082908302272926,
+          "model_Zdot": [
+            0.04304273622625902,
+            -0.03483387712853466,
+            -0.03307375768365634,
+            0.04693461182319449
+          ],
+          "native_Zdot": [
+            0.04303281675000001,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.046924190841077046
+          ],
+          "Zdot_difference": [
+            9.91947625900852e-06,
+            9.245723631146063e-11,
+            7.02600616575566e-11,
+            1.0420982117446964e-05
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "model_rate_Hz": [
+            186.57212651440514,
+            464.4536858244471,
+            470.06108626331473,
+            172.37826511971036
+          ],
+          "native_rate_Hz": [
+            186.59863125000015,
+            464.47161803713533,
+            470.05089058524015,
+            172.40592908732768
+          ],
+          "rate_difference_Hz": [
+            -0.026504735595011653,
+            -0.017932212688208438,
+            0.010195678074580883,
+            -0.02766396761731471
+          ],
+          "weighted_field_RMS_Hz": 0.12157803557745223,
+          "model_Zdot": [
+            0.04314253872525422,
+            -0.03483387712853466,
+            -0.03307375768365634,
+            0.047039460147812184
+          ],
+          "native_Zdot": [
+            0.04314083912499999,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.047037674623086174
+          ],
+          "Zdot_difference": [
+            1.6996002542291055e-06,
+            9.245723631146063e-11,
+            7.02600616575566e-11,
+            1.7855247260098461e-06
+          ]
+        }
+      ],
+      "first100ms_causal_R_le5_s": {
+        "native": null,
+        "model": null
+      },
+      "guards": {
+        "both_windows_spatial": true,
+        "both_windows_core_rate": true,
+        "both_windows_core_drift": true,
+        "no_wrong_R_gate": true,
+        "both_G_below_point1": true,
+        "low_transition_match": true
+      },
+      "retained": true,
+      "native_censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 10.0,
+          "observed_duration_lower_bound_s": 10.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 10.0,
+          "observed_duration_lower_bound_s": 10.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            186.78023749999997,
+            464.55464190981525,
+            470.1805343511452,
+            172.59131648062998
+          ],
+          "peak_Hz_allE_A_B_other": [
+            195.4625,
+            471.35278514588856,
+            476.5903307888041,
+            181.40183847669073
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "high_K9p5",
+      "K": 9.5,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "model_rate_Hz": [
+            55.555193476864396,
+            161.376247912443,
+            145.1646155489151,
+            50.623411441635675
+          ],
+          "native_rate_Hz": [
+            56.484693750000005,
+            163.67957559681696,
+            147.59821882951698,
+            51.48009192383451
+          ],
+          "rate_difference_Hz": [
+            -0.9295002731356092,
+            -2.3033276843739543,
+            -2.4336032806018864,
+            -0.8566804821988327
+          ],
+          "weighted_field_RMS_Hz": 1.4374112280713822,
+          "model_Zdot": [
+            0.12013034122752476,
+            0.0877273430350473,
+            0.09050364690812733,
+            0.12169693487072084
+          ],
+          "native_Zdot": [
+            0.11952841925000071,
+            0.08665144373391535,
+            0.08935826769137667,
+            0.12112076917331539
+          ],
+          "Zdot_difference": [
+            0.0006019219775240531,
+            0.001075899301131944,
+            0.001145379216750661,
+            0.0005761656974054424
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "model_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "native_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rate_difference_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "weighted_field_RMS_Hz": 0.0,
+          "model_Zdot": [
+            0.1579999999703068,
+            0.16516612287147586,
+            0.16692624231633008,
+            0.15759227563831668
+          ],
+          "native_Zdot": [
+            0.15800000000000108,
+            0.16516612277900802,
+            0.16692624224608452,
+            0.15759227567364337
+          ],
+          "Zdot_difference": [
+            -2.969427481680498e-11,
+            9.24678389413458e-11,
+            7.024555936929744e-11,
+            -3.532668602090894e-11
+          ]
+        }
+      ],
+      "first100ms_causal_R_le5_s": {
+        "native": 2.057000000000002,
+        "model": 2.03
+      },
+      "guards": {
+        "both_windows_spatial": true,
+        "both_windows_core_rate": true,
+        "both_windows_core_drift": true,
+        "no_wrong_R_gate": true,
+        "both_G_below_point1": true,
+        "low_transition_match": true
+      },
+      "retained": true,
+      "native_censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 2.04,
+          "observed_duration_lower_bound_s": 2.04,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    }
+  ],
+  "both_conditions_retained": true,
+  "native_future_inputs_and_final_RNG_paired": true,
+  "model_future_RNG_paired_with_four_previous_probes": true,
+  "scope": "Conditional heldfields at82s nativehistory/model100000clock. No independently sampled topology, seed or autonomousloop. A finite-time transition bracket is not a proof of stable/unstablebranches or Fold/Hopf.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PASS",
+  "human_visual": "PENDING",
+  "producer_sha256": "f8ef059c3d70c7751120a785fd42e65ad6e95d6b351d4d3e01b2124e08c6890c",
+  "agent_visual_basis": "Actual spatial/native correspondence PNG and branch PNG opened. Same-state branch PDF rendered and opened; units, data windows and conditional-transition qualifier verified. Zero-rate population markers overlap in this version; allzero status independently shown in spatial panels and tables."
+}

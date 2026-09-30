@@ -1,0 +1,12 @@
+{
+  "status": "REGISTERED_BEFORE_ACTUAL_K9_ROOT",
+  "created_epoch": 1790532760.4998903,
+  "question": "Does the target-resolved static surrogate have a selfconsistent high equilibrium near the corresponding actual-field K9 state?",
+  "design": "One workingpoint Zmean.21/Kmean9, originalactual16.7s fields, source3479groups with40000individualtargetZ/K/weights. Solve local steadyM_i=1000*r_i selfconsistently; externalinput is the completed5-10s exactpaired mean. G includes exact discrete15mscausalR DC factor.",
+  "algorithm": "At most30Newtonsteps, matrixfreeGMRES200inneriterations withdiagonalpreconditioner, boundedpositive line search12trials. JVP checked againstsame-equation centraldifferences before solving. Residual max<1e-6Hz needed for a numerical root.",
+  "interpretation": "Frozenv3staticEresponse andparentI. Staticworkingpointaudit showedsmallgroupmeanerrors butdynamic/DCvalidationnotcertified. Root,evenifconverged,isnotstability,nativebistability,orformalbifurcation.",
+  "stop": "No automatic K sweep, newmodel fit, rootretry, or stability naming. Compare actualspatialfield/globalfeedback/domain and retainfailures.",
+  "model_sha256": "a951a19ae1faf937c44b687bdd13ea9e6724bf508da00634cf5970f2e696bb63",
+  "producer_sha256": "860bad9181e8247766e3056c666cfee037801b5d07bad58282a99ecdaafe9b11",
+  "formal_bifurcation_allowed": false
+}

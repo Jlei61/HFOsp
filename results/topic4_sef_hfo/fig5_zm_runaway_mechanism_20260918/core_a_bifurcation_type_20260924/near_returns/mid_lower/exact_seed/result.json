@@ -1,0 +1,46 @@
+{
+  "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+  "times_ms": [
+    2462,
+    2727
+  ],
+  "period_ms": 265,
+  "weighted_coordinate_relative": 1.016443127646533,
+  "full_state_errors": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 13.014444141482288,
+        "difference_rms": 0.8707260501726543,
+        "relative_rms": 0.06690459006215246
+      },
+      "GABA": {
+        "reference_rms": 0.7112460922075104,
+        "difference_rms": 0.46410714264437947,
+        "relative_rms": 0.6525268085535904
+      },
+      "M": {
+        "reference_rms": 0.02207627114002593,
+        "difference_rms": 0.0004940088364740794,
+        "relative_rms": 0.022377367687716268
+      },
+      "covariance": {
+        "reference_rms": 36.87051754539336,
+        "difference_rms": 0.3478308621104055,
+        "relative_rms": 0.009433848105933729
+      },
+      "input_memory": {
+        "reference_rms": 0.10197086934881362,
+        "difference_rms": 0.0133701764817563,
+        "relative_rms": 0.131117608069229
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0002733560975748946,
+        "difference_rms": 0.00048050937413232175,
+        "relative_rms": 1.7578147273655416
+      }
+    },
+    "combined_relative_rms": 0.7678934004812804
+  },
+  "all_original1ms_group_rates_bitwise": true,
+  "model_promoted": false
+}

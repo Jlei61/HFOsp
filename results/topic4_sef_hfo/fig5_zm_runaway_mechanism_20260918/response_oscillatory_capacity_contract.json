@@ -1,0 +1,77 @@
+{
+  "created_local": "2026-09-19T20:17:45.323564+08:00",
+  "question": "Can one stable damped oscillatory pair repair local variance response capacity in strong-mean workpoints?",
+  "data": "Only75coarsecalibrationknots from freshmidpointassay. No midpoint or old independent validation values fitted. Both methods predict fresh frequencies before new data acquisition.",
+  "x_values": [
+    -0.3,
+    1,
+    2.5
+  ],
+  "fixed_sigma_E": 0.7,
+  "fixed_sigma_I": 1.4,
+  "training_frequencies_hz": [
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "selection_fit_frequencies_hz": [
+    2,
+    5,
+    20,
+    80
+  ],
+  "fresh_frequencies_hz": [
+    15,
+    60,
+    120,
+    200
+  ],
+  "real5_times_ms": [
+    0.25,
+    1,
+    4,
+    16,
+    64
+  ],
+  "pair_real_times_ms": [
+    1,
+    16,
+    64
+  ],
+  "decay_time_bounds_ms": [
+    0.2,
+    200
+  ],
+  "oscillation_bounds_hz": [
+    0.5,
+    800
+  ],
+  "initial_decay_times_ms": [
+    2,
+    20
+  ],
+  "initial_frequency_factors": [
+    0.5,
+    1,
+    2
+  ],
+  "max_nfev": 120,
+  "ridge": 0.0001,
+  "SEM_floor_fraction": 0.01,
+  "local_realization": "h1_dot=a(q-h1)+b*h2; h2_dot=b(q-h1)-a*h2. Outputs q-h1,h2, stable poles-a+-ib, equilibrium h1=q,h2=0. Combine three first-order filters. Correct staticDC and 1/mV variance-to-mean scaling retained.",
+  "fitting": "Variable projection: optimize two positive pole parameters, solve five real coefficients. Six prescribed starts, choose fitting objective only. Four-frequency fit predicts10/40; then allsix training frequencies for locked fresh predictions. No later basis/bounds/ridge changes based on validation.",
+  "eligibility": "Keep original coarse-knot eligibility(meanDCandownvarianceDCSNR>=10) for comparisons; all75knots recorded. Fresh dataset also hasDCandmeanDC forprecision audits buteligibility isnotcherry-picked.",
+  "fresh_assay": {
+    "seed": 919788,
+    "replicates": 8192,
+    "duration_ms": 8000,
+    "burn_ms": 300,
+    "batch": 16,
+    "mean_amplitude_mv": 0.15,
+    "variance_amplitude_relative": 0.05
+  },
+  "scope": "Local channel-specific response capacity diagnostic, not a shared-pole neuronal model, full spatialtable, nonlinearwaveform pass, SNN propagation or bifurcation certificate. StaticnetworkandZM unchanged. No networkpromotion from this test alone."
+}

@@ -1,0 +1,166 @@
+{
+  "status": "VALIDATION_INCOMPLETE",
+  "label": "LPC_burst_high",
+  "J_EE_core": 1.626501518560538,
+  "T_ms": 239.69812295401096,
+  "mesh_checks": [
+    {
+      "label": "LPC_burst_high",
+      "J_EE_core": 1.626500963224448,
+      "T_ms": 239.6944117246555,
+      "N": 256,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N256.npz",
+      "dJ_dlogT": 7.633354945201932e-12,
+      "d2J_dlogT2": -5.848570550024552,
+      "residual_hz": 1.2455314557513475e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed BVP has a non-phase null tangent; parameter curvature nonzero",
+      "floquet_status": "check matching monodromy files separately"
+    },
+    {
+      "label": "LPC_burst_high",
+      "J_EE_core": 1.6265015184765392,
+      "T_ms": 239.69812231617996,
+      "N": 512,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N512.npz",
+      "dJ_dlogT": 4.5506337284389275e-11,
+      "d2J_dlogT2": -6.049604275888461,
+      "residual_hz": 1.5612511283791264e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed BVP has a non-phase null tangent; parameter curvature nonzero",
+      "floquet_status": "check matching monodromy files separately"
+    },
+    {
+      "label": "LPC_burst_high",
+      "J_EE_core": 1.626501518560538,
+      "T_ms": 239.69812295401096,
+      "N": 1024,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+      "dJ_dlogT": -1.5912509674550313e-11,
+      "d2J_dlogT2": -6.049701551992858,
+      "residual_hz": 4.699018951725975e-11,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed BVP has a non-phase null tangent; parameter curvature nonzero",
+      "floquet_status": "check matching monodromy files separately"
+    }
+  ],
+  "J_mesh_change": 8.399880790932457e-11,
+  "curvature_relative_change": 1.6079488146868166e-05,
+  "continuous_defect": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+    "N": 1024,
+    "check_N": 4096,
+    "J_EE_core": 1.626501518560538,
+    "T_ms": 239.69812295401096,
+    "maximum_group_defect_Hz": 5.536761055191519e-05,
+    "regional_defect_Hz": [
+      4.57116546022738e-12,
+      1.4098652624213642e-09,
+      1.5217030315523367e-07
+    ],
+    "minimum_rate_Hz": 4.9598418509724416e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -7.855993775646164e-06,
+        "phase_index": 1120,
+        "group": 15
+      },
+      "slow": {
+        "minimum_Hz": 6.764772905152482e-05,
+        "phase_index": 1770,
+        "group": 399
+      },
+      "positive": false,
+      "N": 1024,
+      "check_N": 4096
+    }
+  },
+  "curvature_coordinate": "logT",
+  "matching_mesh_coordinate": true,
+  "full_state_fold_mode_checks": [
+    {
+      "label": "LPC_burst_high",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+      "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_tangent_N1024.npz",
+      "J_EE_core": 1.626501518560538,
+      "T_ms": 239.69812295401096,
+      "N": 1024,
+      "dt_ms": 0.04999960845932644,
+      "dT_dcoordinate_ms": 239.69812295401096,
+      "dJ_dcoordinate": -1.5912509674550313e-11,
+      "seed_method": "centered finite difference",
+      "analytic_vs_finite_difference_relative_change": null,
+      "derivative_step": 1.0945260658845818e-06,
+      "reconstruction_step_halving_relative_change": 9.438091406542845e-11,
+      "generalized_plus_one_relative_defect": 0.000442537362577335,
+      "generalized_plus_one_defect_over_tangent": 0.0017053478155800517,
+      "phase_relative_defect": 0.001384073547447921,
+      "tangent_fraction_orthogonal_to_phase": 0.022441244805810126,
+      "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+      "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+    },
+    {
+      "label": "LPC_burst_high",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+      "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_tangent_N1024.npz",
+      "J_EE_core": 1.626501518560538,
+      "T_ms": 239.69812295401096,
+      "N": 1024,
+      "dt_ms": 0.02499980422966322,
+      "dT_dcoordinate_ms": 239.69812295401096,
+      "dJ_dcoordinate": -1.5912509674550313e-11,
+      "seed_method": "centered finite difference",
+      "analytic_vs_finite_difference_relative_change": null,
+      "derivative_step": 1.0945260658845818e-06,
+      "reconstruction_step_halving_relative_change": 9.481422503331943e-11,
+      "generalized_plus_one_relative_defect": 0.00011088486987631031,
+      "generalized_plus_one_defect_over_tangent": 0.00042730236646070966,
+      "phase_relative_defect": 0.0003464075514004377,
+      "tangent_fraction_orthogonal_to_phase": 0.02244138420979287,
+      "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+      "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+    },
+    {
+      "label": "LPC_burst_high",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N1024.npz",
+      "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_tangent_N1024.npz",
+      "J_EE_core": 1.626501518560538,
+      "T_ms": 239.69812295401096,
+      "N": 1024,
+      "dt_ms": 0.01249990211483161,
+      "dT_dcoordinate_ms": 239.69812295401096,
+      "dJ_dcoordinate": -1.5912509674550313e-11,
+      "seed_method": "centered finite difference",
+      "analytic_vs_finite_difference_relative_change": null,
+      "derivative_step": 1.0945260658845818e-06,
+      "reconstruction_step_halving_relative_change": 9.494080357196081e-11,
+      "generalized_plus_one_relative_defect": 2.7455153432249233e-05,
+      "generalized_plus_one_defect_over_tangent": 0.00010580028646398586,
+      "phase_relative_defect": 8.540383776015672e-05,
+      "tangent_fraction_orthogonal_to_phase": 0.022441662985405716,
+      "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+      "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+    }
+  ],
+  "successive_defect_reduction": [
+    3.990962545845758,
+    4.038763438344631
+  ],
+  "asymptotic_check_dt_ms": [
+    0.04999960845932644,
+    0.02499980422966322,
+    0.01249990211483161
+  ],
+  "seed_method": "centered finite difference",
+  "scope": "Numerical simple cycle-fold evidence in the frozen full spatial rate DDE; no complete Floquet stability classification of adjacent branches.",
+  "numerical_criteria": {
+    "J_mesh_change": 1e-07,
+    "curvature_relative_change": 0.01,
+    "derivative": 1e-07,
+    "continuous_defect_Hz": 0.001,
+    "finest_mode_relative_defect": 0.001,
+    "minimum_halving_reduction": 3,
+    "convergence_rule": "At least threefold reduction twice on the three finest steps, with no upper bound; all coarser data retained.",
+    "criterion_revision": "Remove an unjustified maximum error-reduction ratio; tighten the finest relative defect from .01 to .001. Equations and recorded errors unchanged."
+  }
+}

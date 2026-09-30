@@ -1,0 +1,18 @@
+{
+  "question": "Can a positivity-preserving numerical return iteration close the actual local bursting orbit more effectively than damped Newton?",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/mid1_active_coarse/root_state.npz",
+  "period_seed_ms": 261.59212044610115,
+  "dt_ms": 0.05,
+  "source_dt_ms": 0.05,
+  "target_D_A": 0.326,
+  "section": "flow",
+  "relaxation": 0.05,
+  "M_relaxation": 0.05,
+  "return_halfwidth_ms": 10.0,
+  "equations": "Same full spatial conditional drift, all Z held at the same original Core-A-only field, all M dynamic. Every P evaluation integrates original dynamics.",
+  "solver": "G(X)=X+W*(P(X)-X), with declared positive fast/history and M relaxation. This is a numerical fixed-point iteration; P=identity iff G=identity. A Core A rate section preserves phase under block-wise convex mixing; a flow-normal section requires uniform relaxation. Anderson memory6 is allowed only if full original physical admissibility holds and coefficientL1<=20. Otherwise use the convex G. Reject a proposal that increases actual residual by more than2x, fall back and clear memory.",
+  "reason": "Current Newton proposals hit nonnegative M/history bounds. Residual-seeded linear diagnostics suggest a large negative return direction, which motivates damping as a solver choice, not a certified Floquet multiplier.",
+  "maximum_actual_returns": 35,
+  "closure_gate": "combined<1e-7 and allsixblocks<1e-6; independent phase/mesh and Floquet still required",
+  "model_promoted": false
+}

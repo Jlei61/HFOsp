@@ -1,0 +1,22 @@
+{
+  "created_local": "2026-09-20T07:55:32.552352+08:00",
+  "question": "Do observed groupmean currenterrors explain native shortevent tails missed even by GaussianLIF?",
+  "only_change": "Use actualpre-step native netinputmean instead of projected AMPA minus Z GABA minusM. Identicalrawprivatevarianceforcing,postfilterZ,meangroupthreshold,noise seed andtwo timesteps.",
+  "groups": [
+    279,
+    141,
+    39,
+    594,
+    293,
+    130
+  ],
+  "replicates": 8192,
+  "seed": 920110,
+  "dt_ms": [
+    0.1,
+    0.05
+  ],
+  "budget": "Sixgroups attwo steps; fixedrate response onthese samemeans; nofit ornetworkrun.",
+  "comparisons": "Samepredeclared50mswindows andthreeexistingtimeintervals; pairedCRN counts plus fixedreadout. Report errors continuously, no posthoc passgate.",
+  "scope": "Teacher-forced diagnostic only; exact inputmean does not reconstruct actualcurrentdistribution or spikeinputcorrelation."
+}

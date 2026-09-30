@@ -1,0 +1,85 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "name": "low_arclength_2",
+      "status": "CONVERGED",
+      "J_coarse": 1.007275360202733,
+      "J_fine": 0.9595080511411868,
+      "rates_coarse_hz": [
+        2.8102856588434983,
+        3.6319064009696325,
+        0.20996019161674317
+      ],
+      "rates_fine_hz": [
+        2.3137228921889386,
+        3.9966229147195738,
+        0.2522117718263404
+      ],
+      "residual": 9.8879238130678e-17,
+      "trace": [
+        {
+          "iteration": 0,
+          "J": 1.007275360202733,
+          "residual": 0.08454740990304303
+        },
+        {
+          "iteration": 1,
+          "J": 0.9773171902168376,
+          "residual": 0.16712527678647549
+        },
+        {
+          "iteration": 2,
+          "J": 0.9719908070348627,
+          "residual": 0.23844519732998726
+        },
+        {
+          "iteration": 3,
+          "J": 0.9694345767495357,
+          "residual": 0.23788408854708676
+        },
+        {
+          "iteration": 4,
+          "J": 0.9662600623691782,
+          "residual": 0.23201944276881892
+        },
+        {
+          "iteration": 5,
+          "J": 0.9588535776289467,
+          "residual": 0.1687066390055021
+        },
+        {
+          "iteration": 6,
+          "J": 0.9595101134534536,
+          "residual": 0.022371723899435203
+        },
+        {
+          "iteration": 7,
+          "J": 0.9595080484865388,
+          "residual": 0.0001304272450473043
+        },
+        {
+          "iteration": 8,
+          "J": 0.959508051141051,
+          "residual": 4.262715513903004e-09
+        },
+        {
+          "iteration": 9,
+          "J": 0.9595080511411868,
+          "residual": 7.144724711729102e-12
+        }
+      ],
+      "seed_projection": "Average each original-neuron coarse-group rate onto its fine group; no re-fitting of network parameters",
+      "projected_newton": true,
+      "eigenvector_residual": 3.0745592566481736e-11,
+      "transversality": 1.4589029054792517,
+      "quadratic_coefficient": -6.515724031272179,
+      "regional_energy": [
+        3.300685488883735e-05,
+        0.30969589215463134,
+        0.51832650144846
+      ]
+    }
+  ],
+  "meaning": "Selected-fold refinement across two spatial grids, not an enumeration of every fine-grid branch"
+}

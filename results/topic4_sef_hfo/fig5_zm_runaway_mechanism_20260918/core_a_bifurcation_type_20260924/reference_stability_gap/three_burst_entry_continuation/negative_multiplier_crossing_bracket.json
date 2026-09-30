@@ -1,0 +1,55 @@
+{
+  "status": "COARSE_NUMERICAL_NEGATIVE_MULTIPLIER_CROSSING_BRACKET",
+  "dt_ms": 0.05,
+  "points": [
+    {
+      "label": "native9551",
+      "theta_ms": 9551.180014482,
+      "Z_A": 0.7061486994565256,
+      "D_A": 0.2938513005434744,
+      "verified_negative_modes": [
+        {
+          "real": -0.2767674730685351,
+          "imag": 0.0,
+          "relative_residual": 5.068602274612631e-14,
+          "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+        }
+      ],
+      "root": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9551/whole_cycle"
+    },
+    {
+      "label": "native9573",
+      "theta_ms": 9573.043350229,
+      "Z_A": 0.7030676768883982,
+      "D_A": 0.2969323231116018,
+      "verified_negative_modes": [
+        {
+          "real": -0.8185894685707278,
+          "imag": 0.0,
+          "relative_residual": 1.926812900239063e-14,
+          "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+        }
+      ],
+      "root": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9573/whole_cycle"
+    },
+    {
+      "label": "native9584",
+      "theta_ms": 9583.9750181025,
+      "Z_A": 0.7015321738308211,
+      "D_A": 0.2984678261691789,
+      "verified_negative_modes": [
+        {
+          "real": -1.4222121150929221,
+          "imag": 0.0,
+          "relative_residual": 5.5076707425821446e-14,
+          "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+        }
+      ],
+      "root": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish"
+    }
+  ],
+  "physical_bifurcation_type": "NOT_ESTABLISHED",
+  "onset_attribution": "NOT_ESTABLISHED",
+  "next_native_theta_ms": 9576.328713509794,
+  "boundary": "A verified numerical real return eigenvalue crosses -1 between continued closed cycles. This nominates a flip/period-doubling candidate only. Independent phase and fine-mesh qualification, transversality/nondegeneracy and a nonlinear daughter branch or equivalent certificate remain unresolved. No certified stable sheet or native-SNN onset claim."
+}

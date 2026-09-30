@@ -1,0 +1,27 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/exact_single_B_cycle",
+  "resume": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/multiphase_single_B/iteration00",
+  "dt_ms": 0.05,
+  "target_D_A": null,
+  "segments": 4,
+  "independent_segment_times": true,
+  "phase_conditions": 4,
+  "cyclic_phase_time_precondition": true,
+  "equations": "Same3479-group physical delayed spatial rate field, entire Z held, all M dynamic. Optional target_D_A changes only the previously audited native within-Core-A field; outside Z unchanged.",
+  "numerical_parameterization": "Solve Phi(h_j,X_j)-X_(j+1)=0 and normal_j dot(X_j-Xref_j)=0 for four full states and four positive durations. The added three durations are node placement freedoms removed by three extra phase gauges; total physical period=sum(h_j). No new physical parameters.",
+  "period_interval_ms": [
+    137.6,
+    206.4
+  ],
+  "segment_interval_ms": [
+    21.5,
+    64.5
+  ],
+  "method": "Exact original-flow fixed-time cubic endpoints and full variational products. Shared float64 cache capacity accommodates unequal segment lengths. Cyclic intrinsic-M inverse is exact for unequal durations; all rate feedback remains in actual operator. All four node proposals respect positivity, refractory occupancy and their phase planes.",
+  "derivative_gate": "Independent cached/original products at every node; actual full-state/four-time finite difference. FD history direction points inward at saturated refractory constraints.",
+  "acceptance": "Original four physical matching errors all<1e-7, every physical block<1e-6, all phases<1e-9. Actual nonlinear residual reduction and actual-step variational prediction gate each proposal. Independent complete-cycle/phase/mesh/Floquet and correspondence remain separate.",
+  "iterations": 8,
+  "Krylov": 64,
+  "linear_tolerance_cap": 0.01,
+  "model_promoted": false
+}

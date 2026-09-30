@@ -1,0 +1,18 @@
+{
+  "created_local": "2026-09-19T21:22:42.812513+08:00",
+  "question": "Does the fine periodic branch tangent satisfy the independent differentiated physical period-return identity, including its nonzero spatial Z parameter direction?",
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "allowed_dt_max_ms": [
+    0.00078125,
+    0.000390625
+  ],
+  "execution": "First listed step, one phase map and one forced family map; second step only if the identity/phase or step robustness remains unresolved. No eigensolve or new orbit/parameter scan in this diagnostic.",
+  "acceptance": {
+    "phase_relative_max": 0.005,
+    "phase_projection_distance_max": 0.003,
+    "family_relative_max": 0.005,
+    "family_history_relative_max": 0.005,
+    "active_state_component_max": 0.01
+  },
+  "scope": "A fixed old-v3 1mm candidate-family consistency test. Explicitly permitted narrow follow-up to clarify the apparent conflict between turn geometry and conditional spectrum, while response-repair remains primary. Includes constant dZ forcing but does not activate Z dynamics. A pass does not establish LPC/nondegeneracy/native equivalence/onset; a fail identifies unresolved inconsistency, not a physical bifurcation."
+}

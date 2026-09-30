@@ -1,0 +1,96 @@
+{
+  "status": "PASS_MANAGER_RELOAD_ALL6_WORKERS_RETAINED",
+  "old_supervisor": 3265151,
+  "new_supervisor": 3282780,
+  "retained_workers": [
+    {
+      "pid": 3209719,
+      "created": 1790283352.37,
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high"
+    },
+    {
+      "pid": 3265375,
+      "created": 1790284676.74,
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high"
+    },
+    {
+      "pid": 3218016,
+      "created": 1790283539.8,
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal"
+    },
+    {
+      "pid": 3238782,
+      "created": 1790284040.85,
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal"
+    },
+    {
+      "pid": 3238783,
+      "created": 1790284040.85,
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high"
+    },
+    {
+      "pid": 3265376,
+      "created": 1790284676.75,
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_high"
+    }
+  ],
+  "reason": "Conditional outputs have eight streams, with counterfactual drift instead of autonomous Zbudget. Fixed inappropriate required-directory check; additional streams still checked if present.",
+  "helper_sha256": "2eac0af593d2556629832ab44dde4b2964b3aba2e0ec86ef16f7ee4d2f442765",
+  "science_and_workers_unchanged": true,
+  "active_after": [
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high",
+      "pid": 3209719,
+      "time_s": 22.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high",
+      "pid": 3265375,
+      "time_s": 14.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3218016,
+      "time_s": 52.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3238782,
+      "time_s": 51.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high",
+      "pid": 3238783,
+      "time_s": 20.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.95_k0.02_high",
+      "pid": 3265376,
+      "time_s": 16.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    }
+  ]
+}

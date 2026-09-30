@@ -1,0 +1,10 @@
+{
+  "status": "REGISTERED_BEFORE_INPUT_RECONSTRUCTION",
+  "created_epoch": 1790550019.398828,
+  "question": "Does replacing individual observed source rates by within-group means introduce appreciable input bias at the missed recruitment edge? Are observed current variances/covariance consistent with the existing independentwhite-source approximation?",
+  "method": "Use original native weighted/delayed edges and percell emittedcounts. Delivered recurrentjump sum equals emittedweightedcounts plus initialqueuedmass minus finalqueuedmass. Reconstruct I mean with exactdiscrete filterboundary terms. The inhibitory balance is independent; excitatory externaljumps are inferred from observedEmean and checked against integerPoissoncounts. Compare group-vs-cell sourceinput and Poisson squared-edge variance, with unchanged targetheterogeneity.",
+  "limits": "Observed2s conditional trajectory, four0.5sblocks. White-source variance excludes source temporal/cross-source correlations andslowdrift; it is a diagnostic assumption, not a fitted replacement. Cell/timeslice scatter is not independentseed uncertainty. Emean agreement after inferring externalcounts is algebraic, not validation.",
+  "gates": "Numerical budget identity: relativeIerror<1e-10 andmaxabsoluteerror<1e-3mV-equiv. Recoveredexternalcount integerresidual<1e-4. No scientificacceptance tolerance or gain is changed.",
+  "producer_sha256": "5d3770fb32e7b7d6a713ef61ceb46431635e51e187963aec29fecdead9ac6dcc",
+  "formal_bifurcation_allowed": false
+}

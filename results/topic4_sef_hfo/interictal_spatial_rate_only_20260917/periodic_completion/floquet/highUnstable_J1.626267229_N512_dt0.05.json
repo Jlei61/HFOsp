@@ -1,0 +1,34 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/highUnstable_J1.626267229_N512.npz",
+  "J_EE_core": 1.6262672287319453,
+  "T_ms": 234.52957358252124,
+  "dt_ms": 0.049995645615544926,
+  "history_dimension": 679745,
+  "multipliers": [
+    [
+      12311.958614701469,
+      0.0
+    ]
+  ],
+  "residuals": [
+    2.662190570930602e-09
+  ],
+  "phase_multiplier_error": 12310.958614701469,
+  "phase_tangent_relative_defect": 9.49279214041854,
+  "raw_multipliers_above_1p001": 1,
+  "requested_multipliers": 1,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 108.25280117988586,
+  "phase_eigenvector_overlaps": [
+    0.9998938079811907
+  ],
+  "identified_neutral_index": null,
+  "nontrivial_multipliers": [
+    [
+      12311.958614701469,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 12311.958614701469,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

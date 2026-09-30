@@ -1,0 +1,12 @@
+{
+  "created_local": "2026-09-20T14:06:03.085895+08:00",
+  "native_simulation_complete": true,
+  "native_end_ms": 3000,
+  "simulation_restarted": false,
+  "reason": "Replay completed; postprocessing repeatedly decompressed entire NPZ spike and moment arrays inside per-group loops. Cache each member once, preserve allchecks anddata; restart only audit fromcompletedfiles.",
+  "stopped_pids": [
+    532724,
+    531843
+  ],
+  "next": "Run optimized audit only, then originalfixedresponse analysis andGPU parity. No newnative steps."
+}

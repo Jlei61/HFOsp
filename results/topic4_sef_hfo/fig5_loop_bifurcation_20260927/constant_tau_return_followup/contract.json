@@ -1,0 +1,22 @@
+{
+  "status": "REGISTERED_ONE_CONSTANT_TAU_RETURN_FOLLOWUP",
+  "created_epoch": 1790566875.5251245,
+  "question": "Does the constant0.5s K-decay variant regain sustained native-like core-led interictal propagation after its interrupted but sufficient Z recovery?",
+  "motivation": "The completed two-mediator experiment refuted necessity of5s low-rate retention for coreZ recovery: constanttau reachesbothreferences25.48s and onecompletebrief occurs26.47s. Ten seconds cannot establish sustainedreturn.",
+  "selection": "First20msboundary after q firstcloses in the independently verified16.7-20s originalrecord:16.8s, causalR194.911Hz,Graw11.9675. This is beforefirstR<=5 at16.868s, not the20s retrospectiveexitcheckpoint.",
+  "state_validation": "Unchanged16.7->16.8 reconstruction, exactobservations versusoriginal; then unchanged16.8->20 reachesoriginal20s completeengine bitwise. Only after both pass dispatch interventions.",
+  "design": "Exactly one30s continuation fromthe completed26.8s fullconstanttau state to56.8s. Same originalgraph, expectedandstochasticexternaldrive, nativeZ/M/G/K/voltage/ref/delay histories. Ktau0.5s bothaboveandbelowR5; noheldfields, reset,pulse,quiettimer ornewseed. Originalbaseline through56.8s reused.",
+  "readouts": "Full16.8-56.8s activity andcoreZ; originalstrict eventobserver, >=10brief events spanning>=5s after bothcore references, brief fraction>=0.8 andsame-seedreference duration/IEI/peak ratios0.5-2. Spatialnative5ms core recruitment/propagation andraster reviewed separately. Reentries/censoring retained.",
+  "decisions": "If core-led briefreturnpersists, 5Hz-dependent Kretention is not needed for this completed sequence under this pairedseed; it mainlychangesinterruption/waiting. Ifreturnfails, adequateZ alone remainsinsufficient. Do not promote a singlevariant to theformalFig5 orreplace acceptedsource.",
+  "stop": "One30s continuation only; no automaticnewseed, furtherhorizon orparametergrid.",
+  "producer_sha256": "a13c27e41c40d8faa7f3b71fc9b224d55666267e639f701de23b50d57babc9ed",
+  "initial_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+  "initial_sha256": "3dcd816a47951b7344427afb61afd36b67f9c56d49203481963f72e5d03f94f9",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false,
+  "prefix_equivalence": "Original0-16.8s is invariant under this Ktau change: K is exactlyzero until9.874s; oncepositive, the continuousR lowerbound is13.864Hz>5. Thus the changed low-rate rule has no earlier physical effect. This is a paired parameter trajectory, not an independent seed.",
+  "extension_producer_sha256": "0ff87858928afd578e1f9234bbb3bf0e4f59e4c37c0f9d0a4b95634664a5a206",
+  "continuation_source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/natural_exit_mediator_probes/runs/remove_low_rate_K_retention/checkpoint.pkl",
+  "continuation_source_sha256": "4965ed10b2a7507ebfb70e6071fe88c98c0cd20d788d4e2754b7636dc490765c",
+  "counts_as_independent_seed": false
+}

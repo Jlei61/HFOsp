@@ -1,0 +1,42 @@
+{
+  "status": "LOCKED_BEFORE_FURTHER_GRID_RESULTS",
+  "created_epoch": 1790265811.0151217,
+  "authorization": "Active user-authorized Figure5 goal: structure and transition-boundary controls",
+  "question": "At identical prescribed spatial Z/K fields and carried histories, do changed axes alter the finite-window state or core propagation?",
+  "conditions": [
+    "rotated",
+    "isotropic"
+  ],
+  "points": [
+    {
+      "Z": 0.25,
+      "K": 0.02
+    },
+    {
+      "Z": 0.95,
+      "K": 0.02
+    },
+    {
+      "Z": 0.75,
+      "K": 2.0
+    },
+    {
+      "Z": 0.75,
+      "K": 8.0
+    }
+  ],
+  "histories": [
+    "high12s",
+    "interictal50s"
+  ],
+  "maximum_new_runs": 16,
+  "duration_s": 30,
+  "reference": "Reuse the same8 cases from original18point native conditional batch",
+  "choice_rationale": "Two extremeZ coordinates at lowK test the lowK recruitment bracket; two higherK levels at centralZ test suppression/recovery response. These are fixed coarse probes, not adaptive root finding or complete phase boundaries.",
+  "known_results_at_lock": "Only originalZ.75K2 pair has completed, bothquiet. Other grid results incomplete.",
+  "state_policy": "Original current-axis complete12s/50s states; common20s fullspatialZ/K template and50s exogenousstate/RNG. One declared EEgraph substitution atbranch start; retain populated olddelay rings as carried history. First20s are transient, tail10s compared. No resets or closed-loop credit.",
+  "controls": "Same prescribedZ/K arrays, futureexternalinput, allnonEEedges, thresholds, source-region-by-delay incoming weight multisets. ChangedEEpartners andoutdegree; rotatedanisotropystrengthattenuation mustremainexplicit.",
+  "gates": "Auditedgraphloader andnative cold-startprefix saved; original18grid finishes first; atmost4CPUworkers with80GiB dispatchreserve. Independent of failedrateapproximation; noformalSN/Hopf naming.",
+  "interpretation": "A change in conditionalstate brackets supports changed finite-window recruitment conditions. No difference at4points does not prove identical boundaries. Uniformquiet orrunaway without usableevents is not a recoveredinterictal state.",
+  "dispatch": "PREPARED_DESIGN_NOT_YET_DISPATCHED"
+}

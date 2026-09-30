@@ -1,0 +1,47 @@
+{
+  "status": "STOPPED_WITH_ERROR",
+  "pid": 403449,
+  "rows": [
+    {
+      "label": "composite_e",
+      "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch_J1.300000000_N256_accuracy_N1024.npz",
+      "refined_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch_J1.300000000_N256_accuracy_N1024_accuracy_N2048.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch_J1.300000000_N256_accuracy_N1024.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch_J1.300000000_N256_accuracy_N1024_accuracy_N2048.npz",
+        "N": 2048,
+        "check_N": 8192,
+        "J_EE_core": 1.3,
+        "T_ms": 249.33163760519673,
+        "maximum_group_defect_Hz": 4.583000645652646e-10,
+        "regional_defect_Hz": [
+          2.159429336642381e-12,
+          1.2394146795253045e-12,
+          1.0452665566087156e-12
+        ],
+        "minimum_rate_Hz": 4.81081263052017e-05,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -4.037395417988421e-11,
+            "phase_index": 2456,
+            "group": 14
+          },
+          "slow": {
+            "minimum_Hz": 6.566472745778374e-05,
+            "phase_index": 3380,
+            "group": 380
+          },
+          "positive": true,
+          "N": 2048,
+          "check_N": 8192
+        }
+      },
+      "relative_waveform_change": 1.3315299528813225e-08,
+      "relative_period_change": 8.881784197001252e-16,
+      "status": "COMPOSITE_WAVEFORM_REFINED"
+    }
+  ],
+  "label": "composite_d",
+  "error": "OutOfMemoryError('Out of memory allocating 2,246,786,048 bytes (allocated so far: 10,376,184,832 bytes).')"
+}

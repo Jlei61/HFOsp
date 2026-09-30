@@ -1,0 +1,11 @@
+{
+  "status": "REGISTERED_BEFORE_LOCAL_STATIC_SCORING",
+  "created_epoch": 1790532545.441175,
+  "question": "At the now spatially corresponding actual-field K9 high state, does the frozen v3 static response return the observed density group rates?",
+  "design": "Read-only one working-point audit, no root, fit or network simulation. Preserve individual target weights/Z/K/M and groupthresholds; feed sourcegroup meanrates andexpectedexternaldrive from elapsed5-10s. G is computed from the exact discrete causalR DC relation, and observedmeanG compared.",
+  "adaptation": "Use observed endpoint individualM, not a hidden groupaverage; compare its E rate equivalent with measuredgroup rates. This is an input-response residual audit, not a selfconsistent equilibrium.",
+  "limits": "v3 static response was validated on its own exact-colored-current assay; dynamic/DC validation previouslyfailed. Here both spatialdomain and local surrogate errors remain inspectable; no automatic continuationpermission.",
+  "model_sha256": "a951a19ae1faf937c44b687bdd13ea9e6724bf508da00634cf5970f2e696bb63",
+  "producer_sha256": "ecc0c66766f75b1bb9e6bbf3ec512a6efd271cc12e51633292adb6716e5e3dc6",
+  "formal_bifurcation_allowed": false
+}

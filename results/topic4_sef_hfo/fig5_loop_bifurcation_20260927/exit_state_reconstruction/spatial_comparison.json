@@ -1,0 +1,46 @@
+{
+  "status": "COMPLETE_DESCRIPTIVE",
+  "rows": [
+    {
+      "region": "allE",
+      "nativeZ": 0.21340404828071916,
+      "common_templateZ": 0.2134040482807191,
+      "Z_RMS": 0.028920165723021043,
+      "nativeK": 12.660267290163945,
+      "common_templateK": 12.660267290163947,
+      "K_relative_RMS": 0.07498395444065738
+    },
+    {
+      "region": "coreA",
+      "nativeZ": 0.1771587063949351,
+      "common_templateZ": 0.2002879780700721,
+      "Z_RMS": 0.023157004662879434,
+      "nativeK": 14.027617324366274,
+      "common_templateK": 13.714682908833229,
+      "K_relative_RMS": 0.0342628535451121
+    },
+    {
+      "region": "coreB",
+      "nativeZ": 0.1682378535075776,
+      "common_templateZ": 0.1977511871169237,
+      "Z_RMS": 0.029526292688041727,
+      "nativeK": 14.201733285040964,
+      "common_templateK": 14.562563107190963,
+      "K_relative_RMS": 0.02882851957265885
+    },
+    {
+      "region": "otherE",
+      "nativeZ": 0.21546674088983178,
+      "common_templateZ": 0.21413263218792764,
+      "Z_RMS": 0.029032588080265802,
+      "nativeK": 12.586643711773865,
+      "common_templateK": 12.585079046938079,
+      "K_relative_RMS": 0.07652683211207495
+    }
+  ],
+  "template": "t20s transformed to same globalmeans",
+  "checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+  "source_observations_bitwise": true,
+  "whole_state_to20_QA": "PENDING",
+  "consequence": "Native conditional probes needed; shape difference alone is not a transition effect."
+}

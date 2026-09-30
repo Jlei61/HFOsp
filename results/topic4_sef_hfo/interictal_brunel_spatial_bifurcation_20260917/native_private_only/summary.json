@@ -1,0 +1,106 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "J_EE_core": 0.88,
+      "mean_rates_hz": [
+        5.385499557913351,
+        6.516539440203562,
+        2.5588896184431316,
+        6.946527777777778
+      ],
+      "cores": [
+        {
+          "peaks": 5,
+          "CV": 0.5021522236743562,
+          "median_interval_ms": 732.5,
+          "peak_hz": 338.099033145412,
+          "quiet_fraction": 0.9462222222222222
+        },
+        {
+          "peaks": 5,
+          "CV": 0.5244466857947857,
+          "median_interval_ms": 634.0,
+          "peak_hz": 339.7245515660161,
+          "quiet_fraction": 0.9517777777777777
+        }
+      ]
+    },
+    {
+      "J_EE_core": 0.94,
+      "mean_rates_hz": [
+        11.346301208370175,
+        7.803505795872208,
+        4.429670971036696,
+        11.70363888888889
+      ],
+      "cores": [
+        {
+          "peaks": 8,
+          "CV": 0.5030722284151585,
+          "median_interval_ms": 474.0,
+          "peak_hz": 339.5147997693668,
+          "quiet_fraction": 0.922
+        },
+        {
+          "peaks": 8,
+          "CV": 0.4983767930524655,
+          "median_interval_ms": 555.0,
+          "peak_hz": 342.8907037102749,
+          "quiet_fraction": 0.9122222222222223
+        }
+      ]
+    },
+    {
+      "J_EE_core": 0.96,
+      "mean_rates_hz": [
+        13.94930739758326,
+        11.509471303364434,
+        5.207995914496243,
+        14.050888888888888
+      ],
+      "cores": [
+        {
+          "peaks": 10,
+          "CV": 0.3997292003518389,
+          "median_interval_ms": 410.0,
+          "peak_hz": 344.0618369858809,
+          "quiet_fraction": 0.8922222222222222
+        },
+        {
+          "peaks": 10,
+          "CV": 0.38944135719535294,
+          "median_interval_ms": 395.0,
+          "peak_hz": 317.01984652341383,
+          "quiet_fraction": 0.8971111111111111
+        }
+      ]
+    },
+    {
+      "J_EE_core": 1.0,
+      "mean_rates_hz": [
+        16.69053934571176,
+        15.342097823013852,
+        6.25358575910119,
+        16.745277777777776
+      ],
+      "cores": [
+        {
+          "peaks": 11,
+          "CV": 0.3841217226353578,
+          "median_interval_ms": 342.5,
+          "peak_hz": 352.5847288925638,
+          "quiet_fraction": 0.8857777777777778
+        },
+        {
+          "peaks": 11,
+          "CV": 0.29465787685931405,
+          "median_interval_ms": 363.0,
+          "peak_hz": 354.9616747263492,
+          "quiet_fraction": 0.8866666666666667
+        }
+      ]
+    }
+  ],
+  "measurement": "After 500 ms; 1-ms core rate smoothed with sigma5ms; peaks >10Hz, prominence10Hz, separation60ms; CV sample SD/mean; one seed and 4.5s observation only"
+}

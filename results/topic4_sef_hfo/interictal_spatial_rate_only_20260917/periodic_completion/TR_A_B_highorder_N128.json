@@ -1,0 +1,36 @@
+{
+  "label": "TR_A_B_highorder",
+  "type": "torus bifurcation of periodic orbit",
+  "J_EE_core": 0.9458266272234517,
+  "T_ms": 165.771863772018,
+  "lambda_per_ms": [
+    -3.191754776912209e-15,
+    0.03793585768636297
+  ],
+  "multiplier": [
+    0.999984806070472,
+    0.005512497359834604
+  ],
+  "distance_from_plus_one": 0.005512518299078741,
+  "distance_from_minus_one": 1.999992403020543,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_eval_J0.9458266272235_N128.npz",
+  "N": 128,
+  "orbit_residual_hz": 1.9949319973733282e-14,
+  "eigen_residual": 2.3876609267614133e-14,
+  "criticality": "NOT_COMPUTED",
+  "orbit_tolerance": 1e-12,
+  "eigen_tolerance": 2e-12,
+  "root_tolerance": 5e-13,
+  "transversal_slope": {
+    "step": 1e-07,
+    "real_exponents": [
+      -1.2761456505734291e-08,
+      1.2770222130750025e-08
+    ],
+    "derivative_per_ms_per_J": 0.1276583931824216
+  },
+  "local_gain_order": 4,
+  "local_gain_step": 0.0001,
+  "mode_seed": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/TR_A_B_strict_mode_N128.npz",
+  "interpretation": "A non-real conjugate pair crosses the unit circle away from +1 and -1; torus criticality requires additional normal-form analysis"
+}

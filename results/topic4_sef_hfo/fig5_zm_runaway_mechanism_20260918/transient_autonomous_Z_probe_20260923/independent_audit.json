@@ -1,0 +1,61 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "native_Z_time_ms": 9420,
+      "D": 0.22884476056519176,
+      "readout_errors_hz": {
+        "field": 2.8548702118769143e-05,
+        "whole": 3.829039343372642e-07,
+        "field_whole": 9.074424838217965e-07
+      },
+      "maximum_final_refractory_occupancy_E_I": [
+        0.9498660006937666,
+        0.9455134962161611
+      ],
+      "tail_mean_static_residual_max_hz": 249.6602663468974,
+      "tail_mean_static_residual_RMS_hz": 66.5937558916143,
+      "tail_mean_regional_rates_hz": [
+        296.0252818639043,
+        274.0325084965927,
+        79.2021731677948
+      ],
+      "mean_input_mu_range_mV": [
+        -95.97594522384621,
+        230.79060768620545
+      ],
+      "tail_M_stationary_target_max_difference_mV": 0.044908772092394744,
+      "tail_persistent_fraction": 0.032687499999999994,
+      "scope": "Static residual of a varying trajectory mean is a nonlinearity/convergence diagnostic, not an equilibrium or stability certificate."
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "D": 0.25634442534475455,
+      "readout_errors_hz": {
+        "field": 2.9692778696244204e-05,
+        "whole": 5.78933537553894e-07,
+        "field_whole": 1.219925735540528e-06
+      },
+      "maximum_final_refractory_occupancy_E_I": [
+        0.9079497562670262,
+        0.8569792582313274
+      ],
+      "tail_mean_static_residual_max_hz": 229.21232954501886,
+      "tail_mean_static_residual_RMS_hz": 24.458086718860464,
+      "tail_mean_regional_rates_hz": [
+        417.6266597982931,
+        411.517430260987,
+        187.0169948574361
+      ],
+      "mean_input_mu_range_mV": [
+        -172.22166138638045,
+        364.18544850936894
+      ],
+      "tail_M_stationary_target_max_difference_mV": 0.004876481206385119,
+      "tail_persistent_fraction": 0.5142499999999999,
+      "scope": "Static residual of a varying trajectory mean is a nonlinearity/convergence diagnostic, not an equilibrium or stability certificate."
+    }
+  ],
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

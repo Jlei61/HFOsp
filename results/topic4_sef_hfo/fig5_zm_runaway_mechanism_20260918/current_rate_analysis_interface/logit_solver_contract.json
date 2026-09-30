@@ -1,0 +1,7 @@
+{
+  "created_local": "2026-09-20T12:37:04.796883+08:00",
+  "reason": "Direct-rate Newton reduces residual only111to110Hz in40iterations; diagnose positivity boundary restriction then use an invertible coordinate, not more iterations of the same stalled solve.",
+  "unchanged": "SamefullQequations, originalnative9870Zfield, constantmeaninput, dynamicM, sameoriginaltailmeaninitialguess. No target fitting or physicalparameterchange.",
+  "solver": "q=logit(r*tref); atmost60Newtonsteps,per-step infinity radius4,30backtracks; originalrate-residual1e-11perms required. Analytic q-Jacobian checked against independent finite differences before solving.",
+  "output": "Separate logit result, no branch search or stability promotion. One numerical initial-guess floor1e-8 in r*tref is recorded, never a change to model response or accepted equilibrium."
+}

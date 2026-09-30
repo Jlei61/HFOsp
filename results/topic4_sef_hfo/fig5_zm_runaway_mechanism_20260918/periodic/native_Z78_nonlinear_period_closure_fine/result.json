@@ -1,0 +1,64 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+  "rows": [
+    {
+      "dt_ms": 0.00625,
+      "steps": 42269,
+      "actual_elapsed_ms": 264.18125000000003,
+      "offset_from_exact_period_ms": 0.0007277154400640029,
+      "E_rate_weighted_rms_error_hz": 0.194390822692518,
+      "E_global_rate_error_hz": 0.014720818766807125,
+      "state_component_scaled_rms": [
+        0.0012521770516754041,
+        0.0009559273348138666,
+        0.0009513671199748836,
+        0.0008254722006925296,
+        0.0012469699439759607,
+        0.0011410212427610277,
+        0.0016757999834817318,
+        0.0009117594676062633,
+        0.0012088945825334911,
+        0.001123365650377463,
+        0.0005564185117546324,
+        0.0,
+        0.0011217815571942184,
+        0.0009408356225157164
+      ],
+      "final_global_E_hz": 184.80748484869488,
+      "expected_global_E_hz": 184.79276402992807,
+      "initial_output_vs_spectral_rate_max_hz": 0.056704072872670874
+    },
+    {
+      "dt_ms": 0.003125,
+      "steps": 84538,
+      "actual_elapsed_ms": 264.18125000000003,
+      "offset_from_exact_period_ms": 0.0007277154400640029,
+      "E_rate_weighted_rms_error_hz": 0.03654529003622567,
+      "E_global_rate_error_hz": 0.0027295744699398806,
+      "state_component_scaled_rms": [
+        0.00023462704677009835,
+        0.0001791635536316122,
+        0.0001781358670254166,
+        0.00015458805685926991,
+        0.00023360067713227976,
+        0.0002136984551016709,
+        0.00031425725555067944,
+        0.00017075138120763045,
+        0.00022644356143173666,
+        0.00021047644896303488,
+        0.00010414708062636294,
+        0.0,
+        0.00021009578104793486,
+        0.00017620123367793376
+      ],
+      "final_global_E_hz": 184.79549360439805,
+      "expected_global_E_hz": 184.79276402992807,
+      "initial_output_vs_spectral_rate_max_hz": 0.056704072872670874
+    }
+  ],
+  "Z": "held",
+  "M": "dynamic",
+  "method": "Endpoint Heun from complete Fourier state/history; expected endpoint at the actual rounded integration time",
+  "scope": "Forward-flow closure diagnostic; no asymptotic stability or bifurcation classification"
+}

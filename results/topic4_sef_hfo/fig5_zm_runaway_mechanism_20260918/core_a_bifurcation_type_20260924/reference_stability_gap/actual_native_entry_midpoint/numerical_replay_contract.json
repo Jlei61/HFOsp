@@ -1,0 +1,7 @@
+{
+  "reason": "Exact restored initial bits produce FP64 terminal variation about1.6--2.8e-15 in the original block norm, for both graph and manual integration; extra device synchronization does not remove it. Original failures and arrays are retained. Cause is not attributed. Test an explicit componentwise floating-point floor rather than repeatedly retrying until a bitwise pass.",
+  "scope": "Only the new finite-trajectory implementation replay check. Original full initial-state identity, frozenZ, emitted/expected equality and model coefficients remain exact. All periodic closure, actual derivative, independent phase/mesh and bifurcation criteria unchanged.",
+  "gate": "Three10ms restored repeats, initial state bits identical; each component absdifference<=1e-14+1e-12*abs(reference); six-block combined<1e-12 and everyblock<1e-11; clocks, parameter rows and Z exact.",
+  "scientific_effect": "The measured replay floor is many orders below the unchanged periodic-root and phase gates. It neither establishes periodicity nor licenses a bifurcation label.",
+  "model_promoted": false
+}

@@ -1,0 +1,110 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "name": "control_K9",
+      "complete_duration_s": 5.0,
+      "final3s_rates_allE_A_B_surround_Hz": [
+        244.1161348801279,
+        469.2272708824191,
+        474.2977506407374,
+        232.60410117909242
+      ],
+      "final3s_Graw": 4.493291316301376,
+      "final3s_dZ_per_s": [
+        -0.04200000010093,
+        -0.03483387689533427,
+        -0.03307375779645745,
+        -0.0424077244393564
+      ],
+      "both_cores_sustained_low": null,
+      "low_transition_right_censored": true,
+      "imposedK_range": [
+        8.999999996751546,
+        8.999999996751546
+      ]
+    },
+    {
+      "name": "ramp2s_K10p5",
+      "complete_duration_s": 7.0,
+      "final3s_rates_allE_A_B_surround_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "final3s_Graw": 0.0005515014743115326,
+      "final3s_dZ_per_s": [
+        0.15799999976530876,
+        0.16516612258687136,
+        0.16692624205092282,
+        0.15759227543686932
+      ],
+      "both_cores_sustained_low": {
+        "first_low_interval_s": [
+          1.28,
+          2.28
+        ],
+        "K_start": 9.96067500732839,
+        "K_confirmation": 10.499999987483024,
+        "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+      },
+      "low_transition_right_censored": false,
+      "imposedK_range": [
+        9.000675001963973,
+        10.499999987483024
+      ]
+    },
+    {
+      "name": "ramp10s_K10p5",
+      "complete_duration_s": 15.0,
+      "final3s_rates_allE_A_B_surround_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "final3s_Graw": 5.307294535997123e-10,
+      "final3s_dZ_per_s": [
+        0.15799999976530876,
+        0.16516612258687136,
+        0.16692624205092282,
+        0.15759227543686932
+      ],
+      "both_cores_sustained_low": {
+        "first_low_interval_s": [
+          4.58,
+          5.58
+        ],
+        "K_start": 9.687134994983673,
+        "K_confirmation": 9.836984989628196,
+        "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+      },
+      "low_transition_right_censored": false,
+      "imposedK_range": [
+        9.000135002449154,
+        10.499999987483024
+      ]
+    }
+  ],
+  "constant_drive_comparison": {
+    "original_last2s_rates_Hz": [
+      244.10685110949146,
+      469.2065809050851,
+      474.28212559591384,
+      232.59526338748864
+    ],
+    "constant_input_control_last2s_rates_Hz": [
+      244.11713394592175,
+      469.2223457415899,
+      474.29734312722576,
+      232.60528318720742
+    ],
+    "weighted_field_RMS_Hz": 0.07249519687693491,
+    "note": "This exposes replacing the prescribed time-varying external mean by the stationary mean used for DirectDC. It is not an independent native validation."
+  },
+  "statistical_unit": "One continued128replica density state, paired numerical streams across two forced ramps; no independent native seeds.",
+  "scope": "HeldZ and prescribedK; finite trajectories do not certify stationary branches, fold, Hopf, autonomous exit or Zrecovery.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "1e50f473bd4e6dda7d5c60b62bd2096dc8fab72f7f32d59d0e2a35c7a0066f2e"
+}

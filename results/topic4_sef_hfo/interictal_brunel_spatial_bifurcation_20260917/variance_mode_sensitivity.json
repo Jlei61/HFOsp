@@ -1,0 +1,39 @@
+{
+  "rows": [
+    {
+      "core": "A",
+      "variance_lambda_sensitivity_per_s": [
+        [
+          3.638871544720724,
+          -0.9825463722505231
+        ],
+        [
+          4.52427053316807,
+          -8.373188076062503
+        ]
+      ],
+      "normalized_variance_action": [
+        0.06720728820742373,
+        0.1399876371509657
+      ]
+    },
+    {
+      "core": "B",
+      "variance_lambda_sensitivity_per_s": [
+        [
+          3.731172240607608,
+          -1.2835488042159826
+        ],
+        [
+          4.527224713438754,
+          -8.658815523830157
+        ]
+      ],
+      "normalized_variance_action": [
+        0.0720779772747098,
+        0.14480198487546858
+      ]
+    }
+  ],
+  "definition": "derivative of temporal eigenvalue with respect to multiplicative variance-response gain at fixed stationary point; not physical parameter derivative"
+}

@@ -1,0 +1,80 @@
+{
+  "time": "2026-09-25T09:44:43.064038+08:00",
+  "previous_checkpoint": "classification_checkpoint_20260925_0924.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "numerical_method": "exponential_midpoint_v1",
+  "all_Z_held": true,
+  "all_E_M_dynamic": true,
+  "outside_A_Z": "native9s",
+  "model_promoted": false,
+  "fine_short_cycle": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root_dt0p0125",
+    "Z_A": 0.8365893776571304,
+    "dt_ms": 0.0125,
+    "period_ms": 233.24480671929103,
+    "closure": 1.0516425798515075e-13,
+    "independent_phase": "RUNNING"
+  },
+  "long_control": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/combined_to20s_audit.json",
+    "status": "COMPLETE_RECORD_RECONSTRUCTION_PASS",
+    "duration_ms": 20000,
+    "Z_A": 0.7914982744961647,
+    "complete_A_at_least500ms": [
+      {
+        "start_ms": 1452,
+        "end_ms": 2092,
+        "duration_ms": 640,
+        "left_censored": false,
+        "right_censored": false
+      },
+      {
+        "start_ms": 3211,
+        "end_ms": 3790,
+        "duration_ms": 579,
+        "left_censored": false,
+        "right_censored": false
+      },
+      {
+        "start_ms": 6363,
+        "end_ms": 6876,
+        "duration_ms": 513,
+        "left_censored": false,
+        "right_censored": false
+      },
+      {
+        "start_ms": 18996,
+        "end_ms": 19588,
+        "duration_ms": 592,
+        "left_censored": false,
+        "right_censored": false
+      }
+    ],
+    "scope": "Repeated long/short activity in the same continuous20s trajectory, not a proved asymptotic attractor or bifurcation."
+  },
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root_dt0p0125/independent_dt0p0125",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3868199
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3819648,
+        "iteration": 2,
+        "last_residual": 0.00038380484324930996
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native5000_continued_root",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3866462
+      }
+    }
+  ]
+}

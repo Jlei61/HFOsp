@@ -1,0 +1,151 @@
+{
+  "status": "SUBCRITICAL_PD",
+  "critical_J": 0.9387254732490684,
+  "critical_T_ms": 825.3654037556493,
+  "parent_stable_side": "J > J_PD locally",
+  "child_side": "J > J_PD",
+  "child_mu": [
+    1.1512718571940206,
+    0.0
+  ],
+  "child_at_checked_orbit": "unstable",
+  "child_mesh_J_shift_difference": 1.9610681412096653e-08,
+  "small_amplitude_J_shift_over_squared_amplitude": [
+    8.751220992309072e-10,
+    8.763369430120349e-10,
+    8.744302731900078e-10,
+    8.688537202899971e-10
+  ],
+  "rows": [
+    {
+      "amplitude_hz": 2.0,
+      "J_EE_core": 0.9387254256838193,
+      "J_minus_same_mesh_PD": 3.4488012445876848e-09,
+      "rms_half_period_difference_E_hz": 0.07070734347602652,
+      "T_ms": 1650.733299001319,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a2.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 5.0,
+      "J_EE_core": 0.9387254441130706,
+      "J_minus_same_mesh_PD": 2.187805248077268e-08,
+      "rms_half_period_difference_E_hz": 0.17676693831275403,
+      "T_ms": 1650.7324681122338,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a5.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 10.0,
+      "J_EE_core": 0.9387255098687124,
+      "J_minus_same_mesh_PD": 8.763369430120349e-08,
+      "rms_half_period_difference_E_hz": 0.35352376120294854,
+      "T_ms": 1650.729506138188,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a10.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 20.0,
+      "J_EE_core": 0.9387257720071274,
+      "J_minus_same_mesh_PD": 3.497721092760031e-07,
+      "rms_half_period_difference_E_hz": 0.706967542243614,
+      "T_ms": 1650.717738335275,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a20.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 40.0,
+      "J_EE_core": 0.9387268124009706,
+      "J_minus_same_mesh_PD": 1.3901659524639953e-06,
+      "rms_half_period_difference_E_hz": 1.4133255451140765,
+      "T_ms": 1650.6716173488298,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a40.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 60.0,
+      "J_EE_core": 0.9387285574697688,
+      "J_minus_same_mesh_PD": 3.135234750706317e-06,
+      "rms_half_period_difference_E_hz": 2.118625709843743,
+      "T_ms": 1650.595945290925,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a60.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 80.0,
+      "J_EE_core": 0.9387311306173416,
+      "J_minus_same_mesh_PD": 5.70838232349935e-06,
+      "rms_half_period_difference_E_hz": 2.822733346752872,
+      "T_ms": 1650.4869021332354,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a80.00000_N3072.npz"
+    },
+    {
+      "amplitude_hz": 120.0,
+      "J_EE_core": 0.9387399135600878,
+      "J_minus_same_mesh_PD": 1.4440311019381369e-05,
+      "rms_half_period_difference_E_hz": 4.233593333930223,
+      "T_ms": 1650.126885475753,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a120.00000_N4096.npz"
+    }
+  ],
+  "maximum_core_A_B_surround_half_period_difference_hz": [
+    27.48205836825899,
+    24.511169498727856,
+    2.2534650906106863
+  ],
+  "core_burst_peaks": {
+    "A": {
+      "times_ms": [
+        7.686600853025722,
+        469.9696318083735,
+        830.8336364454788,
+        1293.3216463804984
+      ],
+      "heights_hz": [
+        85.87662252205271,
+        241.3924611562097,
+        102.0409924405932,
+        241.28434968843874
+      ],
+      "interburst_intervals_ms": [
+        462.2830309553478,
+        360.86400463710527,
+        462.4880099350196,
+        364.49183994828036
+      ],
+      "paired_peak_time_shift_ms": [
+        -1.9164071454234772,
+        -1.711428165751613
+      ],
+      "paired_peak_height_change_hz": [
+        16.164369918540487,
+        -0.1081114677709536
+      ]
+    },
+    "B": {
+      "times_ms": [
+        68.43741781659081,
+        408.2221644096021,
+        892.1916587490904,
+        1231.580634292981
+      ],
+      "heights_hz": [
+        243.66354264137877,
+        122.9787859144541,
+        246.14895252931714,
+        123.66078607036955
+      ],
+      "interburst_intervals_ms": [
+        339.7847465930113,
+        483.9694943394883,
+        339.3889755438905,
+        486.98366899936286
+      ],
+      "paired_peak_time_shift_ms": [
+        -1.3092018053769152,
+        -1.7049728544976688
+      ],
+      "paired_peak_height_change_hz": [
+        2.485409887938374,
+        0.6820001559154605
+      ]
+    }
+  },
+  "minimum_group_rate_hz": -9.057846669703943e-06,
+  "numerical_note": "Tiny Fourier undershoot in almost silent groups decreases under temporal refinement; rates are not clipped.",
+  "inference_limit": "A doubled unstable periodic orbit is not evidence of a stable irregular attractor or a switch between propagation templates."
+}

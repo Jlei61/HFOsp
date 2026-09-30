@@ -1,0 +1,41 @@
+{
+  "status": "COMPLETE_LOCAL_COHERENT_MEAN_GAUSSIAN_RESIDUAL_RESPONSE",
+  "rows": [
+    {
+      "region": "selected_all",
+      "targets": 59,
+      "native_development_mean_Hz": 258.0,
+      "response_rate_mean_Hz": 258.0718683792373,
+      "native_development_rate_RMS_error_Hz": 0.3723840799436535,
+      "output_rate_MCSEM_RMS_Hz": 0.01886580084920507
+    },
+    {
+      "region": "selected_coreA",
+      "targets": 3,
+      "native_development_mean_Hz": 475.1666666666667,
+      "response_rate_mean_Hz": 475.1321614583333,
+      "native_development_rate_RMS_error_Hz": 0.2988164230415758,
+      "output_rate_MCSEM_RMS_Hz": 0.02009184693070057
+    },
+    {
+      "region": "selected_coreB",
+      "targets": 5,
+      "native_development_mean_Hz": 467.5,
+      "response_rate_mean_Hz": 467.5673828125,
+      "native_development_rate_RMS_error_Hz": 0.21226209899422363,
+      "output_rate_MCSEM_RMS_Hz": 0.010669144345160012
+    },
+    {
+      "region": "largest20_errors",
+      "targets": 20,
+      "native_development_mean_Hz": 454.65,
+      "response_rate_mean_Hz": 454.792578125,
+      "native_development_rate_RMS_error_Hz": 0.28054585791551917,
+      "output_rate_MCSEM_RMS_Hz": 0.013989439622513396
+    }
+  ],
+  "phase_output_count_and_exposure_conservation": true,
+  "elapsed_s": 6.838611125946045,
+  "scope": "Data-conditionedlocalbridge with explicitphase-dependentmean. Neither free network dynamics nor spontaneousphase/coherence established. No formalbifurcation.",
+  "producer_sha256": "74899333224a228e70a94c19f7935416522e8ab208c7608677e4ab7de9a41b0d"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/fine_coreB_regularized/best_state.npz",
+  "seed_period_ms": 261.41569675629023,
+  "dt_ms": 0.025,
+  "comparison": "Same original full-state Poincare derivative versus float64 local-Jacobian caching along exactly the same nominal flow. Entire delayed history, all M, private variance and transient response retained. No reduced rank or altered network.",
+  "gates": "Nominal terminal state bitwise identical; every declared full-state derivative product relative error<1e-9, phase and return-time derivative included. Timing reported, not presumed.",
+  "directions": 2,
+  "model_promoted": false
+}

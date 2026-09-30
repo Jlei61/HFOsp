@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "weights": {
+    "I_final.pt": "a54c2facbcf0ea58a6eb5226bfbb4cfee6a4f08d991152ec24e9fdf94b98f94b",
+    "E_final.pt": "b7be30ba81fe957d796dbc361d16807851260681f8d5364847948a7cd37fdaec"
+  },
+  "rows": [
+    {
+      "pop": "E",
+      "dt_ms": 0.1,
+      "independent_rate_error_hz": 2.41158204516978e-11,
+      "trace_error": 4.873879078104437e-14,
+      "convolution_error": 4.440892098500626e-16,
+      "minimum_available_mass": 0.6888521419369814
+    },
+    {
+      "pop": "E",
+      "dt_ms": 0.05,
+      "independent_rate_error_hz": 3.0738078748981934e-11,
+      "trace_error": 7.061018436615996e-14,
+      "convolution_error": 2.220446049250313e-16,
+      "minimum_available_mass": 0.688426464401353
+    },
+    {
+      "pop": "E",
+      "learned_q_derivative_relative_error": 4.942545261954479e-10,
+      "derivative_min": -5.136408562041956,
+      "derivative_max": 8.092907455581857
+    },
+    {
+      "pop": "I",
+      "dt_ms": 0.1,
+      "independent_rate_error_hz": 2.042810365310288e-13,
+      "trace_error": 3.469446951953614e-16,
+      "convolution_error": 6.938893903907228e-18,
+      "minimum_available_mass": 0.9914666113693715
+    },
+    {
+      "pop": "I",
+      "dt_ms": 0.05,
+      "independent_rate_error_hz": 1.652011860642233e-13,
+      "trace_error": 8.257283745649602e-16,
+      "convolution_error": 6.938893903907228e-18,
+      "minimum_available_mass": 0.9914633946254163
+    },
+    {
+      "pop": "I",
+      "learned_q_derivative_relative_error": 3.4063174503273785e-10,
+      "derivative_min": -0.7795150271287138,
+      "derivative_max": 1.2684196977492281
+    }
+  ],
+  "scope": "Trained nonzero-feedback implementation, causal history and mass conservation only. No waveform, gain, spatial or onset validation follows."
+}

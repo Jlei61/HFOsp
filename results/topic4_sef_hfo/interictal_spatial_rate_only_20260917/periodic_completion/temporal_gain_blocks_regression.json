@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "block_size": 7,
+      "maximum_absolute_difference": 0.0,
+      "relative_difference": 0.0
+    },
+    {
+      "block_size": 64,
+      "maximum_absolute_difference": 0.0,
+      "relative_difference": 0.0
+    },
+    {
+      "block_size": 2048,
+      "maximum_absolute_difference": 0.0,
+      "relative_difference": 0.0
+    }
+  ],
+  "time_samples": 260,
+  "scope": "Full-array versus temporal-block central finite differences at identical Fourier-resampled moments. Includes non-dividing block edges; same transfer function, derivative step and layout. No model or Floquet discretization change."
+}

@@ -1,0 +1,9 @@
+{
+  "status": "FIXED_BEFORE_RECORDED_INTEGRATION",
+  "stopped_pid": 327525,
+  "checkpoint_step": 90000,
+  "recorded_chunks": 0,
+  "reason": "Regional freeze baseline must be captured after simulator restores checkpoint, not when the observer attaches.",
+  "application_check": "PASS includes attach-before-restore ordering",
+  "time": 1789828149.0767083
+}

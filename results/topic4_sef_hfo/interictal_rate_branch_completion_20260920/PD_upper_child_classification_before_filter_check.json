@@ -1,0 +1,73 @@
+{
+  "status": "SUPERCRITICAL_PD",
+  "label": "PD2",
+  "J_EE_core": 0.944728374157131,
+  "parent_T_ms": 761.9648707070426,
+  "child_side": "J > J_PD; parent-unstable side",
+  "child_mu": [
+    0.7260892014689608,
+    0.0
+  ],
+  "child_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a10.00000_N4096.npz",
+  "child_T_ms": 1523.9231758668059,
+  "core_A_B_peaks_per_full_child_period": [
+    4,
+    4
+  ],
+  "child_floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperchild_a10.00000_N4096_dt0.05.json",
+  "paired_spectra": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperchild_a10.00000_N4096_dt0.1.json",
+      "assessment": {
+        "status": "UNRESOLVED",
+        "reliable_outside_count": 0,
+        "margin": 0.013240911781631743
+      }
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDupperchild_a10.00000_N4096_dt0.05.json",
+      "assessment": {
+        "status": "NUMERICALLY_STABLE",
+        "reliable_outside_count": 0,
+        "margin": 0.003377813237483672
+      }
+    }
+  ],
+  "matched_multiplier_step_change": 0.003510511245453354,
+  "parent_side_witnesses": [
+    {
+      "side": "below",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcDoubleRef_0002_N1024_accuracy_N2048_dt0.1.json",
+      "J_EE_core": 0.9447179976417638,
+      "status": "NUMERICALLY_STABLE"
+    },
+    {
+      "side": "above",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcDoubleUp_0016_N512_accuracy_N2048_dt0.1.json",
+      "J_EE_core": 0.9447374960718655,
+      "negative_unstable_multipliers": [
+        [
+          -3.605261225115416,
+          0.0
+        ]
+      ],
+      "status": "UNSTABLE"
+    }
+  ],
+  "departure_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_upper_child_departure.json",
+  "continuous_child_check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a10.00000_N4096.npz",
+    "N": 4096,
+    "check_N": 16384,
+    "J_EE_core": 0.9447287467299924,
+    "T_ms": 1523.9231758668059,
+    "maximum_group_defect_Hz": 0.015918264135716953,
+    "regional_defect_Hz": [
+      5.208621723669918e-05,
+      0.0001029902617764213,
+      4.8893457277219685e-05
+    ],
+    "minimum_rate_Hz": 1.9977011707290118e-05
+  },
+  "scope": "Local supercritical period doubling when all checks pass: a stable 2T child emerges on the parent-unstable side. This is regular periodic activity, with peak counts measured separately; it does not establish an irregular attractor or a global connection to another burst family."
+}

@@ -1,0 +1,14 @@
+{
+  "duration_ms": 40,
+  "meshes_ms": [
+    0.05,
+    0.025
+  ],
+  "directions": [
+    "relative",
+    "absolute"
+  ],
+  "acceptance": "Nominal terminal bitwise equal to original midpointflow; every declared directional derivative relative error<1e-10, across syn/M, covariance/memory and entire delayhistory. Two meshes and different source states, duration exceeds maxphysicaldelay.",
+  "scope": "Exact derivative cache implementation only. Physical model and all periodic/stability/type gates unchanged.",
+  "model_promoted": false
+}

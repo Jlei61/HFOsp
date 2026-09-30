@@ -1,0 +1,103 @@
+{
+  "status": "GRID_DOES_NOT_ENCLOSE_OBSERVED_LOOP",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+  "producer_sha256": "5a2aa035b59cea90a02f96b891363d287279fa8a824ee8c08de6afb3c24ff0fe",
+  "observation": "Uninterpolated20ms native samples,0<=t<60s; landmark uses last sample at or before target.",
+  "grid_Z": [
+    0.25,
+    0.75,
+    0.95
+  ],
+  "grid_K_over_gL": [
+    0.02,
+    2.0,
+    8.0
+  ],
+  "native_Z_range": [
+    0.18040162747230618,
+    1.0
+  ],
+  "native_K_range": [
+    0.0,
+    13.305694621163363
+  ],
+  "landmarks": [
+    {
+      "label": "entry_observer",
+      "target_time_s": 9.94,
+      "recorded_time_s": 9.94,
+      "mean_Z": 0.7409855182122724,
+      "mean_K_over_gL": 0.0001654154289152743,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "high_state_checkpoint",
+      "target_time_s": 12.0,
+      "recorded_time_s": 12.0,
+      "mean_Z": 0.5463155336052353,
+      "mean_K_over_gL": 3.2943070665510783,
+      "outside_grid_rectangle": false
+    },
+    {
+      "label": "exit_observer",
+      "target_time_s": 16.7,
+      "recorded_time_s": 16.7,
+      "mean_Z": 0.21340404828071916,
+      "mean_K_over_gL": 12.660267290163945,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "joint_low_activity",
+      "target_time_s": 16.83,
+      "recorded_time_s": 16.82,
+      "mean_Z": 0.20834327273789485,
+      "mean_K_over_gL": 12.191810251492297,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "spatial_template_checkpoint",
+      "target_time_s": 20.0,
+      "recorded_time_s": 20.0,
+      "mean_Z": 0.49720775994953326,
+      "mean_K_over_gL": 5.929764123850076,
+      "outside_grid_rectangle": false
+    },
+    {
+      "label": "recovery",
+      "target_time_s": 35.0,
+      "recorded_time_s": 35.0,
+      "mean_Z": 0.9749681993450733,
+      "mean_K_over_gL": 0.29522557184424114,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "first_returned_event",
+      "target_time_s": 49.31,
+      "recorded_time_s": 49.3,
+      "mean_Z": 0.99856650080849,
+      "mean_K_over_gL": 0.01690720249844599,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "interictal_checkpoint",
+      "target_time_s": 50.0,
+      "recorded_time_s": 50.0,
+      "mean_Z": 0.9864800330171822,
+      "mean_K_over_gL": 0.009713918116723046,
+      "outside_grid_rectangle": true
+    },
+    {
+      "label": "second_entry",
+      "target_time_s": 59.74,
+      "recorded_time_s": 59.74,
+      "mean_Z": 0.7324597412081737,
+      "mean_K_over_gL": 0.0010335382429554438,
+      "outside_grid_rectangle": true
+    }
+  ],
+  "sampled_duration_outside_grid_rectangle_s": 41.18,
+  "interpretation": "Nine held-field points probe finite conditional responses. They cannot locate the complete entry or exit boundary of the observed loop. A rectangle enclosure would still not establish sampled spatial-field, G/M or basin equivalence.",
+  "statistical_unit": "One selected successful trajectory; samples describe time coverage, not independent trials.",
+  "changes_to_existing_scientific_queue": false,
+  "new_simulations": 0
+}

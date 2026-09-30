@@ -1,0 +1,9 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/whole_cycle/iteration01",
+  "segments": 12,
+  "dt_ms": 0.05,
+  "question": "Remove independently established negative-history interpolation floor at quiet shooting boundaries.",
+  "method": "Starting from accepted node0, run the original full spatial model uninterrupted. First K-1 boundaries are fixed equal integer-step durations; final duration is the remaining period. Other accepted nodes are not interpolated or clipped. Each new node is an actual state, with Z unchanged and every E M dynamic. An independent fixed_time run checks one intermediate node.",
+  "interpretation": "Numerical seed only. Its closure and spectral stability must be calculated anew; not a native trajectory replay claim or a periodic certificate.",
+  "model_promoted": false
+}

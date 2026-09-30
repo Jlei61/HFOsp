@@ -1,0 +1,61 @@
+{
+  "status": "STATIC_VALIDATION_PASS",
+  "pid": 4157031,
+  "elapsed_s": 1370.7197797298431,
+  "result": {
+    "status": "STATIC_VALIDATION_PASS",
+    "rows": [
+      {
+        "label": "overall",
+        "total": 1024,
+        "passed": 1021,
+        "within_cap": 1024,
+        "maximum_error_Hz": 13.664904913713144,
+        "median_absolute_error_Hz": 0.275559391372612,
+        "pass_gate": true
+      },
+      {
+        "label": "broad",
+        "total": 256,
+        "passed": 255,
+        "within_cap": 256,
+        "maximum_error_Hz": 13.664904913713144,
+        "median_absolute_error_Hz": 0.7189038243359676,
+        "pass_gate": true
+      },
+      {
+        "label": "low_mean",
+        "total": 256,
+        "passed": 254,
+        "within_cap": 256,
+        "maximum_error_Hz": 4.275965232791776,
+        "median_absolute_error_Hz": 0.34598025960485757,
+        "pass_gate": true
+      },
+      {
+        "label": "zero_g_broad",
+        "total": 256,
+        "passed": 256,
+        "within_cap": 256,
+        "maximum_error_Hz": 5.107973576983312,
+        "median_absolute_error_Hz": 0.25609883683486245,
+        "pass_gate": true
+      },
+      {
+        "label": "zero_g_low_mean",
+        "total": 256,
+        "passed": 256,
+        "within_cap": 256,
+        "maximum_error_Hz": 1.5000595566915464,
+        "median_absolute_error_Hz": 0.11984232913793291,
+        "pass_gate": true
+      }
+    ],
+    "elapsed_s": 1370.7185225486755,
+    "zero_g_old_parent_invariant_intentionally_removed": true,
+    "derivative_validated": false,
+    "transient_validated": false,
+    "spatial_validated": false,
+    "formal_bifurcation_allowed": false
+  }
+}

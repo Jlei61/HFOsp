@@ -1,0 +1,117 @@
+{
+  "status": "DIRECT_LOCAL_BRANCH_CANDIDATES",
+  "K": [
+    9.0,
+    9.00625,
+    9.0125
+  ],
+  "Graw": [
+    4.491652867679528,
+    4.464677770181993,
+    4.436447575533768
+  ],
+  "regional_Hz_allE_coreA_coreB_surround": [
+    [
+      244.10212370300292,
+      469.1515362079327,
+      474.21927369095897,
+      232.59328138786012
+    ],
+    [
+      243.83318534851074,
+      469.06732129165283,
+      474.18359685611483,
+      232.31375127280143
+    ],
+    [
+      243.55173165893555,
+      468.98024015148377,
+      474.14792064249366,
+      232.02114400481676
+    ]
+  ],
+  "sources": [
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_newton_validation",
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_exit_small_K_step/evaluation_1",
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_exit_K_pair/point_00/evaluation_2"
+  ],
+  "absolute_E_cell_rate_change_fraction_coreA_coreB_surround": [
+    0.007378832139552774,
+    0.0031875638906503937,
+    0.9894336039697968
+  ],
+  "Graw_recovery_block_threshold": 2.669402995841955,
+  "precision": [
+    {
+      "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+      "iteration": 1,
+      "K_mean": 9.00625,
+      "Graw": 4.464677770181993,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.0064748300122305135,
+          "combined_SEM_RMS_Hz": 0.006791627829481261,
+          "maximum_residual_Hz": 0.059807786774911165,
+          "outside_6SEM": 0
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.14558137197540078,
+          "combined_SEM_RMS_Hz": 0.14249293343335342,
+          "maximum_residual_Hz": 1.0451297988236092,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.030578743808434096,
+      "E_target_combined_SEM_RMS_Hz": 0.029321463779073284,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.83318534851074,
+        469.06732129165283,
+        474.18359685611483,
+        232.31375127280143,
+        309.4592686767578
+      ],
+      "near_equilibrium": true,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    },
+    {
+      "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+      "iteration": 2,
+      "K_mean": 9.0125,
+      "Graw": 4.436447575533768,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.007233143612201313,
+          "combined_SEM_RMS_Hz": 0.00681305220543601,
+          "maximum_residual_Hz": 0.07301899096229647,
+          "outside_6SEM": 0
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.14300983769292872,
+          "combined_SEM_RMS_Hz": 0.1425995305019824,
+          "maximum_residual_Hz": 1.142470777616154,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.030785681975617384,
+      "E_target_combined_SEM_RMS_Hz": 0.029402091488659642,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.55173165893555,
+        468.98024015148377,
+        474.14792064249366,
+        232.02114400481676,
+        309.10969482421876
+      ],
+      "near_equilibrium": true,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    }
+  ],
+  "scope": "Small related interval only. Every plotted new point independently checked by fresh direct cell counts and prescribed residual precision. No exact root, dynamic stability, fold, native termination or autonomous recovery is inferred.",
+  "full_bifurcation_completed": false,
+  "producer_sha256": "238e6ea3a7bccbb884ee7d9ab0d2c6d38ba3d13b53cf076ffe5a708670a02370"
+}

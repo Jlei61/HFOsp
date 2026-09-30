@@ -1,0 +1,68 @@
+{
+  "status": "COMPLETE_ONE_NATIVE_UPPER_POINT_COMPARISON",
+  "rows": [
+    {
+      "label": "K9.5_evolving12s",
+      "name": "exit_z0.21_k9.5_fields16p7_high",
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_exit_K_bracket",
+      "tail_rate_Hz_allE_A_B_surround": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_Graw": 1.1955386198036663e-18,
+      "tail_counterfactual_Zdot_per_s": [
+        0.15800000000000117,
+        0.1651661227790085,
+        0.16692624224608293,
+        0.15759227567364462
+      ],
+      "finite_window_state": "quiet",
+      "tail_brief_events": 0
+    },
+    {
+      "label": "K9.35_heldK9",
+      "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history",
+      "tail_rate_Hz_allE_A_B_surround": [
+        196.62042500000044,
+        473.15981432360684,
+        474.09821882951417,
+        182.6149015101774
+      ],
+      "tail_Graw": 1.2576656963284174e-18,
+      "tail_counterfactual_Zdot_per_s": [
+        0.04026349362499998,
+        -0.03483387722099196,
+        -0.03307375775391635,
+        0.044014855975679765
+      ],
+      "finite_window_state": "mixed_or_transient",
+      "tail_brief_events": 0
+    },
+    {
+      "label": "K9.5_heldK9",
+      "name": "exit_z0.21_k9.5_fields16p7_held_K9_history",
+      "root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p5_held_history",
+      "tail_rate_Hz_allE_A_B_surround": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_Graw": 1.1267561560915985e-18,
+      "tail_counterfactual_Zdot_per_s": [
+        0.15800000000000117,
+        0.1651661227790085,
+        0.16692624224608293,
+        0.15759227567364462
+      ],
+      "finite_window_state": "quiet",
+      "tail_brief_events": 0
+    }
+  ],
+  "recorded_future_inputs_exact": true,
+  "formal_bifurcation_allowed": false,
+  "scope": "Threefiniteconditionalresponses frompairedendogenoushistories andcommoninput, not independentseeds, attractorcertification orautonomousexit."
+}

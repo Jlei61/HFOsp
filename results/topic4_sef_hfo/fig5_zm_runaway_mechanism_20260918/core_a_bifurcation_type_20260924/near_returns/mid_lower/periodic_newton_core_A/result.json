@@ -1,0 +1,115 @@
+{
+  "status": "PARTIAL_CORRECTOR_REPLACED_NOT_A_BIFURCATION",
+  "iterations": [
+    {
+      "iteration": 0,
+      "period_ms": 263.7764485003188,
+      "fraction": 0.5289700063757097,
+      "section_residual": 2.168404344971009e-19,
+      "section_speed": 0.0362835978430215,
+      "initial_phase": 0.0,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.014444141482288,
+          "difference_rms": 0.5883144400908563,
+          "relative_rms": 0.0452047305052131
+        },
+        "GABA": {
+          "reference_rms": 0.7112460922075104,
+          "difference_rms": 0.30926802496194616,
+          "relative_rms": 0.43482562273497216
+        },
+        "M": {
+          "reference_rms": 0.02207627114002593,
+          "difference_rms": 0.0004955354387531246,
+          "relative_rms": 0.022446518961922055
+        },
+        "covariance": {
+          "reference_rms": 36.87051754539336,
+          "difference_rms": 0.2412831339404713,
+          "relative_rms": 0.006544066913175659
+        },
+        "input_memory": {
+          "reference_rms": 0.10197086934881362,
+          "difference_rms": 0.012915172257285302,
+          "relative_rms": 0.1266555079873462
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0002733560975748946,
+          "difference_rms": 0.0003127682718348617,
+          "relative_rms": 1.144178873672898
+        }
+      },
+      "combined_relative_rms": 0.5028005524949052,
+      "coordinate_residual": 0.72729445596077,
+      "line_search": [
+        {
+          "alpha": 1.0,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.5,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.25,
+          "status": "INADMISSIBLE_NO_FLOW"
+        },
+        {
+          "alpha": 0.125,
+          "status": "EVALUATED",
+          "residual_ratio": 0.8723456258378642,
+          "period_ms": 263.0974345988415
+        }
+      ],
+      "linear_last": {
+        "dimension": 7,
+        "relative_linear_residual": 0.0005967384778310421
+      }
+    },
+    {
+      "iteration": 1,
+      "period_ms": 263.0974345988415,
+      "fraction": 0.9486919768304115,
+      "section_residual": 1.3552527156068805e-19,
+      "section_speed": 0.036228069347644894,
+      "initial_phase": 1.5788694136820158e-18,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.02591247595423,
+          "difference_rms": 0.513461748009829,
+          "relative_rms": 0.0394184859569475
+        },
+        "GABA": {
+          "reference_rms": 0.7084881298718889,
+          "difference_rms": 0.2702380017926207,
+          "relative_rms": 0.3814291170149682
+        },
+        "M": {
+          "reference_rms": 0.022056266400616333,
+          "difference_rms": 0.0004326906643161595,
+          "relative_rms": 0.0196175842482601
+        },
+        "covariance": {
+          "reference_rms": 36.87476570747104,
+          "difference_rms": 0.21077743251091902,
+          "relative_rms": 0.005716034487731383
+        },
+        "input_memory": {
+          "reference_rms": 0.10163321769519006,
+          "difference_rms": 0.011216727122279701,
+          "relative_rms": 0.11036477420128507
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0002874339654574706,
+          "difference_rms": 0.00027297597580222424,
+          "relative_rms": 0.9496997871068038
+        }
+      },
+      "combined_relative_rms": 0.42062841479924773,
+      "coordinate_residual": 0.6157295551282722
+    }
+  ],
+  "reason": "Same physical flow and phase family; algebra-checked positive numerical proposal improves first-step residual to0.1026 versus0.443 for the damped linear step. Resume that saved improved iterate in a separate corrector, preserve this partial numerical route.",
+  "model_promoted": false
+}

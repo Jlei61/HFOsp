@@ -1,0 +1,17 @@
+{
+  "status": "REGISTERED_BEFORE_NATURAL_EXIT_MEDIATOR_PROBES",
+  "created_epoch": 1790564723.9249432,
+  "question": "At the actual firstq-off state, is remainingG memory needed to finishsuppression, and is slowlow-rateK decay needed to provide adequate coreZ recovery time?",
+  "motivation": "StaticheldZ/K highstates relaxG near0, whereas naturalexit retainsG near12. ExistingpairedtauG trajectories show both earlybuildup changes and q-offcarryover; seed8403 has nearlyequalK at a matchedclocktime yetdifferentactivity. Do not continue refining a staticroot before checking its connection to the actualexit mechanism.",
+  "selection": "First20msboundary after q firstcloses in the independently verified16.7-20s originalrecord:16.8s, causalR194.911Hz,Graw11.9675. This is beforefirstR<=5 at16.868s, not the20s retrospectiveexitcheckpoint.",
+  "state_validation": "Unchanged16.7->16.8 reconstruction, exactobservations versusoriginal; then unchanged16.8->20 reachesoriginal20s completeengine bitwise. Only after both pass dispatch interventions.",
+  "design": "Exactlytwo10s nativeinterventions fromthe sameverified16.8s fullstate, futureRNG/OU/drive unchanged. Control1 sets existingglobal_state to0 once, then originalGdynamics continues andmayregenerateG. Control2 preservesinitialstate butuses0.5s instead of5s Kdecay whenR<=5; allother originaldynamics unchanged. Z/K/M are neverclamped andno timer imposesquietactivity.",
+  "readouts": "Originalpairedbaseline16.8-26.8s reused. CausalR,globalG,K,wholeE/coreZlevels andnetZbudgets, firstsustainedlowinterval, Gresourceunblocking, subsequentreactivation andZreferenceattainment. No criterionbasedonlyonwholeEZ.",
+  "decisions": "Gremovalwithcontinuedquiet wouldshowthatGtail atthisspecificstate is not necessary tofinishsuppression; reboundwouldsupportitslocalnecessity. FastKdecaypreventingcoreZ recoverywouldsupportthe retentionmechanism. A null effectwouldrestrict thatclaim tootherstates or mechanisms. Two single-state interventions do not establish universalmediators or formalbifurcation.",
+  "stop": "Two10s branches only after replayQA. No automatic newseed, parametergrid, horizonextension orautonomous-loopcount.",
+  "producer_sha256": "a13c27e41c40d8faa7f3b71fc9b224d55666267e639f701de23b50d57babc9ed",
+  "initial_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+  "initial_sha256": "3dcd816a47951b7344427afb61afd36b67f9c56d49203481963f72e5d03f94f9",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false
+}

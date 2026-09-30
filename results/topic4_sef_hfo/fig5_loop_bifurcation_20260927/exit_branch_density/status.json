@@ -1,0 +1,77 @@
+{
+  "status": "COMPLETE",
+  "supervisor_pid": 10711,
+  "completed": [
+    "exit_z0.21_k9_fields16p7_high",
+    "exit_z0.21_k9_fields16p7_recovery",
+    "exit_z0.21_k12_fields16p7_high",
+    "exit_z0.21_k12_fields16p7_recovery"
+  ],
+  "pending": [],
+  "active": [],
+  "failed": [],
+  "total": 4,
+  "launches": [
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "pid": 10752,
+      "device": 1,
+      "created_epoch": 1790528908.25,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/exit_branch_density.py",
+        "worker",
+        "--name",
+        "exit_z0.21_k9_fields16p7_high",
+        "--device",
+        "1"
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_recovery",
+      "pid": 10753,
+      "device": 0,
+      "created_epoch": 1790528908.25,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/exit_branch_density.py",
+        "worker",
+        "--name",
+        "exit_z0.21_k9_fields16p7_recovery",
+        "--device",
+        "0"
+      ]
+    },
+    {
+      "name": "exit_z0.21_k12_fields16p7_high",
+      "pid": 11563,
+      "device": 1,
+      "created_epoch": 1790529470.33,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/exit_branch_density.py",
+        "worker",
+        "--name",
+        "exit_z0.21_k12_fields16p7_high",
+        "--device",
+        "1"
+      ]
+    },
+    {
+      "name": "exit_z0.21_k12_fields16p7_recovery",
+      "pid": 11628,
+      "device": 0,
+      "created_epoch": 1790529551.1,
+      "command": [
+        "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+        "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/exit_branch_density.py",
+        "worker",
+        "--name",
+        "exit_z0.21_k12_fields16p7_recovery",
+        "--device",
+        "0"
+      ]
+    }
+  ],
+  "updated_epoch": 1790530113.4511626
+}

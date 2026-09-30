@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-19T22:01:42.602548+08:00",
+  "question": "Does restoring the stationary covariance identity for the shared/private stochastic split materially change the autonomous resource trajectory and entry?",
+  "reason": "The completed fixed-graph analytical audit found about 10 percent missing recurrent AMPA current variance and 2 percent missing GABA variance under the old split. This is a bounded follow-up amendment, not promotion of a new model.",
+  "runs": 1,
+  "duration_ms": 12500,
+  "dt_ms": 0.1,
+  "response_variant": "units_history",
+  "input": "Original seed9108401 group external drive and Philox seed1; same physical initial state and history as closure_stochastic_sensitivity/initial.npz",
+  "change": "Only private-variance CSR values: replace delay-summed removed fraction with the covariance of the same continuous synaptic filters resolved over all physical delays, divided by the full continuous calibration variance. The small Heun discretization mismatch is retained explicitly. No fitted coefficients, graph/mean coupling/Z/M/response retuning. Roundoff at analytically exact fractions0/1 may be cleaned only below1e-12 and must be counted.",
+  "comparison": "Reuse the completed units_history stochastic trajectory; original SNN remains an external reference.",
+  "scope": "One finite-time sensitivity diagnostic. The correction restores stationary Poisson variance but does not recover the time-dependent conditional covariance spectrum; no closure/network/bifurcation acceptance follows, no additional runs automatically authorized by this contract.",
+  "amended_local": "2026-09-19T22:04:05.225308+08:00",
+  "preflight_failure": "The attempted exact finite-Heun/continuous-table split produced fractions above1 and failed its physical bounds assertion before any simulation. No clipping or output was used.",
+  "rationale": "Continuous covariance is the mathematical mean-filter model underlying the continuous colored-noise calibration. Cauchy-Schwarz bounds its shared fraction by1. Heun adds a small numerical covariance excess at some saturated pairs; forcing exact equality to a different continuous variance is inconsistent."
+}

@@ -1,0 +1,68 @@
+{
+  "one_second_windows": [
+    {
+      "window_ms": [
+        0,
+        1000
+      ],
+      "global_mean_hz": 38.605278962565045,
+      "quiet_fraction": 0.636
+    },
+    {
+      "window_ms": [
+        1000,
+        2000
+      ],
+      "global_mean_hz": 58.191059404497835,
+      "quiet_fraction": 0.447
+    },
+    {
+      "window_ms": [
+        2000,
+        3000
+      ],
+      "global_mean_hz": 48.02119270191363,
+      "quiet_fraction": 0.481
+    },
+    {
+      "window_ms": [
+        3000,
+        4000
+      ],
+      "global_mean_hz": 57.24730714549932,
+      "quiet_fraction": 0.443
+    },
+    {
+      "window_ms": [
+        4000,
+        5000
+      ],
+      "global_mean_hz": 49.639503004877014,
+      "quiet_fraction": 0.45
+    }
+  ],
+  "tail2s_recurrence": {
+    "status": "RATE_RECURRENCE_ONLY",
+    "best_local_minima": [
+      {
+        "lag_ms": 288,
+        "relative_MSE": 0.0007558079289590718
+      },
+      {
+        "lag_ms": 576,
+        "relative_MSE": 0.002417047457428146
+      },
+      {
+        "lag_ms": 864,
+        "relative_MSE": 0.005043294689791777
+      }
+    ],
+    "direct_formula_errors": [
+      4.440892098500626e-16,
+      6.661338147750939e-16,
+      4.440892098500626e-16
+    ],
+    "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied."
+  },
+  "scope": "Read-only late-tail diagnosis of timestep-change transients. Not an acceptance change or a periodicity certificate."
+}

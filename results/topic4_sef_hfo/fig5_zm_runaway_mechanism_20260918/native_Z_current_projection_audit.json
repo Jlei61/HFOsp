@@ -1,0 +1,73 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t8000ms.npz",
+      "time_ms": 8000,
+      "global_Z": 0.7985396027290185,
+      "true_mean_ZI_mV_equivalent": 200.29252807303774,
+      "factorized_mean_error_mV_equivalent": 0.0074876738401697205,
+      "factorized_global_relative_error": 3.738369030640674e-05,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.06844119572388975,
+      "largest_absolute_group_error_mV_equivalent": 0.6500134539338092
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t9000ms.npz",
+      "time_ms": 9000,
+      "global_Z": 0.7835339789603897,
+      "true_mean_ZI_mV_equivalent": 92.52836911212707,
+      "factorized_mean_error_mV_equivalent": -0.01837043812351304,
+      "factorized_global_relative_error": -0.0001985384406943508,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.032694804300035914,
+      "largest_absolute_group_error_mV_equivalent": 0.5260288061926985
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t9420ms.npz",
+      "time_ms": 9420,
+      "global_Z": 0.7711552394348085,
+      "true_mean_ZI_mV_equivalent": 118.25749754607392,
+      "factorized_mean_error_mV_equivalent": 0.022760777472513233,
+      "factorized_global_relative_error": 0.0001924679444839891,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.034113831242937626,
+      "largest_absolute_group_error_mV_equivalent": 0.43273114870088136
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t9870ms.npz",
+      "time_ms": 9870,
+      "global_Z": 0.7436555746552451,
+      "true_mean_ZI_mV_equivalent": 481.11330062257144,
+      "factorized_mean_error_mV_equivalent": 0.28184684957303274,
+      "factorized_global_relative_error": 0.000585822194498295,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.28306216897784237,
+      "largest_absolute_group_error_mV_equivalent": 2.8126351125922042
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t10370ms.npz",
+      "time_ms": 10370,
+      "global_Z": 0.6912882127142393,
+      "true_mean_ZI_mV_equivalent": 696.6052839198874,
+      "factorized_mean_error_mV_equivalent": 0.2417519309574049,
+      "factorized_global_relative_error": 0.0003470429187631707,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.24437563962123515,
+      "largest_absolute_group_error_mV_equivalent": 2.820157192542979
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t12500ms.npz",
+      "time_ms": 12500,
+      "global_Z": 0.459827298595804,
+      "true_mean_ZI_mV_equivalent": 761.7798967776129,
+      "factorized_mean_error_mV_equivalent": 0.01615974460019388,
+      "factorized_global_relative_error": 2.1213141313587868e-05,
+      "E_weighted_mean_absolute_group_error_mV_equivalent": 0.016521994219695413,
+      "largest_absolute_group_error_mV_equivalent": 0.28630297597692334
+    }
+  ],
+  "observable": "group_mean(Z)*group_mean(I_I) minus group_mean(Z*I_I), weighted by original E-cell counts",
+  "model": "Existing20x20/935groups; grouping and raw native currents unchanged",
+  "source_times": "Original six available checkpoints, not independent replicates or time-window means",
+  "limits": [
+    "Isolates only the product-of-means approximation at actual native states.",
+    "Does not audit Gaussian Z-target closure, dynamic transfer response or recurrent current prediction.",
+    "Small global mean error does not rule out sensitivity of a local critical mode."
+  ]
+}

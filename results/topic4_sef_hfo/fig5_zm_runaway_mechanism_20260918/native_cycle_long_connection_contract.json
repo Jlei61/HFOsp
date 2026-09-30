@@ -1,0 +1,21 @@
+{
+  "created_local": "2026-09-19T17:50:30.271595",
+  "source": "periodic/native_unstable_period_extension_G8505_M65536/point0001.npz",
+  "previous": "periodic/native_unstable_period_extension_G8505_M65536/point0000.npz",
+  "period_targets_ms": [
+    264.45,
+    264.5,
+    264.5528502512292
+  ],
+  "N": 8505,
+  "M": 65536,
+  "independent_endpoint": "periodic/native_long_period_bridge_G8505_M65536/point0000.npz",
+  "question": "Does the explicitly continued longer-period arm of the native candidate turn connect to the independently certified stable longer-period orbit?",
+  "criteria": {
+    "accepted_residual_hz": 2e-08,
+    "explicit_parent_lineage": true,
+    "endpoint_D_difference": 1e-09,
+    "endpoint_phase_aligned_rate_L2": 1e-06
+  },
+  "scope": "Branch connection only. Intermediate point stability is not inherited, no onset type follows from connection. All frozen equations and native Z path unchanged."
+}

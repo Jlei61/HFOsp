@@ -1,0 +1,3711 @@
+{
+  "status": "FINITE_NEARBY_PARAMETER_DIRECTION_DIAGNOSTIC",
+  "timestamp": 1789895904.843039,
+  "torus": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/endpoint_further_TR2_a0.038000Hz_N64x64.npz",
+  "matched_target": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR2_saddle_matched_endpoint_further_TR2_a0.038000Hz_N64x64_N128.npz",
+  "eigenvector_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/TR2_endpoint_middle_N128_dt0.05.npz",
+  "J_torus": 0.945762867639569,
+  "J_target": 0.945762867639569,
+  "J_eigenvectors": 0.94576286705,
+  "parameter_offset": 5.895689492163569e-10,
+  "slow_period_s": 939.3113429358046,
+  "spatial_groups": 935,
+  "local_states": 8415,
+  "history_samples": 718,
+  "history_end_ms": 35.89699620637758,
+  "multipliers": [
+    [
+      1.0032219981886477,
+      0.0
+    ],
+    [
+      0.995963089070791,
+      0.0
+    ]
+  ],
+  "mode_phase_overlap": [
+    9.300586325180807e-14,
+    6.828862491161173e-14
+  ],
+  "closest_fast_averaged_rate_index": 158,
+  "target_offset": {
+    "raw": {
+      "norm": 9.084293367547353e-06,
+      "coefficients": [
+        -7.089533931267535e-06,
+        -4.888037946577976e-06
+      ],
+      "relative_two_mode_residual": 0.036046931532633573,
+      "angles_to_unstable_stable_degrees": [
+        32.3746355054782,
+        50.8675251069429
+      ],
+      "normalized_basis_condition": 1.1272576356136477
+    },
+    "weighted": {
+      "norm": 1.9563348879373238e-07,
+      "coefficients": [
+        -1.557932573197837e-07,
+        -1.3658242361427922e-07
+      ],
+      "relative_two_mode_residual": 0.059486269675356515,
+      "angles_to_unstable_stable_degrees": [
+        44.12813954442965,
+        52.516320445506864
+      ],
+      "normalized_basis_condition": 1.1196496096688477
+    }
+  },
+  "rows": [
+    {
+      "slow_index": 0,
+      "slow_phase_cycles": 0.0,
+      "time_s": 0.0,
+      "rate_phase_averaged_distance_Hz": 0.000991209000495841,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.19857034849952693,
+          "coefficients": [
+            0.19810468894698557,
+            0.003631148328387025
+          ],
+          "relative_two_mode_residual": 0.0005458883367538274,
+          "angles_to_unstable_stable_degrees": [
+            1.040791822630676,
+            82.11269847881177
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.004340202419279477,
+          "coefficients": [
+            0.004350342721985336,
+            0.00010030075277833543
+          ],
+          "relative_two_mode_residual": 0.001139135764595022,
+          "angles_to_unstable_stable_degrees": [
+            1.317410712366683,
+            84.85420950486323
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.19856258942767221,
+          "coefficients": [
+            0.1980975994130544,
+            0.003626260290440452
+          ],
+          "relative_two_mode_residual": 0.0005458872476072415,
+          "angles_to_unstable_stable_degrees": [
+            1.0394324638541381,
+            82.11405845058944
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.004340058919328893,
+          "coefficients": [
+            0.0043501869287280144,
+            0.0001001641703547207
+          ],
+          "relative_two_mode_residual": 0.0011391706189709107,
+          "angles_to_unstable_stable_degrees": [
+            1.3156643478277015,
+            84.8524608921303
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 8,
+      "slow_phase_cycles": 0.03125,
+      "time_s": 29.353479466743895,
+      "rate_phase_averaged_distance_Hz": 0.0016932261626643461,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.3431563661558173,
+          "coefficients": [
+            0.34169193734649683,
+            0.010860830099863095
+          ],
+          "relative_two_mode_residual": 0.0009358574837954422,
+          "angles_to_unstable_stable_degrees": [
+            1.8015620293199863,
+            81.35225877511805
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.007474543086517894,
+          "coefficients": [
+            0.007502359075827789,
+            0.00030021311971990345
+          ],
+          "relative_two_mode_residual": 0.0019419535850943978,
+          "angles_to_unstable_stable_degrees": [
+            2.28996668173413,
+            85.82568420572483
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.343148545191218,
+          "coefficients": [
+            0.34168484781256564,
+            0.010855942061916545
+          ],
+          "relative_two_mode_residual": 0.0009358643030933088,
+          "angles_to_unstable_stable_degrees": [
+            1.8007926990412793,
+            81.35302845798815
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.007474397360749535,
+          "coefficients": [
+            0.007502203282570479,
+            0.00030007653729628985
+          ],
+          "relative_two_mode_residual": 0.0019419883821967974,
+          "angles_to_unstable_stable_degrees": [
+            2.288971407516869,
+            85.82468765863975
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 16,
+      "slow_phase_cycles": 0.0625,
+      "time_s": 58.70695893348779,
+      "rate_phase_averaged_distance_Hz": 0.0028081764897077486,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.5776080351449819,
+          "coefficients": [
+            0.5730769399219269,
+            0.03108121943090974
+          ],
+          "relative_two_mode_residual": 0.0015590476978185543,
+          "angles_to_unstable_stable_degrees": [
+            3.0638735594911237,
+            80.09045890518951
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.012511877328146308,
+          "coefficients": [
+            0.012579384595584442,
+            0.000860130692242308
+          ],
+          "relative_two_mode_residual": 0.0032125048877120685,
+          "angles_to_unstable_stable_degrees": [
+            3.92117091286246,
+            87.45528127368964
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.5776001145558256,
+          "coefficients": [
+            0.5730698503879954,
+            0.031076331392963116
+          ],
+          "relative_two_mode_residual": 0.0015590596954042535,
+          "angles_to_unstable_stable_degrees": [
+            3.0634336976154333,
+            80.09089897400261
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.012511727964266984,
+          "coefficients": [
+            0.012579228802327138,
+            0.0008599941098186929
+          ],
+          "relative_two_mode_residual": 0.003212540907962021,
+          "angles_to_unstable_stable_degrees": [
+            3.920595532521374,
+            87.45470516372872
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 24,
+      "slow_phase_cycles": 0.09375,
+      "time_s": 88.06043840023169,
+      "rate_phase_averaged_distance_Hz": 0.0044071962811017724,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.9164328759261938,
+          "coefficients": [
+            0.9030440508401801,
+            0.0819354018873743
+          ],
+          "relative_two_mode_residual": 0.002450823491884638,
+          "angles_to_unstable_stable_degrees": [
+            5.094751828625649,
+            78.06023409226484
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.01968804434158506,
+          "coefficients": [
+            0.019813616442078914,
+            0.0022715655464383405
+          ],
+          "relative_two_mode_residual": 0.005029176483515264,
+          "angles_to_unstable_stable_degrees": [
+            6.589507722199337,
+            89.87835642056724
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.9164248031431528,
+          "coefficients": [
+            0.9030369613062488,
+            0.0819305138494278
+          ],
+          "relative_two_mode_residual": 0.002450838594861724,
+          "angles_to_unstable_stable_degrees": [
+            5.094492303818877,
+            78.0604937394013
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.01968788928773305,
+          "coefficients": [
+            0.019813460648821602,
+            0.0022714289640147294
+          ],
+          "relative_two_mode_residual": 0.0050292142810386955,
+          "angles_to_unstable_stable_degrees": [
+            6.589162641808222,
+            89.8787019228782
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 32,
+      "slow_phase_cycles": 0.125,
+      "time_s": 117.41391786697558,
+      "rate_phase_averaged_distance_Hz": 0.006252091375630437,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 1.2781269476761288,
+          "coefficients": [
+            1.2427636098356254,
+            0.18512565001241435
+          ],
+          "relative_two_mode_residual": 0.003426673382795755,
+          "angles_to_unstable_stable_degrees": [
+            8.270643853515672,
+            74.88478059821992
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.027159090217912196,
+          "coefficients": [
+            0.027251893211560786,
+            0.005144993896308595
+          ],
+          "relative_two_mode_residual": 0.007117359364587704,
+          "angles_to_unstable_stable_degrees": [
+            10.857686931031909,
+            85.61158054164105
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 1.2781186572494,
+          "coefficients": [
+            1.2427565203016953,
+            0.1851207619744675
+          ],
+          "relative_two_mode_residual": 0.0034266904643887003,
+          "angles_to_unstable_stable_degrees": [
+            8.2704780857927,
+            74.88494643593698
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.02715892676260197,
+          "coefficients": [
+            0.02725173741830349,
+            0.005144857313884985
+          ],
+          "relative_two_mode_residual": 0.007117400578026245,
+          "angles_to_unstable_stable_degrees": [
+            10.857461746675465,
+            85.61180597015145
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 40,
+      "slow_phase_cycles": 0.15625,
+      "time_s": 146.7673973337195,
+      "rate_phase_averaged_distance_Hz": 0.00748630933275647,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 1.3913968594937238,
+          "coefficients": [
+            1.3166405616221128,
+            0.31953289221957976
+          ],
+          "relative_two_mode_residual": 0.0038750338903119474,
+          "angles_to_unstable_stable_degrees": [
+            13.18194615997283,
+            69.97306655094256
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.02923214692799002,
+          "coefficients": [
+            0.028862637627660115,
+            0.008901050226544378
+          ],
+          "relative_two_mode_residual": 0.008460423554117906,
+          "angles_to_unstable_stable_degrees": [
+            17.61859510619055,
+            78.84985464581666
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 1.391388282772301,
+          "coefficients": [
+            1.3166334720881816,
+            0.3195280041816331
+          ],
+          "relative_two_mode_residual": 0.003875052633821337,
+          "angles_to_unstable_stable_degrees": [
+            13.181823647996662,
+            69.97318909885544
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.029231972029877245,
+          "coefficients": [
+            0.028862481834402796,
+            0.008900913644120769
+          ],
+          "relative_two_mode_residual": 0.00846047234796161,
+          "angles_to_unstable_stable_degrees": [
+            17.618424981547683,
+            78.8500249098041
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 48,
+      "slow_phase_cycles": 0.1875,
+      "time_s": 176.12087680046338,
+      "rate_phase_averaged_distance_Hz": 0.007090695096593048,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 1.0533419106796824,
+          "coefficients": [
+            0.9398852837030627,
+            0.3765059824742826
+          ],
+          "relative_two_mode_residual": 0.00329675934096146,
+          "angles_to_unstable_stable_degrees": [
+            20.787656645904207,
+            62.36634569495443
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.022055510040850063,
+          "coefficients": [
+            0.020612513222826825,
+            0.010500191749917573
+          ],
+          "relative_two_mode_residual": 0.007825829952699734,
+          "angles_to_unstable_stable_degrees": [
+            28.23705587524667,
+            68.22849936169624
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 1.0533330154843172,
+          "coefficients": [
+            0.9398781941691324,
+            0.3765010944363361
+          ],
+          "relative_two_mode_residual": 0.003296780340313503,
+          "angles_to_unstable_stable_degrees": [
+            20.787557964119873,
+            62.36644439283957
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.022055322127723372,
+          "coefficients": [
+            0.020612357429569475,
+            0.010500055167493959
+          ],
+          "relative_two_mode_residual": 0.007825893943793889,
+          "angles_to_unstable_stable_degrees": [
+            28.236917899650464,
+            68.2286374161701
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 56,
+      "slow_phase_cycles": 0.21875,
+      "time_s": 205.47435626720727,
+      "rate_phase_averaged_distance_Hz": 0.0052690920559101346,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.564613247805888,
+          "coefficients": [
+            0.44179075359249775,
+            0.3028322557545211
+          ],
+          "relative_two_mode_residual": 0.0022728288473168917,
+          "angles_to_unstable_stable_degrees": [
+            32.17676381384473,
+            50.97661044517237
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.01212392860923641,
+          "coefficients": [
+            0.00969786028980633,
+            0.008448508440294543
+          ],
+          "relative_two_mode_residual": 0.005673848255620014,
+          "angles_to_unstable_stable_degrees": [
+            43.823752624503236,
+            52.639499534892046
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.564604169453054,
+          "coefficients": [
+            0.4417836640585662,
+            0.3028273677165741
+          ],
+          "relative_two_mode_residual": 0.002272854762707387,
+          "angles_to_unstable_stable_degrees": [
+            32.176761579582994,
+            50.976612687543756
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0121237333262025,
+          "coefficients": [
+            0.00969770449654899,
+            0.008448371857870928
+          ],
+          "relative_two_mode_residual": 0.0056739349001045415,
+          "angles_to_unstable_stable_degrees": [
+            43.82374942487918,
+            52.639502785395734
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 64,
+      "slow_phase_cycles": 0.25,
+      "time_s": 234.82783573395116,
+      "rate_phase_averaged_distance_Hz": 0.0032537287436722696,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.25552657750528,
+          "coefficients": [
+            0.15221131884788822,
+            0.18789901211157717
+          ],
+          "relative_two_mode_residual": 0.001492041709549132,
+          "angles_to_unstable_stable_degrees": [
+            46.89457066106765,
+            36.258595088643915
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.005893713848326263,
+          "coefficients": [
+            0.0033437830471779546,
+            0.005244166599678521
+          ],
+          "relative_two_mode_residual": 0.003597018469141266,
+          "angles_to_unstable_stable_degrees": [
+            62.14645997083182,
+            34.31586604562919
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.2555177914286387,
+          "coefficients": [
+            0.1522042293139568,
+            0.18789412407363096
+          ],
+          "relative_two_mode_residual": 0.0014920784349841383,
+          "angles_to_unstable_stable_degrees": [
+            46.895083064417776,
+            36.25808269307297
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0058935282506398555,
+          "coefficients": [
+            0.003343627253920632,
+            0.005244030017254903
+          ],
+          "relative_two_mode_residual": 0.0035971237343254553,
+          "angles_to_unstable_stable_degrees": [
+            62.147050538784136,
+            34.31527552806105
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 72,
+      "slow_phase_cycles": 0.28125,
+      "time_s": 264.18131520069505,
+      "rate_phase_averaged_distance_Hz": 0.0017954064494649965,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.11579869905753268,
+          "coefficients": [
+            0.04371620512985657,
+            0.10214457253365503
+          ],
+          "relative_two_mode_residual": 0.0009277589192935059,
+          "angles_to_unstable_stable_degrees": [
+            61.13943077958438,
+            22.013662906314085
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0029053742581707422,
+          "coefficients": [
+            0.000960772757490363,
+            0.0028521649503891635
+          ],
+          "relative_two_mode_residual": 0.0020954484225642,
+          "angles_to_unstable_stable_degrees": [
+            77.27851077087733,
+            19.183466274916345
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.11579074549097965,
+          "coefficients": [
+            0.04370911559592541,
+            0.10213968449570829
+          ],
+          "relative_two_mode_residual": 0.0009278084119851272,
+          "angles_to_unstable_stable_degrees": [
+            61.14159652847699,
+            22.01149717079897
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0029052109543554437,
+          "coefficients": [
+            0.000960616964233044,
+            0.0028520283679655503
+          ],
+          "relative_two_mode_residual": 0.0020955557891015747,
+          "angles_to_unstable_stable_degrees": [
+            77.28062276280322,
+            19.18135436103164
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 80,
+      "slow_phase_cycles": 0.3125,
+      "time_s": 293.534794667439,
+      "rate_phase_averaged_distance_Hz": 0.0009326886132791409,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.054896764209769244,
+          "coefficients": [
+            0.011403439273583386,
+            0.05235701567548047
+          ],
+          "relative_two_mode_residual": 0.0005217544360995463,
+          "angles_to_unstable_stable_degrees": [
+            71.25070724908332,
+            11.902351504652163
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.001455755058002375,
+          "coefficients": [
+            0.00025067289585610036,
+            0.00146249691972991
+          ],
+          "relative_two_mode_residual": 0.0011290710273834876,
+          "angles_to_unstable_stable_degrees": [
+            86.60976891209529,
+            9.852030633080695
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.05488970278578117,
+          "coefficients": [
+            0.011396349739652123,
+            0.05235212763753384
+          ],
+          "relative_two_mode_residual": 0.0005218328115013537,
+          "angles_to_unstable_stable_degrees": [
+            71.25666252980542,
+            11.89639625400984
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0014556112827581295,
+          "coefficients": [
+            0.00025051710259878056,
+            0.0014623603373062942
+          ],
+          "relative_two_mode_residual": 0.0011291863037020478,
+          "angles_to_unstable_stable_degrees": [
+            86.61497065130246,
+            9.846829047264647
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 88,
+      "slow_phase_cycles": 0.34375,
+      "time_s": 322.88827413418284,
+      "rate_phase_averaged_distance_Hz": 0.0004699020802271494,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.026644774639188663,
+          "coefficients": [
+            0.002825649028536403,
+            0.026159794410899318
+          ],
+          "relative_two_mode_residual": 0.00027322192138930934,
+          "angles_to_unstable_stable_degrees": [
+            77.1089964622091,
+            6.0440433313215065
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0007265277523144358,
+          "coefficients": [
+            6.212083049612248e-05,
+            0.0007308916300839604
+          ],
+          "relative_two_mode_residual": 0.0005793071800255669,
+          "angles_to_unstable_stable_degrees": [
+            88.41217130898718,
+            4.8738708797009735
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0266383328881383,
+          "coefficients": [
+            0.0028185594946051364,
+            0.02615490637295273
+          ],
+          "relative_two_mode_residual": 0.00027353285840978433,
+          "angles_to_unstable_stable_degrees": [
+            77.12275385367505,
+            6.030286032954503
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0007263959950467581,
+          "coefficients": [
+            6.196503723880233e-05,
+            0.000730755047660345
+          ],
+          "relative_two_mode_residual": 0.0005795885331129809,
+          "angles_to_unstable_stable_degrees": [
+            88.4008028524745,
+            4.862502795700976
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 96,
+      "slow_phase_cycles": 0.375,
+      "time_s": 352.24175360092676,
+      "rate_phase_averaged_distance_Hz": 0.00023316848427305158,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.013020424635476131,
+          "coefficients": [
+            0.000678880245355053,
+            0.01292203123187389
+          ],
+          "relative_two_mode_residual": 0.00013795023777807565,
+          "angles_to_unstable_stable_degrees": [
+            80.18561723473789,
+            2.9674124829036286
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0003597060785952169,
+          "coefficients": [
+            1.4925896406342804e-05,
+            0.0003610798990719167
+          ],
+          "relative_two_mode_residual": 0.0002899266970282578,
+          "angles_to_unstable_stable_degrees": [
+            85.90145149076682,
+            2.363096759673166
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.013014336437593164,
+          "coefficients": [
+            0.0006717907114237809,
+            0.012917143193927316
+          ],
+          "relative_two_mode_residual": 0.00014024115279903082,
+          "angles_to_unstable_stable_degrees": [
+            80.21525819703598,
+            2.9377719855355577
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0003595807785722295,
+          "coefficients": [
+            1.4770103149022948e-05,
+            0.00036094331664830227
+          ],
+          "relative_two_mode_residual": 0.0002917415079486314,
+          "angles_to_unstable_stable_degrees": [
+            85.87758812011259,
+            2.339234722090439
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 104,
+      "slow_phase_cycles": 0.40625,
+      "time_s": 381.5952330676706,
+      "rate_phase_averaged_distance_Hz": 0.00011483434977065988,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.006370533150046739,
+          "coefficients": [
+            0.00016073045485943965,
+            0.0063493720169844935
+          ],
+          "relative_two_mode_residual": 6.842567918149126e-05,
+          "angles_to_unstable_stable_degrees": [
+            81.71758915229232,
+            1.435435326288533
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00017706877849814272,
+          "coefficients": [
+            3.533980027892544e-06,
+            0.00017743165762889465
+          ],
+          "relative_two_mode_residual": 0.00014334602633377788,
+          "angles_to_unstable_stable_degrees": [
+            84.67474582203943,
+            1.1363625317086241
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.006364629122657101,
+          "coefficients": [
+            0.00015364092092817177,
+            0.006344483979037906
+          ],
+          "relative_two_mode_residual": 8.559201083841403e-05,
+          "angles_to_unstable_stable_degrees": [
+            81.77964275576386,
+            1.373385134846769
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00017694674804314819,
+          "coefficients": [
+            3.3781867705728147e-06,
+            0.00017729507520528032
+          ],
+          "relative_two_mode_residual": 0.00015764675681528368,
+          "angles_to_unstable_stable_degrees": [
+            84.62539439036995,
+            1.0870189345603067
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 112,
+      "slow_phase_cycles": 0.4375,
+      "time_s": 410.94871253441454,
+      "rate_phase_averaged_distance_Hz": 5.634396641866876e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.003117216281650899,
+          "coefficients": [
+            4.136337286052459e-05,
+            0.0031120144724815155
+          ],
+          "relative_two_mode_residual": 3.3614265678904014e-05,
+          "angles_to_unstable_stable_degrees": [
+            82.39814286809646,
+            0.7548786992433922
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.686964423238793e-05,
+          "coefficients": [
+            9.093987023700869e-07,
+            8.696728519544775e-05
+          ],
+          "relative_two_mode_residual": 7.043575104762276e-05,
+          "angles_to_unstable_stable_degrees": [
+            84.13441683740652,
+            0.5960175730044143
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.003111398612087637,
+          "coefficients": [
+            3.427383892925783e-05,
+            0.0031071264345349362
+          ],
+          "relative_two_mode_residual": 0.00011045225576374638,
+          "angles_to_unstable_stable_degrees": [
+            82.52636208331556,
+            0.6266890213966427
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.674912717860808e-05,
+          "coefficients": [
+            7.536054450503082e-07,
+            8.683070277183376e-05
+          ],
+          "relative_two_mode_residual": 0.00015140331037726958,
+          "angles_to_unstable_stable_degrees": [
+            84.03299611349033,
+            0.49465920059232327
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 120,
+      "slow_phase_cycles": 0.46875,
+      "time_s": 440.3021920011584,
+      "rate_phase_averaged_distance_Hz": 2.7588531766430203e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0015258325636049227,
+          "coefficients": [
+            1.8998564149325284e-05,
+            0.0015234509885128492
+          ],
+          "relative_two_mode_residual": 1.638486593402525e-05,
+          "angles_to_unstable_stable_degrees": [
+            82.4446833802897,
+            0.7083363490707858
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.25295554939577e-05,
+          "coefficients": [
+            4.174965458176742e-07,
+            4.257451600650854e-05
+          ],
+          "relative_two_mode_residual": 3.447257772979153e-05,
+          "angles_to_unstable_stable_degrees": [
+            84.09729980158157,
+            0.5588903756956737
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0015200287480803079,
+          "coefficients": [
+            1.1909030218057556e-05,
+            0.001518562950566274
+          ],
+          "relative_two_mode_residual": 0.0002160349295766388,
+          "angles_to_unstable_stable_degrees": [
+            82.70731872788753,
+            0.4458723907998963
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.240928113688527e-05,
+          "coefficients": [
+            2.61703288497878e-07,
+            4.243793358289419e-05
+          ],
+          "relative_two_mode_residual": 0.00027649576180058694,
+          "angles_to_unstable_stable_degrees": [
+            83.88973567193779,
+            0.3516795185441371
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 126,
+      "slow_phase_cycles": 0.4921875,
+      "time_s": 462.31730160121634,
+      "rate_phase_averaged_distance_Hz": 1.6130357105987745e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0008939088866727991,
+          "coefficients": [
+            2.0484145748797795e-05,
+            0.0008912354112168235
+          ],
+          "relative_two_mode_residual": 9.297987058914588e-06,
+          "angles_to_unstable_stable_degrees": [
+            81.84932332003592,
+            1.3036958954161655
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.486010105262732e-05,
+          "coefficients": [
+            4.4997695832920294e-07,
+            2.4906719010071044e-05
+          ],
+          "relative_two_mode_residual": 1.995528755092601e-05,
+          "angles_to_unstable_stable_degrees": [
+            84.56895513908876,
+            1.0305428598403463
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0008880439014251959,
+          "coefficients": [
+            1.3394611817530211e-05,
+            0.000886347373270246
+          ],
+          "relative_two_mode_residual": 0.0003688433398116175,
+          "angles_to_unstable_stable_degrees": [
+            82.29494286517546,
+            0.8583369488869474
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.473875982461569e-05,
+          "coefficients": [
+            2.941837010094212e-07,
+            2.4770136586456804e-05
+          ],
+          "relative_two_mode_residual": 0.000470797171046822,
+          "angles_to_unstable_stable_degrees": [
+            84.2154403023025,
+            0.6775638832389199
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 128,
+      "slow_phase_cycles": 0.5,
+      "time_s": 469.6556714679023,
+      "rate_phase_averaged_distance_Hz": 1.3484162356765471e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0007483978010362246,
+          "coefficients": [
+            2.2703578517112337e-05,
+            0.000745351569647486
+          ],
+          "relative_two_mode_residual": 7.886463677356129e-06,
+          "angles_to_unstable_stable_degrees": [
+            81.42701555681683,
+            1.7260036088518178
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.0779621077646715e-05,
+          "coefficients": [
+            4.98709578479359e-07,
+            2.082983483947354e-05
+          ],
+          "relative_two_mode_residual": 1.6783746302752824e-05,
+          "angles_to_unstable_stable_degrees": [
+            84.90490224975548,
+            1.3664896749855842
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0007424869422568181,
+          "coefficients": [
+            1.561404458584515e-05,
+            0.0007404635317009075
+          ],
+          "relative_two_mode_residual": 0.0004410880875448532,
+          "angles_to_unstable_stable_degrees": [
+            81.95663097718953,
+            1.1966557758148229
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.0657475268927843e-05,
+          "coefficients": [
+            3.4291632115957793e-07,
+            2.069325241585928e-05
+          ],
+          "relative_two_mode_residual": 0.0005635645404456696,
+          "angles_to_unstable_stable_degrees": [
+            84.48353099204282,
+            0.945668580817068
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 130,
+      "slow_phase_cycles": 0.5078125,
+      "time_s": 476.9940413345883,
+      "rate_phase_averaged_distance_Hz": 1.1269784524748244e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0006269014138501621,
+          "coefficients": [
+            2.5594975922625843e-05,
+            0.0006233347503566941
+          ],
+          "relative_two_mode_residual": 6.858133886634032e-06,
+          "angles_to_unstable_stable_degrees": [
+            80.82980802029348,
+            2.323211119406205
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.7365649776176045e-05,
+          "coefficients": [
+            5.622073955749285e-07,
+            1.741993123246796e-05
+          ],
+          "relative_two_mode_residual": 1.4279164136168834e-05,
+          "angles_to_unstable_stable_degrees": [
+            85.38188021082193,
+            1.8434674794805819
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0006209248823125797,
+          "coefficients": [
+            1.8505441991358325e-05,
+            0.0006184467124101166
+          ],
+          "relative_two_mode_residual": 0.0005274144190978282,
+          "angles_to_unstable_stable_degrees": [
+            81.4573631700927,
+            1.6959262990595676
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.7242345805087722e-05,
+          "coefficients": [
+            4.064141382551511e-07,
+            1.728334880885367e-05
+          ],
+          "relative_two_mode_residual": 0.0006750527016383582,
+          "angles_to_unstable_stable_degrees": [
+            84.88045963437918,
+            1.3426026790006254
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 132,
+      "slow_phase_cycles": 0.515625,
+      "time_s": 484.3324112012743,
+      "rate_phase_averaged_distance_Hz": 9.416581891573008e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00052556178102453,
+          "coefficients": [
+            2.9183768577912293e-05,
+            0.0005212831865366946
+          ],
+          "relative_two_mode_residual": 5.421566888721024e-06,
+          "angles_to_unstable_stable_degrees": [
+            79.99254642195523,
+            3.160472699712912
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.450982992216643e-05,
+          "coefficients": [
+            6.410141084626884e-07,
+            1.4567981014195972e-05
+          ],
+          "relative_two_mode_residual": 1.1674414335559645e-05,
+          "angles_to_unstable_stable_degrees": [
+            86.0543503210691,
+            2.5159374973074695
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0005194926525364715,
+          "coefficients": [
+            2.2094234646644873e-05,
+            0.0005163951485901165
+          ],
+          "relative_two_mode_residual": 0.0006303636480454925,
+          "angles_to_unstable_stable_degrees": [
+            80.73286711840078,
+            2.4204231674573333
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.4384880166761242e-05,
+          "coefficients": [
+            4.852208511429074e-07,
+            1.4431398590581703e-05
+          ],
+          "relative_two_mode_residual": 0.000809072132504082,
+          "angles_to_unstable_stable_degrees": [
+            85.45915928544855,
+            1.9213039898615984
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 134,
+      "slow_phase_cycles": 0.5234375,
+      "time_s": 491.67078106796026,
+      "rate_phase_averaged_distance_Hz": 7.865502467346124e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00044118615092917117,
+          "coefficients": [
+            3.350815525832953e-05,
+            0.00043593519381372357
+          ],
+          "relative_two_mode_residual": 4.27197426734043e-06,
+          "angles_to_unstable_stable_degrees": [
+            78.82832603201419,
+            4.324693081271567
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.212208163278619e-05,
+          "coefficients": [
+            7.359810695798406e-07,
+            1.218282742179956e-05
+          ],
+          "relative_two_mode_residual": 9.655758447879023e-06,
+          "angles_to_unstable_stable_degrees": [
+            86.99707566863611,
+            3.4586628003366124
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00043498843113522255,
+          "coefficients": [
+            2.6418621327061988e-05,
+            0.0004310471558671455
+          ],
+          "relative_two_mode_residual": 0.0007527940154544934,
+          "angles_to_unstable_stable_degrees": [
+            79.69593513727689,
+            3.4573556485885564
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.199482012183437e-05,
+          "coefficients": [
+            5.801878122600574e-07,
+            1.2046244998185301e-05
+          ],
+          "relative_two_mode_residual": 0.000970236301659622,
+          "angles_to_unstable_stable_degrees": [
+            86.29326113605785,
+            2.755406871290269
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 136,
+      "slow_phase_cycles": 0.53125,
+      "time_s": 499.00915093464624,
+      "rate_phase_averaged_distance_Hz": 6.567163093411713e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00037114087325486485,
+          "coefficients": [
+            3.858212461442869e-05,
+            0.00036455898248969536
+          ],
+          "relative_two_mode_residual": 3.6738599942515773e-06,
+          "angles_to_unstable_stable_degrees": [
+            77.22873785497116,
+            5.924281255112154
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.0127820852022743e-05,
+          "coefficients": [
+            8.474264104880613e-07,
+            1.018812262690366e-05
+          ],
+          "relative_two_mode_residual": 8.065731441450929e-06,
+          "angles_to_unstable_stable_degrees": [
+            88.30758058087557,
+            4.769167690806984
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0003647681992772187,
+          "coefficients": [
+            3.149259068316113e-05,
+            0.00035967094454311725
+          ],
+          "relative_two_mode_residual": 0.0008977030406391757,
+          "angles_to_unstable_stable_degrees": [
+            78.23558380199067,
+            4.91770843767221
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 9.997361741387517e-06,
+          "coefficients": [
+            6.916331531682741e-07,
+            1.0051540203289364e-05
+          ],
+          "relative_two_mode_residual": 0.0011640438902394993,
+          "angles_to_unstable_stable_degrees": [
+            87.48015770978967,
+            3.9423064010211846
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 138,
+      "slow_phase_cycles": 0.5390625,
+      "time_s": 506.34752080133217,
+      "rate_phase_averaged_distance_Hz": 5.4802559162749855e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0003132935414383645,
+          "coefficients": [
+            4.446868044395723e-05,
+            0.00030486539367433405
+          ],
+          "relative_two_mode_residual": 3.6343736673172792e-06,
+          "angles_to_unstable_stable_degrees": [
+            75.05152510101253,
+            8.101494008017431
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.46579853427383e-06,
+          "coefficients": [
+            9.76720547258879e-07,
+            8.519902020936449e-06
+          ],
+          "relative_two_mode_residual": 7.235871929354994e-06,
+          "angles_to_unstable_stable_degrees": [
+            89.87874755873631,
+            6.582839541911951
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0003066875986396179,
+          "coefficients": [
+            3.737914651268975e-05,
+            0.0002999773557277559
+          ],
+          "relative_two_mode_residual": 0.0010677255118314649,
+          "angles_to_unstable_stable_degrees": [
+            76.20257143663699,
+            6.9507235917062316
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.330973698412126e-06,
+          "coefficients": [
+            8.209272899390974e-07,
+            8.38331959732217e-06
+          ],
+          "relative_two_mode_residual": 0.0013968744511319905,
+          "angles_to_unstable_stable_degrees": [
+            89.15743564574802,
+            5.61959004711662
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 140,
+      "slow_phase_cycles": 0.546875,
+      "time_s": 513.6858906680181,
+      "rate_phase_averaged_distance_Hz": 4.570353387414879e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00026598303469070573,
+          "coefficients": [
+            5.130977931535652e-05,
+            0.0002549417489686101
+          ],
+          "relative_two_mode_residual": 2.4376679352267116e-06,
+          "angles_to_unstable_stable_degrees": [
+            72.110907848656,
+            11.042111258542748
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 7.0869247262845895e-06,
+          "coefficients": [
+            1.1269699770307344e-06,
+            7.124720260585072e-06
+          ],
+          "relative_two_mode_residual": 5.5488300975754635e-06,
+          "angles_to_unstable_stable_degrees": [
+            87.37012999263264,
+            9.091457100567045
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0002590731355404654,
+          "coefficients": [
+            4.422024538408897e-05,
+            0.0002500537110220322
+          ],
+          "relative_two_mode_residual": 0.0012639702975736707,
+          "angles_to_unstable_stable_degrees": [
+            73.39607667545725,
+            9.757222238108064
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 6.946213046737968e-06,
+          "coefficients": [
+            9.71176719710953e-07,
+            6.9881378369708e-06
+          ],
+          "relative_two_mode_residual": 0.0016753820553529913,
+          "angles_to_unstable_stable_degrees": [
+            88.4758933954014,
+            7.9862690104701315
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 142,
+      "slow_phase_cycles": 0.5546875,
+      "time_s": 521.0242605347041,
+      "rate_phase_averaged_distance_Hz": 3.8089749104572565e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00022797638417445794,
+          "coefficients": [
+            5.924960896990379e-05,
+            0.00021319215638439734
+          ],
+          "relative_two_mode_residual": 2.414860508318688e-06,
+          "angles_to_unstable_stable_degrees": [
+            68.19921957615762,
+            14.953799530803977
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 5.953642379037216e-06,
+          "coefficients": [
+            1.3013530143365615e-06,
+            5.957972251283884e-06
+          ],
+          "relative_two_mode_residual": 5.541047504966584e-06,
+          "angles_to_unstable_stable_degrees": [
+            83.91740139818124,
+            12.54418569351226
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00022068537376464126,
+          "coefficients": [
+            5.2160075038636236e-05,
+            0.0002083041184378195
+          ],
+          "relative_two_mode_residual": 0.0014838151963420117,
+          "angles_to_unstable_stable_degrees": [
+            69.58089962515113,
+            13.572404233437696
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 5.80517519231066e-06,
+          "coefficients": [
+            1.1455597570167788e-06,
+            5.8213898276696e-06
+          ],
+          "relative_two_mode_residual": 0.002004685789128825,
+          "angles_to_unstable_stable_degrees": [
+            85.15371380277648,
+            11.308458785134077
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 144,
+      "slow_phase_cycles": 0.5625,
+      "time_s": 528.3626304013901,
+      "rate_phase_averaged_distance_Hz": 3.1727234197627422e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00019842021580658792,
+          "coefficients": [
+            6.840364636939303e-05,
+            0.0001782800913973066
+          ],
+          "relative_two_mode_residual": 1.5548674215779882e-06,
+          "angles_to_unstable_stable_degrees": [
+            63.13701243975113,
+            20.01600666674312
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 5.039424572742474e-06,
+          "coefficients": [
+            1.502415842668198e-06,
+            4.9823023621241475e-06
+          ],
+          "relative_two_mode_residual": 3.748683084803801e-06,
+          "angles_to_unstable_stable_degrees": [
+            79.22976646081408,
+            17.23182062820699
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00019068098566494247,
+          "coefficients": [
+            6.13141124381255e-05,
+            0.00017339205345072897
+          ],
+          "relative_two_mode_residual": 0.001717263883174459,
+          "angles_to_unstable_stable_degrees": [
+            64.53484770480176,
+            18.618462404085886
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.881172063423493e-06,
+          "coefficients": [
+            1.3466225853484169e-06,
+            4.845719938509874e-06
+          ],
+          "relative_two_mode_residual": 0.0023840907881995943,
+          "angles_to_unstable_stable_degrees": [
+            80.5514846972133,
+            15.910700720443607
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 146,
+      "slow_phase_cycles": 0.5703125,
+      "time_s": 535.7010002680761,
+      "rate_phase_averaged_distance_Hz": 2.642645894432296e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.000176813191657092,
+          "coefficients": [
+            7.893685754788255e-05,
+            0.00014908358111343807
+          ],
+          "relative_two_mode_residual": 2.423410562738334e-06,
+          "angles_to_unstable_stable_degrees": [
+            56.84107020312743,
+            26.311948903592377
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.328822295541886e-06,
+          "coefficients": [
+            1.7337707945454288e-06,
+            4.166361464863367e-06
+          ],
+          "relative_two_mode_residual": 4.292607154418317e-06,
+          "angles_to_unstable_stable_degrees": [
+            73.01002666827678,
+            23.451560420748006
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0001685963069470307,
+          "coefficients": [
+            7.184732361661494e-05,
+            0.00014419554316686035
+          ],
+          "relative_two_mode_residual": 0.0019422181393630362,
+          "angles_to_unstable_stable_degrees": [
+            58.12189552452923,
+            25.031422208045615
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.159091675896683e-06,
+          "coefficients": [
+            1.5779775372256423e-06,
+            4.0297790412490874e-06
+          ],
+          "relative_two_mode_residual": 0.0027979851674833313,
+          "angles_to_unstable_stable_degrees": [
+            74.3139378895246,
+            22.148263184689807
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 148,
+      "slow_phase_cycles": 0.578125,
+      "time_s": 543.0393701347621,
+      "rate_phase_averaged_distance_Hz": 2.204030255423824e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00016293720882218623,
+          "coefficients": [
+            9.109981987655456e-05,
+            0.00012466530892972621
+          ],
+          "relative_two_mode_residual": 9.684601575131706e-07,
+          "angles_to_unstable_stable_degrees": [
+            49.43386931876137,
+            33.71914978757257
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.8174087403663875e-06,
+          "coefficients": [
+            2.000912143560059e-06,
+            3.483959479652018e-06
+          ],
+          "relative_two_mode_residual": 2.5754366666667146e-06,
+          "angles_to_unstable_stable_degrees": [
+            65.07398878466708,
+            31.387598303378507
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00015428447863703216,
+          "coefficients": [
+            8.401028594528705e-05,
+            0.00011977727098314829
+          ],
+          "relative_two_mode_residual": 0.0021224232782440563,
+          "angles_to_unstable_stable_degrees": [
+            50.426368169371145,
+            32.72695840518586
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.6358499672370427e-06,
+          "coefficients": [
+            1.8451188862402726e-06,
+            3.347377056037739e-06
+          ],
+          "relative_two_mode_residual": 0.0032007488643611757,
+          "angles_to_unstable_stable_degrees": [
+            66.17959333570921,
+            30.282625931457904
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 150,
+      "slow_phase_cycles": 0.5859375,
+      "time_s": 550.377740001448,
+      "rate_phase_averaged_distance_Hz": 1.8464834702024193e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00015664798164516088,
+          "coefficients": [
+            0.00010515599188110907,
+            0.00010424522448485398
+          ],
+          "relative_two_mode_residual": 2.6304461422443734e-06,
+          "angles_to_unstable_stable_degrees": [
+            41.355441713912036,
+            41.79757739280271
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.508168630171539e-06,
+          "coefficients": [
+            2.309636353224408e-06,
+            2.9132921388119495e-06
+          ],
+          "relative_two_mode_residual": 5.54658218822007e-06,
+          "angles_to_unstable_stable_degrees": [
+            55.6042855497762,
+            40.85730153949096
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0001476895976284511,
+          "coefficients": [
+            9.806645794984144e-05,
+            9.935718653827595e-05
+          ],
+          "relative_two_mode_residual": 0.002217194825145926,
+          "angles_to_unstable_stable_degrees": [
+            41.90896646437793,
+            41.244370173201446
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.3171093839216043e-06,
+          "coefficients": [
+            2.153843095904626e-06,
+            2.7767097151976706e-06
+          ],
+          "relative_two_mode_residual": 0.0035083454047088645,
+          "angles_to_unstable_stable_degrees": [
+            56.28171374253174,
+            40.18052622695344
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 152,
+      "slow_phase_cycles": 0.59375,
+      "time_s": 557.716109868134,
+      "rate_phase_averaged_distance_Hz": 1.564034986550412e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00015762948913886895,
+          "coefficients": [
+            0.0001213514787196289,
+            8.717018239472761e-05
+          ],
+          "relative_two_mode_residual": 6.685553936301807e-07,
+          "angles_to_unstable_stable_degrees": [
+            33.3027423972172,
+            49.85027670908269
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.402543411972759e-06,
+          "coefficients": [
+            2.6653573241752656e-06,
+            2.4361029169875805e-06
+          ],
+          "relative_two_mode_residual": 1.8631430408711989e-06,
+          "angles_to_unstable_stable_degrees": [
+            45.350333507742214,
+            51.11125358008464
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00014855288962217861,
+          "coefficients": [
+            0.00011426194478836124,
+            8.228214444814967e-05
+          ],
+          "relative_two_mode_residual": 0.002204252274872433,
+          "angles_to_unstable_stable_degrees": [
+            33.3632641369909,
+            49.790084030099344
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.2073330470856544e-06,
+          "coefficients": [
+            2.5095640668554774e-06,
+            2.299520493373297e-06
+          ],
+          "relative_two_mode_residual": 0.0036282920052236084,
+          "angles_to_unstable_stable_degrees": [
+            45.431501044355855,
+            51.03076261186435
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 154,
+      "slow_phase_cycles": 0.6015625,
+      "time_s": 565.05447973482,
+      "rate_phase_averaged_distance_Hz": 1.3551942292151986e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00016536406614651322,
+          "coefficients": [
+            0.00013999702153044225,
+            7.289034219574569e-05
+          ],
+          "relative_two_mode_residual": 1.5450086740297062e-06,
+          "angles_to_unstable_stable_degrees": [
+            25.953618126146278,
+            57.19940098030739
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.4920854043312864e-06,
+          "coefficients": [
+            3.074890952777253e-06,
+            2.037029813519797e-06
+          ],
+          "relative_two_mode_residual": 2.7302797836998398e-06,
+          "angles_to_unstable_stable_degrees": [
+            35.42396276410948,
+            61.03762432395778
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00015634516776731784,
+          "coefficients": [
+            0.00013290748759917494,
+            6.800230424916788e-05
+          ],
+          "relative_two_mode_residual": 0.0020943707998782478,
+          "angles_to_unstable_stable_degrees": [
+            25.585206449055786,
+            57.56815495257754
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.2991434782214104e-06,
+          "coefficients": [
+            2.919097695457469e-06,
+            1.900447389905518e-06
+          ],
+          "relative_two_mode_residual": 0.003527256518500091,
+          "angles_to_unstable_stable_degrees": [
+            34.91735231882333,
+            61.54493853132547
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 156,
+      "slow_phase_cycles": 0.609375,
+      "time_s": 572.392849601506,
+      "rate_phase_averaged_distance_Hz": 1.2222445901974134e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0001792975781538609,
+          "coefficients": [
+            0.0001615118004610507,
+            6.094661097391643e-05
+          ],
+          "relative_two_mode_residual": 5.993901299310378e-07,
+          "angles_to_unstable_stable_degrees": [
+            19.72429828855364,
+            63.428720817749515
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.7583795423147956e-06,
+          "coefficients": [
+            3.5474362557314574e-06,
+            1.7032456229632672e-06
+          ],
+          "relative_two_mode_residual": 1.5701613142787703e-06,
+          "angles_to_unstable_stable_degrees": [
+            26.763402693823334,
+            69.69818439398915
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00017044933705647706,
+          "coefficients": [
+            0.00015442226652978344,
+            5.605857302733846e-05
+          ],
+          "relative_two_mode_residual": 0.0019210956317721563,
+          "angles_to_unstable_stable_degrees": [
+            19.059330038390492,
+            64.09404645066921
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.5723753743973174e-06,
+          "coefficients": [
+            3.391642998411672e-06,
+            1.56666319934899e-06
+          ],
+          "relative_two_mode_residual": 0.0032575586941750697,
+          "angles_to_unstable_stable_degrees": [
+            25.834665489756507,
+            70.62765639172193
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 158,
+      "slow_phase_cycles": 0.6171875,
+      "time_s": 579.731219468192,
+      "rate_phase_averaged_distance_Hz": 1.1680559609570433e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00019897054254955682,
+          "coefficients": [
+            0.0001863551116510088,
+            5.095849867285404e-05
+          ],
+          "relative_two_mode_residual": 2.1091076496950527e-06,
+          "angles_to_unstable_stable_degrees": [
+            14.731175334182987,
+            68.42184377262183
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.1796554239998705e-06,
+          "coefficients": [
+            4.0930895753129234e-06,
+            1.4241137478154412e-06
+          ],
+          "relative_two_mode_residual": 4.227672302862706e-06,
+          "angles_to_unstable_stable_degrees": [
+            19.78920893735692,
+            76.6723781518354
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00019033641461434016,
+          "coefficients": [
+            0.00017926557771974104,
+            4.607046072627611e-05
+          ],
+          "relative_two_mode_residual": 0.0017203756257591842,
+          "angles_to_unstable_stable_degrees": [
+            13.905866611299134,
+            69.24752709360749
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.002397475447254e-06,
+          "coefficients": [
+            3.937296317993139e-06,
+            1.2875313242011634e-06
+          ],
+          "relative_two_mode_residual": 0.002907598855787316,
+          "angles_to_unstable_stable_degrees": [
+            18.64234726239065,
+            77.82001002525121
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 160,
+      "slow_phase_cycles": 0.625,
+      "time_s": 587.069589334878,
+      "rate_phase_averaged_distance_Hz": 1.1910760398851307e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00022410408941690753,
+          "coefficients": [
+            0.0002149957025661355,
+            4.260686370460867e-05
+          ],
+          "relative_two_mode_residual": 6.581978496101923e-07,
+          "angles_to_unstable_stable_degrees": [
+            10.880716347263334,
+            72.27230275907363
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.738248730915405e-06,
+          "coefficients": [
+            4.722153557665854e-06,
+            1.1907132719151412e-06
+          ],
+          "relative_two_mode_residual": 1.5543429162730245e-06,
+          "angles_to_unstable_stable_degrees": [
+            14.45986772263195,
+            82.00171936529503
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00021567939998004565,
+          "coefficients": [
+            0.00020790616863486795,
+            3.771882575803069e-05
+          ],
+          "relative_two_mode_residual": 0.0015181879294638302,
+          "angles_to_unstable_stable_degrees": [
+            9.999707334334822,
+            73.15370626152956
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.56941681564555e-06,
+          "coefficients": [
+            4.566360300346071e-06,
+            1.0541308483008628e-06
+          ],
+          "relative_two_mode_residual": 0.0025467119767942936,
+          "angles_to_unstable_stable_degrees": [
+            13.252409338274717,
+            83.20998882683233
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 162,
+      "slow_phase_cycles": 0.6328125,
+      "time_s": 594.4079592015639,
+      "rate_phase_averaged_distance_Hz": 1.283620633845066e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0002547108404066066,
+          "coefficients": [
+            0.000247996774321292,
+            3.5621276480667486e-05
+          ],
+          "relative_two_mode_residual": 5.039254364667201e-07,
+          "angles_to_unstable_stable_degrees": [
+            7.981448919381975,
+            75.1715701869417
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 5.425887822830118e-06,
+          "coefficients": [
+            5.446990591730224e-06,
+            9.954891455189436e-07
+          ],
+          "relative_two_mode_residual": 1.0171400960599176e-06,
+          "angles_to_unstable_stable_degrees": [
+            10.504036046283233,
+            85.95755104152717
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0002464676170913713,
+          "coefficients": [
+            0.0002409072403900244,
+            3.073323853408953e-05
+          ],
+          "relative_two_mode_residual": 0.001328520543875079,
+          "angles_to_unstable_stable_degrees": [
+            7.1121929206279075,
+            76.04124400318723
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 5.264194466576622e-06,
+          "coefficients": [
+            5.291197334410448e-06,
+            8.589067219046641e-07
+          ],
+          "relative_two_mode_residual": 0.0022105499408888113,
+          "angles_to_unstable_stable_degrees": [
+            9.331058330408483,
+            87.13138777817161
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 164,
+      "slow_phase_cycles": 0.640625,
+      "time_s": 601.7463290682499,
+      "rate_phase_averaged_distance_Hz": 1.4355906426507136e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00029112443827840275,
+          "coefficients": [
+            0.0002860694402533096,
+            2.9776804454593804e-05
+          ],
+          "relative_two_mode_residual": 8.329498384105738e-07,
+          "angles_to_unstable_stable_degrees": [
+            5.828582159983367,
+            77.32443694648498
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 6.244551542728266e-06,
+          "coefficients": [
+            6.283213019341497e-06,
+            8.321565703933172e-07
+          ],
+          "relative_two_mode_residual": 1.8338103768254714e-06,
+          "angles_to_unstable_stable_degrees": [
+            7.609150032803587,
+            88.85243705556758
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00028302812594088587,
+          "coefficients": [
+            0.00027897990632204205,
+            2.4888766508015855e-05
+          ],
+          "relative_two_mode_residual": 0.0011569162191904885,
+          "angles_to_unstable_stable_degrees": [
+            5.009328448751449,
+            78.14413617914202
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 6.08850958538858e-06,
+          "coefficients": [
+            6.127419762021706e-06,
+            6.955741467790379e-07
+          ],
+          "relative_two_mode_residual": 0.0019113033883686177,
+          "angles_to_unstable_stable_degrees": [
+            6.5190817250373625,
+            89.94342134874191
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 166,
+      "slow_phase_cycles": 0.6484375,
+      "time_s": 609.0846989349358,
+      "rate_phase_averaged_distance_Hz": 1.6388500795332324e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.00033389624518446196,
+          "coefficients": [
+            0.00033001326746585403,
+            2.4889307764808425e-05
+          ],
+          "relative_two_mode_residual": 1.743797255221139e-06,
+          "angles_to_unstable_stable_degrees": [
+            4.24436518083329,
+            78.90865392662677
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 7.2033463124396605e-06,
+          "coefficients": [
+            7.24838948857412e-06,
+            6.955676542616917e-07
+          ],
+          "relative_two_mode_residual": 3.332785633427225e-06,
+          "angles_to_unstable_stable_degrees": [
+            5.505904717599305,
+            89.04431762665577
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0003259139886958606,
+          "coefficients": [
+            0.0003229237335345862,
+            2.0001269818230476e-05
+          ],
+          "relative_two_mode_residual": 0.001004672511734989,
+          "angles_to_unstable_stable_degrees": [
+            3.4937912572090637,
+            79.65970677590957
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 7.051608297161791e-06,
+          "coefficients": [
+            7.0925962312543336e-06,
+            5.589852306474128e-07
+          ],
+          "relative_two_mode_residual": 0.001650263467653337,
+          "angles_to_unstable_stable_degrees": [
+            4.518691992987084,
+            88.05612023859057
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 168,
+      "slow_phase_cycles": 0.65625,
+      "time_s": 616.4230688016218,
+      "rate_phase_averaged_distance_Hz": 1.8889478560690135e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0003837257310261077,
+          "coefficients": [
+            0.0003806892546235404,
+            2.0803546780422016e-05
+          ],
+          "relative_two_mode_residual": 1.084901329077006e-06,
+          "angles_to_unstable_stable_degrees": [
+            3.0856068734399447,
+            80.0674122334602
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.316098899672956e-06,
+          "coefficients": [
+            8.361436760161795e-06,
+            5.813833316720986e-07
+          ],
+          "relative_two_mode_residual": 2.3358396762482663e-06,
+          "angles_to_unstable_stable_degrees": [
+            3.983344125978229,
+            87.52175703609208
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.000375829630314026,
+          "coefficients": [
+            0.00037359972069227345,
+            1.5915508833844016e-05
+          ],
+          "relative_two_mode_residual": 0.0008712060072780009,
+          "angles_to_unstable_stable_degrees": [
+            2.410266158261243,
+            80.7432731252118
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.167562396492486e-06,
+          "coefficients": [
+            8.205643502841994e-06,
+            4.4480090805781976e-07
+          ],
+          "relative_two_mode_residual": 0.0014247289084581935,
+          "angles_to_unstable_stable_degrees": [
+            3.1030658780944056,
+            86.64040935286356
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 170,
+      "slow_phase_cycles": 0.6640625,
+      "time_s": 623.7614386683077,
+      "rate_phase_averaged_distance_Hz": 2.185355965345049e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0004415200682935482,
+          "coefficients": [
+            0.0004391098905613107,
+            1.738522825379588e-05
+          ],
+          "relative_two_mode_residual": 7.122341692396165e-07,
+          "angles_to_unstable_stable_degrees": [
+            2.240550957128476,
+            80.91246814951431
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 9.602054077829812e-06,
+          "coefficients": [
+            9.64458664446888e-06,
+            4.858515310771315e-07
+          ],
+          "relative_two_mode_residual": 1.8793693914160276e-06,
+          "angles_to_unstable_stable_degrees": [
+            2.8818910314375863,
+            86.4203039417863
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.00043368790919379836,
+          "coefficients": [
+            0.00043202035663004264,
+            1.249719030721782e-05
+          ],
+          "relative_two_mode_residual": 0.0007549659262663123,
+          "angles_to_unstable_stable_degrees": [
+            1.64005990025228,
+            81.51353202636727
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 9.455865721016836e-06,
+          "coefficients": [
+            9.488793387149084e-06,
+            3.492691074628528e-07
+          ],
+          "relative_two_mode_residual": 0.001230598481903878,
+          "angles_to_unstable_stable_degrees": [
+            2.1045318879201864,
+            85.64176718947589
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 172,
+      "slow_phase_cycles": 0.671875,
+      "time_s": 631.0998085349937,
+      "rate_phase_averaged_distance_Hz": 2.5309143412322594e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0005084397170194085,
+          "coefficients": [
+            0.000506503764642171,
+            1.4523256921392318e-05
+          ],
+          "relative_two_mode_residual": 1.4422962762712856e-06,
+          "angles_to_unstable_stable_degrees": [
+            1.6251631736641525,
+            81.52785593471482
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.1086480918020615e-05,
+          "coefficients": [
+            1.112481845175994e-05,
+            4.058672860582084e-07
+          ],
+          "relative_two_mode_residual": 3.0768655018606666e-06,
+          "angles_to_unstable_stable_degrees": [
+            2.084688406102678,
+            85.62310131102528
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0005006544372643638,
+          "coefficients": [
+            0.0004994142307109044,
+            9.635218974814382e-06
+          ],
+          "relative_two_mode_residual": 0.0006539879837192864,
+          "angles_to_unstable_stable_degrees": [
+            1.0955151444537183,
+            82.05814660125677
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.0941998957877199e-05,
+          "coefficients": [
+            1.096902519444015e-05,
+            2.6928486244392753e-07
+          ],
+          "relative_two_mode_residual": 0.0010634848998015902,
+          "angles_to_unstable_stable_degrees": [
+            1.402568060923983,
+            84.93965988935857
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 174,
+      "slow_phase_cycles": 0.6796875,
+      "time_s": 638.4381784016797,
+      "rate_phase_averaged_distance_Hz": 2.930805409644967e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0005858389815828417,
+          "coefficients": [
+            0.0005842690631049155,
+            1.2129973908089666e-05
+          ],
+          "relative_two_mode_residual": 2.096242802088933e-06,
+          "angles_to_unstable_stable_degrees": [
+            1.1779487113997724,
+            81.97507040101027
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.2799132488652789e-05,
+          "coefficients": [
+            1.2832847540326232e-05,
+            3.389803593795067e-07
+          ],
+          "relative_two_mode_residual": 4.201237810570337e-06,
+          "angles_to_unstable_stable_degrees": [
+            1.5079923439379408,
+            85.04640523712688
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0005780877103006153,
+          "coefficients": [
+            0.0005771795291736495,
+            7.241935961511695e-06
+          ],
+          "relative_two_mode_residual": 0.0005663757434758565,
+          "angles_to_unstable_stable_degrees": [
+            0.7134049822919072,
+            82.44035374219226
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.2655880382479591e-05,
+          "coefficients": [
+            1.267705428300646e-05,
+            2.023979357652273e-07
+          ],
+          "relative_two_mode_residual": 0.0009194626365774571,
+          "angles_to_unstable_stable_degrees": [
+            0.9120377735431495,
+            84.44893040107291
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 176,
+      "slow_phase_cycles": 0.6875,
+      "time_s": 645.7765482683657,
+      "rate_phase_averaged_distance_Hz": 3.3918480475630154e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0006752405349176374,
+          "coefficients": [
+            0.0006739577388904015,
+            1.0131542681928866e-05
+          ],
+          "relative_two_mode_residual": 1.907299827031715e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.8535860831513806,
+            82.29943303012739
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.4773582017750911e-05,
+          "coefficients": [
+            1.4802765518257152e-05,
+            2.8312789609826436e-07
+          ],
+          "relative_two_mode_residual": 4.057792814927585e-06,
+          "angles_to_unstable_stable_degrees": [
+            1.0911340380338344,
+            84.6295469256644
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0006675137082756482,
+          "coefficients": [
+            0.0006668682049591346,
+            5.243504735350955e-06
+          ],
+          "relative_two_mode_residual": 0.0004904670657542306,
+          "angles_to_unstable_stable_degrees": [
+            0.4477515920472941,
+            82.70615110489473
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.4631209710121677e-05,
+          "coefficients": [
+            1.464697226093738e-05,
+            1.4654547248398614e-07
+          ],
+          "relative_two_mode_residual": 0.0007952831602600682,
+          "angles_to_unstable_stable_degrees": [
+            0.5720533833667403,
+            84.10865056446744
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 178,
+      "slow_phase_cycles": 0.6953125,
+      "time_s": 653.1149181350517,
+      "rate_phase_averaged_distance_Hz": 3.9226582700878926e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0007784325953049326,
+          "coefficients": [
+            0.0007773785639274471,
+            8.460973160576226e-06
+          ],
+          "relative_two_mode_residual": 1.8690703301019787e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.6183322880686352,
+            82.5346868274876
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.704930562598842e-05,
+          "coefficients": [
+            1.7074294804952696e-05,
+            2.3643701836398861e-07
+          ],
+          "relative_two_mode_residual": 4.1715291128824605e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.789546170557006,
+            84.32795904678476
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0007707232222684019,
+          "coefficients": [
+            0.000770289029996181,
+            3.5729352139984014e-06
+          ],
+          "relative_two_mode_residual": 0.0004247703450920292,
+          "angles_to_unstable_stable_degrees": [
+            0.2648402422589646,
+            82.88930012377635
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.690755934284433e-05,
+          "coefficients": [
+            1.6918501547632882e-05,
+            9.985459474971045e-08
+          ],
+          "relative_two_mode_residual": 0.0006881935622885714,
+          "angles_to_unstable_stable_degrees": [
+            0.33854049254035457,
+            83.87465076075623
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 180,
+      "slow_phase_cycles": 0.703125,
+      "time_s": 660.4532880017376,
+      "rate_phase_averaged_distance_Hz": 4.533867508558039e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0008975482584620364,
+          "coefficients": [
+            0.0008966788633039894,
+            7.062700110638461e-06
+          ],
+          "relative_two_mode_residual": 2.5355077116620984e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.4476427782792254,
+            82.70537635158685
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.9673362565271262e-05,
+          "coefficients": [
+            1.9694594722681016e-05,
+            1.973528991791366e-07
+          ],
+          "relative_two_mode_residual": 5.381058137377976e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.5711197235524417,
+            84.10953255277425
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0008898512682655017,
+          "coefficients": [
+            0.000889589329372722,
+            2.174662164060521e-06
+          ],
+          "relative_two_mode_residual": 0.00036790664179251316,
+          "angles_to_unstable_stable_degrees": [
+            0.14061276185245367,
+            83.01399582655044
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 1.9532059341581577e-05,
+          "coefficients": [
+            1.953880146536127e-05,
+            6.077047556485706e-08
+          ],
+          "relative_two_mode_residual": 0.00059574765268722,
+          "angles_to_unstable_stable_degrees": [
+            0.18039218733776,
+            83.71554739069877
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 182,
+      "slow_phase_cycles": 0.7109375,
+      "time_s": 667.7916578684236,
+      "rate_phase_averaged_distance_Hz": 5.237856878069585e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0010350359696829027,
+          "coefficients": [
+            0.0010343164654180357,
+            5.896317658703861e-06
+          ],
+          "relative_two_mode_residual": 3.177632664541258e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.32407236467124495,
+            82.82894679277642
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.2699703322861706e-05,
+          "coefficients": [
+            2.2717653189106725e-05,
+            1.6474698876680984e-07
+          ],
+          "relative_two_mode_residual": 6.5922811562286136e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.41319612373223913,
+            83.95160886358431
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0010273476766215937,
+          "coefficients": [
+            0.0010272269314867692,
+            1.0082797121259693e-06
+          ],
+          "relative_two_mode_residual": 0.00031865936077799255,
+          "angles_to_unstable_stable_degrees": [
+            0.05874082295303741,
+            83.09718814301388
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.255871073456689e-05,
+          "coefficients": [
+            2.256185993178693e-05,
+            2.8164565152531756e-08
+          ],
+          "relative_two_mode_residual": 0.0005158304546548572,
+          "angles_to_unstable_stable_degrees": [
+            0.07697907181309922,
+            83.60949319547404
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 184,
+      "slow_phase_cycles": 0.71875,
+      "time_s": 675.1300277351096,
+      "rate_phase_averaged_distance_Hz": 6.0486904224278825e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0011936614556209383,
+          "coefficients": [
+            0.0011930637881687157,
+            4.929074498527327e-06
+          ],
+          "relative_two_mode_residual": 3.3593319638660562e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.23490905524100245,
+            82.91811012992196
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.6189227151988215e-05,
+          "coefficients": [
+            2.620436668494515e-05,
+            1.3770561669215836e-07
+          ],
+          "relative_two_mode_residual": 7.11976988094551e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.29935487819762174,
+            83.83776751276338
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0011859791924141363,
+          "coefficients": [
+            0.0011859742542374486,
+            4.103655194919204e-08
+          ],
+          "relative_two_mode_residual": 0.0002760114712041581,
+          "angles_to_unstable_stable_degrees": [
+            0.01593632181988927,
+            83.15105099271055
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 2.6048449649645045e-05,
+          "coefficients": [
+            2.6048573427625372e-05,
+            1.1231930778774624e-09
+          ],
+          "relative_two_mode_residual": 0.0004467077170354818,
+          "angles_to_unstable_stable_degrees": [
+            0.025711925989285195,
+            83.54086842430215
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 186,
+      "slow_phase_cycles": 0.7265625,
+      "time_s": 682.4683976017956,
+      "rate_phase_averaged_distance_Hz": 6.982725934024887e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.001376635048102957,
+          "coefficients": [
+            0.0013761366935886037,
+            4.128989291846583e-06
+          ],
+          "relative_two_mode_residual": 3.6710833542278945e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.1706239886581005,
+            82.98239524730609
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.02126018054352e-05,
+          "coefficients": [
+            3.022536360216748e-05,
+            1.1533215476234802e-07
+          ],
+          "relative_two_mode_residual": 7.884798583230315e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.21732978359594632,
+            83.75574222660043
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0013689569138723757,
+          "coefficients": [
+            0.0013690471596573362,
+            -7.590486547314557e-07
+          ],
+          "relative_two_mode_residual": 0.00023910401649497522,
+          "angles_to_unstable_stable_degrees": [
+            0.03438895606047796,
+            83.1845616525387
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.0071971452222922e-05,
+          "coefficients": [
+            3.0069570344847715e-05,
+            -2.125026885193331e-08
+          ],
+          "relative_two_mode_residual": 0.0003869479845949604,
+          "angles_to_unstable_stable_degrees": [
+            0.045935167410815825,
+            83.49818270156511
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 188,
+      "slow_phase_cycles": 0.734375,
+      "time_s": 689.8067674684816,
+      "rate_phase_averaged_distance_Hz": 8.059176297262257e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0015877251653132847,
+          "coefficients": [
+            0.0015873077625823018,
+            3.4698172207128617e-06
+          ],
+          "relative_two_mode_residual": 4.462229157152654e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.12432163491471093,
+            83.02869773431382
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.485273020344194e-05,
+          "coefficients": [
+            3.486350081806565e-05,
+            9.688882285041658e-08
+          ],
+          "relative_two_mode_residual": 9.443235118848235e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.15826867034285214,
+            83.69668065814771
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0015800498123700827,
+          "coefficients": [
+            0.001580218228651034,
+            -1.4182207258651327e-06
+          ],
+          "relative_two_mode_residual": 0.00020716781282665564,
+          "angles_to_unstable_stable_degrees": [
+            0.052422272105503175,
+            83.20408001576111
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 3.471219892074909e-05,
+          "coefficients": [
+            3.4707707560745886e-05,
+            -3.969360076386444e-08
+          ],
+          "relative_two_mode_residual": 0.0003352843151916938,
+          "angles_to_unstable_stable_degrees": [
+            0.06787703710114804,
+            83.47331140865191
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 190,
+      "slow_phase_cycles": 0.7421875,
+      "time_s": 697.1451373351675,
+      "rate_phase_averaged_distance_Hz": 9.300111500084623e-06,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0018312627555354794,
+          "coefficients": [
+            0.001830910357693869,
+            2.9364407121030753e-06
+          ],
+          "relative_two_mode_residual": 5.2978730542938285e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.0912194282521233,
+            83.06180018316294
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.020481825351606e-05,
+          "coefficients": [
+            4.021395865874653e-05,
+            8.195413814945933e-08
+          ],
+          "relative_two_mode_residual": 1.1124194251608524e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.11605253187193847,
+            83.65446369436738
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.001823589216823148,
+          "coefficients": [
+            0.0018238208237626016,
+            -1.951597234474874e-06
+          ],
+          "relative_two_mode_residual": 0.00017951336629317154,
+          "angles_to_unstable_stable_degrees": [
+            0.0617431038572294,
+            83.21389960967036
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.0064351571428546e-05,
+          "coefficients": [
+            4.005816540142672e-05,
+            -5.462828546481667e-08
+          ],
+          "relative_two_mode_residual": 0.0002905805184330991,
+          "angles_to_unstable_stable_degrees": [
+            0.0793926385835388,
+            83.46078586983262
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 192,
+      "slow_phase_cycles": 0.75,
+      "time_s": 704.4835072018535,
+      "rate_phase_averaged_distance_Hz": 1.0730634416454685e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0021121784863015187,
+          "coefficients": [
+            0.002111876683920657,
+            2.5190924378881964e-06
+          ],
+          "relative_two_mode_residual": 5.92199811091204e-06,
+          "angles_to_unstable_stable_degrees": [
+            0.0678473993995159,
+            83.08517255543187
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.637721522076537e-05,
+          "coefficients": [
+            4.6385069164626646e-05,
+            7.02567586619923e-08
+          ],
+          "relative_two_mode_residual": 1.251910977866336e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.08624890980258272,
+            83.62465883991473
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.002104506068553235,
+          "coefficients": [
+            0.0021047871499893867,
+            -2.3689455086898133e-06
+          ],
+          "relative_two_mode_residual": 0.00015556165483783163,
+          "angles_to_unstable_stable_degrees": [
+            0.0646525819887799,
+            83.21705444739636
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 4.623678843879719e-05,
+          "coefficients": [
+            4.622927590730681e-05,
+            -6.632566495229204e-08
+          ],
+          "relative_two_mode_residual": 0.00025188853991318065,
+          "angles_to_unstable_stable_degrees": [
+            0.082932879309697,
+            83.45674565089666
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 200,
+      "slow_phase_cycles": 0.78125,
+      "time_s": 733.8369866685974,
+      "rate_phase_averaged_distance_Hz": 1.9002441185346504e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.0037381878033698685,
+          "coefficients": [
+            0.00373796019227547,
+            1.9051824926650263e-06
+          ],
+          "relative_two_mode_residual": 1.045125044800455e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.028998950429301902,
+            83.1240263394533
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.209417795055916e-05,
+          "coefficients": [
+            8.21001022869608e-05,
+            5.279252729494751e-08
+          ],
+          "relative_two_mode_residual": 2.205610064205807e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.03663310046823572,
+            83.57502421078745
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.0037305162379682104,
+          "coefficients": [
+            0.0037308706583442032,
+            -2.9828554539134017e-06
+          ],
+          "relative_two_mode_residual": 8.818780984406361e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.0457657575449926,
+            83.19850510748532
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 8.195378163458309e-05,
+          "coefficients": [
+            8.194430902964081e-05,
+            -8.378989631932513e-08
+          ],
+          "relative_two_mode_residual": 0.00014357493571388825,
+          "angles_to_unstable_stable_degrees": [
+            0.05878575440360465,
+            83.48020564392837
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 208,
+      "slow_phase_cycles": 0.8125,
+      "time_s": 763.1904661353412,
+      "rate_phase_averaged_distance_Hz": 3.362574075645234e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.006615488422073056,
+          "coefficients": [
+            0.006615054801104294,
+            3.6289667855532137e-06
+          ],
+          "relative_two_mode_residual": 1.846032290473978e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.031223717262421458,
+            83.12181331001366
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00014528066512640533,
+          "coefficients": [
+            0.00014529188518695992,
+            1.000039716795098e-07
+          ],
+          "relative_two_mode_residual": 3.891386365393445e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.03925239798925478,
+            83.57760194161563
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.006607815290447862,
+          "coefficients": [
+            0.006607965267173028,
+            -1.2590711610237707e-06
+          ],
+          "relative_two_mode_residual": 5.2583134489424407e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.011250343257699505,
+            83.16385854886046
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00014514021348696878,
+          "coefficients": [
+            0.00014513609192964017,
+            -3.6578451934772206e-08
+          ],
+          "relative_two_mode_residual": 8.899067847679868e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.015227077684853004,
+            83.52406489876684
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 216,
+      "slow_phase_cycles": 0.84375,
+      "time_s": 792.5439456020852,
+      "rate_phase_averaged_distance_Hz": 5.9466071730781e-05,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.011704739549294232,
+          "coefficients": [
+            0.011703391984155787,
+            1.1258532402001378e-05
+          ],
+          "relative_two_mode_residual": 3.2616625646690164e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.05475041494238522,
+            83.09830059807572
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0002570153210896253,
+          "coefficients": [
+            0.00025705004673004875,
+            3.1021862224593756e-07
+          ],
+          "relative_two_mode_residual": 6.869717064395125e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.0688295960305519,
+            83.6071298886164
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.01169706364942058,
+          "coefficients": [
+            0.011696302450224523,
+            6.3704944554226586e-06
+          ],
+          "relative_two_mode_residual": 4.265513594753364e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.031078318466602688,
+            83.12203703802342
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.000256874771774284,
+          "coefficients": [
+            0.0002568942534727292,
+            1.7363619863168402e-07
+          ],
+          "relative_two_mode_residual": 8.219845815957486e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.03877054799357864,
+            83.57689636992875
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 224,
+      "slow_phase_cycles": 0.875,
+      "time_s": 821.8974250688291,
+      "rate_phase_averaged_distance_Hz": 0.0001050705762010543,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.020699813263561923,
+          "coefficients": [
+            0.020695370900872284,
+            3.6988919620827574e-05
+          ],
+          "relative_two_mode_residual": 5.7611521961503114e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.10170644646903479,
+            83.05136625098582
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00045443004871199735,
+          "coefficients": [
+            0.00045454369621481303,
+            1.0199389977271669e-06
+          ],
+          "relative_two_mode_residual": 0.00012124653682905972,
+          "angles_to_unstable_stable_degrees": [
+            0.12796858879154457,
+            83.6661928486408
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.020692132956825534,
+          "coefficients": [
+            0.02068828136694105,
+            3.2100881674250204e-05
+          ],
+          "relative_two_mode_residual": 5.953225083595586e-05,
+          "angles_to_unstable_stable_degrees": [
+            0.08831819672774635,
+            83.0647668136927
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.000454289344045533,
+          "coefficients": [
+            0.0004543879029574931,
+            8.833565741128993e-07
+          ],
+          "relative_two_mode_residual": 0.00012389240780863328,
+          "angles_to_unstable_stable_degrees": [
+            0.11093019119994237,
+            83.64911580004892
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 232,
+      "slow_phase_cycles": 0.90625,
+      "time_s": 851.250904535573,
+      "rate_phase_averaged_distance_Hz": 0.00018536646096383865,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.03657736823089536,
+          "coefficients": [
+            0.03656292915588361,
+            0.00011949907828859828
+          ],
+          "relative_two_mode_residual": 0.00010165347365600573,
+          "angles_to_unstable_stable_degrees": [
+            0.18594315845411077,
+            82.96716722418428
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0008026756432753622,
+          "coefficients": [
+            0.0008030399583471477,
+            3.296854397062855e-06
+          ],
+          "relative_two_mode_residual": 0.00021372839677866418,
+          "angles_to_unstable_stable_degrees": [
+            0.23415885333019168,
+            83.7722514852643
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.03656968057196484,
+          "coefficients": [
+            0.03655583962195242,
+            0.00011461104034201921
+          ],
+          "relative_two_mode_residual": 0.00010193568209720735,
+          "angles_to_unstable_stable_degrees": [
+            0.17838284208854907,
+            82.97473193869003
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0008025346793482531,
+          "coefficients": [
+            0.0008028841650898285,
+            3.1602719734484416e-06
+          ],
+          "relative_two_mode_residual": 0.00021422281385805682,
+          "angles_to_unstable_stable_degrees": [
+            0.22452600869108508,
+            83.76260332505517
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 240,
+      "slow_phase_cycles": 0.9375,
+      "time_s": 880.6043840023168,
+      "rate_phase_averaged_distance_Hz": 0.00032614276793972523,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.06453474436066951,
+          "coefficients": [
+            0.06448845961348859,
+            0.0003790236252208651
+          ],
+          "relative_two_mode_residual": 0.0001789689121991516,
+          "angles_to_unstable_stable_degrees": [
+            0.33426721246349633,
+            82.81890932580856
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0014151993742445525,
+          "coefficients": [
+            0.0014163383411239501,
+            1.0460911445364383e-05
+          ],
+          "relative_two_mode_residual": 0.00037574112256338513,
+          "angles_to_unstable_stable_degrees": [
+            0.4213842901206222,
+            83.95924734220199
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.06452704409341899,
+          "coefficients": [
+            0.06448137007955729,
+            0.0003741355872742935
+          ],
+          "relative_two_mode_residual": 0.00017898750951676558,
+          "angles_to_unstable_stable_degrees": [
+            0.32999977716214973,
+            82.82317882957176
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.0014150579650096253,
+          "coefficients": [
+            0.001416182547866633,
+            1.0324329021750232e-05
+          ],
+          "relative_two_mode_residual": 0.00037585035574278316,
+          "angles_to_unstable_stable_degrees": [
+            0.41593863809331155,
+            83.95379415191853
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    },
+    {
+      "slow_index": 248,
+      "slow_phase_cycles": 0.96875,
+      "time_s": 909.9578634690607,
+      "rate_phase_averaged_distance_Hz": 0.0005710622969695296,
+      "history_slow_shift_Taylor_order": 6,
+      "history_absolute_evaluation_bound_per_ms": 6.724979963743718e-21,
+      "matched_target": {
+        "raw": {
+          "norm": 0.11352948341435293,
+          "coefficients": [
+            0.11338231395966829,
+            0.0011834070251210407
+          ],
+          "relative_two_mode_residual": 0.00031377952941958703,
+          "angles_to_unstable_stable_degrees": [
+            0.5932625553441132,
+            82.56002937865624
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.00248659814335161,
+          "coefficients": [
+            0.0024900626255843117,
+            3.267342162906135e-05
+          ],
+          "relative_two_mode_residual": 0.0006572380373138418,
+          "angles_to_unstable_stable_degrees": [
+            0.7490415717122102,
+            84.28650860270177
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      },
+      "original_target": {
+        "raw": {
+          "norm": 0.1135217614205812,
+          "coefficients": [
+            0.11337522442573698,
+            0.0011785189871744693
+          ],
+          "relative_two_mode_residual": 0.0003137714500002187,
+          "angles_to_unstable_stable_degrees": [
+            0.5908544034812051,
+            82.56243862734664
+          ],
+          "normalized_basis_condition": 1.1272576356136477
+        },
+        "weighted": {
+          "norm": 0.002486455964355396,
+          "coefficients": [
+            0.00248990683232699,
+            3.253683920544718e-05
+          ],
+          "relative_two_mode_residual": 0.0006572820761098861,
+          "angles_to_unstable_stable_degrees": [
+            0.7459608332270573,
+            84.28342382058987
+          ],
+          "normalized_basis_condition": 1.1196496096688477
+        }
+      }
+    }
+  ],
+  "norm": "Raw Poincare-section projection first; additionally neuron-weighted local scales [1000,1000,1,1,1,1,.1,.1,1] and history rate in Hz averaged across the stored delay samples.",
+  "scope": "Full 935-group state and history projection on two nearby-J right Floquet vectors. Least-squares coefficients are not adjoint modal coordinates. Common fast-phase alignment followed by linear section projection is not a solved nonlinear Poincare return. This does not establish invariant-manifold connection, exact-J eigendirections or torus stability."
+}

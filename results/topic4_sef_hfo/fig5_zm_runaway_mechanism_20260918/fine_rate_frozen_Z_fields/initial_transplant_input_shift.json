@@ -1,0 +1,108 @@
+{
+  "status": "ALGEBRAIC_INITIAL_STATE_AUDIT",
+  "tick": 180000,
+  "rows": [
+    {
+      "native_Z_time_ms": 9000,
+      "region": "Core A",
+      "own_Z": 0.7642015449657645,
+      "native_Z": 0.7442783003859392,
+      "instant_net_input_shift_mV": 8.039045728282218,
+      "own_GABA_mean_mV": 488.329542177257,
+      "M_unchanged_mV": 0.029844254795382597,
+      "minimum_shift_mV": -2.1418356651743373,
+      "maximum_shift_mV": 26.376273707009958
+    },
+    {
+      "native_Z_time_ms": 9000,
+      "region": "Core B",
+      "own_Z": 0.7598164682471202,
+      "native_Z": 0.739900296770452,
+      "instant_net_input_shift_mV": 18.744730444727335,
+      "own_GABA_mean_mV": 1000.4178634757359,
+      "M_unchanged_mV": 0.02429744666099452,
+      "minimum_shift_mV": 4.715717471640081,
+      "maximum_shift_mV": 41.07764071082531
+    },
+    {
+      "native_Z_time_ms": 9000,
+      "region": "Surround",
+      "own_Z": 0.9194673645823074,
+      "native_Z": 0.7856316433020323,
+      "instant_net_input_shift_mV": 13.193912285402522,
+      "own_GABA_mean_mV": 257.57783229805875,
+      "M_unchanged_mV": 0.005232859157175513,
+      "minimum_shift_mV": -11.820264638029624,
+      "maximum_shift_mV": 138.071649037864
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "region": "Core A",
+      "own_Z": 0.7642015449657645,
+      "native_Z": 0.7248786168531299,
+      "instant_net_input_shift_mV": 17.637411490485775,
+      "own_GABA_mean_mV": 488.329542177257,
+      "M_unchanged_mV": 0.029844254795382597,
+      "minimum_shift_mV": 6.875484985675212,
+      "maximum_shift_mV": 30.732519849986854
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "region": "Core B",
+      "own_Z": 0.7598164682471202,
+      "native_Z": 0.7163253334996629,
+      "instant_net_input_shift_mV": 42.85430365968511,
+      "own_GABA_mean_mV": 1000.4178634757359,
+      "M_unchanged_mV": 0.02429744666099452,
+      "minimum_shift_mV": 27.647856485775833,
+      "maximum_shift_mV": 69.38146994078791
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "region": "Surround",
+      "own_Z": 0.9194673645823074,
+      "native_Z": 0.7737156097398517,
+      "instant_net_input_shift_mV": 17.700913814240558,
+      "own_GABA_mean_mV": 257.57783229805875,
+      "M_unchanged_mV": 0.005232859157175513,
+      "minimum_shift_mV": 0.00799044287772362,
+      "maximum_shift_mV": 154.55876451198728
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "region": "Core A",
+      "own_Z": 0.7642015449657645,
+      "native_Z": 0.6625268682481934,
+      "instant_net_input_shift_mV": 48.061330014461774,
+      "own_GABA_mean_mV": 488.329542177257,
+      "M_unchanged_mV": 0.029844254795382597,
+      "minimum_shift_mV": 38.89947974222556,
+      "maximum_shift_mV": 54.629994391744546
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "region": "Core B",
+      "own_Z": 0.7598164682471202,
+      "native_Z": 0.6741173801287448,
+      "instant_net_input_shift_mV": 85.63347774013626,
+      "own_GABA_mean_mV": 1000.4178634757359,
+      "M_unchanged_mV": 0.02429744666099452,
+      "minimum_shift_mV": 64.38319015240005,
+      "maximum_shift_mV": 121.73826960626242
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "region": "Surround",
+      "own_Z": 0.9194673645823074,
+      "native_Z": 0.7474582032018225,
+      "instant_net_input_shift_mV": 31.066745466626756,
+      "own_GABA_mean_mV": 257.57783229805875,
+      "M_unchanged_mV": 0.005232859157175513,
+      "minimum_shift_mV": 0.008123431516382862,
+      "maximum_shift_mV": 224.52764329307578
+    }
+  ],
+  "formula": "delta_mu=(Z_own-Z_transplant)*I_G; same current and M at application, before any future update.",
+  "scope": "Initial applied input shift, not integrated response, basin crossing, model mismatch attribution or bifurcation evidence.",
+  "network_runs": 0
+}

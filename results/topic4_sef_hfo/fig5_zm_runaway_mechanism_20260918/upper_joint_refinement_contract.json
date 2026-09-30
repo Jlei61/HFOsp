@@ -1,0 +1,28 @@
+{
+  "status": "PRESPECIFIED_BEFORE_FINE_SPECTRUM",
+  "updated_local": "2026-09-19T09:56:05.395223",
+  "question": "Does the upper periodic solution retain a real transverse multiplier above +1 when both orbit and variational discretizations are refined?",
+  "coarse_source": "periodic/rate_upper_G16385_M65536/point0000.npz",
+  "coarse_spectrum": "floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.003125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json",
+  "intended_fine_source": "periodic/rate_upper_G32769_M262144_cached6/point0000.npz",
+  "intended_fine_max_dt_ms": 0.0018,
+  "criteria": {
+    "both_BVP_residual_max_hz": 2e-08,
+    "max_period_difference_ms": 1e-08,
+    "max_D_difference": 1e-08,
+    "max_Z_difference": 1e-06,
+    "max_rate_relative_L2_difference": 0.001,
+    "both_phase_defect_max": 0.005,
+    "both_phase_projection_error_max": 0.003,
+    "both_eigen_residual_max": 1e-05,
+    "max_multiplier_difference": 0.005,
+    "both_leading_real_multiplier_min": 1.001
+  },
+  "acceptance_label": "UNSTABLE_WITH_JOINT_ORBIT_AND_TIME_REFINEMENT",
+  "limits": [
+    "This is joint orbit/quadrature/time-step refinement, not a same-orbit time-step comparison.",
+    "Earlier finer-time test at N16385 failed phase invariance and is retained.",
+    "Acceptance concerns this upper cycle, not the full branch or autonomous/native SNN onset.",
+    "No LPC type is certified by this spectral test alone."
+  ]
+}

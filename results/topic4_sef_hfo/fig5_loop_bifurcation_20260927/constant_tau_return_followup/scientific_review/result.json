@@ -1,0 +1,112 @@
+{
+  "status": "COMPLETE_RETURN_REVIEW_CANDIDATE",
+  "original_first_return": {
+    "event_s": 49.31,
+    "preceding_Z_sample_s": 49.3,
+    "Z_allE_coreA_coreB": [
+      0.99856650080849,
+      0.9985113347449243,
+      0.9985000193716707
+    ],
+    "K_mean": 0.016873421885322606
+  },
+  "candidate_first_return": {
+    "event_s": 26.47,
+    "preceding_Z_sample_s": 26.46,
+    "Z_allE_coreA_coreB": [
+      0.7994557001106557,
+      0.7875439593059842,
+      0.7859521614370766
+    ],
+    "K_mean": 0.0034260202230507295
+  },
+  "candidate_reentry": {
+    "event_s": 29.87,
+    "preceding_Z_sample_s": 29.86,
+    "Z_allE_coreA_coreB": [
+      0.7406415767251749,
+      0.7026276477315487,
+      0.6873665851937413
+    ],
+    "K_mean": 3.815816180449083e-06
+  },
+  "after_reference_finite_events": 14,
+  "brief_events": 13,
+  "brief_fraction": 0.9285714285714286,
+  "brief_span_s": 2.9700000000000024,
+  "minimum_required_span_s": 5.0,
+  "reference_feature_ratios": {
+    "duration_ms": 1.2,
+    "interval_ms": 1.1739130434782692,
+    "peak_Hz": 1.626135443834877
+  },
+  "spatial_summary": {
+    "n": 13,
+    "core_over100": 11,
+    "median_peak_5ms_Hz": [
+      113.0875,
+      402.38726790450926,
+      441.2213740458015,
+      109.83585029546947
+    ],
+    "median_core_to_other_peak_ratio": 2.887144341662084,
+    "core_recruitment_order": {
+      "A_first": 4,
+      "B_first": 7,
+      "same_5ms_bin": 0,
+      "both_reach100Hz_for10ms": 11
+    }
+  },
+  "selected_spatial_examples": [
+    [
+      "Original interictal reference",
+      0.57
+    ],
+    [
+      "Returned event 1",
+      26.47
+    ],
+    [
+      "Returned event 2",
+      26.73
+    ],
+    [
+      "Returned event 3",
+      27.02
+    ],
+    [
+      "First weak returned event",
+      27.44
+    ]
+  ],
+  "first_weak_events": [
+    {
+      "start_s": 27.44,
+      "end_s": 27.53,
+      "duration_s": 0.09,
+      "quiet_gap_s": 0.03,
+      "peak_s": 27.465,
+      "peak_Hz": 42.953125,
+      "onset_interval_s": 0.120000000000001,
+      "interevent_gap_s": 0.030000000000001137
+    },
+    {
+      "start_s": 29.37,
+      "end_s": 29.44,
+      "duration_s": 0.07,
+      "quiet_gap_s": 0.08,
+      "peak_s": 29.395,
+      "peak_Hz": 57.8125,
+      "onset_interval_s": 0.1999999999999993,
+      "interevent_gap_s": 0.08000000000000185
+    }
+  ],
+  "return_screen": "FAIL_INSUFFICIENT_EVENT_SPAN",
+  "original_fig5_replaced": false,
+  "mechanism": "The constant-tau parameter trajectory permits full core-Z reference crossing and13 brief returns, but begins returning nearcoreZ0.79 rather than the original first-return coreZ0.999. It reenters after a2.97s brief span. This is consistent with a smaller recovered resource reserve and faster recurrent depletion, not proof that Z reserve alone determines return duration: K/G/M and time-dependent drive differ at the two return times.",
+  "interpretation": "Same-seed paired parameter trajectory. The0-16.8s invariant prefix makes this consistent with the constant-tau model fromt0; do not add it as an independent seed or to original-model confirmed loop counts. NativeZ/G/M/K and all fast states evolve without release timer or clamp.",
+  "agent_spatial_review": "REVIEWED_MIXED_CORE_RECRUITMENT_NOT_UNIFORM_CORE_ORIGIN",
+  "human_review": "PENDING",
+  "producer_sha256": "9208cc2b6fa2f0b1a612f6dcfe2e1c2b41aeba1d1a662d0beadeddeba4fbedf8",
+  "visual_observations": "Firstreturned event showsB-toA propagation. Events2and3 showearlynon-core activity followed bycore recruitment; firstweak event ismainlyremote. Fixed150ms weak-eventwindow includeslatercontext beyondits90ms duration; event2 extends180ms beyondthe150ms displayedwindow. Do not labelallreturned events coreinitiated or fully matched."
+}

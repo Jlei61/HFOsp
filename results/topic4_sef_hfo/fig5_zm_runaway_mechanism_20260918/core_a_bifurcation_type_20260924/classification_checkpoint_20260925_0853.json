@@ -1,0 +1,60 @@
+{
+  "time": "2026-09-25T08:53:21.373577+08:00",
+  "previous_checkpoint": "classification_checkpoint_20260925_0837.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "numerical_method": "exponential_midpoint_v1",
+  "frozen_model_unchanged": true,
+  "all_Z_held": true,
+  "all_E_M_dynamic": true,
+  "outside_A_Z": "native9s",
+  "new_short_side": {
+    "label": "native4000_fine",
+    "Z_A": 0.8365893776571304,
+    "maximum_complete_A_ms": 53,
+    "duration_ms": 5000,
+    "source_audit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/independent_audit.json"
+  },
+  "first_numerical_cycle": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root",
+    "Z_A": 1.0,
+    "dt_ms": 0.025,
+    "period_ms": 232.3550271307739,
+    "whole_closure": 3.0725661612719554e-08,
+    "independent_phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "phase_errors": [
+      {
+        "phase": 0.0,
+        "combined": 3.1071840337437925e-08,
+        "max_block": 7.370104550288311e-08
+      },
+      {
+        "phase": 0.25,
+        "combined": 1.1467678500802996e-06,
+        "max_block": 2.807961176163234e-06
+      },
+      {
+        "phase": 0.5,
+        "combined": 5.44764761520969e-06,
+        "max_block": 1.3317552144670139e-05
+      }
+    ],
+    "physical_periodic_branch": "NOT_YET_QUALIFIED"
+  },
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root_tight",
+      "purpose": "Tighten only numerical root closure to1e-11, originalphasegateunchanged. Distinguish amplified rootresidualfrom true meshphase defect."
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root",
+      "purpose": "Correct actualshorttrajectoryoneburstseedatZA.836589."
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine",
+      "purpose": "5s actualmidfieldflowbetween native4000short andnative8000long, same originalcompletehistory."
+    }
+  ],
+  "figure": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/figures/fig_local_resource_recovery.png",
+  "figure_scope": "Finite5s controls, agentcheckedPNGandPDF; humanpending, notbifurcationplot.",
+  "model_promoted": false
+}

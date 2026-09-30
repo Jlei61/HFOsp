@@ -1,0 +1,28 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine",
+  "dt_ms": 0.025,
+  "numerical_method": "exponential_midpoint",
+  "candidate": {
+    "index1": 11,
+    "index2": 12,
+    "burst_count": 1,
+    "time1_ms": 4581.437519854877,
+    "time2_ms": 4813.874772640358,
+    "period_ms": 232.43725278548118,
+    "history_relative_rms": 0.004866558195015381,
+    "M_relative_rms": 0.004060713220204636,
+    "score": 0.004481784272040326
+  },
+  "times_ms": [
+    4581.45,
+    4813.875
+  ],
+  "period_seed_ms": 232.42500000000018,
+  "checkpoint_interval_ms": [
+    4000,
+    5000
+  ],
+  "acceptance": "All original1ms group rates within one float32 ULP+1e-12Hz; full original float64 terminalcheckpoint combinederror<1e-10 and everyblock<1e-9. Report bitwise identity separately. This checks seed provenance, not periodic closure.",
+  "scope": "Complete retained spatial/M/history state, actual uninterrupted flow. A near return only nominates shooting; no bifurcation claim.",
+  "model_promoted": false
+}

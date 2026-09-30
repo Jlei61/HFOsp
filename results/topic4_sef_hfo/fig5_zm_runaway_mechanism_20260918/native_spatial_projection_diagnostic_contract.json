@@ -1,0 +1,12 @@
+{
+  "created_local": "2026-09-19T18:24:49.576824",
+  "question": "At identical lifted coarse states and delay histories, which unresolved spatial variations are introduced by finer grouping?",
+  "conditions": "D=.219, exactinitial andcoarse12s state; frozenZ/Mdynamic; no forwardparameterchanges",
+  "analyses": [
+    "Delayedmean/variancearrival aggregation parity using actual history",
+    "Output and fullRHS aggregation errors",
+    "Withinparent threshold differences and forcing dispersion",
+    "Pointwise transfer re-evaluation withcoarseparentthreshold as identitycontrol only"
+  ],
+  "scope": "Instantaneous closure diagnostic, not causal mechanism or boundary relocation; two snapshots are not independent realizations."
+}

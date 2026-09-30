@@ -1,0 +1,48 @@
+{
+  "index": 60,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0065_N256.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0065_N256_accuracy_N512_accuracy_N1024.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0065_N256_accuracy_N512.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0065_N256_accuracy_N512_accuracy_N1024.npz",
+    "N": 1024,
+    "check_N": 4096,
+    "J_EE_core": 0.9645442026012844,
+    "T_ms": 270.8950550206161,
+    "maximum_group_defect_Hz": 9.390871780201593e-05,
+    "regional_defect_Hz": [
+      6.387040300493421e-13,
+      5.849734196297152e-13,
+      2.425902614756385e-08
+    ],
+    "minimum_rate_Hz": 4.5717555193727116e-06
+  },
+  "relative_waveform_refinement_change": 1.0173337634216015e-05,
+  "relative_period_change": 1.9141355167562324e-12,
+  "status": "UNSTABLE",
+  "checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleDown_0065_N256_positive_leading_dt0.1.json",
+      "multiplier": [
+        97660.23843650198,
+        0.0
+      ],
+      "relative_residual": 1.7880213344956884e-14,
+      "phase_defect": 762.0892687098981,
+      "assessment": null
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleDown_0065_N256_positive_leading_dt0.05.json",
+      "multiplier": [
+        97239.90118327954,
+        0.0
+      ],
+      "relative_residual": 1.5665387677554607e-12,
+      "phase_defect": 193.90868609245447,
+      "assessment": null
+    }
+  ],
+  "relative_multiplier_step_change": 0.004322682850429747,
+  "scope": "Positive, refined full spatial periodic orbit at the same J. Paired physical-time DDE monodromy. A leading-mode instability verdict does not supply a complete spectrum or locate a bifurcation."
+}

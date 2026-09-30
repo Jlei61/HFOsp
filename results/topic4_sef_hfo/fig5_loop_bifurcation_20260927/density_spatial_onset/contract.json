@@ -1,0 +1,35 @@
+{
+  "status": "FROZEN_AFTER_REVIEW_OF_3S_PREFIX",
+  "created_epoch": 1790517990.859231,
+  "question": "Do retained local state distributions preserve late interictal propagation and predict the observed Z-driven entry without fitting its time?",
+  "evidence": "512/2048 numerical particles/group yield12/11events in0.5–3s, median82/81ms,9bothcoreevents each,1forward/11or10reverse. Native8401/2 yield12/15events,95.5/86ms. Densityquietfraction.634/.639 exceeds native.552/.504, so this is promising but not accepted.",
+  "decision": "Extend only2048-particle existing realization to12.5s using its complete saved state; addone2048-particle independentnumericalstream fromcold to12.5s. Same original recorded8401externaldrive andphysical model. No equation/parameter/response fitting.",
+  "jobs": [
+    {
+      "name": "R2048_num927611",
+      "seed": 927611,
+      "resume": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_spatial_baseline/R2048_num927611",
+      "start_ms": 3000
+    },
+    {
+      "name": "R2048_num927612",
+      "seed": 927612,
+      "resume": null,
+      "start_ms": 0
+    }
+  ],
+  "duration_ms": 12500,
+  "replicas": 2048,
+  "added_global_gain": 0.0,
+  "readouts": "Original whole/core/surround rates, allqualifiedeventduration/quiet/area/direction,400cellfield,15contactcurrent envelopes, same-clock Z/M, entry. Keep original A4 rules with their original observationwindow; do not substitute3s counts for fullgate. Also retain stricter quiet-bounded complete-event subset.",
+  "statistical_unit": "One physical external forcing, two numerical particle streams; not two native noise seeds.512/2048prefix checks numericalresolution only.",
+  "gate": "This is a diagnostic, not promoted closure. Apply pre-existing full-window A4 criteria and native-noise comparisons; visual space/contact review required. If late depletion/entry/propagation fails, diagnose spatial/input/correlation closure before any continuation.",
+  "source_sha256": "6d117d061121861de62d03f4d0ba069b91cd88dd1727166d0222f37fbb3556d1",
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "original_prefix_sha256": {
+    "trajectory.npz": "cd6bc24c72fdbb6463da402cc0f91dc1b9558b2afe96a7651b30b202b3274bb1",
+    "final_state.npz": "869ea7721b713cf132cbc9261a520c131466d841daaca5c8d8607a1a47f0756d"
+  },
+  "resources": "One extra GPU process, sequentialtwojobs; originalnativequeueunmodified.",
+  "formal_bifurcation_allowed": false
+}

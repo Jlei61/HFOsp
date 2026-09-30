@@ -1,0 +1,17 @@
+{
+  "created_local": "2026-09-20T13:07:35.316836+08:00",
+  "source_contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/a4_contract.json",
+  "original_primary": "Use native_readouts active segments, original1-9.42s event statistics andfull-recordquiet fraction as in originalA4; do not replace with strictcompleteevent subset.",
+  "original_six_gates": {
+    "self_limited_events": "stochastic arm: events in 1-9.42 s with median duration within 2x of native (50-200 ms) and inter-event quiet present (quiet fraction >= 0.15)",
+    "two_core_participation": "both-core fraction >= 0.5 of events",
+    "surround_recruitment": "median area within [0.3, 1.0] (native 0.68-0.75)",
+    "propagation": "both directions present; median extent within 2x of native (5-20 mm); direction sign not fixed",
+    "entry": "a transition to sustained >=200 Hz activity occurs between 7 and 13 s in the stochastic arm; deterministic arm reported (may not transition without noise)",
+    "D_track": "D at native onset time (9.87 s) within +/-0.05 of native (0.256)"
+  },
+  "resource_clock": "Read D at actualstate_time_ms9870. Legacy a4_acceptance indexed987 in a10ms-endpoint array, i.e.9880; preserve intended9870ms, not that historical index error.",
+  "role": "Actual-count arm is the primary stochastic contrast. Expectedflux still receives exogenous OU; neither is the constant-input deterministic bifurcation skeleton.",
+  "strict_diagnostic": "Also retain previously used extra20msquiet onbothsides andactual754/786core50percentpeak order, without promoting either to a newA4gate.",
+  "completion": "NumericalreadoutPASS, originalA4criteria andlocalresponsevalidation reported separately. No automaticmodelpromotion or bifurcation label."
+}

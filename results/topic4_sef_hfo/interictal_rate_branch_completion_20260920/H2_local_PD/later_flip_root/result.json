@@ -1,0 +1,29 @@
+{
+  "status": "ROOT_LOCATED_CHECKS_PENDING",
+  "root_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD4_child_later_flip_20260920_N1024.json",
+  "root": {
+    "coordinate": "parent_PD_mode_amplitude_Hz",
+    "coordinate_value": 0.049069219417516366,
+    "J_EE_core": 0.9463111051000997,
+    "T_ms": 593.7950562360314,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD4_child_later_flip_20260920_eval_a0.049069219418_N1024.npz",
+    "orbit_residual_hz": 3.9898639947466563e-14,
+    "half_period_relative_mismatch": 0.006264421644718276,
+    "streamed_harmonic_actions": true,
+    "host_krylov": true,
+    "border_scalar": -9.884107810208774e-12,
+    "linear_residual": 1.3520370111643812e-10,
+    "antiperiodic_relative_residual": 1.3556450983574121e-10,
+    "label": "PD4_child_later_flip_20260920",
+    "N": 1024,
+    "multiplier": -1.0,
+    "dborder_dJ": -4038.2327162256843,
+    "dborder_dcoordinate": -0.03660612619752367,
+    "dJ_dcoordinate": 9.064887729337555e-06,
+    "type": "secondary period-doubling candidate located on the doubled branch",
+    "criticality": "NOT_COMPUTED",
+    "validation": "Requires temporal-mesh, positive parent and independent full-state/history mode checks."
+  },
+  "full_acceptance": false,
+  "scope": "Independent antiperiodic root on one temporal mesh. Requires finer mesh, positive full-orbit checks, nonzero crossing verification and independent full-history mode checks before a new PD is added to the figure."
+}

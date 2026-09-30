@@ -1,0 +1,84 @@
+{
+  "status": "COMPLETE_PREDECLARED_FIRST_SECOND_ONLY",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "prefix_interval_s": [
+        0,
+        1
+      ],
+      "rates_Hz_allE_A_B_surround": [
+        239.9295625,
+        464.759946949603,
+        475.37531806615686,
+        228.2886408404468
+      ],
+      "initial_Graw": 4.51130203132469,
+      "causal_R_min_Hz": 233.00684745454782,
+      "causal_R_at1s_Hz": 237.84722429462371,
+      "Graw_at1s": 3.8980239285596556,
+      "sampled_R_below5_fraction": 0.0,
+      "counterfactual_dZ_per_s": [
+        -0.041999999999999836,
+        -0.03483387722099197,
+        -0.033073757753916404,
+        -0.04240772432635589
+      ],
+      "recorded_future_inputs_bitwise": true
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_zero",
+      "prefix_interval_s": [
+        0,
+        1
+      ],
+      "rates_Hz_allE_A_B_surround": [
+        281.79215625,
+        462.1657824933689,
+        469.8295165394408,
+        272.4750492449117
+      ],
+      "initial_Graw": 0.0,
+      "causal_R_min_Hz": 239.34301216417728,
+      "causal_R_at1s_Hz": 239.34301216417728,
+      "Graw_at1s": 6.277643539724981,
+      "sampled_R_below5_fraction": 0.0,
+      "counterfactual_dZ_per_s": [
+        -0.034289521249999864,
+        -0.03483387722099197,
+        -0.033073757753916404,
+        -0.03430741835130659
+      ],
+      "recorded_future_inputs_bitwise": true
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+      "prefix_interval_s": [
+        0,
+        1
+      ],
+      "rates_Hz_allE_A_B_surround": [
+        138.45621875,
+        437.9840848806367,
+        420.6921119592866,
+        123.7588640840446
+      ],
+      "initial_Graw": 11.495040572672318,
+      "causal_R_min_Hz": 107.1568480072617,
+      "causal_R_at1s_Hz": 122.75818246636139,
+      "Graw_at1s": 1.6618097766344564,
+      "sampled_R_below5_fraction": 0.0,
+      "counterfactual_dZ_per_s": [
+        -0.01729389124999988,
+        -0.03483387722099197,
+        -0.033073757753916404,
+        -0.016452521437321014
+      ],
+      "recorded_future_inputs_bitwise": true
+    }
+  ],
+  "full_declared_duration_s": 30.0,
+  "new_native_runs_complete": false,
+  "interpretation": "One-second initial response only; does not show the later conditional state, basin selection, autonomous exit or recovery. Z/K held. Final30s comparison remains pending.",
+  "formal_bifurcation_allowed": false
+}

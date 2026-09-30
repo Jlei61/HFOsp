@@ -155,8 +155,9 @@ def _shared_display_geometry(shared_plane):
     return pts, int(sign), xlim, ylim
 
 
-def load_frozen(ds_sid):
-    rec = json.load(open(FROZEN / f"{ds_sid}.json"))
+def load_frozen(ds_sid, frozen_root=None):
+    root = FROZEN if frozen_root is None else Path(frozen_root)
+    rec = json.load(open(root / f"{ds_sid}.json"))
     scorers_from_interictal_record(rec)                          # <- fingerprint gate (raises)
     template_a, template_b, template_mode = build_interictal_ab_panel_payloads(
         rec, display_sigma_mm=DEFAULT_DISPLAY_SIGMA_MM,

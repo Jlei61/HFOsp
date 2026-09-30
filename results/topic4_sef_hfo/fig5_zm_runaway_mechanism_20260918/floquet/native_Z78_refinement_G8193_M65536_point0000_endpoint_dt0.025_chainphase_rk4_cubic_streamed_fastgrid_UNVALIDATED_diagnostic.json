@@ -1,0 +1,54 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+  "N": 8193,
+  "D": 0.2193352638617445,
+  "T_ms": 264.18052228455997,
+  "dt_ms": 0.02446115947079259,
+  "multipliers": [
+    [
+      12.923373571427291,
+      0.0
+    ],
+    [
+      1.202685553278489,
+      0.0
+    ],
+    [
+      0.8335373418442484,
+      0.0
+    ]
+  ],
+  "eigen_residuals": [
+    5.7993403648588715e-12,
+    6.469561321350491e-12,
+    1.542086761779292e-12
+  ],
+  "phase_index": 2,
+  "phase_defect": 0.9999141142401894,
+  "phase_alignment": 0.9869541440957946,
+  "phase_valid": false,
+  "max_transverse_modulus": 12.923373571427291,
+  "phase_projection": 0.09007448465862458,
+  "phase_quotient": false,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "RK4 with cubic delayed history",
+  "status": "PHASE_CHECK_FAILED",
+  "sampled_stability": "UNRESOLVED",
+  "calls": 21,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": null,
+  "eigenvector_refined_orbit_check": null,
+  "time_grid": {
+    "requested_maximum_dt_ms": 0.025,
+    "steps": 10800,
+    "fft_friendly": true
+  },
+  "gain_cache": "GPU float64",
+  "requested_eigenpairs": 3,
+  "arnoldi_basis_size": 16
+}

@@ -1,0 +1,105 @@
+{
+  "status": "COMPLETE_MEASURED_SOURCE_CROSS_SPECTRAL_DIAGNOSIS",
+  "rows": [
+    {
+      "region": "selected_all",
+      "targets": 59,
+      "diagonal_recurrent_IE_II_variance_mV2": [
+        9.019327360400801,
+        2.6804537017551624
+      ],
+      "full_cross_recurrent_IE_II_variance_mV2": [
+        93.26881187945105,
+        5.143672368707175
+      ],
+      "cross_source_contribution_IE_II_mV2": [
+        84.24948451905024,
+        2.463218666952014
+      ],
+      "expected_external_IE_variance_mV2": 14.97991682229426,
+      "observed_total_IE_II_variance_mV2": [
+        109.67536762157046,
+        5.133082008364171
+      ]
+    },
+    {
+      "region": "selected_coreA",
+      "targets": 3,
+      "diagonal_recurrent_IE_II_variance_mV2": [
+        11.742934707305444,
+        1.559066142803515
+      ],
+      "full_cross_recurrent_IE_II_variance_mV2": [
+        18.13789145011864,
+        2.189068393630233
+      ],
+      "cross_source_contribution_IE_II_mV2": [
+        6.394956742813197,
+        0.6300022508267182
+      ],
+      "expected_external_IE_variance_mV2": 15.214732489797896,
+      "observed_total_IE_II_variance_mV2": [
+        33.31338641451051,
+        2.1821886633212366
+      ]
+    },
+    {
+      "region": "selected_coreB",
+      "targets": 5,
+      "diagonal_recurrent_IE_II_variance_mV2": [
+        11.734084891603047,
+        1.5966276743380043
+      ],
+      "full_cross_recurrent_IE_II_variance_mV2": [
+        149.18995154229358,
+        1.6164864635543956
+      ],
+      "cross_source_contribution_IE_II_mV2": [
+        137.45586665069052,
+        0.01985878921639146
+      ],
+      "expected_external_IE_variance_mV2": 15.100939903277824,
+      "observed_total_IE_II_variance_mV2": [
+        165.5808984532021,
+        1.611622177157551
+      ]
+    },
+    {
+      "region": "largest20_errors",
+      "targets": 20,
+      "diagonal_recurrent_IE_II_variance_mV2": [
+        11.874014034545286,
+        1.6020311348338647
+      ],
+      "full_cross_recurrent_IE_II_variance_mV2": [
+        239.6090653752201,
+        1.9443815040295003
+      ],
+      "cross_source_contribution_IE_II_mV2": [
+        227.73505134067486,
+        0.3423503691956359
+      ],
+      "expected_external_IE_variance_mV2": 15.178865901590635,
+      "observed_total_IE_II_variance_mV2": [
+        255.13333449668716,
+        1.9479840947547928
+      ]
+    }
+  ],
+  "QA": {
+    "source_PSD_max_abs_error": 0.0,
+    "original_graph_identity": true,
+    "Parseval_max_abs_error": [
+      3.410605131648481e-13,
+      1.4210854715202004e-14
+    ],
+    "pure_II_waveform_after_1s_max_abs_error": 4.547473508864641e-12,
+    "earlier_0p3s_error": 5.657184374285862e-06,
+    "homogeneous_II_tail_prediction_error": 4.547473509670234e-12,
+    "IE_recurrent_external_variance_budget_error": 7.389644451905042e-13
+  },
+  "reference": "Native72-74s, circular2s Fourier reconstruction; waveformQA trims first1s so delayed source and synapse initial conditions no longer affect the record. Earlier0.3s discrepancy is independently checked against the unmodified GABA decay tail. Mean selected moments use full2s and retain boundary effects.",
+  "scope": "Measured source correlations describe the missing input structure. No endogenous cross-spectral closure, formal stability or bifurcation established; no data-forced simulation is promoted to a predictive model.",
+  "elapsed_s": 148.26625084877014,
+  "producer_sha256": "faad3aa30958ac2a9c173d79fb862621ae5266ae5db76d8b8568aa686f9ff38c"
+}

@@ -1,0 +1,70 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/physical_delay_count_rate/scientific_comparison.json",
+  "snapshots": [
+    {
+      "condition": "Native SNN",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Native SNN",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Original rate model",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Original rate model",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Corrected rate model",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Corrected rate model",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    }
+  ],
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_fine_forcing/recorded_drive_binomial_seed1",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/physical_delay_count_rate/recorded_drive_binomial_seed1"
+  ],
+  "meaning": "Original andcorrectedfinite-count ratefield: only actual0.1msdelaylag inprivatevariance changed; commonphysicalclock, noevent/onsetrealignment. ZandMbothdynamic.",
+  "native_slow": "Exactnativecheckpointobservations, unconnected dots, not an interpolated trajectory.",
+  "scope": "Directcorrespondence diagnostic, not abifurcationplot or scientificacceptance.",
+  "agent_PNG_PDF_check": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "agent_review_local": "2026-09-20T13:41:27.084801+08:00",
+  "agent_visual_notes": "PNG and rasterized same-state PDF inspected; shared rate scales, actual common clock, fixed spatial color range; no clipping or overlap; not a bifurcation plot.",
+  "artifact_sha256": {
+    "png": "29a3d8c0db994365c3fba9d9a19da8e720bbd8efb4348f188a5508fb77d6f0b9",
+    "pdf": "3d3e9178af94fa940d3c0c8bf833075f826bce6a850e8bba48ac7444dae20059",
+    "svg": "98d8e4bf8f2039f6594851fd2aac40f4db30cb46ddea2dd12b532bd6d69c15df"
+  }
+}

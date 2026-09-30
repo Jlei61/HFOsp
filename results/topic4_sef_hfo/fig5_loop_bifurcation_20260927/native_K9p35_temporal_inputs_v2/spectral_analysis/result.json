@@ -1,0 +1,157 @@
+{
+  "status": "COMPLETE_SOURCE_AUTOCORRELATION_DIAGNOSTIC",
+  "rows": [
+    {
+      "region": "allE",
+      "targets": 32000,
+      "measured_IE_II_variance": [
+        21.938172242046537,
+        2.041943656409205
+      ],
+      "white_IE_II_variance": [
+        167.83882574609012,
+        118.45294089803855
+      ],
+      "source_auto_IE_II_variance": [
+        18.305485800864634,
+        1.375346293108131
+      ],
+      "source_CV_eligible": 7364,
+      "median_source_CV": 0.0,
+      "source_CV_q10_q90": [
+        0.0,
+        0.017526684518247158
+      ],
+      "median_lag1_ISI_correlation": 0.378422035104505
+    },
+    {
+      "region": "coreA",
+      "targets": 754,
+      "measured_IE_II_variance": [
+        34.50592501031454,
+        3.3711924323173617
+      ],
+      "white_IE_II_variance": [
+        577.1326942089787,
+        399.7585578642872
+      ],
+      "source_auto_IE_II_variance": [
+        26.123385337103752,
+        3.2465421390393705
+      ],
+      "source_CV_eligible": 670,
+      "median_source_CV": 0.0,
+      "source_CV_q10_q90": [
+        0.0,
+        0.016120138327174134
+      ],
+      "median_lag1_ISI_correlation": 0.3448696076041943
+    },
+    {
+      "region": "coreB",
+      "targets": 786,
+      "measured_IE_II_variance": [
+        28.88045145274919,
+        9.281724479688679
+      ],
+      "white_IE_II_variance": [
+        237.4106072477826,
+        187.0125138706159
+      ],
+      "source_auto_IE_II_variance": [
+        20.745654545593247,
+        3.7780431573828186
+      ],
+      "source_CV_eligible": 262,
+      "median_source_CV": 0.0026643683752067843,
+      "source_CV_q10_q90": [
+        0.0,
+        0.030885341300040985
+      ],
+      "median_lag1_ISI_correlation": 0.4730521372397139
+    },
+    {
+      "region": "surroundE",
+      "targets": 30460,
+      "measured_IE_II_variance": [
+        21.4479320238296,
+        1.8222220114935015
+      ],
+      "white_IE_II_variance": [
+        155.91200378018894,
+        109.72043073556337
+      ],
+      "source_auto_IE_II_variance": [
+        18.048996343094537,
+        1.2670271400171176
+      ],
+      "source_CV_eligible": 6432,
+      "median_source_CV": 0.0,
+      "source_CV_q10_q90": [
+        0.0,
+        0.017364715014938425
+      ],
+      "median_lag1_ISI_correlation": 0.3736794501767059
+    },
+    {
+      "region": "I",
+      "targets": 8000,
+      "measured_IE_II_variance": [
+        17.124880959259368,
+        1.001669333970359
+      ],
+      "white_IE_II_variance": [
+        122.86449059885308,
+        59.167810906951104
+      ],
+      "source_auto_IE_II_variance": [
+        15.461603958178173,
+        0.6741342282001134
+      ],
+      "source_CV_eligible": 2175,
+      "median_source_CV": 0.0341754395917055,
+      "source_CV_q10_q90": [
+        0.02148946576069444,
+        0.1682173373925553
+      ],
+      "median_lag1_ISI_correlation": 0.4220301716240197
+    },
+    {
+      "region": "selected10edge_cells_E",
+      "targets": 785,
+      "measured_IE_II_variance": [
+        28.5966205170934,
+        6.8428059273188175
+      ],
+      "white_IE_II_variance": [
+        290.5186558750081,
+        236.61005740970538
+      ],
+      "source_auto_IE_II_variance": [
+        22.54966066108921,
+        3.846692470834939
+      ],
+      "source_CV_eligible": 295,
+      "median_source_CV": 0.017200200447152234,
+      "source_CV_q10_q90": [
+        0.0,
+        0.14439739483157743
+      ],
+      "median_lag1_ISI_correlation": 0.38234403729509925
+    }
+  ],
+  "white_projection_relative_error": 4.439290195202665e-16,
+  "filter_Parseval_errors": [
+    0.0,
+    0.0,
+    8.673617379884035e-19,
+    1.6263032587282567e-19
+  ],
+  "repeated_source_target_delay_edges": [
+    0,
+    0
+  ],
+  "data_prescribed_not_autonomous": true,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "3b7daf3e5d2e35a5253d8c10cca4999ed720fb57037a44b60162ee19032d4f85"
+}

@@ -1,0 +1,42 @@
+{
+  "status": "REGISTERED_AFTER_ALL_TARGET_RESPONSE_CORRESPONDENCE",
+  "created_epoch": 1790535090.0032647,
+  "question": "What is the spatial selfconsistency Jacobian near the actual corresponding high state when every local derivative is measured from the density equations rather than inherited from the rejected static neural surrogate?",
+  "basis": "Full40000target local mean check reproduces the supplied network field with weightedRMS below.1Hz. Independent physicalG derivative chain rule11/11 and amplitude55/55 passed. Existing root is not used as a validated equilibrium.",
+  "design": {
+    "physical_targets": 40000,
+    "partitions": [
+      [
+        0,
+        20000
+      ],
+      [
+        20000,
+        40000
+      ]
+    ],
+    "devices": [
+      0,
+      1
+    ],
+    "replicas": 256,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "base_seed": 928861,
+    "target_batch": 128,
+    "channels": [
+      "effective_mean",
+      "effective_variance_E",
+      "effective_variance_I",
+      "physical_applied_G_E_only"
+    ],
+    "amplitudes": "mean .02*(theta-11), varianceE5%, varianceI10%, appliedG .002*(1+g); every target/channel repeated at half amplitude"
+  },
+  "stochastic_unit": "Independent physical-target/channel noise. Full and half amplitudes share replica paths, and each modulation uses paired plus/minus sides. Target partitions use disjoint batch seeds. These are numerical samples, not independent native seeds.",
+  "uncertainty": "Save all paired counts plus eight replicate-block derivative estimates. Retain nonestimable/failed-amplitude channels and propagate their uncertainty into spatial results; never replace them by zero or declare them passed.",
+  "gate": "Per-target amplitude comparison <=max(10%abs(fullgain),2pairedSEM,1e-7); SNR>=10 for individually estimable channels. Aggregated source-group action and its uncertainty must then be checked before any spectral claim. A DC matrix alone does not establish dynamical stability; synaptic delays/G/M feedback remain required.",
+  "limits": "Same fixedM and supplied mean source/G input as all-target static check. Static adaptation feedback must be restored through its implicit equation. A near-selfconsistent measured response is not an exact residual root. No native physics modification, response fit, parameter sweep, or automatic branch naming.",
+  "input_sha256": "c984e450ea2f6f81d521c92c43f33a24f0ba605c3709ea44c1d3460eece00e04",
+  "producer_sha256": "e7b235951305a673580b71b7b4f5063ae170fa74b25dfdf298cbd915d39d119a",
+  "formal_bifurcation_allowed": false
+}

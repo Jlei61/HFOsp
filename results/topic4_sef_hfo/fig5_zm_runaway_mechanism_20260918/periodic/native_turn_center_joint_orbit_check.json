@@ -1,0 +1,34 @@
+{
+  "status": "ORBIT_MESH_CHECK_PASS",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/turn.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_center_G16875_M262144/point0000.npz"
+  ],
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_turn_center_refinement_contract.json",
+  "values": {
+    "period_difference_ms": 0.0,
+    "D_difference": 1.7279719322083054e-10,
+    "max_Z_difference": 4.344518078625015e-10,
+    "residuals_hz": [
+      1.5415565213770278e-09,
+      6.38378239159465e-12
+    ],
+    "minimum_group_rates_hz": [
+      -0.03700344264176028,
+      -0.0011040795244925982
+    ],
+    "phase_aligned_relative_L2": 3.3234321642293414e-05,
+    "phase_shift_cycles": 0.9999999993330245,
+    "unaligned_relative_L2": 3.323430315730709e-05
+  },
+  "checks": {
+    "residual": true,
+    "period": true,
+    "D": true,
+    "Z": true,
+    "waveform": true,
+    "prescribed_period": true
+  },
+  "normalization": "All-group rate L2; a single common time shift is optimized; separate region shifts are prohibited.",
+  "scope": "Periodic orbit mesh agreement only. Phase invariance, derivatives, Floquet spectrum, branch connection and onset mechanism remain separate checks."
+}

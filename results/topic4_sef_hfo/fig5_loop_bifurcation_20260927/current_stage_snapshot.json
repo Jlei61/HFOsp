@@ -1,0 +1,2445 @@
+{
+  "updated_epoch": 1790548866.082678,
+  "goal_status": "ACTIVE",
+  "formal_bifurcation": "NOT_ESTABLISHED",
+  "handoff": "HANDOFF.md",
+  "mechanistic_derivation": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_response_operator.md",
+  "processes": [
+    {
+      "pid": 33768,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/topic4_loop_bifurcation/supervise_probes_v4.py --root /data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history --max-workers 1 "
+    },
+    {
+      "pid": 33778,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python /home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/spatial_probes.py worker --root /data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history --name exit_z0.21_k9.35_fields16p7_held_K9_history --device 0 "
+    },
+    {
+      "pid": 33780,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/topic4_loop_bifurcation/collect_native_root.py --root /data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history "
+    },
+    {
+      "pid": 33817,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/topic4_loop_bifurcation/compare_native_held_history.py --wait "
+    },
+    {
+      "pid": 34166,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/topic4_loop_bifurcation/density_held_history.py worker --device 1 "
+    },
+    {
+      "pid": 34170,
+      "cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/topic4_loop_bifurcation/density_held_history.py compare --wait "
+    }
+  ],
+  "completed": {
+    "exit_midpoint_probes": {
+      "stage": "COMPLETE",
+      "supervisor_pid": 13842,
+      "completed": [
+        "exit_z0.21_k10.5_fields16p7_high",
+        "exit_z0.21_k10.5_fields16p7_recovery"
+      ],
+      "pending": [],
+      "active": [],
+      "failed": [],
+      "total": 2,
+      "updated_epoch": 1790534508.4750304,
+      "global_native_cap": 16,
+      "per_GPU_cap": {
+        "0": 8,
+        "1": 8
+      },
+      "max_workers": 2
+    },
+    "target_density_field_family": {
+      "status": "COMPLETE",
+      "supervisor_pid": 14178,
+      "completed": [
+        "exit_z0.21_k9_fields16p7_recovery",
+        "exit_z0.21_k12_fields16p7_high",
+        "exit_z0.21_k12_fields16p7_recovery",
+        "exit_z0.21_k10.5_fields16p7_high",
+        "exit_z0.21_k10.5_fields16p7_recovery"
+      ],
+      "pending": [],
+      "active": [],
+      "failed": [],
+      "updated_epoch": 1790533385.772773
+    },
+    "target_root_response_audit": {
+      "status": "COMPLETE_LOCAL_DC_AUDIT",
+      "summary": [
+        {
+          "kernel": "exact_colored",
+          "population": "E",
+          "primary": 44,
+          "estimable": 31,
+          "derivative_pass": 2,
+          "mean_pass": 36
+        },
+        {
+          "kernel": "exact_colored",
+          "population": "I",
+          "primary": 21,
+          "estimable": 19,
+          "derivative_pass": 14,
+          "mean_pass": 21
+        },
+        {
+          "kernel": "density_discrete",
+          "population": "E",
+          "primary": 44,
+          "estimable": 32,
+          "derivative_pass": 2,
+          "mean_pass": 36
+        },
+        {
+          "kernel": "density_discrete",
+          "population": "I",
+          "primary": 21,
+          "estimable": 19,
+          "derivative_pass": 15,
+          "mean_pass": 21
+        }
+      ],
+      "elapsed_s": 54.2738573551178
+    },
+    "target_direct_response": {
+      "status": "COMPLETE_DIRECT_RESPONSE",
+      "elapsed_s": 118.2796618938446,
+      "DC_pass": 65,
+      "DC_total": 65,
+      "amplitude_pass": 320,
+      "amplitude_total": 325
+    },
+    "target_raw_G_response": {
+      "status": "COMPLETE_PHYSICAL_G_RESPONSE",
+      "DC_chain_pass": 11,
+      "DC_chain_total": 11,
+      "amplitude_pass": 55,
+      "amplitude_total": 55,
+      "elapsed_s": 56.50073742866516
+    },
+    "all_target_stationary_direct": {
+      "status": "COMPLETE_ALL_TARGET_LOCAL_RESPONSE",
+      "rows": [
+        {
+          "region": "allE",
+          "observed_density_rate_Hz": 244.11083442473205,
+          "direct_stationary_rate_Hz": 244.10617012023926,
+          "regional_MC_SEM_Hz": 0.00011571502551899784,
+          "group_weighted_RMS_Hz": 0.03406916173791142,
+          "maximum_group_error_Hz": 0.4096285502115862
+        },
+        {
+          "region": "coreA",
+          "observed_density_rate_Hz": 469.23104069150725,
+          "direct_stationary_rate_Hz": 469.17232766391743,
+          "regional_MC_SEM_Hz": 0.0005057957084971635,
+          "group_weighted_RMS_Hz": 0.09943549029721543,
+          "maximum_group_error_Hz": 0.20001220703125
+        },
+        {
+          "region": "coreB",
+          "observed_density_rate_Hz": 474.301867885444,
+          "direct_stationary_rate_Hz": 474.23194042720263,
+          "regional_MC_SEM_Hz": 0.0003746483813901747,
+          "group_weighted_RMS_Hz": 0.11643501146965414,
+          "maximum_group_error_Hz": 0.204864501953125
+        },
+        {
+          "region": "surround",
+          "observed_density_rate_Hz": 232.5983331829307,
+          "direct_stationary_rate_Hz": 232.59669086058048,
+          "regional_MC_SEM_Hz": 0.00012053180308175373,
+          "group_weighted_RMS_Hz": 0.024996156529013568,
+          "maximum_group_error_Hz": 0.4096285502115862
+        },
+        {
+          "region": "I",
+          "observed_density_rate_Hz": 309.80315906686303,
+          "direct_stationary_rate_Hz": 309.8182625732422,
+          "regional_MC_SEM_Hz": 0.0025274487538493977,
+          "group_weighted_RMS_Hz": 0.20264470511193156,
+          "maximum_group_error_Hz": 1.89093017578125
+        }
+      ],
+      "implied_stationary_Graw": 4.492076145023011,
+      "group_selfconsistency_maximum_Hz": 1.89093017578125,
+      "weighted_field_RMS_Hz": 0.019429119939734157,
+      "stream_difference_rms_Hz": 0.2061873776128197,
+      "stream_combined_SEM_rms_Hz": 0.2055585433290076,
+      "target_response_difference_from_old_surrogate_RMS_Hz": 3.2745931039272285,
+      "elapsed_s": 284.2618935108185,
+      "root_established": false,
+      "formal_bifurcation_allowed": false,
+      "interpretation": "Direct fixed-input local response. Finite group residuals, fixedM and supplied mean source/G still require a selfconsistent dynamic treatment."
+    },
+    "all_target_dc_direct": {
+      "status": "COMPLETE_DC_OPERATOR_AND_UNVALIDATED_STEP",
+      "summary": [
+        {
+          "population": "E",
+          "channel": "effective_mean",
+          "targets": 32000,
+          "estimable": 15378,
+          "amplitude_pass_among_estimable": 15270,
+          "amplitude_fail_among_estimable": 108,
+          "nonestimable": 16622
+        },
+        {
+          "population": "E",
+          "channel": "varianceE",
+          "targets": 32000,
+          "estimable": 12298,
+          "amplitude_pass_among_estimable": 11720,
+          "amplitude_fail_among_estimable": 578,
+          "nonestimable": 19702
+        },
+        {
+          "population": "E",
+          "channel": "varianceI",
+          "targets": 32000,
+          "estimable": 0,
+          "amplitude_pass_among_estimable": 0,
+          "amplitude_fail_among_estimable": 0,
+          "nonestimable": 32000
+        },
+        {
+          "population": "E",
+          "channel": "physicalG",
+          "targets": 32000,
+          "estimable": 14787,
+          "amplitude_pass_among_estimable": 14347,
+          "amplitude_fail_among_estimable": 440,
+          "nonestimable": 17213
+        },
+        {
+          "population": "I",
+          "channel": "effective_mean",
+          "targets": 8000,
+          "estimable": 5044,
+          "amplitude_pass_among_estimable": 5023,
+          "amplitude_fail_among_estimable": 21,
+          "nonestimable": 2956
+        },
+        {
+          "population": "I",
+          "channel": "varianceE",
+          "targets": 8000,
+          "estimable": 5205,
+          "amplitude_pass_among_estimable": 5126,
+          "amplitude_fail_among_estimable": 79,
+          "nonestimable": 2795
+        },
+        {
+          "population": "I",
+          "channel": "varianceI",
+          "targets": 8000,
+          "estimable": 4797,
+          "amplitude_pass_among_estimable": 4723,
+          "amplitude_fail_among_estimable": 74,
+          "nonestimable": 3203
+        }
+      ],
+      "minimum_adaptation_denominator": 1.0,
+      "maximum_fixedM_corrected_residual_Hz": 1.89093017578125,
+      "E_weighted_residual_RMS_Hz": 0.034043635057405305,
+      "I_weighted_residual_RMS_Hz": 0.20264470511192964,
+      "gmres_info": 0,
+      "gmres_iterations": 59,
+      "maximum_proposed_group_change_Hz": 2.193752098240509,
+      "clipping_maximum_Hz": 5.050810163529672e-06,
+      "maximum_predicted_linear_residual_Hz": 5.0509571414172805e-06,
+      "maximum_matrix_action_MC_SEM_Hz": 0.007048661266727282,
+      "full_nonlinear_validation_required": true,
+      "dynamic_stability_established": false,
+      "formal_bifurcation_allowed": false,
+      "interpretation": "One measured DC operator and one bounded proposal, not an accepted new root. All amplitude failures remain; eight-block sampling uncertainty is separate from approximation and native fluctuations.",
+      "producer_sha256": "dce598f8415b9ddc4af8bff28433ca43b2bd5d9873b17dedd97502a5f1539cfb"
+    },
+    "joint_operator_qa": {
+      "status": "PASS_SAME_EQUATION_LINEARISATION",
+      "rows": [
+        {
+          "scale": 1.0,
+          "joint_local_source_JVP_relative_error": 2.1821516605192123e-10
+        },
+        {
+          "scale": 0.1,
+          "joint_local_source_JVP_relative_error": 2.308098031182986e-09
+        }
+      ],
+      "source_constraint_max_error_Hz": 2.7057522888895846e-13,
+      "targets_below_zero": 15,
+      "minimum_target_rate_Hz": -5.659107775288225e-05,
+      "targets_above_cap": 0,
+      "minimum_proposed_E_M": -5.659107775288225e-05,
+      "gmres_info": 0,
+      "clarification": "The earlier local_adaptation_corrected_rate was at the old source input. This file also includes the proposed source-current and G changes. No proposed M/rate has been accepted without fresh nonlinear evaluation.",
+      "independent_response_validation": false,
+      "formal_bifurcation_allowed": false,
+      "producer_sha256": "d6d1d3376e8343997fff31bf81b66783a8f383b906869452e3d605c1cc569cab"
+    },
+    "direct_newton_validation": {
+      "status": "DIRECT_NEWTON_STEP_REDUCES_RESIDUAL",
+      "rows": [
+        {
+          "population": "E",
+          "old_weighted_RMS_Hz": 0.034043635057405305,
+          "new_weighted_RMS_Hz": 0.006972115686310096,
+          "weighted_MC_SEM_RMS_Hz": 0.004780749368159043,
+          "new_maximum_residual_Hz": 0.09650266647435046,
+          "groups_outside_3MC_SEM": 34,
+          "groups": 1885
+        },
+        {
+          "population": "I",
+          "old_weighted_RMS_Hz": 0.20264470511192964,
+          "new_weighted_RMS_Hz": 0.1419641019847046,
+          "weighted_MC_SEM_RMS_Hz": 0.10072457739723285,
+          "new_maximum_residual_Hz": 1.3586712579333948,
+          "groups_outside_3MC_SEM": 66,
+          "groups": 1594
+        }
+      ],
+      "proposed_Graw": 4.491652867679528,
+      "measured_E_rate_Hz": 244.10212370300292,
+      "maximum_target_residual_Hz": 1.9234391408528495,
+      "local_target_residual_RMS_Hz": 0.1443003593203932,
+      "root_certified": false,
+      "dynamic_stability_established": false,
+      "formal_bifurcation_allowed": false,
+      "interpretation": "Fresh nonlinear local response to the proposed source/M coordinates. Report finite residual and MC uncertainty. No next step or bifurcation label is automatic.",
+      "producer_sha256": "4cb41f3a47114eee43756d7ddc5f500ae2fd6cfd8b3dcdd822feecd67d975e4f"
+    },
+    "sampling_precision": {
+      "status": "SAMPLING_PRECISION_DIAGNOSTIC",
+      "rows": [
+        {
+          "population": "E",
+          "groups": 1885,
+          "residual_weighted_RMS_Hz": 0.006972115686310096,
+          "combined_sampling_SEM_weighted_RMS_Hz": 0.006762841866888811,
+          "groups_outside_3combinedSEM_plus_1e_minus7_Hz": 0,
+          "zero_count_estimator_SEM_groups": 844
+        },
+        {
+          "population": "I",
+          "groups": 1594,
+          "residual_weighted_RMS_Hz": 0.1419641019847046,
+          "combined_sampling_SEM_weighted_RMS_Hz": 0.14239808548859287,
+          "groups_outside_3combinedSEM_plus_1e_minus7_Hz": 2,
+          "zero_count_estimator_SEM_groups": 100
+        }
+      ],
+      "definition": "First-order independent sampling errors from initial direct response, fresh validation, and eight-block measured-matrix action. Numerical absolute floor1e-7Hz only prevents interpreting solver roundoff at zero-count groups.",
+      "limits": "Not a posthoc replacement acceptance gate. Does not include finite-record/reset-phase bias, fixedM approximation, inherited source averaging, or native-network error. Zero counts do not prove zero true rate.",
+      "decision": "Fresh residual reduction is real, and remaining aggregate residual is at the estimated numerical sampling scale. Do not keep iterating the same noisy map merely to chase an arbitrary1e-6Hz residual. Retain finite precision when advancing the related branch and dynamic correspondence.",
+      "root_certified": false,
+      "formal_bifurcation_allowed": false,
+      "producer_sha256": "d4cfa1afe41f849cde145daf1d36e44cce32737e4d3411cbf5870af6fc0bec9a"
+    },
+    "direct_exit_first_K_step": {
+      "status": "PREDICTOR_OUTSIDE_BOUNDED_STEP",
+      "attempts": [
+        {
+          "delta_K": 0.05,
+          "maximum_projection_Hz": 135.1927568111977,
+          "maximum_predicted_change_Hz": 222.46321148512948
+        },
+        {
+          "delta_K": 0.025,
+          "maximum_projection_Hz": 37.932076613101884,
+          "maximum_predicted_change_Hz": 111.23160574256474
+        },
+        {
+          "delta_K": 0.0125,
+          "maximum_projection_Hz": 5.244305158786339,
+          "maximum_predicted_change_Hz": 55.61580287128237
+        }
+      ],
+      "formal_bifurcation_allowed": false
+    },
+    "direct_exit_small_K_step": {
+      "status": "BOUNDED_DIRECT_PARAMETER_STEP_COMPLETE",
+      "reason": "Fresh nonlinear residual at recorded sampling precision",
+      "rows": [
+        {
+          "status": "RESIDUAL_REQUIRES_CORRECTION",
+          "iteration": 0,
+          "K_mean": 9.00625,
+          "Graw": 4.465192763461977,
+          "rows": [
+            {
+              "population": "E",
+              "residual_RMS_Hz": 0.029031701812665442,
+              "combined_SEM_RMS_Hz": 0.008587841503586092,
+              "maximum_residual_Hz": 0.4433939895415122,
+              "outside_6SEM": 12
+            },
+            {
+              "population": "I",
+              "residual_RMS_Hz": 0.14123656997595732,
+              "combined_SEM_RMS_Hz": 0.17458768358967708,
+              "maximum_residual_Hz": 0.9858389292750189,
+              "outside_6SEM": 0
+            }
+          ],
+          "E_target_residual_RMS_Hz": 0.0900944066339856,
+          "E_target_combined_SEM_RMS_Hz": 0.036932869573208384,
+          "regional_Hz_allE_A_B_surround_I": [
+            243.83794400024414,
+            469.06718724096487,
+            474.18337818563134,
+            232.31875947387454,
+            309.46633392333985
+          ],
+          "near_equilibrium": false,
+          "formal_bifurcation_allowed": false,
+          "stability_established": false
+        },
+        {
+          "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+          "iteration": 1,
+          "K_mean": 9.00625,
+          "Graw": 4.464677770181993,
+          "rows": [
+            {
+              "population": "E",
+              "residual_RMS_Hz": 0.0064748300122305135,
+              "combined_SEM_RMS_Hz": 0.006791627829481261,
+              "maximum_residual_Hz": 0.059807786774911165,
+              "outside_6SEM": 0
+            },
+            {
+              "population": "I",
+              "residual_RMS_Hz": 0.14558137197540078,
+              "combined_SEM_RMS_Hz": 0.14249293343335342,
+              "maximum_residual_Hz": 1.0451297988236092,
+              "outside_6SEM": 0
+            }
+          ],
+          "E_target_residual_RMS_Hz": 0.030578743808434096,
+          "E_target_combined_SEM_RMS_Hz": 0.029321463779073284,
+          "regional_Hz_allE_A_B_surround_I": [
+            243.83318534851074,
+            469.06732129165283,
+            474.18359685611483,
+            232.31375127280143,
+            309.4592686767578
+          ],
+          "near_equilibrium": true,
+          "formal_bifurcation_allowed": false,
+          "stability_established": false
+        }
+      ],
+      "candidate_near_equilibrium": true,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    },
+    "direct_exit_K_pair": {
+      "status": "BOUNDED_DIRECT_K_PAIR_COMPLETE",
+      "accepted_K": [
+        9.0125
+      ],
+      "rows": [
+        {
+          "point": 0,
+          "requested_K": 9.0125,
+          "K_mean": 9.0125,
+          "candidate_near_equilibrium": true,
+          "reason": "Fresh nonlinear residual at declared precision",
+          "evaluations": [
+            {
+              "status": "RESIDUAL_REQUIRES_CORRECTION",
+              "iteration": 0,
+              "K_mean": 9.0125,
+              "Graw": 4.437714994591786,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.064561145544822,
+                  "combined_SEM_RMS_Hz": 0.008639691539158036,
+                  "maximum_residual_Hz": 0.9573322033782858,
+                  "outside_6SEM": 36
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.24533536388872276,
+                  "combined_SEM_RMS_Hz": 0.17458637242703065,
+                  "maximum_residual_Hz": 1.6776957487020354,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.1991944802197064,
+              "E_target_combined_SEM_RMS_Hz": 0.03711717282011709,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.5636920928955,
+                468.981699166943,
+                474.14683225986005,
+                232.033701104548,
+                309.1170269165039
+              ],
+              "near_equilibrium": false,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            },
+            {
+              "status": "RESIDUAL_REQUIRES_CORRECTION",
+              "iteration": 1,
+              "K_mean": 9.0125,
+              "Graw": 4.436746627893467,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.009115402654960312,
+                  "combined_SEM_RMS_Hz": 0.006811598587472945,
+                  "maximum_residual_Hz": 0.11316322788397315,
+                  "outside_6SEM": 2
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.13880172781248662,
+                  "combined_SEM_RMS_Hz": 0.1424257236401801,
+                  "maximum_residual_Hz": 1.0146810504872406,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.035301882855379024,
+              "E_target_combined_SEM_RMS_Hz": 0.02939286034209645,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.5545180053711,
+                468.98050631009613,
+                474.1481598133349,
+                232.02405846358442,
+                309.1124443359375
+              ],
+              "near_equilibrium": false,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            },
+            {
+              "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+              "iteration": 2,
+              "K_mean": 9.0125,
+              "Graw": 4.436447575533768,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.007233143612201313,
+                  "combined_SEM_RMS_Hz": 0.00681305220543601,
+                  "maximum_residual_Hz": 0.07301899096229647,
+                  "outside_6SEM": 0
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.14300983769292872,
+                  "combined_SEM_RMS_Hz": 0.1425995305019824,
+                  "maximum_residual_Hz": 1.142470777616154,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.030785681975617384,
+              "E_target_combined_SEM_RMS_Hz": 0.029402091488659642,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.55173165893555,
+                468.98024015148377,
+                474.14792064249366,
+                232.02114400481676,
+                309.10969482421876
+              ],
+              "near_equilibrium": true,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            }
+          ],
+          "formal_bifurcation_allowed": false
+        },
+        {
+          "point": 1,
+          "requested_K": 9.025,
+          "K_mean": 9.01875,
+          "candidate_near_equilibrium": false,
+          "reason": "Nonlinear evaluation limit",
+          "evaluations": [
+            {
+              "status": "RESIDUAL_REQUIRES_CORRECTION",
+              "iteration": 0,
+              "K_mean": 9.01875,
+              "Graw": 4.408232137381918,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.06695960344922422,
+                  "combined_SEM_RMS_Hz": 0.008712458537424392,
+                  "maximum_residual_Hz": 1.1895956608014444,
+                  "outside_6SEM": 47
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.2387820141249734,
+                  "combined_SEM_RMS_Hz": 0.17479119239721116,
+                  "maximum_residual_Hz": 1.7944924695266877,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.2062076640381231,
+              "E_target_combined_SEM_RMS_Hz": 0.037386259964403125,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.26982164001464,
+                468.8942579679211,
+                474.11249726661896,
+                231.728023608703,
+                308.76595697021486
+              ],
+              "near_equilibrium": false,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            },
+            {
+              "status": "RESIDUAL_REQUIRES_CORRECTION",
+              "iteration": 1,
+              "K_mean": 9.01875,
+              "Graw": 4.407187710808464,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.010431750277808727,
+                  "combined_SEM_RMS_Hz": 0.006834079648633518,
+                  "maximum_residual_Hz": 0.12395641059559637,
+                  "outside_6SEM": 4
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.14066981175954615,
+                  "combined_SEM_RMS_Hz": 0.14249348605124004,
+                  "maximum_residual_Hz": 1.329134033551611,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.040723853466519744,
+              "E_target_combined_SEM_RMS_Hz": 0.029462789349363035,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.259984664917,
+                468.89416018215354,
+                474.1128240298982,
+                231.71768328340445,
+                308.7378455200195
+              ],
+              "near_equilibrium": false,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            },
+            {
+              "status": "RESIDUAL_REQUIRES_CORRECTION",
+              "iteration": 2,
+              "K_mean": 9.01875,
+              "Graw": 4.407137114865469,
+              "rows": [
+                {
+                  "population": "E",
+                  "residual_RMS_Hz": 0.00868602220567875,
+                  "combined_SEM_RMS_Hz": 0.006838959935708676,
+                  "maximum_residual_Hz": 0.11487660446096015,
+                  "outside_6SEM": 3
+                },
+                {
+                  "population": "I",
+                  "residual_RMS_Hz": 0.1354662733461886,
+                  "combined_SEM_RMS_Hz": 0.14245077410613316,
+                  "maximum_residual_Hz": 0.8900410638011067,
+                  "outside_6SEM": 0
+                }
+              ],
+              "E_target_residual_RMS_Hz": 0.03419836204086882,
+              "E_target_combined_SEM_RMS_Hz": 0.029484682306898293,
+              "regional_Hz_allE_A_B_surround_I": [
+                243.25953810119628,
+                468.89311497533987,
+                474.11320856691316,
+                231.71723009235987,
+                308.7463806152344
+              ],
+              "near_equilibrium": false,
+              "formal_bifurcation_allowed": false,
+              "stability_established": false
+            }
+          ],
+          "formal_bifurcation_allowed": false
+        }
+      ],
+      "reason": "Nonlinear evaluation limit",
+      "dynamic_stability_established": false,
+      "formal_bifurcation_allowed": false
+    },
+    "direct_multisine_validation": {
+      "status": "MULTISINE_PILOT_REQUIRES_REVIEW",
+      "estimable_comparisons": 400,
+      "estimable_passes": 396,
+      "total_comparisons": 520,
+      "total_passes": 514,
+      "elapsed_s": 29.78200101852417,
+      "full_spatial_response_qualified": false,
+      "formal_bifurcation_allowed": false
+    },
+    "direct_frequency_assembly_QA": {
+      "status": "PASS",
+      "rows": [
+        {
+          "frequency_Hz": 0.0,
+          "operator": "mean_ampa",
+          "delayed_action_error": 3.842847400787252e-13,
+          "DC_array_error": 0.0
+        },
+        {
+          "frequency_Hz": 0.0,
+          "operator": "mean_gaba",
+          "delayed_action_error": 1.8474111129762605e-13,
+          "DC_array_error": 0.0
+        },
+        {
+          "frequency_Hz": 0.0,
+          "operator": "variance_ampa",
+          "delayed_action_error": 1.2094650597140528e-13,
+          "DC_array_error": 0.0
+        },
+        {
+          "frequency_Hz": 0.0,
+          "operator": "variance_gaba",
+          "delayed_action_error": 1.3506902320073358e-13,
+          "DC_array_error": 0.0
+        },
+        {
+          "frequency_Hz": 1.0,
+          "operator": "mean_ampa",
+          "delayed_action_error": 2.21980646867526e-13,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 1.0,
+          "operator": "mean_gaba",
+          "delayed_action_error": 1.1457157353758233e-13,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 1.0,
+          "operator": "variance_ampa",
+          "delayed_action_error": 7.53644380168212e-14,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 1.0,
+          "operator": "variance_gaba",
+          "delayed_action_error": 1.0004532555519122e-13,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 5.0,
+          "operator": "mean_ampa",
+          "delayed_action_error": 2.31335954426011e-13,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 5.0,
+          "operator": "mean_gaba",
+          "delayed_action_error": 1.1374233532693354e-13,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 5.0,
+          "operator": "variance_ampa",
+          "delayed_action_error": 6.750740292339637e-14,
+          "DC_array_error": null
+        },
+        {
+          "frequency_Hz": 5.0,
+          "operator": "variance_gaba",
+          "delayed_action_error": 1.139086659085919e-13,
+          "DC_array_error": null
+        }
+      ],
+      "full_DC_action_error": 1.897149936107019e-15
+    },
+    "direct_branch_step_review": {
+      "status": "DIRECT_LOCAL_BRANCH_CANDIDATES",
+      "K": [
+        9.0,
+        9.00625,
+        9.0125
+      ],
+      "Graw": [
+        4.491652867679528,
+        4.464677770181993,
+        4.436447575533768
+      ],
+      "regional_Hz_allE_coreA_coreB_surround": [
+        [
+          244.10212370300292,
+          469.1515362079327,
+          474.21927369095897,
+          232.59328138786012
+        ],
+        [
+          243.83318534851074,
+          469.06732129165283,
+          474.18359685611483,
+          232.31375127280143
+        ],
+        [
+          243.55173165893555,
+          468.98024015148377,
+          474.14792064249366,
+          232.02114400481676
+        ]
+      ],
+      "sources": [
+        "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_newton_validation",
+        "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_exit_small_K_step/evaluation_1",
+        "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/direct_exit_K_pair/point_00/evaluation_2"
+      ],
+      "absolute_E_cell_rate_change_fraction_coreA_coreB_surround": [
+        0.007378832139552774,
+        0.0031875638906503937,
+        0.9894336039697968
+      ],
+      "Graw_recovery_block_threshold": 2.669402995841955,
+      "precision": [
+        {
+          "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+          "iteration": 1,
+          "K_mean": 9.00625,
+          "Graw": 4.464677770181993,
+          "rows": [
+            {
+              "population": "E",
+              "residual_RMS_Hz": 0.0064748300122305135,
+              "combined_SEM_RMS_Hz": 0.006791627829481261,
+              "maximum_residual_Hz": 0.059807786774911165,
+              "outside_6SEM": 0
+            },
+            {
+              "population": "I",
+              "residual_RMS_Hz": 0.14558137197540078,
+              "combined_SEM_RMS_Hz": 0.14249293343335342,
+              "maximum_residual_Hz": 1.0451297988236092,
+              "outside_6SEM": 0
+            }
+          ],
+          "E_target_residual_RMS_Hz": 0.030578743808434096,
+          "E_target_combined_SEM_RMS_Hz": 0.029321463779073284,
+          "regional_Hz_allE_A_B_surround_I": [
+            243.83318534851074,
+            469.06732129165283,
+            474.18359685611483,
+            232.31375127280143,
+            309.4592686767578
+          ],
+          "near_equilibrium": true,
+          "formal_bifurcation_allowed": false,
+          "stability_established": false
+        },
+        {
+          "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+          "iteration": 2,
+          "K_mean": 9.0125,
+          "Graw": 4.436447575533768,
+          "rows": [
+            {
+              "population": "E",
+              "residual_RMS_Hz": 0.007233143612201313,
+              "combined_SEM_RMS_Hz": 0.00681305220543601,
+              "maximum_residual_Hz": 0.07301899096229647,
+              "outside_6SEM": 0
+            },
+            {
+              "population": "I",
+              "residual_RMS_Hz": 0.14300983769292872,
+              "combined_SEM_RMS_Hz": 0.1425995305019824,
+              "maximum_residual_Hz": 1.142470777616154,
+              "outside_6SEM": 0
+            }
+          ],
+          "E_target_residual_RMS_Hz": 0.030785681975617384,
+          "E_target_combined_SEM_RMS_Hz": 0.029402091488659642,
+          "regional_Hz_allE_A_B_surround_I": [
+            243.55173165893555,
+            468.98024015148377,
+            474.14792064249366,
+            232.02114400481676,
+            309.10969482421876
+          ],
+          "near_equilibrium": true,
+          "formal_bifurcation_allowed": false,
+          "stability_established": false
+        }
+      ],
+      "scope": "Small related interval only. Every plotted new point independently checked by fresh direct cell counts and prescribed residual precision. No exact root, dynamic stability, fold, native termination or autonomous recovery is inferred.",
+      "full_bifurcation_completed": false,
+      "producer_sha256": "238e6ea3a7bccbb884ee7d9ab0d2c6d38ba3d13b53cf076ffe5a708670a02370"
+    },
+    "sampled_frequency_mode_review": {
+      "status": "COMPLETE_FIXED_THREE_SAMPLES",
+      "rows": [
+        {
+          "frequency_Hz": 0,
+          "nearest_sampled_mode": {
+            "eigenvalue": [
+              0.9603197625723676,
+              -8.317345400922623e-18
+            ],
+            "distance_to_one": 0.03968023742763238,
+            "eigen_residual": 2.152862754742755e-15,
+            "left_eigen_residual": 1.8521922182582103e-15,
+            "eigenvalue_condition": 2.1002358884576915,
+            "firstorder_MC_eigenvalue_SEM": 0.0003796671349558399,
+            "half_amplitude_eigenvalue": [
+              0.9602266111491515,
+              5.529948443455213e-18
+            ],
+            "amplitude_eigenvalue_difference": 9.315142321608683e-05,
+            "global_rate_participation": 0.053134637517585674,
+            "source_mode_absolute_mass_A_B_surround_I": [
+              0.0018716628821474008,
+              0.0006010442652071145,
+              0.7093501542740526,
+              0.288177138578593
+            ],
+            "sensitivity_to_global_feedback_multiplier": [
+              -0.002055452056097337,
+              -1.3881654663136906e-18
+            ]
+          },
+          "rank_one_global_feedback": {
+            "eta": [
+              -1.195291285377169,
+              0.0
+            ],
+            "one_minus_eta": [
+              2.195291285377169,
+              0.0
+            ],
+            "firstorder_MC_SEM": 0.008546286617402244,
+            "half_amplitude_eta": [
+              -1.1912836913844702,
+              0.0
+            ],
+            "amplitude_difference": 0.004007593992698899
+          }
+        },
+        {
+          "frequency_Hz": 1,
+          "nearest_sampled_mode": {
+            "eigenvalue": [
+              0.9647265420142294,
+              -0.04023454705194324
+            ],
+            "distance_to_one": 0.05350734169017333,
+            "eigen_residual": 2.357779838488167e-15,
+            "left_eigen_residual": 1.945299513766308e-15,
+            "eigenvalue_condition": 2.3491717484498014,
+            "firstorder_MC_eigenvalue_SEM": 0.0006197642092994577,
+            "half_amplitude_eigenvalue": [
+              0.963942372193556,
+              -0.040830422126469805
+            ],
+            "amplitude_eigenvalue_difference": 0.0009848804049715132,
+            "global_rate_participation": 0.1324844132452703,
+            "source_mode_absolute_mass_A_B_surround_I": [
+              0.0024248011524822645,
+              0.00047534058092594384,
+              0.7079225693404326,
+              0.28917728892615935
+            ],
+            "sensitivity_to_global_feedback_multiplier": [
+              -0.003744521090312238,
+              0.0021130400124375975
+            ]
+          },
+          "rank_one_global_feedback": {
+            "eta": [
+              0.10844454037798887,
+              0.23073699656214935
+            ],
+            "one_minus_eta": [
+              0.8915554596220111,
+              -0.23073699656214935
+            ],
+            "firstorder_MC_SEM": 0.0015078153896496524,
+            "half_amplitude_eta": [
+              0.10746076199774793,
+              0.23076472410626064
+            ],
+            "amplitude_difference": 0.0009841690495702108
+          }
+        },
+        {
+          "frequency_Hz": 5,
+          "nearest_sampled_mode": {
+            "eigenvalue": [
+              0.9172065272783216,
+              -0.20671736334754398
+            ],
+            "distance_to_one": 0.22268099926728327,
+            "eigen_residual": 2.8143996343619967e-15,
+            "left_eigen_residual": 1.830156153618525e-15,
+            "eigenvalue_condition": 2.1932812777567623,
+            "firstorder_MC_eigenvalue_SEM": 0.0004432803018453135,
+            "half_amplitude_eigenvalue": [
+              0.9166371633724308,
+              -0.20585448920150268
+            ],
+            "amplitude_eigenvalue_difference": 0.0010337925561918757,
+            "global_rate_participation": 0.1886467610240444,
+            "source_mode_absolute_mass_A_B_surround_I": [
+              0.00020622651200632555,
+              0.00048424243271285005,
+              0.6829917685297836,
+              0.3163177625254972
+            ],
+            "sensitivity_to_global_feedback_multiplier": [
+              0.0006108428618374171,
+              0.0013884955415293715
+            ]
+          },
+          "rank_one_global_feedback": {
+            "eta": [
+              0.01672239172646256,
+              0.005470583363089402
+            ],
+            "one_minus_eta": [
+              0.9832776082735375,
+              -0.005470583363089402
+            ],
+            "firstorder_MC_SEM": 2.1914834220154602e-05,
+            "half_amplitude_eta": [
+              0.016741307963168073,
+              0.005485186660496508
+            ],
+            "amplitude_difference": 2.3897286587799267e-05
+          }
+        }
+      ],
+      "full_dynamic_stability": false,
+      "formal_bifurcation": false,
+      "selection": "Minimum complex distance to1 among the8computedmodes, not maximum realpart; frequencies0/1/5only."
+    },
+    "actual_G_prefix5s": {
+      "status": "COMPLETE_PRESPECIFIED_5S_PREFIX_ONLY",
+      "rows": [
+        {
+          "name": "exit_z0.21_k9_fields16p7_high",
+          "windows": [
+            {
+              "interval_s": [
+                0,
+                1
+              ],
+              "minimum_causal_R_Hz": 233.00684745454782,
+              "mean_causal_R_Hz": 241.0439281810524,
+              "mean_Graw": 4.411235018826133,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                -0.041999999999999836,
+                -0.03483387722099197,
+                -0.033073757753916404,
+                -0.04240772432635589
+              ]
+            },
+            {
+              "interval_s": [
+                1,
+                5
+              ],
+              "minimum_causal_R_Hz": 236.3777606037623,
+              "mean_causal_R_Hz": 243.42789450699223,
+              "mean_Graw": 4.289133856205766,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                -0.04199999999999982,
+                -0.03483387722099193,
+                -0.033073757753916404,
+                -0.04240772432635603
+              ]
+            }
+          ],
+          "completed_prefix_s": 5,
+          "complete30s_claim": false
+        },
+        {
+          "name": "exit_z0.21_k9_actualfield_G_zero",
+          "windows": [
+            {
+              "interval_s": [
+                0,
+                1
+              ],
+              "minimum_causal_R_Hz": 239.34301216417728,
+              "mean_causal_R_Hz": 283.014654960442,
+              "mean_Graw": 5.161412063047836,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                -0.034289521249999864,
+                -0.03483387722099197,
+                -0.033073757753916404,
+                -0.03430741835130659
+              ]
+            },
+            {
+              "interval_s": [
+                1,
+                5
+              ],
+              "minimum_causal_R_Hz": 226.9380625167063,
+              "mean_causal_R_Hz": 241.53222061062587,
+              "mean_Graw": 4.379057355751623,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                -0.04199999999999982,
+                -0.03483387722099193,
+                -0.033073757753916404,
+                -0.04240772432635603
+              ]
+            }
+          ],
+          "completed_prefix_s": 5,
+          "complete30s_claim": false
+        },
+        {
+          "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+          "windows": [
+            {
+              "interval_s": [
+                0,
+                1
+              ],
+              "minimum_causal_R_Hz": 107.1568480072617,
+              "mean_causal_R_Hz": 141.00640249014418,
+              "mean_Graw": 5.275223715051372,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                -0.01729389124999988,
+                -0.03483387722099197,
+                -0.033073757753916404,
+                -0.016452521437321014
+              ]
+            },
+            {
+              "interval_s": [
+                1,
+                5
+              ],
+              "minimum_causal_R_Hz": 122.75070895943593,
+              "mean_causal_R_Hz": 199.31763379054163,
+              "mean_Graw": 1.0111574164502493,
+              "sampled_R_below5_fraction": 0.0,
+              "counterfactual_dZ_allE_A_B_surround_per_s": [
+                0.04679585671875002,
+                -0.03483387722099193,
+                -0.033073757753916404,
+                0.05087748299472115
+              ]
+            }
+          ],
+          "completed_prefix_s": 5,
+          "complete30s_claim": false
+        }
+      ],
+      "future_input_samples_bitwise": 50,
+      "complete_30s_comparison_pending": true
+    },
+    "carried_K_control": {
+      "status": "COMPLETE",
+      "name": "control_K9",
+      "duration_s": 5.0,
+      "terminal2s_rates_allE_A_B_surround_Hz": [
+        244.11713394592175,
+        469.2223457415899,
+        474.29734312722576,
+        232.60528318720742
+      ],
+      "high_state_preserved": true,
+      "elapsed_s": 280.15405917167664,
+      "full_state_continuation": true,
+      "forced_K": true,
+      "formal_bifurcation_allowed": false
+    },
+    "carried_K_control_comparison": {
+      "status": "COMPLETE_CONTROL_ONLY",
+      "previous_timevarying_mean_last2s_rates": [
+        244.10685110949146,
+        469.2065809050851,
+        474.28212559591384,
+        232.59526338748864
+      ],
+      "constant_mean_last2s_rates": [
+        244.11713394592175,
+        469.2223457415899,
+        474.29734312722576,
+        232.60528318720742
+      ],
+      "weighted400field_RMS_Hz": 0.07249519687693491,
+      "previous_Graw": 4.494143137539873,
+      "control_Graw": 4.4932957890414755,
+      "scope": "One carried density trajectory, localGaussianstream continued, timevaryingexpectedexternalmean replaced byDirectDCstationarymean; not independentnative replication."
+    },
+    "local_branch_input_balance": {
+      "status": "COMPLETE_EXACT_LOCAL_INPUT_DECOMPOSITION",
+      "rows": [
+        {
+          "region": "CoreA",
+          "delta_drift_at_threshold_mV_equiv": {
+            "excitation_from_CoreA": -0.2472498606643915,
+            "excitation_from_CoreB": 0.0,
+            "excitation_from_surround": -1.0987771762257152,
+            "local_inhibition": 0.32387969820935114,
+            "M": 8.524020446430481e-05,
+            "global_G": 0.3377209695009983,
+            "K": -0.6572335295674904
+          },
+          "total_mean": -1.3415746585428003,
+          "old_mean_margin_mV_equiv": 652.9552079656719,
+          "new_mean_margin_mV_equiv": 651.6136333071291
+        },
+        {
+          "region": "CoreB",
+          "delta_drift_at_threshold_mV_equiv": {
+            "excitation_from_CoreA": 0.0,
+            "excitation_from_CoreB": -0.10074088446018727,
+            "excitation_from_surround": -0.2935841744407091,
+            "local_inhibition": 0.07304182936716926,
+            "M": 3.557699543958921e-05,
+            "global_G": 0.3209504958642474,
+            "K": -0.6658552571044974
+          },
+          "total_mean": -0.6661524137785627,
+          "old_mean_margin_mV_equiv": 690.4632219073746,
+          "new_mean_margin_mV_equiv": 689.7970694935962
+        },
+        {
+          "region": "surround",
+          "delta_drift_at_threshold_mV_equiv": {
+            "excitation_from_CoreA": -0.007615558656261686,
+            "excitation_from_CoreB": -0.003686234550948136,
+            "excitation_from_surround": -1.74506167797263,
+            "local_inhibition": 0.3682086627821807,
+            "M": 0.0002859892043702374,
+            "global_G": 0.4174569605231948,
+            "K": -0.5965108045492216
+          },
+          "total_mean": -1.566922663219313,
+          "old_mean_margin_mV_equiv": 110.81306551174802,
+          "new_mean_margin_mV_equiv": 109.24614284852872
+        }
+      ],
+      "reconstruction_max_error": 3.654354596704934e-12,
+      "scope": "Differences in supplied stationarymean input balance at grouptargetthresholds between two independentlychecked nearselfconsistent candidates. Not native current measurements, causal ablations or a termination prediction.",
+      "producer_sha256": "22e99343de2bf04bbfa540c641b425a051f6edf93140290d9f25578b117b0bec"
+    },
+    "fast_carried_K_ramp": {
+      "name": "ramp2s_K10p5",
+      "complete_duration_s": 7.0,
+      "final3s_rates_allE_A_B_surround_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "final3s_Graw": 0.0005515014743115326,
+      "final3s_dZ_per_s": [
+        0.15799999976530876,
+        0.16516612258687136,
+        0.16692624205092282,
+        0.15759227543686932
+      ],
+      "both_cores_sustained_low": {
+        "first_low_interval_s": [
+          1.28,
+          2.28
+        ],
+        "K_start": 9.96067500732839,
+        "K_confirmation": 10.499999987483024,
+        "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+      },
+      "low_transition_right_censored": false,
+      "imposedK_range": [
+        9.000675001963973,
+        10.499999987483024
+      ]
+    },
+    "paired_carried_K_ramps": {
+      "status": "COMPLETE",
+      "rows": [
+        {
+          "name": "control_K9",
+          "complete_duration_s": 5.0,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            244.1161348801279,
+            469.2272708824191,
+            474.2977506407374,
+            232.60410117909242
+          ],
+          "final3s_Graw": 4.493291316301376,
+          "final3s_dZ_per_s": [
+            -0.04200000010093,
+            -0.03483387689533427,
+            -0.03307375779645745,
+            -0.0424077244393564
+          ],
+          "both_cores_sustained_low": null,
+          "low_transition_right_censored": true,
+          "imposedK_range": [
+            8.999999996751546,
+            8.999999996751546
+          ]
+        },
+        {
+          "name": "ramp2s_K10p5",
+          "complete_duration_s": 7.0,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final3s_Graw": 0.0005515014743115326,
+          "final3s_dZ_per_s": [
+            0.15799999976530876,
+            0.16516612258687136,
+            0.16692624205092282,
+            0.15759227543686932
+          ],
+          "both_cores_sustained_low": {
+            "first_low_interval_s": [
+              1.28,
+              2.28
+            ],
+            "K_start": 9.96067500732839,
+            "K_confirmation": 10.499999987483024,
+            "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+          },
+          "low_transition_right_censored": false,
+          "imposedK_range": [
+            9.000675001963973,
+            10.499999987483024
+          ]
+        },
+        {
+          "name": "ramp10s_K10p5",
+          "complete_duration_s": 15.0,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final3s_Graw": 5.307294535997123e-10,
+          "final3s_dZ_per_s": [
+            0.15799999976530876,
+            0.16516612258687136,
+            0.16692624205092282,
+            0.15759227543686932
+          ],
+          "both_cores_sustained_low": {
+            "first_low_interval_s": [
+              4.58,
+              5.58
+            ],
+            "K_start": 9.687134994983673,
+            "K_confirmation": 9.836984989628196,
+            "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+          },
+          "low_transition_right_censored": false,
+          "imposedK_range": [
+            9.000135002449154,
+            10.499999987483024
+          ]
+        }
+      ],
+      "constant_drive_comparison": {
+        "original_last2s_rates_Hz": [
+          244.10685110949146,
+          469.2065809050851,
+          474.28212559591384,
+          232.59526338748864
+        ],
+        "constant_input_control_last2s_rates_Hz": [
+          244.11713394592175,
+          469.2223457415899,
+          474.29734312722576,
+          232.60528318720742
+        ],
+        "weighted_field_RMS_Hz": 0.07249519687693491,
+        "note": "This exposes replacing the prescribed time-varying external mean by the stationary mean used for DirectDC. It is not an independent native validation."
+      },
+      "statistical_unit": "One continued128replica density state, paired numerical streams across two forced ramps; no independent native seeds.",
+      "scope": "HeldZ and prescribedK; finite trajectories do not certify stationary branches, fold, Hopf, autonomous exit or Zrecovery.",
+      "formal_bifurcation_allowed": false,
+      "producer_sha256": "1e50f473bd4e6dda7d5c60b62bd2096dc8fab72f7f32d59d0e2a35c7a0066f2e"
+    },
+    "higher_K_holds": {
+      "status": "COMPLETE",
+      "rows": [
+        {
+          "name": "held_K9p5",
+          "complete_duration_s": 11.34,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final3s_Graw": 8.009240409308367e-07,
+          "final3s_dZ_per_s": [
+            0.15799999976530876,
+            0.16516612258687136,
+            0.16692624205092282,
+            0.15759227543686932
+          ],
+          "both_cores_sustained_low": {
+            "first_low_interval_s": [
+              5.159999999999999,
+              6.16
+            ],
+            "K_start": 9.500000005856156,
+            "K_confirmation": 9.500000005856156,
+            "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+          },
+          "low_transition_right_censored": false,
+          "imposedK_range": [
+            9.00013500599563,
+            9.500000005856156
+          ],
+          "K": 9.5,
+          "hold_at_least_s": 8.0,
+          "last_three_1s_regional_rates_Hz": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "final1s_minus_prior1s_field_RMS_Hz": 0.0,
+          "numerical_M_projection_RMS_Hz": 0.012430566086165027,
+          "M_minus_rate_regional_E": [
+            1.6657077951046653,
+            4.790125918798776,
+            4.165156951998515,
+            1.5238700307388109
+          ],
+          "both_cores_active_in_last3s": false,
+          "both_cores_low_in_last3s": true,
+          "stationary_root_or_stability_certified": false
+        },
+        {
+          "name": "held_K9p65",
+          "complete_duration_s": 12.34,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final3s_Graw": 1.0841526461882732e-07,
+          "final3s_dZ_per_s": [
+            0.15799999976530876,
+            0.16516612258687136,
+            0.16692624205092282,
+            0.15759227543686932
+          ],
+          "both_cores_sustained_low": {
+            "first_low_interval_s": [
+              4.6,
+              5.6
+            ],
+            "K_start": 9.650000001609325,
+            "K_confirmation": 9.650000001609325,
+            "definition": "Both core20msrates<5Hz throughout50consecutivebins; imposed parametertrajectory,not a bifurcation estimator."
+          },
+          "low_transition_right_censored": false,
+          "imposedK_range": [
+            9.000135005429387,
+            9.650000001609325
+          ],
+          "K": 9.65,
+          "hold_at_least_s": 8.0,
+          "last_three_1s_regional_rates_Hz": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "final1s_minus_prior1s_field_RMS_Hz": 0.0,
+          "numerical_M_projection_RMS_Hz": 0.002787962880559931,
+          "M_minus_rate_regional_E": [
+            0.38983352484879796,
+            1.0736711417170237,
+            1.0194556171472378,
+            0.3566589835597231
+          ],
+          "both_cores_active_in_last3s": false,
+          "both_cores_low_in_last3s": true,
+          "stationary_root_or_stability_certified": false
+        }
+      ],
+      "scope": "Two carried histories held8s after a forcedparameter approach. Last-window constancy is a descriptive check, not an equilibrium/stability proof. Zdrift remains counterfactual under its clamp.",
+      "formal_bifurcation_allowed": false,
+      "producer_sha256": "8aa42fa7e05f97b0e28e133616315b0035b9c555bf3af105297a6fa92f79ab3f"
+    },
+    "ramp_current_budget": {
+      "status": "COMPLETE_OBSERVED_DENSITY_CURRENT_BUDGET",
+      "rows": [
+        {
+          "name": "ramp2s_K10p5",
+          "windows": [
+            {
+              "label": "start",
+              "window_s": [
+                0,
+                0.02
+              ],
+              "mean_K": 9.007800000482051,
+              "mean_rates_allE_A_B_surround_Hz": [
+                244.04267584338382,
+                469.83794804803574,
+                474.830531502134,
+                232.49806357187745
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  778.4666655635817,
+                  1451.7419274772828,
+                  1491.0968875642343,
+                  743.4116129708227
+                ],
+                "local_inhibition": [
+                  -157.21970047975134,
+                  -280.41199141282294,
+                  -277.258577472017,
+                  -151.07270295252036
+                ],
+                "M": [
+                  -0.1220568894176243,
+                  -0.23461622023038586,
+                  -0.2371502028322099,
+                  -0.11630071476967004
+                ],
+                "global_G": [
+                  -33.62650813115264,
+                  -27.483456276729317,
+                  -26.118688862741113,
+                  -33.972306129944705
+                ],
+                "K": [
+                  -432.1184753626503,
+                  -473.6182548228347,
+                  -479.83127937052103,
+                  -429.86000203162064
+                ],
+                "leak": [
+                  -17.97481959483074,
+                  -17.460261847833202,
+                  -17.49260763526393,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                137.40510510577923,
+                652.5333468968321,
+                690.158584020859,
+                110.3903011419674
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.0454263275360066,
+                0.037232466663898144,
+                0.03540983500604831,
+                0.0458876254423138
+              ],
+              "counterfactual_Z_drift_per_s": [
+                -0.042000000100932085,
+                -0.03483387689533536,
+                -0.033073757796455897,
+                -0.04240772443935423
+              ]
+            },
+            {
+              "label": "approaching_core_exit",
+              "window_s": [
+                1.08,
+                1.18
+              ],
+              "mean_K": 9.847799999684394,
+              "mean_rates_allE_A_B_surround_Hz": [
+                83.86790527779529,
+                291.0546875638291,
+                295.6610808019223,
+                73.27406844898263
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  286.73314872273,
+                  855.7431036031907,
+                  939.307099886305,
+                  255.8087681713695
+                ],
+                "local_inhibition": [
+                  -56.24412982617296,
+                  -155.5527925029927,
+                  -174.0620798019477,
+                  -50.745651811094795
+                ],
+                "M": [
+                  -0.09771036467917678,
+                  -0.21726297678413697,
+                  -0.22897093686907055,
+                  -0.09136389457844149
+                ],
+                "global_G": [
+                  -7.736373329336005,
+                  -6.3230555283342404,
+                  -6.009066630612696,
+                  -7.815930279012691
+                ],
+                "K": [
+                  -472.4146097063819,
+                  -517.7843483961201,
+                  -524.5767517558942,
+                  -469.9455280706965
+                ],
+                "leak": [
+                  -17.97481959483072,
+                  -17.460261847833184,
+                  -17.492607635263944,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -267.73449409867095,
+                158.40538235112675,
+                216.93762312571695,
+                -290.78970588401285
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.045423892640043165,
+                0.03723073116600372,
+                0.035409016997651144,
+                0.045885131510901546
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.07967946120457876,
+                -0.034833876895335354,
+                -0.03307375779645584,
+                0.08542362033334268
+              ]
+            },
+            {
+              "label": "first_joint_core_low",
+              "window_s": [
+                1.28,
+                1.3
+              ],
+              "mean_K": 9.967799996878206,
+              "mean_rates_allE_A_B_surround_Hz": [
+                5.9807128937748715,
+                0.0,
+                0.6242048316632821,
+                6.2669792384474245
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  46.07190774206073,
+                  12.890066993141678,
+                  104.43702813911682,
+                  45.38721054221169
+                ],
+                "local_inhibition": [
+                  -9.825061713622988,
+                  -0.5131165998684,
+                  -36.05346513342008,
+                  -9.378761041522214
+                ],
+                "M": [
+                  -0.08665105654308695,
+                  -0.19048913675201978,
+                  -0.20601124795811776,
+                  -0.08100066183101376
+                ],
+                "global_G": [
+                  -5.608781923396402,
+                  -4.584142729187116,
+                  -4.3565043799609,
+                  -5.6664597993509025
+                ],
+                "K": [
+                  -478.1712001978244,
+                  -524.0937896496409,
+                  -530.9689618198489,
+                  -475.67203167905956
+                ],
+                "leak": [
+                  -17.97481959483074,
+                  -17.460261847833202,
+                  -17.49260763526393,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -465.59460674415703,
+                -533.9517329701399,
+                -484.6405220773352,
+                -463.41104263955185
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.045422786598625406,
+                0.037228053514235346,
+                0.035406720799140215,
+                0.04588409508398408
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.1353187180403091,
+                0.16516612258687896,
+                0.034764982666923974,
+                0.1371746042180953
+              ]
+            },
+            {
+              "label": "late_hold",
+              "window_s": [
+                6.0,
+                7.0
+              ],
+              "mean_K": 10.499999987483024,
+              "mean_rates_allE_A_B_surround_Hz": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  12.936396947251,
+                  12.885277775653158,
+                  12.927991533707699,
+                  12.937879235840287
+                ],
+                "local_inhibition": [
+                  -0.10944447816278915,
+                  -0.09035463040633812,
+                  -0.08595057410122128,
+                  -0.11052326850424526
+                ],
+                "M": [
+                  -0.0004931966963991729,
+                  -0.0010839881118100416,
+                  -0.001172318939558346,
+                  -0.00046104808148312253
+                ],
+                "global_G": [
+                  -0.00019660896832002364,
+                  -0.00016069149860464571,
+                  -0.0001527119155859613,
+                  -0.00019863079549055417
+                ],
+                "K": [
+                  -503.70167917241685,
+                  -552.0761657193788,
+                  -559.3184163914865,
+                  -501.0690751569892
+                ],
+                "leak": [
+                  -17.97481959483056,
+                  -17.460261847833145,
+                  -17.492607635263987,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -508.850236103837,
+                -556.7427491015791,
+                -563.9703080979899,
+                -506.2423788685214
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.04541416995097595,
+                0.03720911110513037,
+                0.03538623485764421,
+                0.04587604031713248
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.15799999976530837,
+                0.16516612258687824,
+                0.1669262420509287,
+                0.1575922754368805
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ramp10s_K10p5",
+          "windows": [
+            {
+              "label": "start",
+              "window_s": [
+                0,
+                0.02
+              ],
+              "mean_K": 9.001559999482334,
+              "mean_rates_allE_A_B_surround_Hz": [
+                244.12286380825577,
+                469.90167068178215,
+                474.8687985766025,
+                232.57974085649735
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  778.549165960379,
+                  1451.8421728402295,
+                  1491.1642386089454,
+                  743.4940650316469
+                ],
+                "local_inhibition": [
+                  -157.2268314439826,
+                  -280.42055783056776,
+                  -277.26396387697173,
+                  -151.07984340104707
+                ],
+                "M": [
+                  -0.12205715269190967,
+                  -0.23461644609385526,
+                  -0.237150350074671,
+                  -0.11630098196413827
+                ],
+                "global_G": [
+                  -33.62670926925942,
+                  -27.483620669961653,
+                  -26.11884509257056,
+                  -33.97250933645405
+                ],
+                "K": [
+                  -431.8191326022408,
+                  -473.29016383974476,
+                  -479.49888371753616,
+                  -429.5622238061245
+                ],
+                "leak": [
+                  -17.97481959483074,
+                  -17.460261847833202,
+                  -17.49260763526393,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                137.77961589737353,
+                652.9529522060285,
+                690.5527879365281,
+                110.76318750605705
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.045426327562336666,
+                0.03723246668648676,
+                0.03540983502077403,
+                0.04588762546903591
+              ],
+              "counterfactual_Z_drift_per_s": [
+                -0.042000000100932085,
+                -0.03483387689533536,
+                -0.033073757796455897,
+                -0.04240772443935423
+              ]
+            },
+            {
+              "label": "approaching_core_exit",
+              "window_s": [
+                4.38,
+                4.48
+              ],
+              "mean_K": 9.664560000043958,
+              "mean_rates_allE_A_B_surround_Hz": [
+                77.3154687716289,
+                254.6420134003377,
+                134.4024331705116,
+                71.45287623493917
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  260.61616560712463,
+                  789.4678561344704,
+                  484.5373999959154,
+                  241.74695139546316
+                ],
+                "local_inhibition": [
+                  -51.330717563024585,
+                  -150.2750695340008,
+                  -98.43151334918484,
+                  -47.66606664792159
+                ],
+                "M": [
+                  -0.07911983388653043,
+                  -0.2234142653475895,
+                  -0.2119869998405785,
+                  -0.07211945326402484
+                ],
+                "global_G": [
+                  -0.08999783482714077,
+                  -0.07355659852711702,
+                  -0.06990394117053038,
+                  -0.09092332703279776
+                ],
+                "K": [
+                  -463.6242958376053,
+                  -508.1498303658076,
+                  -514.8158465909947,
+                  -461.20115690371085
+                ],
+                "leak": [
+                  -17.97481959483072,
+                  -17.460261847833184,
+                  -17.492607635263944,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -272.48278505704985,
+                113.28572352295416,
+                -146.48445852053896,
+                -285.28331493646624
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.04542203340104,
+                0.03723134635637912,
+                0.03540731843409194,
+                0.045883206874306436
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.08847893878788238,
+                -0.034444495266113415,
+                -0.01724668626603482,
+                0.09424993716506856
+              ]
+            },
+            {
+              "label": "first_joint_core_low",
+              "window_s": [
+                4.58,
+                4.6
+              ],
+              "mean_K": 9.688560000331702,
+              "mean_rates_allE_A_B_surround_Hz": [
+                16.807604973501668,
+                0.0,
+                4.165175739404657,
+                17.549886113620527
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  77.62238148152085,
+                  12.886619435128228,
+                  130.02434683015932,
+                  77.87263820571486
+                ],
+                "local_inhibition": [
+                  -15.432934418974957,
+                  -1.3397493738750246,
+                  -39.001736867079,
+                  -15.17361671706411
+                ],
+                "M": [
+                  -0.07109055273593581,
+                  -0.19636855854671895,
+                  -0.1864108061268736,
+                  -0.0650136868282993
+                ],
+                "global_G": [
+                  -0.06524739792600047,
+                  -0.05332769019832585,
+                  -0.050679555512749316,
+                  -0.06591836915920737
+                ],
+                "K": [
+                  -464.77561397671917,
+                  -509.4117188971637,
+                  -516.0942884145725,
+                  -462.346457666208
+                ],
+                "leak": [
+                  -17.97481959483074,
+                  -17.460261847833202,
+                  -17.49260763526393,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -420.69732445966594,
+                -515.574806932489,
+                -442.8013764483955,
+                -417.7783682335447
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.04542123039262409,
+                0.03722864151521491,
+                0.03540476055893307,
+                0.04588249622659809
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.1314233664891684,
+                0.16516612258687896,
+                0.052144117617075283,
+                0.1326338540635542
+              ]
+            },
+            {
+              "label": "late_hold",
+              "window_s": [
+                14.0,
+                15.0
+              ],
+              "mean_K": 10.499999987483024,
+              "mean_rates_allE_A_B_surround_Hz": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "threshold_current_components_allE_A_B_surround_mV_equiv": {
+                "excitatory_input": [
+                  12.936531622188749,
+                  12.883662543917834,
+                  12.925776234573386,
+                  12.938117867089659
+                ],
+                "local_inhibition": [
+                  -0.10941616803021413,
+                  -0.09078837633927885,
+                  -0.08592550981983678,
+                  -0.11048343698255579
+                ],
+                "M": [
+                  -3.6856676696604935e-06,
+                  -1.0161085990455208e-05,
+                  -9.646193230608779e-06,
+                  -3.3715692289255997e-06
+                ],
+                "global_G": [
+                  -1.8920379217399002e-10,
+                  -1.5463913556899538e-10,
+                  -1.469600994598955e-10,
+                  -1.911494682591326e-10
+                ],
+                "K": [
+                  -503.70167917241685,
+                  -552.0761657193788,
+                  -559.3184163914865,
+                  -501.0690751569892
+                ],
+                "leak": [
+                  -17.97481959483056,
+                  -17.460261847833145,
+                  -17.492607635263987,
+                  -18.0
+                ]
+              },
+              "net_threshold_current_mV_equiv": [
+                -508.8493869989588,
+                -556.743563560876,
+                -563.9711829483277,
+                -506.2414440986338
+              ],
+              "bound_on_postupdate_alignment_error_mV_equiv": [
+                0.04541412099497753,
+                0.037209003711688504,
+                0.035386118578741695,
+                0.045875994544904077
+              ],
+              "counterfactual_Z_drift_per_s": [
+                0.15799999976530837,
+                0.16516612258687824,
+                0.1669262420509287,
+                0.1575922754368805
+              ]
+            }
+          ]
+        }
+      ],
+      "scope": "Current at a threshold reference, not average dV/dt. It shows the balance accompanying collapse, but separating mediated necessity from correlation still requires a targeted intervention. Not a native trajectory or autonomousZrecovery.",
+      "producer_sha256": "7dbcc381c336344c4cbf9000f58fa10477d878b3294007f73973ed8effe3d833"
+    },
+    "native_unclamped_flow": {
+      "status": "COMPLETE_REUSED_NATIVE_COUNTERFACTUAL_BUDGET",
+      "rows": [
+        {
+          "name": "exit_z0.21_k9_fields16p7_high",
+          "state": "sustained_high",
+          "window": [
+            20.0,
+            30.0
+          ],
+          "held_K": 9.0,
+          "regional_rate": [
+            242.57829687500012,
+            464.5328912466845,
+            470.7650127226468,
+            231.19587655942203
+          ],
+          "native_counterfactual_Z_K_drift": [
+            [
+              -0.04200000000000024,
+              -12.38688183359338
+            ],
+            [
+              -0.03483387722099196,
+              -9.197639681193634
+            ],
+            [
+              -0.03307375775391635,
+              -9.29509780803218
+            ],
+            [
+              -0.04240772432635607,
+              -12.545609043934832
+            ]
+          ]
+        },
+        {
+          "name": "exit_z0.21_k9_fields16p7_recovery",
+          "state": "quiet",
+          "window": [
+            20.0,
+            30.0
+          ],
+          "held_K": 9.0,
+          "regional_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "native_counterfactual_Z_K_drift": [
+            [
+              0.15800000000000117,
+              -1.799982000110244
+            ],
+            [
+              0.1651661227790085,
+              -1.9943859090487586
+            ],
+            [
+              0.16692624224608293,
+              -2.019140962632008
+            ],
+            [
+              0.15759227567364462,
+              -1.7895145184332057
+            ]
+          ]
+        },
+        {
+          "name": "exit_z0.21_k10.5_fields16p7_high",
+          "state": "quiet",
+          "window": [
+            20.0,
+            30.0
+          ],
+          "held_K": 10.5,
+          "regional_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "native_counterfactual_Z_K_drift": [
+            [
+              0.15800000000000117,
+              -2.0999790001285694
+            ],
+            [
+              0.1651661227790085,
+              -2.32678356055683
+            ],
+            [
+              0.16692624224608293,
+              -2.355664456404003
+            ],
+            [
+              0.15759227567364462,
+              -2.0877669381720807
+            ]
+          ]
+        }
+      ],
+      "scope": "Originalnative per-step budgets evaluated under held Z/K, not observed released evolution. Tests whether conditional persistence can be equated to a stationary state of the full autonomous model."
+    },
+    "lower_K_holds": {
+      "status": "COMPLETE",
+      "rows": [
+        {
+          "name": "held_K9p2",
+          "complete_duration_s": 9.34,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            210.97011876546208,
+            473.8954709983921,
+            475.22758719474734,
+            197.64273577895364
+          ],
+          "final3s_Graw": 1.1674867815179748,
+          "final3s_dZ_per_s": [
+            0.03110895764590229,
+            -0.03483387689533427,
+            -0.03307375779645745,
+            0.03439748396178502
+          ],
+          "both_cores_sustained_low": null,
+          "low_transition_right_censored": true,
+          "imposedK_range": [
+            9.000135006472469,
+            9.200000005126
+          ],
+          "K": 9.2,
+          "hold_at_least_s": 8.0,
+          "last_three_1s_regional_rates_Hz": [
+            [
+              210.9658603841649,
+              473.89336075829704,
+              475.2341573340669,
+              197.63814480029367
+            ],
+            [
+              210.97276492273772,
+              473.897816114943,
+              475.22785550264547,
+              197.64545074694226
+            ],
+            [
+              210.97173098948494,
+              473.89523612193346,
+              475.2207487475317,
+              197.6446117896264
+            ]
+          ],
+          "final1s_minus_prior1s_field_RMS_Hz": 0.03517980738598626,
+          "numerical_M_projection_RMS_Hz": 0.005432328518743172,
+          "M_minus_rate_regional_E": [
+            0.03784207199694619,
+            -0.02998198120562701,
+            -0.011350404085340495,
+            0.040790352440656576
+          ],
+          "both_cores_active_in_last3s": true,
+          "both_cores_low_in_last3s": false,
+          "stationary_root_or_stability_certified": false
+        },
+        {
+          "name": "held_K9p35",
+          "complete_duration_s": 10.34,
+          "final3s_rates_allE_A_B_surround_Hz": [
+            200.44956269190124,
+            472.3095266315564,
+            475.0006668157331,
+            186.63539392460643
+          ],
+          "final3s_Graw": 0.11203524614145126,
+          "final3s_dZ_per_s": [
+            0.03817303913781588,
+            -0.03483387689533427,
+            -0.03307375779645745,
+            0.041818712055719215
+          ],
+          "both_cores_sustained_low": null,
+          "low_transition_right_censored": true,
+          "imposedK_range": [
+            9.00013500599563,
+            9.350000001579524
+          ],
+          "K": 9.35,
+          "hold_at_least_s": 8.0,
+          "last_three_1s_regional_rates_Hz": [
+            [
+              200.4523896784258,
+              472.31531863775024,
+              475.0009053733452,
+              186.6382143083819
+            ],
+            [
+              200.4486274716896,
+              472.3137748033722,
+              474.99819185552013,
+              186.63437012783606
+            ],
+            [
+              200.4476709255906,
+              472.29948645354773,
+              475.00290321833336,
+              186.6335973376006
+            ]
+          ],
+          "final1s_minus_prior1s_field_RMS_Hz": 0.055867025041267684,
+          "numerical_M_projection_RMS_Hz": 0.004667429777769886,
+          "M_minus_rate_regional_E": [
+            0.01817907311579278,
+            -0.009675580002655549,
+            -0.005299356597164598,
+            0.019474426175730215
+          ],
+          "both_cores_active_in_last3s": true,
+          "both_cores_low_in_last3s": false,
+          "stationary_root_or_stability_certified": false
+        }
+      ],
+      "scope": "Two carried histories held8s after a forcedparameter approach. Last-window constancy is a descriptive check, not an equilibrium/stability proof. Zdrift remains counterfactual under its clamp.",
+      "formal_bifurcation_allowed": false,
+      "producer_sha256": "8aa42fa7e05f97b0e28e133616315b0035b9c555bf3af105297a6fa92f79ab3f"
+    },
+    "actual_G_history": {
+      "status": "COMPLETE_ACTUAL_FIELD_G_HISTORY_COMPARISON",
+      "analysis": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_actual_G_history_probes/G_history_comparison/analysis.json"
+    },
+    "held_K9p35_stationarity": {
+      "status": "COMPLETE_FRESH_HELD_STATE_RESPONSE",
+      "K": 9.35,
+      "rows": [
+        {
+          "region": "allE",
+          "observed_density_rate_Hz": 200.44956269190197,
+          "direct_rate_Hz": 200.44501860046387,
+          "group_residual_weighted_RMS_Hz": 0.030762384862909185,
+          "maximum_group_residual_Hz": 0.33334641520184505,
+          "group_MC_SEM_weighted_RMS_Hz": 0.004636354974694407,
+          "groups_outside6MC_SEM": 297,
+          "groups": 1885
+        },
+        {
+          "region": "coreA",
+          "observed_density_rate_Hz": 472.3095266315567,
+          "direct_rate_Hz": 472.24319644189325,
+          "group_residual_weighted_RMS_Hz": 0.12395111021226413,
+          "maximum_group_residual_Hz": 0.33334060668943266,
+          "group_MC_SEM_weighted_RMS_Hz": 0.003945772896339447,
+          "groups_outside6MC_SEM": 106,
+          "groups": 172
+        },
+        {
+          "region": "coreB",
+          "observed_density_rate_Hz": 475.0006668157329,
+          "direct_rate_Hz": 474.9320823145277,
+          "group_residual_weighted_RMS_Hz": 0.13135888996489714,
+          "maximum_group_residual_Hz": 0.33334641520184505,
+          "group_MC_SEM_weighted_RMS_Hz": 0.0030421874921214747,
+          "groups_outside6MC_SEM": 105,
+          "groups": 171
+        },
+        {
+          "region": "surround",
+          "observed_density_rate_Hz": 186.63539392460615,
+          "direct_rate_Hz": 186.63403179246347,
+          "group_residual_weighted_RMS_Hz": 0.012984485349012913,
+          "maximum_group_residual_Hz": 0.11773840684156767,
+          "group_MC_SEM_weighted_RMS_Hz": 0.004685975093223056,
+          "groups_outside6MC_SEM": 86,
+          "groups": 1542
+        },
+        {
+          "region": "I",
+          "observed_density_rate_Hz": 255.20435025708943,
+          "direct_rate_Hz": 255.19759197998047,
+          "group_residual_weighted_RMS_Hz": 0.22367244169560446,
+          "maximum_group_residual_Hz": 1.5511067708333712,
+          "group_MC_SEM_weighted_RMS_Hz": 0.09147518946001279,
+          "groups_outside6MC_SEM": 29,
+          "groups": 1594
+        }
+      ],
+      "stationary_Graw": 0.11184703061128687,
+      "implied_Graw": 0.11139110508733267,
+      "individual_E_M_residual_RMS_Hz": 0.21517281020459433,
+      "field_RMS_Hz": 0.01752612429536804,
+      "root_certified": false,
+      "dynamic_stability_established": false,
+      "formal_bifurcation_allowed": false,
+      "interpretation": "Finite nonlinear response residual at the actual near-exit held state. SEM measures fresh count uncertainty only; finite observation, fixedM, upstream mean and closure errors remain explicit.",
+      "producer_sha256": "6740cadb648a15bef4025dd11d35fdb468360ebcaaaff8066c4aa60c93fa57c2"
+    },
+    "phase_window_audit": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_response_window_audit/result.json",
+    "phase_observer_validation": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_phase_response_validation/review.json",
+    "held_exit_DC_K9p35": {
+      "status": "COMPLETE_DC_OPERATOR_AND_UNVALIDATED_STEP",
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_dc_K9p35/analysis.json",
+      "old_value_proposal_not_promotable": true
+    },
+    "phase_repaired_alltarget_values": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_phase_stationarity_K9p35/result.json",
+    "phase_current_point_QA": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_phase_dc_operator_K9p35/joint_operator_qa.json",
+    "current_K_tangent": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_K9p35_tangent/result.json",
+    "fresh_phase_correction": {
+      "status": "NEAR_SELFCONSISTENT_AT_RECORDED_SAMPLING_PRECISION",
+      "rows": [
+        {
+          "population": "E",
+          "previous_source_RMS_Hz": 0.016927877784649686,
+          "source_residual_RMS_Hz": 0.0031342933275634627,
+          "combined_sampling_SEM_RMS_Hz": 0.003252672728644364,
+          "groups_outside6combinedSEM": 0,
+          "maximum_residual_Hz": 0.03241171637944262
+        },
+        {
+          "population": "I",
+          "previous_source_RMS_Hz": 0.21393864139550636,
+          "source_residual_RMS_Hz": 0.06608029651682262,
+          "combined_sampling_SEM_RMS_Hz": 0.06480589692733213,
+          "groups_outside6combinedSEM": 0,
+          "maximum_residual_Hz": 0.3601004205639242
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.01431120429325546,
+      "E_target_combined_SEM_RMS_Hz": 0.014160489197506742,
+      "near_selfconsistent": true,
+      "root_certified": false,
+      "stability_established": false,
+      "formal_bifurcation_allowed": false,
+      "interpretation": "Fresh nonlinear validation of one bounded phase-aware correction. A finiteprecision pass does not prove mathematical bifurcation or native state correspondence.",
+      "producer_sha256": "bcdc18733f5a9562e6c039e93ce67e6b5b23602cd92adfb1bc6cb286b7969cd9"
+    }
+  },
+  "rejected_proxy": {
+    "root_count": 22,
+    "reason": "Independent actual-domain E DC derivatives only2/32estimablepassed; firstturnmainlysurround; continuation stopped",
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_exit_equilibrium_branch_v2"
+  },
+  "next": "Complete original-network heldK9-history toK9.35 reachability and matched density; resolve remaining spatial mismatch before formal continuation.",
+  "current_figure": "figures/native_density_K9p35_protocol.png",
+  "companion_figure": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/figures/native_initial_G_history.png",
+  "pending_analysis": [
+    "native_K9p35_held_history/history_comparison/result.json",
+    "density_K9p35_held_history/comparison/result.json"
+  ],
+  "latest_completed_evidence": [
+    "native_exit_K_bracket/density_correspondence/result.json",
+    "native_exit_K_bracket/unclamped_flow/result.json",
+    "density_exit_bracket_protocol/comparison/result.json",
+    "G_activation_rectification/result.json",
+    "native_exit_bracket_review.md"
+  ]
+}

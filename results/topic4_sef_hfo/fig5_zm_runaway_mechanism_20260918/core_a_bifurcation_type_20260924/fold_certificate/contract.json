@@ -1,0 +1,10 @@
+{
+  "question": "Is the actual local-resource equilibrium turn a nondegenerate saddle-node, and where is its spatial zero mode?",
+  "source_points": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/equilibrium_branch/point010.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/equilibrium_branch/point011.npz"
+  ],
+  "method": "Root of D_A tangent along a pseudo-arclength chart of F(q,D_A)=0. Check original physical residual, left/right zero modes, single zero eigenvalue, nonzero parameter transversality and quadratic coefficient under finite-difference refinement, and nonzero temporal characteristic derivative at lambda=0 for both time steps and continuous limit.",
+  "interpretation": "Certifies an equilibrium bifurcation of this complete fixed-Z/dynamic-M system only. Attractor relevance and native onset attribution require separate evidence; a critical symbol is not promoted to the onset diagram solely by this certificate.",
+  "model_promoted": false
+}

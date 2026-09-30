@@ -1,0 +1,17 @@
+{
+  "stage": "EXPLICIT_FIELD_FILE_ROUTE_QA",
+  "question": "Same t20field route must reproduce prior0.2s complete state and streams.",
+  "rows": [
+    {
+      "name": "qa_high",
+      "Z": 0.75,
+      "K": 2.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "duration_s": 0.2,
+      "reason": "Route QA with unchanged fields."
+    }
+  ]
+}

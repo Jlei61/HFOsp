@@ -1,0 +1,6 @@
+{
+  "status": "ANALYSIS_ONLY_INPUT_COLUMN_REPAIR",
+  "updated_epoch": 1790573658.7183526,
+  "cause": "analyze_native.analyze returns only the3inputvalue columns; attempted comparison with full4column raw records including time failed before result/figure. Direct raw100x4 comparisons showed all values and times bitwiseidentical.",
+  "change": "Compare returned3value columns with reference[:,1:], assert exactshape and referenceclock. Native/model simulations unchanged; no gate relaxed."
+}

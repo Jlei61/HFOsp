@@ -1,0 +1,8 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/replay_difference_diagnostic",
+  "original_failed_replay": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/three_burst_seed/jobs.json",
+  "question": "Does the separately completed diagnostic replay actually meet all the already declared source-identity bounds, and do the complete candidate nodes reproduce10ms flows on restored repetition?",
+  "acceptance": "Unchanged per-saved-value onefloat32ULP+1e-12Hz bound, unchanged fullfloat64 endpoint combined<1e-10/everyblock<1e-9. In addition, three10ms replays at every one of6nodes must have exact restored initial arrays and agree componentwise<=1e-14+1e-12*abs(reference); Z/clock/parameters exact. Failure never licenses correction.",
+  "limitation": "Earlier attempt failed at15210ms in one weak-rate group, and its cause is unresolved. This separate successful source comparison neither erases that failure nor establishes deterministic bitwise reproducibility universally. Final periodic, independent phase/mesh and derivative gates remain unchanged.",
+  "model_promoted": false
+}

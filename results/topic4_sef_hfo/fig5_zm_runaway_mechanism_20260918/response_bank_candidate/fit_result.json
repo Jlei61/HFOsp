@@ -1,0 +1,237 @@
+{
+  "status": "TRAINING_FIT_COMPLETE",
+  "rows": [
+    {
+      "pop": "E",
+      "channel": 0,
+      "eligible_workpoints": 523,
+      "total_grid_points": 576,
+      "chosen_smoothing": 1,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 14.371289833725509,
+          "linear_residual": 1.6973420148049284e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 4.868728543226244,
+          "linear_residual": 5.307316485673118e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 5.223219556872042,
+          "linear_residual": 6.143048271048174e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 7.133486799008449,
+          "linear_residual": 6.73315953082181e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 13.604792815849482,
+          "linear_residual": 3.2019182897233513e-15
+        }
+      ],
+      "final_linear_residual": 5.534294418942401e-16,
+      "median_training_relative_RMS": 0.02299567947578488,
+      "p90_training_relative_RMS": 0.059415561862699265,
+      "max_coefficient": 10.981736730510725
+    },
+    {
+      "pop": "E",
+      "channel": 1,
+      "eligible_workpoints": 389,
+      "total_grid_points": 576,
+      "chosen_smoothing": 0,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 2.7647339573949896,
+          "linear_residual": 1.4400359120436244e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 3.096928928805216,
+          "linear_residual": 4.864067799602751e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 4.436086785700026,
+          "linear_residual": 6.280488640943522e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 7.481461984701525,
+          "linear_residual": 6.538430538077034e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 12.258148358979456,
+          "linear_residual": 7.715774045639933e-16
+        }
+      ],
+      "final_linear_residual": 1.3690738702654468e-16,
+      "median_training_relative_RMS": 0.03129375936170617,
+      "p90_training_relative_RMS": 0.0948132089199332,
+      "max_coefficient": 106.87335113553162
+    },
+    {
+      "pop": "E",
+      "channel": 2,
+      "eligible_workpoints": 214,
+      "total_grid_points": 576,
+      "chosen_smoothing": 1,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 2.6213842271972054,
+          "linear_residual": 2.655259836378772e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 2.4910839503132443,
+          "linear_residual": 7.946615899233177e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 2.61678509309811,
+          "linear_residual": 7.989083103655113e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 3.0091362354984845,
+          "linear_residual": 8.047114015161435e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 3.768308283480966,
+          "linear_residual": 1.0148061876935676e-15
+        }
+      ],
+      "final_linear_residual": 7.111735732652415e-16,
+      "median_training_relative_RMS": 0.13867643407614777,
+      "p90_training_relative_RMS": 0.3207587360498969,
+      "max_coefficient": 3.544745913811454
+    },
+    {
+      "pop": "I",
+      "channel": 0,
+      "eligible_workpoints": 395,
+      "total_grid_points": 450,
+      "chosen_smoothing": 10,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 8.831881109739893,
+          "linear_residual": 1.5917054870862164e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 8.49419592042127,
+          "linear_residual": 4.954598042807368e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 7.770516513066549,
+          "linear_residual": 5.622529231087164e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 8.848727951597148,
+          "linear_residual": 5.324109254636478e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 18.197540452090674,
+          "linear_residual": 8.948162756581917e-16
+        }
+      ],
+      "final_linear_residual": 5.23162481853298e-16,
+      "median_training_relative_RMS": 0.0144638670920932,
+      "p90_training_relative_RMS": 0.04094550808263076,
+      "max_coefficient": 3.5807639757765957
+    },
+    {
+      "pop": "I",
+      "channel": 1,
+      "eligible_workpoints": 287,
+      "total_grid_points": 450,
+      "chosen_smoothing": 0,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 2.9563878757688506,
+          "linear_residual": 1.464662724838499e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 3.4448685869172166,
+          "linear_residual": 6.376849750948983e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 6.061315632377395,
+          "linear_residual": 6.812892922965221e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 10.189279252189884,
+          "linear_residual": 5.934006457185749e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 15.498822990470872,
+          "linear_residual": 5.734716309587202e-16
+        }
+      ],
+      "final_linear_residual": 1.4684415792033465e-16,
+      "median_training_relative_RMS": 0.028039962068297782,
+      "p90_training_relative_RMS": 0.0848856434460269,
+      "max_coefficient": 52.69812506954336
+    },
+    {
+      "pop": "I",
+      "channel": 2,
+      "eligible_workpoints": 203,
+      "total_grid_points": 450,
+      "chosen_smoothing": 10,
+      "selection": [
+        {
+          "smoothing": 0,
+          "training_frequency_holdout_weighted_MSE": 1.9204873377253744,
+          "linear_residual": 2.0333292930554825e-16
+        },
+        {
+          "smoothing": 1,
+          "training_frequency_holdout_weighted_MSE": 1.8653316089390868,
+          "linear_residual": 7.120390354104607e-16
+        },
+        {
+          "smoothing": 10,
+          "training_frequency_holdout_weighted_MSE": 1.8647086536377466,
+          "linear_residual": 7.493636758476897e-16
+        },
+        {
+          "smoothing": 100,
+          "training_frequency_holdout_weighted_MSE": 2.0574686997381013,
+          "linear_residual": 7.082551011159492e-16
+        },
+        {
+          "smoothing": 1000,
+          "training_frequency_holdout_weighted_MSE": 2.524910218807349,
+          "linear_residual": 7.516406054947206e-16
+        }
+      ],
+      "final_linear_residual": 6.397014759280412e-16,
+      "median_training_relative_RMS": 0.09130160623119175,
+      "p90_training_relative_RMS": 0.25833541203192534,
+      "max_coefficient": 1.2027543443369577
+    }
+  ],
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/rows.json",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/response_bank_candidate_contract.json",
+  "validation": "NOT_YET_RUN",
+  "scope": "One response candidate trained only on single-cell assays; no network or bifurcation acceptance."
+}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "schur_condition": 2.8552294805626124,
+  "checks": [
+    {
+      "direction": 0,
+      "approximate_operator_inverse_error": 7.500814564634846e-17
+    },
+    {
+      "direction": 1,
+      "approximate_operator_inverse_error": 1.0952064353896102e-16
+    }
+  ],
+  "scope": "Exact inverse of the stated approximate numerical operator; the original full variational equation still controls every Newton update. Not a physical eigenvalue or stability test."
+}

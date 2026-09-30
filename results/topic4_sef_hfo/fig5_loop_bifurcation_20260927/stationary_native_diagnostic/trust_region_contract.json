@@ -1,0 +1,8 @@
+{
+  "status": "NUMERICAL_FALLBACK_ONLY",
+  "source_sha256": "88ae0bd3358a5c8bdfd24c2be849fa1d0353e0898b89aa974f8bd9f0a6371941",
+  "reason": "Newton initialization reaches a near-zero I rate where positivity backtracking stalls. The subsequent I-only Newton also cannot advance. This says nothing about equilibrium existence.",
+  "fixed": "Exactly same staticv3 equations,Z.21/K9,graph,meaninput. No fit or change to transfer,fields or parameters.",
+  "solver": "One bounded scipyTRF least_squares with analytic same-equation sparseJacobian,maximum200functionevaluations. Initialrateminimum1e-5/ms only keeps the optimizer interior; residual equation is unmodified and bounds remain0..refractoryceiling.",
+  "acceptance": "Maximum residual<1e-6Hz to count as a numerical root; optimizer success or small spatial difference alone is insufficient. No stability or bifurcation."
+}

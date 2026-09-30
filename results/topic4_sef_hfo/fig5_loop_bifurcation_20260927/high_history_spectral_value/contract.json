@@ -1,0 +1,19 @@
+{
+  "status": "REGISTERED_BEFORE_SECOND_HISTORY_RESPONSE",
+  "created_epoch": 1790558148.3725958,
+  "question": "Does the unchanged individual-source spectral map retain the native double-core high-history state and the correct G-off segment at the same held Z/K and fixed external mean?",
+  "design": "Exactly one response F(X_native_high), 40000 targets times64 numerical replicas, from the completed72-74s native source record. Reuse original weights, individual thresholds, filters and unchanged sampler. Same2s FFT,3-4s burn, dynamicM and stationaryG protocol. No damping, root solve, new parameter, or automatic next generation.",
+  "interpretation": "Development-anchor local response, not independent self-consistency or physical stability. Native sources provide the initial candidate only; one returned output does not certify a self-generated solution. Compare both native variable-background2s anchor and completed constant-background10s tail explicitly.",
+  "decision": "If either core, spatial recruitment, G segment or counterfactual coreZ drift fails correspondence, stop root refinement and diagnose that failure. Retained state permits further bounded work but is not a formal gate pass.",
+  "uncertainty": "64 independent numerical target replicas do not constitute native seeds. Source cross spectra and shared-input correlations omitted; finite2s periodic drive remains an approximation.",
+  "unit": "One second native conditional history at the existing Z0.21/K9.35 spatial field family.",
+  "replicas": 64,
+  "generations": 1,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_high_history_source_spectra",
+  "source_spikes_sha256": "8217f1915a21ab406e224469a0d77b01899247ff4b0d1f4eb5aec78d54ac798c",
+  "unchanged_map_sha256": "84e1917e21a5159e3abcd09785e0a02c1c07faaa90ae7bfd41117267e83827d7",
+  "sampler_sha256": "7de8f5cb04ac657aa40650426b60f4011b1212d1e2206d5401f1a7139a8ed3d2",
+  "producer_sha256": "54d68669b3af06d61aa790e3b98e8f5b9c52bffabdce4a61d51de10f2f75df52",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

@@ -1,0 +1,49 @@
+{
+  "status": "SAME_J_PHYSICAL_PROFILE_CHECKED",
+  "index": 45,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0019_N256.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0019_N256_accuracy_N1024_accuracy_N2048.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0019_N256_accuracy_N1024.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0019_N256_accuracy_N1024_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 1.1038840435091706,
+    "T_ms": 255.88017696436995,
+    "maximum_group_defect_Hz": 1.2334300247829333e-09,
+    "regional_defect_Hz": [
+      2.5069860165122914e-13,
+      1.0589052253078373e-12,
+      3.685231012897784e-12
+    ],
+    "minimum_rate_Hz": 5.3666265769939324e-05,
+    "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+    "harmonic_chunk_size": 32,
+    "phase_chunk_size": 512,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -4.614177421223553e-11,
+        "phase_index": 2780,
+        "group": 554
+      },
+      "slow": {
+        "minimum_Hz": 7.296955439742899e-05,
+        "phase_index": 3061,
+        "group": 380
+      },
+      "positive": true,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "relative_waveform_change": 0.0006154792589062706,
+  "relative_period_change": 2.4862237824052613e-08,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 96
+    }
+  ],
+  "scope": "Physical periodic profile only. The queued original Floquet survey must compute stability on this corrected profile."
+}

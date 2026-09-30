@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "model": "linear",
+      "maximum_delay_error_mv_per_ms": 4.263256414560601e-14,
+      "stationary_rate_error_per_ms": 0.0,
+      "pass": true
+    },
+    {
+      "model": "nonlinear",
+      "maximum_delay_error_mv_per_ms": 4.973799150320701e-14,
+      "stationary_rate_error_per_ms": 2.220446049250313e-16,
+      "pass": true
+    }
+  ],
+  "scope": "Numerical and source-operator checks, not model dynamics acceptance"
+}

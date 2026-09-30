@@ -1,0 +1,105 @@
+{
+  "status": "COMPLETE_REUSED_NATIVE_COUNTERFACTUAL_BUDGET",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "state": "sustained_high",
+      "window": [
+        20.0,
+        30.0
+      ],
+      "held_K": 9.0,
+      "regional_rate": [
+        242.57829687500012,
+        464.5328912466845,
+        470.7650127226468,
+        231.19587655942203
+      ],
+      "native_counterfactual_Z_K_drift": [
+        [
+          -0.04200000000000024,
+          -12.38688183359338
+        ],
+        [
+          -0.03483387722099196,
+          -9.197639681193634
+        ],
+        [
+          -0.03307375775391635,
+          -9.29509780803218
+        ],
+        [
+          -0.04240772432635607,
+          -12.545609043934832
+        ]
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_recovery",
+      "state": "quiet",
+      "window": [
+        20.0,
+        30.0
+      ],
+      "held_K": 9.0,
+      "regional_rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "native_counterfactual_Z_K_drift": [
+        [
+          0.15800000000000117,
+          -1.799982000110244
+        ],
+        [
+          0.1651661227790085,
+          -1.9943859090487586
+        ],
+        [
+          0.16692624224608293,
+          -2.019140962632008
+        ],
+        [
+          0.15759227567364462,
+          -1.7895145184332057
+        ]
+      ]
+    },
+    {
+      "name": "exit_z0.21_k10.5_fields16p7_high",
+      "state": "quiet",
+      "window": [
+        20.0,
+        30.0
+      ],
+      "held_K": 10.5,
+      "regional_rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "native_counterfactual_Z_K_drift": [
+        [
+          0.15800000000000117,
+          -2.0999790001285694
+        ],
+        [
+          0.1651661227790085,
+          -2.32678356055683
+        ],
+        [
+          0.16692624224608293,
+          -2.355664456404003
+        ],
+        [
+          0.15759227567364462,
+          -2.0877669381720807
+        ]
+      ]
+    }
+  ],
+  "scope": "Originalnative per-step budgets evaluated under held Z/K, not observed released evolution. Tests whether conditional persistence can be equated to a stationary state of the full autonomous model."
+}

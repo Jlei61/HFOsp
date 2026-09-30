@@ -1,0 +1,42 @@
+{
+  "label": "PD_double_upper",
+  "N": 8192,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048_accuracy_N8192.npz",
+  "source_root_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+  "source_root_N": 2048,
+  "J_EE_core": 0.944728374157131,
+  "T_ms": 761.9648707039768,
+  "continuous_check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048_accuracy_N8192.npz",
+    "N": 8192,
+    "check_N": 32768,
+    "J_EE_core": 0.944728374157131,
+    "T_ms": 761.9648707039768,
+    "maximum_group_defect_Hz": 1.5543122344752192e-12,
+    "regional_defect_Hz": [
+      2.5867350896726984e-13,
+      2.820051232397105e-13,
+      3.3846046733314484e-14
+    ],
+    "minimum_rate_Hz": 2.4157040779196337e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -7.771561172376096e-13,
+        "phase_index": 19071,
+        "group": 571
+      },
+      "slow": {
+        "minimum_Hz": 3.325654068450645e-05,
+        "phase_index": 4312,
+        "group": 379
+      },
+      "positive": true,
+      "N": 8192,
+      "check_N": 32768
+    }
+  },
+  "relative_waveform_change": 1.750177734369503e-06,
+  "relative_period_change": 4.02355926354403e-12,
+  "antiperiodic_relative_residual": 9.244057253816305e-05,
+  "status": "FINE_CRITICAL_MODE_CORRECTION_REQUIRED"
+}

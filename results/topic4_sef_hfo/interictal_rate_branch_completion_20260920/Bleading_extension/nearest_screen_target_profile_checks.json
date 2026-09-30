@@ -1,0 +1,45 @@
+{
+  "rows": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256.npz",
+      "J_EE_core": 0.9645924161605287,
+      "T_ms": 270.87976814483034,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -2.0507628985372195,
+          "phase_index": 183,
+          "group": 647
+        },
+        "slow": {
+          "minimum_Hz": -0.024659771996708324,
+          "phase_index": 199,
+          "group": 15
+        },
+        "positive": false,
+        "N": 256,
+        "check_N": 1024
+      }
+    },
+    {
+      "orbit": "/data/hfosp/rate_periodic_arrays/orbits/arcB_0087_N64_accuracy_N128_attempt_1789852759717667833.npz",
+      "J_EE_core": 0.9600733875691013,
+      "T_ms": 282.8074647560975,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": 0.00020728792724370625,
+          "phase_index": 184,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.006904219442191815,
+          "phase_index": 223,
+          "group": 17
+        },
+        "positive": true,
+        "N": 128,
+        "check_N": 512
+      }
+    }
+  ],
+  "scope": "CPU constituent-filter check on nearest cached screen targets; no corrected target, continuous-defect or global-connection claim."
+}

@@ -1,0 +1,38 @@
+{
+  "created_local": "2026-09-23T14:10:28.873357+08:00",
+  "question": "Does supplying the native spatial Z history remove the early-entry error in the fixed transient-corrected rate network?",
+  "authorization": "User continued the autonomous model/onset investigation after being told the remaining local failure and missing whole-network validation. This new diagnostic extends the previous local-only batch; its failed acceptance and no-promotion decision remain unchanged.",
+  "design_revision": "After the completed free run entered near7.67s, distinguish wrong endogenous Z path from conditional fast/M response. One prescribed-slow-input experiment; no local-response or physical parameter retuning.",
+  "local_failure": "Early weak surround E group531 fails the original waveform gate; 13/14 fresh local inputs pass. All numerical convergence checks pass. No refit or tolerance change.",
+  "parameters": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_response_correction/locked.json",
+  "parameter_sha256": "f5cf0f3128658c02ffca2d92c08cbcb2a4be33c040eae767164a84021cf37044",
+  "changed": "Replace only the endogenous Z evolution with the original native per-E-cell Z projected onto the same g40 groups, linearly interpolated between actual5/10ms native observations and represented on a5ms grid; original final12500ms checkpoint supplies the endpoint.",
+  "unchanged": "Same physical graph, response correction, mean/variance synapses, delays, fine external drive, countseed1, own fast/refractory histories and dynamicM from physical zero initialization.",
+  "stationary": "Correction and first derivative vanish at stationary input histories. This does not certify the parent stationary approximation.",
+  "runs": [
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "seed": 1
+    }
+  ],
+  "dt_ms": 0.05,
+  "duration_ms": 12500,
+  "checkpoints_ms": [
+    3000,
+    8000,
+    9000,
+    9420,
+    9870
+  ],
+  "readouts": "Unchanged original A4 six gates plus separate early0.5-3s,4-8s,8-9.42s complete-event, quiet, core-order and spatial diagnostics. D=1-cell-weighted mean Z_E; y=Hz per neuron.",
+  "interpretation": "Improved early and late correspondence supports transient response error as a contributor. Early improvement but late failure rejects it as a sufficient repair. New persistent activity in the early interval is a failed regime. No outcome alone proves a bifurcation.",
+  "budget": "One12.5s prescribed-Z trajectory, exact replay and interpolation checks, comparative readout. No refit or branch launch.",
+  "local_failure_retained": true,
+  "model_promoted": false,
+  "native_information": "Native Z(t) is supplied. Native spikes, rates, M, synaptic currents and membrane histories are not supplied. This is a conditional diagnostic, not autonomous model validation.",
+  "Z_dynamic": false,
+  "M_dynamic": true,
+  "inference": "If recruitment and entry still differ, the fast/M network conditional on native Z remains mismatched. If they recover, the endogenous Z path is a major mediator; this alone does not identify an erroneous Z law or establish a bifurcation.",
+  "acceptance": "Original state/propagation readouts retained as descriptive comparison. D_track is supplied by construction and must never count as a validation pass. Local failed gates remain.",
+  "sources": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields"
+}

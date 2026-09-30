@@ -1,0 +1,27 @@
+{
+  "status": "FROZEN_BEFORE_LOCAL_FACTORIAL",
+  "created_epoch": 1790551690.8711953,
+  "question": "At selected targets on the missed recruitment edge, how much do source averaging and excessive white-input variance independently change the local frozen-M response?",
+  "design": "Four conditions per target: native observed means or their exact group-source bias, crossed with group-white predicted variance or measured total variance. Native thresholds/refractory/Z/K, measured mean M and G, original discrete synaptic filters and membrane. Same Gaussian streams and randomized count phase for all conditions; no fitted scale.",
+  "selection": "Native rate 25/50/75 percentiles within each of the previously selected ten display-edge cells, plus coreA/coreB/I controls; selected before fresh local counts. Duplicate targets retained once.",
+  "limits": "Measured moments prescribe data and are not an autonomous closure. Measured-variance conditions still omit native autocorrelation, E/I cross-covariance, non-Gaussian currents and M dynamics. Two seconds of native data is not stationary ground truth; target selection is development-only. Numerical replicas estimate Monte Carlo precision, not independent native seed uncertainty. This is a local response diagnosis, not a network causal experiment or new bifurcation.",
+  "threshold_source": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/historical_manual_hard_native_z_v1/substrate.npz",
+    "file_sha256": "4c77176cfe8a129903a312ed897b3e2dddfb0931f64c0e71ed7429b172918ee5",
+    "native_vtheta_float32_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b"
+  },
+  "exact_native_thresholds": true,
+  "targets": 39,
+  "conditions": 156,
+  "replicas": 1024,
+  "duration_ms": 16000,
+  "burn_ms": 1000,
+  "extra_burn_phase_ms": 1000,
+  "seed": 929471,
+  "device": 1,
+  "source_sha256": "f93aa7380bedea2db5656c194f9ef4ae137dfb20398480ea233937aae019afef",
+  "observer_sha256": "c0798ed42fd0c95bf56f82135a6afcd52cebf08c53430ac17ac68a01d9cdc197",
+  "producer_sha256": "75e571d42ce140f8202d2e5cf46e862b2b7b7eaafddb6d4f50f6b09caf6df7a4",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

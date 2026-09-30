@@ -1,0 +1,2267 @@
+{
+  "status": "COMPARISON_COMPLETE",
+  "rows": [
+    {
+      "label": "native",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+      "original_event_window": {
+        "n": 40,
+        "median_duration_ms": 100.0,
+        "iqr_duration_ms": [
+          79.75,
+          124.0
+        ],
+        "median_gap_ms": 239.0,
+        "both_cores": 32,
+        "coreA_only": 1,
+        "coreB_only": 1,
+        "median_area": 0.745828125,
+        "median_surround_cells": 284.5,
+        "forward": 17,
+        "reverse": 22,
+        "undirected": 1,
+        "median_extent_mm": 10.587844472946372
+      },
+      "original_six_checks": {
+        "self_limited_events": true,
+        "two_core_participation": true,
+        "surround_recruitment": true,
+        "propagation": true,
+        "entry": true,
+        "D_track": true
+      },
+      "original_six_passed": 6,
+      "quiet_fraction_full": 0.38576,
+      "high_entry_ms": 9868.5,
+      "D_at_native9870": 0.2563444253447549,
+      "strict_complete_window": {
+        "n": 31,
+        "median_duration_ms": 104.0,
+        "iqr_duration_ms": [
+          85.0,
+          125.0
+        ],
+        "median_gap_ms": 266.0,
+        "both_cores": 26,
+        "coreA_only": 1,
+        "coreB_only": 1,
+        "median_area": 0.7592187499999999,
+        "median_surround_cells": 290.0,
+        "forward": 13,
+        "reverse": 17,
+        "undirected": 1,
+        "median_extent_mm": 10.105750851586855
+      },
+      "physical_core_order": {
+        "original_events": {
+          "events": 40,
+          "eligible_core_pairs": 32,
+          "A_first": 19,
+          "B_first": 13,
+          "ties": 0,
+          "median_lag_ms": 13.5
+        },
+        "strict_complete_events": {
+          "events": 31,
+          "eligible_core_pairs": 26,
+          "A_first": 16,
+          "B_first": 10,
+          "ties": 0,
+          "median_lag_ms": 13.5
+        }
+      },
+      "terminal_no_return_start_ms": 9323.5,
+      "terminal_right_censored": true,
+      "tail_global_hz": 448.36449990490854,
+      "tail_persistent_fraction": 0.9728124999999999
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/recorded_drive_expected",
+      "original_event_window": {
+        "n": 32,
+        "median_duration_ms": 96.5,
+        "iqr_duration_ms": [
+          92.0,
+          101.0
+        ],
+        "median_gap_ms": 230.0,
+        "both_cores": 30,
+        "coreA_only": 2,
+        "coreB_only": 0,
+        "median_area": 0.4125,
+        "median_surround_cells": 149.0,
+        "forward": 0,
+        "reverse": 32,
+        "undirected": 0,
+        "median_extent_mm": 17.237007014660556
+      },
+      "original_six_checks": {
+        "self_limited_events": true,
+        "two_core_participation": true,
+        "surround_recruitment": true,
+        "propagation": false,
+        "entry": true,
+        "D_track": true
+      },
+      "original_six_passed": 5,
+      "quiet_fraction_full": 0.40936,
+      "high_entry_ms": 9345.0,
+      "D_at_native9870": 0.2454167880974032,
+      "strict_complete_window": {
+        "n": 29,
+        "median_duration_ms": 97.0,
+        "iqr_duration_ms": [
+          92.0,
+          101.0
+        ],
+        "median_gap_ms": 230.0,
+        "both_cores": 29,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.41521874999999997,
+        "median_surround_cells": 150.0,
+        "forward": 0,
+        "reverse": 29,
+        "undirected": 0,
+        "median_extent_mm": 17.27072739323269
+      },
+      "physical_core_order": {
+        "original_events": {
+          "events": 32,
+          "eligible_core_pairs": 30,
+          "A_first": 0,
+          "B_first": 30,
+          "ties": 0,
+          "median_lag_ms": -33.5
+        },
+        "strict_complete_events": {
+          "events": 29,
+          "eligible_core_pairs": 29,
+          "A_first": 0,
+          "B_first": 29,
+          "ties": 0,
+          "median_lag_ms": -33.0
+        }
+      },
+      "terminal_no_return_start_ms": 8399.0,
+      "terminal_right_censored": true,
+      "tail_global_hz": 346.21345576954883,
+      "tail_persistent_fraction": 0.7636874999999999,
+      "terminal_D_interpolated": 0.13059343074196467,
+      "high_entry_D_interpolated": 0.1976790824453421
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/recorded_drive_binomial_seed1",
+      "original_event_window": {
+        "n": 26,
+        "median_duration_ms": 89.5,
+        "iqr_duration_ms": [
+          75.25,
+          99.0
+        ],
+        "median_gap_ms": 224.0,
+        "both_cores": 25,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.383703125,
+        "median_surround_cells": 138.0,
+        "forward": 0,
+        "reverse": 25,
+        "undirected": 1,
+        "median_extent_mm": 16.264510810118768
+      },
+      "original_six_checks": {
+        "self_limited_events": true,
+        "two_core_participation": true,
+        "surround_recruitment": true,
+        "propagation": false,
+        "entry": true,
+        "D_track": false
+      },
+      "original_six_passed": 4,
+      "quiet_fraction_full": 0.50344,
+      "high_entry_ms": 10462.0,
+      "D_at_native9870": 0.15860408361551404,
+      "strict_complete_window": {
+        "n": 22,
+        "median_duration_ms": 89.5,
+        "iqr_duration_ms": [
+          76.25,
+          97.5
+        ],
+        "median_gap_ms": 224.0,
+        "both_cores": 22,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.383703125,
+        "median_surround_cells": 138.0,
+        "forward": 0,
+        "reverse": 22,
+        "undirected": 0,
+        "median_extent_mm": 16.436146719653827
+      },
+      "physical_core_order": {
+        "original_events": {
+          "events": 26,
+          "eligible_core_pairs": 25,
+          "A_first": 1,
+          "B_first": 24,
+          "ties": 0,
+          "median_lag_ms": -37.0
+        },
+        "strict_complete_events": {
+          "events": 22,
+          "eligible_core_pairs": 22,
+          "A_first": 0,
+          "B_first": 22,
+          "ties": 0,
+          "median_lag_ms": -39.0
+        }
+      },
+      "terminal_no_return_start_ms": 8984.0,
+      "terminal_right_censored": true,
+      "tail_global_hz": 289.556781207953,
+      "tail_persistent_fraction": 0.6503125000000001,
+      "terminal_D_interpolated": 0.10504831708698445,
+      "high_entry_D_interpolated": 0.20861038465822754
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/physical_delay_count_rate/recorded_drive_binomial_seed1",
+      "original_event_window": {
+        "n": 24,
+        "median_duration_ms": 80.0,
+        "iqr_duration_ms": [
+          66.25,
+          91.25
+        ],
+        "median_gap_ms": 222.0,
+        "both_cores": 23,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.34693749999999995,
+        "median_surround_cells": 124.0,
+        "forward": 11,
+        "reverse": 12,
+        "undirected": 1,
+        "median_extent_mm": 14.513111768627729
+      },
+      "original_six_checks": {
+        "self_limited_events": true,
+        "two_core_participation": true,
+        "surround_recruitment": true,
+        "propagation": true,
+        "entry": true,
+        "D_track": false
+      },
+      "original_six_passed": 5,
+      "quiet_fraction_full": 0.54768,
+      "high_entry_ms": 10971.0,
+      "D_at_native9870": 0.1283331003060486,
+      "strict_complete_window": {
+        "n": 23,
+        "median_duration_ms": 78.0,
+        "iqr_duration_ms": [
+          64.5,
+          90.0
+        ],
+        "median_gap_ms": 221.0,
+        "both_cores": 22,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.34324999999999994,
+        "median_surround_cells": 122.0,
+        "forward": 11,
+        "reverse": 12,
+        "undirected": 0,
+        "median_extent_mm": 14.622554499533498
+      },
+      "physical_core_order": {
+        "original_events": {
+          "events": 24,
+          "eligible_core_pairs": 23,
+          "A_first": 11,
+          "B_first": 12,
+          "ties": 0,
+          "median_lag_ms": -3.0
+        },
+        "strict_complete_events": {
+          "events": 23,
+          "eligible_core_pairs": 22,
+          "A_first": 10,
+          "B_first": 12,
+          "ties": 0,
+          "median_lag_ms": -4.5
+        }
+      },
+      "terminal_no_return_start_ms": 9184.0,
+      "terminal_right_censored": true,
+      "tail_global_hz": 256.640812469684,
+      "tail_persistent_fraction": 0.5708125,
+      "terminal_D_interpolated": 0.09201640161559992,
+      "high_entry_D_interpolated": 0.21416189316567097
+    }
+  ],
+  "core_event_rows": [
+    {
+      "label": "native",
+      "start_ms": 1021.5,
+      "duration_ms": 142.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        364.19098143236056,
+        363.6132315521626
+      ],
+      "core_halfpeak_time_ms": [
+        1115.5,
+        1064.5
+      ],
+      "lag_B_minus_A_ms": -51.0
+    },
+    {
+      "label": "native",
+      "start_ms": 1308.5,
+      "duration_ms": 94.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        431.0344827586206,
+        403.30788804071216
+      ],
+      "core_halfpeak_time_ms": [
+        1354.5,
+        1310.5
+      ],
+      "lag_B_minus_A_ms": -44.0
+    },
+    {
+      "label": "native",
+      "start_ms": 1597.5,
+      "duration_ms": 124.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        122.28116710875311,
+        313.74045801526694
+      ],
+      "core_halfpeak_time_ms": [
+        1675.5,
+        1630.5
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "native",
+      "start_ms": 1858.5,
+      "duration_ms": 96.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        401.3262599469494,
+        302.29007633587753
+      ],
+      "core_halfpeak_time_ms": [
+        1891.5,
+        1863.5
+      ],
+      "lag_B_minus_A_ms": -28.0
+    },
+    {
+      "label": "native",
+      "start_ms": 2146.5,
+      "duration_ms": 90.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        391.77718832891213,
+        229.77099236641192
+      ],
+      "core_halfpeak_time_ms": [
+        2149.5,
+        2164.5
+      ],
+      "lag_B_minus_A_ms": 15.0
+    },
+    {
+      "label": "native",
+      "start_ms": 2397.5,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        442.7055702917769,
+        422.6463104325697
+      ],
+      "core_halfpeak_time_ms": [
+        2447.5,
+        2399.5
+      ],
+      "lag_B_minus_A_ms": -48.0
+    },
+    {
+      "label": "native",
+      "start_ms": 2698.5,
+      "duration_ms": 95.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        438.19628647214824,
+        364.3765903307886
+      ],
+      "core_halfpeak_time_ms": [
+        2756.5,
+        2704.5
+      ],
+      "lag_B_minus_A_ms": -52.0
+    },
+    {
+      "label": "native",
+      "start_ms": 2956.5,
+      "duration_ms": 111.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        445.62334217506594,
+        397.4554707379133
+      ],
+      "core_halfpeak_time_ms": [
+        3011.5,
+        2964.5
+      ],
+      "lag_B_minus_A_ms": -47.0
+    },
+    {
+      "label": "native",
+      "start_ms": 3210.5,
+      "duration_ms": 122.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        441.3793103448273,
+        427.7353689567428
+      ],
+      "core_halfpeak_time_ms": [
+        3258.5,
+        3212.5
+      ],
+      "lag_B_minus_A_ms": -46.0
+    },
+    {
+      "label": "native",
+      "start_ms": 3429.5,
+      "duration_ms": 79.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        364.19098143236045,
+        0.7633587786257492
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 3548.5,
+      "duration_ms": 106.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        -2.888356220864807e-13,
+        404.83460559796424
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 3742.5,
+      "duration_ms": 81.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        427.85145888594127,
+        429.770992366412
+      ],
+      "core_halfpeak_time_ms": [
+        3746.5,
+        3790.5
+      ],
+      "lag_B_minus_A_ms": 44.0
+    },
+    {
+      "label": "native",
+      "start_ms": 3835.5,
+      "duration_ms": 84.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        -5.193179219986633e-13,
+        -2.602362769721367e-13
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 4026.5,
+      "duration_ms": 68.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        411.67108753315586,
+        429.00763358778596
+      ],
+      "core_halfpeak_time_ms": [
+        4028.5,
+        4061.5
+      ],
+      "lag_B_minus_A_ms": 33.0
+    },
+    {
+      "label": "native",
+      "start_ms": 4364.5,
+      "duration_ms": 73.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        403.71352785145825,
+        448.60050890585205
+      ],
+      "core_halfpeak_time_ms": [
+        4367.5,
+        4394.5
+      ],
+      "lag_B_minus_A_ms": 27.0
+    },
+    {
+      "label": "native",
+      "start_ms": 4497.5,
+      "duration_ms": 44.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        -5.719869022868806e-13,
+        -4.082068016941776e-13
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 4620.5,
+      "duration_ms": 127.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        419.3633952254636,
+        447.83715012722604
+      ],
+      "core_halfpeak_time_ms": [
+        4621.5,
+        4668.5
+      ],
+      "lag_B_minus_A_ms": 47.0
+    },
+    {
+      "label": "native",
+      "start_ms": 4779.5,
+      "duration_ms": 53.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        0.26525198938938244,
+        -4.437339384821826e-13
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 4854.5,
+      "duration_ms": 99.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        426.2599469496016,
+        446.3104325699742
+      ],
+      "core_halfpeak_time_ms": [
+        4867.5,
+        4917.5
+      ],
+      "lag_B_minus_A_ms": 50.0
+    },
+    {
+      "label": "native",
+      "start_ms": 4972.5,
+      "duration_ms": 59.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        -5.077716025425616e-13,
+        -4.861888669438485e-13
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 5142.5,
+      "duration_ms": 58.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        341.90981432360695,
+        428.49872773536856
+      ],
+      "core_halfpeak_time_ms": [
+        5149.5,
+        5164.5
+      ],
+      "lag_B_minus_A_ms": 15.0
+    },
+    {
+      "label": "native",
+      "start_ms": 5376.5,
+      "duration_ms": 104.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        421.2201591511932,
+        140.2035623409665
+      ],
+      "core_halfpeak_time_ms": [
+        5418.5,
+        5452.5
+      ],
+      "lag_B_minus_A_ms": 34.0
+    },
+    {
+      "label": "native",
+      "start_ms": 5629.5,
+      "duration_ms": 124.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        342.17506631299693,
+        365.394402035623
+      ],
+      "core_halfpeak_time_ms": [
+        5707.5,
+        5662.5
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "native",
+      "start_ms": 5811.5,
+      "duration_ms": 56.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        -3.4203750942651825e-13,
+        0.25445292620816007
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 5925.5,
+      "duration_ms": 103.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        453.3156498673737,
+        437.91348600508843
+      ],
+      "core_halfpeak_time_ms": [
+        5968.5,
+        5926.5
+      ],
+      "lag_B_minus_A_ms": -42.0
+    },
+    {
+      "label": "native",
+      "start_ms": 6114.5,
+      "duration_ms": 77.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        0.5305039787796106,
+        2.290076335877116
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "native",
+      "start_ms": 6206.5,
+      "duration_ms": 105.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        334.4827586206894,
+        439.44020356234006
+      ],
+      "core_halfpeak_time_ms": [
+        6251.5,
+        6210.5
+      ],
+      "lag_B_minus_A_ms": -41.0
+    },
+    {
+      "label": "native",
+      "start_ms": 6486.5,
+      "duration_ms": 109.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        450.3978779840847,
+        164.6310432569967
+      ],
+      "core_halfpeak_time_ms": [
+        6522.5,
+        6549.5
+      ],
+      "lag_B_minus_A_ms": 27.0
+    },
+    {
+      "label": "native",
+      "start_ms": 6794.5,
+      "duration_ms": 153.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        241.37931034482722,
+        397.2010178117041
+      ],
+      "core_halfpeak_time_ms": [
+        6866.5,
+        6831.5
+      ],
+      "lag_B_minus_A_ms": -35.0
+    },
+    {
+      "label": "native",
+      "start_ms": 7080.5,
+      "duration_ms": 116.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        427.58620689655135,
+        462.5954198473276
+      ],
+      "core_halfpeak_time_ms": [
+        7085.5,
+        7128.5
+      ],
+      "lag_B_minus_A_ms": 43.0
+    },
+    {
+      "label": "native",
+      "start_ms": 7352.5,
+      "duration_ms": 80.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        444.2970822281163,
+        453.4351145038162
+      ],
+      "core_halfpeak_time_ms": [
+        7355.5,
+        7393.5
+      ],
+      "lag_B_minus_A_ms": 38.0
+    },
+    {
+      "label": "native",
+      "start_ms": 7591.5,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        443.23607427055674,
+        448.85496183206016
+      ],
+      "core_halfpeak_time_ms": [
+        7605.5,
+        7652.5
+      ],
+      "lag_B_minus_A_ms": 47.0
+    },
+    {
+      "label": "native",
+      "start_ms": 7917.5,
+      "duration_ms": 154.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        444.0318302387266,
+        447.07379134859957
+      ],
+      "core_halfpeak_time_ms": [
+        7920.5,
+        7925.5
+      ],
+      "lag_B_minus_A_ms": 5.0
+    },
+    {
+      "label": "native",
+      "start_ms": 8165.5,
+      "duration_ms": 193.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        217.24137931034483,
+        446.81933842239096
+      ],
+      "core_halfpeak_time_ms": [
+        8177.5,
+        8193.5
+      ],
+      "lag_B_minus_A_ms": 16.0
+    },
+    {
+      "label": "native",
+      "start_ms": 8441.5,
+      "duration_ms": 126.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        447.48010610079564,
+        448.6005089058517
+      ],
+      "core_halfpeak_time_ms": [
+        8443.5,
+        8455.5
+      ],
+      "lag_B_minus_A_ms": 12.0
+    },
+    {
+      "label": "native",
+      "start_ms": 8648.5,
+      "duration_ms": 162.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        306.10079575596814,
+        382.9516539440197
+      ],
+      "core_halfpeak_time_ms": [
+        8726.5,
+        8774.5
+      ],
+      "lag_B_minus_A_ms": 48.0
+    },
+    {
+      "label": "native",
+      "start_ms": 8930.5,
+      "duration_ms": 184.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        365.78249336870033,
+        397.20101781170433
+      ],
+      "core_halfpeak_time_ms": [
+        9009.5,
+        9049.5
+      ],
+      "lag_B_minus_A_ms": 40.0
+    },
+    {
+      "label": "native",
+      "start_ms": 9201.5,
+      "duration_ms": 95.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        122.81167108753323,
+        109.66921119592823
+      ],
+      "core_halfpeak_time_ms": [
+        9247.5,
+        9258.5
+      ],
+      "lag_B_minus_A_ms": 11.0
+    },
+    {
+      "label": "native",
+      "start_ms": 9323.5,
+      "duration_ms": 77.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        44.5623342175067,
+        255.7251908396942
+      ],
+      "core_halfpeak_time_ms": [
+        9353.5,
+        9337.5
+      ],
+      "lag_B_minus_A_ms": -16.0
+    },
+    {
+      "label": "native",
+      "start_ms": 9417.5,
+      "duration_ms": 3083.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        479.8408488063645,
+        481.6793893129772
+      ],
+      "core_halfpeak_time_ms": [
+        9461.5,
+        9621.5
+      ],
+      "lag_B_minus_A_ms": 160.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 1569.0,
+      "duration_ms": 59.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        100.54676861168244,
+        0.0003009426958985097
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 1765.0,
+      "duration_ms": 61.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        138.96438978110353,
+        0.00032221065216721695
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 1921.0,
+      "duration_ms": 88.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        139.5615583344508,
+        87.60689124179041
+      ],
+      "core_halfpeak_time_ms": [
+        1964.0,
+        1921.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 2116.0,
+      "duration_ms": 88.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        154.70312692082513,
+        84.26532326492428
+      ],
+      "core_halfpeak_time_ms": [
+        2159.0,
+        2116.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 2308.0,
+      "duration_ms": 88.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        187.32671443825288,
+        86.88746594377378
+      ],
+      "core_halfpeak_time_ms": [
+        2350.0,
+        2308.0
+      ],
+      "lag_B_minus_A_ms": -42.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 2502.0,
+      "duration_ms": 89.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        192.00248387026164,
+        98.52095935135034
+      ],
+      "core_halfpeak_time_ms": [
+        2545.0,
+        2502.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 2705.0,
+      "duration_ms": 89.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        234.88889402348187,
+        102.40179176044441
+      ],
+      "core_halfpeak_time_ms": [
+        2746.0,
+        2705.0
+      ],
+      "lag_B_minus_A_ms": -41.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 2905.0,
+      "duration_ms": 92.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        250.91264445926817,
+        115.77168295509107
+      ],
+      "core_halfpeak_time_ms": [
+        2950.0,
+        2905.0
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 3110.0,
+      "duration_ms": 92.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        281.8792909248363,
+        135.0523867751589
+      ],
+      "core_halfpeak_time_ms": [
+        3154.0,
+        3110.0
+      ],
+      "lag_B_minus_A_ms": -44.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 3319.0,
+      "duration_ms": 92.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        283.60486344615055,
+        192.69417906915194
+      ],
+      "core_halfpeak_time_ms": [
+        3363.0,
+        3319.0
+      ],
+      "lag_B_minus_A_ms": -44.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 3537.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        315.6561484175605,
+        223.8424653515427
+      ],
+      "core_halfpeak_time_ms": [
+        3580.0,
+        3537.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 3751.0,
+      "duration_ms": 94.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        342.5039712215786,
+        255.66647023896365
+      ],
+      "core_halfpeak_time_ms": [
+        3794.0,
+        3752.0
+      ],
+      "lag_B_minus_A_ms": -42.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 3969.0,
+      "duration_ms": 96.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        360.90159651976023,
+        267.87611474259626
+      ],
+      "core_halfpeak_time_ms": [
+        4014.0,
+        3972.0
+      ],
+      "lag_B_minus_A_ms": -42.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 4203.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        362.8067186842865,
+        301.874596899001
+      ],
+      "core_halfpeak_time_ms": [
+        4243.0,
+        4206.0
+      ],
+      "lag_B_minus_A_ms": -37.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 4439.0,
+      "duration_ms": 97.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        368.76963293791516,
+        326.37825151426784
+      ],
+      "core_halfpeak_time_ms": [
+        4473.0,
+        4442.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 4670.0,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        382.5166875038009,
+        338.60493655363354
+      ],
+      "core_halfpeak_time_ms": [
+        4707.0,
+        4674.0
+      ],
+      "lag_B_minus_A_ms": -33.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 4900.0,
+      "duration_ms": 99.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        384.60026537217146,
+        344.49031518298716
+      ],
+      "core_halfpeak_time_ms": [
+        4934.0,
+        4903.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 5130.0,
+      "duration_ms": 95.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        379.91723068520645,
+        359.747817817095
+      ],
+      "core_halfpeak_time_ms": [
+        5161.0,
+        5134.0
+      ],
+      "lag_B_minus_A_ms": -27.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 5367.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        376.79146194133654,
+        369.7100880636477
+      ],
+      "core_halfpeak_time_ms": [
+        5395.0,
+        5371.0
+      ],
+      "lag_B_minus_A_ms": -24.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 5592.0,
+      "duration_ms": 99.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        402.08753121107725,
+        381.8013855434933
+      ],
+      "core_halfpeak_time_ms": [
+        5627.0,
+        5596.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 5821.0,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        416.1500275784841,
+        391.82041470864925
+      ],
+      "core_halfpeak_time_ms": [
+        5857.0,
+        5825.0
+      ],
+      "lag_B_minus_A_ms": -32.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 6055.0,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        420.1210116240327,
+        398.190027167536
+      ],
+      "core_halfpeak_time_ms": [
+        6092.0,
+        6059.0
+      ],
+      "lag_B_minus_A_ms": -33.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 6288.0,
+      "duration_ms": 101.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        416.1575625384835,
+        403.179527314261
+      ],
+      "core_halfpeak_time_ms": [
+        6323.0,
+        6291.0
+      ],
+      "lag_B_minus_A_ms": -32.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 6518.0,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        439.81832528759395,
+        409.0929451872068
+      ],
+      "core_halfpeak_time_ms": [
+        6559.0,
+        6521.0
+      ],
+      "lag_B_minus_A_ms": -38.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 6752.0,
+      "duration_ms": 101.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        436.9563884461908,
+        420.54552547076247
+      ],
+      "core_halfpeak_time_ms": [
+        6790.0,
+        6756.0
+      ],
+      "lag_B_minus_A_ms": -34.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 6989.0,
+      "duration_ms": 103.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        432.34949125092623,
+        424.5251130159874
+      ],
+      "core_halfpeak_time_ms": [
+        7024.0,
+        6993.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 7223.0,
+      "duration_ms": 104.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        434.6086145051912,
+        427.56959649005887
+      ],
+      "core_halfpeak_time_ms": [
+        7256.0,
+        7227.0
+      ],
+      "lag_B_minus_A_ms": -29.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 7456.0,
+      "duration_ms": 105.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        440.3513310520974,
+        432.4833763064315
+      ],
+      "core_halfpeak_time_ms": [
+        7490.0,
+        7459.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 7693.0,
+      "duration_ms": 107.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        440.5768248742708,
+        435.74980204730207
+      ],
+      "core_halfpeak_time_ms": [
+        7726.0,
+        7697.0
+      ],
+      "lag_B_minus_A_ms": -29.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 7929.0,
+      "duration_ms": 110.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        442.61040032181893,
+        437.88181022663423
+      ],
+      "core_halfpeak_time_ms": [
+        7963.0,
+        7933.0
+      ],
+      "lag_B_minus_A_ms": -30.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 8162.0,
+      "duration_ms": 112.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        447.7388548590462,
+        440.6450027504644
+      ],
+      "core_halfpeak_time_ms": [
+        8199.0,
+        8166.0
+      ],
+      "lag_B_minus_A_ms": -33.0
+    },
+    {
+      "label": "recorded_drive_expected_parent",
+      "start_ms": 8399.0,
+      "duration_ms": 4102.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        464.8828439646759,
+        464.3080944265104
+      ],
+      "core_halfpeak_time_ms": [
+        8437.0,
+        8403.0
+      ],
+      "lag_B_minus_A_ms": -34.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 1144.0,
+      "duration_ms": 59.0,
+      "strict_complete": false,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        114.85411192592946,
+        1.554312234475219e-14
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 3627.0,
+      "duration_ms": 77.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        220.1591521043042,
+        105.34351240162944
+      ],
+      "core_halfpeak_time_ms": [
+        3668.0,
+        3627.0
+      ],
+      "lag_B_minus_A_ms": -41.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 3825.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        226.25994789669917,
+        155.47073902101016
+      ],
+      "core_halfpeak_time_ms": [
+        3871.0,
+        3825.0
+      ],
+      "lag_B_minus_A_ms": -46.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 4020.0,
+      "duration_ms": 88.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        182.758621926143,
+        197.455472182257
+      ],
+      "core_halfpeak_time_ms": [
+        4066.0,
+        4020.0
+      ],
+      "lag_B_minus_A_ms": -46.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 4220.0,
+      "duration_ms": 90.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        151.4588866883941,
+        161.32315658297563
+      ],
+      "core_halfpeak_time_ms": [
+        4266.0,
+        4220.0
+      ],
+      "lag_B_minus_A_ms": -46.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 4441.0,
+      "duration_ms": 75.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        238.99204324980292,
+        118.82951745865614
+      ],
+      "core_halfpeak_time_ms": [
+        4478.0,
+        4441.0
+      ],
+      "lag_B_minus_A_ms": -37.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 4871.0,
+      "duration_ms": 72.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        335.01326399178316,
+        210.94147772946744
+      ],
+      "core_halfpeak_time_ms": [
+        4906.0,
+        4872.0
+      ],
+      "lag_B_minus_A_ms": -34.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 5094.0,
+      "duration_ms": 63.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        349.0716191866035,
+        197.70992505216722
+      ],
+      "core_halfpeak_time_ms": [
+        5126.0,
+        5094.0
+      ],
+      "lag_B_minus_A_ms": -32.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 5294.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        252.25464333046003,
+        270.4834624011402
+      ],
+      "core_halfpeak_time_ms": [
+        5342.0,
+        5296.0
+      ],
+      "lag_B_minus_A_ms": -46.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 5511.0,
+      "duration_ms": 104.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        306.1007965573579,
+        319.33842418563876
+      ],
+      "core_halfpeak_time_ms": [
+        5568.0,
+        5517.0
+      ],
+      "lag_B_minus_A_ms": -51.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 5735.0,
+      "duration_ms": 89.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        238.1962874030558,
+        231.04325835929268
+      ],
+      "core_halfpeak_time_ms": [
+        5778.0,
+        5737.0
+      ],
+      "lag_B_minus_A_ms": -41.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 5944.0,
+      "duration_ms": 92.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        244.82758723898945,
+        306.36132510624475
+      ],
+      "core_halfpeak_time_ms": [
+        5991.0,
+        5946.0
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 6200.0,
+      "duration_ms": 64.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        264.4562343931322,
+        321.3740482087658
+      ],
+      "core_halfpeak_time_ms": [
+        6208.0,
+        6205.0
+      ],
+      "lag_B_minus_A_ms": -3.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 6417.0,
+      "duration_ms": 71.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        362.06896627815695,
+        350.8905866783085
+      ],
+      "core_halfpeak_time_ms": [
+        6441.0,
+        6419.0
+      ],
+      "lag_B_minus_A_ms": -22.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 6639.0,
+      "duration_ms": 80.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        387.5331572636368,
+        391.3486024890543
+      ],
+      "core_halfpeak_time_ms": [
+        6676.0,
+        6643.0
+      ],
+      "lag_B_minus_A_ms": -33.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 6868.0,
+      "duration_ms": 75.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        392.0424409942219,
+        353.9440219500595
+      ],
+      "core_halfpeak_time_ms": [
+        6900.0,
+        6871.0
+      ],
+      "lag_B_minus_A_ms": -29.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 7120.0,
+      "duration_ms": 76.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        348.2758623522849,
+        383.2061090425683
+      ],
+      "core_halfpeak_time_ms": [
+        7130.0,
+        7126.0
+      ],
+      "lag_B_minus_A_ms": -4.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 7362.0,
+      "duration_ms": 81.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        400.5305050746197,
+        388.80407309107534
+      ],
+      "core_halfpeak_time_ms": [
+        7396.0,
+        7368.0
+      ],
+      "lag_B_minus_A_ms": -28.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 7589.0,
+      "duration_ms": 99.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        440.0530512670621,
+        424.1730302572861
+      ],
+      "core_halfpeak_time_ms": [
+        7625.0,
+        7593.0
+      ],
+      "lag_B_minus_A_ms": -32.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 7831.0,
+      "duration_ms": 105.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        434.21750751161414,
+        370.7379157418213
+      ],
+      "core_halfpeak_time_ms": [
+        7844.0,
+        7837.0
+      ],
+      "lag_B_minus_A_ms": -7.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 8058.0,
+      "duration_ms": 100.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        420.95490870791946,
+        411.450383944912
+      ],
+      "core_halfpeak_time_ms": [
+        8108.0,
+        8063.0
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 8277.0,
+      "duration_ms": 99.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        434.21750701074563,
+        436.13231670195256
+      ],
+      "core_halfpeak_time_ms": [
+        8324.0,
+        8281.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 8515.0,
+      "duration_ms": 93.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        423.60742868681484,
+        430.2799009366805
+      ],
+      "core_halfpeak_time_ms": [
+        8558.0,
+        8519.0
+      ],
+      "lag_B_minus_A_ms": -39.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 8750.0,
+      "duration_ms": 99.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        447.74535865277755,
+        434.35114760459567
+      ],
+      "core_halfpeak_time_ms": [
+        8792.0,
+        8753.0
+      ],
+      "lag_B_minus_A_ms": -39.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 8984.0,
+      "duration_ms": 105.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        414.05835705562356,
+        445.0381699113145
+      ],
+      "core_halfpeak_time_ms": [
+        9020.0,
+        8989.0
+      ],
+      "lag_B_minus_A_ms": -31.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_parent",
+      "start_ms": 9104.0,
+      "duration_ms": 3397.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        471.6180378678623,
+        469.9745566991746
+      ],
+      "core_halfpeak_time_ms": [
+        9126.0,
+        9189.0
+      ],
+      "lag_B_minus_A_ms": 63.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 4067.0,
+      "duration_ms": 92.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        206.63130072231942,
+        195.67430147748573
+      ],
+      "core_halfpeak_time_ms": [
+        4115.0,
+        4067.0
+      ],
+      "lag_B_minus_A_ms": -48.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 4268.0,
+      "duration_ms": 91.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        229.97347614682948,
+        103.8167947958445
+      ],
+      "core_halfpeak_time_ms": [
+        4317.0,
+        4268.0
+      ],
+      "lag_B_minus_A_ms": -49.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 4502.0,
+      "duration_ms": 54.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        94.16445674946826,
+        219.59287632367096
+      ],
+      "core_halfpeak_time_ms": [
+        4522.0,
+        4519.0
+      ],
+      "lag_B_minus_A_ms": -3.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 4716.0,
+      "duration_ms": 40.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        22.81167112294805,
+        229.51654150965265
+      ],
+      "core_halfpeak_time_ms": [
+        4728.0,
+        4717.0
+      ],
+      "lag_B_minus_A_ms": -11.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 4901.0,
+      "duration_ms": 68.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        114.58886010046024,
+        343.00254580956397
+      ],
+      "core_halfpeak_time_ms": [
+        4901.0,
+        4939.0
+      ],
+      "lag_B_minus_A_ms": 38.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 5117.0,
+      "duration_ms": 69.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        221.48541186102503,
+        340.2035636358287
+      ],
+      "core_halfpeak_time_ms": [
+        5134.0,
+        5154.0
+      ],
+      "lag_B_minus_A_ms": 20.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 5364.0,
+      "duration_ms": 96.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        305.0397888264541,
+        281.6793915639398
+      ],
+      "core_halfpeak_time_ms": [
+        5415.0,
+        5366.0
+      ],
+      "lag_B_minus_A_ms": -49.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 5578.0,
+      "duration_ms": 94.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        318.5676404148577,
+        334.35114709596917
+      ],
+      "core_halfpeak_time_ms": [
+        5626.0,
+        5581.0
+      ],
+      "lag_B_minus_A_ms": -45.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 5798.0,
+      "duration_ms": 98.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        355.96817057075793,
+        346.3104350985463
+      ],
+      "core_halfpeak_time_ms": [
+        5846.0,
+        5803.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 6062.0,
+      "duration_ms": 46.0,
+      "strict_complete": true,
+      "eligible_core_pair": false,
+      "peak_core_hz": [
+        101.32626073012611,
+        8.282263763703668e-14
+      ],
+      "core_halfpeak_time_ms": [
+        null,
+        null
+      ],
+      "lag_B_minus_A_ms": null
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 6212.0,
+      "duration_ms": 89.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        152.51989471273643,
+        312.9771012963837
+      ],
+      "core_halfpeak_time_ms": [
+        6258.0,
+        6216.0
+      ],
+      "lag_B_minus_A_ms": -42.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 6422.0,
+      "duration_ms": 75.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        325.7294441121957,
+        384.9872793687817
+      ],
+      "core_halfpeak_time_ms": [
+        6463.0,
+        6428.0
+      ],
+      "lag_B_minus_A_ms": -35.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 6648.0,
+      "duration_ms": 95.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        397.6127330749673,
+        382.95165512628546
+      ],
+      "core_halfpeak_time_ms": [
+        6696.0,
+        6653.0
+      ],
+      "lag_B_minus_A_ms": -43.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 6879.0,
+      "duration_ms": 61.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        312.4668449341144,
+        392.62086653575966
+      ],
+      "core_halfpeak_time_ms": [
+        6902.0,
+        6883.0
+      ],
+      "lag_B_minus_A_ms": -19.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 7114.0,
+      "duration_ms": 56.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        293.3687018599372,
+        372.77353899812596
+      ],
+      "core_halfpeak_time_ms": [
+        7129.0,
+        7123.0
+      ],
+      "lag_B_minus_A_ms": -6.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 7349.0,
+      "duration_ms": 60.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        359.4164467687632,
+        422.9007656340078
+      ],
+      "core_halfpeak_time_ms": [
+        7353.0,
+        7373.0
+      ],
+      "lag_B_minus_A_ms": 20.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 7571.0,
+      "duration_ms": 71.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        383.2891254779199,
+        444.5292644005696
+      ],
+      "core_halfpeak_time_ms": [
+        7574.0,
+        7608.0
+      ],
+      "lag_B_minus_A_ms": 34.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 7788.0,
+      "duration_ms": 82.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        377.9840857305958,
+        429.51654188238655
+      ],
+      "core_halfpeak_time_ms": [
+        7792.0,
+        7835.0
+      ],
+      "lag_B_minus_A_ms": 43.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 8001.0,
+      "duration_ms": 89.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        356.2334227483533,
+        397.4554732344534
+      ],
+      "core_halfpeak_time_ms": [
+        8017.0,
+        8053.0
+      ],
+      "lag_B_minus_A_ms": 36.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 8247.0,
+      "duration_ms": 77.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        383.02387377184976,
+        442.74809451503626
+      ],
+      "core_halfpeak_time_ms": [
+        8250.0,
+        8288.0
+      ],
+      "lag_B_minus_A_ms": 38.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 8466.0,
+      "duration_ms": 83.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        400.5305048611185,
+        443.2569992337217
+      ],
+      "core_halfpeak_time_ms": [
+        8470.0,
+        8511.0
+      ],
+      "lag_B_minus_A_ms": 41.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 8696.0,
+      "duration_ms": 85.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        407.69230903099344,
+        442.7480931328153
+      ],
+      "core_halfpeak_time_ms": [
+        8700.0,
+        8743.0
+      ],
+      "lag_B_minus_A_ms": 43.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 8942.0,
+      "duration_ms": 78.0,
+      "strict_complete": true,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        428.6472161492873,
+        453.68956996150945
+      ],
+      "core_halfpeak_time_ms": [
+        8945.0,
+        8983.0
+      ],
+      "lag_B_minus_A_ms": 38.0
+    },
+    {
+      "label": "recorded_drive_binomial_seed1_fine_forcing",
+      "start_ms": 9184.0,
+      "duration_ms": 3317.0,
+      "strict_complete": false,
+      "eligible_core_pair": true,
+      "peak_core_hz": [
+        468.96551820466556,
+        469.7201029498457
+      ],
+      "core_halfpeak_time_ms": [
+        9189.0,
+        9212.0
+      ],
+      "lag_B_minus_A_ms": 23.0
+    }
+  ],
+  "original_gates_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/a4_contract.json",
+  "readout_contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/physical_delay_count_rate/readout_contract.json",
+  "scope": "One native history and matched rate diagnostics. OriginalA4rules andstrict-event diagnostics are separate. No changedgates, native confidence intervals ornewbifurcationclaim.",
+  "local_response_validation": "FAIL_REMAINS",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

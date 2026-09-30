@@ -1,0 +1,19 @@
+{
+  "status": "COMPARISON_COMPLETE",
+  "comparison_pass": true,
+  "coarse_entry_ms": 10163.0,
+  "fine_entry_ms": 10159.0,
+  "entry_difference_ms": 4.0,
+  "D_max_difference": 0.0004336361014034562,
+  "fine_D9870": 0.1632186002876964,
+  "fine_D_final": 0.4025448484614267,
+  "qa": {
+    "CPU_GPU_rhs_max_error": 4.263256414560601e-14,
+    "CPU_GPU_rate_max_error": 2.7755575615628914e-15
+  },
+  "initial_common_samples_bitwise": true,
+  "Z_and_M_dynamic": true,
+  "seconds": 658.0606939792633,
+  "scope": "Numerical sensitivity check, not SNN equivalence or replacement acceptance. Same graph, mean input, response coefficients, Z/M dynamic. One fixed run; report a failure without adjusting tolerances.",
+  "replacement_promoted": false
+}

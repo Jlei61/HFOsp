@@ -1,0 +1,80 @@
+{
+  "status": "PREFIX_15S_TOTAL_NOT_FINAL",
+  "window_cumulative_ms": [
+    10000,
+    15000
+  ],
+  "regions": [
+    {
+      "region": "Global E",
+      "mean_hz": 54.552330351060675,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.5988,
+      "range_10ms_hz": [
+        20.845435248510032,
+        94.29595133137548
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 423.152308188159,
+      "quiet_fraction": 0.0,
+      "duty_above50": 1.0,
+      "range_10ms_hz": [
+        340.56210064981866,
+        436.9206845797029
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 126.84614476047135,
+      "quiet_fraction": 0.359,
+      "duty_above50": 0.5638,
+      "range_10ms_hz": [
+        2.8882979291105244e-05,
+        460.08586703196124
+      ],
+      "complete_local_episodes": 22,
+      "episode_durations_ms": [
+        515,
+        43,
+        38,
+        22,
+        284,
+        44,
+        36,
+        371,
+        40,
+        47,
+        49,
+        256,
+        44,
+        46,
+        37,
+        237,
+        39,
+        48,
+        50,
+        274,
+        49,
+        585
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 43.562595570529844,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.371,
+      "range_10ms_hz": [
+        12.76532840164746,
+        76.85848614077001
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    }
+  ]
+}

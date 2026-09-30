@@ -1,0 +1,1550 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "job": "projected_full_num928731",
+      "regions": [
+        {
+          "region": "surround_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 33258,
+              "density_count": 33114.84020996094,
+              "count_ratio": 0.9956954780792873,
+              "native_rate_Hz": 420.9873417721519,
+              "density_rate_Hz": 419.1751925311511,
+              "relative_L2": 0.005878085569893861
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 99739,
+              "density_count": 99329.47802734375,
+              "count_ratio": 0.9958940637799031,
+              "native_rate_Hz": 420.83966244725735,
+              "density_rate_Hz": 419.1117216343618,
+              "relative_L2": 0.005334035730211825
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1316.058754543927,
+              "density_mean": 1313.5671187860617,
+              "signed_mean_error": -2.4916357578655575,
+              "RMS_error": 2.560048241178939,
+              "native_mean_within_group_std": 26.27926638377498,
+              "density_mean_within_group_std": 25.52463975927149
+            },
+            {
+              "variable": "II",
+              "native_mean": 1462.6392357565348,
+              "density_mean": 1460.692117187569,
+              "signed_mean_error": -1.9471185689656294,
+              "RMS_error": 1.9505561680348469,
+              "native_mean_within_group_std": 27.903567383019197,
+              "density_mean_within_group_std": 21.73644577587411
+            }
+          ]
+        },
+        {
+          "region": "core_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 4721,
+              "density_count": 4723.94580078125,
+              "count_ratio": 1.000623978136253,
+              "native_rate_Hz": 472.1,
+              "density_rate_Hz": 472.394580078125,
+              "relative_L2": 0.012479431548919293
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 14172,
+              "density_count": 14171.741943359375,
+              "count_ratio": 0.9999817910922506,
+              "native_rate_Hz": 472.40000000000003,
+              "density_rate_Hz": 472.3913981119792,
+              "relative_L2": 0.013714979054880342
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1477.617525807691,
+              "density_mean": 1477.4455387939545,
+              "signed_mean_error": -0.17198701373669187,
+              "RMS_error": 1.3339515129375292,
+              "native_mean_within_group_std": 6.650991778596401,
+              "density_mean_within_group_std": 27.237993153757824
+            },
+            {
+              "variable": "II",
+              "native_mean": 1664.3483451815307,
+              "density_mean": 1663.3576107177896,
+              "signed_mean_error": -0.990734463741128,
+              "RMS_error": 1.0275077349437496,
+              "native_mean_within_group_std": 4.404543505137226,
+              "density_mean_within_group_std": 23.309375748679287
+            }
+          ]
+        },
+        {
+          "region": "I",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 9297,
+              "density_count": 9103.31201171875,
+              "count_ratio": 0.9791666141463644,
+              "native_rate_Hz": 581.0625,
+              "density_rate_Hz": 568.9570007324219,
+              "relative_L2": 0.0219280847454378
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 27909,
+              "density_count": 27312.304077148438,
+              "count_ratio": 0.978619946151723,
+              "native_rate_Hz": 581.4375,
+              "density_rate_Hz": 569.0063349405924,
+              "relative_L2": 0.022210911072738718
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1259.837575376768,
+              "density_mean": 1259.414171282324,
+              "signed_mean_error": -0.423404094443725,
+              "RMS_error": 0.8179234529311329,
+              "native_mean_within_group_std": 5.192741527535044,
+              "density_mean_within_group_std": 22.74766478785903
+            },
+            {
+              "variable": "II",
+              "native_mean": 1153.7075075058308,
+              "density_mean": 1152.747699327963,
+              "signed_mean_error": -0.959808177867961,
+              "RMS_error": 0.968895284026523,
+              "native_mean_within_group_std": 3.5448550296143138,
+              "density_mean_within_group_std": 16.276835535859075
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "group": 531,
+          "role": "surround_u0.2_offset-3",
+          "N": 13,
+          "native_count": 1083,
+          "density_count": 0.0,
+          "count_ratio": 0.0,
+          "native_rate_Hz": 55.53846153846154,
+          "density_rate_Hz": 0.0,
+          "current_mean_error_mv": [
+            3.232246007389019,
+            -2.8875436377071035
+          ]
+        },
+        {
+          "group": 833,
+          "role": "surround_u0.2_offset0",
+          "N": 16,
+          "native_count": 10910,
+          "density_count": 11025.23828125,
+          "count_ratio": 1.0105626288955087,
+          "native_rate_Hz": 454.5833333333333,
+          "density_rate_Hz": 459.3849283854167,
+          "current_mean_error_mv": [
+            -0.042583348180351095,
+            0.6729437934459475
+          ]
+        },
+        {
+          "group": 1140,
+          "role": "surround_u0.2_offset3",
+          "N": 17,
+          "native_count": 11591,
+          "density_count": 11631.729125976562,
+          "count_ratio": 1.0035138578187008,
+          "native_rate_Hz": 454.54901960784315,
+          "density_rate_Hz": 456.146240234375,
+          "current_mean_error_mv": [
+            0.046650355616085715,
+            -0.1276715540141246
+          ]
+        },
+        {
+          "group": 342,
+          "role": "surround_u0.5_offset-3",
+          "N": 16,
+          "native_count": 10705,
+          "density_count": 10703.974609375,
+          "count_ratio": 0.9999042138603457,
+          "native_rate_Hz": 446.0416666666667,
+          "density_rate_Hz": 445.9989420572917,
+          "current_mean_error_mv": [
+            -9.199591855011796,
+            -1.34853562072984
+          ]
+        },
+        {
+          "group": 682,
+          "role": "surround_u0.5_offset0",
+          "N": 16,
+          "native_count": 10908,
+          "density_count": 11001.3125,
+          "count_ratio": 1.0085545012834616,
+          "native_rate_Hz": 454.5,
+          "density_rate_Hz": 458.3880208333333,
+          "current_mean_error_mv": [
+            0.01856965473642049,
+            0.06164370539330321
+          ]
+        },
+        {
+          "group": 973,
+          "role": "surround_u0.5_offset3",
+          "N": 14,
+          "native_count": 9547,
+          "density_count": 9603.646240234375,
+          "count_ratio": 1.005933407377645,
+          "native_rate_Hz": 454.61904761904765,
+          "density_rate_Hz": 457.3164876302083,
+          "current_mean_error_mv": [
+            -1.458217689887515,
+            -8.402675179147932
+          ]
+        },
+        {
+          "group": 185,
+          "role": "surround_u0.8_offset-3",
+          "N": 19,
+          "native_count": 12954,
+          "density_count": 13029.948120117188,
+          "count_ratio": 1.0058629087630993,
+          "native_rate_Hz": 454.5263157894737,
+          "density_rate_Hz": 457.191162109375,
+          "current_mean_error_mv": [
+            -1.3879258726430908,
+            -1.5415735776173338
+          ]
+        },
+        {
+          "group": 549,
+          "role": "surround_u0.8_offset0",
+          "N": 24,
+          "native_count": 16360,
+          "density_count": 16652.666015625,
+          "count_ratio": 1.0178891207594742,
+          "native_rate_Hz": 454.4444444444444,
+          "density_rate_Hz": 462.5740559895833,
+          "current_mean_error_mv": [
+            -0.04201324411942702,
+            1.18119041036608
+          ]
+        },
+        {
+          "group": 788,
+          "role": "surround_u0.8_offset3",
+          "N": 23,
+          "native_count": 15681,
+          "density_count": 15680.963134765625,
+          "count_ratio": 0.9999976490508019,
+          "native_rate_Hz": 454.52173913043475,
+          "density_rate_Hz": 454.5206705729167,
+          "current_mean_error_mv": [
+            -10.483437304847392,
+            -6.066708678429179
+          ]
+        },
+        {
+          "group": 945,
+          "role": "core_A",
+          "N": 6,
+          "native_count": 4170,
+          "density_count": 4202.347412109375,
+          "count_ratio": 1.0077571731677157,
+          "native_rate_Hz": 463.3333333333333,
+          "density_rate_Hz": 466.927490234375,
+          "current_mean_error_mv": [
+            -0.21242211348332754,
+            -2.2269232429750097
+          ]
+        },
+        {
+          "group": 364,
+          "role": "core_B",
+          "N": 14,
+          "native_count": 10002,
+          "density_count": 9969.39453125,
+          "count_ratio": 0.9967401051039793,
+          "native_rate_Hz": 476.2857142857143,
+          "density_rate_Hz": 474.7330729166667,
+          "current_mean_error_mv": [
+            -0.15465768527386292,
+            -0.4609392726409245
+          ]
+        },
+        {
+          "group": 2613,
+          "role": "I_u0",
+          "N": 10,
+          "native_count": 8757,
+          "density_count": 8635.48095703125,
+          "count_ratio": 0.9861232108063549,
+          "native_rate_Hz": 583.8000000000001,
+          "density_rate_Hz": 575.69873046875,
+          "current_mean_error_mv": [
+            -0.6450776584196001,
+            -2.6486018725365494
+          ]
+        },
+        {
+          "group": 2498,
+          "role": "I_u0.2",
+          "N": 5,
+          "native_count": 4069,
+          "density_count": 3941.96044921875,
+          "count_ratio": 0.9687786800734209,
+          "native_rate_Hz": 542.5333333333333,
+          "density_rate_Hz": 525.5947265625,
+          "current_mean_error_mv": [
+            -1.3396402805806913,
+            -1.3277671708424759
+          ]
+        },
+        {
+          "group": 2386,
+          "role": "I_u0.5",
+          "N": 5,
+          "native_count": 4383,
+          "density_count": 4264.9639892578125,
+          "count_ratio": 0.9730695845899641,
+          "native_rate_Hz": 584.4,
+          "density_rate_Hz": 568.661865234375,
+          "current_mean_error_mv": [
+            0.019645716301976486,
+            0.45932978930314977
+          ]
+        },
+        {
+          "group": 2272,
+          "role": "I_u0.8",
+          "N": 7,
+          "native_count": 6117,
+          "density_count": 5992.1435546875,
+          "count_ratio": 0.9795886144658329,
+          "native_rate_Hz": 582.5714285714286,
+          "density_rate_Hz": 570.6803385416666,
+          "current_mean_error_mv": [
+            -0.049197604237886786,
+            -0.18121740580231138
+          ]
+        },
+        {
+          "group": 2237,
+          "role": "I_u1",
+          "N": 5,
+          "native_count": 4583,
+          "density_count": 4477.755126953125,
+          "count_ratio": 0.9770358121215634,
+          "native_rate_Hz": 611.0666666666667,
+          "density_rate_Hz": 597.0340169270834,
+          "current_mean_error_mv": [
+            -0.03075967738881142,
+            0.2765731563807988
+          ]
+        }
+      ]
+    },
+    {
+      "job": "measured_full_num928731",
+      "regions": [
+        {
+          "region": "surround_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 33258,
+              "density_count": 33139.44421386719,
+              "count_ratio": 0.9964352701265016,
+              "native_rate_Hz": 420.9873417721519,
+              "density_rate_Hz": 419.486635618572,
+              "relative_L2": 0.005290316555019882
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 99739,
+              "density_count": 99402.57336425781,
+              "count_ratio": 0.9966269299296946,
+              "native_rate_Hz": 420.83966244725735,
+              "density_rate_Hz": 419.42014077745915,
+              "relative_L2": 0.004780024053174349
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1316.058754543927,
+              "density_mean": 1316.0586796636262,
+              "signed_mean_error": -7.488030067179352e-05,
+              "RMS_error": 0.10571480640375298,
+              "native_mean_within_group_std": 26.27926638377498,
+              "density_mean_within_group_std": 25.524639759271494
+            },
+            {
+              "variable": "II",
+              "native_mean": 1462.6392357565348,
+              "density_mean": 1462.6334124090235,
+              "signed_mean_error": -0.005823347510978844,
+              "RMS_error": 0.08151673898278083,
+              "native_mean_within_group_std": 27.903567383019197,
+              "density_mean_within_group_std": 21.73644577587411
+            }
+          ]
+        },
+        {
+          "region": "core_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 4721,
+              "density_count": 4724.18505859375,
+              "count_ratio": 1.0006746576135883,
+              "native_rate_Hz": 472.1,
+              "density_rate_Hz": 472.418505859375,
+              "relative_L2": 0.01314494884672772
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 14172,
+              "density_count": 14170.58447265625,
+              "count_ratio": 0.9999001180254199,
+              "native_rate_Hz": 472.40000000000003,
+              "density_rate_Hz": 472.3528157552084,
+              "relative_L2": 0.013642587324736973
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1477.617525807691,
+              "density_mean": 1477.6357367471298,
+              "signed_mean_error": 0.018210939438775615,
+              "RMS_error": 0.239440931446524,
+              "native_mean_within_group_std": 6.650991778596401,
+              "density_mean_within_group_std": 27.237993153757824
+            },
+            {
+              "variable": "II",
+              "native_mean": 1664.3483451815307,
+              "density_mean": 1664.3344560398034,
+              "signed_mean_error": -0.013889141727178563,
+              "RMS_error": 0.1643158095963772,
+              "native_mean_within_group_std": 4.404543505137226,
+              "density_mean_within_group_std": 23.309375748679287
+            }
+          ]
+        },
+        {
+          "region": "I",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 9297,
+              "density_count": 9073.301025390625,
+              "count_ratio": 0.9759385850694444,
+              "native_rate_Hz": 581.0625,
+              "density_rate_Hz": 567.0813140869141,
+              "relative_L2": 0.024985129708922797
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 27909,
+              "density_count": 27227.075439453125,
+              "count_ratio": 0.9755661413684877,
+              "native_rate_Hz": 581.4375,
+              "density_rate_Hz": 567.2307383219401,
+              "relative_L2": 0.025037495311204607
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1259.837575376768,
+              "density_mean": 1259.8334330902276,
+              "signed_mean_error": -0.004142286540341047,
+              "RMS_error": 0.11931984748347278,
+              "native_mean_within_group_std": 5.192741527535044,
+              "density_mean_within_group_std": 22.74766478785903
+            },
+            {
+              "variable": "II",
+              "native_mean": 1153.7075075058308,
+              "density_mean": 1153.6757291078738,
+              "signed_mean_error": -0.03177839795713529,
+              "RMS_error": 0.0965956634713775,
+              "native_mean_within_group_std": 3.5448550296143138,
+              "density_mean_within_group_std": 16.276835535859075
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "group": 531,
+          "role": "surround_u0.2_offset-3",
+          "N": 13,
+          "native_count": 1083,
+          "density_count": 0.0,
+          "count_ratio": 0.0,
+          "native_rate_Hz": 55.53846153846154,
+          "density_rate_Hz": 0.0,
+          "current_mean_error_mv": [
+            0.015227691631862399,
+            -0.0202670225830434
+          ]
+        },
+        {
+          "group": 833,
+          "role": "surround_u0.2_offset0",
+          "N": 16,
+          "native_count": 10910,
+          "density_count": 11026.189453125,
+          "count_ratio": 1.0106498123854262,
+          "native_rate_Hz": 454.5833333333333,
+          "density_rate_Hz": 459.424560546875,
+          "current_mean_error_mv": [
+            -0.036795699874551245,
+            -0.0020325206164852716
+          ]
+        },
+        {
+          "group": 1140,
+          "role": "surround_u0.2_offset3",
+          "N": 17,
+          "native_count": 11591,
+          "density_count": 11631.89306640625,
+          "count_ratio": 1.0035280015879777,
+          "native_rate_Hz": 454.54901960784315,
+          "density_rate_Hz": 456.1526692708333,
+          "current_mean_error_mv": [
+            -0.038626258409876754,
+            -0.01347075171644216
+          ]
+        },
+        {
+          "group": 342,
+          "role": "surround_u0.5_offset-3",
+          "N": 16,
+          "native_count": 10705,
+          "density_count": 10770.830078125,
+          "count_ratio": 1.0061494701658105,
+          "native_rate_Hz": 446.0416666666667,
+          "density_rate_Hz": 448.7845865885417,
+          "current_mean_error_mv": [
+            0.012705471148124162,
+            0.040296460667785444
+          ]
+        },
+        {
+          "group": 682,
+          "role": "surround_u0.5_offset0",
+          "N": 16,
+          "native_count": 10908,
+          "density_count": 11001.638671875,
+          "count_ratio": 1.0085844033622111,
+          "native_rate_Hz": 454.5,
+          "density_rate_Hz": 458.401611328125,
+          "current_mean_error_mv": [
+            0.026516760850417997,
+            -0.03945578424509222
+          ]
+        },
+        {
+          "group": 973,
+          "role": "surround_u0.5_offset3",
+          "N": 14,
+          "native_count": 9547,
+          "density_count": 9603.36083984375,
+          "count_ratio": 1.0059035131291243,
+          "native_rate_Hz": 454.61904761904765,
+          "density_rate_Hz": 457.3028971354167,
+          "current_mean_error_mv": [
+            0.017118699164957434,
+            0.028585724910990394
+          ]
+        },
+        {
+          "group": 185,
+          "role": "surround_u0.8_offset-3",
+          "N": 19,
+          "native_count": 12954,
+          "density_count": 13034.892944335938,
+          "count_ratio": 1.0062446305647628,
+          "native_rate_Hz": 454.5263157894737,
+          "density_rate_Hz": 457.3646647135417,
+          "current_mean_error_mv": [
+            0.023507384601172514,
+            0.05735082000491881
+          ]
+        },
+        {
+          "group": 549,
+          "role": "surround_u0.8_offset0",
+          "N": 24,
+          "native_count": 16360,
+          "density_count": 16652.771484375,
+          "count_ratio": 1.0178955675045844,
+          "native_rate_Hz": 454.4444444444444,
+          "density_rate_Hz": 462.5769856770833,
+          "current_mean_error_mv": [
+            0.000683819706223403,
+            -0.03111817169021227
+          ]
+        },
+        {
+          "group": 788,
+          "role": "surround_u0.8_offset3",
+          "N": 23,
+          "native_count": 15681,
+          "density_count": 15680.996826171875,
+          "count_ratio": 0.9999997976004001,
+          "native_rate_Hz": 454.52173913043475,
+          "density_rate_Hz": 454.5216471354167,
+          "current_mean_error_mv": [
+            -0.012812302974733332,
+            -0.050068475441615495
+          ]
+        },
+        {
+          "group": 945,
+          "role": "core_A",
+          "N": 6,
+          "native_count": 4170,
+          "density_count": 4201.453125,
+          "count_ratio": 1.0075427158273382,
+          "native_rate_Hz": 463.3333333333333,
+          "density_rate_Hz": 466.828125,
+          "current_mean_error_mv": [
+            0.025922624418543212,
+            0.01204571172240018
+          ]
+        },
+        {
+          "group": 364,
+          "role": "core_B",
+          "N": 14,
+          "native_count": 10002,
+          "density_count": 9969.13134765625,
+          "count_ratio": 0.9967137920072235,
+          "native_rate_Hz": 476.2857142857143,
+          "density_rate_Hz": 474.7205403645833,
+          "current_mean_error_mv": [
+            0.01490593159030747,
+            -0.02500407891986015
+          ]
+        },
+        {
+          "group": 2613,
+          "role": "I_u0",
+          "N": 10,
+          "native_count": 8757,
+          "density_count": 8542.108154296875,
+          "count_ratio": 0.9754605634688678,
+          "native_rate_Hz": 583.8000000000001,
+          "density_rate_Hz": 569.473876953125,
+          "current_mean_error_mv": [
+            -0.01942859217143905,
+            -0.06455561162928461
+          ]
+        },
+        {
+          "group": 2498,
+          "role": "I_u0.2",
+          "N": 5,
+          "native_count": 4069,
+          "density_count": 3940.6915283203125,
+          "count_ratio": 0.968466829275083,
+          "native_rate_Hz": 542.5333333333333,
+          "density_rate_Hz": 525.425537109375,
+          "current_mean_error_mv": [
+            0.0023074334373707948,
+            -0.03632441322533395
+          ]
+        },
+        {
+          "group": 2386,
+          "role": "I_u0.5",
+          "N": 5,
+          "native_count": 4383,
+          "density_count": 4278.392333984375,
+          "count_ratio": 0.9761333182715891,
+          "native_rate_Hz": 584.4,
+          "density_rate_Hz": 570.4523111979166,
+          "current_mean_error_mv": [
+            -0.0015286186229620095,
+            0.01629717791573815
+          ]
+        },
+        {
+          "group": 2272,
+          "role": "I_u0.8",
+          "N": 7,
+          "native_count": 6117,
+          "density_count": 5981.689697265625,
+          "count_ratio": 0.9778796300908329,
+          "native_rate_Hz": 582.5714285714286,
+          "density_rate_Hz": 569.6847330729166,
+          "current_mean_error_mv": [
+            0.012632348693224837,
+            -0.013965998885652576
+          ]
+        },
+        {
+          "group": 2237,
+          "role": "I_u1",
+          "N": 5,
+          "native_count": 4583,
+          "density_count": 4484.1937255859375,
+          "count_ratio": 0.9784406994514374,
+          "native_rate_Hz": 611.0666666666667,
+          "density_rate_Hz": 597.8924967447916,
+          "current_mean_error_mv": [
+            -0.006117552500137814,
+            -0.0346908899175484
+          ]
+        }
+      ]
+    },
+    {
+      "job": "projected_full_num928732",
+      "regions": [
+        {
+          "region": "surround_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 33258,
+              "density_count": 33115.12451171875,
+              "count_ratio": 0.9957040264513425,
+              "native_rate_Hz": 420.9873417721519,
+              "density_rate_Hz": 419.1787912875791,
+              "relative_L2": 0.0059037954172752325
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 99739,
+              "density_count": 99329.56921386719,
+              "count_ratio": 0.9958949780313336,
+              "native_rate_Hz": 420.83966244725735,
+              "density_rate_Hz": 419.11210638762526,
+              "relative_L2": 0.005329149411957769
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1316.058754543927,
+              "density_mean": 1313.5853503610779,
+              "signed_mean_error": -2.473404182848999,
+              "RMS_error": 2.5444643943468654,
+              "native_mean_within_group_std": 26.27926638377498,
+              "density_mean_within_group_std": 25.52827389712908
+            },
+            {
+              "variable": "II",
+              "native_mean": 1462.6392357565348,
+              "density_mean": 1460.687528152455,
+              "signed_mean_error": -1.951707604079911,
+              "RMS_error": 1.9548407070841944,
+              "native_mean_within_group_std": 27.903567383019197,
+              "density_mean_within_group_std": 21.742629763514277
+            }
+          ]
+        },
+        {
+          "region": "core_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 4721,
+              "density_count": 4723.999755859375,
+              "count_ratio": 1.0006354068755297,
+              "native_rate_Hz": 472.1,
+              "density_rate_Hz": 472.3999755859375,
+              "relative_L2": 0.012323773279633913
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 14172,
+              "density_count": 14171.4140625,
+              "count_ratio": 0.9999586552709568,
+              "native_rate_Hz": 472.40000000000003,
+              "density_rate_Hz": 472.38046875000003,
+              "relative_L2": 0.013586730899070731
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1477.617525807691,
+              "density_mean": 1477.394595524082,
+              "signed_mean_error": -0.22293028360901493,
+              "RMS_error": 1.3670472132685445,
+              "native_mean_within_group_std": 6.650991778596401,
+              "density_mean_within_group_std": 27.209400930646567
+            },
+            {
+              "variable": "II",
+              "native_mean": 1664.3483451815307,
+              "density_mean": 1663.3904928819638,
+              "signed_mean_error": -0.9578522995670695,
+              "RMS_error": 0.9928606316687966,
+              "native_mean_within_group_std": 4.404543505137226,
+              "density_mean_within_group_std": 23.334906402424913
+            }
+          ]
+        },
+        {
+          "region": "I",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 9297,
+              "density_count": 9099.8681640625,
+              "count_ratio": 0.978796188454609,
+              "native_rate_Hz": 581.0625,
+              "density_rate_Hz": 568.7417602539062,
+              "relative_L2": 0.02226701410862253
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 27909,
+              "density_count": 27316.349853515625,
+              "count_ratio": 0.9787649092950527,
+              "native_rate_Hz": 581.4375,
+              "density_rate_Hz": 569.0906219482422,
+              "relative_L2": 0.022077284594625015
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1259.837575376768,
+              "density_mean": 1259.4372394530806,
+              "signed_mean_error": -0.4003359236875773,
+              "RMS_error": 0.8137760273397852,
+              "native_mean_within_group_std": 5.192741527535044,
+              "density_mean_within_group_std": 22.742145471842633
+            },
+            {
+              "variable": "II",
+              "native_mean": 1153.7075075058308,
+              "density_mean": 1152.763721118808,
+              "signed_mean_error": -0.9437863870228679,
+              "RMS_error": 0.954984984560968,
+              "native_mean_within_group_std": 3.5448550296143138,
+              "density_mean_within_group_std": 16.25767328030313
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "group": 531,
+          "role": "surround_u0.2_offset-3",
+          "N": 13,
+          "native_count": 1083,
+          "density_count": 0.0,
+          "count_ratio": 0.0,
+          "native_rate_Hz": 55.53846153846154,
+          "density_rate_Hz": 0.0,
+          "current_mean_error_mv": [
+            3.2413288589369116,
+            -2.878611903185599
+          ]
+        },
+        {
+          "group": 833,
+          "role": "surround_u0.2_offset0",
+          "N": 16,
+          "native_count": 10910,
+          "density_count": 11025.580078125,
+          "count_ratio": 1.0105939576649863,
+          "native_rate_Hz": 454.5833333333333,
+          "density_rate_Hz": 459.399169921875,
+          "current_mean_error_mv": [
+            0.002911728189700019,
+            0.7296218112957937
+          ]
+        },
+        {
+          "group": 1140,
+          "role": "surround_u0.2_offset3",
+          "N": 17,
+          "native_count": 11591,
+          "density_count": 11631.664794921875,
+          "count_ratio": 1.0035083077320226,
+          "native_rate_Hz": 454.54901960784315,
+          "density_rate_Hz": 456.1437174479167,
+          "current_mean_error_mv": [
+            0.09084029292136772,
+            -0.09027180871943073
+          ]
+        },
+        {
+          "group": 342,
+          "role": "surround_u0.5_offset-3",
+          "N": 16,
+          "native_count": 10705,
+          "density_count": 10704.1015625,
+          "count_ratio": 0.9999160730966838,
+          "native_rate_Hz": 446.0416666666667,
+          "density_rate_Hz": 446.0042317708333,
+          "current_mean_error_mv": [
+            -9.218219139738958,
+            -1.3987415886932921
+          ]
+        },
+        {
+          "group": 682,
+          "role": "surround_u0.5_offset0",
+          "N": 16,
+          "native_count": 10908,
+          "density_count": 11001.140625,
+          "count_ratio": 1.00853874449945,
+          "native_rate_Hz": 454.5,
+          "density_rate_Hz": 458.380859375,
+          "current_mean_error_mv": [
+            -0.010262600901366265,
+            0.032048312992751564
+          ]
+        },
+        {
+          "group": 973,
+          "role": "surround_u0.5_offset3",
+          "N": 14,
+          "native_count": 9547,
+          "density_count": 9603.547119140625,
+          "count_ratio": 1.005923024944027,
+          "native_rate_Hz": 454.61904761904765,
+          "density_rate_Hz": 457.311767578125,
+          "current_mean_error_mv": [
+            -1.4426000027786676,
+            -8.44280754090592
+          ]
+        },
+        {
+          "group": 185,
+          "role": "surround_u0.8_offset-3",
+          "N": 19,
+          "native_count": 12954,
+          "density_count": 13029.911010742188,
+          "count_ratio": 1.0058600440591468,
+          "native_rate_Hz": 454.5263157894737,
+          "density_rate_Hz": 457.1898600260417,
+          "current_mean_error_mv": [
+            -1.3571384968763838,
+            -1.5735395397644318
+          ]
+        },
+        {
+          "group": 549,
+          "role": "surround_u0.8_offset0",
+          "N": 24,
+          "native_count": 16360,
+          "density_count": 16652.677734375,
+          "count_ratio": 1.0178898370644867,
+          "native_rate_Hz": 454.4444444444444,
+          "density_rate_Hz": 462.5743815104167,
+          "current_mean_error_mv": [
+            -0.02177897112648073,
+            1.1443498108865955
+          ]
+        },
+        {
+          "group": 788,
+          "role": "surround_u0.8_offset3",
+          "N": 23,
+          "native_count": 15681,
+          "density_count": 15680.9462890625,
+          "count_ratio": 0.9999965747760028,
+          "native_rate_Hz": 454.52173913043475,
+          "density_rate_Hz": 454.5201822916667,
+          "current_mean_error_mv": [
+            -10.450677132616773,
+            -6.025561789460016
+          ]
+        },
+        {
+          "group": 945,
+          "role": "core_A",
+          "N": 6,
+          "native_count": 4170,
+          "density_count": 4202.181884765625,
+          "count_ratio": 1.0077174783610612,
+          "native_rate_Hz": 463.3333333333333,
+          "density_rate_Hz": 466.9090983072917,
+          "current_mean_error_mv": [
+            -0.2547239291035051,
+            -2.2324791506808257
+          ]
+        },
+        {
+          "group": 364,
+          "role": "core_B",
+          "N": 14,
+          "native_count": 10002,
+          "density_count": 9969.232177734375,
+          "count_ratio": 0.9967238729988377,
+          "native_rate_Hz": 476.2857142857143,
+          "density_rate_Hz": 474.725341796875,
+          "current_mean_error_mv": [
+            -0.20930443553995245,
+            -0.4115836490897421
+          ]
+        },
+        {
+          "group": 2613,
+          "role": "I_u0",
+          "N": 10,
+          "native_count": 8757,
+          "density_count": 8633.934326171875,
+          "count_ratio": 0.9859465942870703,
+          "native_rate_Hz": 583.8000000000001,
+          "density_rate_Hz": 575.5956217447916,
+          "current_mean_error_mv": [
+            -0.5938638705634017,
+            -2.5537986093978784
+          ]
+        },
+        {
+          "group": 2498,
+          "role": "I_u0.2",
+          "N": 5,
+          "native_count": 4069,
+          "density_count": 3942.02880859375,
+          "count_ratio": 0.9687954801164291,
+          "native_rate_Hz": 542.5333333333333,
+          "density_rate_Hz": 525.6038411458334,
+          "current_mean_error_mv": [
+            -1.3212488404996898,
+            -1.3269634846929967
+          ]
+        },
+        {
+          "group": 2386,
+          "role": "I_u0.5",
+          "N": 5,
+          "native_count": 4383,
+          "density_count": 4267.4578857421875,
+          "count_ratio": 0.9736385776276951,
+          "native_rate_Hz": 584.4,
+          "density_rate_Hz": 568.994384765625,
+          "current_mean_error_mv": [
+            0.057715717442295804,
+            0.40562484534591176
+          ]
+        },
+        {
+          "group": 2272,
+          "role": "I_u0.8",
+          "N": 7,
+          "native_count": 6117,
+          "density_count": 5994.30029296875,
+          "count_ratio": 0.9799411955155714,
+          "native_rate_Hz": 582.5714285714286,
+          "density_rate_Hz": 570.8857421875,
+          "current_mean_error_mv": [
+            -0.055438571743332735,
+            -0.21810995932465174
+          ]
+        },
+        {
+          "group": 2237,
+          "role": "I_u1",
+          "N": 5,
+          "native_count": 4583,
+          "density_count": 4478.6285400390625,
+          "count_ratio": 0.9772263888368018,
+          "native_rate_Hz": 611.0666666666667,
+          "density_rate_Hz": 597.1504720052084,
+          "current_mean_error_mv": [
+            -0.03327504697558955,
+            0.2940569242510416
+          ]
+        }
+      ]
+    },
+    {
+      "job": "measured_full_num928732",
+      "regions": [
+        {
+          "region": "surround_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 33258,
+              "density_count": 33139.791015625,
+              "count_ratio": 0.9964456977456552,
+              "native_rate_Hz": 420.9873417721519,
+              "density_rate_Hz": 419.4910255142405,
+              "relative_L2": 0.00528080575774075
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 99739,
+              "density_count": 99402.90551757812,
+              "count_ratio": 0.9966302601547853,
+              "native_rate_Hz": 420.83966244725735,
+              "density_rate_Hz": 419.4215422682621,
+              "relative_L2": 0.0047871244085047554
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1316.058754543927,
+              "density_mean": 1316.0769112386427,
+              "signed_mean_error": 0.018156694715903542,
+              "RMS_error": 0.09655521039545846,
+              "native_mean_within_group_std": 26.27926638377498,
+              "density_mean_within_group_std": 25.528273897129075
+            },
+            {
+              "variable": "II",
+              "native_mean": 1462.6392357565348,
+              "density_mean": 1462.6288233739094,
+              "signed_mean_error": -0.010412382625296838,
+              "RMS_error": 0.08411583728755939,
+              "native_mean_within_group_std": 27.903567383019197,
+              "density_mean_within_group_std": 21.74262976351428
+            }
+          ]
+        },
+        {
+          "region": "core_E",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 4721,
+              "density_count": 4724.26611328125,
+              "count_ratio": 1.0006918265793794,
+              "native_rate_Hz": 472.1,
+              "density_rate_Hz": 472.426611328125,
+              "relative_L2": 0.013044265924917569
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 14172,
+              "density_count": 14170.199951171875,
+              "count_ratio": 0.9998729855469852,
+              "native_rate_Hz": 472.40000000000003,
+              "density_rate_Hz": 472.3399983723959,
+              "relative_L2": 0.013748699968443098
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1477.617525807691,
+              "density_mean": 1477.5847934772576,
+              "signed_mean_error": -0.0327323304335323,
+              "RMS_error": 0.24522384279266068,
+              "native_mean_within_group_std": 6.650991778596401,
+              "density_mean_within_group_std": 27.209400930646563
+            },
+            {
+              "variable": "II",
+              "native_mean": 1664.3483451815307,
+              "density_mean": 1664.3673382039776,
+              "signed_mean_error": 0.01899302244689352,
+              "RMS_error": 0.18561068714691842,
+              "native_mean_within_group_std": 4.404543505137226,
+              "density_mean_within_group_std": 23.334906402424913
+            }
+          ]
+        },
+        {
+          "region": "I",
+          "windows": [
+            {
+              "window": "initial",
+              "time_s": [
+                42.0,
+                42.5
+              ],
+              "native_count": 9297,
+              "density_count": 9069.898193359375,
+              "count_ratio": 0.9755725710830778,
+              "native_rate_Hz": 581.0625,
+              "density_rate_Hz": 566.8686370849609,
+              "relative_L2": 0.025311064142533448
+            },
+            {
+              "window": "tail",
+              "time_s": [
+                42.5,
+                44.0
+              ],
+              "native_count": 27909,
+              "density_count": 27231.064208984375,
+              "count_ratio": 0.9757090619149513,
+              "native_rate_Hz": 581.4375,
+              "density_rate_Hz": 567.3138376871744,
+              "relative_L2": 0.024887097790929902
+            }
+          ],
+          "currents_tail": [
+            {
+              "variable": "IE",
+              "native_mean": 1259.837575376768,
+              "density_mean": 1259.8565012609838,
+              "signed_mean_error": 0.018925884215791486,
+              "RMS_error": 0.12728335105784766,
+              "native_mean_within_group_std": 5.192741527535044,
+              "density_mean_within_group_std": 22.742145471842633
+            },
+            {
+              "variable": "II",
+              "native_mean": 1153.7075075058308,
+              "density_mean": 1153.6917508987187,
+              "signed_mean_error": -0.01575660711205425,
+              "RMS_error": 0.09343785041482743,
+              "native_mean_within_group_std": 3.5448550296143138,
+              "density_mean_within_group_std": 16.25767328030313
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "group": 531,
+          "role": "surround_u0.2_offset-3",
+          "N": 13,
+          "native_count": 1083,
+          "density_count": 0.0,
+          "count_ratio": 0.0,
+          "native_rate_Hz": 55.53846153846154,
+          "density_rate_Hz": 0.0,
+          "current_mean_error_mv": [
+            0.02431054317975016,
+            -0.011335288061538147
+          ]
+        },
+        {
+          "group": 833,
+          "role": "surround_u0.2_offset0",
+          "N": 16,
+          "native_count": 10910,
+          "density_count": 11026.51171875,
+          "count_ratio": 1.0106793509395051,
+          "native_rate_Hz": 454.5833333333333,
+          "density_rate_Hz": 459.43798828125,
+          "current_mean_error_mv": [
+            0.008699376495502899,
+            0.05464549723335949
+          ]
+        },
+        {
+          "group": 1140,
+          "role": "surround_u0.2_offset3",
+          "N": 17,
+          "native_count": 11591,
+          "density_count": 11631.961547851562,
+          "count_ratio": 1.0035339097447642,
+          "native_rate_Hz": 454.54901960784315,
+          "density_rate_Hz": 456.1553548177083,
+          "current_mean_error_mv": [
+            0.005563678895420404,
+            0.02392899357826991
+          ]
+        },
+        {
+          "group": 342,
+          "role": "surround_u0.5_offset-3",
+          "N": 16,
+          "native_count": 10705,
+          "density_count": 10770.85546875,
+          "count_ratio": 1.006151842013078,
+          "native_rate_Hz": 446.0416666666667,
+          "density_rate_Hz": 448.78564453125,
+          "current_mean_error_mv": [
+            -0.005921813579029731,
+            -0.00990950729567127
+          ]
+        },
+        {
+          "group": 682,
+          "role": "surround_u0.5_offset0",
+          "N": 16,
+          "native_count": 10908,
+          "density_count": 11001.451171875,
+          "count_ratio": 1.0085672141432893,
+          "native_rate_Hz": 454.5,
+          "density_rate_Hz": 458.393798828125,
+          "current_mean_error_mv": [
+            -0.002315494787374822,
+            -0.06905117664563477
+          ]
+        },
+        {
+          "group": 973,
+          "role": "surround_u0.5_offset3",
+          "N": 14,
+          "native_count": 9547,
+          "density_count": 9603.22412109375,
+          "count_ratio": 1.0058891925310307,
+          "native_rate_Hz": 454.61904761904765,
+          "density_rate_Hz": 457.29638671875,
+          "current_mean_error_mv": [
+            0.03273638627381085,
+            -0.011546636846992442
+          ]
+        },
+        {
+          "group": 185,
+          "role": "surround_u0.8_offset-3",
+          "N": 19,
+          "native_count": 12954,
+          "density_count": 13035.127197265625,
+          "count_ratio": 1.0062627140084626,
+          "native_rate_Hz": 454.5263157894737,
+          "density_rate_Hz": 457.3728841145833,
+          "current_mean_error_mv": [
+            0.054294760367885525,
+            0.02538485785781783
+          ]
+        },
+        {
+          "group": 549,
+          "role": "surround_u0.8_offset0",
+          "N": 24,
+          "native_count": 16360,
+          "density_count": 16652.7802734375,
+          "count_ratio": 1.0178961047333435,
+          "native_rate_Hz": 454.4444444444444,
+          "density_rate_Hz": 462.5772298177083,
+          "current_mean_error_mv": [
+            0.020918092699175758,
+            -0.06795877116972558
+          ]
+        },
+        {
+          "group": 788,
+          "role": "surround_u0.8_offset3",
+          "N": 23,
+          "native_count": 15681,
+          "density_count": 15680.994018554688,
+          "count_ratio": 0.9999996185546003,
+          "native_rate_Hz": 454.52173913043475,
+          "density_rate_Hz": 454.5215657552083,
+          "current_mean_error_mv": [
+            0.019947869255879595,
+            -0.008921586472451963
+          ]
+        },
+        {
+          "group": 945,
+          "role": "core_A",
+          "N": 6,
+          "native_count": 4170,
+          "density_count": 4201.31982421875,
+          "count_ratio": 1.0075107492131294,
+          "native_rate_Hz": 463.3333333333333,
+          "density_rate_Hz": 466.8133138020833,
+          "current_mean_error_mv": [
+            -0.0163791912016283,
+            0.006489804016581123
+          ]
+        },
+        {
+          "group": 364,
+          "role": "core_B",
+          "N": 14,
+          "native_count": 10002,
+          "density_count": 9968.880126953125,
+          "count_ratio": 0.9966886749603204,
+          "native_rate_Hz": 476.2857142857143,
+          "density_rate_Hz": 474.7085774739583,
+          "current_mean_error_mv": [
+            -0.039740818675789644,
+            0.024351544631293413
+          ]
+        },
+        {
+          "group": 2613,
+          "role": "I_u0",
+          "N": 10,
+          "native_count": 8757,
+          "density_count": 8540.57861328125,
+          "count_ratio": 0.9752858985133321,
+          "native_rate_Hz": 583.8000000000001,
+          "density_rate_Hz": 569.3719075520834,
+          "current_mean_error_mv": [
+            0.03178519568477744,
+            0.03024765150938644
+          ]
+        },
+        {
+          "group": 2498,
+          "role": "I_u0.2",
+          "N": 5,
+          "native_count": 4069,
+          "density_count": 3940.7391357421875,
+          "count_ratio": 0.968478529305035,
+          "native_rate_Hz": 542.5333333333333,
+          "density_rate_Hz": 525.431884765625,
+          "current_mean_error_mv": [
+            0.02069887351836466,
+            -0.035520727075866794
+          ]
+        },
+        {
+          "group": 2386,
+          "role": "I_u0.5",
+          "N": 5,
+          "native_count": 4383,
+          "density_count": 4280.9417724609375,
+          "count_ratio": 0.9767149834499059,
+          "native_rate_Hz": 584.4,
+          "density_rate_Hz": 570.792236328125,
+          "current_mean_error_mv": [
+            0.03654138251735731,
+            -0.03740776604147262
+          ]
+        },
+        {
+          "group": 2272,
+          "role": "I_u0.8",
+          "N": 7,
+          "native_count": 6117,
+          "density_count": 5983.7344970703125,
+          "count_ratio": 0.9782139115694478,
+          "native_rate_Hz": 582.5714285714286,
+          "density_rate_Hz": 569.8794759114584,
+          "current_mean_error_mv": [
+            0.006391381187771306,
+            -0.0508585524079884
+          ]
+        },
+        {
+          "group": 2237,
+          "role": "I_u1",
+          "N": 5,
+          "native_count": 4583,
+          "density_count": 4485.0701904296875,
+          "count_ratio": 0.978631942053172,
+          "native_rate_Hz": 611.0666666666667,
+          "density_rate_Hz": 598.0093587239584,
+          "current_mean_error_mv": [
+            -0.008632922086894724,
+            -0.017207122047308683
+          ]
+        }
+      ]
+    }
+  ],
+  "statistical_unit": "One original native conditional continuation; 16 geometric groups, two numerical streams per arm. Groups are not independent network replications.",
+  "source_interval_s": [
+    42.0,
+    44.0
+  ],
+  "current_time_alignment": "Updated current at native tick99 equals local post100step current; no extra timestep shift.",
+  "scope": "Input-forced local check with held native Z/K; it does not validate the freely coupled network or stability.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "e90183eb5dad68ed72fc06d7bec8db1c5ed584559377a4068078fc8a6a938af1"
+}

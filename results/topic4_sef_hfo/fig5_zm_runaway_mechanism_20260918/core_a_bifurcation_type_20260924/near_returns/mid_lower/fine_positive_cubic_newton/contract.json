@@ -1,0 +1,20 @@
+{
+  "question": "Does the individual recurrent self-terminating burst correct to an actual periodic orbit of the unchanged full spatial model?",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/periodic_active_fine_newton_fdrefined/iteration00/positive_coordinate_probe/candidate0p125.npz",
+  "dt_ms": 0.025,
+  "source_dt_ms": 0.025,
+  "all_M_dynamic": true,
+  "all_Z_held": true,
+  "section": "flow",
+  "interpolation": "cubic",
+  "positive_coordinate_proposals": true,
+  "source_is_corrector_iterate": true,
+  "method": "Actual full-state positive Poincare return, full variational derivative including return time, matrix-free Newton-GMRES. Fixed section through source. No rate-only recurrence or projected dynamics.",
+  "gates": "First section derivative must match nonlinear full-state finite differences; no inadmissible states or clipping. Numerical orbit requires combined closure<1e-7 and every block<1e-6. Independent phase, mesh, fundamental period and Floquet checks remain necessary.",
+  "limits": {
+    "nonlinear_iterations": 6,
+    "Krylov_per_step": 16,
+    "admissible_linesearch_returns": 4
+  },
+  "model_promoted": false
+}

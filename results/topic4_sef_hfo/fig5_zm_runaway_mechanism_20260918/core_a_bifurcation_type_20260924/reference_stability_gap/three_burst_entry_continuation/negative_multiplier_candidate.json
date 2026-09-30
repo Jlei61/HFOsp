@@ -1,0 +1,44 @@
+{
+  "time": "2026-09-25T05:39:44.237773+08:00",
+  "status": "NEGATIVE_MULTIPLIER_APPROACH_ONLY",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "fixed_model": "Full3479group0.5mm spatial rate; native CoreA Z alone varied; allZheld, allE Mdynamic; outsideA native9s",
+  "points": [
+    {
+      "theta_ms": 9551.180014482,
+      "Z_A": 0.7061486994565256,
+      "negative_verified_numerical_eigenpairs": [
+        {
+          "real": -0.2767674730685351,
+          "imag": 0.0,
+          "relative_residual": 5.068602274612631e-14,
+          "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+        }
+      ],
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9551/whole_cycle/multiple_section_spectrum",
+      "physical_phase_mesh_qualification": "NOT_PASSED"
+    },
+    {
+      "theta_ms": 9573.043350229,
+      "Z_A": 0.7030676768883982,
+      "negative_verified_numerical_eigenpairs": [
+        {
+          "real": -0.8185894685707278,
+          "imag": 0.0,
+          "relative_residual": 1.926812900239063e-14,
+          "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+        }
+      ],
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9573/whole_cycle/section_spectrum_segmented",
+      "physical_phase_mesh_qualification": "NOT_PASSED"
+    }
+  ],
+  "interpretation": "A negative real return multiplier approaches -1 along the same numerical three-burst branch. Prior native9573 physical neutral failure retained. This is a candidate direction for period-doubling investigation, not a crossing, physical Floquet certificate, or onset attribution.",
+  "next_point": {
+    "theta_ms": 9583.9750181025,
+    "source_root": "native9573",
+    "period_predictor_ms": 791.4889729763091
+  },
+  "reference": "https://arxiv.org/html/2505.19786v1#S2.SS1.SSS2",
+  "method_boundary": "Exact full-state Poincare derivative, not a fitted return map. Mesh and phase gates, simple crossing and nonlinear daughter branch remain required; no use of ODE-only normal form formulas for delayed state."
+}

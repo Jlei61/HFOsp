@@ -1,0 +1,18 @@
+{
+  "epoch": 1790273089.9721034,
+  "old_supervisor_pid": 2646751,
+  "maximum_scientific_jobs": 16,
+  "maximum_active_jobs": 4,
+  "original_prerequisites_unchanged": true,
+  "scientific_jobs_unchanged": true,
+  "physics_unchanged": true,
+  "GPU_gate": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/axis_cuda_device0_route/gate.json",
+  "GPU_wrapper_sha256": "d67dd6c86de0dd83ed1b84aeaa8d4b85006f15b362064d3bebbb4083bc1bceaf",
+  "GPU_dispatch_free_GiB": 9.3,
+  "GPU_startup_reservation_GiB": 1.25,
+  "host_dispatch_free_GiB": 88,
+  "CPU_dispatch_busy_limit_percent": 65,
+  "CPU_threads_each": 8,
+  "policy": "Use validated original CUDA on GPU0 when the existing16branch gate opens and memory allows; otherwise existing CPU. Startup reservations carried across polls. No current science worker stopped.",
+  "new_supervisor_pid": 2852545
+}

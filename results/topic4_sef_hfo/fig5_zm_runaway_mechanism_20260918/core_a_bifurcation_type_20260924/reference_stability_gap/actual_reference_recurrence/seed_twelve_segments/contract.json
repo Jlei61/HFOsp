@@ -1,0 +1,12 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_reference_recurrence/exact_six_burst_seed",
+  "segments": 12,
+  "old_segments": 4,
+  "period_ms": 1576.5,
+  "dt_ms": 0.05,
+  "reason": "The reference foursegment Newton operator has a projected singular-value ratio about7.6e6, and all bounded actual proposals fail despite the full derivative test. Shorter physical flow segments limit segmentwise expansion; this changes the boundary-value numerical partition only.",
+  "physical_scope": "Same exact complete source node0, unchangedfull3479-group drift, allZheld/allE Mdynamic, no futureinput or response/network adjustment.",
+  "verification": "Visit every original saved node at its original actual grid time. Original six-block comparison combined<1e-10 and eachblock<1e-9; clock/Z/parameters exact. Report bit equality separately. Original periodic closure, phase, mesh and stability gates unchanged.",
+  "new_nodes": "Actual original-flow states at nearest0.05ms uniform fraction times; roundoff in node spacing belongs only to the initial seed, not the matching equation.",
+  "model_promoted": false
+}

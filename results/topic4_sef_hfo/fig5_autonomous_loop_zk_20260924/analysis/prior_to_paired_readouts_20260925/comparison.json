@@ -1,0 +1,226 @@
+{
+  "status": "RUNNING_PARTIAL",
+  "new_completed": 0,
+  "new_total": 16,
+  "rows": [
+    {
+      "name": "z0.75_k2_high",
+      "job": {
+        "name": "z0.75_k2_high",
+        "seed": 9108405,
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "mode": "native",
+        "gamma": 0.0,
+        "global_gain": 30.0,
+        "global_resource": "native_z",
+        "phi_jump": 0.0,
+        "horizon_s": 42.0,
+        "checkpoint_s": 2.0,
+        "device": 0,
+        "qa": false,
+        "stop_after_second_entry": false,
+        "stage": "conditional",
+        "C_R": 0.0,
+        "feedback_form": "conductance",
+        "global_reversal_mV": -17.662847938268442,
+        "sahp_gain": 16.0,
+        "sahp_tau_s": 0.5,
+        "k100": 8.0,
+        "K500": 40.0,
+        "G500": 30.0,
+        "rate_start_Hz": 200.0,
+        "rate_full_Hz": 500.0,
+        "added_K_increment_when_gate1": 0.16,
+        "local_inhibition_multiplier": 1.0,
+        "mechanism": "G_raw=G500*s; tau_G*ds/dt=q-s (tau_G=0: s=q). K increment remains0.16*q; K tau0.5s except5s at causal R_G<=5Hz.",
+        "global_tau_s": 0.5,
+        "off_tau_s": 5.0,
+        "on_tau_s": 0.5,
+        "retention_below_Hz": 5.0,
+        "full_state_snapshots": true,
+        "conditional_clamp": true,
+        "target_Z": 0.75,
+        "target_K": 2.0,
+        "backend": "cpu",
+        "branch_start_s": 12.0,
+        "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+        "common_exogenous_input": true,
+        "diagnostic_only": true
+      },
+      "duration_s": 30.0,
+      "finite_window_state": "quiet",
+      "full_horizon": true,
+      "tail_mean_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_high_fraction": 0.0,
+      "tail_joint_quiet_fraction": 1.0,
+      "tail_brief_events": 0,
+      "tail_brief_span_s": 0.0,
+      "events": [],
+      "counterfactual_drift_mean_allE_A_B_other": [
+        [
+          0.05000000000000044,
+          -0.39999600002449387
+        ],
+        [
+          0.05287677274675778,
+          -0.43330983299220055
+        ],
+        [
+          0.05349798325918692,
+          -0.4600982632891322
+        ],
+        [
+          0.049838525886645606,
+          -0.3976204580355331
+        ]
+      ],
+      "drift_definition": "Native dZ/dt and discrete native dK/dt at the held spatial fields; G and M dynamic.",
+      "independent_unit": "one conditional trajectory; paired initial histories, one shared future noise stream",
+      "certified_bifurcation": false,
+      "counts_as_autonomous_loop": false,
+      "interpretation": "Finite30s conditional response, not demonstrated attractor convergence or original full-model bistability.",
+      "axis_condition": "current",
+      "source_root": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924"
+    },
+    {
+      "name": "z0.75_k2_interictal",
+      "job": {
+        "name": "z0.75_k2_interictal",
+        "seed": 9108405,
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "mode": "native",
+        "gamma": 0.0,
+        "global_gain": 30.0,
+        "global_resource": "native_z",
+        "phi_jump": 0.0,
+        "horizon_s": 80.0,
+        "checkpoint_s": 2.0,
+        "device": 0,
+        "qa": false,
+        "stop_after_second_entry": false,
+        "stage": "conditional",
+        "C_R": 0.0,
+        "feedback_form": "conductance",
+        "global_reversal_mV": -17.662847938268442,
+        "sahp_gain": 16.0,
+        "sahp_tau_s": 0.5,
+        "k100": 8.0,
+        "K500": 40.0,
+        "G500": 30.0,
+        "rate_start_Hz": 200.0,
+        "rate_full_Hz": 500.0,
+        "added_K_increment_when_gate1": 0.16,
+        "local_inhibition_multiplier": 1.0,
+        "mechanism": "G_raw=G500*s; tau_G*ds/dt=q-s (tau_G=0: s=q). K increment remains0.16*q; K tau0.5s except5s at causal R_G<=5Hz.",
+        "global_tau_s": 0.5,
+        "off_tau_s": 5.0,
+        "on_tau_s": 0.5,
+        "retention_below_Hz": 5.0,
+        "full_state_snapshots": true,
+        "conditional_clamp": true,
+        "target_Z": 0.75,
+        "target_K": 2.0,
+        "backend": "cpu",
+        "branch_start_s": 50.0,
+        "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t50s.pkl",
+        "common_exogenous_input": true,
+        "diagnostic_only": true
+      },
+      "duration_s": 30.0,
+      "finite_window_state": "quiet",
+      "full_horizon": true,
+      "tail_mean_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_high_fraction": 0.0,
+      "tail_joint_quiet_fraction": 1.0,
+      "tail_brief_events": 0,
+      "tail_brief_span_s": 0.0,
+      "events": [],
+      "counterfactual_drift_mean_allE_A_B_other": [
+        [
+          0.05000000000000044,
+          -0.39999600002449387
+        ],
+        [
+          0.05287677274675778,
+          -0.43330983299220055
+        ],
+        [
+          0.05349798325918692,
+          -0.4600982632891322
+        ],
+        [
+          0.049838525886645606,
+          -0.3976204580355331
+        ]
+      ],
+      "drift_definition": "Native dZ/dt and discrete native dK/dt at the held spatial fields; G and M dynamic.",
+      "independent_unit": "one conditional trajectory; paired initial histories, one shared future noise stream",
+      "certified_bifurcation": false,
+      "counts_as_autonomous_loop": false,
+      "interpretation": "Finite30s conditional response, not demonstrated attractor convergence or original full-model bistability.",
+      "axis_condition": "current",
+      "source_root": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924"
+    }
+  ],
+  "paired_comparisons": [],
+  "contract": {
+    "status": "LOCKED_BEFORE_FURTHER_GRID_RESULTS",
+    "created_epoch": 1790265811.0151217,
+    "authorization": "Active user-authorized Figure5 goal: structure and transition-boundary controls",
+    "question": "At identical prescribed spatial Z/K fields and carried histories, do changed axes alter the finite-window state or core propagation?",
+    "conditions": [
+      "rotated",
+      "isotropic"
+    ],
+    "points": [
+      {
+        "Z": 0.25,
+        "K": 0.02
+      },
+      {
+        "Z": 0.95,
+        "K": 0.02
+      },
+      {
+        "Z": 0.75,
+        "K": 2.0
+      },
+      {
+        "Z": 0.75,
+        "K": 8.0
+      }
+    ],
+    "histories": [
+      "high12s",
+      "interictal50s"
+    ],
+    "maximum_new_runs": 16,
+    "duration_s": 30,
+    "reference": "Reuse the same8 cases from original18point native conditional batch",
+    "choice_rationale": "Two extremeZ coordinates at lowK test the lowK recruitment bracket; two higherK levels at centralZ test suppression/recovery response. These are fixed coarse probes, not adaptive root finding or complete phase boundaries.",
+    "known_results_at_lock": "Only originalZ.75K2 pair has completed, bothquiet. Other grid results incomplete.",
+    "state_policy": "Original current-axis complete12s/50s states; common20s fullspatialZ/K template and50s exogenousstate/RNG. One declared EEgraph substitution atbranch start; retain populated olddelay rings as carried history. First20s are transient, tail10s compared. No resets or closed-loop credit.",
+    "controls": "Same prescribedZ/K arrays, futureexternalinput, allnonEEedges, thresholds, source-region-by-delay incoming weight multisets. ChangedEEpartners andoutdegree; rotatedanisotropystrengthattenuation mustremainexplicit.",
+    "gates": "Auditedgraphloader andnative cold-startprefix saved; original18grid finishes first; atmost4CPUworkers with80GiB dispatchreserve. Independent of failedrateapproximation; noformalSN/Hopf naming.",
+    "interpretation": "A change in conditionalstate brackets supports changed finite-window recruitment conditions. No difference at4points does not prove identical boundaries. Uniformquiet orrunaway without usableevents is not a recoveredinterictal state.",
+    "dispatch": "PREPARED_DESIGN_NOT_YET_DISPATCHED"
+  },
+  "formal_bifurcation_status": "NOT_ESTABLISHED",
+  "limits": "Four coordinates per graph and two carried histories. A state difference bounds conditional responses; no difference does not prove equal boundaries. Outdegree differs; rotated anisotropy attenuates."
+}

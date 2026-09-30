@@ -1,0 +1,53 @@
+{
+  "stage": "RESOURCE_ONLY_AMENDMENT",
+  "created_epoch": 1790513955.786718,
+  "global_native_cap": 12,
+  "per_GPU_cap": 6,
+  "per_worker_reserved_GPU_GiB": 3,
+  "host_available_gate_GiB": 70,
+  "observed_host_available_GiB": 175.24756622314453,
+  "observed_GPU": "0, NVIDIA GeForce RTX 3090, 46, 4431, 19720, 215.91\n1, NVIDIA GeForce RTX 3090, 100, 4697, 19455, 272.74\n",
+  "workers_before": [
+    {
+      "pid": 4172106,
+      "device": 0,
+      "created_epoch": 1790512099.57
+    },
+    {
+      "pid": 4172107,
+      "device": 1,
+      "created_epoch": 1790512099.57
+    },
+    {
+      "pid": 4172108,
+      "device": 0,
+      "created_epoch": 1790512099.57
+    },
+    {
+      "pid": 4172109,
+      "device": 1,
+      "created_epoch": 1790512099.57
+    },
+    {
+      "pid": 4172110,
+      "device": 0,
+      "created_epoch": 1790512099.58
+    },
+    {
+      "pid": 4172111,
+      "device": 1,
+      "created_epoch": 1790512099.58
+    },
+    {
+      "pid": 4173008,
+      "device": 1,
+      "created_epoch": 1790513047.64
+    },
+    {
+      "pid": 4174016,
+      "device": 0,
+      "created_epoch": 1790513583.32
+    }
+  ],
+  "reason": "Eight nativeworkers currently use~1.1GiBGPU/~2.4GiBhosteach; GPU0~39percent,GPU1~67percent including localMC. Parallelize alreadyfrozen12localprobes, no newscientificpoints andno runningworker reset. Reserve3GiB each and globaldispatchlock prevents capraces."
+}

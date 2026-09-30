@@ -1,0 +1,49 @@
+{
+  "created_local": "2026-09-20T02:34:08.353413+08:00",
+  "question": "Can a deterministic population response retaining reset/refractory and conditional synaptic-current memory autonomously predict the strong waveforms missed by old rate filters?",
+  "model": "Voltage density with mass plus4conditional current means and10second moments per voltage node; a Gaussian conditional-current closure. Gaussian transition truncated at threshold; linear positive remapping below threshold. Refractory cohorts preserve current moments and native0.1ms update order. Rate is computed threshold flux.",
+  "approximations": [
+    "Conditional Gaussian current law at each voltage node",
+    "Finite voltage grid and linear remapping",
+    "Input diffusion law already used by original local response assay"
+  ],
+  "preserved": [
+    "Native AMPA/GABA rise/decay matrices and exact innovation covariance",
+    "Native membrane exponential step, reset and refractory ordering",
+    "No resetting or whitening synaptic current on a spike",
+    "Original thresholds and already fixed local waveform inputs"
+  ],
+  "scope": "Local candidate only, not a particle network or accepted spatial model. No measured future spikes supplied. If viable, it must be compressed to an analyzable response and pass original DC/linear/network gates before spatial use. Old static transfer is a validation target, not silently inherited.",
+  "statistical_unit": "A deterministic predicted population response compared with original8192independent noise paths; all targets already seen, not a new blind validation.",
+  "source": "factorial_waveform",
+  "full_indices": [
+    0,
+    3,
+    6,
+    9
+  ],
+  "allowed_grid_nodes": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "simulation": {
+    "dt_ms": 0.1,
+    "burn_cycles": 5,
+    "record_cycles": 20,
+    "phase_bins": 128,
+    "voltage_minimum_mv": -500.0
+  },
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1,
+    "grid_relative_waveform_difference_max": 0.02,
+    "mass_error_max": 1e-08,
+    "global_current_moment_relative_error_max": 1e-07,
+    "discarded_probability_max": 1e-10,
+    "lower_edge_probability_sum_max": 1e-08
+  },
+  "budget": "Four full waveforms on128and256nodes. At most two further grid levels per full waveform if refinement is needed to separate closure error from grid error. Only if all four full waveforms pass, extend to the8factorialcounterfactuals and12moderatein-domain targets. No coefficients fitted or network/bifurcation launched in this diagnostic.",
+  "continuation": "A local pass is insufficient: assess practical state dimension and differentiability; independently verify static/linear response and new held-out waveforms before any full spatial rate replacement."
+}

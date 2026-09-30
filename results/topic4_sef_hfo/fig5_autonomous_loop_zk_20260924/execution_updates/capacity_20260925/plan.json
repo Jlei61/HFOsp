@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-09-25T05:06:32.691102+08:00",
+  "scope": "Scheduling only; same frozen16 jobs, existing routes and all scientific gates unchanged.",
+  "previous_total_cap": 4,
+  "new_total_cap": 6,
+  "CPU_cap": 4,
+  "GPU0_cap": 2,
+  "dispatch_host_reserve_GiB": 88,
+  "dispatch_CPU_limit_percent": 65,
+  "dispatch_GPU0_free_min_GiB": 9.3,
+  "observed_host_available_GiB": 158.8,
+  "observed_CPU_busy_percent": 31.4,
+  "reason": "Use available capacity for already authorized work while retaining original four-CPU-worker bound and validated GPU route; no new trials.",
+  "previous_supervisor_sha256": "6f64946cf3e2fe70b19b1671470388991281e8c3df5f75153e24ba28344c2776",
+  "handoff": "Adopt the four existing worker PIDs; never stop or restart simulation workers."
+}

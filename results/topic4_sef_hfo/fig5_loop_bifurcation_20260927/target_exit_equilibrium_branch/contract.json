@@ -1,0 +1,12 @@
+{
+  "status": "REGISTERED_AFTER_ACTUAL_K9_ROOT",
+  "created_epoch": 1790532996.0355399,
+  "question": "How does the high equilibrium connected to the corresponding actual-field K9 state change as held K approaches the native K9-to12 exit interval?",
+  "design": "One connected static-surrogate branch at Zmean.21 with actual16.7s spatialshape. K scales eachcellheldK, G remains selfconsistent fromR andM_i fromindividualrate. Sourcegraph3479groups/40000targets andfrozenv3response unchanged. Externalmeanfixed to paired5-10smean.",
+  "algorithm": "Weighted pseudo-arclength, initialds.0125(Kstep~.125), maximum60acceptedpoints, atmost5halvingsperpoint, minarcstep.00025; max18Newtonsteps/point. DomainK8.5-12, stopafter6acceptedpost-turnpoints or90minwall. Allfailed attempts retained.",
+  "validation": "AnalyticKderivative compared withsame-equation finite difference; tangent andequilibriumresiduals saved at every point. Accepted maxresidual<1e-6Hz. Numerical turning is NOT dynamicstability or nativebifurcation certification.",
+  "gate": "Do not draw stable/unstable labels or certifyfold until actual-domain independentresponse andfull dynamic stability are established. Not anewMLP fit orunrelatedcommonfieldrootsearch.",
+  "root_producer_sha256": "860bad9181e8247766e3056c666cfee037801b5d07bad58282a99ecdaafe9b11",
+  "producer_sha256": "53acce58ef8291dbcae6ab202144d55b2f7eedf89540f4dae8940b705b729a0b",
+  "formal_bifurcation_allowed": false
+}

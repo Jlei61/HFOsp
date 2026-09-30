@@ -1,0 +1,20 @@
+{
+  "status": "PRESPECIFIED_BEFORE_PHASE_RESULTS",
+  "created_local": "2026-09-19T10:29:45.061881",
+  "orbit": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G32769_M262144_cached6/point0000.npz",
+  "dt_max_ms": [
+    0.0009,
+    0.00045
+  ],
+  "algorithm": "same RK4 stages and cubic physical-delay history; exact float64 gain blocks, host cache parity PASS",
+  "phase_criteria": {
+    "defect_max": 0.005,
+    "projection_error_max": 0.003
+  },
+  "spectral_criteria": {
+    "eigen_residual_max": 1e-05,
+    "successive_multiplier_difference_max": 0.005,
+    "real_multiplier_instability_min": 1.001
+  },
+  "scope": "Phase-only diagnostics first; compute transverse spectra only if phase invariant. Earlier dt=.0018 failure retained. No model retuning. No LPC classification from this test alone."
+}

@@ -1,0 +1,24 @@
+{
+  "status": "REGISTERED_AFTER_BOTH_HIGHER_K_HOLDS_COLLAPSED",
+  "created_epoch": 1790543433.822503,
+  "question": "Which lower K value preserves the carried active state after the transient recruitment shrinkage has time to unfold?",
+  "selection": "K9.5 and9.65 both went quiet during their8s holds, so the prior slow-ramp K9.687 coreexit was a delayed dynamic location. Next exactlyK9.2 and9.35, spanning the first recruitment drop of that trajectory; no inference of root nonexistence from finite quiet histories.",
+  "design": "Same complete K9 control state, same0.15K/s prescribed approach, then8s heldK at9.2or9.35. Actual Zfieldheldmean.21,40000x128densityparticles, unchanged constant expectedexternalmean and paired numericalRNG future. This pair is selected after the previous negative evidence, not an independent boundary confirmation.",
+  "readouts": "Full1msgroupoutputs andglobalR/G; terminal3s rates/field/G/Zcounterfactualdrift; adjacent1s windows for residual drift; per-target meanM averaged at10ms during last3s, and fullfinalstate, for subsequent independent stationary-response checking.",
+  "interpretation": "A finite held-state persistence/silence does not prove an equilibrium or its stability. Subsequent stationary residual and measured local response are required at the actual relevant state. Kfixed and Zfixed are interventions, not an autonomous loop.",
+  "jobs": {
+    "held_K9p2": 9.2,
+    "held_K9p35": 9.35
+  },
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_high_state_continuation/control_K9",
+  "source_sha256": "5257e865aff05e6370dbeac00ea207c817ed589903a31310f2f6890e7cb8767b",
+  "producer_sha256": "532983fc20b4238f7bad089275e15283000d86f75641e26512211cff41a35cbe",
+  "carried_producer_sha256": "3282d13e39be5030712f9d20250dac24e7c616a67e98573aee5f32b5b4a09a64",
+  "formal_bifurcation_allowed": false,
+  "predecessor_results": [
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/carried_exit_fixed_holds/held_K9p5/result.json",
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/carried_exit_fixed_holds/held_K9p65/result.json"
+  ],
+  "wrapper_sha256": "06c4414d14fb286d7b178621cb5bcb22d02f692ad265da1f030e449fa313d6c0",
+  "collector_sha256": "8aa42fa7e05f97b0e28e133616315b0035b9c555bf3af105297a6fa92f79ab3f"
+}

@@ -1,0 +1,71 @@
+{
+  "status": "NONZERO_CHILD_DEPARTURE_QUANTIFIED_STABILITY_PENDING",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PDupperchild_branch_N4096.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a2.00000_N4096.npz",
+      "N": 4096,
+      "switch_coordinate": 2.0,
+      "J_EE_core": 0.9447283885451626,
+      "own_mesh_parent_J": 0.944728374157131,
+      "J_shift": 1.4388031654988254e-08,
+      "T_ms": 1523.9294636464633,
+      "odd_rate_RMS_Hz": 0.02659995695040839,
+      "J_shift_over_odd_rate_RMS_squared": 2.033478182266689e-05,
+      "minimum_collocation_rate_Hz": 2.3459600140626576e-05,
+      "half_period_relative_mismatch": 0.0009435976546369309
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PDupperchild_branch_N4096.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a5.00000_N4096.npz",
+      "N": 4096,
+      "switch_coordinate": 5.0,
+      "J_EE_core": 0.9447284648323395,
+      "own_mesh_parent_J": 0.944728374157131,
+      "J_shift": 9.06752085638729e-08,
+      "T_ms": 1523.9280261631093,
+      "odd_rate_RMS_Hz": 0.06653138353214882,
+      "J_shift_over_odd_rate_RMS_squared": 2.0484975724745065e-05,
+      "minimum_collocation_rate_Hz": 2.304600077483099e-05,
+      "half_period_relative_mismatch": 0.002359185712325339
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PDupperchild_branch_N4096.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a10.00000_N4096.npz",
+      "N": 4096,
+      "switch_coordinate": 10.0,
+      "J_EE_core": 0.9447287467299924,
+      "own_mesh_parent_J": 0.944728374157131,
+      "J_shift": 3.725728614512036e-07,
+      "T_ms": 1523.9231758668059,
+      "odd_rate_RMS_Hz": 0.13339805252699014,
+      "J_shift_over_odd_rate_RMS_squared": 2.0936893241021982e-05,
+      "minimum_collocation_rate_Hz": 2.240019000640322e-05,
+      "half_period_relative_mismatch": 0.0047241122245708705
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PDupperchildMesh_branch_N2048.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchildMesh_a2.00000_N2048.npz",
+      "N": 2048,
+      "switch_coordinate": 2.0,
+      "J_EE_core": 0.9447283790377338,
+      "own_mesh_parent_J": 0.9447283638455413,
+      "J_shift": 1.5192192504009938e-08,
+      "T_ms": 1523.9292594721326,
+      "odd_rate_RMS_Hz": 0.027300591485541436,
+      "J_shift_over_odd_rate_RMS_squared": 2.0383386618838592e-05,
+      "minimum_collocation_rate_Hz": -0.007175410997477054,
+      "half_period_relative_mismatch": 0.0009684334895685014
+    }
+  ],
+  "common_amplitude_definition": "sqrt(mean_t sum_g (n_g/N_total) * [(r_g(t)-r_g(t+T))/2]^2), Hz; r is the full 2T child and T is its half period.",
+  "mesh_comparison": {
+    "fine_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a2.00000_N4096.npz",
+    "coarse_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchildMesh_a2.00000_N2048.npz",
+    "coefficient_relative_difference": 0.0023902295385103173,
+    "scope": "Departure coefficient relative to each mesh critical point, using physical odd-component amplitude. Coarse orbit negativity is retained and excludes it as a display trajectory."
+  },
+  "fine_coefficient_relative_spread": 0.029609927640527944,
+  "all_fine_shifts_positive": true,
+  "criticality": "Independent child Floquet and parent crossing checks remain required for final classification."
+}

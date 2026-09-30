@@ -1,0 +1,200 @@
+{
+  "status": "PARTIAL_READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native",
+      "high_onset_ms": 9868.5,
+      "D_at_native_checkpoints": {
+        "10370": 0.30871178728576065,
+        "12500": 0.5401727014041959,
+        "8000": 0.20146039727098164,
+        "9000": 0.21646602103961032,
+        "9300": 0.22333473704327822,
+        "9420": 0.22884476056519154,
+        "9870": 0.2563444253447549
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 11,
+          "median_duration_ms": 96.0,
+          "iqr_duration_ms": [
+            92.0,
+            105.5
+          ],
+          "median_gap_ms": 256.0,
+          "both_cores": 9,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.72075,
+          "median_surround_cells": 274.0,
+          "forward": 1,
+          "reverse": 9,
+          "undirected": 1,
+          "median_extent_mm": 12.659633743936364
+        },
+        "4000-8000": {
+          "n": 16,
+          "median_duration_ms": 101.5,
+          "iqr_duration_ms": [
+            65.5,
+            118.0
+          ],
+          "median_gap_ms": 253.0,
+          "both_cores": 13,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.752,
+          "median_surround_cells": 287.5,
+          "forward": 8,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 8.628925496258699
+        },
+        "8000-9420": {
+          "n": 5,
+          "median_duration_ms": 162.0,
+          "iqr_duration_ms": [
+            126.0,
+            184.0
+          ],
+          "median_gap_ms": 273.5,
+          "both_cores": 5,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.9162499999999998,
+          "median_surround_cells": 351.0,
+          "forward": 3,
+          "reverse": 1,
+          "undirected": 1,
+          "median_extent_mm": 9.49418726572921
+        },
+        "1000-9420": {
+          "n": 31,
+          "median_duration_ms": 104.0,
+          "iqr_duration_ms": [
+            85.0,
+            125.0
+          ],
+          "median_gap_ms": 266.0,
+          "both_cores": 26,
+          "coreA_only": 1,
+          "coreB_only": 1,
+          "median_area": 0.7592187499999999,
+          "median_surround_cells": 290.0,
+          "forward": 13,
+          "reverse": 17,
+          "undirected": 1,
+          "median_extent_mm": 10.105750851586855
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.552,
+        "4000-8000": 0.55225,
+        "8000-9420": 0.35845070422535213,
+        "1000-9420": 0.5176959619952494
+      },
+      "tail_global_mean_hz": 448.36449990490854,
+      "tail_spatial_persistence": 0.9728124999999999,
+      "total_complete_events": 38,
+      "qa": {
+        "source": "Original seed9108401 SNN, original recorded clock."
+      }
+    },
+    {
+      "label": "recorded_drive_expected",
+      "high_onset_ms": 10746.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.1996081474278577,
+        "12500": 0.3968315420089903,
+        "8000": 0.08634428166588592,
+        "9000": 0.1076309212408717,
+        "9300": 0.12012770420473817,
+        "9420": 0.1257186561538689,
+        "9870": 0.15712425775801975
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 0
+        },
+        "4000-8000": {
+          "n": 12,
+          "median_duration_ms": 91.0,
+          "iqr_duration_ms": [
+            65.0,
+            95.75
+          ],
+          "median_gap_ms": 209.0,
+          "both_cores": 12,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.46962499999999996,
+          "median_surround_cells": 173.5,
+          "forward": 1,
+          "reverse": 11,
+          "undirected": 0,
+          "median_extent_mm": 11.20537028951387
+        },
+        "8000-9420": {
+          "n": 4,
+          "median_duration_ms": 90.0,
+          "iqr_duration_ms": [
+            76.0,
+            109.5
+          ],
+          "median_gap_ms": 186.0,
+          "both_cores": 4,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.5280156249999999,
+          "median_surround_cells": 199.5,
+          "forward": 3,
+          "reverse": 0,
+          "undirected": 1,
+          "median_extent_mm": 8.237942858189813
+        },
+        "1000-9420": {
+          "n": 17,
+          "median_duration_ms": 89.0,
+          "iqr_duration_ms": [
+            65.0,
+            101.0
+          ],
+          "median_gap_ms": 209.5,
+          "both_cores": 16,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.47496874999999994,
+          "median_surround_cells": 175.0,
+          "forward": 4,
+          "reverse": 12,
+          "undirected": 1,
+          "median_extent_mm": 10.647709823703684
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.8496,
+        "4000-8000": 0.60975,
+        "8000-9420": 0.326056338028169,
+        "1000-9420": 0.6467933491686461
+      },
+      "tail_global_mean_hz": 292.03367942121554,
+      "tail_spatial_persistence": 0.625375,
+      "total_complete_events": 17,
+      "qa": {
+        "weighted_rate_error_hz": 1.1031315807485953e-06,
+        "D_float32_error": 3.320754782265567e-09,
+        "Z_physical": true,
+        "M_dynamic_peak_mV": 0.22882117331027985,
+        "expected_emitted_global_mean_difference_hz": 6.499380132289081e-10,
+        "final_tick": 250000,
+        "Z_and_M_dynamic": true
+      }
+    }
+  ],
+  "statistical_unit": "One native realization and the explicitly registered diagnostic trajectories. No population inference.",
+  "scope": "All Z/M dynamic, unchanged physical graph and frozen local response. Local validation remains FAIL; no accepted replacement or bifurcation claim.",
+  "completed": [
+    "recorded_drive_expected"
+  ],
+  "model_promoted": false
+}

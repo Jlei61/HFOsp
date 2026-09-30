@@ -1,0 +1,11 @@
+{
+  "question": "Does the actual late Core-A termination persist under two local timestep halvings from the same complete pretermination state?",
+  "replay_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/final_state.npz",
+  "source_total_elapsed_ms": 60000,
+  "selected_total_elapsed_ms": 64650,
+  "replay": "Original dt.05 flow must reproduce every recorded1ms all3479-group float32 rate bitwise from60s to64.65s; exact full state saved at64.65s.",
+  "controls": "Three750ms continuations from that exact physical state, dt=.05,.025,.0125ms. Fine histories are successive physical-lag-preserving linear interpolations; original lag knots and physical clock retained. All Z held, all M dynamic; no tangent, noise, parameter or response change.",
+  "acceptance": "Coarse continuation must match original records bitwise. Qualified quiet retains10ms smoothing,<5Hz for>=20ms. Report each mesh and timing changes; no gate relaxation and no inference of long-time deterministic agreement.",
+  "scope": "Local numerical robustness of a real terminating episode only; not a crisis, periodicity, separatrix or onset-bifurcation certificate.",
+  "model_promoted": false
+}

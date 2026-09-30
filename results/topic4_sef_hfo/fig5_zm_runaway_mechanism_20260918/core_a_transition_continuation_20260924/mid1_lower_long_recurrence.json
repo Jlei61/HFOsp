@@ -1,0 +1,46 @@
+{
+  "status": "RATE_RECURRENCE_ONLY",
+  "best_local_minima": [
+    {
+      "lag_ms": 34,
+      "relative_MSE": 1.2824637149761418
+    },
+    {
+      "lag_ms": 539,
+      "relative_MSE": 1.537143025153795
+    },
+    {
+      "lag_ms": 69,
+      "relative_MSE": 1.5569069427659477
+    },
+    {
+      "lag_ms": 268,
+      "relative_MSE": 1.5583380232368869
+    },
+    {
+      "lag_ms": 808,
+      "relative_MSE": 1.6613103355453567
+    },
+    {
+      "lag_ms": 103,
+      "relative_MSE": 1.688748115487213
+    },
+    {
+      "lag_ms": 1077,
+      "relative_MSE": 1.693600246608529
+    },
+    {
+      "lag_ms": 510,
+      "relative_MSE": 1.7083895221376773
+    }
+  ],
+  "direct_formula_errors": [
+    2.886579864025407e-15,
+    9.103828801926284e-15,
+    1.021405182655144e-14
+  ],
+  "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied.",
+  "observed_ms": 30000,
+  "maximum_tested_lag_ms": 15000,
+  "scope": "Full E/I rate-field recurrence over30s; finite-time nonstationarity can affect this diagnostic. No statement about longer periods, chaos, full-state closure or bifurcation."
+}

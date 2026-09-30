@@ -1,0 +1,475 @@
+{
+  "status": "COMPLETE_FOUR_SELECTED_HISTORY_RETURNS",
+  "rows": [
+    {
+      "name": "from_lower_K",
+      "one_second_windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "mean_rate_Hz": [
+            190.96602150332166,
+            464.47973410936277,
+            470.2944711101096,
+            176.98763999656248
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.9686047146170274,
+          "I_field_RMS_to_control_Hz": 1.4364878666214023,
+          "M_field_RMS_to_control_counts": 4.105754299858313
+        },
+        {
+          "interval_s": [
+            1,
+            2
+          ],
+          "mean_rate_Hz": [
+            190.81466017718483,
+            464.5357479078043,
+            470.2430240320426,
+            176.82856713257502
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.9711320434881254,
+          "I_field_RMS_to_control_Hz": 1.11553935546368,
+          "M_field_RMS_to_control_counts": 1.6700852605948546
+        },
+        {
+          "interval_s": [
+            2,
+            3
+          ],
+          "mean_rate_Hz": [
+            190.81756936992,
+            464.4720667773315,
+            470.2496438077387,
+            176.8330289380975
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.9736898446921051,
+          "I_field_RMS_to_control_Hz": 1.109491347687625,
+          "M_field_RMS_to_control_counts": 1.0397545772740153
+        },
+        {
+          "interval_s": [
+            3,
+            4
+          ],
+          "mean_rate_Hz": [
+            190.82009282520997,
+            464.5186722951071,
+            470.22992372358436,
+            176.83503517562278
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.9744114464003824,
+          "I_field_RMS_to_control_Hz": 1.1116021621214922,
+          "M_field_RMS_to_control_counts": 0.9600342924461219
+        },
+        {
+          "interval_s": [
+            4,
+            5
+          ],
+          "mean_rate_Hz": [
+            190.82033499918995,
+            464.48626186707475,
+            470.28139074659424,
+            176.83476380169006
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.9733371513505384,
+          "I_field_RMS_to_control_Hz": 1.1119014507866334,
+          "M_field_RMS_to_control_counts": 0.9626303568684614
+        }
+      ],
+      "final_rate_difference_Hz": [
+        -0.09324273180050113,
+        -0.08127497314376342,
+        -0.31267873934018553,
+        -0.08787657907885205
+      ],
+      "final_E_field_change_from_previous_second_Hz": 0.06600028153781011,
+      "final_jointquiet_fraction": 0.0,
+      "selected_high_return_guards": {
+        "E_field": true,
+        "I_field": false,
+        "E_M_field": true,
+        "core_rate": true,
+        "allE_rate": true,
+        "last_second_E_field_stationary": true
+      },
+      "returned_to_high_control": false
+    },
+    {
+      "name": "same_K_control",
+      "one_second_windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "mean_rate_Hz": [
+            190.91415732711275,
+            464.5693189545995,
+            470.5629190783709,
+            176.92400898162347
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.0,
+          "I_field_RMS_to_control_Hz": 0.0,
+          "M_field_RMS_to_control_counts": 0.0
+        },
+        {
+          "interval_s": [
+            1,
+            2
+          ],
+          "mean_rate_Hz": [
+            190.911539155251,
+            464.6139972484269,
+            470.55244270570523,
+            176.92042281930514
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.0,
+          "I_field_RMS_to_control_Hz": 0.0,
+          "M_field_RMS_to_control_counts": 0.0
+        },
+        {
+          "interval_s": [
+            2,
+            3
+          ],
+          "mean_rate_Hz": [
+            190.91235705490044,
+            464.55924777659163,
+            470.5565378150531,
+            176.92253165497831
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.0,
+          "I_field_RMS_to_control_Hz": 0.0,
+          "M_field_RMS_to_control_counts": 0.0
+        },
+        {
+          "interval_s": [
+            3,
+            4
+          ],
+          "mean_rate_Hz": [
+            190.91455429374994,
+            464.60148074861416,
+            470.5415091794047,
+            176.92418236048988
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.0,
+          "I_field_RMS_to_control_Hz": 0.0,
+          "M_field_RMS_to_control_counts": 0.0
+        },
+        {
+          "interval_s": [
+            4,
+            5
+          ],
+          "mean_rate_Hz": [
+            190.91357773099045,
+            464.5675368402185,
+            470.5940694859344,
+            176.9226403807689
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 0.0,
+          "I_field_RMS_to_control_Hz": 0.0,
+          "M_field_RMS_to_control_counts": 0.0
+        }
+      ],
+      "final_rate_difference_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "final_E_field_change_from_previous_second_Hz": 0.06548728422594717,
+      "final_jointquiet_fraction": 0.0,
+      "selected_high_return_guards": {
+        "E_field": true,
+        "I_field": true,
+        "E_M_field": true,
+        "core_rate": true,
+        "allE_rate": true,
+        "last_second_E_field_stationary": true
+      },
+      "returned_to_high_control": true
+    },
+    {
+      "name": "from_upper_K",
+      "one_second_windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "mean_rate_Hz": [
+            188.2203472285748,
+            464.6049622688025,
+            470.7410361627925,
+            174.08852643925627
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 14.523088767316118,
+          "I_field_RMS_to_control_Hz": 15.88012712102329,
+          "M_field_RMS_to_control_counts": 16.09427770371194
+        },
+        {
+          "interval_s": [
+            1,
+            2
+          ],
+          "mean_rate_Hz": [
+            188.3797686175922,
+            464.6300368469169,
+            470.75290405360676,
+            174.25508093874697
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 14.408593198647852,
+          "I_field_RMS_to_control_Hz": 15.742902410128192,
+          "M_field_RMS_to_control_counts": 14.915997486927004
+        },
+        {
+          "interval_s": [
+            2,
+            3
+          ],
+          "mean_rate_Hz": [
+            188.38132769220314,
+            464.59476641908003,
+            470.7434017665318,
+            174.25783711365835
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 14.390263250383432,
+          "I_field_RMS_to_control_Hz": 15.727817448397023,
+          "M_field_RMS_to_control_counts": 14.573818240430672
+        },
+        {
+          "interval_s": [
+            3,
+            4
+          ],
+          "mean_rate_Hz": [
+            188.37594635845068,
+            464.62336384223056,
+            470.73050015168735,
+            174.25180873322904
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 14.408008738548917,
+          "I_field_RMS_to_control_Hz": 15.748842328706926,
+          "M_field_RMS_to_control_counts": 14.46395623344281
+        },
+        {
+          "interval_s": [
+            4,
+            5
+          ],
+          "mean_rate_Hz": [
+            188.3759536650199,
+            464.60473405573714,
+            470.76053758799344,
+            174.25150247073043
+          ],
+          "core_Zdot_if_released": [
+            -0.03483387712853676,
+            -0.0330737576836552
+          ],
+          "E_field_RMS_to_control_Hz": 14.410617639421378,
+          "I_field_RMS_to_control_Hz": 15.75172653839713,
+          "M_field_RMS_to_control_counts": 14.427438083369458
+        }
+      ],
+      "final_rate_difference_Hz": [
+        -2.5376240659705616,
+        0.03719721551863131,
+        0.16646810205901375,
+        -2.6711379100384818
+      ],
+      "final_E_field_change_from_previous_second_Hz": 0.06264701008550275,
+      "final_jointquiet_fraction": 0.0,
+      "selected_high_return_guards": {
+        "E_field": false,
+        "I_field": false,
+        "E_M_field": false,
+        "core_rate": true,
+        "allE_rate": false,
+        "last_second_E_field_stationary": true
+      },
+      "returned_to_high_control": false
+    },
+    {
+      "name": "from_quiet",
+      "one_second_windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "core_Zdot_if_released": [
+            0.16516612287146326,
+            0.16692624231634803
+          ],
+          "E_field_RMS_to_control_Hz": 289.2134443079519,
+          "I_field_RMS_to_control_Hz": 363.4928137371987,
+          "M_field_RMS_to_control_counts": 289.213560607908
+        },
+        {
+          "interval_s": [
+            1,
+            2
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "core_Zdot_if_released": [
+            0.16516612287146326,
+            0.16692624231634803
+          ],
+          "E_field_RMS_to_control_Hz": 289.2072652247714,
+          "I_field_RMS_to_control_Hz": 363.49719296845,
+          "M_field_RMS_to_control_counts": 289.2118860506215
+        },
+        {
+          "interval_s": [
+            2,
+            3
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "core_Zdot_if_released": [
+            0.16516612287146326,
+            0.16692624231634803
+          ],
+          "E_field_RMS_to_control_Hz": 289.21005974455034,
+          "I_field_RMS_to_control_Hz": 363.49495006898667,
+          "M_field_RMS_to_control_counts": 289.2117975726461
+        },
+        {
+          "interval_s": [
+            3,
+            4
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "core_Zdot_if_released": [
+            0.16516612287146326,
+            0.16692624231634803
+          ],
+          "E_field_RMS_to_control_Hz": 289.2111879769047,
+          "I_field_RMS_to_control_Hz": 363.4978267464212,
+          "M_field_RMS_to_control_counts": 289.21165461117477
+        },
+        {
+          "interval_s": [
+            4,
+            5
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "core_Zdot_if_released": [
+            0.16516612287146326,
+            0.16692624231634803
+          ],
+          "E_field_RMS_to_control_Hz": 289.2119570704638,
+          "I_field_RMS_to_control_Hz": 363.4927974249411,
+          "M_field_RMS_to_control_counts": 289.21075611376756
+        }
+      ],
+      "final_rate_difference_Hz": [
+        -190.91357773099045,
+        -464.5675368402185,
+        -470.5940694859344,
+        -176.9226403807689
+      ],
+      "final_E_field_change_from_previous_second_Hz": 0.0,
+      "final_jointquiet_fraction": 1.0,
+      "selected_high_return_guards": null,
+      "returned_to_high_control": null
+    }
+  ],
+  "both_neighbor_high_histories_return": false,
+  "quiet_history_remains_quiet": true,
+  "paired_future_RNGs_and_clock_bitwise": true,
+  "held_fields_bitwise": true,
+  "interpretation": "Only the selected physically generated history perturbations are tested. Return of E/I/M spatial means is a finite macro-observable property; it does not certify convergence of all microscopic phases, all perturbationdirections, stable/unstablebranches or an infinite-replica bifurcation. Persistent distinct states must not be forced onto one branch.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PENDING",
+  "human_visual": "PENDING",
+  "producer_sha256": "372efb4a1412da1f294be44e8182f19746bc0eda81303728b032cca01216ab08"
+}

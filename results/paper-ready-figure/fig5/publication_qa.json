@@ -1,0 +1,185 @@
+{
+  "status": "PASS_EXPORT_AND_DATA_QA_PENDING_HUMAN_REVIEW",
+  "unchanged_panel_pngs": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "F"
+  ],
+  "unchanged_metadata": [
+    "source",
+    "job",
+    "display_time_window_s",
+    "snapshots",
+    "selection",
+    "native_maps",
+    "state_time_links",
+    "raster_zoom_windows",
+    "raster",
+    "panel_mapping",
+    "fonts",
+    "effective_M_axis_shared_limits",
+    "E1",
+    "E_grid_layout",
+    "E2",
+    "E2_display",
+    "all_descriptive_titles_removed",
+    "legend_location",
+    "time_axis_label",
+    "event_frequency_audit",
+    "event_frequency_increase_claim",
+    "scope",
+    "no_simulation_state_change_in_plotting",
+    "manual_reset_in_display",
+    "human_review",
+    "producer",
+    "E_display_artists",
+    "paper_slot",
+    "asset_id",
+    "publication_status",
+    "author_selected_canonical",
+    "author_selection",
+    "frozen_snapshot",
+    "automatically_updated",
+    "export_producer"
+  ],
+  "E_surface_changed_with_new11_points": true,
+  "E_display_artists": {
+    "collections": [
+      "QuadMesh"
+    ],
+    "lines": 0,
+    "legend": false
+  },
+  "E_log_colorbar_unchanged": {
+    "width_px": 408.1382803712577,
+    "height_px": 408.13828037125745,
+    "height_over_width": 0.9999999999999994,
+    "colorbar_height_px": 408.13828037125745,
+    "square": true,
+    "parameter_axes": "logarithmic",
+    "colorbar_axis_scale": "log",
+    "colorbar_ticks": [
+      1,
+      10,
+      100,
+      1000
+    ],
+    "colorbar_decade_y_px": [
+      1245.225464351465,
+      1381.2715578085508,
+      1517.3176512656366
+    ],
+    "colorbar_limits": [
+      1.0,
+      1000.0
+    ],
+    "colormap": "viridis"
+  },
+  "formats": {
+    "complete": {
+      "png_pixels": [
+        8820,
+        5292
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 164
+    },
+    "A": {
+      "png_pixels": [
+        4131,
+        2531
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 30
+    },
+    "B": {
+      "png_pixels": [
+        4380,
+        1101
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 23
+    },
+    "C": {
+      "png_pixels": [
+        4324,
+        1179
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 40
+    },
+    "D": {
+      "png_pixels": [
+        2157,
+        1751
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 24
+    },
+    "E": {
+      "png_pixels": [
+        2017,
+        1561
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 18
+    },
+    "F": {
+      "png_pixels": [
+        4121,
+        1705
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 31
+    }
+  },
+  "raw_count_audit": "PASS_ALL19_RAW_COUNT_ENDPOINTS",
+  "long_followup_summary": {
+    "total_unique_points": 70,
+    "original_points": 59,
+    "new_parameter_points": 11,
+    "completed_long_jobs": 19,
+    "continued_jobs": 8,
+    "fresh_jobs": 11,
+    "long_jobs_entered": 7,
+    "long_jobs_censored3000": 12,
+    "entered_by1000": 33,
+    "no_entry_by1000": 37,
+    "observed_entries": 34,
+    "late_entries": 1,
+    "censored1000": 24,
+    "censored3000": 12,
+    "eligible3000_points": 46,
+    "actual_entry_range_s": [
+      10.07,
+      1535.03
+    ]
+  },
+  "late_entries": [
+    {
+      "name": "eta0.004216965034_tau10_s9108401",
+      "tau_M_s": 10.0,
+      "eta_M": 0.004216965034,
+      "seed": 9108401,
+      "event_observed": true,
+      "confirmation_s": 1535.03,
+      "followup_s": 1535.03,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.004216965034_tau10_s9108401",
+      "long_job": true,
+      "complete": true,
+      "kind": "eta_bracket_midpoint",
+      "onset_s": 1534.83
+    }
+  ],
+  "no1000s_censor_mislabeled_as3000s": true,
+  "interpolation_at_samples_max_error_log10_s": 1.3322676295501878e-15,
+  "caption_sha256": "4d3bf6e1173e1ca470e80d5ea40e065fc9602e813e4a698e1a00b6e11d4e4414",
+  "scientific_scope": "Fixed-seed common1000s capped confirmation-time surface incorporating11 new parameter combinations;19 long runs separately retain actual endpoints up to3000s.",
+  "human_review": "PENDING",
+  "agent_visual_review": [
+    "E PNG and PDF inspected:70-point continuous surface, no overlays, square axes and unchanged log colorbar.",
+    "Complete PDF inspected; A/B/C/D/F PNGs byte identical to prior canonical."
+  ]
+}

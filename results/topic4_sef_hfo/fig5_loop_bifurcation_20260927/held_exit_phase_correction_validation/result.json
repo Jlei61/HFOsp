@@ -1,0 +1,29 @@
+{
+  "status": "NEAR_SELFCONSISTENT_AT_RECORDED_SAMPLING_PRECISION",
+  "rows": [
+    {
+      "population": "E",
+      "previous_source_RMS_Hz": 0.016927877784649686,
+      "source_residual_RMS_Hz": 0.0031342933275634627,
+      "combined_sampling_SEM_RMS_Hz": 0.003252672728644364,
+      "groups_outside6combinedSEM": 0,
+      "maximum_residual_Hz": 0.03241171637944262
+    },
+    {
+      "population": "I",
+      "previous_source_RMS_Hz": 0.21393864139550636,
+      "source_residual_RMS_Hz": 0.06608029651682262,
+      "combined_sampling_SEM_RMS_Hz": 0.06480589692733213,
+      "groups_outside6combinedSEM": 0,
+      "maximum_residual_Hz": 0.3601004205639242
+    }
+  ],
+  "E_target_residual_RMS_Hz": 0.01431120429325546,
+  "E_target_combined_SEM_RMS_Hz": 0.014160489197506742,
+  "near_selfconsistent": true,
+  "root_certified": false,
+  "stability_established": false,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "Fresh nonlinear validation of one bounded phase-aware correction. A finiteprecision pass does not prove mathematical bifurcation or native state correspondence.",
+  "producer_sha256": "bcdc18733f5a9562e6c039e93ce67e6b5b23602cd92adfb1bc6cb286b7969cd9"
+}

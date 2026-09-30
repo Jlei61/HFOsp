@@ -1,0 +1,295 @@
+{
+  "status": "ITERATION_LIMIT_NOT_A_PERIODIC_ROOT",
+  "iterations": [
+    {
+      "iteration": 0,
+      "period_ms": 791.4889729763091,
+      "durations_ms": [
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.98897297630913
+      ],
+      "phase": 0.0,
+      "whole_cycle": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 15.904334001825914,
+            "difference_rms": 0.09128219631905206,
+            "relative_rms": 0.00573945418327937
+          },
+          "GABA": {
+            "reference_rms": 8.235980232905108,
+            "difference_rms": 0.14224954866632775,
+            "relative_rms": 0.01727172050486473
+          },
+          "M": {
+            "reference_rms": 0.021056259378505453,
+            "difference_rms": 5.165229410264384e-05,
+            "relative_rms": 0.002453061257184706
+          },
+          "covariance": {
+            "reference_rms": 37.56372606527978,
+            "difference_rms": 0.05083381037756601,
+            "relative_rms": 0.0013532685838786316
+          },
+          "input_memory": {
+            "reference_rms": 0.08871364402841525,
+            "difference_rms": 0.0004446069690242489,
+            "relative_rms": 0.0050117090092910615
+          },
+          "delay_refractory_history": {
+            "reference_rms": 0.0047084885553699135,
+            "difference_rms": 6.440606764916977e-05,
+            "relative_rms": 0.01367871385727725
+          }
+        },
+        "combined_relative_rms": 0.009585813727368334
+      },
+      "max_combined_relative_rms": 0.009585813727368334,
+      "coordinate_residual": 0.009015643980191194,
+      "trials": [
+        {
+          "status": "EVALUATED",
+          "period_ms": 791.4589508453824,
+          "max_combined_relative_rms": 0.0011875417946649834,
+          "residual_ratio": 0.13974461373457625,
+          "predicted_gain": 0.9806217828217665,
+          "agreement": 0.9998466892208331,
+          "diagnostics": {
+            "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+            "original_step_norm": 0.004832035343682314,
+            "projected_step_norm": 0.004832035149339486,
+            "phase_error": 1.6430177598764258e-15
+          },
+          "radius": 0.004841352951100901,
+          "step_norm": 0.004841352951100881,
+          "lagrange_multiplier": 2.321638994520697,
+          "predicted_relative_residual": 0.1392056899435751
+        }
+      ],
+      "linear_last": {
+        "dimension": 4,
+        "relative_linear_residual": 0.004864885930181392
+      }
+    },
+    {
+      "iteration": 1,
+      "period_ms": 791.4589508453824,
+      "durations_ms": [
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.95895084538245
+      ],
+      "phase": 1.6430177598764258e-15,
+      "whole_cycle": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 15.902261072255472,
+            "difference_rms": 0.009358432343314611,
+            "relative_rms": 0.0005884969628402203
+          },
+          "GABA": {
+            "reference_rms": 8.234498223029842,
+            "difference_rms": 0.006099340012420508,
+            "relative_rms": 0.0007407057293864212
+          },
+          "M": {
+            "reference_rms": 0.021069031104177096,
+            "difference_rms": 2.6183378320608927e-05,
+            "relative_rms": 0.00124274240192364
+          },
+          "covariance": {
+            "reference_rms": 37.56281486080591,
+            "difference_rms": 0.004239887775417223,
+            "relative_rms": 0.00011287460194686422
+          },
+          "input_memory": {
+            "reference_rms": 0.08870182058594347,
+            "difference_rms": 0.00018151009668372403,
+            "relative_rms": 0.002046295053300043
+          },
+          "delay_refractory_history": {
+            "reference_rms": 0.004708704318851269,
+            "difference_rms": 6.356029892473082e-06,
+            "relative_rms": 0.0013498468924937066
+          }
+        },
+        "combined_relative_rms": 0.0011875417946649834
+      },
+      "max_combined_relative_rms": 0.0011875417946649834,
+      "coordinate_residual": 0.001259838946324716,
+      "trials": [
+        {
+          "status": "EVALUATED",
+          "period_ms": 791.4776539913539,
+          "max_combined_relative_rms": 2.941272540332077e-05,
+          "residual_ratio": 0.01666875728907383,
+          "predicted_gain": 0.9999947293959657,
+          "agreement": 0.9997274216978199,
+          "diagnostics": {
+            "unmodified_admissible_Newton_step": true
+          },
+          "radius": 0.009682705902201803,
+          "step_norm": 0.00496762705519711,
+          "lagrange_multiplier": 0.0,
+          "predicted_relative_residual": 0.0022957796136362893
+        }
+      ],
+      "linear_last": {
+        "dimension": 5,
+        "relative_linear_residual": 0.0022957796136362884
+      }
+    },
+    {
+      "iteration": 2,
+      "period_ms": 791.4776539913539,
+      "durations_ms": [
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.97765399135392
+      ],
+      "phase": -6.7113411098583e-10,
+      "whole_cycle": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 15.900764785686265,
+            "difference_rms": 0.00014690612213882974,
+            "relative_rms": 9.238934360633608e-06
+          },
+          "GABA": {
+            "reference_rms": 8.230432458870778,
+            "difference_rms": 0.0002186232521428398,
+            "relative_rms": 2.656279038013454e-05
+          },
+          "M": {
+            "reference_rms": 0.021092955042683468,
+            "difference_rms": 1.1957252871181837e-06,
+            "relative_rms": 5.668837224080397e-05
+          },
+          "covariance": {
+            "reference_rms": 37.562084985609765,
+            "difference_rms": 8.038030840286638e-05,
+            "relative_rms": 2.139932020111783e-06
+          },
+          "input_memory": {
+            "reference_rms": 0.08868817669861964,
+            "difference_rms": 2.3794170847533064e-06,
+            "relative_rms": 2.682902246191222e-05
+          },
+          "delay_refractory_history": {
+            "reference_rms": 0.004709493269348303,
+            "difference_rms": 1.0120080283921308e-07,
+            "relative_rms": 2.1488681913588803e-05
+          }
+        },
+        "combined_relative_rms": 2.941272540332077e-05
+      },
+      "max_combined_relative_rms": 2.941272540332077e-05,
+      "coordinate_residual": 2.0997819895552732e-05,
+      "trials": [
+        {
+          "status": "EVALUATED",
+          "period_ms": 791.4775733007937,
+          "max_combined_relative_rms": 1.7146808014176646e-07,
+          "residual_ratio": 0.004988929656298817,
+          "predicted_gain": 0.9999999973010686,
+          "agreement": 0.9999751132797488,
+          "diagnostics": {
+            "unmodified_admissible_Newton_step": true
+          },
+          "radius": 0.019365411804403605,
+          "step_norm": 0.00015002975658796687,
+          "lagrange_multiplier": 0.0,
+          "predicted_relative_residual": 5.195124077288751e-05
+        }
+      ],
+      "linear_last": {
+        "dimension": 6,
+        "relative_linear_residual": 5.195124077288763e-05
+      }
+    },
+    {
+      "iteration": 3,
+      "period_ms": 791.4775733007937,
+      "durations_ms": [
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.9,
+        131.97757330079367
+      ],
+      "phase": -1.674005452282517e-13,
+      "whole_cycle": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 15.900758062412576,
+            "difference_rms": 6.860698651613263e-07,
+            "relative_rms": 4.31469910093853e-08
+          },
+          "GABA": {
+            "reference_rms": 8.230423755088935,
+            "difference_rms": 1.0867667239389782e-06,
+            "relative_rms": 1.3204262092422905e-07
+          },
+          "M": {
+            "reference_rms": 0.0210929899170251,
+            "difference_rms": 7.819688676469185e-09,
+            "relative_rms": 3.707245254101014e-07
+          },
+          "covariance": {
+            "reference_rms": 37.562082088964196,
+            "difference_rms": 4.006142556728938e-07,
+            "relative_rms": 1.0665390026145407e-08
+          },
+          "input_memory": {
+            "reference_rms": 0.0886880907631367,
+            "difference_rms": 8.68110324938213e-09,
+            "relative_rms": 9.788352838226212e-08
+          },
+          "delay_refractory_history": {
+            "reference_rms": 0.004709493984341357,
+            "difference_rms": 4.704614553706679e-10,
+            "relative_rms": 9.989639161551323e-08
+          }
+        },
+        "combined_relative_rms": 1.7146808014176646e-07
+      },
+      "max_combined_relative_rms": 1.7146808014176646e-07,
+      "coordinate_residual": 1.0475668212760407e-07,
+      "trials": [
+        {
+          "status": "EVALUATED",
+          "period_ms": 791.4775732403746,
+          "max_combined_relative_rms": 7.511630179384405e-12,
+          "residual_ratio": 4.529818535728947e-05,
+          "predicted_gain": 0.999999999538888,
+          "agreement": 0.9999999984091864,
+          "diagnostics": {
+            "unmodified_admissible_Newton_step": true
+          },
+          "radius": 0.03873082360880721,
+          "step_norm": 9.166878203916234e-07,
+          "lagrange_multiplier": 0.0,
+          "predicted_relative_residual": 2.147343932651683e-05
+        }
+      ],
+      "linear_last": {
+        "dimension": 6,
+        "relative_linear_residual": 2.147343932651685e-05
+      }
+    }
+  ],
+  "seconds": 1609.3351774215698,
+  "physical_Floquet": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

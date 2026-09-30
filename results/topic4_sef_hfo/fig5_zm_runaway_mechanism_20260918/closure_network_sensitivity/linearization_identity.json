@@ -1,0 +1,96 @@
+{
+  "status": "CONDITIONAL_EQUILIBRIUM_AND_LOCAL_JACOBIAN_IDENTITY_PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/native_unconstrained/t9870_tail_average.npz",
+  "units": "Both models include the same voltage-unit correction",
+  "conditional_equilibrium_residual_per_ms": 1.4710455076283324e-18,
+  "equilibrium_RHS_difference": 0.0,
+  "rate_difference_per_ms": 0.0,
+  "finite_difference_checks": [
+    {
+      "direction": 0,
+      "dynamic_Z_linearization": false,
+      "step": 1e-05,
+      "relative_difference": 1.2622170540416786e-14,
+      "rate_derivative_relative_difference": 1.2985951407102542e-07
+    },
+    {
+      "direction": 0,
+      "dynamic_Z_linearization": false,
+      "step": 5e-06,
+      "relative_difference": 3.1555783593387963e-15,
+      "rate_derivative_relative_difference": 3.2464852420522906e-08
+    },
+    {
+      "direction": 0,
+      "dynamic_Z_linearization": true,
+      "step": 1e-05,
+      "relative_difference": 1.2622170540416766e-14,
+      "rate_derivative_relative_difference": 1.2985951407102542e-07
+    },
+    {
+      "direction": 0,
+      "dynamic_Z_linearization": true,
+      "step": 5e-06,
+      "relative_difference": 3.1555783593387916e-15,
+      "rate_derivative_relative_difference": 3.2464852420522906e-08
+    },
+    {
+      "direction": 1,
+      "dynamic_Z_linearization": false,
+      "step": 1e-05,
+      "relative_difference": 2.419066238488106e-14,
+      "rate_derivative_relative_difference": 6.191679424578033e-08
+    },
+    {
+      "direction": 1,
+      "dynamic_Z_linearization": false,
+      "step": 5e-06,
+      "relative_difference": 6.04771846936925e-15,
+      "rate_derivative_relative_difference": 1.547947245220923e-08
+    },
+    {
+      "direction": 1,
+      "dynamic_Z_linearization": true,
+      "step": 1e-05,
+      "relative_difference": 2.4190662384881026e-14,
+      "rate_derivative_relative_difference": 6.191679424578033e-08
+    },
+    {
+      "direction": 1,
+      "dynamic_Z_linearization": true,
+      "step": 5e-06,
+      "relative_difference": 6.047718469369242e-15,
+      "rate_derivative_relative_difference": 1.547947245220923e-08
+    },
+    {
+      "direction": 2,
+      "dynamic_Z_linearization": false,
+      "step": 1e-05,
+      "relative_difference": 2.2099816708163183e-14,
+      "rate_derivative_relative_difference": 5.3890449950453535e-08
+    },
+    {
+      "direction": 2,
+      "dynamic_Z_linearization": false,
+      "step": 5e-06,
+      "relative_difference": 5.524974046882064e-15,
+      "rate_derivative_relative_difference": 1.3472935370266791e-08
+    },
+    {
+      "direction": 2,
+      "dynamic_Z_linearization": true,
+      "step": 1e-05,
+      "relative_difference": 2.209981670816315e-14,
+      "rate_derivative_relative_difference": 5.3890449950453535e-08
+    },
+    {
+      "direction": 2,
+      "dynamic_Z_linearization": true,
+      "step": 5e-06,
+      "relative_difference": 5.524974046882057e-15,
+      "rate_derivative_relative_difference": 1.3472935370266791e-08
+    }
+  ],
+  "reason": "At steady inputs mu=mus,ve=vEf=vEv,vi=vIf=vIv. Derivatives of coefficient lookup multiply zero filter differences, so changing instantaneous to filtered lookup leaves first-order response unchanged.",
+  "scope": "The Z field is held at this equilibrium. Dynamic-Z derivatives are checked at the same state, not claimed as a full-ZM equilibrium. This is not periodic-orbit or onset-type equivalence."
+}

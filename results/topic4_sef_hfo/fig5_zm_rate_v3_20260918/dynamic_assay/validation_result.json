@@ -1,0 +1,4391 @@
+{
+  "status": "COMPLETE",
+  "n_rows": 186,
+  "n_counted": 146,
+  "n_failed": 65,
+  "by_channel": {
+    "mean": {
+      "counted": 58,
+      "failed": 11,
+      "median_norm_error": 0.04143471669059719
+    },
+    "variance_E": {
+      "counted": 56,
+      "failed": 40,
+      "median_norm_error": 0.16436190823475244
+    },
+    "variance_I": {
+      "counted": 32,
+      "failed": 14,
+      "median_norm_error": 0.07967127670376967
+    }
+  },
+  "dc_consistency_median": 0.011157148779990689,
+  "dc_consistency_p90": 0.07949890966437281,
+  "verdict": "FAIL",
+  "candidates_tried": 2,
+  "rows": [
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        3.009478594451992,
+        -0.7666516015710728
+      ],
+      "sem": 0.04004144093741738,
+      "predicted": [
+        2.9561824168560085,
+        -0.8008485947389519
+      ],
+      "dc_measured": 3.4197998046875,
+      "dc_snr": 142.85548916715086,
+      "norm_error": 0.018516845479671536,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.3615160626406744,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        1.7952758766228696,
+        -0.8845893352530121
+      ],
+      "sem": 0.034821033007335585,
+      "predicted": [
+        1.7387647152490044,
+        -0.7694864611519143
+      ],
+      "dc_measured": 3.4197998046875,
+      "dc_snr": 142.85548916715086,
+      "norm_error": 0.03749549189814654,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.3615160626406744,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.7297537279446932,
+        -0.021088683441153232
+      ],
+      "sem": 0.013063405582983417,
+      "predicted": [
+        0.6654021244179558,
+        -0.10957490608214288
+      ],
+      "dc_measured": 0.6676049528071619,
+      "dc_snr": 91.25086097130026,
+      "norm_error": 0.1638870302863098,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.6636335144046235,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.5859835960688572,
+        -0.4557074157670295
+      ],
+      "sem": 0.015116556406435394,
+      "predicted": [
+        0.42446044534361854,
+        -0.4484363739123316
+      ],
+      "dc_measured": 0.6676049528071619,
+      "dc_snr": 91.25086097130026,
+      "norm_error": 0.24218921973955942,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.6636335144046235,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.22944962706008054,
+        -0.12180245540160052
+      ],
+      "sem": 0.02383781748115852,
+      "predicted": [
+        0.21201425508921004,
+        -0.12457158123037589
+      ],
+      "dc_measured": 0.26786611262243126,
+      "dc_snr": 20.92047469756423,
+      "norm_error": 0.0659056935744809,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.2689131131459191,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 293,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.0311258112842624,
+        -0.0933413675507542
+      ],
+      "sem": 0.03181165567836775,
+      "predicted": [
+        0.007504687342959055,
+        -0.10192448871003287
+      ],
+      "dc_measured": 0.26786611262243126,
+      "dc_snr": 20.92047469756423,
+      "norm_error": 0.1477325105751044,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.2689131131459191,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        1.7339321499880078,
+        -0.3449992931748812
+      ],
+      "sem": 0.029967327379705404,
+      "predicted": [
+        1.760315363259986,
+        -0.3144538354967327
+      ],
+      "dc_measured": 1.8613688151041665,
+      "dc_snr": 97.31104458861407,
+      "norm_error": 0.02168409469960348,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 1.8572766161369525,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        1.1371755504745957,
+        -0.5676970107953023
+      ],
+      "sem": 0.025752359328726205,
+      "predicted": [
+        1.1618274137830409,
+        -0.5412966419090842
+      ],
+      "dc_measured": 1.8613688151041665,
+      "dc_snr": 97.31104458861407,
+      "norm_error": 0.019405367537633098,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 1.8572766161369525,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.35591926476364233,
+        -0.05387199375737105
+      ],
+      "sem": 0.006728069524386594,
+      "predicted": [
+        0.34401497499280653,
+        -0.07706243759415693
+      ],
+      "dc_measured": 0.3530940729325173,
+      "dc_snr": 85.06208390835498,
+      "norm_error": 0.07382562210251693,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.35614186562902356,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.24632572662124153,
+        -0.206974345922826
+      ],
+      "sem": 0.006658662635466052,
+      "predicted": [
+        0.20032153897421343,
+        -0.2339931254319514
+      ],
+      "dc_measured": 0.3530940729325173,
+      "dc_snr": 85.06208390835498,
+      "norm_error": 0.15109758291106667,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.35614186562902356,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.09772184317855095,
+        -0.057140992215744243
+      ],
+      "sem": 0.013909156800111072,
+      "predicted": [
+        0.09568297515769197,
+        -0.05466783154031231
+      ],
+      "dc_measured": 0.12596866083681793,
+      "dc_snr": 14.659481021461623,
+      "norm_error": 0.025444670910723624,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.12098751202659527,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN1",
+      "group": 719,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.027959001565430554,
+        -0.061871836508114786
+      ],
+      "sem": 0.014673946201418047,
+      "predicted": [
+        0.0045649675582251185,
+        -0.049828745068128455
+      ],
+      "dc_measured": 0.12596866083681793,
+      "dc_snr": 14.659481021461623,
+      "norm_error": 0.2753228474111604,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.12098751202659527,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        3.1011879601562047,
+        -0.40877582623496134
+      ],
+      "sem": 0.0367979676751628,
+      "predicted": [
+        2.998078795175584,
+        -0.414809330131541
+      ],
+      "dc_measured": 3.312784830729167,
+      "dc_snr": 142.57843442444462,
+      "norm_error": 0.031177859935315414,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.2080263173317776,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        2.4005697955393295,
+        -0.4655161342827822
+      ],
+      "sem": 0.03592231855866601,
+      "predicted": [
+        2.3675023983243264,
+        -0.39856492924203757
+      ],
+      "dc_measured": 3.312784830729167,
+      "dc_snr": 142.57843442444462,
+      "norm_error": 0.02254057063360508,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.2080263173317776,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.06179286841872374,
+        0.014456185331606811
+      ],
+      "sem": 0.0013092723971403243,
+      "predicted": [
+        0.060397598438897776,
+        0.014431241616287085
+      ],
+      "dc_measured": 0.05165521566612047,
+      "dc_snr": 73.04166627035151,
+      "norm_error": 0.027015528009200852,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.04990786080478488,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.0934431768207576,
+        -0.01535523366003741
+      ],
+      "sem": 0.001978944000552441,
+      "predicted": [
+        0.08690451375864547,
+        -0.014902803677210768
+      ],
+      "dc_measured": 0.05165521566612047,
+      "dc_snr": 73.04166627035151,
+      "norm_error": 0.12688548079318243,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.04990786080478488,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        0.021137118669813677,
+        -0.007669365325150435
+      ],
+      "sem": 0.0005772648853733813,
+      "predicted": [
+        0.020939868390056706,
+        -0.008521910971930238
+      ],
+      "dc_measured": 0.021812367952366712,
+      "dc_snr": 68.89976678220067,
+      "norm_error": 0.04011791453364943,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.021937872050104387,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 379,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.0030446020033176027,
+        -0.013029316896083748
+      ],
+      "sem": 0.0009153952309406301,
+      "predicted": [
+        0.0013553674353957833,
+        -0.010947493121797764
+      ],
+      "dc_measured": 0.021812367952366712,
+      "dc_snr": 68.89976678220067,
+      "norm_error": 0.12290971850314898,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.021937872050104387,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        7.747208549321641,
+        0.03808103495900957
+      ],
+      "sem": 0.0402765813977275,
+      "predicted": [
+        7.731579662469062,
+        -0.06277454862087496
+      ],
+      "dc_measured": 7.745157877604167,
+      "dc_snr": 293.11174037911434,
+      "norm_error": 0.013177181308132398,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.7509360772936775,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        7.6815959119204935,
+        0.31132837880886904
+      ],
+      "sem": 0.04685511990192335,
+      "predicted": [
+        7.612103266755521,
+        -0.10805927144174145
+      ],
+      "dc_measured": 7.745157877604167,
+      "dc_snr": 293.11174037911434,
+      "norm_error": 0.05488669761532962,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.7509360772936775,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.05259014571842913,
+        0.010455059688206945
+      ],
+      "sem": 0.0008008107118681658,
+      "predicted": [
+        -0.05374586537376484,
+        0.015594800042479873
+      ],
+      "dc_measured": -0.054929399239419696,
+      "dc_snr": 118.50625310411023,
+      "norm_error": 0.09590629994049894,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.05703254436036841,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.035225189530524975,
+        0.03198712163914391
+      ],
+      "sem": 0.0010773413695123022,
+      "predicted": [
+        -0.02212859128913056,
+        0.03862633461357676
+      ],
+      "dc_measured": -0.054929399239419696,
+      "dc_snr": 118.50625310411023,
+      "norm_error": 0.2673126822730498,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.05703254436036841,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.007812037271103993,
+        0.004365245992307809
+      ],
+      "sem": 0.0003466953235707046,
+      "predicted": [
+        -0.0074017027649530285,
+        0.004583280076188285
+      ],
+      "dc_measured": -0.009607374099262572,
+      "dc_snr": 44.75325787945427,
+      "norm_error": 0.04836542007449685,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.009594109576359358,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 797,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.00032409404366850553,
+        0.0033222777404346383
+      ],
+      "sem": 0.000439914763622866,
+      "predicted": [
+        0.00011744949148743835,
+        0.0038297232460775686
+      ],
+      "dc_measured": -0.009607374099262572,
+      "dc_snr": 44.75325787945427,
+      "norm_error": 0.05702991817847569,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.009594109576359358,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        3.9209610619797894,
+        0.04996558044979598
+      ],
+      "sem": 0.03134694505172624,
+      "predicted": [
+        3.8907327452904927,
+        -0.07211225850305861
+      ],
+      "dc_measured": 3.8850911458333335,
+      "dc_snr": 178.5971285061426,
+      "norm_error": 0.03237109659157069,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.927230935880861,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        3.8416547760642823,
+        0.23356838040829078
+      ],
+      "sem": 0.04117420658749536,
+      "predicted": [
+        3.7811106012532663,
+        -0.06928826118409832
+      ],
+      "dc_measured": 3.8850911458333335,
+      "dc_snr": 178.5971285061426,
+      "norm_error": 0.07949596273904272,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.927230935880861,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.047702178613510435,
+        0.014890417156133366
+      ],
+      "sem": 0.0010858060719516197,
+      "predicted": [
+        -0.049931014709902626,
+        0.016627551468014333
+      ],
+      "dc_measured": -0.04975388979205526,
+      "dc_snr": 82.55603304781859,
+      "norm_error": 0.05679627174455405,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.05370926978208502,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.01796710450283348,
+        0.044215217373238365
+      ],
+      "sem": 0.0018505647168745348,
+      "predicted": [
+        -0.015944262921797698,
+        0.04034769613167371
+      ],
+      "dc_measured": -0.04975388979205526,
+      "dc_snr": 82.55603304781859,
+      "norm_error": 0.08772350766328758,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.05370926978208502,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.006821882412602131,
+        0.005940542298631784
+      ],
+      "sem": 0.0005241215052266728,
+      "predicted": [
+        -0.005274974128960345,
+        0.006187205282678617
+      ],
+      "dc_measured": -0.009567163767983,
+      "dc_snr": 33.43067294733351,
+      "norm_error": 0.1637319858200116,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.009622611631091323,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 348,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.0009201781018404005,
+        0.004248335356930224
+      ],
+      "sem": 0.0008937729561917958,
+      "predicted": [
+        0.001999567762333711,
+        0.0019081042783629985
+      ],
+      "dc_measured": -0.009567163767983,
+      "dc_snr": 33.43067294733351,
+      "norm_error": 0.2693757500450493,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.009622611631091323,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "measured": [
+        7.616763778644085,
+        0.10629422271788415
+      ],
+      "sem": 0.034604946415077914,
+      "predicted": [
+        7.646957653124239,
+        -0.03438106895180693
+      ],
+      "dc_measured": 7.623494466145834,
+      "dc_snr": 347.953798316955,
+      "norm_error": 0.0188731222239802,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.657558991522769,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        7.641866397561124,
+        0.4826278137801883
+      ],
+      "sem": 0.041141545166123714,
+      "predicted": [
+        7.58152148051312,
+        -0.05918311392023436
+      ],
+      "dc_measured": 7.623494466145834,
+      "dc_snr": 347.953798316955,
+      "norm_error": 0.07151065311585544,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.657558991522769,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.07303795135039402,
+        0.01052457085457378
+      ],
+      "sem": 0.0009056352999604491,
+      "predicted": [
+        -0.0738277705702577,
+        0.013430801303142807
+      ],
+      "dc_measured": -0.07325573283393746,
+      "dc_snr": 142.10883395905063,
+      "norm_error": 0.04111135419308969,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.07596838755712018,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.05830632044200598,
+        0.03358169599614039
+      ],
+      "sem": 0.0011780187573771587,
+      "predicted": [
+        -0.04968866638359655,
+        0.040336816873682825
+      ],
+      "dc_measured": -0.07325573283393746,
+      "dc_snr": 142.10883395905063,
+      "norm_error": 0.14947206717715183,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.07596838755712018,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "measured": [
+        -0.011592177766298464,
+        0.005524302653406086
+      ],
+      "sem": 0.0004004401989749283,
+      "predicted": [
+        -0.010947790018255982,
+        0.006097567711835195
+      ],
+      "dc_measured": -0.013544507152905675,
+      "dc_snr": 54.94761244077756,
+      "norm_error": 0.06367733031855845,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.013794329051580217,
+      "sign_ok": true
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "upper_D0228",
+      "group": 771,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.0013829999074140764,
+        0.006306693737584894
+      ],
+      "sem": 0.0005020580558720883,
+      "predicted": [
+        -0.0009219151186242822,
+        0.00559047379522255
+      ],
+      "dc_measured": -0.013544507152905675,
+      "dc_snr": 54.94761244077756,
+      "norm_error": 0.0628892634458383,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.013794329051580217,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 309,
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        3.825474573507996,
+        0.2011126405329845
+      ],
+      "sem": 0.06010414985786418,
+      "predicted": [
+        3.784677342227531,
+        -0.08367997570525224
+      ],
+      "dc_measured": 3.891194661458333,
+      "dc_snr": 112.82565733094893,
+      "norm_error": 0.07393614368736355,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.961148014787671,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 309,
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.007009142383306737,
+        0.041843246898152595
+      ],
+      "sem": 0.002782819514077454,
+      "predicted": [
+        -0.009466224255798154,
+        0.03774636858755274
+      ],
+      "dc_measured": -0.045081533571105926,
+      "dc_snr": 50.20716303345119,
+      "norm_error": 0.10596805540129686,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.048323267370482245,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 309,
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.00011892856826593531,
+        0.0015202837581453613
+      ],
+      "sem": 0.0013624186117907893,
+      "predicted": [
+        0.0024983997808422347,
+        0.001018280302068974
+      ],
+      "dc_measured": -0.0077917927601920825,
+      "dc_snr": 18.125895493673497,
+      "norm_error": 0.3121039424275452,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.008020834464533552,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 587,
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "measured": [
+        7.689762054553225,
+        0.27616754934881654
+      ],
+      "sem": 0.06811136163080664,
+      "predicted": [
+        7.712409079655827,
+        -0.11744273767190706
+      ],
+      "dc_measured": 7.805989583333334,
+      "dc_snr": 179.14162403683832,
+      "norm_error": 0.050507531645791755,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.863297616388898,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 587,
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "measured": [
+        -0.03248355069099382,
+        0.033907822253694445
+      ],
+      "sem": 0.0016399272483698217,
+      "predicted": [
+        -0.02055548220943559,
+        0.03906259461827222
+      ],
+      "dc_measured": -0.055091897393411124,
+      "dc_snr": 78.40003036324106,
+      "norm_error": 0.2358649671222494,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.055833908679034296,
+      "sign_ok": null
+    },
+    {
+      "kind": "v2_assayed",
+      "state": "SN7",
+      "group": 587,
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "measured": [
+        0.00011798552500591474,
+        0.004730187257135357
+      ],
+      "sem": 0.0007226807086953835,
+      "predicted": [
+        0.0002532674061330245,
+        0.0037121463009581824
+      ],
+      "dc_measured": -0.009725094483175708,
+      "dc_snr": 31.610879094635944,
+      "norm_error": 0.10560206464974202,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.00953115338271863,
+      "sign_ok": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        4.112459806495997,
+        -0.49536598005023647
+      ],
+      "sem": 0.0634356552645118,
+      "predicted": [
+        4.04827223228201,
+        -0.3980334136297205
+      ],
+      "dc_measured": 4.584147135416667,
+      "dc_snr": 123.86954299125482,
+      "norm_error": 0.025433718690771056,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 4.551914043451201
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        3.61935037419797,
+        -0.22812896663431842
+      ],
+      "sem": 0.0880883100962101,
+      "predicted": [
+        3.764442699072457,
+        -0.15558671876894745
+      ],
+      "dc_measured": 4.584147135416667,
+      "dc_snr": 123.86954299125482,
+      "norm_error": 0.03538638601958803,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 4.551914043451201
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.12594936361682235,
+        0.04642259771321426
+      ],
+      "sem": 0.0031850812423692312,
+      "predicted": [
+        0.1247048713645064,
+        0.03220826574790093
+      ],
+      "dc_measured": 0.053145134758097234,
+      "dc_snr": 46.26536517824632,
+      "norm_error": 0.2684856644061613,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.05208409086828152
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.14933699156298819,
+        -0.1227068968122936
+      ],
+      "sem": 0.007680474079901801,
+      "predicted": [
+        0.10387350090628268,
+        -0.06728532105969971
+      ],
+      "dc_measured": 0.053145134758097234,
+      "dc_snr": 46.26536517824632,
+      "norm_error": 1.3488194640886233,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.05208409086828152
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.190049636661756,
+        0.04339731307636718
+      ],
+      "sem": 0.1345049493149155,
+      "predicted": [
+        0.042596460680625885,
+        -0.045620618507545535
+      ],
+      "dc_measured": 0.0866880845451917,
+      "dc_snr": 1.7641670832271368,
+      "norm_error": 1.986894052738105,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.0882089556445055
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.496389312200575,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.18092822568241204,
+        -0.0628618269252075
+      ],
+      "sem": 0.28199298890190444,
+      "predicted": [
+        0.0042292836101961665,
+        -0.019737094624859054
+      ],
+      "dc_measured": 0.0866880845451917,
+      "dc_snr": 1.7641670832271368,
+      "norm_error": 2.0981579049606864,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.0882089556445055
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        4.302544198622884,
+        0.4673848663236544
+      ],
+      "sem": 0.0155863948788563,
+      "predicted": [
+        4.285780725523933,
+        -0.00039837228898165965
+      ],
+      "dc_measured": 4.248453776041666,
+      "dc_snr": 330.95656132882374,
+      "norm_error": 0.11017738092493883,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 4.286284796122713
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        4.794823887758499,
+        2.137800608234894
+      ],
+      "sem": 0.055733426802909894,
+      "predicted": [
+        4.285496654345602,
+        -0.00015571918127655222
+      ],
+      "dc_measured": 4.248453776041666,
+      "dc_snr": 330.95656132882374,
+      "norm_error": 0.5173147640002067,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 4.286284796122713
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.11954961947793902,
+        0.023629528339448515
+      ],
+      "sem": 0.00859343471206068,
+      "predicted": [
+        -0.1326884287076506,
+        0.020339577505891288
+      ],
+      "dc_measured": -0.11948259483476835,
+      "dc_snr": 25.52652616984715,
+      "norm_error": 0.11335917580819904,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.12562570549629606
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.09857955854684072,
+        0.12174401135561196
+      ],
+      "sem": 0.030462542054895948,
+      "predicted": [
+        -0.0808156603434932,
+        0.06864741301101918
+      ],
+      "dc_measured": -0.11948259483476835,
+      "dc_snr": 25.52652616984715,
+      "norm_error": 0.4685981916089479,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.12562570549629606
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.029654353172052905,
+        -0.0070389594287961765
+      ],
+      "sem": 0.0342263535537217,
+      "predicted": [
+        -0.012128344974891956,
+        0.01554686960418878
+      ],
+      "dc_measured": -0.006694231265655671,
+      "dc_snr": 0.41909700838205644,
+      "norm_error": 4.270560638395608,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -0.02923836470087459
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.6410551148018477,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.10190869216400478,
+        0.06148663052858594
+      ],
+      "sem": 0.11863852369160231,
+      "predicted": [
+        -0.0007383346115439753,
+        0.005575347694301897
+      ],
+      "dc_measured": -0.006694231265655671,
+      "dc_snr": 0.41909700838205644,
+      "norm_error": 17.46079911415765,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -0.02923836470087459
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        4.023757119058903,
+        -0.8431079122334818
+      ],
+      "sem": 0.06335641523673395,
+      "predicted": [
+        3.8695325292972993,
+        -0.7479006221219786
+      ],
+      "dc_measured": 4.84130859375,
+      "dc_snr": 125.62735634499492,
+      "norm_error": 0.037437136377182566,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 4.815870226087969
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        3.349542205695939,
+        -0.40551769187497255
+      ],
+      "sem": 0.0683419791737795,
+      "predicted": [
+        3.336219804297055,
+        -0.2923458176540495
+      ],
+      "dc_measured": 4.84130859375,
+      "dc_snr": 125.62735634499492,
+      "norm_error": 0.023537710796496785,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 4.815870226087969
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.2946213548837153,
+        0.014483951955128522
+      ],
+      "sem": 0.007533414685460762,
+      "predicted": [
+        0.2693531610168823,
+        -0.010231738126646205
+      ],
+      "dc_measured": 0.19114737325600414,
+      "dc_snr": 62.88211516570644,
+      "norm_error": 0.18491544945266114,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.1920020466097346
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.19855890471627663,
+        -0.23566677867751123
+      ],
+      "sem": 0.014762094383045684,
+      "predicted": [
+        0.1453392714807008,
+        -0.14710871311703447
+      ],
+      "dc_measured": 0.19114737325600414,
+      "dc_snr": 62.88211516570644,
+      "norm_error": 0.5405212426553805,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.1920020466097346
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.03927393704858048,
+        -0.05667042739999413
+      ],
+      "sem": 0.005280606883837756,
+      "predicted": [
+        0.023562933597833794,
+        -0.05123760545636429
+      ],
+      "dc_measured": 0.0751312321800307,
+      "dc_snr": 35.63772747757378,
+      "norm_error": 0.22126369115509864,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.07049495017200252
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.8449656186489549,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.01641814572339087,
+        -0.019043902330823967
+      ],
+      "sem": 0.010456325256509219,
+      "predicted": [
+        -0.005132362150195576,
+        -0.00754159414345247
+      ],
+      "dc_measured": 0.0751312321800307,
+      "dc_snr": 35.63772747757378,
+      "norm_error": 0.21448259413032233,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.07049495017200252
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        1.1343058931646333,
+        -0.5006248330699881
+      ],
+      "sem": 0.03650914036347095,
+      "predicted": [
+        1.1774273480829343,
+        -0.5243098135450952
+      ],
+      "dc_measured": 1.834716796875,
+      "dc_snr": 68.14853513291446,
+      "norm_error": 0.026815009797501357,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 1.840849902736308
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.78443693244808,
+        -0.16812030404875247
+      ],
+      "sem": 0.029693934964097297,
+      "predicted": [
+        0.8035526819371154,
+        -0.2049467223466007
+      ],
+      "dc_measured": 1.834716796875,
+      "dc_snr": 68.14853513291446,
+      "norm_error": 0.02261500598411261,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 1.840849902736308
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.06120347850696861,
+        -0.0201381186866411
+      ],
+      "sem": 0.0011509402871872482,
+      "predicted": [
+        0.06465990528624996,
+        -0.015721871938948587
+      ],
+      "dc_measured": 0.05574675599992763,
+      "dc_snr": 90.39826514740662,
+      "norm_error": 0.10059851343466819,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.05564784128203758
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.01772968779288702,
+        -0.03966330085216033
+      ],
+      "sem": 0.0015291874221105737,
+      "predicted": [
+        0.016108162042734006,
+        -0.036574007588684274
+      ],
+      "dc_measured": 0.05574675599992763,
+      "dc_snr": 90.39826514740662,
+      "norm_error": 0.06258649252181922,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.05564784128203758
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.004082922785031158,
+        -0.01605000671252321
+      ],
+      "sem": 0.0018297213093702131,
+      "predicted": [
+        0.006006920555293907,
+        -0.015592896340576319
+      ],
+      "dc_measured": 0.025359335360511718,
+      "dc_snr": 28.75189013195545,
+      "norm_error": 0.07798127739006028,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.02396193611792221
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3101596356652233,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.00040936997760654365,
+        0.0007954026348836276
+      ],
+      "sem": 0.002591724573726391,
+      "predicted": [
+        -0.0015108911167192104,
+        -0.0021551981942885302
+      ],
+      "dc_measured": 0.025359335360511718,
+      "dc_snr": 28.75189013195545,
+      "norm_error": 0.12419516964298491,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.02396193611792221
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        2.8771837244352865,
+        -0.6481492191001569
+      ],
+      "sem": 0.0564309194184366,
+      "predicted": [
+        2.9075113125629826,
+        -0.611688791757579
+      ],
+      "dc_measured": 3.609619140625,
+      "dc_snr": 106.59455603430804,
+      "norm_error": 0.013138489874448026,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 3.681496712791898
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        2.2913313394719896,
+        -0.22504435516593413
+      ],
+      "sem": 0.0623017153054822,
+      "predicted": [
+        2.471328473914218,
+        -0.23910216770353437
+      ],
+      "dc_measured": 3.609619140625,
+      "dc_snr": 106.59455603430804,
+      "norm_error": 0.05001781402334504,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 3.681496712791898
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.052809551978791516,
+        0.010272266868163552
+      ],
+      "sem": 0.0008779895381648661,
+      "predicted": [
+        0.04980555731762059,
+        0.00808855680306012
+      ],
+      "dc_measured": 0.02318555263502793,
+      "dc_snr": 67.28220937260238,
+      "norm_error": 0.16017886158007807,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.023201006561472046
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.03632587934502614,
+        -0.03560448950014555
+      ],
+      "sem": 0.001555414017648415,
+      "predicted": [
+        0.03312027047952206,
+        -0.027600451123093752
+      ],
+      "dc_measured": 0.02318555263502793,
+      "dc_snr": 67.28220937260238,
+      "norm_error": 0.3718736940943917,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.023201006561472046
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.007438444541836151,
+        -0.019128195364757378
+      ],
+      "sem": 0.04885303484730469,
+      "predicted": [
+        0.02955705507479711,
+        -0.023592598619793553
+      ],
+      "dc_measured": 0.06214778424219802,
+      "dc_snr": 2.698524910879651,
+      "norm_error": 0.36308066506273473,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.03981657551287758
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 1.7453763443501318,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.01018372361363035,
+        -0.06941723051824256
+      ],
+      "sem": 0.0764991129532379,
+      "predicted": [
+        0.0032678370967027027,
+        -0.012620621934579168
+      ],
+      "dc_measured": 0.06214778424219802,
+      "dc_snr": 2.698524910879651,
+      "norm_error": 0.9206461556712778,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.03981657551287758
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        4.098674619326434,
+        -1.082811034840135
+      ],
+      "sem": 0.06624120048256439,
+      "predicted": [
+        3.952529678384589,
+        -1.012502715318179
+      ],
+      "dc_measured": 5.266520182291667,
+      "dc_snr": 129.82321244963305,
+      "norm_error": 0.030794089017247516,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 5.233675139782844
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        3.221029544831949,
+        -0.5821241801406467
+      ],
+      "sem": 0.06680033195684472,
+      "predicted": [
+        3.230534581436512,
+        -0.3957757560714558
+      ],
+      "dc_measured": 5.266520182291667,
+      "dc_snr": 129.82321244963305,
+      "norm_error": 0.035429595044063636,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 5.233675139782844
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.37572222392564214,
+        -0.011180741870374954
+      ],
+      "sem": 0.006840970845904726,
+      "predicted": [
+        0.3293514673816977,
+        -0.04185415827552378
+      ],
+      "dc_measured": 0.24604765349943108,
+      "dc_snr": 88.50810710717893,
+      "norm_error": 0.22596318567005452,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.24383860783779515
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.1774591821044844,
+        -0.2956445954138115
+      ],
+      "sem": 0.012024884189604323,
+      "predicted": [
+        0.117551838055686,
+        -0.18584310973990967
+      ],
+      "dc_measured": 0.24604765349943108,
+      "dc_snr": 88.50810710717893,
+      "norm_error": 0.5083608662259469,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.24383860783779515
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.020874943669549343,
+        -0.11207537810292317
+      ],
+      "sem": 0.06991863637594795,
+      "predicted": [
+        0.03307764314211855,
+        -0.05250361315292005
+      ],
+      "dc_measured": 0.10100643832485517,
+      "dc_snr": 3.377797262705738,
+      "norm_error": 0.7957127874057943,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.09451582532638018
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7663742753022404,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.05241058750391339,
+        0.08816316882798049
+      ],
+      "sem": 0.12167394846320165,
+      "predicted": [
+        -3.124236187821063e-05,
+        -0.014811658436894186
+      ],
+      "dc_measured": 0.10100643832485517,
+      "dc_snr": 3.377797262705738,
+      "norm_error": 1.143798327096868,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.09451582532638018
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.32459473270221517,
+        -0.22326584374599054
+      ],
+      "sem": 0.019424378087923303,
+      "predicted": [
+        0.3644255106378723,
+        -0.24064454991967332
+      ],
+      "dc_measured": 0.6884765625,
+      "dc_snr": 42.21936955649788,
+      "norm_error": 0.06312051279822756,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.6689191858404437
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.19232692069667479,
+        -0.09336339881534383
+      ],
+      "sem": 0.013595983802906263,
+      "predicted": [
+        0.19282677562146125,
+        -0.09406520816984114
+      ],
+      "dc_measured": 0.6884765625,
+      "dc_snr": 42.21936955649788,
+      "norm_error": 0.0012514897044989392,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.6689191858404437
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.06890319247009041,
+        -0.04926637334172309
+      ],
+      "sem": 0.0030423988417097782,
+      "predicted": [
+        0.06804071250177327,
+        -0.047183993813214246
+      ],
+      "dc_measured": 0.09534841633772419,
+      "dc_snr": 48.681931569878344,
+      "norm_error": 0.023638825975595027,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.0939416296190335
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.00021037258555352202,
+        -0.03880084888653353
+      ],
+      "sem": 0.0029351749742235183,
+      "predicted": [
+        -0.005898507923143405,
+        -0.037889270549090415
+      ],
+      "dc_measured": 0.09534841633772419,
+      "dc_snr": 48.681931569878344,
+      "norm_error": 0.06477841982246549,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.0939416296190335
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.008071329912344388,
+        -0.027627754472513786
+      ],
+      "sem": 0.011395236550353632,
+      "predicted": [
+        0.003310171821418391,
+        -0.026271898492321786
+      ],
+      "dc_measured": 0.04384742724209093,
+      "dc_snr": 7.125380828725213,
+      "norm_error": 0.2614059290333657,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.04750820914292861
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.3562016438607448,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.01723513354212917,
+        0.0007231038345721415
+      ],
+      "sem": 0.01330671015983428,
+      "predicted": [
+        -0.0032678156257842264,
+        -0.001720921607878282
+      ],
+      "dc_measured": 0.04384742724209093,
+      "dc_snr": 7.125380828725213,
+      "norm_error": 0.4709079862457917,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.04750820914292861
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        4.523537098499534,
+        0.4429211398954339
+      ],
+      "sem": 0.0333942152721139,
+      "predicted": [
+        4.446185281544633,
+        -0.011865478887300543
+      ],
+      "dc_measured": 4.490152994791667,
+      "dc_snr": 189.01550837541933,
+      "norm_error": 0.10273989887359627,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 4.461198974045205
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        5.454301350315076,
+        1.9501763226836264
+      ],
+      "sem": 0.12624102907372975,
+      "predicted": [
+        4.437724249835814,
+        -0.004638080280402537
+      ],
+      "dc_measured": 4.490152994791667,
+      "dc_snr": 189.01550837541933,
+      "norm_error": 0.4907059542163507,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 4.461198974045205
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.10705569938616571,
+        0.04299386440791613
+      ],
+      "sem": 0.004081110535601463,
+      "predicted": [
+        -0.0987052523225376,
+        0.047484383258877196
+      ],
+      "dc_measured": -0.10842599558485452,
+      "dc_snr": 59.32298038465569,
+      "norm_error": 0.0874447392786751,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.11285861325566614
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.025905076477395615,
+        0.1453926273004241
+      ],
+      "sem": 0.01716325611570857,
+      "predicted": [
+        -0.00829507362286282,
+        0.05516561327380166
+      ],
+      "dc_measured": -0.10842599558485452,
+      "dc_snr": 59.32298038465569,
+      "norm_error": 0.8478544560388352,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.11285861325566614
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.08988336748772766,
+        0.01688920675513071
+      ],
+      "sem": 0.0516427682227235,
+      "predicted": [
+        -0.0031760501370056387,
+        0.00661298844441872
+      ],
+      "dc_measured": -0.037705599013798705,
+      "dc_snr": 1.862095345157513,
+      "norm_error": 2.315681096511226,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -0.014273197024779404
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.4797215412518376,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.1946905443756174,
+        -0.09787898200740543
+      ],
+      "sem": 0.21567696476482082,
+      "predicted": [
+        -7.119315180958362e-05,
+        0.00178048288478869
+      ],
+      "dc_measured": -0.037705599013798705,
+      "dc_snr": 1.862095345157513,
+      "norm_error": 5.798926796053609,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -0.014273197024779404
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        7.986958568384714,
+        0.8949248077361341
+      ],
+      "sem": 0.02182732616064943,
+      "predicted": [
+        7.91939938482179,
+        -0.0013613527134942788
+      ],
+      "dc_measured": 7.95166015625,
+      "dc_snr": 472.52153183774385,
+      "norm_error": 0.11303661549096918,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 7.921121939066701
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        9.225715223427606,
+        4.119635517483365
+      ],
+      "sem": 0.08836846741277712,
+      "predicted": [
+        7.9184286318850425,
+        -0.0005321372390530443
+      ],
+      "dc_measured": 7.95166015625,
+      "dc_snr": 472.52153183774385,
+      "norm_error": 0.5436084271882989,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 7.921121939066701
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.4117618745003299,
+        0.10269137698859487
+      ],
+      "sem": 0.02007218911728037,
+      "predicted": [
+        -0.3937702912755628,
+        0.11066904239630426
+      ],
+      "dc_measured": -0.41569083813390495,
+      "dc_snr": 41.0362589976084,
+      "norm_error": 0.04734518745477095,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.4140514101036419
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.37816916178389326,
+        0.64991893676132
+      ],
+      "sem": 0.08813794859965245,
+      "predicted": [
+        -0.17631405475240491,
+        0.20718054183572376
+      ],
+      "dc_measured": -0.41569083813390495,
+      "dc_snr": 41.0362589976084,
+      "norm_error": 1.1705399861758305,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.4140514101036419
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.07894856253893334,
+        -0.14314486447550137
+      ],
+      "sem": 0.23724889183436657,
+      "predicted": [
+        0.00867498781732287,
+        -0.00998469191187672
+      ],
+      "dc_measured": -0.2877588450327709,
+      "dc_snr": 2.4999566737005936,
+      "norm_error": 0.5539486813440182,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.019431066970682226
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 3.5071553934408843,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.03350288730660855,
+        0.9846952259458712
+      ],
+      "sem": 1.1009075023288082,
+      "predicted": [
+        0.000782065970157675,
+        -0.004057943670160295
+      ],
+      "dc_measured": -0.2877588450327709,
+      "dc_snr": 2.4999566737005936,
+      "norm_error": 3.4379288554357847,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.019431066970682226
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        2.3678533800734964,
+        -0.33870289274959425
+      ],
+      "sem": 0.04247471610685642,
+      "predicted": [
+        2.4052666206428652,
+        -0.4523490482246354
+      ],
+      "dc_measured": 2.901611328125,
+      "dc_snr": 93.2548820147539,
+      "norm_error": 0.04123437916795218,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 2.9776353870008854
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        2.165134666603695,
+        0.03981934242321042
+      ],
+      "sem": 0.05126378101877904,
+      "predicted": [
+        2.082705712917611,
+        -0.17681808044638056
+      ],
+      "dc_measured": 2.901611328125,
+      "dc_snr": 93.2548820147539,
+      "norm_error": 0.07988297860738304,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 2.9776353870008854
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.07634467781800236,
+        0.004587372303270286
+      ],
+      "sem": 0.004016749119731832,
+      "predicted": [
+        0.08437263893426668,
+        0.005654482218271732
+      ],
+      "dc_measured": 0.05506712481681577,
+      "dc_snr": 30.655285535590817,
+      "norm_error": 0.1470672918125804,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.05480612535444713
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0667784869388974,
+        -0.05095054719497489
+      ],
+      "sem": 0.007734891411513124,
+      "predicted": [
+        0.0596819709686683,
+        -0.04496393729757142
+      ],
+      "dc_measured": 0.05506712481681577,
+      "dc_snr": 30.655285535590817,
+      "norm_error": 0.16860145745968497,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.05480612535444713
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.009668332502493234,
+        -0.01574785211344841
+      ],
+      "sem": 0.0005867188466492061,
+      "predicted": [
+        0.00943639618068504,
+        -0.016259988335136883
+      ],
+      "dc_measured": 0.0228675681343459,
+      "dc_snr": 89.97055114036401,
+      "norm_error": 0.02458539158175924,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.02348009847377399
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 0.7287393687781978,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.00011881482750035477,
+        -0.004690188850452701
+      ],
+      "sem": 0.0012315193643226102,
+      "predicted": [
+        -0.0009932990225377893,
+        -0.0034001587699094573
+      ],
+      "dc_measured": 0.0228675681343459,
+      "dc_snr": 89.97055114036401,
+      "norm_error": 0.07448211461595286,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.02348009847377399
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        1.59156048171691,
+        -0.42067737661771987
+      ],
+      "sem": 0.03487108044540578,
+      "predicted": [
+        1.6559815153161297,
+        -0.450655113674533
+      ],
+      "dc_measured": 2.2440592447916665,
+      "dc_snr": 80.25849115523066,
+      "norm_error": 0.03166335564150071,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 2.2262069031647034
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        1.5039000211357547,
+        -0.003087736969944282
+      ],
+      "sem": 0.03403009496958472,
+      "predicted": [
+        1.3346285178722233,
+        -0.1761559407630399
+      ],
+      "dc_measured": 2.2440592447916665,
+      "dc_snr": 80.25849115523066,
+      "norm_error": 0.10787844195467317,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 2.2262069031647034
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.12617162735332388,
+        -0.02760489836007953
+      ],
+      "sem": 0.020359168144026572,
+      "predicted": [
+        0.09822712308568343,
+        -0.026051359222090224
+      ],
+      "dc_measured": 0.10758699232601657,
+      "dc_snr": 10.559068869327424,
+      "norm_error": 0.260139760977252,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.09872463418890015
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0648943196387632,
+        -0.12379590543234673
+      ],
+      "sem": 0.032069534264418526,
+      "predicted": [
+        0.04087639927039274,
+        -0.052440584173545385
+      ],
+      "dc_measured": 0.10758699232601657,
+      "dc_snr": 10.559068869327424,
+      "norm_error": 0.6997970399973428,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.09872463418890015
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.008660278266771987,
+        -0.02566061193102294
+      ],
+      "sem": 0.0006127524482898207,
+      "predicted": [
+        0.00870140150488557,
+        -0.025580154829331358
+      ],
+      "dc_measured": 0.04177775403771033,
+      "dc_snr": 110.04153175065467,
+      "norm_error": 0.002162812155380693,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.042012578476740906
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": -0.9156139245125108,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.0017564279364960884,
+        -0.005182867075459004
+      ],
+      "sem": 0.0011277929990826674,
+      "predicted": [
+        -0.002398583238309487,
+        -0.003428564086112588
+      ],
+      "dc_measured": 0.04177775403771033,
+      "dc_snr": 110.04153175065467,
+      "norm_error": 0.04471611264424463,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.042012578476740906
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        5.326540228920715,
+        0.7597954559489155
+      ],
+      "sem": 0.021401532676398584,
+      "predicted": [
+        5.250128782720583,
+        -7.151307848204864e-05
+      ],
+      "dc_measured": 5.270589192708333,
+      "dc_snr": 337.7176215823586,
+      "norm_error": 0.14489826580894,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 5.250219270039325
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        7.7105494919279565,
+        3.8635058958742294
+      ],
+      "sem": 0.17565166884403777,
+      "predicted": [
+        5.250077788198543,
+        -2.795364622438163e-05
+      ],
+      "dc_measured": 5.270589192708333,
+      "dc_snr": 337.7176215823586,
+      "norm_error": 0.869064496104765,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 5.250219270039325
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.18803916577363677,
+        0.03619068421007786
+      ],
+      "sem": 0.013926332756363295,
+      "predicted": [
+        -0.19013202470822527,
+        0.04377936666883207
+      ],
+      "dc_measured": -0.17861315278347384,
+      "dc_snr": 30.436987906806973,
+      "norm_error": 0.044072822456756706,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.18311355258850506
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.06964890959093259,
+        0.4114210757860894
+      ],
+      "sem": 0.1242125171488502,
+      "predicted": [
+        -0.0836067545638861,
+        0.10171597776857773
+      ],
+      "dc_measured": -0.17861315278347384,
+      "dc_snr": 30.436987906806973,
+      "norm_error": 1.735703451665011,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.18311355258850506
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0717223485918515,
+        -0.030559290332178718
+      ],
+      "sem": 0.08298324996676155,
+      "predicted": [
+        -0.022104337877670802,
+        0.030195308152382427
+      ],
+      "dc_measured": -0.09882867510194952,
+      "dc_snr": 3.30771588373645,
+      "norm_error": 1.1310391944186768,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -0.05616292605559658
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "x": 2.4551995815937966,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.9491632072285937,
+        -0.8879926362343489
+      ],
+      "sem": 0.7725628524676326,
+      "predicted": [
+        -0.0009898788909209278,
+        0.010111001543857488
+      ],
+      "dc_measured": -0.09882867510194952,
+      "dc_snr": 3.30771588373645,
+      "norm_error": 13.214736986680315,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -0.05616292605559658
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        11.897207531613674,
+        0.8986445198811165
+      ],
+      "sem": 0.05166785009353025,
+      "predicted": [
+        11.81861886037773,
+        -0.036379326028822476
+      ],
+      "dc_measured": 11.781412760416668,
+      "dc_snr": 350.1631039681735,
+      "norm_error": 0.07964415966584427,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 11.84666260346805
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        13.376507601916618,
+        3.784571983778818
+      ],
+      "sem": 0.13754513626557807,
+      "predicted": [
+        11.77858632629146,
+        -0.022077732939032854
+      ],
+      "dc_measured": 11.781412760416668,
+      "dc_snr": 350.1631039681735,
+      "norm_error": 0.3504189275649092,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 11.84666260346805
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.14329876402940706,
+        0.0608826789737312
+      ],
+      "sem": 0.008867720257514464,
+      "predicted": [
+        -0.12883463043498347,
+        0.06786920925092857
+      ],
+      "dc_measured": -0.14434666268193708,
+      "dc_snr": 37.10033819300772,
+      "norm_error": 0.11128131931312775,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.1536435268506473
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.02313215627147709,
+        0.2731867017515468
+      ],
+      "sem": 0.029916986116325817,
+      "predicted": [
+        0.0033661250556933464,
+        0.08721632771506298
+      ],
+      "dc_measured": -0.14434666268193708,
+      "dc_snr": 37.10033819300772,
+      "norm_error": 1.295616025792272,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.1536435268506473
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.0041161819446880075,
+        0.030965799288798595
+      ],
+      "sem": 0.024095938394338514,
+      "predicted": [
+        -0.01762320279202537,
+        0.030134672183566105
+      ],
+      "dc_measured": -0.03570157831013478,
+      "dc_snr": 3.428995459837332,
+      "norm_error": 0.37904675894810336,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -0.04993227922002809
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9394097033343023,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.05893866312048284,
+        0.032131174817399896
+      ],
+      "sem": 0.08131171566619821,
+      "predicted": [
+        0.0036224638433370124,
+        0.006500792462955952
+      ],
+      "dc_measured": -0.03570157831013478,
+      "dc_snr": 3.428995459837332,
+      "norm_error": 1.8936914615631077,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -0.04993227922002809
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        2.448452524998252,
+        -0.38058756250570636
+      ],
+      "sem": 0.04546061342125231,
+      "predicted": [
+        2.4228113536405864,
+        -0.3930369932241841
+      ],
+      "dc_measured": 2.833251953125,
+      "dc_snr": 88.98099217563555,
+      "norm_error": 0.01006040029343432,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 2.7257919106261013
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        2.1719264553209627,
+        0.0012843557906916
+      ],
+      "sem": 0.03912845969207057,
+      "predicted": [
+        1.9903056272852842,
+        -0.23852464349364616
+      ],
+      "dc_measured": 2.833251953125,
+      "dc_snr": 88.98099217563555,
+      "norm_error": 0.10617587549596418,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 2.7257919106261013
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.16694280251645033,
+        -0.039428215811599304
+      ],
+      "sem": 0.015103554807074758,
+      "predicted": [
+        0.16780504555412287,
+        -0.030519914619599933
+      ],
+      "dc_measured": 0.16461654452185742,
+      "dc_snr": 19.150744849870122,
+      "norm_error": 0.05436836622843512,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.160467836369792
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.1284715259691827,
+        -0.11998305297862015
+      ],
+      "sem": 0.022577959002052523,
+      "predicted": [
+        0.07422682702414785,
+        -0.10979443416473604
+      ],
+      "dc_measured": 0.16461654452185742,
+      "dc_snr": 19.150744849870122,
+      "norm_error": 0.33528376161004947,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.160467836369792
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.016997880317281402,
+        -0.03187783485757126
+      ],
+      "sem": 0.0007273617970178382,
+      "predicted": [
+        0.014701271838764261,
+        -0.030926247973744873
+      ],
+      "dc_measured": 0.053333272445031873,
+      "dc_snr": 111.14649809205173,
+      "norm_error": 0.04661154292482501,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.051654015673608784
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.13665199445712284,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.004242110640150077,
+        -0.006633538640547671
+      ],
+      "sem": 0.0010817246541127126,
+      "predicted": [
+        -0.004095563242527622,
+        -0.005411678995066064
+      ],
+      "dc_measured": 0.053333272445031873,
+      "dc_snr": 111.14649809205173,
+      "norm_error": 0.023074086958915406,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.051654015673608784
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        2.216043215893853,
+        -0.7766809265521215
+      ],
+      "sem": 0.04872037265597804,
+      "predicted": [
+        2.2577301267474104,
+        -0.6969399966412759
+      ],
+      "dc_measured": 2.817789713541667,
+      "dc_snr": 87.30802301913273,
+      "norm_error": 0.03193285772264259,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 2.794980492509836
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        1.383069904322006,
+        -0.4694014968430317
+      ],
+      "sem": 0.037468390194493516,
+      "predicted": [
+        1.4908034896370355,
+        -0.422956024753892
+      ],
+      "dc_measured": 2.817789713541667,
+      "dc_snr": 87.30802301913273,
+      "norm_error": 0.04163505421324219,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 2.794980492509836
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.11149092535413233,
+        -0.04083973467099303
+      ],
+      "sem": 0.001650496869028845,
+      "predicted": [
+        0.13178054809378473,
+        -0.012113788045394706
+      ],
+      "dc_measured": 0.11706791551454579,
+      "dc_snr": 120.40022330458399,
+      "norm_error": 0.3004141747875421,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.1144446394692617
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.021434984344104083,
+        -0.07371025224984383
+      ],
+      "sem": 0.0016456325068602725,
+      "predicted": [
+        0.06391134265765838,
+        -0.0926300443462774
+      ],
+      "dc_measured": 0.11706791551454579,
+      "dc_snr": 120.40022330458399,
+      "norm_error": 0.3972006958848454,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.1144446394692617
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.00929308624228065,
+        -0.03303107485631529
+      ],
+      "sem": 0.025487159943889243,
+      "predicted": [
+        0.014493853304893618,
+        -0.021187907630043062
+      ],
+      "dc_measured": 0.06528927003831522,
+      "dc_snr": 4.76353661562362,
+      "norm_error": 0.4069910567795761,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.039024499515238995
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.363985419707348,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.019510289105512377,
+        -0.017213071897872356
+      ],
+      "sem": 0.031319773107586615,
+      "predicted": [
+        -0.00029225862093174417,
+        -0.006414806057402241
+      ],
+      "dc_measured": 0.06528927003831522,
+      "dc_snr": 4.76353661562362,
+      "norm_error": 0.3376349414878453,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.039024499515238995
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        7.496172410831887,
+        -0.6038874241613263
+      ],
+      "sem": 0.07588137043735199,
+      "predicted": [
+        7.368427603087553,
+        -0.616754698988136
+      ],
+      "dc_measured": 7.758382161458334,
+      "dc_snr": 162.50873315316846,
+      "norm_error": 0.016548709098112954,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.843865501922367
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        6.244325072892002,
+        -0.2811078193156855
+      ],
+      "sem": 0.09445649694925039,
+      "predicted": [
+        6.689738462707431,
+        -0.37429350731691946
+      ],
+      "dc_measured": 7.758382161458334,
+      "dc_snr": 162.50873315316846,
+      "norm_error": 0.05865356417381018,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 7.843865501922367
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.049572065386422864,
+        0.017763676523649095
+      ],
+      "sem": 0.0010066070607357006,
+      "predicted": [
+        0.04008826046423232,
+        0.007281808152246314
+      ],
+      "dc_measured": 0.030491974308506406,
+      "dc_snr": 64.51612875480663,
+      "norm_error": 0.4635807236199438,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.02933219268604875
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.05736861789622056,
+        -0.040792430643930656
+      ],
+      "sem": 0.00186862879191369,
+      "predicted": [
+        0.0405005859980756,
+        -0.02323249598008806
+      ],
+      "dc_measured": 0.030491974308506406,
+      "dc_snr": 64.51612875480663,
+      "norm_error": 0.7985433846822364,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.02933219268604875
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0190604088203616,
+        0.07559254625344237
+      ],
+      "sem": 0.11780848795360889,
+      "predicted": [
+        0.05830831907169067,
+        -0.07613195512222148
+      ],
+      "dc_measured": 0.012252798849952673,
+      "dc_snr": 0.21213436494650634,
+      "norm_error": 12.790433606174073,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.14207716349984123
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 1.9919605366201907,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.2421220123174049,
+        0.19852639376058812
+      ],
+      "sem": 0.19570951739278974,
+      "predicted": [
+        0.0009091607727008725,
+        -0.026032181571095436
+      ],
+      "dc_measured": 0.012252798849952673,
+      "dc_snr": 0.21213436494650634,
+      "norm_error": 27.005568359101265,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.14207716349984123
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.001186006255307911,
+        -0.00046621763274536863
+      ],
+      "sem": 0.001161170821013968,
+      "predicted": [
+        0.0006342951286308616,
+        -0.00022611564708368369
+      ],
+      "dc_measured": 0.0016276041666666667,
+      "dc_snr": 2.0019559906875344,
+      "norm_error": 0.36968000794249073,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.0008086009722985543
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0008813595867413636,
+        -0.00099027157267117
+      ],
+      "sem": 0.0011795088037551955,
+      "predicted": [
+        0.0003854729722735699,
+        -0.0001372241164032295
+      ],
+      "dc_measured": 0.0016276041666666667,
+      "dc_snr": 2.0019559906875344,
+      "norm_error": 0.6062336504318334,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.0008086009722985543
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0005190233230486229,
+        -0.0005663596735775599
+      ],
+      "sem": 0.0006308989093635654,
+      "predicted": [
+        0.0005937896088986577,
+        -0.0002418984379806955
+      ],
+      "dc_measured": 0.0007218195076123186,
+      "dc_snr": 2.0019559906875344,
+      "norm_error": 0.4612844277703552,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.0006745647562604459
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        8.155160610934679e-05,
+        -0.000441932476880742
+      ],
+      "sem": 0.00040966750395969874,
+      "predicted": [
+        0.00012634133172265805,
+        -0.00036608584746521046
+      ],
+      "dc_measured": 0.0007218195076123186,
+      "dc_snr": 2.0019559906875344,
+      "norm_error": 0.12203081821237227,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.0006745647562604459
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -1.474633369187136e-05,
+        -3.847571551385289e-05
+      ],
+      "sem": 5.815978054198891e-05,
+      "predicted": [
+        3.583773511201055e-05,
+        -6.687313386544703e-05
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 58010011.082496054,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.00011973694597759966
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.04914991635829613,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.00013248258912126095,
+        9.75318979321266e-05
+      ],
+      "sem": 0.00016447155571179634,
+      "predicted": [
+        -4.271751655733938e-06,
+        -1.5380043131843022e-05
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 177343892.3565844,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.00011973694597759966
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        9.569504289971821,
+        0.2584866026898849
+      ],
+      "sem": 0.05867131627722287,
+      "predicted": [
+        9.526110506410404,
+        -0.10665540780914294
+      ],
+      "dc_measured": 9.590250651041668,
+      "dc_snr": 242.17178717451196,
+      "norm_error": 0.03834221444446019,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 9.60832799591043
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        9.794966208142103,
+        1.6062033227987613
+      ],
+      "sem": 0.10724987700052187,
+      "predicted": [
+        9.408744773872595,
+        -0.06472658696998171
+      ],
+      "dc_measured": 9.590250651041668,
+      "dc_snr": 242.17178717451196,
+      "norm_error": 0.1788258851056003,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 9.60832799591043
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.03524702046720384,
+        0.03686281592401221
+      ],
+      "sem": 0.004282302453341321,
+      "predicted": [
+        -0.033558057854449395,
+        0.03945359958051088
+      ],
+      "dc_measured": -0.04070318831675727,
+      "dc_snr": 19.108188755610108,
+      "norm_error": 0.0759816093743697,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": -0.05397934184602639
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.031478578282243125,
+        0.03747914021938467
+      ],
+      "sem": 0.009957027290047103,
+      "predicted": [
+        0.03336092162198829,
+        0.026142584969558343
+      ],
+      "dc_measured": -0.04070318831675727,
+      "dc_snr": 19.108188755610108,
+      "norm_error": 0.2823308726713496,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.05397934184602639
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.0009375854917141158,
+        0.0057043639232292834
+      ],
+      "sem": 0.0009025906735697277,
+      "predicted": [
+        0.0011990005665475426,
+        0.0037914549080661935
+      ],
+      "dc_measured": -0.006350460164030101,
+      "dc_snr": 13.366167047753384,
+      "norm_error": 0.45158778578439107,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.005586601146360019
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.6355587199095907,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.00026352869919649163,
+        0.0009464156269014268
+      ],
+      "sem": 0.0021097332308837487,
+      "predicted": [
+        0.0013745368066274142,
+        -0.0007359955741288742
+      ],
+      "dc_measured": -0.006350460164030101,
+      "dc_snr": 13.366167047753384,
+      "norm_error": 0.31748036946640984,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.005586601146360019
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        5.319451305411185,
+        -0.5384443044913523
+      ],
+      "sem": 0.059006253240093016,
+      "predicted": [
+        5.285419161225843,
+        -0.5235677271715556
+      ],
+      "dc_measured": 5.74951171875,
+      "dc_snr": 132.55323192451186,
+      "norm_error": 0.006459959466425188,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 5.6890219882696496
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        4.844596114695164,
+        0.21273607598106292
+      ],
+      "sem": 0.06299185613987973,
+      "predicted": [
+        4.709274818478529,
+        -0.31774058834492847
+      ],
+      "dc_measured": 5.74951171875,
+      "dc_snr": 132.55323192451186,
+      "norm_error": 0.09521929784399903,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 5.6890219882696496
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.11849111417605618,
+        -0.0031773763074758347
+      ],
+      "sem": 0.009596742968826977,
+      "predicted": [
+        0.11443168946180861,
+        0.006167842404052574
+      ],
+      "dc_measured": 0.09872943649679397,
+      "dc_snr": 20.02529150748702,
+      "norm_error": 0.10319940851632797,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.09009119963193307
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.07451633424055686,
+        -0.09048522082218738
+      ],
+      "sem": 0.01548329466023261,
+      "predicted": [
+        0.08467108107201088,
+        -0.07487605431748437
+      ],
+      "dc_measured": 0.09872943649679397,
+      "dc_snr": 20.02529150748702,
+      "norm_error": 0.18861270616667147,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 0.09009119963193307
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.013746467657444531,
+        -0.02050479329228692
+      ],
+      "sem": 0.00039489018651190847,
+      "predicted": [
+        0.016077395695343447,
+        -0.020369750784276875
+      ],
+      "dc_measured": 0.03329416487452913,
+      "dc_snr": 154.62873921341634,
+      "norm_error": 0.07012750189429927,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.033670259291791724
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.5759137357171582,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.0017067397862645562,
+        -0.006941022706552731
+      ],
+      "sem": 0.0006977425009321057,
+      "predicted": [
+        -0.0017788669085463094,
+        -0.006052031187663919
+      ],
+      "dc_measured": 0.03329416487452913,
+      "dc_snr": 154.62873921341634,
+      "norm_error": 0.026788858979649742,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.033670259291791724
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        6.885080091123619,
+        -1.0678032331254117
+      ],
+      "sem": 0.0804774746583001,
+      "predicted": [
+        6.652130646238613,
+        -1.0154740028242453
+      ],
+      "dc_measured": 7.510986328125,
+      "dc_snr": 150.6335553311999,
+      "norm_error": 0.031787392372546734,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.434929426720096
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        5.65351611518494,
+        -0.7715939739969394
+      ],
+      "sem": 0.0763164551695873,
+      "predicted": [
+        5.534682851862901,
+        -0.6162666076639808
+      ],
+      "dc_measured": 7.510986328125,
+      "dc_snr": 150.6335553311999,
+      "norm_error": 0.0260379642281616,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 7.434929426720096
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.4376096893933616,
+        -0.029421106819799862
+      ],
+      "sem": 0.006494565878379477,
+      "predicted": [
+        0.44603380691794375,
+        -0.0144567980505915
+      ],
+      "dc_measured": 0.3763997009389578,
+      "dc_snr": 107.34137131613703,
+      "norm_error": 0.04562316256321646,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 0.37284108619309175
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.2653059209276821,
+        -0.3575344085075588
+      ],
+      "sem": 0.009791772571702282,
+      "predicted": [
+        0.26350513814201404,
+        -0.30414503020128164
+      ],
+      "dc_measured": 0.3763997009389578,
+      "dc_snr": 107.34137131613703,
+      "norm_error": 0.14192290549524683,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.37284108619309175
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.06449708722285105,
+        -0.07822963783618693
+      ],
+      "sem": 0.022392544459067566,
+      "predicted": [
+        0.052316517839405094,
+        -0.05236084004899442
+      ],
+      "dc_measured": 0.11395913024137164,
+      "dc_snr": 9.791271783462154,
+      "norm_error": 0.2509059434732315,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.09532600771297113
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 0.7034308792825454,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.04319954817834952,
+        -0.02191361531236316
+      ],
+      "sem": 0.03596578244439121,
+      "predicted": [
+        0.0015486011230929546,
+        -0.022218773729925204
+      ],
+      "dc_measured": 0.11395913024137164,
+      "dc_snr": 9.791271783462154,
+      "norm_error": 0.3926775301203923,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.09532600771297113
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        -6.185737443795289e-07,
+        1.8112116696999925e-07
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 644545.0755069696,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -7.581946782775654e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        -4.1926440905190625e-07,
+        1.0991805485350419e-07
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 433433.528329803,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -7.581946782775654e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        7.382776418199774e-07,
+        -4.2122473320366735e-07
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 849990.6777569785,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 8.887925652395055e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        -1.0499605116864723e-07,
+        -5.305872903440019e-07
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 540876.1812426199,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 8.887925652395055e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        -7.487488791463947e-08,
+        1.3686941325989832e-07
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 156011.16987683493,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -2.4118917937117015e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": -0.7999344872340488,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "sem": 0.0,
+      "predicted": [
+        1.0360311289654827e-08,
+        3.110694397298943e-08
+      ],
+      "dc_measured": 0.0,
+      "dc_snr": 0.0,
+      "norm_error": 32786.85732663703,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -2.4118917937117015e-07
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        8.977474569510576,
+        0.2664860998318847
+      ],
+      "sem": 0.061864681478393656,
+      "predicted": [
+        8.906752786377696,
+        -0.11353577493448494
+      ],
+      "dc_measured": 9.051920572916666,
+      "dc_snr": 228.3934229152621,
+      "norm_error": 0.04270325793446275,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 8.994274146759698
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        9.029955676457238,
+        1.0813735199412475
+      ],
+      "sem": 0.11592351782285437,
+      "predicted": [
+        8.781815760978303,
+        -0.0689021153400085
+      ],
+      "dc_measured": 9.051920572916666,
+      "dc_snr": 228.3934229152621,
+      "norm_error": 0.12999848186857163,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 8.994274146759698
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.04765233779914685,
+        0.033243382968058136
+      ],
+      "sem": 0.001689341704818237,
+      "predicted": [
+        -0.044026727807104996,
+        0.04028222722709206
+      ],
+      "dc_measured": -0.06128384735009547,
+      "dc_snr": 74.13990851253253,
+      "norm_error": 0.12919759110036227,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.06334148565454834
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.018596393914926873,
+        0.03904482762276682
+      ],
+      "sem": 0.0037730241488009137,
+      "predicted": [
+        0.027002776457207518,
+        0.03273860170176457
+      ],
+      "dc_measured": -0.06128384735009547,
+      "dc_snr": 74.13990851253253,
+      "norm_error": 0.17147816437580987,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.06334148565454834
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.0019326684604295077,
+        0.002503280680699933
+      ],
+      "sem": 0.005949783965225013,
+      "predicted": [
+        0.0003481530154130986,
+        0.009308682668247156
+      ],
+      "dc_measured": -0.010350956692774946,
+      "dc_snr": 3.6175188958680287,
+      "norm_error": 0.6750516630596364,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": -0.014228692723530391
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 3.226124908506134,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.010783942026556012,
+        -0.013715836902880096
+      ],
+      "sem": 0.0131749729845728,
+      "predicted": [
+        0.0026844126260332744,
+        -0.0006304522373922277
+      ],
+      "dc_measured": -0.010350956692774946,
+      "dc_snr": 3.6175188958680287,
+      "norm_error": 1.4867486809265151,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": -0.014228692723530391
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        7.7407714349797505,
+        -0.3505374115803144
+      ],
+      "sem": 0.07059612495753011,
+      "predicted": [
+        7.6722933166845,
+        -0.4150462449007117
+      ],
+      "dc_measured": 8.042399088541666,
+      "dc_snr": 179.8500163323111,
+      "norm_error": 0.011697734854419472,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 7.99224015279068
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        7.176761678263063,
+        0.20742023465657236
+      ],
+      "sem": 0.09621500931736172,
+      "predicted": [
+        7.21556817193602,
+        -0.2518815259250953
+      ],
+      "dc_measured": 8.042399088541666,
+      "dc_snr": 179.8500163323111,
+      "norm_error": 0.05731352351696043,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 7.99224015279068
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.024697547799784815,
+        0.01963762233593476
+      ],
+      "sem": 0.001604449228039696,
+      "predicted": [
+        0.023851033710791975,
+        0.021971724391609413
+      ],
+      "dc_measured": 0.00613017935094465,
+      "dc_snr": 7.732422529200294,
+      "norm_error": 0.4050232200252468,
+      "counted": false,
+      "tol": 0.1,
+      "passed": null,
+      "dc_spline": 0.004620607141981698
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        0.04468936942412022,
+        -0.01663021405680555
+      ],
+      "sem": 0.0029242002933770107,
+      "predicted": [
+        0.045787042116502814,
+        -0.01421762673517896
+      ],
+      "dc_measured": 0.00613017935094465,
+      "dc_snr": 7.732422529200294,
+      "norm_error": 0.4323787007821964,
+      "counted": false,
+      "tol": 0.15,
+      "passed": null,
+      "dc_spline": 0.004620607141981698
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        0.006397224905706191,
+        -0.0032874159648470106
+      ],
+      "sem": 0.000624848235516015,
+      "predicted": [
+        0.005026838974389651,
+        -0.0038511582468295103
+      ],
+      "dc_measured": 0.006143053766180779,
+      "dc_snr": 18.936754742050482,
+      "norm_error": 0.24121727726657344,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": 0.0070078180498986025
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.4613955334246196,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        4.562669221572121e-05,
+        -0.0016862250677166428
+      ],
+      "sem": 0.001159563085539415,
+      "predicted": [
+        0.00031303750995262104,
+        -0.0021084787651371676
+      ],
+      "dc_measured": 0.006143053766180779,
+      "dc_snr": 18.936754742050482,
+      "norm_error": 0.08136127601747906,
+      "counted": true,
+      "tol": 0.15,
+      "passed": true,
+      "dc_spline": 0.0070078180498986025
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "measured": [
+        11.5076820622691,
+        1.0113464577227358
+      ],
+      "sem": 0.031779828615079865,
+      "predicted": [
+        11.436339442666263,
+        -0.002840747048486937
+      ],
+      "dc_measured": 11.435953776041668,
+      "dc_snr": 577.0642186925536,
+      "norm_error": 0.08890324437032276,
+      "counted": true,
+      "tol": 0.1,
+      "passed": true,
+      "dc_spline": 11.438529290283265
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "measured": [
+        12.636774605733407,
+        4.3940226900669135
+      ],
+      "sem": 0.11189513789947393,
+      "predicted": [
+        11.433213428100768,
+        -0.0017239806651214765
+      ],
+      "dc_measured": 11.435953776041668,
+      "dc_snr": 577.0642186925536,
+      "norm_error": 0.39852710279576653,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": 11.438529290283265
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.24999546848805373,
+        0.028901637821660907
+      ],
+      "sem": 0.011735730909541867,
+      "predicted": [
+        -0.23547119700036062,
+        0.06238936358019081
+      ],
+      "dc_measured": -0.2214421446186794,
+      "dc_snr": 39.38396219568581,
+      "norm_error": 0.16483678618319506,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.2416169053707824
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.27236380187613274,
+        0.19422779389675476
+      ],
+      "sem": 0.04840621835212702,
+      "predicted": [
+        -0.08681549020310585,
+        0.1490278331305834
+      ],
+      "dc_measured": -0.2214421446186794,
+      "dc_snr": 39.38396219568581,
+      "norm_error": 0.862412061026615,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.2416169053707824
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "measured": [
+        -0.03576953243833214,
+        0.02080510966275779
+      ],
+      "sem": 0.0080691505986331,
+      "predicted": [
+        -0.02583165538637597,
+        0.024636875037633617
+      ],
+      "dc_measured": -0.038183375515060444,
+      "dc_snr": 10.12033076542098,
+      "norm_error": 0.2789434155243333,
+      "counted": true,
+      "tol": 0.1,
+      "passed": false,
+      "dc_spline": -0.04401337819958062
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "x": 2.1306507887269075,
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "measured": [
+        -0.021114518918502946,
+        0.031247047178705464
+      ],
+      "sem": 0.033483742148523545,
+      "predicted": [
+        -0.0005291999924208538,
+        0.010730751184391806
+      ],
+      "dc_measured": -0.038183375515060444,
+      "dc_snr": 10.12033076542098,
+      "norm_error": 0.7611498778433842,
+      "counted": true,
+      "tol": 0.15,
+      "passed": false,
+      "dc_spline": -0.04401337819958062
+    }
+  ]
+}

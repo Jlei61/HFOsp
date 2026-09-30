@@ -1,0 +1,30 @@
+{
+  "created_local": "2026-09-20T01:01:52.687810+08:00",
+  "question": "Does retaining the response weight at the time each mean-input change occurred repair the strong-input termination error, without new coefficients or changes to static and first-order response?",
+  "hypothesis": "Existing closure multiplies all accumulated mean memory by the current (or filtered-current) alpha. A moving working point can therefore reweight old input history instantaneously. Test weighting mean increments before the same causal exponential memory filter.",
+  "equations": "p_dot=-p/tau_s+(1-alpha(workpoint(t)))*mu_dot; mu_eff=mu-p+eta_E*(vE-vEf)+eta_I*(vI-vIf). The same existing variance readout and static transfer are retained.",
+  "variants": [
+    "weighted_input_memory_instantaneous",
+    "weighted_input_memory_history"
+  ],
+  "workpoints": [
+    "mu,vE,vI",
+    "mus,vEv,vIv"
+  ],
+  "datasets": [
+    "in_domain_waveform",
+    "factorial_waveform"
+  ],
+  "prediction": "No new coefficient, pole, time constant or selected optimum. Both variants are diagnostics on already acquired targets; no held-out acceptance claim.",
+  "checks": [
+    "Constant alpha identity to original input mixture under fixed weights",
+    "Small perturbation first-order identity with original response, including amplitude halving",
+    "Rates within zero and refractory bounds without post-hoc clipping"
+  ],
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1
+  },
+  "scope": "Two zero-fit local nonlinear closure diagnostics motivated by new mean/variance counterfactual evidence. This does not repair existing small-signal validation failures, constitute fresh held-out validation, deploy a spatial model or classify onset. If no variant passes every selected full/mean/variance waveform, do not launch a network with it.",
+  "budget": "Two fixed variants on the two existing 12-condition input sets; no new Monte Carlo or network run."
+}

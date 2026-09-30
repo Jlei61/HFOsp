@@ -1,0 +1,91 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "steps": 5284,
+      "actual_elapsed_ms": 264.2,
+      "offset_from_exact_period_ms": 0.019477715440018528,
+      "E_rate_weighted_rms_error_hz": 3.9440170480240657,
+      "E_global_rate_error_hz": 0.32360142587906054,
+      "state_component_scaled_rms": [
+        0.026734505242253584,
+        0.020387217042566196,
+        0.020168744954972773,
+        0.017542414918520297,
+        0.026508551835458208,
+        0.02422106727851548,
+        0.03587251832454306,
+        0.019362432491918435,
+        0.025691804506249916,
+        0.0239054330607723,
+        0.01212225199023606,
+        0.0,
+        0.023805015333080656,
+        0.01997816383752736
+      ],
+      "final_global_E_hz": 185.12597161333812,
+      "expected_global_E_hz": 184.80237018745905,
+      "initial_output_vs_spectral_rate_max_hz": 0.05670407287383661
+    },
+    {
+      "dt_ms": 0.025,
+      "steps": 10567,
+      "actual_elapsed_ms": 264.175,
+      "offset_from_exact_period_ms": -0.0055222845599587345,
+      "E_rate_weighted_rms_error_hz": 2.261911984894173,
+      "E_global_rate_error_hz": 0.18425300120568222,
+      "state_component_scaled_rms": [
+        0.015208694547598592,
+        0.011588809557756846,
+        0.011527625822689791,
+        0.010010536245335157,
+        0.015115958482091702,
+        0.01382987935909575,
+        0.020334798339934453,
+        0.011055476708953125,
+        0.014657194210253199,
+        0.013620655413699273,
+        0.006812230205199713,
+        0.0,
+        0.013593272122799285,
+        0.011404337498178006
+      ],
+      "final_global_E_hz": 184.97439025299758,
+      "expected_global_E_hz": 184.79013725179195,
+      "initial_output_vs_spectral_rate_max_hz": 0.05670407287383661
+    },
+    {
+      "dt_ms": 0.0125,
+      "steps": 21134,
+      "actual_elapsed_ms": 264.175,
+      "offset_from_exact_period_ms": -0.0055222845599587345,
+      "E_rate_weighted_rms_error_hz": 0.7332619483077699,
+      "E_global_rate_error_hz": 0.0598587454370484,
+      "state_component_scaled_rms": [
+        0.004796522011885208,
+        0.003659070064837821,
+        0.003641874006639872,
+        0.0031606205545449233,
+        0.004773760799172346,
+        0.004368227456452724,
+        0.006415950907094196,
+        0.0034909899209677785,
+        0.004628421353974799,
+        0.004300747525829212,
+        0.0021348099237967835,
+        0.0,
+        0.004294177329539817,
+        0.003601827077171729
+      ],
+      "final_global_E_hz": 184.84999599722894,
+      "expected_global_E_hz": 184.79013725179195,
+      "initial_output_vs_spectral_rate_max_hz": 0.05670407287383661
+    }
+  ],
+  "Z": "held",
+  "M": "dynamic",
+  "method": "Endpoint Heun from complete Fourier state/history; expected endpoint at the actual rounded integration time",
+  "scope": "Forward-flow closure diagnostic; no asymptotic stability or bifurcation classification"
+}

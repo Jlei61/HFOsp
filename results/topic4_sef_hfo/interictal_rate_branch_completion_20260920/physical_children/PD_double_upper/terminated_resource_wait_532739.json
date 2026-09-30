@@ -1,0 +1,13 @@
+{
+  "previous_worker": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 532739,
+    "dependencies": [
+      532738
+    ]
+  },
+  "confirmed_absent_pid": 532739,
+  "terminal_exception": "TypeError: status() got multiple values for argument 'stage'",
+  "fix": "Rename informational keyword to next_stage; preserve resource gates.",
+  "timestamp": 1789901792.5016887
+}

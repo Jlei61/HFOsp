@@ -1,0 +1,68 @@
+{
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_response_network_20260923/recorded_drive_binomial_seed1",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_native_Z_path_20260923/recorded_drive_binomial_seed1"
+  ],
+  "snapshots": [
+    {
+      "condition": "Native SNN",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Native SNN",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Rate: free Z",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Rate: free Z",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Rate: native Z(t)",
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "condition": "Rate: native Z(t)",
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    }
+  ],
+  "Z_modes": [
+    "dynamic",
+    "dynamic",
+    "prescribed"
+  ],
+  "M_dynamic_in_all": true,
+  "time_alignment": "Original common external clock; no event or onset alignment.",
+  "native_slow": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_native_Z_path_20260923/native_slow_observations.npz",
+  "scope": "Native Z(t) supplied to the third column; D agreement is by construction. M and fast rates free. Conditional diagnostic only. Local validation remains failed; no model promotion or bifurcation labels.",
+  "agent_PNG_PDF_check": "PASS",
+  "human_visual_acceptance": "PENDING"
+}

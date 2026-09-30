@@ -1,0 +1,94 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/SCL_branch_scan/summary.json",
+  "families": [
+    {
+      "family": "A",
+      "checked_points": 666,
+      "J_range": [
+        0.7057755315516056,
+        1.306854855971254
+      ],
+      "points_with_SCL_at_all_bin_origins": 0,
+      "SCL_count_range": [
+        0,
+        0
+      ],
+      "all_bin_origins_agree": true,
+      "contiguous_plotted_runs": 19,
+      "unverified_family_samples": 553
+    },
+    {
+      "family": "B",
+      "checked_points": 273,
+      "J_range": [
+        0.9432499489116852,
+        0.982694404708437
+      ],
+      "points_with_SCL_at_all_bin_origins": 0,
+      "SCL_count_range": [
+        0,
+        0
+      ],
+      "all_bin_origins_agree": true,
+      "contiguous_plotted_runs": 2,
+      "unverified_family_samples": 632
+    },
+    {
+      "family": "double",
+      "checked_points": 3,
+      "J_range": [
+        0.942,
+        0.9447720644904876
+      ],
+      "points_with_SCL_at_all_bin_origins": 3,
+      "SCL_count_range": [
+        2,
+        3
+      ],
+      "all_bin_origins_agree": true,
+      "contiguous_plotted_runs": 3,
+      "unverified_family_samples": 253
+    },
+    {
+      "family": "Bleading",
+      "checked_points": 83,
+      "J_range": [
+        0.9488489167801094,
+        1.0199514540453916
+      ],
+      "points_with_SCL_at_all_bin_origins": 83,
+      "SCL_count_range": [
+        2,
+        3
+      ],
+      "all_bin_origins_agree": true,
+      "contiguous_plotted_runs": 4,
+      "unverified_family_samples": 228
+    },
+    {
+      "family": "single",
+      "checked_points": 9,
+      "J_range": [
+        0.9575887984733535,
+        1.6264477575618144
+      ],
+      "points_with_SCL_at_all_bin_origins": 0,
+      "SCL_count_range": [
+        0,
+        0
+      ],
+      "all_bin_origins_agree": true,
+      "contiguous_plotted_runs": 9,
+      "unverified_family_samples": 295
+    }
+  ],
+  "individually_classified_return_witness": {
+    "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/return_witness24/result.json",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingConnection_20260920_0024_N4096.npz",
+    "J_EE_core": 0.9693444148956987,
+    "status": "UNSTABLE",
+    "numerical_unstable_dimension": 1
+  },
+  "readout": "Four original SCL contact thresholds; ranges span four deterministic bin origins, not uncertainty across realizations.",
+  "scope": "Periodic solutions, including unstable or unclassified branches. No complete parameter window or new dynamical bifurcation is established."
+}

@@ -1,0 +1,74 @@
+{
+  "status": "ACTUAL_CLOSED_ROOT_PROFILE_RECORDED",
+  "period_ms": 261.748259457055,
+  "dt_ms": 0.05,
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_hz": 36.458144644377484,
+      "min_hz": 0.011606030096242066,
+      "max_hz": 176.52143934753383,
+      "time_fraction_below5": 0.5744843391902216
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 124.00751139305233,
+      "min_hz": 2.1199818849167503e-05,
+      "max_hz": 479.59701045512793,
+      "time_fraction_below5": 0.6109625668449198
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 93.79229341721222,
+      "min_hz": 2.616648271719853e-05,
+      "max_hz": 477.436252271575,
+      "time_fraction_below5": 0.5338044308632544
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 32.81149778082057,
+      "min_hz": 0.012179198888884381,
+      "max_hz": 163.83451733229845,
+      "time_fraction_below5": 0.5855614973262032
+    }
+  ],
+  "partial_period_returns": [
+    {
+      "divisor": 8,
+      "elapsed_ms": 33,
+      "full_state_coordinate_relative": 327.5868400317403
+    },
+    {
+      "divisor": 7,
+      "elapsed_ms": 37,
+      "full_state_coordinate_relative": 453.9706527795024
+    },
+    {
+      "divisor": 6,
+      "elapsed_ms": 44,
+      "full_state_coordinate_relative": 721.707754512606
+    },
+    {
+      "divisor": 5,
+      "elapsed_ms": 52,
+      "full_state_coordinate_relative": 1083.4310603031433
+    },
+    {
+      "divisor": 4,
+      "elapsed_ms": 65,
+      "full_state_coordinate_relative": 1570.0824471782935
+    },
+    {
+      "divisor": 3,
+      "elapsed_ms": 87,
+      "full_state_coordinate_relative": 1388.2446206640675
+    },
+    {
+      "divisor": 2,
+      "elapsed_ms": 131,
+      "full_state_coordinate_relative": 736.6182161022089
+    }
+  ],
+  "fundamental_scope": "Excludes tested subperiods only; full phase/mesh checks and Floquet certificate remain separate.",
+  "model_promoted": false
+}

@@ -1,0 +1,122 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "N": 128,
+      "temporal_RMS_Hz": 0.7071067811865476,
+      "first_harmonic_RMS_fraction": 1.0,
+      "nyquist_energy_fraction": 0.0,
+      "period_divisor_mismatches": [
+        {
+          "divisor": 2,
+          "relative_difference": 2.0
+        },
+        {
+          "divisor": 3,
+          "relative_difference": 1.732050807568877
+        },
+        {
+          "divisor": 4,
+          "relative_difference": 1.414213562373095
+        },
+        {
+          "divisor": 5,
+          "relative_difference": 1.1755705045849463
+        },
+        {
+          "divisor": 6,
+          "relative_difference": 0.9999999999999999
+        }
+      ],
+      "known_harmonic": 1
+    },
+    {
+      "N": 128,
+      "temporal_RMS_Hz": 0.7071067811865476,
+      "first_harmonic_RMS_fraction": 6.528224701108045e-17,
+      "nyquist_energy_fraction": 0.0,
+      "period_divisor_mismatches": [
+        {
+          "divisor": 2,
+          "relative_difference": 1.1455597227315694e-15
+        },
+        {
+          "divisor": 3,
+          "relative_difference": 1.7320508075688774
+        },
+        {
+          "divisor": 4,
+          "relative_difference": 2.0
+        },
+        {
+          "divisor": 5,
+          "relative_difference": 1.902113032590307
+        },
+        {
+          "divisor": 6,
+          "relative_difference": 1.7320508075688772
+        }
+      ],
+      "known_harmonic": 2
+    },
+    {
+      "N": 256,
+      "temporal_RMS_Hz": 0.7071067811865476,
+      "first_harmonic_RMS_fraction": 1.0,
+      "nyquist_energy_fraction": 0.0,
+      "period_divisor_mismatches": [
+        {
+          "divisor": 2,
+          "relative_difference": 2.0
+        },
+        {
+          "divisor": 3,
+          "relative_difference": 1.7320508075688772
+        },
+        {
+          "divisor": 4,
+          "relative_difference": 1.414213562373095
+        },
+        {
+          "divisor": 5,
+          "relative_difference": 1.1755705045849463
+        },
+        {
+          "divisor": 6,
+          "relative_difference": 0.9999999999999999
+        }
+      ],
+      "known_harmonic": 1
+    },
+    {
+      "N": 256,
+      "temporal_RMS_Hz": 0.7071067811865476,
+      "first_harmonic_RMS_fraction": 8.37411552648095e-17,
+      "nyquist_energy_fraction": 0.0,
+      "period_divisor_mismatches": [
+        {
+          "divisor": 2,
+          "relative_difference": 1.110594880153303e-15
+        },
+        {
+          "divisor": 3,
+          "relative_difference": 1.7320508075688774
+        },
+        {
+          "divisor": 4,
+          "relative_difference": 2.0
+        },
+        {
+          "divisor": 5,
+          "relative_difference": 1.902113032590307
+        },
+        {
+          "divisor": 6,
+          "relative_difference": 1.7320508075688772
+        }
+      ],
+      "known_harmonic": 2
+    }
+  ],
+  "scope": "Known first-harmonic and doubled-frequency positive signals check the primitive-period diagnostic at two temporal meshes; no model validation is inferred."
+}

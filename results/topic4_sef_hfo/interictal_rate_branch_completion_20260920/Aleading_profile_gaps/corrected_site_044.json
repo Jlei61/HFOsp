@@ -1,0 +1,49 @@
+{
+  "status": "SAME_J_PHYSICAL_PROFILE_CHECKED",
+  "index": 44,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256_accuracy_N1024_accuracy_N2048.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256_accuracy_N1024.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256_accuracy_N1024_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 1.3267733664936305,
+    "T_ms": 248.5770189886239,
+    "maximum_group_defect_Hz": 3.5360603334311236e-10,
+    "regional_defect_Hz": [
+      4.407992170507961e-12,
+      4.394367962529135e-12,
+      1.1366068847196212e-12
+    ],
+    "minimum_rate_Hz": 4.874967083617486e-05,
+    "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+    "harmonic_chunk_size": 32,
+    "phase_chunk_size": 512,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -3.094052791752233e-11,
+        "phase_index": 2464,
+        "group": 14
+      },
+      "slow": {
+        "minimum_Hz": 6.653670704720894e-05,
+        "phase_index": 3408,
+        "group": 380
+      },
+      "positive": true,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "relative_waveform_change": 0.00043250869445917345,
+  "relative_period_change": 5.4110861125167276e-08,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 120
+    }
+  ],
+  "scope": "Physical periodic profile only. The queued original Floquet survey must compute stability on this corrected profile."
+}

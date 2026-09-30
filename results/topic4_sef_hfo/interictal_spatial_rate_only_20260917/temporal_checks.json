@@ -1,0 +1,150 @@
+{
+  "step_halving": [
+    {
+      "J_EE_core": 0.942,
+      "dt_ms": [
+        0.1,
+        0.05
+      ],
+      "mean_rate_relative_difference": [
+        2.997751780318476e-05,
+        8.099968868785215e-06,
+        8.08844581501654e-06
+      ],
+      "waveform_relative_rms": [
+        0.0038167897646286474,
+        0.0036341277750742526,
+        0.0017154435330075217
+      ],
+      "burst_count_dt01": [
+        20,
+        20,
+        20
+      ],
+      "burst_count_dt005": [
+        20,
+        20,
+        20
+      ],
+      "IEI_CV_dt01": [
+        0.14674589435927818,
+        0.16683035664636692,
+        0.06560597857810635
+      ],
+      "IEI_CV_dt005": [
+        0.14674589435927818,
+        0.16723167135865494,
+        0.06560597857810635
+      ]
+    },
+    {
+      "J_EE_core": 1.3,
+      "dt_ms": [
+        0.1,
+        0.05
+      ],
+      "mean_rate_relative_difference": [
+        6.408356668648183e-06,
+        1.4890071752836584e-05,
+        3.582459018029086e-06
+      ],
+      "waveform_relative_rms": [
+        0.0022478414759458157,
+        0.002383281796741219,
+        0.001409658639194218
+      ],
+      "burst_count_dt01": [
+        32,
+        32,
+        32
+      ],
+      "burst_count_dt005": [
+        32,
+        32,
+        32
+      ],
+      "IEI_CV_dt01": [
+        0.001850911702478129,
+        0.0058856199587829765,
+        0.004670589816720096
+      ],
+      "IEI_CV_dt005": [
+        0.001850911702478129,
+        0.0058856199587829765,
+        0.004670589816720096
+      ]
+    }
+  ],
+  "long_run": [
+    {
+      "core": "A",
+      "analysis_window_ms": [
+        10000,
+        30000
+      ],
+      "burst_count": 50,
+      "IEI_CV": 0.1469577672386097,
+      "last_20_intervals_ms": [
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336,
+        449,
+        336
+      ],
+      "two_interval_recurrence_RMSE_ms": 0.20628424925175867,
+      "interpretation": "Long-short interval alternation, not evidence of irregular/chaotic events or a classified period-doubling bifurcation"
+    },
+    {
+      "core": "B",
+      "analysis_window_ms": [
+        10000,
+        30000
+      ],
+      "burst_count": 51,
+      "IEI_CV": 0.16342595306768254,
+      "last_20_intervals_ms": [
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456,
+        329,
+        456
+      ],
+      "two_interval_recurrence_RMSE_ms": 0.0,
+      "interpretation": "Long-short interval alternation, not evidence of irregular/chaotic events or a classified period-doubling bifurcation"
+    }
+  ],
+  "full_field_recurrence_785ms_relative_error": 0.002973975846543908,
+  "interpretation": "The middle case approaches a repeating two-burst pattern. CV>0 is insufficient to label it irregular.",
+  "deterministic": true,
+  "native_equivalence": "NOT_VALIDATED"
+}

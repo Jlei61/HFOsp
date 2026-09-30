@@ -1,0 +1,199 @@
+{
+  "index": 21,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0031_N64.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0031_N64.npz",
+  "memberships": [
+    {
+      "family": "A",
+      "index": 144
+    }
+  ],
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0031_N64.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0031_N64.npz",
+    "N": 64,
+    "check_N": 256,
+    "J_EE_core": 0.9610888382119596,
+    "T_ms": 161.55319958074975,
+    "maximum_group_defect_Hz": 2.5056895330312356e-06,
+    "regional_defect_Hz": [
+      1.346096499565155e-10,
+      4.1947313060158e-16,
+      7.493078175420052e-09
+    ],
+    "minimum_rate_Hz": 0.0167998935077892,
+    "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+    "harmonic_chunk_size": 32,
+    "phase_chunk_size": 512,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 0.0018661545981206538,
+        "phase_index": 162,
+        "group": 355
+      },
+      "slow": {
+        "minimum_Hz": 0.01875600577648936,
+        "phase_index": 185,
+        "group": 277
+      },
+      "positive": true,
+      "N": 64,
+      "check_N": 256
+    }
+  },
+  "J_EE_core": 0.9610888382119596,
+  "T_ms": 161.55319958074975,
+  "relative_waveform_refinement_change": 2.0514933636736622e-16,
+  "relative_period_change": 0.0,
+  "status": "UNSTABLE",
+  "attempts": [
+    {
+      "nev": 6,
+      "requested_steps_ms": [
+        0.05,
+        0.025
+      ],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_021_k6_arcA_0031_N64_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_021_k6_arcA_0031_N64_dt0.025.json"
+      ],
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            8.944641838874093,
+            0.0
+          ],
+          [
+            -4.855020544459169,
+            0.0
+          ],
+          [
+            1.4057291118267277,
+            0.740232181812748
+          ],
+          [
+            1.4057291118267277,
+            -0.740232181812748
+          ],
+          [
+            0.0019403417525478011,
+            -0.01992101108593765
+          ],
+          [
+            0.0019403417525478011,
+            0.01992101108593765
+          ]
+        ],
+        "per_mode_margin": [
+          0.002062647165982455,
+          0.002062647165982455,
+          0.002062647165982455,
+          0.002062647165982455,
+          0.002062647165982455,
+          0.002062647165982455
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.0002825608642407218,
+          0.0002609678212337485,
+          9.14900667360536e-06,
+          9.14900667360536e-06,
+          4.65318203825457e-07,
+          4.65318203825457e-07
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": 4,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 8.944641838874093,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        8.944641838874093,
+        0.0
+      ],
+      [
+        -4.855020544459169,
+        0.0
+      ],
+      [
+        1.4057291118267277,
+        0.740232181812748
+      ],
+      [
+        1.4057291118267277,
+        -0.740232181812748
+      ],
+      [
+        0.0019403417525478011,
+        -0.01992101108593765
+      ],
+      [
+        0.0019403417525478011,
+        0.01992101108593765
+      ]
+    ],
+    "per_mode_margin": [
+      0.002062647165982455,
+      0.002062647165982455,
+      0.002062647165982455,
+      0.002062647165982455,
+      0.002062647165982455,
+      0.002062647165982455
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0002825608642407218,
+      0.0002609678212337485,
+      9.14900667360536e-06,
+      9.14900667360536e-06,
+      4.65318203825457e-07,
+      4.65318203825457e-07
+    ],
+    "reliable_outside_count": 4,
+    "numerical_unstable_dimension": 4,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 8.944641838874093,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "unstable_dimension_requested": true,
+  "numerical_dimension_status": "RESOLVED_AT_THIS_SAMPLE"
+}

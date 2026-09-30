@@ -1,0 +1,71 @@
+{
+  "status": "MESH_CHECKED_DOUBLED_BRANCH",
+  "rows": [
+    {
+      "source": "PDreturnchild_branch_N2048.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a0.20000_N2048.npz",
+      "N": 2048,
+      "switch_coordinate": 0.2,
+      "J_EE_core": 1.0758067725742213,
+      "T_ms": 210.79958753144393,
+      "J_shift": -9.68003455170674e-11,
+      "odd_rate_RMS_Hz": 0.0063991978269496725,
+      "departure_coefficient": -2.3638822241556777e-06,
+      "minimum_rate_Hz": 2.3079556885231936e-08,
+      "half_period_relative_mismatch": 0.0001966717034571513
+    },
+    {
+      "source": "PDreturnchild_branch_N2048.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a0.50000_N2048.npz",
+      "N": 2048,
+      "switch_coordinate": 0.5,
+      "J_EE_core": 1.0758067720929791,
+      "T_ms": 210.7995836605731,
+      "J_shift": -5.780425027523961e-10,
+      "odd_rate_RMS_Hz": 0.015997994599487482,
+      "departure_coefficient": -2.2585446517212104e-06,
+      "minimum_rate_Hz": 2.3044636678587947e-08,
+      "half_period_relative_mismatch": 0.0004916792667533689
+    },
+    {
+      "source": "PDreturnchild_branch_N2048.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a1.00000_N2048.npz",
+      "N": 2048,
+      "switch_coordinate": 1.0,
+      "J_EE_core": 1.075806770358625,
+      "T_ms": 210.799569713722,
+      "J_shift": -2.312396718551213e-09,
+      "odd_rate_RMS_Hz": 0.03199598942097209,
+      "departure_coefficient": -2.258766069969341e-06,
+      "minimum_rate_Hz": 2.2986050142044984e-08,
+      "half_period_relative_mismatch": 0.0009833585935190264
+    },
+    {
+      "source": "PDreturnchildMesh_branch_N1024.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchildMesh_a0.50000_N1024.npz",
+      "N": 1024,
+      "switch_coordinate": 0.5,
+      "J_EE_core": 1.0758067720929652,
+      "T_ms": 210.79958366046205,
+      "J_shift": -5.781877199240171e-10,
+      "odd_rate_RMS_Hz": 0.016000186707047646,
+      "departure_coefficient": -2.258493071073974e-06,
+      "minimum_rate_Hz": 2.3044628719127468e-08,
+      "half_period_relative_mismatch": 0.0004917466379208158
+    }
+  ],
+  "mesh_pairs": [
+    {
+      "fine": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a0.50000_N2048.npz",
+      "coarse": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchildMesh_a0.50000_N1024.npz",
+      "coefficient_relative_difference": 2.2838001983760897e-05,
+      "absolute_J_difference": 1.3988810110276972e-14
+    }
+  ],
+  "continuous_accuracy_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PDreturnchild_accuracy.json",
+  "amplitude_definition": "Neuron-weighted RMS Hz of (r(t)-r(t+T/2))/2 over the full 2T child.",
+  "branch_side": "J < J_PD3",
+  "parent_stability": "ALREADY_UNSTABLE",
+  "criticality": "NOT_COMPUTED",
+  "scope": "Nonzero full-space 2T branch with converged departure coefficient across temporal meshes. This establishes local branch geometry, not its critical multiplier, full Floquet stability, or a global connection."
+}

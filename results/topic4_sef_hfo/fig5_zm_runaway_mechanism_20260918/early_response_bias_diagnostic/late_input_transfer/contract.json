@@ -1,0 +1,9 @@
+{
+  "created_local": "2026-09-20T14:45:47.875477+08:00",
+  "question": "Does the fixed early-population bias damage the existing near-onset local response?",
+  "inputs": "Existing g20 sixselectednativeinput profiles8-10.37s, projectedmean/privatevariance;1s preparation, primary9-10.35s,27fixed50ms bins. Reuses untouched inputs and localLIF reference; not a g40 autonomous test.",
+  "correction": "Exactly alreadylocked E/Ioffsets; no latefit or nativeonsettarget.",
+  "reference": "Original groupmeanthreshold independentGaussianLIF dt0.1and0.05, firstsixcases, no mixturecase substitution.",
+  "check": "All6groups compared against bothsteps; waveformL2<=.15 andtotalcountrelativeerror<=.10, same localcriteria. This developmental transfer cannot waive earlyoffaxisFAIL or otheroriginalvalidationfails.",
+  "budget": "Read-only response reconstruction/scoring only. No refit, newreference, network or branch launch."
+}

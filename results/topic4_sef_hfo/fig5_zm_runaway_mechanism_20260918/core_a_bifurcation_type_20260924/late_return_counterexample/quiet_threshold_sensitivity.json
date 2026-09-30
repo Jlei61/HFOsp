@@ -1,0 +1,189 @@
+{
+  "status": "LATE_RETURN_PRESENT_IN_ALL_NINE_DIAGNOSTIC_DEFINITIONS",
+  "primary_unchanged": {
+    "rate_threshold_hz": 5,
+    "min_quiet_duration_ms": 20,
+    "smoothing_ms": 10
+  },
+  "rows": [
+    {
+      "rate_threshold_hz": 1,
+      "min_quiet_duration_ms": 10,
+      "late_quiet_intervals_ms": [
+        [
+          64763,
+          64776
+        ],
+        [
+          64833,
+          64918
+        ],
+        [
+          64975,
+          65104
+        ],
+        [
+          65163,
+          65320
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 1,
+      "min_quiet_duration_ms": 20,
+      "late_quiet_intervals_ms": [
+        [
+          64833,
+          64918
+        ],
+        [
+          64975,
+          65104
+        ],
+        [
+          65163,
+          65320
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 1,
+      "min_quiet_duration_ms": 50,
+      "late_quiet_intervals_ms": [
+        [
+          64833,
+          64918
+        ],
+        [
+          64975,
+          65104
+        ],
+        [
+          65163,
+          65320
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 5,
+      "min_quiet_duration_ms": 10,
+      "late_quiet_intervals_ms": [
+        [
+          64761,
+          64780
+        ],
+        [
+          64830,
+          64919
+        ],
+        [
+          64973,
+          65105
+        ],
+        [
+          65161,
+          65330
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 5,
+      "min_quiet_duration_ms": 20,
+      "late_quiet_intervals_ms": [
+        [
+          64830,
+          64919
+        ],
+        [
+          64973,
+          65105
+        ],
+        [
+          65161,
+          65330
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 5,
+      "min_quiet_duration_ms": 50,
+      "late_quiet_intervals_ms": [
+        [
+          64830,
+          64919
+        ],
+        [
+          64973,
+          65105
+        ],
+        [
+          65161,
+          65330
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 10,
+      "min_quiet_duration_ms": 10,
+      "late_quiet_intervals_ms": [
+        [
+          64759,
+          64781
+        ],
+        [
+          64828,
+          64920
+        ],
+        [
+          64972,
+          65106
+        ],
+        [
+          65160,
+          65332
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 10,
+      "min_quiet_duration_ms": 20,
+      "late_quiet_intervals_ms": [
+        [
+          64759,
+          64781
+        ],
+        [
+          64828,
+          64920
+        ],
+        [
+          64972,
+          65106
+        ],
+        [
+          65160,
+          65332
+        ]
+      ]
+    },
+    {
+      "rate_threshold_hz": 10,
+      "min_quiet_duration_ms": 50,
+      "late_quiet_intervals_ms": [
+        [
+          64828,
+          64920
+        ],
+        [
+          64972,
+          65106
+        ],
+        [
+          65160,
+          65332
+        ]
+      ]
+    }
+  ],
+  "scope": "Diagnostic of whether the observed quiet return is marginal to the chosen activity threshold. No redefinition of primary endpoints or selection of a bifurcation value."
+}

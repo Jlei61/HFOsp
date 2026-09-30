@@ -1,0 +1,47 @@
+{
+  "status": "COMPLETE_SOURCE_PHASE_OPERATOR_PREPARATION",
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "graphQA": {
+    "ampa": {
+      "nnz": 32000000,
+      "original_combined_weights_max_abs_error": 0.0
+    },
+    "gaba": {
+      "nnz": 8000000,
+      "original_combined_weights_max_abs_error": 0.0
+    }
+  },
+  "source_residual_Parseval_error": 5.551115123125783e-17,
+  "phase_projection_QA": {
+    "wave_RMS_mV": [
+      0.014996261150959957,
+      0.0010822758260286176
+    ],
+    "wave_max_abs_mV": [
+      0.053884256046103474,
+      0.008750519163641002
+    ],
+    "measured_wave_RMS_mV": [
+      9.198818385171144,
+      0.12381084126206682
+    ],
+    "mean_max_abs_mV": [
+      0.026015189073405054,
+      0.00248485425436229
+    ],
+    "caveat": "Phase-conditioning a finite20000step circular record does not commute exactly with22step delays/filters because20000 is not divisible by22. Differences are measured, not silently set tozero."
+  },
+  "native_development_allE_rate_Hz": 196.5212681982484,
+  "local_response_required": true,
+  "elapsed_s": 163.24729824066162,
+  "producer_sha256": "75bee89ad5d12db0127512bb826660bcc5827786db09d236d3c9c5b907fd0ce5"
+}

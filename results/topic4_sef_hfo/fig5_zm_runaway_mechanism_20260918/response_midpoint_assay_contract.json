@@ -1,0 +1,86 @@
+{
+  "created_local": "2026-09-19T20:02:26.871861+08:00",
+  "question": "Does resolving the variance axes and avoiding cubic overshoot recover transfer to entirely held-out input workpoints?",
+  "x_values": [
+    -0.3,
+    1.0,
+    2.5
+  ],
+  "fixed_sigma_E": 0.7,
+  "fixed_sigma_I": 1.4,
+  "sigma_knots": {
+    "E": {
+      "1": [
+        0.15,
+        0.35,
+        0.7,
+        1.4,
+        2.8,
+        5.0
+      ],
+      "2": [
+        0.05,
+        0.15,
+        0.3,
+        0.7,
+        1.4,
+        2.8,
+        5.5
+      ]
+    },
+    "I": {
+      "1": [
+        0.15,
+        0.35,
+        0.7,
+        1.4,
+        2.8
+      ],
+      "2": [
+        0.05,
+        0.15,
+        0.3,
+        0.7,
+        1.4,
+        2.8,
+        5.0
+      ]
+    }
+  },
+  "frequencies_hz": [
+    0,
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "filter_times_ms": [
+    0.25,
+    1,
+    4,
+    16,
+    64
+  ],
+  "replicates": 8192,
+  "duration_ms": 8000,
+  "burn_ms": 300,
+  "seed": 919787,
+  "batch": 16,
+  "mean_amplitude_mv": 0.15,
+  "variance_amplitude_relative": 0.05,
+  "ridge": 0.0001,
+  "SEM_floor_fraction": 0.01,
+  "methods": [
+    "linear_sigma",
+    "cubic_sigma",
+    "pchip_sigma",
+    "pchip_log_sigma"
+  ],
+  "source": "Fresh single-cell assay; no independent prior validation or six error-selected workpoints in selection or fitting.",
+  "design": "12 lines: E/I x3fixednormalizedmeans x2varianceaxes. Calibrate at coarse knots; predict all arithmetic midpoints as whole unseen workpoints at six frequencies. Zero variance is excluded rather than imputed as zero response. Retain low-SNR observations and report eligibility; no fit at midpoints.",
+  "readouts": "Same-channel DC-normalized complex error; eligibility meanDCandownvarianceDCSNR>=10; .10 up to25Hz/.15 above; counts and workpoint RMS, no pooled independent-frequency inference.",
+  "stop": "One fixed batch and four prespecified interpolation variants. Do not fit to midpoint outcomes or launch network/bifurcation based solely on this local assay.",
+  "scope": "Fresh local operating-point transfer diagnostic; calibration-only spatial lines do not establish full-table or strong-waveform accuracy, SNN propagation or onset mechanism. Frozen network remains unchanged."
+}

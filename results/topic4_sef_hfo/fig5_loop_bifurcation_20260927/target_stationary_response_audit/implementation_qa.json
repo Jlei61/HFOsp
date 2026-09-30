@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "operator_checks": [
+    {
+      "channel": "mean_ampa",
+      "error": 4.973799150320701e-13
+    },
+    {
+      "channel": "mean_gaba",
+      "error": 2.1316282072803006e-13
+    },
+    {
+      "channel": "variance_ampa",
+      "error": 1.4210854715202004e-13
+    },
+    {
+      "channel": "variance_gaba",
+      "error": 2.2737367544323206e-13
+    }
+  ],
+  "discrete_causal_rate_factor": 1.0033370370342938,
+  "G_from_stationary_mean": 4.492544156608088,
+  "observed_mean_G": 4.492972254218486
+}

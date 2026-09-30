@@ -1,0 +1,46 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "above_SN",
+  "coordinates": {
+    "D_A": 0.3631576412548057,
+    "Z_A": 0.6368423587451943,
+    "D_global": 0.21899748041452027,
+    "native_time_ms": 10067.69345650688
+  },
+  "observed_ms": 70000,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "quiet_intervals_ms": [
+    [
+      0,
+      39
+    ]
+  ],
+  "activities": [
+    {
+      "start_ms": 39,
+      "end_ms": 70000,
+      "duration_ms": 69961,
+      "left_censored": false,
+      "right_censored": true
+    }
+  ],
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block02.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block03.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block02.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block03.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block04.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block05.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block06.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block07.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block08.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block09.npz"
+  ],
+  "scope": "Finite actual history; censored activity duration cannot establish asymptotic persistence or a bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,4580 @@
+{
+  "grid": {
+    "quantity_kind": "single_seed_boundary_refinement",
+    "seed": 9108401,
+    "horizon_s": 1000.0,
+    "all_complete": true,
+    "base_grid": {
+      "eta_M": [
+        0.0001,
+        0.0005,
+        0.001,
+        0.01,
+        0.1,
+        1.0,
+        10.0
+      ],
+      "tau_M_s": [
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "seed": 9108401,
+      "value": [
+        [
+          10.110000000000001,
+          10.780000000000001,
+          10.73,
+          10.21,
+          10.27
+        ],
+        [
+          10.07,
+          11.64,
+          10.790000000000001,
+          10.520000000000001,
+          10.99
+        ],
+        [
+          10.14,
+          10.620000000000001,
+          11.07,
+          12.370000000000001,
+          11.68
+        ],
+        [
+          11.520000000000001,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ]
+      ],
+      "entered": [
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "followup": [
+        [
+          10.110000000000001,
+          10.780000000000001,
+          10.73,
+          10.21,
+          10.270000000000001
+        ],
+        [
+          10.07,
+          11.64,
+          10.790000000000001,
+          10.520000000000001,
+          10.99
+        ],
+        [
+          10.14,
+          10.620000000000001,
+          11.07,
+          12.370000000000001,
+          11.68
+        ],
+        [
+          11.520000000000001,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ],
+        [
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0,
+          1000.0
+        ]
+      ],
+      "stages": [
+        [
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED"
+        ],
+        [
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED"
+        ],
+        [
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED",
+          "OBSERVED"
+        ],
+        [
+          "OBSERVED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED"
+        ],
+        [
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED"
+        ],
+        [
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED"
+        ],
+        [
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED",
+          "CENSORED"
+        ]
+      ],
+      "records": [
+        {
+          "job": {
+            "name": "eta0.0005_tau1_s9108401",
+            "eta_m": 0.0005,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 1,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/runs/eta0.0005_s9108401",
+          "first_entry": {
+            "onset_s": 9.870000000000001,
+            "confirmation_s": 10.07
+          },
+          "result_sha256": "58695c11603cec2ea2a37567e0fb2a25f774f48ae119e909d7ac442a14af9b63",
+          "event_observed": true,
+          "followup_s": 10.07,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.001_tau1_s9108401",
+            "eta_m": 0.001,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 2,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/runs/eta0.001_s9108401",
+          "first_entry": {
+            "onset_s": 9.940000000000001,
+            "confirmation_s": 10.14
+          },
+          "result_sha256": "f837a0bd4bc046fd6961cab2bc8aac576ecbb5e70ef9c095d0d2091b80eeaf31",
+          "event_observed": true,
+          "followup_s": 10.14,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.01_tau1_s9108401",
+            "eta_m": 0.01,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 3,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t0_s9108401",
+          "first_entry": {
+            "onset_s": 11.320000000000002,
+            "confirmation_s": 11.520000000000001
+          },
+          "result_sha256": "1112581f174819a4438ffe3e3a7d13aa9dbb71e12310bd40654aabed108adafe",
+          "event_observed": true,
+          "followup_s": 11.520000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0001_tau1_s9108401",
+            "eta_m": 0.0001,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 0,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1_s9108401",
+          "first_entry": {
+            "onset_s": 9.910000000000002,
+            "confirmation_s": 10.110000000000001
+          },
+          "result_sha256": "077c862f849e6279bea90c74abf7c210bb415f49dcd6858bdc2f73f35b285c72",
+          "event_observed": true,
+          "followup_s": 10.110000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0001_tau10_s9108401",
+            "eta_m": 0.0001,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 0,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau10_s9108401",
+          "first_entry": {
+            "onset_s": 10.580000000000002,
+            "confirmation_s": 10.780000000000001
+          },
+          "result_sha256": "fa57cdfffc90a79a86e4b70647c54e96559c35678fe53982b9ea7012a75404f4",
+          "event_observed": true,
+          "followup_s": 10.780000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0001_tau100_s9108401",
+            "eta_m": 0.0001,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 0,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau100_s9108401",
+          "first_entry": {
+            "onset_s": 10.530000000000001,
+            "confirmation_s": 10.73
+          },
+          "result_sha256": "52ba87bc9db2e831b120682e82e8c2efdc0c49d9b4df45f8bf6d5a31badf78e2",
+          "event_observed": true,
+          "followup_s": 10.73,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0001_tau1000_s9108401",
+            "eta_m": 0.0001,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 0,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1000_s9108401",
+          "first_entry": {
+            "onset_s": 10.010000000000002,
+            "confirmation_s": 10.21
+          },
+          "result_sha256": "a985a3949204dde8a3c3a69005c756308fefb5b71be0ef7731136a4f3590c4eb",
+          "event_observed": true,
+          "followup_s": 10.21,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0005_tau10_s9108401",
+            "eta_m": 0.0005,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 1,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau10_s9108401",
+          "first_entry": {
+            "onset_s": 11.440000000000001,
+            "confirmation_s": 11.64
+          },
+          "result_sha256": "5f43a99187596a3f919b54a67fe191fdce23423ed1b36e0a06d193b294f96be7",
+          "event_observed": true,
+          "followup_s": 11.64,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0005_tau100_s9108401",
+            "eta_m": 0.0005,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 1,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau100_s9108401",
+          "first_entry": {
+            "onset_s": 10.590000000000002,
+            "confirmation_s": 10.790000000000001
+          },
+          "result_sha256": "0aeba99399d65291f38a03f1901233306b7a09ae51d5775613abc63bcc97a56d",
+          "event_observed": true,
+          "followup_s": 10.790000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.0005_tau1000_s9108401",
+            "eta_m": 0.0005,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 1,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau1000_s9108401",
+          "first_entry": {
+            "onset_s": 10.320000000000002,
+            "confirmation_s": 10.520000000000001
+          },
+          "result_sha256": "58eade391d0b0a33b5b9ad74e4d33a3176f17a01233d97da8e659ac7628eb954",
+          "event_observed": true,
+          "followup_s": 10.520000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.001_tau10_s9108401",
+            "eta_m": 0.001,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 2,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau10_s9108401",
+          "first_entry": {
+            "onset_s": 10.420000000000002,
+            "confirmation_s": 10.620000000000001
+          },
+          "result_sha256": "8d514ef7aa0330e785b765211ea0d9e3861c2d7f9742764021dee6d54e9ee0fa",
+          "event_observed": true,
+          "followup_s": 10.620000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.001_tau100_s9108401",
+            "eta_m": 0.001,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 2,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau100_s9108401",
+          "first_entry": {
+            "onset_s": 10.870000000000001,
+            "confirmation_s": 11.07
+          },
+          "result_sha256": "d80029e0577ac5e31a6286660ac2bcde49ab947c23612dcd8f806706df2ae1c5",
+          "event_observed": true,
+          "followup_s": 11.07,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.001_tau1000_s9108401",
+            "eta_m": 0.001,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 2,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 300.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau1000_s9108401",
+          "first_entry": {
+            "onset_s": 12.170000000000002,
+            "confirmation_s": 12.370000000000001
+          },
+          "result_sha256": "4418376d31486faab283789df1ce21e87a1554258b58aad7c458273a27b414b7",
+          "event_observed": true,
+          "followup_s": 12.370000000000001,
+          "complete": true,
+          "stage": "OBSERVED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.01_tau10_s9108401",
+            "eta_m": 0.01,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 3,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau10_s9108401",
+          "result_sha256": "11ae91ed9269d7779f67068462342839002f99109a39224773c243575c7f5e39",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.01_tau100_s9108401",
+            "eta_m": 0.01,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 3,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau100_s9108401",
+          "result_sha256": "f54babe45c63140a665ec40a567fca73c11e746d7dcac1a7756ee1f39f89a2f3",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.01_tau1000_s9108401",
+            "eta_m": 0.01,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 3,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau1000_s9108401",
+          "result_sha256": "e1e545c039511532504d5dbe26b793c49e19c12cbaf69dc07c0a93604aa4d060",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.1_tau1_s9108401",
+            "eta_m": 0.1,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 4,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1_s9108401",
+          "result_sha256": "48f1b41e095efe18e561fdb092da0298c5116bfd24ac5d6ad96328f7c344e908",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.1_tau10_s9108401",
+            "eta_m": 0.1,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 4,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau10_s9108401",
+          "result_sha256": "f4dd7212f45afdf513a13bdb860cea486f6bb7363b049906008f4bb53d4530e4",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.1_tau100_s9108401",
+            "eta_m": 0.1,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 4,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau100_s9108401",
+          "result_sha256": "71a54a87a7f224b68d5627de0418c5336af8c69d6e16b70d9cc9d29bf2ee3a88",
+          "event_observed": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete": true,
+          "stage": "CENSORED",
+          "reused": true
+        },
+        {
+          "job": {
+            "name": "eta0.1_tau1000_s9108401",
+            "eta_m": 0.1,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 4,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.010187500000000002
+        },
+        {
+          "job": {
+            "name": "eta1_tau1_s9108401",
+            "eta_m": 1.0,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 5,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 1.35765625
+        },
+        {
+          "job": {
+            "name": "eta1_tau10_s9108401",
+            "eta_m": 1.0,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 5,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau10_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.02515625
+        },
+        {
+          "job": {
+            "name": "eta1_tau100_s9108401",
+            "eta_m": 1.0,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 5,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau100_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.01184375
+        },
+        {
+          "job": {
+            "name": "eta1_tau1000_s9108401",
+            "eta_m": 1.0,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 5,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.0008750000000000001
+        },
+        {
+          "job": {
+            "name": "eta0.0001_tau10000_s9108401",
+            "eta_m": 0.0001,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 0,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0001_tau10000_s9108401",
+          "complete": true,
+          "event_observed": true,
+          "stage": "OBSERVED",
+          "reused": false,
+          "first_entry": {
+            "onset_s": 10.07,
+            "confirmation_s": 10.27
+          },
+          "followup_s": 10.270000000000001,
+          "complete_count_coverage": true,
+          "audited_chunks": 1,
+          "late_mean_E_Hz": 105.39862499999998
+        },
+        {
+          "job": {
+            "name": "eta0.0005_tau10000_s9108401",
+            "eta_m": 0.0005,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 1,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0005_tau10000_s9108401",
+          "complete": true,
+          "event_observed": true,
+          "stage": "OBSERVED",
+          "reused": false,
+          "first_entry": {
+            "onset_s": 10.790000000000001,
+            "confirmation_s": 10.99
+          },
+          "followup_s": 10.99,
+          "complete_count_coverage": true,
+          "audited_chunks": 1,
+          "late_mean_E_Hz": 96.142875
+        },
+        {
+          "job": {
+            "name": "eta0.001_tau10000_s9108401",
+            "eta_m": 0.001,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 2,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.001_tau10000_s9108401",
+          "complete": true,
+          "event_observed": true,
+          "stage": "OBSERVED",
+          "reused": false,
+          "first_entry": {
+            "onset_s": 11.48,
+            "confirmation_s": 11.68
+          },
+          "followup_s": 11.68,
+          "complete_count_coverage": true,
+          "audited_chunks": 1,
+          "late_mean_E_Hz": 116.40365625
+        },
+        {
+          "job": {
+            "name": "eta0.01_tau10000_s9108401",
+            "eta_m": 0.01,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 3,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.01_tau10000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.014187499999999999
+        },
+        {
+          "job": {
+            "name": "eta0.1_tau10000_s9108401",
+            "eta_m": 0.1,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 4,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.1_tau10000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.00271875
+        },
+        {
+          "job": {
+            "name": "eta1_tau10000_s9108401",
+            "eta_m": 1.0,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 5,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta1_tau10000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 6.25e-05
+        },
+        {
+          "job": {
+            "name": "eta10_tau1_s9108401",
+            "eta_m": 10.0,
+            "tau_M_s": 1.0,
+            "seed": 9108401,
+            "eta_index": 6,
+            "tau_index": 0,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.6693125000000001
+        },
+        {
+          "job": {
+            "name": "eta10_tau10_s9108401",
+            "eta_m": 10.0,
+            "tau_M_s": 10.0,
+            "seed": 9108401,
+            "eta_index": 6,
+            "tau_index": 1,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.023093750000000003
+        },
+        {
+          "job": {
+            "name": "eta10_tau100_s9108401",
+            "eta_m": 10.0,
+            "tau_M_s": 100.0,
+            "seed": 9108401,
+            "eta_index": 6,
+            "tau_index": 2,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau100_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.00359375
+        },
+        {
+          "job": {
+            "name": "eta10_tau1000_s9108401",
+            "eta_m": 10.0,
+            "tau_M_s": 1000.0,
+            "seed": 9108401,
+            "eta_index": 6,
+            "tau_index": 3,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 1
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 9.375000000000002e-05
+        },
+        {
+          "job": {
+            "name": "eta10_tau10000_s9108401",
+            "eta_m": 10.0,
+            "tau_M_s": 10000.0,
+            "seed": 9108401,
+            "eta_index": 6,
+            "tau_index": 4,
+            "tau_z_ms": 5000.0,
+            "threshold": 95.19851312666987,
+            "horizon_s": 1000.0,
+            "device": 0
+          },
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10000_s9108401",
+          "complete": true,
+          "event_observed": false,
+          "stage": "CENSORED",
+          "reused": false,
+          "first_entry": null,
+          "followup_s": 1000.0,
+          "complete_count_coverage": true,
+          "audited_chunks": 50,
+          "late_mean_E_Hz": 0.0
+        }
+      ],
+      "horizon_s": 1000.0,
+      "all_complete": true,
+      "quantity_kind": "single_seed_confirmation_time",
+      "snapshot_unix_s": 1789637978.0507753,
+      "endpoint": "All-E10ms rate>=200Hz for20 consecutive bins; report first confirmation, preserve onset separately.",
+      "interpretation": "One fixed noise realization per cell. Observed confirmation time or an audited right-censoring lower bound; no averaging across seeds.",
+      "progress_summary": {
+        "total_cells": 35,
+        "observed": 16,
+        "complete": 35,
+        "censored": 19,
+        "running": 0,
+        "queued": 0,
+        "new_complete": 11,
+        "new_total": 11
+      }
+    },
+    "refinement_records": [
+      {
+        "job": {
+          "name": "eta0.031622777_tau1_s9108401",
+          "eta_m": 0.031622776602,
+          "tau_M_s": 1.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau1_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 36.04,
+          "confirmation_s": 36.24
+        },
+        "followup_s": 36.24,
+        "complete_count_coverage": true,
+        "audited_chunks": 2,
+        "late_mean_E_Hz": 128.56331250000002
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau10_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 10.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau10_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 147.89000000000001,
+          "confirmation_s": 148.09
+        },
+        "followup_s": 148.09,
+        "complete_count_coverage": true,
+        "audited_chunks": 8,
+        "late_mean_E_Hz": 137.0501875
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau100_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 100.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau100_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 1.07796875
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau1000_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 1000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1000_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.029593750000000002
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau10000_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 10000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau10000_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.021156249999999998
+      },
+      {
+        "job": {
+          "name": "eta0.01_tau1.7782794_s9108401",
+          "eta_m": 0.01,
+          "tau_M_s": 1.778279410039,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau1.7782794_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 16.18,
+          "confirmation_s": 16.38
+        },
+        "followup_s": 16.380000000000003,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 123.30578125000002
+      },
+      {
+        "job": {
+          "name": "eta0.01_tau3.1622777_s9108401",
+          "eta_m": 0.01,
+          "tau_M_s": 3.162277660168,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau3.1622777_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 105.41,
+          "confirmation_s": 105.61
+        },
+        "followup_s": 105.61,
+        "complete_count_coverage": true,
+        "audited_chunks": 6,
+        "late_mean_E_Hz": 138.13431250000002
+      },
+      {
+        "job": {
+          "name": "eta0.01_tau5.6234133_s9108401",
+          "eta_m": 0.01,
+          "tau_M_s": 5.623413251903,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau5.6234133_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 4.848781249999999
+      },
+      {
+        "job": {
+          "name": "eta0.017782794_tau1_s9108401",
+          "eta_m": 0.0177827941,
+          "tau_M_s": 1.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.017782794_tau1_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 14.27,
+          "confirmation_s": 14.47
+        },
+        "followup_s": 14.47,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 111.98199999999999
+      },
+      {
+        "job": {
+          "name": "eta0.0017782794_tau10_s9108401",
+          "eta_m": 0.00177827941,
+          "tau_M_s": 10.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 12.72,
+          "confirmation_s": 12.92
+        },
+        "followup_s": 12.92,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 118.81228125
+      },
+      {
+        "job": {
+          "name": "eta0.0017782794_tau100_s9108401",
+          "eta_m": 0.00177827941,
+          "tau_M_s": 100.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau100_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 13.84,
+          "confirmation_s": 14.040000000000001
+        },
+        "followup_s": 14.040000000000001,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 114.03603125
+      },
+      {
+        "job": {
+          "name": "eta0.0017782794_tau1000_s9108401",
+          "eta_m": 0.00177827941,
+          "tau_M_s": 1000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau1000_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.03409375
+      },
+      {
+        "job": {
+          "name": "eta0.0017782794_tau10000_s9108401",
+          "eta_m": 0.00177827941,
+          "tau_M_s": 10000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10000_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 13.51,
+          "confirmation_s": 13.71
+        },
+        "followup_s": 13.71,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 134.39315625
+      },
+      {
+        "job": {
+          "name": "eta0.056234133_tau1_s9108401",
+          "eta_m": 0.056234132519,
+          "tau_M_s": 1.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.056234133_tau1_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 9.4583125
+      },
+      {
+        "job": {
+          "name": "eta0.0056234133_tau10_s9108401",
+          "eta_m": 0.005623413252,
+          "tau_M_s": 10.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau10_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 6.7641874999999985
+      },
+      {
+        "job": {
+          "name": "eta0.0056234133_tau100_s9108401",
+          "eta_m": 0.005623413252,
+          "tau_M_s": 100.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau100_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.9865625
+      },
+      {
+        "job": {
+          "name": "eta0.0056234133_tau1000_s9108401",
+          "eta_m": 0.005623413252,
+          "tau_M_s": 1000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau1000_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.025687500000000002
+      },
+      {
+        "job": {
+          "name": "eta0.0056234133_tau10000_s9108401",
+          "eta_m": 0.005623413252,
+          "tau_M_s": 10000.0,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau10000_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 0.01625
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau1.7782794_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 1.778279410039,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1.7782794_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 10.620000000000001,
+          "confirmation_s": 10.82
+        },
+        "followup_s": 10.82,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 113.86296875
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau3.1622777_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 3.162277660168,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau3.1622777_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 11.450000000000001,
+          "confirmation_s": 11.65
+        },
+        "followup_s": 11.65,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 119.09046875000001
+      },
+      {
+        "job": {
+          "name": "eta0.0031622777_tau5.6234133_s9108401",
+          "eta_m": 0.00316227766,
+          "tau_M_s": 5.623413251903,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau5.6234133_s9108401",
+        "complete": true,
+        "event_observed": true,
+        "stage": "OBSERVED",
+        "first_entry": {
+          "onset_s": 12.43,
+          "confirmation_s": 12.63
+        },
+        "followup_s": 12.63,
+        "complete_count_coverage": true,
+        "audited_chunks": 1,
+        "late_mean_E_Hz": 115.971875
+      },
+      {
+        "job": {
+          "name": "eta0.031622777_tau1.7782794_s9108401",
+          "eta_m": 0.031622776602,
+          "tau_M_s": 1.778279410039,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau1.7782794_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 7.9392499999999995
+      },
+      {
+        "job": {
+          "name": "eta0.031622777_tau3.1622777_s9108401",
+          "eta_m": 0.031622776602,
+          "tau_M_s": 3.162277660168,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 0
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau3.1622777_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 6.045625
+      },
+      {
+        "job": {
+          "name": "eta0.031622777_tau5.6234133_s9108401",
+          "eta_m": 0.031622776602,
+          "tau_M_s": 5.623413251903,
+          "seed": 9108401,
+          "tau_z_ms": 5000.0,
+          "threshold": 95.19851312666987,
+          "horizon_s": 1000.0,
+          "device": 1
+        },
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau5.6234133_s9108401",
+        "complete": true,
+        "event_observed": false,
+        "stage": "CENSORED",
+        "first_entry": null,
+        "followup_s": 1000.0,
+        "complete_count_coverage": true,
+        "audited_chunks": 50,
+        "late_mean_E_Hz": 4.53375
+      }
+    ],
+    "colorbar": {
+      "cmap": "viridis",
+      "scale": "log",
+      "vmin": 1.0,
+      "vmax": 1000.0,
+      "ticks": [
+        1.0,
+        10.0,
+        100.0,
+        1000.0
+      ],
+      "label": "Entry time / lower bound (s)"
+    },
+    "progress_summary": {
+      "new_total": 24,
+      "new_complete": 24,
+      "new_observed": 11,
+      "new_censored": 13,
+      "running": 0,
+      "queued": 0,
+      "reused": 35,
+      "total": 59
+    },
+    "snapshot_unix_s": 1790578631.9060318,
+    "interpretation": "Piecewise-linear barycentric interpolation of log10(min(T_confirmation,1000 s)) in log10(tau_M),log10(eta_M); no extrapolation outside the measured convex hull. Color capped at1000s for any later entry or non-entry. Actual follow-up is preserved separately:24 untouched1000s censorings,12 audited3000s censorings,1 observed1535.03s entry.",
+    "display_mode": "continuous_log_bracket_boundary_v1",
+    "continuous_surface": {
+      "parameters": [
+        [
+          1.0,
+          0.0001
+        ],
+        [
+          1.0,
+          0.0005
+        ],
+        [
+          1.0,
+          0.001
+        ],
+        [
+          1.0,
+          0.01
+        ],
+        [
+          1.0,
+          0.0177827941
+        ],
+        [
+          1.0,
+          0.031622776602
+        ],
+        [
+          1.0,
+          0.042169650343
+        ],
+        [
+          1.0,
+          0.056234132519
+        ],
+        [
+          1.0,
+          0.1
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          10.0
+        ],
+        [
+          1.778279410039,
+          0.00316227766
+        ],
+        [
+          1.778279410039,
+          0.01
+        ],
+        [
+          1.778279410039,
+          0.0177827941
+        ],
+        [
+          1.778279410039,
+          0.031622776602
+        ],
+        [
+          3.162277660168,
+          0.00316227766
+        ],
+        [
+          3.162277660168,
+          0.01
+        ],
+        [
+          3.162277660168,
+          0.0177827941
+        ],
+        [
+          3.162277660168,
+          0.031622776602
+        ],
+        [
+          5.623413251903,
+          0.00316227766
+        ],
+        [
+          5.623413251903,
+          0.005623413252
+        ],
+        [
+          5.623413251903,
+          0.01
+        ],
+        [
+          5.623413251903,
+          0.031622776602
+        ],
+        [
+          10.0,
+          0.0001
+        ],
+        [
+          10.0,
+          0.0005
+        ],
+        [
+          10.0,
+          0.001
+        ],
+        [
+          10.0,
+          0.00177827941
+        ],
+        [
+          10.0,
+          0.00316227766
+        ],
+        [
+          10.0,
+          0.004216965034
+        ],
+        [
+          10.0,
+          0.005623413252
+        ],
+        [
+          10.0,
+          0.01
+        ],
+        [
+          10.0,
+          0.1
+        ],
+        [
+          10.0,
+          1.0
+        ],
+        [
+          10.0,
+          10.0
+        ],
+        [
+          31.622776601684,
+          0.003066247046
+        ],
+        [
+          100.0,
+          0.0001
+        ],
+        [
+          100.0,
+          0.0005
+        ],
+        [
+          100.0,
+          0.001
+        ],
+        [
+          100.0,
+          0.00177827941
+        ],
+        [
+          100.0,
+          0.002371373706
+        ],
+        [
+          100.0,
+          0.00316227766
+        ],
+        [
+          100.0,
+          0.005623413252
+        ],
+        [
+          100.0,
+          0.01
+        ],
+        [
+          100.0,
+          0.1
+        ],
+        [
+          100.0,
+          1.0
+        ],
+        [
+          100.0,
+          10.0
+        ],
+        [
+          316.227766016838,
+          0.0016548171
+        ],
+        [
+          1000.0,
+          0.0001
+        ],
+        [
+          1000.0,
+          0.0005
+        ],
+        [
+          1000.0,
+          0.001
+        ],
+        [
+          1000.0,
+          0.001333521432
+        ],
+        [
+          1000.0,
+          0.00177827941
+        ],
+        [
+          1000.0,
+          0.00316227766
+        ],
+        [
+          1000.0,
+          0.005623413252
+        ],
+        [
+          1000.0,
+          0.01
+        ],
+        [
+          1000.0,
+          0.1
+        ],
+        [
+          1000.0,
+          1.0
+        ],
+        [
+          1000.0,
+          10.0
+        ],
+        [
+          3162.277660168379,
+          0.001539926526
+        ],
+        [
+          10000.0,
+          0.0001
+        ],
+        [
+          10000.0,
+          0.0005
+        ],
+        [
+          10000.0,
+          0.001
+        ],
+        [
+          10000.0,
+          0.00177827941
+        ],
+        [
+          10000.0,
+          0.002371373706
+        ],
+        [
+          10000.0,
+          0.00316227766
+        ],
+        [
+          10000.0,
+          0.005623413252
+        ],
+        [
+          10000.0,
+          0.01
+        ],
+        [
+          10000.0,
+          0.1
+        ],
+        [
+          10000.0,
+          1.0
+        ],
+        [
+          10000.0,
+          10.0
+        ]
+      ],
+      "log10_parameters": [
+        [
+          0.0,
+          -4.0
+        ],
+        [
+          0.0,
+          -3.3010299956639813
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          0.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -1.7500000000095057
+        ],
+        [
+          0.0,
+          -1.4999999999956575
+        ],
+        [
+          0.0,
+          -1.3749999999985398
+        ],
+        [
+          0.0,
+          -1.2500000000002696
+        ],
+        [
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.2500000000000189,
+          -2.5000000000231246
+        ],
+        [
+          0.2500000000000189,
+          -2.0
+        ],
+        [
+          0.2500000000000189,
+          -1.7500000000095057
+        ],
+        [
+          0.2500000000000189,
+          -1.4999999999956575
+        ],
+        [
+          0.4999999999999479,
+          -2.5000000000231246
+        ],
+        [
+          0.4999999999999479,
+          -2.0
+        ],
+        [
+          0.4999999999999479,
+          -1.7500000000095057
+        ],
+        [
+          0.4999999999999479,
+          -1.4999999999956575
+        ],
+        [
+          0.749999999999962,
+          -2.5000000000231246
+        ],
+        [
+          0.749999999999962,
+          -2.249999999992547
+        ],
+        [
+          0.749999999999962,
+          -2.0
+        ],
+        [
+          0.749999999999962,
+          -1.4999999999956575
+        ],
+        [
+          1.0,
+          -4.0
+        ],
+        [
+          1.0,
+          -3.3010299956639813
+        ],
+        [
+          1.0,
+          -3.0
+        ],
+        [
+          1.0,
+          -2.7500000000095057
+        ],
+        [
+          1.0,
+          -2.5000000000231246
+        ],
+        [
+          1.0,
+          -2.375000000029436
+        ],
+        [
+          1.0,
+          -2.249999999992547
+        ],
+        [
+          1.0,
+          -2.0
+        ],
+        [
+          1.0,
+          -1.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          1.5000000000000029,
+          -2.5133928571814868
+        ],
+        [
+          2.0,
+          -4.0
+        ],
+        [
+          2.0,
+          -3.3010299956639813
+        ],
+        [
+          2.0,
+          -3.0
+        ],
+        [
+          2.0,
+          -2.7500000000095057
+        ],
+        [
+          2.0,
+          -2.6249999999380353
+        ],
+        [
+          2.0,
+          -2.5000000000231246
+        ],
+        [
+          2.0,
+          -2.249999999992547
+        ],
+        [
+          2.0,
+          -2.0
+        ],
+        [
+          2.0,
+          -1.0
+        ],
+        [
+          2.0,
+          0.0
+        ],
+        [
+          2.0,
+          1.0
+        ],
+        [
+          2.5,
+          -2.7812499999850884
+        ],
+        [
+          3.0,
+          -4.0
+        ],
+        [
+          3.0,
+          -3.3010299956639813
+        ],
+        [
+          3.0,
+          -3.0
+        ],
+        [
+          3.0,
+          -2.8750000000531903
+        ],
+        [
+          3.0,
+          -2.7500000000095057
+        ],
+        [
+          3.0,
+          -2.5000000000231246
+        ],
+        [
+          3.0,
+          -2.249999999992547
+        ],
+        [
+          3.0,
+          -2.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          3.0,
+          0.0
+        ],
+        [
+          3.0,
+          1.0
+        ],
+        [
+          3.5,
+          -2.812500000016778
+        ],
+        [
+          4.0,
+          -4.0
+        ],
+        [
+          4.0,
+          -3.3010299956639813
+        ],
+        [
+          4.0,
+          -3.0
+        ],
+        [
+          4.0,
+          -2.7500000000095057
+        ],
+        [
+          4.0,
+          -2.6249999999380353
+        ],
+        [
+          4.0,
+          -2.5000000000231246
+        ],
+        [
+          4.0,
+          -2.249999999992547
+        ],
+        [
+          4.0,
+          -2.0
+        ],
+        [
+          4.0,
+          -1.0
+        ],
+        [
+          4.0,
+          0.0
+        ],
+        [
+          4.0,
+          1.0
+        ]
+      ],
+      "triangles": [
+        [
+          42,
+          30,
+          34
+        ],
+        [
+          25,
+          37,
+          34
+        ],
+        [
+          30,
+          31,
+          22
+        ],
+        [
+          58,
+          48,
+          60
+        ],
+        [
+          49,
+          48,
+          58
+        ],
+        [
+          46,
+          36,
+          48
+        ],
+        [
+          46,
+          48,
+          49
+        ],
+        [
+          37,
+          36,
+          46
+        ],
+        [
+          28,
+          20,
+          19
+        ],
+        [
+          11,
+          3,
+          2
+        ],
+        [
+          12,
+          3,
+          11
+        ],
+        [
+          62,
+          58,
+          61
+        ],
+        [
+          61,
+          58,
+          60
+        ],
+        [
+          53,
+          58,
+          65
+        ],
+        [
+          41,
+          46,
+          53
+        ],
+        [
+          42,
+          34,
+          41
+        ],
+        [
+          20,
+          28,
+          29
+        ],
+        [
+          29,
+          34,
+          30
+        ],
+        [
+          29,
+          28,
+          34
+        ],
+        [
+          26,
+          19,
+          25
+        ],
+        [
+          25,
+          34,
+          26
+        ],
+        [
+          15,
+          2,
+          25
+        ],
+        [
+          25,
+          19,
+          15
+        ],
+        [
+          15,
+          11,
+          2
+        ],
+        [
+          19,
+          20,
+          15
+        ],
+        [
+          20,
+          16,
+          15
+        ],
+        [
+          7,
+          14,
+          8
+        ],
+        [
+          49,
+          58,
+          50
+        ],
+        [
+          58,
+          51,
+          50
+        ],
+        [
+          50,
+          46,
+          49
+        ],
+        [
+          50,
+          51,
+          46
+        ],
+        [
+          53,
+          46,
+          52
+        ],
+        [
+          46,
+          51,
+          52
+        ],
+        [
+          52,
+          58,
+          53
+        ],
+        [
+          52,
+          51,
+          58
+        ],
+        [
+          64,
+          65,
+          58
+        ],
+        [
+          37,
+          46,
+          38
+        ],
+        [
+          46,
+          39,
+          38
+        ],
+        [
+          38,
+          34,
+          37
+        ],
+        [
+          38,
+          39,
+          34
+        ],
+        [
+          40,
+          39,
+          46
+        ],
+        [
+          46,
+          41,
+          40
+        ],
+        [
+          34,
+          39,
+          40
+        ],
+        [
+          40,
+          41,
+          34
+        ],
+        [
+          27,
+          28,
+          19
+        ],
+        [
+          19,
+          26,
+          27
+        ],
+        [
+          34,
+          28,
+          27
+        ],
+        [
+          27,
+          26,
+          34
+        ],
+        [
+          5,
+          14,
+          6
+        ],
+        [
+          14,
+          7,
+          6
+        ],
+        [
+          63,
+          58,
+          62
+        ],
+        [
+          63,
+          64,
+          58
+        ],
+        [
+          18,
+          17,
+          22
+        ],
+        [
+          31,
+          8,
+          18
+        ],
+        [
+          18,
+          22,
+          31
+        ],
+        [
+          8,
+          14,
+          18
+        ],
+        [
+          30,
+          22,
+          21
+        ],
+        [
+          22,
+          17,
+          21
+        ],
+        [
+          21,
+          17,
+          16
+        ],
+        [
+          21,
+          16,
+          20
+        ],
+        [
+          10,
+          9,
+          33
+        ],
+        [
+          33,
+          9,
+          32
+        ],
+        [
+          33,
+          32,
+          44
+        ],
+        [
+          44,
+          45,
+          33
+        ],
+        [
+          2,
+          1,
+          24
+        ],
+        [
+          25,
+          2,
+          24
+        ],
+        [
+          0,
+          23,
+          24
+        ],
+        [
+          24,
+          1,
+          0
+        ],
+        [
+          48,
+          47,
+          59
+        ],
+        [
+          59,
+          60,
+          48
+        ],
+        [
+          56,
+          57,
+          45
+        ],
+        [
+          56,
+          45,
+          44
+        ],
+        [
+          67,
+          55,
+          66
+        ],
+        [
+          55,
+          54,
+          66
+        ],
+        [
+          32,
+          9,
+          8
+        ],
+        [
+          8,
+          31,
+          32
+        ],
+        [
+          43,
+          56,
+          44
+        ],
+        [
+          55,
+          56,
+          43
+        ],
+        [
+          43,
+          54,
+          55
+        ],
+        [
+          42,
+          54,
+          43
+        ],
+        [
+          44,
+          32,
+          43
+        ],
+        [
+          32,
+          31,
+          43
+        ],
+        [
+          43,
+          31,
+          30
+        ],
+        [
+          43,
+          30,
+          42
+        ],
+        [
+          36,
+          23,
+          35
+        ],
+        [
+          36,
+          24,
+          23
+        ],
+        [
+          25,
+          24,
+          36
+        ],
+        [
+          36,
+          37,
+          25
+        ],
+        [
+          35,
+          47,
+          36
+        ],
+        [
+          47,
+          48,
+          36
+        ],
+        [
+          69,
+          57,
+          68
+        ],
+        [
+          57,
+          56,
+          68
+        ],
+        [
+          68,
+          55,
+          67
+        ],
+        [
+          68,
+          56,
+          55
+        ],
+        [
+          65,
+          66,
+          54
+        ],
+        [
+          54,
+          53,
+          65
+        ],
+        [
+          41,
+          54,
+          42
+        ],
+        [
+          41,
+          53,
+          54
+        ],
+        [
+          15,
+          16,
+          12
+        ],
+        [
+          12,
+          11,
+          15
+        ],
+        [
+          20,
+          29,
+          21
+        ],
+        [
+          21,
+          29,
+          30
+        ],
+        [
+          13,
+          4,
+          3
+        ],
+        [
+          13,
+          3,
+          12
+        ],
+        [
+          12,
+          16,
+          13
+        ],
+        [
+          16,
+          17,
+          13
+        ],
+        [
+          5,
+          4,
+          13
+        ],
+        [
+          13,
+          14,
+          5
+        ],
+        [
+          13,
+          18,
+          14
+        ],
+        [
+          17,
+          18,
+          13
+        ]
+      ],
+      "entry_observed": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "entry_observed_definition": "Confirmed by the common1000-s horizon.",
+      "time_or_lower_bound_s": [
+        10.110000000000001,
+        10.07,
+        10.14,
+        11.520000000000001,
+        14.47,
+        36.24,
+        203.47,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        10.82,
+        16.38,
+        86.39,
+        1000.0,
+        11.65,
+        105.61,
+        1000.0,
+        1000.0,
+        12.63,
+        117.95,
+        1000.0,
+        1000.0,
+        10.780000000000001,
+        11.64,
+        10.620000000000001,
+        12.92,
+        148.09,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        10.73,
+        10.790000000000001,
+        11.07,
+        14.040000000000001,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        14.13,
+        10.21,
+        10.520000000000001,
+        12.370000000000001,
+        11.89,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        13.21,
+        10.27,
+        10.99,
+        11.68,
+        13.71,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0
+      ],
+      "n_total": 70,
+      "n_entered": 33,
+      "n_censored": 37,
+      "common_horizon_s": 1000,
+      "display_cap_s": 1000,
+      "entry_range_s": [
+        10.07,
+        203.47
+      ],
+      "interpolation_at_samples_max_error_log10_s": 1.3322676295501878e-15,
+      "source_records": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1_s9108401",
+          "result_sha256": "077c862f849e6279bea90c74abf7c210bb415f49dcd6858bdc2f73f35b285c72"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/runs/eta0.0005_s9108401",
+          "result_sha256": "58695c11603cec2ea2a37567e0fb2a25f774f48ae119e909d7ac442a14af9b63"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/runs/eta0.001_s9108401",
+          "result_sha256": "f837a0bd4bc046fd6961cab2bc8aac576ecbb5e70ef9c095d0d2091b80eeaf31"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t0_s9108401",
+          "result_sha256": "1112581f174819a4438ffe3e3a7d13aa9dbb71e12310bd40654aabed108adafe"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.017782794_tau1_s9108401",
+          "result_sha256": "1769e0e44f90c69c8c54c888dda834692676db99f7311dff9ca2f89e535a512e"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau1_s9108401",
+          "result_sha256": "ce4764cba110a6a6733d4732ebf6a48c5cbdfd5cbf299ee3c3b366fcbfd8ab05"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.04216965034_tau1_s9108401",
+          "result_sha256": "b7e0b4ff9eccf00a04960b897cba8224c63cfb8dc87ece8dc7222515c83660a2"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.056234133_tau1_s9108401",
+          "result_sha256": "5b410653ce9ec1c119cb7166ed639e7eeab6378e70c6df7d3e8c0fe6fa224a84"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1_s9108401",
+          "result_sha256": "48f1b41e095efe18e561fdb092da0298c5116bfd24ac5d6ad96328f7c344e908"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1_s9108401",
+          "result_sha256": "957cb7cc0972b484f6a17a886ed70a4dc89bf16ed7669cf9f9a4b0d9eb497930"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1_s9108401",
+          "result_sha256": "f9280ece64974a638e666af7df7c74f39aa346aff624714a6c89ac4583ee8df3"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1.7782794_s9108401",
+          "result_sha256": "d4d3ce0e93e1ab9eb61f5e49dbe3fc89fd255abe54ae8d9c4d40f6f5d714cc09"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau1.7782794_s9108401",
+          "result_sha256": "d5213488d8c238b3e82ea00ce68b98b072a8b3f5ee3e4b731552c7991d40f30a"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau1.77827941_s9108401",
+          "result_sha256": "6c4c51f6cf9b1e368bb7b2b2b368c7cb4161629ae34fe8f98a5eadbefdd116a3"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau1.7782794_s9108401",
+          "result_sha256": "8b57f6d550227b8c3fcdda5a1db20296b77fba3c6f62ac93983731d69a27d6bb"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau3.1622777_s9108401",
+          "result_sha256": "8d580a47103daf3c4557d037e7f5fec475ae252ca5c9e8d1ac8dd20e58c49d80"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau3.1622777_s9108401",
+          "result_sha256": "44fe798415e21ab52c34309b9c9c8a91d03cee5f87829ccaf55ad5d148ef56af"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau3.16227766_s9108401",
+          "result_sha256": "f1ed956282af490d319e8bcb65bc3091a0efb6db68efcce9bea5f4af67c25fe0"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau3.1622777_s9108401",
+          "result_sha256": "797981ec1f975dcf2f344d15e374a10c465ce6215542e467478a69bc4f2ba47a"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau5.6234133_s9108401",
+          "result_sha256": "9c4081b108aeceb86451bab1824b696a9d0fad5c879c9272f9078f57681c63f6"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.005623413252_tau5.623413252_s9108401",
+          "result_sha256": "971a9204e8af24f5f2895827cf5945c272a703bbeb1464d7914ce72d24b48ba8"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.01_tau5.6234133_s9108401",
+          "result_sha256": "b9a60de6efd56e4236d32fd74c4be4352624ebc5adec7e2437346cff05f3e112"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau5.6234133_s9108401",
+          "result_sha256": "e5fe7c3920e4f23c328e43970423f2d81b5f34da3465a210d067081316310fc6"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau10_s9108401",
+          "result_sha256": "fa57cdfffc90a79a86e4b70647c54e96559c35678fe53982b9ea7012a75404f4"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau10_s9108401",
+          "result_sha256": "5f43a99187596a3f919b54a67fe191fdce23423ed1b36e0a06d193b294f96be7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau10_s9108401",
+          "result_sha256": "8d514ef7aa0330e785b765211ea0d9e3861c2d7f9742764021dee6d54e9ee0fa"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10_s9108401",
+          "result_sha256": "83045912f1c425f724948af77ce9dafdc927f88007f6dca665f0c01d01a4cda2"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau10_s9108401",
+          "result_sha256": "17427d6d207c6d3a1091a90769da7976508e2550f4fa947b4e75bd2885c6e98b"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.004216965034_tau10_s9108401",
+          "result_sha256": "1cf0728407d52466e118f3ccdc46a2fb874291d38e7aa81be5929391dd776c47"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0056234133_tau10_s9108401",
+          "result_sha256": "5b22f0139b14825ad52b4c6c49da26e48f7966fc80bc415e451fa1d330c462a7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau10_s9108401",
+          "result_sha256": "11ae91ed9269d7779f67068462342839002f99109a39224773c243575c7f5e39"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau10_s9108401",
+          "result_sha256": "f4dd7212f45afdf513a13bdb860cea486f6bb7363b049906008f4bb53d4530e4"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau10_s9108401",
+          "result_sha256": "b69ca630632dcdf87ba914404b3931af72b3a1e3ec1be1883bd10888fa5300be"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10_s9108401",
+          "result_sha256": "255b93ce4f300744240455ddc5bc321fec84db0cd5e09b8f7c929f6c7ca9615a"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.003066247046_tau31.6227766_s9108401",
+          "result_sha256": "4f2ef9d42c6b2fc6a9ab8cb5617bac80030a47a4686d349a61c79d7506a8ddb4"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau100_s9108401",
+          "result_sha256": "52ba87bc9db2e831b120682e82e8c2efdc0c49d9b4df45f8bf6d5a31badf78e2"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau100_s9108401",
+          "result_sha256": "0aeba99399d65291f38a03f1901233306b7a09ae51d5775613abc63bcc97a56d"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau100_s9108401",
+          "result_sha256": "d80029e0577ac5e31a6286660ac2bcde49ab947c23612dcd8f806706df2ae1c5"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau100_s9108401",
+          "result_sha256": "9124de1c88d640d56e5bd737863820363c231cdd26231e62ba62f5f6fd1b6ece"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau100_s9108401",
+          "result_sha256": "211ba4e8e6e378b7db523277e42b4cc0c338ca4f83e9f2f6537ace231fb5960f"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau100_s9108401",
+          "result_sha256": "be6913eccf62c79005864178a49834c8e9bbf72cb3c4097b0f19e957b1f9e4c7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau100_s9108401",
+          "result_sha256": "29c01e492cb91c25c86058e2c3cbad767f5c4905ecba1284b4a3422dd32bb343"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau100_s9108401",
+          "result_sha256": "f54babe45c63140a665ec40a567fca73c11e746d7dcac1a7756ee1f39f89a2f3"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau100_s9108401",
+          "result_sha256": "71a54a87a7f224b68d5627de0418c5336af8c69d6e16b70d9cc9d29bf2ee3a88"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau100_s9108401",
+          "result_sha256": "9c881ad59ad510b471a283f3bd06e8aa87f7f826e8d5ad490738a142719d6a6f"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau100_s9108401",
+          "result_sha256": "6019b7f0cbdc5848de0e72e7fed034d9674c1404c7f3abbd08fc06894a427a01"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0016548171_tau316.227766_s9108401",
+          "result_sha256": "9359aa64bccc5bb7125509c9735827a500c10eac9f755254b7de29a655ef58f7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1000_s9108401",
+          "result_sha256": "a985a3949204dde8a3c3a69005c756308fefb5b71be0ef7731136a4f3590c4eb"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau1000_s9108401",
+          "result_sha256": "58eade391d0b0a33b5b9ad74e4d33a3176f17a01233d97da8e659ac7628eb954"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau1000_s9108401",
+          "result_sha256": "4418376d31486faab283789df1ce21e87a1554258b58aad7c458273a27b414b7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001333521432_tau1000_s9108401",
+          "result_sha256": "8ce3ca1f0114065d02966cff5471b2de28eddaed7a800f89e35bf4239ed1777e"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0017782794_tau1000_s9108401",
+          "result_sha256": "0a11cbe739b321599861ec0ebbae08ff4e54473a2a4570a63c166265269e1a0d"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1000_s9108401",
+          "result_sha256": "c7895b4bd2cb814253bd5eda4e88d1a8b27656119b422dc829fc29a9a1408b9f"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau1000_s9108401",
+          "result_sha256": "3130d27f1271096c6484f41e33f239158ba0326fb448beb83f8aa1fe4e13f25c"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau1000_s9108401",
+          "result_sha256": "e1e545c039511532504d5dbe26b793c49e19c12cbaf69dc07c0a93604aa4d060"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1000_s9108401",
+          "result_sha256": "5a5cdbd6e0516d7da8975fc1900184282e3f1b93fe11c470b45d28e95e63f4c5"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1000_s9108401",
+          "result_sha256": "dc934a9c7e9673d479616cb83183154ed7d2ab47b70e64e25de4329f2e15b0ed"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1000_s9108401",
+          "result_sha256": "03bf41cca4de637a20f2a3c86d681f993c0c9d2210f762828ff88c6276cd8f1a"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001539926526_tau3162.27766_s9108401",
+          "result_sha256": "ba60a1dbeeddde2ab479b9142f02f53ca3e177f3c1beef269ced3eb7ac8d9b74"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0001_tau10000_s9108401",
+          "result_sha256": "a84863538f720d429cfeb4e995072887e44cd62b45ef6e0fdd093a4353b48f13"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0005_tau10000_s9108401",
+          "result_sha256": "3f1225bcc6f1113d22e9fb8182b5457dbf33d28b13b722f6c79cdc18d17cd0f5"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.001_tau10000_s9108401",
+          "result_sha256": "a349f56e54d3f66bb359dc54664b7a3d8869da05cde64dc80ba45ccbdd53c76d"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10000_s9108401",
+          "result_sha256": "e38083e88737da9fab1cd51d6b49675d49c41d9c8f6fc6f9a9132a67bf0b2c39"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau10000_s9108401",
+          "result_sha256": "c3d3c0d6e13410d0887b847aa93c1028bd11a42d6a217a83af153ebd6006730f"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau10000_s9108401",
+          "result_sha256": "d919c90797c37a58ae0018ef603de24c948acb3680ecc738a4e2b46ef7cbfcae"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau10000_s9108401",
+          "result_sha256": "92bc2ac0c8e559b65f104c56a70fe084b43674b3f4f9f6e1b65c3de7848c14d7"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.01_tau10000_s9108401",
+          "result_sha256": "40042ae27246e496f019c2d3b5557785aac29f9647bfabdcc089a47d20d21de8"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.1_tau10000_s9108401",
+          "result_sha256": "d0e83e66bd811fbb4e764ba31a4e4f9ef8da2e4187858f93aa1d4e274d887e39"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta1_tau10000_s9108401",
+          "result_sha256": "b8f5adcc9845caff8988fff45e8be97b7499646a9598f52fb65da3cbb1ecd5ec"
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10000_s9108401",
+          "result_sha256": "b245d3ab4cc84908a2e2b931c27be1cb3db56c56a4f0e5394699f4862799dba4"
+        }
+      ],
+      "interpolation": "Piecewise-linear barycentric interpolation of log10(min(T_confirmation,1000 s)) in log10(tau_M),log10(eta_M); no extrapolation outside the measured convex hull.",
+      "censoring": "Color capped at1000s for any later entry or non-entry. Actual follow-up is preserved separately:24 untouched1000s censorings,12 audited3000s censorings,1 observed1535.03s entry.",
+      "producer": "/home/honglab/leijiaxin/HFOsp/scripts/prepare_topic4_fig5_long_surface.py",
+      "producer_sha256": "2ecbf6fbbbef82b5e3a0d74911873204d1e1115127a4e428320f7ad1b2a0673e"
+    },
+    "long_followup": {
+      "summary": {
+        "total_unique_points": 70,
+        "original_points": 59,
+        "new_parameter_points": 11,
+        "completed_long_jobs": 19,
+        "continued_jobs": 8,
+        "fresh_jobs": 11,
+        "long_jobs_entered": 7,
+        "long_jobs_censored3000": 12,
+        "entered_by1000": 33,
+        "no_entry_by1000": 37,
+        "observed_entries": 34,
+        "late_entries": 1,
+        "censored1000": 24,
+        "censored3000": 12,
+        "eligible3000_points": 46,
+        "actual_entry_range_s": [
+          10.07,
+          1535.03
+        ]
+      },
+      "records": [
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.0001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.110000000000001,
+          "followup_s": 10.110000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.0005,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.07,
+          "followup_s": 10.07,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/runs/eta0.0005_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.14,
+          "followup_s": 10.14,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/weaker_M_onset_paired_20260914/runs/eta0.001_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.520000000000001,
+          "followup_s": 11.520000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/m_parameter_modes_fig5_20260913/runs/e1_t0_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.0177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 14.47,
+          "followup_s": 14.47,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.017782794_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 36.24,
+          "followup_s": 36.24,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.04216965034_tau1_s9108401",
+          "tau_M_s": 1.0,
+          "eta_M": 0.042169650343,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 203.47,
+          "followup_s": 203.47,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.04216965034_tau1_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 203.27
+        },
+        {
+          "name": "eta0.056234133_tau1_s9108401",
+          "tau_M_s": 1.0,
+          "eta_M": 0.056234132519,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.056234133_tau1_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 0.1,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 1.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.0,
+          "eta_M": 10.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.82,
+          "followup_s": 10.82,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1.7782794_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 16.38,
+          "followup_s": 16.380000000000003,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau1.7782794_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.0177827941_tau1.77827941_s9108401",
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.0177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 86.39,
+          "followup_s": 86.39,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau1.77827941_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 86.19
+        },
+        {
+          "name": "eta0.031622777_tau1.7782794_s9108401",
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau1.7782794_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.65,
+          "followup_s": 11.65,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau3.1622777_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 105.61,
+          "followup_s": 105.61,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.01_tau3.1622777_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.0177827941_tau3.16227766_s9108401",
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.0177827941,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau3.16227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.031622777_tau3.1622777_s9108401",
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau3.1622777_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 12.63,
+          "followup_s": 12.63,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau5.6234133_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.005623413252_tau5.623413252_s9108401",
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 117.95,
+          "followup_s": 117.95,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.005623413252_tau5.623413252_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 117.75
+        },
+        {
+          "name": "eta0.01_tau5.6234133_s9108401",
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.01_tau5.6234133_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.031622777_tau5.6234133_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.0001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.780000000000001,
+          "followup_s": 10.780000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.0005,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.64,
+          "followup_s": 11.64,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.620000000000001,
+          "followup_s": 10.620000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.00177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 12.92,
+          "followup_s": 12.92,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 148.09,
+          "followup_s": 148.09,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.004216965034_tau10_s9108401",
+          "tau_M_s": 10.0,
+          "eta_M": 0.004216965034,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 1535.03,
+          "followup_s": 1535.03,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.004216965034_tau10_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 1534.83
+        },
+        {
+          "name": "eta0.0056234133_tau10_s9108401",
+          "tau_M_s": 10.0,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0056234133_tau10_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 0.1,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 1.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10.0,
+          "eta_M": 10.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.003066247046_tau31.6227766_s9108401",
+          "tau_M_s": 31.622776601684,
+          "eta_M": 0.003066247046,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.003066247046_tau31.6227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.0001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.73,
+          "followup_s": 10.73,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.0005,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.790000000000001,
+          "followup_s": 10.790000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.07,
+          "followup_s": 11.07,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.00177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 14.040000000000001,
+          "followup_s": 14.040000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.002371373706_tau100_s9108401",
+          "tau_M_s": 100.0,
+          "eta_M": 0.002371373706,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau100_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0031622777_tau100_s9108401",
+          "tau_M_s": 100.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau100_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 0.1,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 1.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 100.0,
+          "eta_M": 10.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau100_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.0016548171_tau316.227766_s9108401",
+          "tau_M_s": 316.227766016838,
+          "eta_M": 0.0016548171,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 14.13,
+          "followup_s": 14.13,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0016548171_tau316.227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": 13.930000000000001
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.0001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.21,
+          "followup_s": 10.21,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0001_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.0005,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.520000000000001,
+          "followup_s": 10.520000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.0005_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 12.370000000000001,
+          "followup_s": 12.370000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_kinetics_20260914/runs/eta0.001_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.001333521432_tau1000_s9108401",
+          "tau_M_s": 1000.0,
+          "eta_M": 0.001333521432,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.89,
+          "followup_s": 11.89,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001333521432_tau1000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 11.690000000000001
+        },
+        {
+          "name": "eta0.0017782794_tau1000_s9108401",
+          "tau_M_s": 1000.0,
+          "eta_M": 0.00177827941,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0017782794_tau1000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0031622777_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.01_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 0.1,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta0.1_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 1.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_log_m_entry_extension_20260915/runs/eta1_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 1000.0,
+          "eta_M": 10.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau1000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.001539926526_tau3162.27766_s9108401",
+          "tau_M_s": 3162.277660168379,
+          "eta_M": 0.001539926526,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 13.21,
+          "followup_s": 13.21,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001539926526_tau3162.27766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": 13.010000000000002
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.0001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.27,
+          "followup_s": 10.270000000000001,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0001_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.0005,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 10.99,
+          "followup_s": 10.99,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.0005_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.001,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.68,
+          "followup_s": 11.68,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.001_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.00177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 13.71,
+          "followup_s": 13.71,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0017782794_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "name": "eta0.002371373706_tau10000_s9108401",
+          "tau_M_s": 10000.0,
+          "eta_M": 0.002371373706,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau10000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0031622777_tau10000_s9108401",
+          "tau_M_s": 10000.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau10000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_boundary_refinement_20260917/runs/eta0.0056234133_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.01_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 0.1,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta0.1_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 1.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta1_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        },
+        {
+          "tau_M_s": 10000.0,
+          "eta_M": 10.0,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 1000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_single_seed_wide_m_20260916/runs/eta10_tau10000_s9108401",
+          "long_job": false,
+          "complete": true
+        }
+      ],
+      "jobs": [
+        {
+          "name": "eta0.056234133_tau1_s9108401",
+          "tau_M_s": 1.0,
+          "eta_M": 0.056234132519,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.056234133_tau1_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.04216965034_tau1_s9108401",
+          "tau_M_s": 1.0,
+          "eta_M": 0.042169650343,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 203.47,
+          "followup_s": 203.47,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.04216965034_tau1_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 203.27
+        },
+        {
+          "name": "eta0.031622777_tau1.7782794_s9108401",
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau1.7782794_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0177827941_tau1.77827941_s9108401",
+          "tau_M_s": 1.778279410039,
+          "eta_M": 0.0177827941,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 86.39,
+          "followup_s": 86.39,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau1.77827941_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 86.19
+        },
+        {
+          "name": "eta0.031622777_tau3.1622777_s9108401",
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.031622776602,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.031622777_tau3.1622777_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0177827941_tau3.16227766_s9108401",
+          "tau_M_s": 3.162277660168,
+          "eta_M": 0.0177827941,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0177827941_tau3.16227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.01_tau5.6234133_s9108401",
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.01,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.01_tau5.6234133_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.005623413252_tau5.623413252_s9108401",
+          "tau_M_s": 5.623413251903,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 117.95,
+          "followup_s": 117.95,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.005623413252_tau5.623413252_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 117.75
+        },
+        {
+          "name": "eta0.0056234133_tau10_s9108401",
+          "tau_M_s": 10.0,
+          "eta_M": 0.005623413252,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0056234133_tau10_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.004216965034_tau10_s9108401",
+          "tau_M_s": 10.0,
+          "eta_M": 0.004216965034,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 1535.03,
+          "followup_s": 1535.03,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.004216965034_tau10_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 1534.83
+        },
+        {
+          "name": "eta0.0031622777_tau100_s9108401",
+          "tau_M_s": 100.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau100_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.002371373706_tau100_s9108401",
+          "tau_M_s": 100.0,
+          "eta_M": 0.002371373706,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau100_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0017782794_tau1000_s9108401",
+          "tau_M_s": 1000.0,
+          "eta_M": 0.00177827941,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0017782794_tau1000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.001333521432_tau1000_s9108401",
+          "tau_M_s": 1000.0,
+          "eta_M": 0.001333521432,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 11.89,
+          "followup_s": 11.89,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001333521432_tau1000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 11.690000000000001
+        },
+        {
+          "name": "eta0.0031622777_tau10000_s9108401",
+          "tau_M_s": 10000.0,
+          "eta_M": 0.00316227766,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0031622777_tau10000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "continue_nearest_censored",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.002371373706_tau10000_s9108401",
+          "tau_M_s": 10000.0,
+          "eta_M": 0.002371373706,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.002371373706_tau10000_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.003066247046_tau31.6227766_s9108401",
+          "tau_M_s": 31.622776601684,
+          "eta_M": 0.003066247046,
+          "seed": 9108401,
+          "event_observed": false,
+          "confirmation_s": null,
+          "followup_s": 3000.0,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.003066247046_tau31.6227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": null
+        },
+        {
+          "name": "eta0.0016548171_tau316.227766_s9108401",
+          "tau_M_s": 316.227766016838,
+          "eta_M": 0.0016548171,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 14.13,
+          "followup_s": 14.13,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.0016548171_tau316.227766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": 13.930000000000001
+        },
+        {
+          "name": "eta0.001539926526_tau3162.27766_s9108401",
+          "tau_M_s": 3162.277660168379,
+          "eta_M": 0.001539926526,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 13.21,
+          "followup_s": 13.21,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.001539926526_tau3162.27766_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "tau_gap_midpoint",
+          "onset_s": 13.010000000000002
+        }
+      ],
+      "late_entries": [
+        {
+          "name": "eta0.004216965034_tau10_s9108401",
+          "tau_M_s": 10.0,
+          "eta_M": 0.004216965034,
+          "seed": 9108401,
+          "event_observed": true,
+          "confirmation_s": 1535.03,
+          "followup_s": 1535.03,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/runs/eta0.004216965034_tau10_s9108401",
+          "long_job": true,
+          "complete": true,
+          "kind": "eta_bracket_midpoint",
+          "onset_s": 1534.83
+        }
+      ],
+      "measured_brackets": {
+        "1000": [
+          {
+            "tau_M_s": 1.0,
+            "eta_enter": 0.042169650343,
+            "eta_censored": 0.056234132519,
+            "eta_mid": 0.04869675251665306
+          },
+          {
+            "tau_M_s": 1.778279410039,
+            "eta_enter": 0.0177827941,
+            "eta_censored": 0.031622776602,
+            "eta_mid": 0.02371373705647559
+          },
+          {
+            "tau_M_s": 3.162277660168,
+            "eta_enter": 0.01,
+            "eta_censored": 0.0177827941,
+            "eta_mid": 0.0133352143214873
+          },
+          {
+            "tau_M_s": 5.623413251903,
+            "eta_enter": 0.005623413252,
+            "eta_censored": 0.01,
+            "eta_mid": 0.007498942093388907
+          },
+          {
+            "tau_M_s": 10.0,
+            "eta_enter": 0.00316227766,
+            "eta_censored": 0.004216965034,
+            "eta_mid": 0.0036517412723274007
+          },
+          {
+            "tau_M_s": 100.0,
+            "eta_enter": 0.00177827941,
+            "eta_censored": 0.002371373706,
+            "eta_mid": 0.0020535250265811696
+          },
+          {
+            "tau_M_s": 1000.0,
+            "eta_enter": 0.001333521432,
+            "eta_censored": 0.00177827941,
+            "eta_mid": 0.0015399265259483372
+          },
+          {
+            "tau_M_s": 10000.0,
+            "eta_enter": 0.00177827941,
+            "eta_censored": 0.002371373706,
+            "eta_mid": 0.0020535250265811696
+          }
+        ],
+        "3000": [
+          {
+            "tau_M_s": 1.0,
+            "eta_enter": 0.042169650343,
+            "eta_censored": 0.056234132519,
+            "eta_mid": 0.04869675251665306
+          },
+          {
+            "tau_M_s": 1.778279410039,
+            "eta_enter": 0.0177827941,
+            "eta_censored": 0.031622776602,
+            "eta_mid": 0.02371373705647559
+          },
+          {
+            "tau_M_s": 3.162277660168,
+            "eta_enter": 0.01,
+            "eta_censored": 0.0177827941,
+            "eta_mid": 0.0133352143214873
+          },
+          {
+            "tau_M_s": 5.623413251903,
+            "eta_enter": 0.005623413252,
+            "eta_censored": 0.01,
+            "eta_mid": 0.007498942093388907
+          },
+          {
+            "tau_M_s": 10.0,
+            "eta_enter": 0.004216965034,
+            "eta_censored": 0.005623413252,
+            "eta_mid": 0.004869675251535387
+          },
+          {
+            "tau_M_s": 100.0,
+            "eta_enter": 0.00177827941,
+            "eta_censored": 0.002371373706,
+            "eta_mid": 0.0020535250265811696
+          },
+          {
+            "tau_M_s": 1000.0,
+            "eta_enter": 0.001333521432,
+            "eta_censored": 0.00177827941,
+            "eta_mid": 0.0015399265259483372
+          },
+          {
+            "tau_M_s": 10000.0,
+            "eta_enter": 0.00177827941,
+            "eta_censored": 0.002371373706,
+            "eta_mid": 0.0020535250265811696
+          }
+        ]
+      },
+      "protocol_file": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/protocol.json",
+      "protocol_sha256": "eccba41fc95c30b74ac67709cb9804102e4a0e551b3e22737e039ec78e76d0f4",
+      "count_audit": "PASS_ALL19_RAW_COUNT_ENDPOINTS",
+      "continuation_qa": {
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "eta0.056234133_tau1_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.031622777_tau1.7782794_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.031622777_tau3.1622777_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.01_tau5.6234133_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.0056234133_tau10_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.0031622777_tau100_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.0017782794_tau1000_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          },
+          {
+            "name": "eta0.0031622777_tau10000_s9108401",
+            "status": "PASS",
+            "resume_s": 1000.0,
+            "whole_engine_exact": true,
+            "whole_tracker_exact": true,
+            "counts_exact": true,
+            "only_job_change": "horizon_s1000->3000"
+          }
+        ],
+        "inherited_full_executor_replay": {
+          "seed": 9108401,
+          "entire_executor_state_exact": true,
+          "tracker_exact": true,
+          "end_step": 10200
+        }
+      },
+      "display_interpretation": "Common1000-s restricted entry-time surface; longer follow-up reported in caption and tables. This is not a complete3000-s map."
+    },
+    "display_overlays": false,
+    "display_style": {
+      "author_request": "2026-09-28: incorporate completed long runs; retain the surface-only display and fixed1-1000s colorbar.",
+      "sampling_points": false,
+      "boundary_line": false,
+      "hatching": false,
+      "working_point": false,
+      "legend": false,
+      "producer": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_continuous_boundary.py",
+      "producer_sha256": "df04cf5644275a07b21740ca43c627085235bb16eff2c803bb02f2b107001e1d"
+    }
+  },
+  "simulation_status": {
+    "status": "COMPLETE_PENDING_HUMAN_REVIEW",
+    "pid": 681889,
+    "seed": 9108401,
+    "horizon_s": 3000.0,
+    "completed": 19,
+    "total": 19,
+    "continuations": 8,
+    "fresh_points": 11,
+    "running": {},
+    "pending": 0,
+    "failed": [],
+    "retried": [],
+    "updated_at": 1790380197.9471176
+  },
+  "live_processes": {},
+  "frozen_at_unix_s": 1790578631.906169,
+  "seed": 9108401,
+  "source_figure": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5/figures/fig5-complete-layout.png",
+  "previous_snapshot": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_long_boundary_20260923/previous_1000s_snapshot.json",
+  "previous_snapshot_sha256": "b68fb8c4a1dffc80f7ff23e2e18df7621a0681fc8d93ac0ee3f1a8e136a7ac87"
+}

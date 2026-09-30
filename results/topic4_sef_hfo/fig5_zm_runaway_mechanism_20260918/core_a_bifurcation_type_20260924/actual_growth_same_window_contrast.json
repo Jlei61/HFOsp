@@ -1,0 +1,299 @@
+{
+  "status": "MATCHED_WINDOW_READOUT_PASS",
+  "rows": [
+    {
+      "condition": "returning_D0328122",
+      "label": "coarse",
+      "D_A": 0.32812159912785477,
+      "Z_A": 0.6718784008721452,
+      "dt_ms": 0.05,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/final_state.npz",
+      "source_prior_same_field_ms": 30000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 10.207072314140207,
+      "common_one_second_growth_per_s": [
+        12.391965525267379,
+        9.421683217014285,
+        8.80756820013896
+      ],
+      "all_post_alignment_growth_per_s": 8.63540644094208,
+      "all_post_alignment_duration_ms": 8000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [
+        [
+          29,
+          53
+        ],
+        [
+          101,
+          125
+        ],
+        [
+          157,
+          207
+        ],
+        [
+          259,
+          353
+        ],
+        [
+          406,
+          553
+        ],
+        [
+          608,
+          777
+        ],
+        [
+          891,
+          1049
+        ],
+        [
+          1141,
+          1201
+        ]
+      ],
+      "minimum_Core_A_10ms_hz": 1.761802446825845e-05,
+      "mean_rates_global_A_B_surround": [
+        49.5578157965171,
+        309.2427439540127,
+        136.5469126218791,
+        40.88493772903573
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    },
+    {
+      "condition": "returning_D0328122",
+      "label": "fine",
+      "D_A": 0.32812159912785477,
+      "Z_A": 0.6718784008721452,
+      "dt_ms": 0.025,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/final_state.npz",
+      "source_prior_same_field_ms": 30000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 6.753062993386688,
+      "common_one_second_growth_per_s": [
+        8.14316033180903,
+        7.343185304803647,
+        4.772843343547387
+      ],
+      "all_post_alignment_growth_per_s": 6.753062993386689,
+      "all_post_alignment_duration_ms": 3000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [
+        [
+          29,
+          53
+        ],
+        [
+          101,
+          126
+        ],
+        [
+          139,
+          193
+        ],
+        [
+          246,
+          291
+        ],
+        [
+          320,
+          474
+        ],
+        [
+          3578,
+          3734
+        ],
+        [
+          3821,
+          3992
+        ],
+        [
+          4089,
+          4149
+        ]
+      ],
+      "minimum_Core_A_10ms_hz": 2.4994282399186417e-05,
+      "mean_rates_global_A_B_surround": [
+        47.01863551560982,
+        317.29470018132866,
+        119.23836274018869,
+        38.46470057284973
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    },
+    {
+      "condition": "late_return_D0343158",
+      "label": "coarse",
+      "D_A": 0.34315764125480563,
+      "Z_A": 0.6568423587451944,
+      "dt_ms": 0.05,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/final_state.npz",
+      "source_prior_same_field_ms": 60000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 9.345593307542321,
+      "common_one_second_growth_per_s": [
+        11.48240464201876,
+        9.675345019513074,
+        6.879030261095127
+      ],
+      "all_post_alignment_growth_per_s": 8.02731544922908,
+      "all_post_alignment_duration_ms": 8000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [
+        [
+          4830,
+          4919
+        ],
+        [
+          4973,
+          5000
+        ]
+      ],
+      "minimum_Core_A_10ms_hz": 2.901950999519726e-05,
+      "mean_rates_global_A_B_surround": [
+        53.30209831934518,
+        373.0069098189532,
+        143.96640415612185,
+        43.048665218281236
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    },
+    {
+      "condition": "late_return_D0343158",
+      "label": "fine",
+      "D_A": 0.34315764125480563,
+      "Z_A": 0.6568423587451944,
+      "dt_ms": 0.025,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/final_state.npz",
+      "source_prior_same_field_ms": 60000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 9.692245282863515,
+      "common_one_second_growth_per_s": [
+        4.932229662969389,
+        8.910119977379889,
+        15.234386208241265
+      ],
+      "all_post_alignment_growth_per_s": 9.692245282863514,
+      "all_post_alignment_duration_ms": 3000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [
+        [
+          4521,
+          4682
+        ]
+      ],
+      "minimum_Core_A_10ms_hz": 2.7631179410206476e-05,
+      "mean_rates_global_A_B_surround": [
+        53.59442153676342,
+        377.57728157350607,
+        132.3043430573151,
+        43.54356550318315
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    },
+    {
+      "condition": "strong_depletion",
+      "label": "depleted_coarse",
+      "D_A": 0.40052149864164854,
+      "Z_A": 0.5994785013583515,
+      "dt_ms": 0.05,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/final_state.npz",
+      "source_prior_same_field_ms": 10000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 9.765749388664858,
+      "common_one_second_growth_per_s": [
+        11.79191079911164,
+        9.953959718045507,
+        7.551377648837429
+      ],
+      "all_post_alignment_growth_per_s": 10.73257562333815,
+      "all_post_alignment_duration_ms": 18000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [],
+      "minimum_Core_A_10ms_hz": 340.56210064981866,
+      "mean_rates_global_A_B_surround": [
+        54.552330351060604,
+        423.1523081881595,
+        126.84614476047109,
+        43.562595570529886
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    },
+    {
+      "condition": "strong_depletion",
+      "label": "depleted_fine",
+      "D_A": 0.40052149864164854,
+      "Z_A": 0.5994785013583515,
+      "dt_ms": 0.025,
+      "common_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/final_state.npz",
+      "source_prior_same_field_ms": 10000,
+      "growth_window_after_source_ms": [
+        2000,
+        5000
+      ],
+      "common_window_growth_per_s": 9.073787605297907,
+      "common_one_second_growth_per_s": [
+        12.166669514457471,
+        8.231960377282052,
+        6.822732924154199
+      ],
+      "all_post_alignment_growth_per_s": 9.204577003970027,
+      "all_post_alignment_duration_ms": 8000,
+      "activity_window_after_source_ms": [
+        0,
+        5000
+      ],
+      "quiet_intervals_after_source_ms": [],
+      "minimum_Core_A_10ms_hz": 333.5729396965312,
+      "mean_rates_global_A_B_surround": [
+        57.52244695768841,
+        422.00731956274194,
+        152.0620177515388,
+        46.06053965013166
+      ],
+      "Z_identity": true,
+      "all_M_dynamic": true
+    }
+  ],
+  "observation_unit": "One actual complete-state history at each local Z field; dt.05/.025 are paired numerical controls, not independent runs or seeds.",
+  "definition": "Full original delayed-state variational growth,100ms normalization; discard2s directional alignment, compare exactly the common2--5s interval. Quiet applies original10ms mean<5Hz for>=20ms to the same first5s after each source.",
+  "interpretation": "Signs describe finite-time expansion on actual trajectories. An unstable short-cycle root is a separate invariant object. No asymptotic chaos, crisis, stable cycle or complete bifurcation certificate follows from these signs alone.",
+  "model_promoted": false
+}

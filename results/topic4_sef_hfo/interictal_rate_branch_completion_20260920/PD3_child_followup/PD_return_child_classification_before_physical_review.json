@@ -1,0 +1,89 @@
+{
+  "status": "SUPERCRITICAL_PD",
+  "label": "PD3",
+  "child_stability": "UNSTABLE",
+  "display_title": "Supercritical PD3 | unstable doubled child",
+  "J_EE_core": 1.0758067726710216,
+  "parent_T_ms": 105.39979415446477,
+  "child_orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60_refined_N2048.npz",
+  "child_T_ms": 210.73162774066444,
+  "child_side": "J < J_PD3; the PD direction of the parent is unstable on this side",
+  "child_mu": 0.9917647557575047,
+  "critical_mode_phase_aligned_seed_overlap": 0.971985238146298,
+  "inherited_unstable_multiplier": [
+    73394.7914855662,
+    0.0
+  ],
+  "radial_mode_mesh_difference": 2.2040924640975845e-10,
+  "radial_mode_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3child_a60_radial_N1024.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3child_a60_radial_N2048.json"
+  ],
+  "direct_mode_checks": [
+    {
+      "label": "PD3child_a60_radial",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60_refined_N2048.npz",
+      "N": 2048,
+      "dt_ms": 0.04999564121961197,
+      "J_EE_core": 1.0757981672453432,
+      "T_ms": 210.73162774066444,
+      "expected_multiplier": 0.9917647557575047,
+      "independent_rayleigh_multiplier": 0.9909853963028508,
+      "full_state_mode_relative_defect": 0.03755297514615608,
+      "phase_relative_defect": 0.35285113459574113,
+      "output_reconstruction_error": 3.4118487115403218e-18,
+      "scope": "Direct propagation of this eigenfunction in all nine states and physical delay history. Not a complete spectrum. Strong inherited instability can amplify whole-period integration error."
+    },
+    {
+      "label": "PD3child_a60_radial",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60_refined_N2048.npz",
+      "N": 2048,
+      "dt_ms": 0.024997820609805984,
+      "J_EE_core": 1.0757981672453432,
+      "T_ms": 210.73162774066444,
+      "expected_multiplier": 0.9917647557575047,
+      "independent_rayleigh_multiplier": 0.9915570058244221,
+      "full_state_mode_relative_defect": 0.010011944195677261,
+      "phase_relative_defect": 0.09480741227992144,
+      "output_reconstruction_error": 3.4118487115403218e-18,
+      "scope": "Direct propagation of this eigenfunction in all nine states and physical delay history. Not a complete spectrum. Strong inherited instability can amplify whole-period integration error."
+    },
+    {
+      "label": "PD3child_a60_radial",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60_refined_N2048.npz",
+      "N": 2048,
+      "dt_ms": 0.012499651684006432,
+      "J_EE_core": 1.0757981672453432,
+      "T_ms": 210.73162774066444,
+      "expected_multiplier": 0.9917647557575047,
+      "independent_rayleigh_multiplier": 0.9917132350356637,
+      "full_state_mode_relative_defect": 0.0024869342075606493,
+      "phase_relative_defect": 0.02337298207337074,
+      "output_reconstruction_error": 3.4118487115403218e-18,
+      "scope": "Direct propagation of this eigenfunction in all nine states and physical delay history. Not a complete spectrum. Strong inherited instability can amplify whole-period integration error."
+    },
+    {
+      "label": "PD3child_a60_radial",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnextension_a60_refined_N2048.npz",
+      "N": 2048,
+      "dt_ms": 0.006249825842003216,
+      "J_EE_core": 1.0757981672453432,
+      "T_ms": 210.73162774066444,
+      "expected_multiplier": 0.9917647557575047,
+      "independent_rayleigh_multiplier": 0.9917512741500426,
+      "full_state_mode_relative_defect": 0.000650017823961613,
+      "phase_relative_defect": 0.006181167341723189,
+      "output_reconstruction_error": 3.4118487115403218e-18,
+      "scope": "Direct propagation of this eigenfunction in all nine states and physical delay history. Not a complete spectrum. Strong inherited instability can amplify whole-period integration error."
+    }
+  ],
+  "segmented_mode_checks_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3child_a60_radial_segmented_checks_N2048.json",
+  "departure_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_return_child_departure.json",
+  "instability_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3child_a60_instability.json",
+  "core_A_B_peaks_per_full_child_period": [
+    2,
+    2
+  ],
+  "criticality_basis": "Local branch departs quadratically onto the PD-unstable side; its continued PD mode lies inside the unit circle. This is a supercritical PD in that direction; inherited unstable modes keep the full child unstable.",
+  "scope": "Numerical local PD classification and instability of the checked child; no full unstable-index count, globally stable attractor, or connection to a stable burst family is claimed."
+}

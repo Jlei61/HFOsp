@@ -1,0 +1,112 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "K": 9.35,
+      "interval_s": [
+        20,
+        29
+      ],
+      "causal_R_between_samples_bound_Hz": [
+        91.75613949407713,
+        106.09432036953268
+      ],
+      "q_zero_throughout_interval": true,
+      "K_decay_tau_s": 0.5,
+      "mean_Z_allE_A_B_surround": [
+        0.21000000000000002,
+        0.17416938610496047,
+        0.16536878876958155,
+        0.21203862163177836
+      ],
+      "exact_budget_mean_dZ_dK_per_s": [
+        [
+          0.08063577791666662,
+          -18.698130124659475
+        ],
+        [
+          -0.03483387722099183,
+          -20.717588978054778
+        ],
+        [
+          -0.015001685376195102,
+          -20.974743334661817
+        ],
+        [
+          0.08596194883334383,
+          -18.58939440704556
+        ]
+      ],
+      "implied_mean_Z_recovery_eligible_fraction": [
+        0.6131788895833332,
+        1.3322676295501878e-15,
+        0.09036036188860605,
+        0.6418483657984976
+      ],
+      "analytic_no_jump_K_flow_per_s": [
+        -18.698130124660434,
+        -20.71758897805585,
+        -20.974743334662925,
+        -18.58939440704645
+      ],
+      "maximum_K_budget_error": 1.1084466677857563e-12
+    },
+    {
+      "name": "exit_z0.21_k9.5_fields16p7_high",
+      "K": 9.5,
+      "interval_s": [
+        20,
+        29
+      ],
+      "causal_R_between_samples_bound_Hz": [
+        3.46e-322,
+        3.95e-322
+      ],
+      "q_zero_throughout_interval": true,
+      "K_decay_tau_s": 5.0,
+      "mean_Z_allE_A_B_surround": [
+        0.21000000000000002,
+        0.17416938610496047,
+        0.16536878876958155,
+        0.21203862163177836
+      ],
+      "exact_budget_mean_dZ_dK_per_s": [
+        [
+          0.15800000000000117,
+          -1.8999810001163335
+        ],
+        [
+          0.16516612277900802,
+          -2.1051851262180947
+        ],
+        [
+          0.16692624224608352,
+          -2.1313154605560083
+        ],
+        [
+          0.15759227567364398,
+          -1.8889319916795215
+        ]
+      ],
+      "implied_mean_Z_recovery_eligible_fraction": [
+        1.0000000000000058,
+        1.0000000000000004,
+        0.9999999999999991,
+        0.9999999999999982
+      ],
+      "analytic_no_jump_K_flow_per_s": [
+        -1.8999810001266664,
+        -2.1051851262295465,
+        -2.1313154605675693,
+        -1.8889319916897616
+      ],
+      "maximum_K_budget_error": 1.156097440002668e-11
+    }
+  ],
+  "bound": "Causal R decays exponentially15ms with only nonnegative spike jumps. Between neighboring1ms samples use previousR*exp(-1/15) and nextR*exp(1/15). Recorded20ms budgets themselves integrate original0.1ms updates.",
+  "interpretation": "Z/K are held. These are evaluations of their original unclamped vector field, not an actual release trajectory. Positive allE recovery does not imply positive core recovery. Neither conditional state is a fixed point of the full autonomous system.",
+  "producer_sha256": "e0bc46216d3ba8888bd4b8ab5f694a480cb93f1d089e17660d5229957919a1bd",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false
+}

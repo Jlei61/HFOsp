@@ -1,0 +1,78 @@
+{
+  "label": "PD_double_upper",
+  "J_EE_core": 0.944728374156709,
+  "T_ms": 761.9648707025799,
+  "parent_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_filter_parent_N8192.npz",
+  "mode_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_filter_mode_N8192.npz",
+  "accepted_fine_parent": true,
+  "common_display_phase_shift_ms": 544.6858255412974,
+  "normalization": "Largest absolute E-group rate mode component = 1 Hz; all derivatives per this unit.",
+  "E_mode_energy_A_B_surround": [
+    0.038806209384155396,
+    0.043121588303488494,
+    0.9180722023123561
+  ],
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mode_RMS_relative_to_network": [
+    1.2833346712267393,
+    1.324985393222878,
+    0.9820835996912456
+  ],
+  "core_peak_derivatives": {
+    "A": [
+      {
+        "peak_ms": 216.56830807194842,
+        "peak_rate_Hz": 169.28163772062393,
+        "delta_peak_height_Hz_per_unit": 0.0015895334215711415,
+        "delta_peak_time_ms_per_unit": -0.006176813423529443
+      },
+      {
+        "peak_ms": 651.0394528065949,
+        "peak_rate_Hz": 207.3585866671347,
+        "delta_peak_height_Hz_per_unit": 0.01569568325213152,
+        "delta_peak_time_ms_per_unit": 0.00697241293500611
+      }
+    ],
+    "B": [
+      {
+        "peak_ms": 277.79654139705485,
+        "peak_rate_Hz": 249.78393222689814,
+        "delta_peak_height_Hz_per_unit": -0.0732217578333314,
+        "delta_peak_time_ms_per_unit": -0.0051680939669795836
+      },
+      {
+        "peak_ms": 599.9709106062546,
+        "peak_rate_Hz": 118.67595936550956,
+        "delta_peak_height_Hz_per_unit": 0.007549189210717234,
+        "delta_peak_time_ms_per_unit": 1.8656756284526204e-05
+      }
+    ]
+  },
+  "maximum_regional_mode_Hz": [
+    0.09285115837686839,
+    0.09770965133591526,
+    0.022272315264221697
+  ],
+  "maximum_contact_mode_Hz": [
+    0.16129109431501396,
+    0.0006020454581331866,
+    0.07354638502203588,
+    0.005136439365907518,
+    0.059326777792593814,
+    0.04492095157676931,
+    0.154477323265449,
+    0.0058953537464996476,
+    0.22049895658792953,
+    0.25389798221848037,
+    0.46557749033525386,
+    0.46126428131082314,
+    0.29994333515651755,
+    0.12877723734823243,
+    0.1428126436895412
+  ],
+  "meaning": "The mode changes sign after one parent period, so adjacent parent-length windows receive opposite first-order changes. This does not establish child stability, a propagation-template switch, or irregular dynamics."
+}

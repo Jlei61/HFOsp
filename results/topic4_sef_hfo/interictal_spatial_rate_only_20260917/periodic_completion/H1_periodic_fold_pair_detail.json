@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "label": "LPC61",
+      "J_EE_core": 1.2115992495880454,
+      "T_ms": 106.98543512379396,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn1_N2048.npz",
+      "validation": "LPC_A_stage4_turn1_validation.json",
+      "mean_rates_hz": [
+        48.79375196389649,
+        32.12529447731805,
+        10.427826760620501
+      ],
+      "generalized_plus_one_errors": [
+        0.00012311454437686673,
+        3.0762878708123924e-05,
+        7.703420106568737e-06
+      ],
+      "dt_ms": [
+        0.04999319398308129,
+        0.024996596991540644,
+        0.012499758747960506
+      ]
+    },
+    {
+      "label": "LPC62",
+      "J_EE_core": 1.198713442456352,
+      "T_ms": 106.26514784898256,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N2048.npz",
+      "validation": "LPC_A_stage4_turn2_validation.json",
+      "mean_rates_hz": [
+        37.79449667438078,
+        27.79858758500076,
+        9.826014289504302
+      ],
+      "generalized_plus_one_errors": [
+        5.665777165339032e-05,
+        1.2557759966610697e-05,
+        3.946284561885857e-06
+      ],
+      "dt_ms": [
+        0.04998360670224956,
+        0.024997682392138922,
+        0.012498841196069461
+      ]
+    }
+  ],
+  "segment_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcAconnectionStage4_accuracy.json",
+  "included_branch_indices": [
+    30,
+    65
+  ],
+  "scope": "Local geometry of the same H1 periodic family and independently checked generalized +1 fold directions. Period folds are not period doubling. Smooth plotted geometry does not certify stability between sampled points."
+}

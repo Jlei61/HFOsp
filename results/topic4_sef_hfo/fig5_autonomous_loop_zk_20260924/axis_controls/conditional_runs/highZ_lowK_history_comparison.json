@@ -1,0 +1,117 @@
+{
+  "status": "PASS_PAIRED_READOUT_AUDIT",
+  "rows": [
+    {
+      "graph": "current",
+      "paired_future_input_values_exact": true,
+      "relative_input_timestamps_match": true,
+      "input_time_column": 0,
+      "absolute_branch_start_s": [
+        12.0,
+        50.0
+      ],
+      "native_count_readouts": {
+        "spikes_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        },
+        "regions_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        },
+        "field_5ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        }
+      },
+      "sources": [
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/runs/z0.95_k0.02_high",
+          "result_sha256": "ce3ae031ffa63586ec1e6b6dd38b62d2f76946ff76034ca11ea193e2cea691e0"
+        },
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/runs/z0.95_k0.02_interictal",
+          "result_sha256": "3cc97a7b8ced4695898a1eb6acd36529dab06a82dd5969a9d150206ced2b08eb"
+        }
+      ]
+    },
+    {
+      "graph": "rotated",
+      "paired_future_input_values_exact": true,
+      "relative_input_timestamps_match": true,
+      "input_time_column": 0,
+      "absolute_branch_start_s": [
+        12.0,
+        50.0
+      ],
+      "native_count_readouts": {
+        "spikes_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": false,
+          "tail_unequal_elements": 19978
+        },
+        "regions_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": false,
+          "tail_unequal_elements": 32237
+        },
+        "field_5ms": {
+          "full30s_exact": false,
+          "tail10s_exact": false,
+          "tail_unequal_elements": 178150
+        }
+      },
+      "sources": [
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.95_k0.02_high",
+          "result_sha256": "82f6b3e8dbc77db8883d916e20bd7187503bb0809fe976482e83c63df66d4247"
+        },
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/runs/z0.95_k0.02_interictal",
+          "result_sha256": "9b029763c0de0cd6bcc6623e60f671875236cdbd31620ef392ec04149ca009cd"
+        }
+      ]
+    },
+    {
+      "graph": "isotropic",
+      "paired_future_input_values_exact": true,
+      "relative_input_timestamps_match": true,
+      "input_time_column": 0,
+      "absolute_branch_start_s": [
+        12.0,
+        50.0
+      ],
+      "native_count_readouts": {
+        "spikes_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        },
+        "regions_1ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        },
+        "field_5ms": {
+          "full30s_exact": false,
+          "tail10s_exact": true,
+          "tail_unequal_elements": 0
+        }
+      },
+      "sources": [
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/runs/z0.95_k0.02_high",
+          "result_sha256": "e9bbf4cbded396b1738867e17fea176b1e15261755ad1ae65ed4ecace4790263"
+        },
+        {
+          "folder": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/runs/z0.95_k0.02_interictal",
+          "result_sha256": "0610557e1e2aea39b0f0d28993ae8bde40c513fe2c611144ec05b27d95be67a6"
+        }
+      ]
+    }
+  ],
+  "interpretation": "Two endogenous histories and one shared future noise stream. Input firstcolumn is absolute time: relative times checked separately, payload columns1 onward exactly equal. Equality is restricted to recorded native spike counts, regional counts and5ms fields over the declared window; not whole-engine convergence, independent replication or a bifurcation certificate."
+}

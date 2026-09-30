@@ -1,0 +1,42 @@
+{
+  "core": "H15_half",
+  "J_EE_core": 1.0115517474745457,
+  "omega_per_ms": 0.06271367030820595,
+  "frequency_hz": 9.981190628986404,
+  "eigenvector_max_rate_hz": 1.0,
+  "cubic": [
+    -0.003290196493284573,
+    -0.0008543447232270238
+  ],
+  "lambda_J": [
+    -2.997770524639642,
+    -0.13475800439477337
+  ],
+  "J_shift_per_amplitude_squared": -0.0010975478163659919,
+  "omega_shift_per_amplitude_squared": -0.0007064413697657015,
+  "criticality": "supercritical",
+  "first_derivative_relative_error": 3.0265059504445214e-12,
+  "cubic_taylor_checks": [
+    {
+      "epsilon": 0.04,
+      "relative_cubic_error": 3.710001888984835e-06
+    },
+    {
+      "epsilon": 0.02,
+      "relative_cubic_error": 1.73672394180211e-06
+    },
+    {
+      "epsilon": 0.01,
+      "relative_cubic_error": 1.2610687382079319e-05
+    }
+  ],
+  "characteristic_residual": 1.710621123788321e-12,
+  "normalization": "max abs rate eigenvector 1 Hz; z is dimensionless; cubic per ms",
+  "parameter_step": 5e-08,
+  "stationary_continuation_rate_steps_Hz": [
+    3.951446150840532e-05,
+    3.951423491535544e-05
+  ],
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stationary_root_counts/H15_highorder_half.npz",
+  "interpretation": "Local Hopf center manifold. Criticality alone does not imply full-system stability when other transverse modes are already unstable."
+}

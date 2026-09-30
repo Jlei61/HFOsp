@@ -1,0 +1,53 @@
+{
+  "created_local": "2026-09-19T18:00:59.105537",
+  "question": "Do the two coarse states bracketing the native-cycle candidate persist when the same physical graph is resolved at0.5mm, separating network resolution from native Z subcell detail?",
+  "D": [
+    0.219,
+    0.22884476056519154
+  ],
+  "grid": [
+    20,
+    40
+  ],
+  "dt_ms": 0.05,
+  "duration_ms": 12000,
+  "new_arms": [
+    {
+      "Z_detail": "lifted",
+      "D": 0.219
+    },
+    {
+      "Z_detail": "lifted",
+      "D": 0.22884476056519154
+    },
+    {
+      "Z_detail": "native",
+      "D": 0.219
+    },
+    {
+      "Z_detail": "native",
+      "D": 0.22884476056519154
+    }
+  ],
+  "budget": {
+    "new_trajectories": 4,
+    "duration_ms_each": 12000
+  },
+  "initial": "Same complete coarse periodic state and canonical delay history, lifted to exact nested fine groups; M initially identical per original member cell and dynamic thereafter.",
+  "Z": "held throughout; primary lifted arms preserve original per-cell coarseZ exactly; secondary native arms project original finerZ and preserve the coarse averages and globalD.",
+  "parameters": "Same original physical topology/weights/positions/delays; same threshold bins, response tables, Z/M parameters. Finer threshold group means reflect same original cells.",
+  "preconditions": [
+    "Identical physical graph source",
+    "Fine groups exactlypartitioncoarse",
+    "Weighted state/history recovery",
+    "Mean/variance delayed operator aggregation identity on two probes atzero andnonzero imaginarylambda",
+    "ProjectednativefineZ aggregates tocoarseZ"
+  ],
+  "primary_readout": "Existing canonical last4s selflimited/event/persistent classification, not runner historical3s category; global200Hz and75percentbroad criteria separately.",
+  "comparisons": [
+    "existing endpoint_D0.2190000_dt0.05",
+    "existing endpoint_D0.2288448_dt0.05"
+  ],
+  "interpretation": "Finitewindow spatialresolution check, not same criticalD or Floquet convergence. A changed lifted-Z state rejects spatial robustness of that coarse bracketing result; native-vs-lifted contrast isolates added Z detail. No automatic bifurcation type or SNN correspondence.",
+  "followup": "Time refinement or local bracket search only if these results reveal a specific unresolved state or resolution dependence."
+}

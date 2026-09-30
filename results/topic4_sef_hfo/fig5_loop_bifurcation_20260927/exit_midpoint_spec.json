@@ -1,0 +1,35 @@
+{
+  "stage": "ACTUAL_EXIT_FIELD_SINGLE_MIDPOINT",
+  "question": "At the midpoint K10.5 of the observed K9-to12 exit bracket, is high activity sustained, lost, or history-dependent under the same actual spatial fields?",
+  "max_workers": 2,
+  "rows": [
+    {
+      "name": "exit_z0.21_k10.5_fields16p7_high",
+      "Z": 0.21,
+      "K": 10.5,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Single midpoint of actual-exit-field K9 high/history separation and K12 silence; no grid expansion or new noise."
+    },
+    {
+      "name": "exit_z0.21_k10.5_fields16p7_recovery",
+      "Z": 0.21,
+      "K": 10.5,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl",
+      "history_label": "recovery",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Single midpoint of actual-exit-field K9 high/history separation and K12 silence; no grid expansion or new noise."
+    }
+  ],
+  "source_evidence": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes/extended_analysis_summary.json",
+  "limits": "Exactly2conditions x30s, same source8405 futureinput andtwoexistingfullhistories; no automatic further midpoint or duration/seed expansion. Finite history persistence does not certify bifurcation.",
+  "decision": "Use native field/G/Z drift to constrain relevant high/quiet branches and judge density near exit; do not infer a fold solely from two outcomes.",
+  "created_epoch": 1790531734.1564791
+}

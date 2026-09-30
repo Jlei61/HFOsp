@@ -1,0 +1,1773 @@
+{
+  "status": "COMPLETE_TWELVE_BOUNDED_UPDATES",
+  "updates": [
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 1,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4894072265625,
+          "output_rate_Hz": 98.4898525390625,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.04598437765460407,
+          "mean_first_second_1s_Hz": [
+            98.4899765625,
+            98.489728515625
+          ],
+          "mean_M_start_end": [
+            98.49203013492436,
+            98.49012234498824
+          ],
+          "mean_M": 98.4908064340307,
+          "counterfactual_mean_Zdot_per_s": 0.08059440109375,
+          "mean_PSD_L1_change": 0.0005456048869332124,
+          "mean_spike_variance": 0.009419375025366213,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027577689941406223
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72065649867375,
+          "output_rate_Hz": 392.7241379310345,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.09679515084336844,
+          "mean_first_second_1s_Hz": [
+            392.72538129973475,
+            392.7228945623342
+          ],
+          "mean_M_start_end": [
+            392.73289536474886,
+            392.72483556914284
+          ],
+          "mean_M": 392.72816782883746,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.002263904030857056,
+          "mean_spike_variance": 0.03751503895598476,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49598441475828,
+          "output_rate_Hz": 132.4924856870229,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.09043107376921627,
+          "mean_first_second_1s_Hz": [
+            132.49491094147584,
+            132.49006043256998
+          ],
+          "mean_M_start_end": [
+            132.49822798791556,
+            132.49458735835856
+          ],
+          "mean_M": 132.49430600180136,
+          "counterfactual_mean_Zdot_per_s": -0.015212106990557535,
+          "mean_PSD_L1_change": 0.0014045258210540262,
+          "mean_spike_variance": 0.012700598904460878,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32855589297439,
+          "output_rate_Hz": 90.32902782337491,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.04217254528720449,
+          "mean_first_second_1s_Hz": [
+            90.32906475705843,
+            90.3289908896914
+          ],
+          "mean_M_start_end": [
+            90.33095055857036,
+            90.32923976877282
+          ],
+          "mean_M": 90.32988321827388,
+          "counterfactual_mean_Zdot_per_s": 0.0859239098660278,
+          "mean_PSD_L1_change": 0.0004809066135012511,
+          "mean_spike_variance": 0.008639231474064346,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02897196579530529
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.11075,
+          "output_rate_Hz": 128.8732265625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.9257000887419613,
+          "mean_first_second_1s_Hz": [
+            128.875625,
+            128.870828125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0035462765405091384,
+          "mean_spike_variance": 0.012197874455820313,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027863385937500068
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.81851682448747,
+      "development_native_field_weighted_RMS_Hz": 0.013149718552381262,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        53.953922271728516,
+        54.50808262825012
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.054996667206251716,
+      "core_mean_difference_from_native_Hz": [
+        0.07891246684351927,
+        0.016658715012738412
+      ],
+      "blend_float_identity_max_abs_error": 2.3283064365386963e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 2,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.48945175781249,
+          "output_rate_Hz": 98.491791015625,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.03765718197757414,
+          "mean_first_second_1s_Hz": [
+            98.49189453125,
+            98.4916875
+          ],
+          "mean_M_start_end": [
+            98.49409558475195,
+            98.4920470347274
+          ],
+          "mean_M": 98.49281529063731,
+          "counterfactual_mean_Zdot_per_s": 0.08059739357421876,
+          "mean_PSD_L1_change": 0.0005057884660161158,
+          "mean_spike_variance": 0.009419558465019533,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027597047753906388
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.7210046419098,
+          "output_rate_Hz": 392.72803381962865,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.07515612204406576,
+          "mean_first_second_1s_Hz": [
+            392.7299403183024,
+            392.7261273209549
+          ],
+          "mean_M_start_end": [
+            392.73712099641835,
+            392.7283246445737
+          ],
+          "mean_M": 392.7324319955509,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.002081497080808519,
+          "mean_spike_variance": 0.037515408955155836,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49563454198474,
+          "output_rate_Hz": 132.50556615776082,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.07170262270028255,
+          "mean_first_second_1s_Hz": [
+            132.5081106870229,
+            132.50302162849871
+          ],
+          "mean_M_start_end": [
+            132.51162590153874,
+            132.50624481892302
+          ],
+          "mean_M": 132.50825669906877,
+          "counterfactual_mean_Zdot_per_s": -0.015206124166130054,
+          "mean_PSD_L1_change": 0.001310737127552765,
+          "mean_spike_variance": 0.012701843803276082,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32860308601444,
+          "output_rate_Hz": 90.3306303348654,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.03488940711777478,
+          "mean_first_second_1s_Hz": [
+            90.33062623112278,
+            90.33063443860802
+          ],
+          "mean_M_start_end": [
+            90.33267010906613,
+            90.33087458639515
+          ],
+          "mean_M": 90.33152809620093,
+          "counterfactual_mean_Zdot_per_s": 0.08592689925785314,
+          "mean_PSD_L1_change": 0.0004460125650469339,
+          "mean_spike_variance": 0.008639382905418993,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.028992302302199752
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08699765625002,
+          "output_rate_Hz": 129.035046875,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.44149304179911286,
+          "mean_first_second_1s_Hz": [
+            129.0367421875,
+            129.0333515625
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.003170584682179004,
+          "mean_spike_variance": 0.012212690191406248,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02788188203124992
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82046176981807,
+      "development_native_field_weighted_RMS_Hz": 0.011441005940387909,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        58.65629458427429,
+        58.72753143310547
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.05679148778596776,
+      "core_mean_difference_from_native_Hz": [
+        0.08280835543769172,
+        0.029739185750656816
+      ],
+      "blend_float_identity_max_abs_error": 2.5647750589996576e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 3,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.48968568359375,
+          "output_rate_Hz": 98.4922490234375,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.03540173451112789,
+          "mean_first_second_1s_Hz": [
+            98.492404296875,
+            98.49209375
+          ],
+          "mean_M_start_end": [
+            98.49454080933133,
+            98.49245671504944
+          ],
+          "mean_M": 98.49329107057854,
+          "counterfactual_mean_Zdot_per_s": 0.08059783847656249,
+          "mean_PSD_L1_change": 0.00046427421714815274,
+          "mean_spike_variance": 0.00941960186708496,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027614123925781303
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72170755968165,
+          "output_rate_Hz": 392.72940152519897,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.06418629673389198,
+          "mean_first_second_1s_Hz": [
+            392.7315152519894,
+            392.7272877984085
+          ],
+          "mean_M_start_end": [
+            392.73792915323804,
+            392.72938546206814
+          ],
+          "mean_M": 392.73367337078406,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0018921100192112097,
+          "mean_spike_variance": 0.03751553985970657,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49662770356235,
+          "output_rate_Hz": 132.50620229007635,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.06352116047432879,
+          "mean_first_second_1s_Hz": [
+            132.5083492366412,
+            132.50405534351145
+          ],
+          "mean_M_start_end": [
+            132.5121938271478,
+            132.50687727512903
+          ],
+          "mean_M": 132.5088605660858,
+          "counterfactual_mean_Zdot_per_s": -0.015219580750099522,
+          "mean_PSD_L1_change": 0.0011923866531713511,
+          "mean_spike_variance": 0.012701903073314251,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32880581089954,
+          "output_rate_Hz": 90.3310612278398,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.033324839566519625,
+          "mean_first_second_1s_Hz": [
+            90.33111662836507,
+            90.33100582731451
+          ],
+          "mean_M_start_end": [
+            90.33310318348394,
+            90.33126240003048
+          ],
+          "mean_M": 90.33198161956659,
+          "counterfactual_mean_Zdot_per_s": 0.08592771389179929,
+          "mean_PSD_L1_change": 0.0004101414341714693,
+          "mean_spike_variance": 0.008639423732005089,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029010241813033542
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.081802578125,
+          "output_rate_Hz": 129.06834765625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.31433933682687404,
+          "mean_first_second_1s_Hz": [
+            129.0698828125,
+            129.0668125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0029407827458310973,
+          "mean_spike_variance": 0.012215703142871097,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027898117187499932
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82092130601959,
+      "development_native_field_weighted_RMS_Hz": 0.01188950060901954,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        56.118823766708374,
+        56.15094184875488
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.057439595540193025,
+      "core_mean_difference_from_native_Hz": [
+        0.08417606100800867,
+        0.030375318066177215
+      ],
+      "blend_float_identity_max_abs_error": 2.5647750589996576e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 4,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.48994201757814,
+          "output_rate_Hz": 98.4924814453125,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.03345043398998742,
+          "mean_first_second_1s_Hz": [
+            98.492609375,
+            98.492353515625
+          ],
+          "mean_M_start_end": [
+            98.49478187676948,
+            98.49273459426074
+          ],
+          "mean_M": 98.49350508656694,
+          "counterfactual_mean_Zdot_per_s": 0.080597941796875,
+          "mean_PSD_L1_change": 0.0004259499854894373,
+          "mean_spike_variance": 0.00941962384737793,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027630221386718605
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72247695623344,
+          "output_rate_Hz": 392.7299817639257,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.0579088329463624,
+          "mean_first_second_1s_Hz": [
+            392.7319297082228,
+            392.72803381962865
+          ],
+          "mean_M_start_end": [
+            392.73832985618213,
+            392.7299214560047
+          ],
+          "mean_M": 392.7341859640144,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.001726895432914386,
+          "mean_spike_variance": 0.03751559463838693,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49758516221377,
+          "output_rate_Hz": 132.50608301526717,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.05743746688251593,
+          "mean_first_second_1s_Hz": [
+            132.50779262086513,
+            132.5043734096692
+          ],
+          "mean_M_start_end": [
+            132.5115189381341,
+            132.50691361830994
+          ],
+          "mean_M": 132.50838567517934,
+          "counterfactual_mean_Zdot_per_s": -0.015229436029997741,
+          "mean_PSD_L1_change": 0.001089752702960512,
+          "mean_spike_variance": 0.01270189130586037,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32903135259356,
+          "output_rate_Hz": 90.33129411523309,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.031738972242305555,
+          "mean_first_second_1s_Hz": [
+            90.33133617859488,
+            90.3312520518713
+          ],
+          "mean_M_start_end": [
+            90.33336393498644,
+            90.33154012260412
+          ],
+          "mean_M": 90.33220602142431,
+          "counterfactual_mean_Zdot_per_s": 0.08592807674472115,
+          "mean_PSD_L1_change": 0.00037661768728554113,
+          "mean_spike_variance": 0.008639445771252259,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02902715313115546
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.0804570859375,
+          "output_rate_Hz": 129.0760234375,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.25568064098607346,
+          "mean_first_second_1s_Hz": [
+            129.077359375,
+            129.0746875
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.002731683261062483,
+          "mean_spike_variance": 0.012216385689609375,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02791446757812508
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82115450349501,
+      "development_native_field_weighted_RMS_Hz": 0.01251668558261676,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        57.78120279312134,
+        57.85052514076233
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.05790479683284698,
+      "core_mean_difference_from_native_Hz": [
+        0.08475629973474952,
+        0.0302560432569976
+      ],
+      "blend_float_identity_max_abs_error": 2.3283064365386963e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 5,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.49019596035156,
+          "output_rate_Hz": 98.4926962890625,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.031775956001261846,
+          "mean_first_second_1s_Hz": [
+            98.492861328125,
+            98.49253125
+          ],
+          "mean_M_start_end": [
+            98.49497694925455,
+            98.49292675174507
+          ],
+          "mean_M": 98.49372138781737,
+          "counterfactual_mean_Zdot_per_s": 0.08059803884765626,
+          "mean_PSD_L1_change": 0.0003933976065459809,
+          "mean_spike_variance": 0.009419644317661135,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027643441308593912
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.7232274370027,
+          "output_rate_Hz": 392.7300232095491,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.05104742136684374,
+          "mean_first_second_1s_Hz": [
+            392.7319297082228,
+            392.7281167108753
+          ],
+          "mean_M_start_end": [
+            392.73897883005293,
+            392.72995651685994
+          ],
+          "mean_M": 392.73453436614574,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0015766497936064486,
+          "mean_spike_variance": 0.03751560005926725,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.4984349475191,
+          "output_rate_Hz": 132.50588422391857,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.05003614639510471,
+          "mean_first_second_1s_Hz": [
+            132.50779262086513,
+            132.503975826972
+          ],
+          "mean_M_start_end": [
+            132.5115392560998,
+            132.50691973039784
+          ],
+          "mean_M": 132.50819398676953,
+          "counterfactual_mean_Zdot_per_s": -0.015234944140684763,
+          "mean_PSD_L1_change": 0.0010013348362440642,
+          "mean_spike_variance": 0.012701872870547075,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32925762885752,
+          "output_rate_Hz": 90.33152392481944,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.030522974588538164,
+          "mean_first_second_1s_Hz": [
+            90.33160086999344,
+            90.33144697964543
+          ],
+          "mean_M_start_end": [
+            90.33355228112248,
+            90.33174096960079
+          ],
+          "mean_M": 90.33242958058047,
+          "counterfactual_mean_Zdot_per_s": 0.08592832083533178,
+          "mean_PSD_L1_change": 0.00034842023256087627,
+          "mean_spike_variance": 0.00863946761799799,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02904104142728185
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08001372109376,
+          "output_rate_Hz": 129.07897265625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.22360186310357819,
+          "mean_first_second_1s_Hz": [
+            129.080203125,
+            129.0777421875
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.002547309697248506,
+          "mean_spike_variance": 0.012216649325410157,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02792743320312499
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82137006418654,
+      "development_native_field_weighted_RMS_Hz": 0.013302512391302606,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        56.936336278915405,
+        57.035478591918945
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.058303121994401734,
+      "core_mean_difference_from_native_Hz": [
+        0.08479774535811657,
+        0.030057251908402804
+      ],
+      "blend_float_identity_max_abs_error": 2.794422471197322e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 6,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.49044599322266,
+          "output_rate_Hz": 98.492904296875,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.03042168710990044,
+          "mean_first_second_1s_Hz": [
+            98.4930859375,
+            98.49272265625
+          ],
+          "mean_M_start_end": [
+            98.49517341294627,
+            98.49312129993734
+          ],
+          "mean_M": 98.49393035337951,
+          "counterfactual_mean_Zdot_per_s": 0.08059809585937501,
+          "mean_PSD_L1_change": 0.00036583857756717736,
+          "mean_spike_variance": 0.009419664097128909,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02765590820312511
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72390701425735,
+          "output_rate_Hz": 392.7308521220159,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.04520084564439853,
+          "mean_first_second_1s_Hz": [
+            392.7319297082228,
+            392.72977453580904
+          ],
+          "mean_M_start_end": [
+            392.73938368892,
+            392.73093453049853
+          ],
+          "mean_M": 392.7350767012268,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.001464614071866529,
+          "mean_spike_variance": 0.037515677296916454,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49917987515903,
+          "output_rate_Hz": 132.5061625318066,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.04525372739436776,
+          "mean_first_second_1s_Hz": [
+            132.50858778625954,
+            132.50373727735368
+          ],
+          "mean_M_start_end": [
+            132.51159914788363,
+            132.50701487502218
+          ],
+          "mean_M": 132.5084546682374,
+          "counterfactual_mean_Zdot_per_s": -0.015238314051626239,
+          "mean_PSD_L1_change": 0.0009311541737929478,
+          "mean_spike_variance": 0.012701899664241414,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32948425845372,
+          "output_rate_Hz": 90.33171474885096,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.029476261309047947,
+          "mean_first_second_1s_Hz": [
+            90.33181631648063,
+            90.33161318122127
+          ],
+          "mean_M_start_end": [
+            90.33374711039392,
+            90.33191868910798
+          ],
+          "mean_M": 90.33262895949392,
+          "counterfactual_mean_Zdot_per_s": 0.08592846768776119,
+          "mean_PSD_L1_change": 0.0003240521435115251,
+          "mean_spike_variance": 0.008639485794161402,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029054138624425595
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.0799096146094,
+          "output_rate_Hz": 129.08047265625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.2020665994863101,
+          "mean_first_second_1s_Hz": [
+            129.0815,
+            129.0794453125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.002380904174449073,
+          "mean_spike_variance": 0.012216785370175781,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02793986835937496
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82157876612882,
+      "development_native_field_weighted_RMS_Hz": 0.014012554751467442,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        56.60634517669678,
+        55.384639739990234
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.058623778490048226,
+      "core_mean_difference_from_native_Hz": [
+        0.08562665782494605,
+        0.030335559796441203
+      ],
+      "blend_float_identity_max_abs_error": 2.0941115508321673e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 7,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4906918235879,
+          "output_rate_Hz": 98.493076171875,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.0292047371653611,
+          "mean_first_second_1s_Hz": [
+            98.49324609375,
+            98.49290625
+          ],
+          "mean_M_start_end": [
+            98.4954291189976,
+            98.49332006064999
+          ],
+          "mean_M": 98.49413070104868,
+          "counterfactual_mean_Zdot_per_s": 0.08059811162109375,
+          "mean_PSD_L1_change": 0.00034200392450151225,
+          "mean_spike_variance": 0.009419680453095705,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027667579589843703
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72460152503317,
+          "output_rate_Hz": 392.7307277851459,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.040271822981371844,
+          "mean_first_second_1s_Hz": [
+            392.73159814323606,
+            392.7298574270557
+          ],
+          "mean_M_start_end": [
+            392.7399467586727,
+            392.73113172888867
+          ],
+          "mean_M": 392.7351353000379,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0013555316461965757,
+          "mean_spike_variance": 0.03751566620047249,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.4998781408238,
+          "output_rate_Hz": 132.50624204834605,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.04200550808254354,
+          "mean_first_second_1s_Hz": [
+            132.50882633587787,
+            132.50365776081424
+          ],
+          "mean_M_start_end": [
+            132.51235572702984,
+            132.50714138863287
+          ],
+          "mean_M": 132.50884921754454,
+          "counterfactual_mean_Zdot_per_s": -0.015240391023636416,
+          "mean_PSD_L1_change": 0.0008775786614655199,
+          "mean_spike_variance": 0.012701907129254139,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32970730749344,
+          "output_rate_Hz": 90.3318963394616,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.02846685057056582,
+          "mean_first_second_1s_Hz": [
+            90.33198662179908,
+            90.3318060571241
+          ],
+          "mean_M_start_end": [
+            90.33398228333671,
+            90.33211935278234
+          ],
+          "mean_M": 90.33282780473864,
+          "counterfactual_mean_Zdot_per_s": 0.08592853784124119,
+          "mean_PSD_L1_change": 0.00030309513771845944,
+          "mean_spike_variance": 0.008639503059104154,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029066400094386033
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.07996591877344,
+          "output_rate_Hz": 129.0808984375,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.1849960986867091,
+          "mean_first_second_1s_Hz": [
+            129.08234375,
+            129.079453125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.002232435260795361,
+          "mean_spike_variance": 0.012216825112421876,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027951598046874936
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82175121468207,
+      "development_native_field_weighted_RMS_Hz": 0.014798854387162554,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        56.49176096916199,
+        56.55334734916687
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.05893583076802605,
+      "core_mean_difference_from_native_Hz": [
+        0.08550232095495858,
+        0.030415076335884805
+      ],
+      "blend_float_identity_max_abs_error": 2.3283064365386963e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 8,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4909302584166,
+          "output_rate_Hz": 98.49327734375,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.028280386178961916,
+          "mean_first_second_1s_Hz": [
+            98.49341015625,
+            98.49314453125
+          ],
+          "mean_M_start_end": [
+            98.4956152534731,
+            98.49352134682195
+          ],
+          "mean_M": 98.4943242970757,
+          "counterfactual_mean_Zdot_per_s": 0.08059811439453125,
+          "mean_PSD_L1_change": 0.00032088817858669363,
+          "mean_spike_variance": 0.009419699593701173,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027679061230468698
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72521415104444,
+          "output_rate_Hz": 392.7310593501326,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.036401120230705186,
+          "mean_first_second_1s_Hz": [
+            392.73226127320953,
+            392.7298574270557
+          ],
+          "mean_M_start_end": [
+            392.74025333285186,
+            392.73128458699455
+          ],
+          "mean_M": 392.7355437230614,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0012559732221628546,
+          "mean_spike_variance": 0.03751569725733588,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.50051453157604,
+          "output_rate_Hz": 132.50695769720102,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.0392063784046301,
+          "mean_first_second_1s_Hz": [
+            132.50938295165395,
+            132.5045324427481
+          ],
+          "mean_M_start_end": [
+            132.5128547548128,
+            132.50780443716673
+          ],
+          "mean_M": 132.50948285602402,
+          "counterfactual_mean_Zdot_per_s": -0.01524183663432344,
+          "mean_PSD_L1_change": 0.0008269968750085027,
+          "mean_spike_variance": 0.012701975204158717,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32992621069026,
+          "output_rate_Hz": 90.33208100787918,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.027708319363783106,
+          "mean_first_second_1s_Hz": [
+            90.33212820091924,
+            90.33203381483914
+          ],
+          "mean_M_start_end": [
+            90.33415736247154,
+            90.33230992226159
+          ],
+          "mean_M": 90.33300472798422,
+          "counterfactual_mean_Zdot_per_s": 0.08592857805791879,
+          "mean_PSD_L1_change": 0.00028468149578157325,
+          "mean_spike_variance": 0.008639520642020273,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02907846222504919
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08005917064614,
+          "output_rate_Hz": 129.08169921875,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.17159945014062258,
+          "mean_first_second_1s_Hz": [
+            129.08353125,
+            129.0798671875
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.002101610303509511,
+          "mean_spike_variance": 0.01221690015748047,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02796262382812498
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82195305787506,
+      "development_native_field_weighted_RMS_Hz": 0.01563808664871315,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        54.3524911403656,
+        56.04642128944397
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.05935875111589961,
+      "core_mean_difference_from_native_Hz": [
+        0.08583388594166763,
+        0.031130725190848807
+      ],
+      "blend_float_identity_max_abs_error": 2.801243681460619e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 9,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.49116496694992,
+          "output_rate_Hz": 98.4934873046875,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.0275077823451796,
+          "mean_first_second_1s_Hz": [
+            98.49359765625,
+            98.493376953125
+          ],
+          "mean_M_start_end": [
+            98.49578482730722,
+            98.4937326535359
+          ],
+          "mean_M": 98.49451339157322,
+          "counterfactual_mean_Zdot_per_s": 0.0805981055078125,
+          "mean_PSD_L1_change": 0.000302999553019239,
+          "mean_spike_variance": 0.009419719526459962,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02768780585937493
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.7257986709532,
+          "output_rate_Hz": 392.73130802387266,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.03334928855432138,
+          "mean_first_second_1s_Hz": [
+            392.73242705570294,
+            392.73018899204243
+          ],
+          "mean_M_start_end": [
+            392.7405425553165,
+            392.7316599785203
+          ],
+          "mean_M": 392.735749312271,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0011681285665165893,
+          "mean_spike_variance": 0.03751571983898376,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.50115884813852,
+          "output_rate_Hz": 132.5073155216285,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.0369710823604549,
+          "mean_first_second_1s_Hz": [
+            132.50938295165395,
+            132.50524809160305
+          ],
+          "mean_M_start_end": [
+            132.5135356605428,
+            132.50821467838534
+          ],
+          "mean_M": 132.50997601270726,
+          "counterfactual_mean_Zdot_per_s": -0.015243057213203846,
+          "mean_PSD_L1_change": 0.0007821033576695201,
+          "mean_spike_variance": 0.012702008589376593,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.33014169040915,
+          "output_rate_Hz": 90.33228619500984,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.0270579532878269,
+          "mean_first_second_1s_Hz": [
+            90.33232107682205,
+            90.33225131319763
+          ],
+          "mean_M_start_end": [
+            90.3343107799715,
+            90.33251203388465
+          ],
+          "mean_M": 90.33318556805327,
+          "counterfactual_mean_Zdot_per_s": 0.0859286002181289,
+          "mean_PSD_L1_change": 0.0002692213893084011,
+          "mean_spike_variance": 0.008639540162077314,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02908764896585679
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08022317545652,
+          "output_rate_Hz": 129.08200390625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.15940169281515035,
+          "mean_first_second_1s_Hz": [
+            129.0838125,
+            129.0801953125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0019898779631001384,
+          "mean_spike_variance": 0.012216929617597657,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02797180703125003
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82216371946,
+      "development_native_field_weighted_RMS_Hz": 0.016385259193318902,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        55.505603313446045,
+        55.5537543296814
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.05974157844795595,
+      "core_mean_difference_from_native_Hz": [
+        0.08608255968169942,
+        0.03148854961833081
+      ],
+      "blend_float_identity_max_abs_error": 2.3283064365386963e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 10,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4913972007237,
+          "output_rate_Hz": 98.4936796875,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.026482642447283232,
+          "mean_first_second_1s_Hz": [
+            98.49387109375,
+            98.49348828125
+          ],
+          "mean_M_start_end": [
+            98.4959402206151,
+            98.49392905972671
+          ],
+          "mean_M": 98.49468526794423,
+          "counterfactual_mean_Zdot_per_s": 0.08059808794921876,
+          "mean_PSD_L1_change": 0.00028796817115069555,
+          "mean_spike_variance": 0.00941973779006836,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027695339453124974
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72634960624526,
+          "output_rate_Hz": 392.7318053713528,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.031385265509933154,
+          "mean_first_second_1s_Hz": [
+            392.7330901856764,
+            392.7305205570292
+          ],
+          "mean_M_start_end": [
+            392.7407407303924,
+            392.7321072975861
+          ],
+          "mean_M": 392.7361220877561,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.001104643916283411,
+          "mean_spike_variance": 0.03751576565421917,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.50177451548754,
+          "output_rate_Hz": 132.50759382951654,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.034968573249056056,
+          "mean_first_second_1s_Hz": [
+            132.50962150127228,
+            132.50556615776082
+          ],
+          "mean_M_start_end": [
+            132.51422133337195,
+            132.5086513623627
+          ],
+          "mean_M": 132.5103788150212,
+          "counterfactual_mean_Zdot_per_s": -0.015244003460023185,
+          "mean_PSD_L1_change": 0.000750987568999501,
+          "mean_spike_variance": 0.012702035352457062,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.33035614086923,
+          "output_rate_Hz": 90.33246881155614,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.02609312911434163,
+          "mean_first_second_1s_Hz": [
+            90.33258576822061,
+            90.33235185489166
+          ],
+          "mean_M_start_end": [
+            90.33445143075942,
+            90.33269602882649
+          ],
+          "mean_M": 90.33334651252268,
+          "counterfactual_mean_Zdot_per_s": 0.0859286061890744,
+          "mean_PSD_L1_change": 0.0002558044561625397,
+          "mean_spike_variance": 0.008639557524355712,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029095563443860772
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08040124853588,
+          "output_rate_Hz": 129.08251953125,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.14902042558811476,
+          "mean_first_second_1s_Hz": [
+            129.083921875,
+            129.0811171875
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0018945299777799658,
+          "mean_spike_variance": 0.012216979525878907,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027979241796875037
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82235674426106,
+      "development_native_field_weighted_RMS_Hz": 0.017040753646823854,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        112.33700704574585,
+        70.42854404449463
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.06009126080588608,
+      "core_mean_difference_from_native_Hz": [
+        0.08657990716181985,
+        0.031766857506369206
+      ],
+      "blend_float_identity_max_abs_error": 2.095474904706407e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 11,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.49162544940133,
+          "output_rate_Hz": 98.493849609375,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.025474062780946726,
+          "mean_first_second_1s_Hz": [
+            98.494060546875,
+            98.493638671875
+          ],
+          "mean_M_start_end": [
+            98.49607726492341,
+            98.49406609337976
+          ],
+          "mean_M": 98.49485519514663,
+          "counterfactual_mean_Zdot_per_s": 0.08059805025390625,
+          "mean_PSD_L1_change": 0.00027513417007429575,
+          "mean_spike_variance": 0.009419753898935547,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027700882910156276
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72689518275604,
+          "output_rate_Hz": 392.7323441644562,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.02945357519497399,
+          "mean_first_second_1s_Hz": [
+            392.7331730769231,
+            392.7315152519894
+          ],
+          "mean_M_start_end": [
+            392.74074492169683,
+            392.7327399027277
+          ],
+          "mean_M": 392.73634667394083,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0010476842652535443,
+          "mean_spike_variance": 0.03751581528556035,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.50235644689042,
+          "output_rate_Hz": 132.50842875318065,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.034082728259185895,
+          "mean_first_second_1s_Hz": [
+            132.5103371501272,
+            132.5065203562341
+          ],
+          "mean_M_start_end": [
+            132.51462803255401,
+            132.5095000667282
+          ],
+          "mean_M": 132.5109927360936,
+          "counterfactual_mean_Zdot_per_s": -0.015245023657224204,
+          "mean_PSD_L1_change": 0.0007201416890061742,
+          "mean_spike_variance": 0.012702114103451019,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.3305674079379,
+          "output_rate_Hz": 90.3326124425476,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.025105518665939627,
+          "mean_first_second_1s_Hz": [
+            90.3327642810243,
+            90.33246060407092
+          ],
+          "mean_M_start_end": [
+            90.33458480541684,
+            90.33280243102605
+          ],
+          "mean_M": 90.33350362974296,
+          "counterfactual_mean_Zdot_per_s": 0.08592859291346705,
+          "mean_PSD_L1_change": 0.00024452751604784765,
+          "mean_spike_variance": 0.008639571186976773,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029101387167596877
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08061307680728,
+          "output_rate_Hz": 129.08259765625,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.13967967510425966,
+          "mean_first_second_1s_Hz": [
+            129.0837109375,
+            129.081484375
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.001810573111827365,
+          "mean_spike_variance": 0.012216986579394533,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02798500703124995
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82252723317166,
+      "development_native_field_weighted_RMS_Hz": 0.017769276583401442,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        59.445146799087524,
+        59.47509241104126
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.06039762518250495,
+      "core_mean_difference_from_native_Hz": [
+        0.08711870026525048,
+        0.0326017811704844
+      ],
+      "blend_float_identity_max_abs_error": 2.091837814077735e-10
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 12,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4918478653987,
+          "output_rate_Hz": 98.4940185546875,
+          "native_reference_rate_Hz": 98.4894072265625,
+          "individual_rate_RMS_change_Hz": 0.024488128487451365,
+          "mean_first_second_1s_Hz": [
+            98.494220703125,
+            98.49381640625
+          ],
+          "mean_M_start_end": [
+            98.49629271589872,
+            98.49424946696048
+          ],
+          "mean_M": 98.49504017915646,
+          "counterfactual_mean_Zdot_per_s": 0.08059802345703126,
+          "mean_PSD_L1_change": 0.0002640249461849132,
+          "mean_spike_variance": 0.00941976997020996,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027705134765625177
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.727440080926,
+          "output_rate_Hz": 392.7323441644562,
+          "native_reference_rate_Hz": 392.72065649867375,
+          "individual_rate_RMS_change_Hz": 0.02606783138966104,
+          "mean_first_second_1s_Hz": [
+            392.732924403183,
+            392.73176392572947
+          ],
+          "mean_M_start_end": [
+            392.7414231605714,
+            392.7328456169258
+          ],
+          "mean_M": 392.7366329362792,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0010104391769029933,
+          "mean_spike_variance": 0.03751581594330239,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.50296367751946,
+          "output_rate_Hz": 132.50886609414758,
+          "native_reference_rate_Hz": 132.49598441475828,
+          "individual_rate_RMS_change_Hz": 0.03192971675693255,
+          "mean_first_second_1s_Hz": [
+            132.51113231552162,
+            132.50659987277353
+          ],
+          "mean_M_start_end": [
+            132.51510090482725,
+            132.50981492020222
+          ],
+          "mean_M": 132.51150908646014,
+          "counterfactual_mean_Zdot_per_s": -0.015245760775544815,
+          "mean_PSD_L1_change": 0.0006973346991775959,
+          "mean_spike_variance": 0.012702155814050573,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.33077191139888,
+          "output_rate_Hz": 90.33277864412344,
+          "native_reference_rate_Hz": 90.32855589297439,
+          "individual_rate_RMS_change_Hz": 0.024225149468228152,
+          "mean_first_second_1s_Hz": [
+            90.33291817137228,
+            90.33263911687459
+          ],
+          "mean_M_start_end": [
+            90.33478215805951,
+            90.3329843342186
+          ],
+          "mean_M": 90.33367755604381,
+          "counterfactual_mean_Zdot_per_s": 0.08592858378263973,
+          "mean_PSD_L1_change": 0.00023436710653246148,
+          "mean_spike_variance": 0.008639586978188608,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02910585398883801
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.08081153475155,
+          "output_rate_Hz": 129.0829609375,
+          "native_reference_rate_Hz": 129.11075,
+          "individual_rate_RMS_change_Hz": 0.13127466434714036,
+          "mean_first_second_1s_Hz": [
+            129.0843515625,
+            129.0815703125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0017413414321945967,
+          "mean_spike_variance": 0.012217021284296876,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02798929960937496
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.82269674226092,
+      "development_native_field_weighted_RMS_Hz": 0.018419519194574924,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        67.4603054523468,
+        67.46246838569641
+      ],
+      "numerical_alpha": 0.1,
+      "undamped_response_saved": true,
+      "initial_reference_is_predicted_generation1": true,
+      "actual_native_field_RMS_Hz": 0.060684504800626315,
+      "core_mean_difference_from_native_Hz": [
+        0.08711870026525048,
+        0.033039122137410004
+      ],
+      "blend_float_identity_max_abs_error": 2.7921487344428897e-10
+    }
+  ],
+  "root_established": false,
+  "formal_bifurcation_allowed": false,
+  "physical_stability_established": false,
+  "producer_sha256": "b48a3cb0693bffd64d0ac881e04b75f1b4e4ede329df8bc4f0898bd305cc66bd"
+}

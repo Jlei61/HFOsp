@@ -1,0 +1,7 @@
+{
+  "status": "REGISTERED_BEFORE_LOCAL_RESIDUAL_PROPAGATION",
+  "created_epoch": 1790539922.5802543,
+  "question": "Do the three unresolved nearquiet source groups indicate a substantial global response in the existing measured DC operator, or a small tail accuracy issue?",
+  "method": "Preserve the failed point. Propagate only its three outofbound residual components through the old measured K9 linear solver and compare with propagating all residuals. This is a diagnostic using a frozen Jacobian, not a new root, error bound, or independent validation.",
+  "formal_bifurcation_allowed": false
+}

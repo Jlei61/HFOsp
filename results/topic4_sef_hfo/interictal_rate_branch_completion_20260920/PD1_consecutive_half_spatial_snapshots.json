@@ -1,0 +1,101 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_physical_child.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+  "T_ms": 1650.6720668332723,
+  "phase_shift_samples": 5759,
+  "first_half_indices": [
+    2497,
+    3104,
+    6475,
+    7088
+  ],
+  "first_half_times_ms": [
+    251.570321709148,
+    312.7249814117723,
+    652.3499531704979,
+    714.1091070382223
+  ],
+  "second_half_times_ms": [
+    1076.906355125784,
+    1138.0610148284086,
+    1477.685986587134,
+    1539.4451404548586
+  ],
+  "child_stability": "UNSTABLE",
+  "child_stability_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "paired_spectrum_classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.017217126086245,
+        0.0
+      ],
+      [
+        0.19128119499872873,
+        0.0
+      ],
+      [
+        0.1902297078684823,
+        0.0
+      ],
+      [
+        0.1899424394760947,
+        0.0
+      ],
+      [
+        0.144688120697635,
+        0.0
+      ],
+      [
+        0.0023036242018664803,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006108536097427564,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343
+    ],
+    "reliable_mode_mask": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010180893495712606,
+      1.299894826556347e-06,
+      9.412130547170605e-08,
+      2.6865511537632614e-08,
+      3.991334707187377e-06,
+      3.91946666943822e-05
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.017217126086245,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "local_criticality": "SUBCRITICAL_PD",
+  "maximum_absolute_field_difference_Hz": 24.384184019024786,
+  "shared_rate_limits_Hz": [
+    0.05,
+    300.0
+  ],
+  "frame_selection": "The two Core A and two Core B peaks in the first half; second-half frames use exactly the same phase plus half the full child period, with no independent realignment.",
+  "scope": "Actual nonlinear 400-cell E-rate fields and their signed difference in Hz. This does not establish a stable attractor, criticality, or propagation-template switch."
+}

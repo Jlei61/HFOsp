@@ -1,0 +1,9 @@
+{
+  "status": "FAILED_STEP_INVARIANCE_DIAGNOSIS_PENDING",
+  "created_local": "2026-09-20T12:54:18.944125+08:00",
+  "failed_assertion": "private operators bitwise unchanged between split(s,.05) and split(s,.025)",
+  "observed_code": "shared_variance_delay_audit.kernels uses lag=arange(nlag)*dt; split indexes delayed operator columns whose physical spacing is0.1ms, while actual transport usesfactor=round(.1/dt).",
+  "interpretation": "Unit/index inconsistency in derived shared/private covariance atdt!=.1; quantify before attributing native Z-clock error. Current3field noise-removal run retains actualoldprivateQ deliberately forpairedbaseline.",
+  "simulation_changed": false,
+  "model_promoted": false
+}

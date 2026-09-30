@@ -1,0 +1,17 @@
+{
+  "status": "AGENT_VISUAL_REVIEWED",
+  "human_review": "PENDING",
+  "reviewed_at": "2026-09-25T06:54:01.148013+08:00",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.25_k0.02_high/figures/full_rate_context.png",
+      "sha256": "b3d7b6774b84666efc24dbe4520858878686c9961dab30ffb0be661ac9067c7b"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.25_k0.02_high/figures/conditional_tail_fixed_window.png",
+      "sha256": "97b9d7ae8eab2f7002071aab6b11b15e0530e9319a32f9d558d402f399f0c4c8"
+    }
+  ],
+  "observation": "Full30s stays near476Hz. Fixedfinal300ms raster has uninterrupted dense spiking in bothcores/otherE/I; allsix native5msfields show global high occupancy. Contact fluctuations do not delineate separated propagation events. HeldZ/K conditional response, not an autonomous attractor.",
+  "selection": "Prespecified final10s; no completebriefs, fixedfinal300ms. No morphology selection."
+}

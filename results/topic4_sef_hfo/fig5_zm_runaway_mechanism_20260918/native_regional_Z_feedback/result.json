@@ -1,0 +1,444 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "arm": "all_dynamic",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/runs/native_t9000_Zdynamic",
+      "checks": {
+        "same_future_xi": true,
+        "input_state_difference_keys": []
+      },
+      "regional": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.391527538054047,
+          "tail_rate_Hz": 473.16578249336874,
+          "M_feedback_final_mv": 0.2231182163710237
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.3983770785011802,
+          "tail_rate_Hz": 471.8091603053436,
+          "M_feedback_final_mv": 0.22053243127827266
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.46310365750725707,
+          "tail_rate_Hz": 447.14560078791857,
+          "M_feedback_final_mv": 0.19836566988764195
+        }
+      ],
+      "global_Z_final": 0.459827298595804,
+      "high_entry_s": 9.87,
+      "high_confirmation_s": 10.07,
+      "high_entry_left_censored": false,
+      "broad_entry_s": 10.39,
+      "broad_entry_left_censored": false,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 30,
+          "duration_ms": 100,
+          "peak_hz": 65.790625,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.3
+        },
+        {
+          "start_bin": 32,
+          "end_bin": 40,
+          "duration_ms": 80,
+          "peak_hz": 150.08125,
+          "qualifies": true,
+          "start_s": 9.32,
+          "end_s": 9.4
+        }
+      ],
+      "tail_window_ms": [
+        11500,
+        12500
+      ],
+      "tail": {
+        "lo_bin": 250,
+        "hi_bin": 350,
+        "n_bins": 100,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 448.36449999999996,
+        "max_rate_hz": 464.88750000000005,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.98296875,
+          "20Hz_duty90": 0.97825,
+          "50Hz_duty80": 0.98078125,
+          "50Hz_duty90": 0.9728125,
+          "100Hz_duty80": 0.97825,
+          "100Hz_duty90": 0.97065625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.98831
+      }
+    },
+    {
+      "arm": "all_held",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/runs/native_t9000_Zheld",
+      "checks": {
+        "same_future_xi": true,
+        "input_state_difference_keys": []
+      },
+      "regional": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.7442783003859391,
+          "tail_rate_Hz": 110.88063660477454,
+          "M_feedback_final_mv": 0.07252218067864286
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.739900296770452,
+          "tail_rate_Hz": 106.18702290076335,
+          "M_feedback_final_mv": 0.047136687762289596
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.7856316433020321,
+          "tail_rate_Hz": 37.983322390019694,
+          "M_feedback_final_mv": 0.019387535482339822
+        }
+      ],
+      "global_Z_final": 0.7835339789603897,
+      "high_entry_s": null,
+      "high_confirmation_s": null,
+      "high_entry_left_censored": false,
+      "broad_entry_s": null,
+      "broad_entry_left_censored": false,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 29,
+          "duration_ms": 90,
+          "peak_hz": 65.8625,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.29
+        },
+        {
+          "start_bin": 31,
+          "end_bin": 41,
+          "duration_ms": 100,
+          "peak_hz": 128.959375,
+          "qualifies": true,
+          "start_s": 9.31,
+          "end_s": 9.41
+        },
+        {
+          "start_bin": 48,
+          "end_bin": 57,
+          "duration_ms": 90,
+          "peak_hz": 80.8625,
+          "qualifies": true,
+          "start_s": 9.48,
+          "end_s": 9.57
+        },
+        {
+          "start_bin": 60,
+          "end_bin": 69,
+          "duration_ms": 90,
+          "peak_hz": 159.60625,
+          "qualifies": true,
+          "start_s": 9.6,
+          "end_s": 9.69
+        },
+        {
+          "start_bin": 77,
+          "end_bin": 282,
+          "duration_ms": 2050,
+          "peak_hz": 161.59062500000002,
+          "qualifies": true,
+          "start_s": 9.77,
+          "end_s": 11.82
+        },
+        {
+          "start_bin": 288,
+          "end_bin": 294,
+          "duration_ms": 60,
+          "peak_hz": 54.259375,
+          "qualifies": true,
+          "start_s": 11.879999999999999,
+          "end_s": 11.94
+        },
+        {
+          "start_bin": 305,
+          "end_bin": 315,
+          "duration_ms": 100,
+          "peak_hz": 89.803125,
+          "qualifies": true,
+          "start_s": 12.05,
+          "end_s": 12.15
+        }
+      ],
+      "tail_window_ms": [
+        11500,
+        12500
+      ],
+      "tail": {
+        "lo_bin": 250,
+        "hi_bin": 350,
+        "n_bins": 100,
+        "quiet_fraction": 0.22,
+        "longest_quiet_ms": 110,
+        "quiet_runs_ge20ms": 3,
+        "n_events": 2,
+        "event_durations_ms": [
+          60,
+          100
+        ],
+        "event_peaks_hz": [
+          54.259375,
+          89.803125
+        ],
+        "inter_onset_ms": [
+          170
+        ],
+        "activity_duty": 0.78,
+        "mean_rate_hz": 41.37621875000001,
+        "max_rate_hz": 161.59062500000002,
+        "trailing_activity_ms": 310,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.14054687500000002
+      }
+    },
+    {
+      "arm": "cores_dynamic",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_regional_Z_feedback/runs/native_t9000_cores_dynamic",
+      "checks": {
+        "same_future_xi": true,
+        "input_state_difference_keys": [],
+        "held_Z_exact": true
+      },
+      "regional": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.42529934343112374,
+          "tail_rate_Hz": 452.1949602122016,
+          "M_feedback_final_mv": 0.2073339955077381
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.4670569054160757,
+          "tail_rate_Hz": 441.4185750636132,
+          "M_feedback_final_mv": 0.18000591212130537
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.7856316433020321,
+          "tail_rate_Hz": 62.11382140512148,
+          "M_feedback_final_mv": 0.02899972094485406
+        }
+      ],
+      "global_Z_final": 0.7693163214870001,
+      "high_entry_s": null,
+      "high_confirmation_s": null,
+      "high_entry_left_censored": false,
+      "broad_entry_s": null,
+      "broad_entry_left_censored": false,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 29,
+          "duration_ms": 90,
+          "peak_hz": 66.01249999999999,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.29
+        },
+        {
+          "start_bin": 31,
+          "end_bin": 41,
+          "duration_ms": 100,
+          "peak_hz": 129.321875,
+          "qualifies": true,
+          "start_s": 9.31,
+          "end_s": 9.41
+        },
+        {
+          "start_bin": 48,
+          "end_bin": 57,
+          "duration_ms": 90,
+          "peak_hz": 82.190625,
+          "qualifies": true,
+          "start_s": 9.48,
+          "end_s": 9.57
+        },
+        {
+          "start_bin": 60,
+          "end_bin": 69,
+          "duration_ms": 90,
+          "peak_hz": 159.771875,
+          "qualifies": true,
+          "start_s": 9.6,
+          "end_s": 9.69
+        }
+      ],
+      "tail_window_ms": [
+        11500,
+        12500
+      ],
+      "tail": {
+        "lo_bin": 250,
+        "hi_bin": 350,
+        "n_bins": 100,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 80.62178125,
+        "max_rate_hz": 159.190625,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.1515625,
+          "20Hz_duty90": 0.13909375,
+          "50Hz_duty80": 0.13909375,
+          "50Hz_duty90": 0.1338125,
+          "100Hz_duty80": 0.12921875,
+          "100Hz_duty90": 0.11540625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.26135281250000003
+      }
+    },
+    {
+      "arm": "surround_dynamic",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_regional_Z_feedback/runs/native_t9000_surround_dynamic",
+      "checks": {
+        "same_future_xi": true,
+        "input_state_difference_keys": [],
+        "held_Z_exact": true
+      },
+      "regional": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.7442783003859391,
+          "tail_rate_Hz": 386.28912466843497,
+          "M_feedback_final_mv": 0.18274124255683805
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.739900296770452,
+          "tail_rate_Hz": 385.80534351145036,
+          "M_feedback_final_mv": 0.18156586394224047
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.47323280714252797,
+          "tail_rate_Hz": 441.4690413657255,
+          "M_feedback_final_mv": 0.19406962545100548
+        }
+      ],
+      "global_Z_final": 0.4861693367910617,
+      "high_entry_s": 10.03,
+      "high_confirmation_s": 10.23,
+      "high_entry_left_censored": false,
+      "broad_entry_s": 10.52,
+      "broad_entry_left_censored": false,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 29,
+          "duration_ms": 90,
+          "peak_hz": 65.86562500000001,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.29
+        },
+        {
+          "start_bin": 33,
+          "end_bin": 42,
+          "duration_ms": 90,
+          "peak_hz": 156.528125,
+          "qualifies": true,
+          "start_s": 9.33,
+          "end_s": 9.42
+        }
+      ],
+      "tail_window_ms": [
+        11500,
+        12500
+      ],
+      "tail": {
+        "lo_bin": 250,
+        "hi_bin": 350,
+        "n_bins": 100,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 438.80162500000006,
+        "max_rate_hz": 459.11875000000003,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.9728125,
+          "20Hz_duty90": 0.9661875,
+          "50Hz_duty80": 0.97065625,
+          "50Hz_duty90": 0.9661875,
+          "100Hz_duty80": 0.96825,
+          "100Hz_duty90": 0.9605625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.9833687499999999
+      }
+    }
+  ],
+  "same_initial_state_and_future_input": true,
+  "application_and_geometry_checks": "PASS",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_regional_Z_feedback_contract.json",
+  "statistical_unit": "One native history with paired counterfactuals. This tests finite-window spatial feedback, not a universal resource threshold, autonomous attractor or bifurcation type. No additional parameter selection or expansion in this batch.",
+  "bifurcation_type": "NOT_INFERRED",
+  "M": "Dynamic in all four conditions."
+}

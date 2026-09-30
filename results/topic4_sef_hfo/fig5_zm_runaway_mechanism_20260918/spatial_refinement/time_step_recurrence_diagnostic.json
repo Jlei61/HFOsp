@@ -1,0 +1,132 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.05/trajectory.npz",
+      "D": 0.21899999999999986,
+      "global_Z": 0.7810000000000001,
+      "global_mean_hz": 62.21985211435926,
+      "global_std_hz": 8.06229053952254,
+      "weighted_spatial_temporal_RMS_hz": 59.14707203366483,
+      "temporal_RMS_over_spatial_mean_RMS": 0.4342811268027525,
+      "spatial_recurrence_peaks": [
+        {
+          "lag_ms": 308,
+          "correlation": 0.5562634025363875,
+          "normalized_return_error": 0.9420713574408199
+        },
+        {
+          "lag_ms": 103,
+          "correlation": 0.5166122587383142,
+          "normalized_return_error": 0.9832565176193284
+        },
+        {
+          "lag_ms": 207,
+          "correlation": 0.4443329984297501,
+          "normalized_return_error": 1.0542077776998837
+        },
+        {
+          "lag_ms": 51,
+          "correlation": 0.43544169582152753,
+          "normalized_return_error": 1.0626015524199481
+        },
+        {
+          "lag_ms": 919,
+          "correlation": 0.4149336323516254,
+          "normalized_return_error": 1.0817551352960066
+        }
+      ],
+      "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/spatial_refinement/initial_g40.npz",
+      "time_step_ms": 0.05,
+      "history_scheme": "instantaneous rate at the labelled endpoint",
+      "tail_duration_ms": 4000,
+      "Z": "held",
+      "M": "dynamic"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.025/trajectory.npz",
+      "D": 0.21899999999999986,
+      "global_Z": 0.7810000000000001,
+      "global_mean_hz": 69.23680678080788,
+      "global_std_hz": 26.41585499119041,
+      "weighted_spatial_temporal_RMS_hz": 110.49898789118508,
+      "temporal_RMS_over_spatial_mean_RMS": 0.988571004165739,
+      "spatial_recurrence_peaks": [
+        {
+          "lag_ms": 343,
+          "correlation": 0.482882562129276,
+          "normalized_return_error": 1.0169783361127132
+        },
+        {
+          "lag_ms": 101,
+          "correlation": 0.39080474433947304,
+          "normalized_return_error": 1.1038073129429875
+        },
+        {
+          "lag_ms": 687,
+          "correlation": 0.3742401600135042,
+          "normalized_return_error": 1.118714847321316
+        },
+        {
+          "lag_ms": 242,
+          "correlation": 0.36225450637106016,
+          "normalized_return_error": 1.1293794276965288
+        },
+        {
+          "lag_ms": 584,
+          "correlation": 0.3322355359430501,
+          "normalized_return_error": 1.1556519254350603
+        }
+      ],
+      "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/spatial_refinement/initial_g40_dt0.025.npz",
+      "time_step_ms": 0.025,
+      "history_scheme": "instantaneous rate at the labelled endpoint",
+      "tail_duration_ms": 4000,
+      "Z": "held",
+      "M": "dynamic"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_nativeZ_D0.2190000_dt0.05/trajectory.npz",
+      "D": 0.21899999999999997,
+      "global_Z": 0.781,
+      "global_mean_hz": 61.97147316039484,
+      "global_std_hz": 7.8073895833310285,
+      "weighted_spatial_temporal_RMS_hz": 59.904276842272395,
+      "temporal_RMS_over_spatial_mean_RMS": 0.4417097577539193,
+      "spatial_recurrence_peaks": [
+        {
+          "lag_ms": 313,
+          "correlation": 0.6618440505069901,
+          "normalized_return_error": 0.8223898488302583
+        },
+        {
+          "lag_ms": 104,
+          "correlation": 0.5795790364301784,
+          "normalized_return_error": 0.9169745841614311
+        },
+        {
+          "lag_ms": 209,
+          "correlation": 0.5532984438825964,
+          "normalized_return_error": 0.9452004147687141
+        },
+        {
+          "lag_ms": 417,
+          "correlation": 0.4390487074048617,
+          "normalized_return_error": 1.059205009135452
+        },
+        {
+          "lag_ms": 51,
+          "correlation": 0.43004434320055057,
+          "normalized_return_error": 1.0676669473014055
+        }
+      ],
+      "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/spatial_refinement/initial_g40.npz",
+      "time_step_ms": 0.05,
+      "history_scheme": "instantaneous rate at the labelled endpoint",
+      "tail_duration_ms": 4000,
+      "Z": "held",
+      "M": "dynamic"
+    }
+  ],
+  "scope": "Finite4s spatialrecurrence, not asymptotic attractor classification."
+}

@@ -1,0 +1,11 @@
+{
+  "status": "SAME_MEAN_DIFFERENT_WITHIN_CORE_A_FIELD",
+  "reference_time_ms": 9000,
+  "family_time_ms": 9015.709838521607,
+  "outside_A_bitwise": true,
+  "D_reference": 0.25572169961406077,
+  "D_family": 0.2557216996140622,
+  "within_A_max_abs": 0.0013529843050991142,
+  "within_A_weighted_rms": 0.00041221743989262866,
+  "interpretation": "Native A mean first recovers before later crossing its9s mean. Family.field selects first upward crossing after9s, so this near-reference-D short-cycle spectrum is not yet a spectrum at the exact reference9s spatial field. Actual six-burst replay/root uses exact9s, andD.270/.300 roots and actual interventions still use identical full fields."
+}

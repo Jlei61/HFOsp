@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "block": 7,
+      "mode": "T",
+      "relative_error": 2.828257050377503e-17
+    },
+    {
+      "block": 7,
+      "mode": "J",
+      "relative_error": 0.0
+    },
+    {
+      "block": 16,
+      "mode": "T",
+      "relative_error": 2.1804907649714748e-17
+    },
+    {
+      "block": 16,
+      "mode": "J",
+      "relative_error": 0.0
+    }
+  ],
+  "scope": "Exact block-diagonal harmonic derivative actions compared with unchunked actions; no state, mode, or delay is removed."
+}

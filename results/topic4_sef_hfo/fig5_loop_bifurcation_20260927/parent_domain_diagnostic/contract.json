@@ -1,0 +1,36 @@
+{
+  "status": "KNOWN_FAILURE_DIAGNOSIS_NOT_ACCEPTANCE",
+  "question": "Is v2 failure270 inherited from the g0 parent outside its static noise-table support?",
+  "source_index": 270,
+  "source_sha256": "d9b9d71e51b6107eed25fffefe807a9799fca4fe1aa098b55513f05c04c8a26e",
+  "new_MC_seed": 927294,
+  "source_inputs": {
+    "x": -8.242776059517682,
+    "sigmaE": 11.162703263389458,
+    "sigmaI": 1.4271490860557747
+  },
+  "parent_table_support": {
+    "sigmaE_max": 6.5,
+    "sigmaI_max": 8.5
+  },
+  "g": [
+    0.0,
+    0.01,
+    0.03,
+    0.06958569271135091,
+    0.1,
+    0.3
+  ],
+  "prediction_Hz": [
+    2.3717362622092524,
+    2.6623303356631673,
+    3.325550870795885,
+    4.993929027349719,
+    6.623573775257649,
+    22.009586859268182
+  ],
+  "replicates": 4096,
+  "record_ms": 2000,
+  "burn_ms": 500,
+  "interpretation": "Known test point selected for error diagnosis. This is development evidence, not independent validation of a new model. No fitted parameter changes."
+}

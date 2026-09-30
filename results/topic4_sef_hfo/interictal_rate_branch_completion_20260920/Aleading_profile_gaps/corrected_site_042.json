@@ -1,0 +1,49 @@
+{
+  "status": "SAME_J_PHYSICAL_PROFILE_CHECKED",
+  "index": 42,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512_accuracy_N2048.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 1.566111176505257,
+    "T_ms": 242.88046111394442,
+    "maximum_group_defect_Hz": 2.1604940059205546e-10,
+    "regional_defect_Hz": [
+      1.8659550768650262e-13,
+      2.3672133662381726e-13,
+      6.513089252250634e-13
+    ],
+    "minimum_rate_Hz": 4.915146807720199e-05,
+    "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+    "harmonic_chunk_size": 32,
+    "phase_chunk_size": 512,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -1.1747547379314938e-11,
+        "phase_index": 2488,
+        "group": 14
+      },
+      "slow": {
+        "minimum_Hz": 6.704011632094141e-05,
+        "phase_index": 3525,
+        "group": 399
+      },
+      "positive": true,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "relative_waveform_change": 0.0003102432932645102,
+  "relative_period_change": 1.2162537532667272e-08,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 144
+    }
+  ],
+  "scope": "Physical periodic profile only. The queued original Floquet survey must compute stability on this corrected profile."
+}

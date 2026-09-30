@@ -1,0 +1,119 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z219_stable_side_G8505_M65536/point0000.npz",
+      "D": 0.219,
+      "T_ms": 264.17351154071343,
+      "phase_aligned_E_rate_relative_L2_from_first": 0.0,
+      "global_phase_shift": 1.1688822781686584e-14,
+      "core_B_minus_A_peak_offset_ms": 32.627233251555765,
+      "regions": [
+        {
+          "region": "A",
+          "peak_phase": 0.90796164010473,
+          "peak_hz": 444.07435470824663,
+          "mean_hz": 69.11488958770789
+        },
+        {
+          "region": "B",
+          "peak_phase": 0.03146847113130468,
+          "peak_hz": 456.4578038493337,
+          "mean_hz": 67.55544411082136
+        },
+        {
+          "region": "surround",
+          "peak_phase": 0.0021529797794157058,
+          "peak_hz": 177.2731914238794,
+          "mean_hz": 29.0232531101486
+        }
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_period_bridge_G8505_M65536/point0000.npz",
+      "D": 0.21932193379661225,
+      "T_ms": 264.5528502512292,
+      "phase_aligned_E_rate_relative_L2_from_first": 0.06859891596322706,
+      "global_phase_shift": 0.9998358919950991,
+      "core_B_minus_A_peak_offset_ms": 32.096292451441144,
+      "regions": [
+        {
+          "region": "A",
+          "peak_phase": 0.9085196536432867,
+          "peak_hz": 444.1078582608178,
+          "mean_hz": 69.73830026755866
+        },
+        {
+          "region": "B",
+          "peak_phase": 0.029842453306799313,
+          "peak_hz": 456.3614220735528,
+          "mean_hz": 68.18646041092991
+        },
+        {
+          "region": "surround",
+          "peak_phase": 0.0018776815163951029,
+          "peak_hz": 179.4486806552135,
+          "mean_hz": 29.379742395735246
+        }
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+      "D": 0.2193352638617445,
+      "T_ms": 264.18052228455997,
+      "phase_aligned_E_rate_relative_L2_from_first": 0.06634925856007806,
+      "global_phase_shift": 0.9999440089560643,
+      "core_B_minus_A_peak_offset_ms": 32.550392323742635,
+      "regions": [
+        {
+          "region": "A",
+          "peak_phase": 0.9079708784484908,
+          "peak_hz": 444.10752493201323,
+          "mean_hz": 70.3939806051266
+        },
+        {
+          "region": "B",
+          "peak_phase": 0.031183566659778464,
+          "peak_hz": 456.50430946177534,
+          "mean_hz": 68.00166969261417
+        },
+        {
+          "region": "surround",
+          "peak_phase": 0.0030032692977929225,
+          "peak_hz": 177.7009819223298,
+          "mean_hz": 29.419570656153148
+        }
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_second_G8505_M65536/point0000.npz",
+      "D": 0.2193355233904148,
+      "T_ms": 264.28605076103946,
+      "phase_aligned_E_rate_relative_L2_from_first": 0.06699207297428218,
+      "global_phase_shift": 0.9999189124806321,
+      "core_B_minus_A_peak_offset_ms": 32.430170295919176,
+      "regions": [
+        {
+          "region": "A",
+          "peak_phase": 0.9081175460442868,
+          "peak_hz": 444.10742929195067,
+          "mean_hz": 70.2796223948742
+        },
+        {
+          "region": "B",
+          "peak_phase": 0.030826142288897917,
+          "peak_hz": 456.4745424409123,
+          "mean_hz": 68.05964888009298
+        },
+        {
+          "region": "surround",
+          "peak_phase": 0.003069501096469207,
+          "peak_hz": 178.1828098227405,
+          "mean_hz": 29.4158170053672
+        }
+      ]
+    }
+  ],
+  "observable": "Neuron-weighted spatial E rate L2 after one global phase shift; regional primary peak offset on each solved periodic waveform",
+  "scope": "Different Z fields; no same-parameter coexistence or branch connectivity inferred from similarity. Core peak offset is not a propagation-speed estimate."
+}

@@ -1,0 +1,37 @@
+{
+  "status": "SEARCH_FINISHED",
+  "pid": 608523,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0159_N2048.npz",
+  "J_EE_core": 1.2634666122157996,
+  "rows": [
+    {
+      "seed": "cycle_mean",
+      "scipy_termination": 0,
+      "evaluations": 80,
+      "maximum_residual_Hz": 16.640371523686,
+      "status": "FAILED_TRIAL",
+      "candidate_regional_rates_Hz": null,
+      "failed_trial_regional_rates_Hz": [
+        0.5656691320370919,
+        160.34610573507257,
+        3.513435105801745
+      ]
+    },
+    {
+      "seed": "low_A_phase",
+      "scipy_termination": 0,
+      "evaluations": 80,
+      "maximum_residual_Hz": 32.11763886124869,
+      "status": "FAILED_TRIAL",
+      "candidate_regional_rates_Hz": null,
+      "failed_trial_regional_rates_Hz": [
+        0.4244223085138972,
+        152.08266228777626,
+        2.946459680471239
+      ]
+    }
+  ],
+  "equations_changed": false,
+  "scope": "Bounded positive equilibrium search at a single parameter. A converged root requires a fresh residual and finite-difference Jacobian check; no spectral or branch identity claim.",
+  "verified_roots": 0
+}

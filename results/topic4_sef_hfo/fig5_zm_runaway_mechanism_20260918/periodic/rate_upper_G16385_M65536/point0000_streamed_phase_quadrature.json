@@ -1,0 +1,43 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+  "rows": [
+    {
+      "N": 16385,
+      "M": 65536,
+      "D": 0.1449718771100008,
+      "T_ms": 267.35066063917935,
+      "retained_residual_max_hz": 5.080380560684716e-10,
+      "phase_JVP_relative": 0.002729376418175213,
+      "phase_JVP_max_hz_per_cycle_phase": 13463.633207978603,
+      "unprojected_rms_hz": 0.0006500349696579482,
+      "unprojected_max_hz": 0.7167042000232882,
+      "unprojected_relative_rate_L2": 4.370238274276521e-06
+    },
+    {
+      "N": 16385,
+      "M": 131072,
+      "D": 0.1449718771100008,
+      "T_ms": 267.35066063917935,
+      "retained_residual_max_hz": 0.026476632679017786,
+      "phase_JVP_relative": 0.001271513440726657,
+      "phase_JVP_max_hz_per_cycle_phase": 6980.259385062275,
+      "unprojected_rms_hz": 0.0006494085340109797,
+      "unprojected_max_hz": 0.8165996175978352,
+      "unprojected_relative_rate_L2": 4.366026696085261e-06
+    },
+    {
+      "N": 16385,
+      "M": 262144,
+      "D": 0.1449718771100008,
+      "T_ms": 267.35066063917935,
+      "retained_residual_max_hz": 0.020220732007025788,
+      "phase_JVP_relative": 0.0006805729750497968,
+      "phase_JVP_max_hz_per_cycle_phase": 3511.3832263352406,
+      "unprojected_rms_hz": 0.0006505850185009976,
+      "unprojected_max_hz": 0.816599617597058,
+      "unprojected_relative_rate_L2": 4.373936297450984e-06
+    }
+  ],
+  "scope": "Same orbit evaluated on different quadrature grids; not re-corrected and not a stability result"
+}

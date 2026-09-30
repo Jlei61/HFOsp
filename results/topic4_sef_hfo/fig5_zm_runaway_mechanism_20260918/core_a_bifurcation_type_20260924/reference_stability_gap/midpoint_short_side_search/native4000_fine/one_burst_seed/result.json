@@ -1,0 +1,80 @@
+{
+  "status": "SOURCE_REPLAY_PASS_RECURRENCE_ONLY",
+  "period_ms": 233.25,
+  "dt_ms": 0.025,
+  "all_recorded_rates_bitwise": true,
+  "recorded_differences": 0,
+  "maximum_rate_difference_hz": 0.0,
+  "source_checkpoint": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 12.776407513187824,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "GABA": {
+        "reference_rms": 9.165771853313233,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "M": {
+        "reference_rms": 0.017021946695537856,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "covariance": {
+        "reference_rms": 36.76500425350614,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "input_memory": {
+        "reference_rms": 0.2359386908822001,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "delay_refractory_history": {
+        "reference_rms": 5.988683971945474e-05,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      }
+    },
+    "combined_relative_rms": 0.0
+  },
+  "full_state_recurrence": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.73226225779612,
+        "difference_rms": 0.019596430939807678,
+        "relative_rms": 0.0011711764158296675
+      },
+      "GABA": {
+        "reference_rms": 11.068740758460653,
+        "difference_rms": 0.03553972242148648,
+        "relative_rms": 0.0032108189356879514
+      },
+      "M": {
+        "reference_rms": 0.01578100064618516,
+        "difference_rms": 4.940466958210064e-05,
+        "relative_rms": 0.0031306423901606983
+      },
+      "covariance": {
+        "reference_rms": 37.738666490543565,
+        "difference_rms": 0.014455924379364327,
+        "relative_rms": 0.0003830533965206917
+      },
+      "input_memory": {
+        "reference_rms": 0.09764420504105052,
+        "difference_rms": 5.7798297507312505e-05,
+        "relative_rms": 0.0005919275750467073
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.005486535844632717,
+        "difference_rms": 1.2543790915850643e-05,
+        "relative_rms": 0.00228628615050821
+      }
+    },
+    "combined_relative_rms": 0.0021294031530975756
+  },
+  "seconds": 162.6706018447876,
+  "model_promoted": false
+}

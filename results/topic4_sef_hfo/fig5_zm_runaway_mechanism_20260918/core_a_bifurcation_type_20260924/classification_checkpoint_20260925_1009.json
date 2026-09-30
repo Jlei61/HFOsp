@@ -1,0 +1,137 @@
+{
+  "time": "2026-09-25T10:09:37.280974+08:00",
+  "previous_checkpoint": "classification_checkpoint_20260925_0944.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "numerical_method": "exponential_midpoint_v1",
+  "all_Z_held": true,
+  "all_E_M_dynamic": true,
+  "outside_A_Z": "native9s",
+  "cycles": [
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root_dt0p0125",
+      "Z_A": 0.8365893776571304,
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "dt_ms": 0.0125,
+      "period_ms": 233.24480671929103,
+      "closure": 1.0516425798515075e-13,
+      "phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+      "phase_errors": [
+        1.060677228582037e-13,
+        2.9471678729819845e-07,
+        1.292511218345598e-06
+      ]
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4500_continued_root",
+      "Z_A": 0.8208408842945173,
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "dt_ms": 0.025,
+      "period_ms": 232.97153552637744,
+      "closure": 7.401536620125364e-11
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native5000_continued_root",
+      "Z_A": 0.8054717074383299,
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "dt_ms": 0.025,
+      "period_ms": 232.72017085528987,
+      "closure": 1.7575639797215425e-09
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root",
+      "Z_A": 0.7914982744961648,
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "dt_ms": 0.025,
+      "period_ms": 232.50926695821326,
+      "closure": 3.5125575896955227e-12,
+      "phenotype": {
+        "status": "INDEPENDENT_CYCLE_ACTIVITY_RECONSTRUCTION_PASS",
+        "period_ms": 232.50926695821326,
+        "dt_ms": 0.025,
+        "Z_A": 0.7914982744961647,
+        "rows": [
+          {
+            "region": "Global E",
+            "minimum_10ms_hz": 0.020059093515498835,
+            "maximum_10ms_hz": 130.48657522373696,
+            "quiet_intervals_in_recorded_period_ms": [
+              [
+                83.55000000000001,
+                232.525
+              ]
+            ],
+            "maximum_recorded_quiet_ms": 148.975
+          },
+          {
+            "region": "Core A",
+            "minimum_10ms_hz": 1.3547648624665022e-05,
+            "maximum_10ms_hz": 466.39795753499254,
+            "quiet_intervals_in_recorded_period_ms": [
+              [
+                46.475,
+                221.425
+              ]
+            ],
+            "maximum_recorded_quiet_ms": 174.95000000000002
+          },
+          {
+            "region": "Core B",
+            "minimum_10ms_hz": 1.4553702201548025e-05,
+            "maximum_10ms_hz": 476.4827366705164,
+            "quiet_intervals_in_recorded_period_ms": [
+              [
+                0.0,
+                23.3
+              ],
+              [
+                82.55000000000001,
+                232.525
+              ]
+            ],
+            "maximum_recorded_quiet_ms": 149.975
+          },
+          {
+            "region": "Surround",
+            "minimum_10ms_hz": 0.021058050186422036,
+            "maximum_10ms_hz": 125.94950519141904,
+            "quiet_intervals_in_recorded_period_ms": [
+              [
+                83.825,
+                232.525
+              ]
+            ],
+            "maximum_recorded_quiet_ms": 148.7
+          }
+        ],
+        "both_cores_have_nontrivial_burst_and_quiet": true,
+        "definition": "Same10ms smoothing and below5Hz for at least20ms quiet definition as uninterrupted controls. Wrap smoothing at the period edge; interval endpoints are reported in the recorded period without merging across that edge. Edge-bin rounding is at most one dt.",
+        "scope": "Phenotype and nontrivial amplitude of this closed numerical orbit only. No stability, bifurcation or SNN correspondence certificate.",
+        "model_promoted": false
+      }
+    }
+  ],
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3912939
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native5000_continued_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3925546
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4500_continued_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "LAUNCHING"
+      }
+    }
+  ],
+  "decision": "Half-step anchor fails unchanged phase gate narrowly (halfphase1.29e-6); focus further mesh qualification on actual critical interval. ZA.791498 has an emerging negative Ritz value near-1.769 but final full eigenpair verification and onset-link remain pending. No physical PD claim.",
+  "model_promoted": false
+}

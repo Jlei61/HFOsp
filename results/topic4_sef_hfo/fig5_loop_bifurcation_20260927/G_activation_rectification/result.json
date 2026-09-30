@@ -1,0 +1,345 @@
+{
+  "status": "COMPLETE_RECORDED_WINDOW_DIAGNOSTIC",
+  "rows": [
+    {
+      "source": "native",
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "complete_30s": true,
+      "recorded_prefix_s": 30.0,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "samples": 1000,
+          "mean_R_Hz": 241.0439281810524,
+          "sd_R_Hz": 8.715005026304668,
+          "min_R_Hz": 233.00684745454782,
+          "max_R_Hz": 261.4256356295147,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 4.411235018826133,
+          "G_of_mean_R": 4.104392818105239,
+          "sampled_mean_G_target": 4.104392818105239,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -0.30694599737989714,
+          "approximate_filter_balance_residual": -0.00010379665900339674
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "samples": 4000,
+          "mean_R_Hz": 243.42789450699223,
+          "sd_R_Hz": 1.685371218421851,
+          "min_R_Hz": 236.3777606037623,
+          "max_R_Hz": 246.8242740909749,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 4.289133856205766,
+          "G_of_mean_R": 4.342789450699223,
+          "sampled_mean_G_target": 4.342789450699223,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": 0.054836047907827375,
+          "approximate_filter_balance_residual": 0.0011804534143711257
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "samples": 5000,
+          "mean_R_Hz": 243.38563520996823,
+          "sd_R_Hz": 0.46866134252992375,
+          "min_R_Hz": 242.30680561013727,
+          "max_R_Hz": 244.38272953953964,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 4.3396842661561,
+          "G_of_mean_R": 4.338563520996822,
+          "sampled_mean_G_target": 4.3385635209968205,
+          "activation_rectification": -1.7763568394002505e-15,
+          "approximate_G_boundary_term": 1.894970395309334e-05,
+          "approximate_filter_balance_residual": 0.001139694863232495
+        },
+        {
+          "interval_s": [
+            10,
+            20
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 243.37681232816215,
+          "sd_R_Hz": 0.47079641076761036,
+          "min_R_Hz": 242.3052200433008,
+          "max_R_Hz": 244.4881105963285,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 4.338646012036302,
+          "G_of_mean_R": 4.337681232816214,
+          "sampled_mean_G_target": 4.337681232816213,
+          "activation_rectification": -8.881784197001252e-16,
+          "approximate_G_boundary_term": -0.00012200377535525558,
+          "approximate_filter_balance_residual": 0.0008427754447338292
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 243.37626377827758,
+          "sd_R_Hz": 0.46922707017674337,
+          "min_R_Hz": 242.31428223599676,
+          "max_R_Hz": 244.52190681857604,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 4.338578300009933,
+          "G_of_mean_R": 4.337626377827758,
+          "sampled_mean_G_target": 4.337626377827756,
+          "activation_rectification": -1.7763568394002505e-15,
+          "approximate_G_boundary_term": 5.4602745953598706e-05,
+          "approximate_filter_balance_residual": 0.0010065249281310325
+        }
+      ]
+    },
+    {
+      "source": "native",
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "complete_30s": true,
+      "recorded_prefix_s": 30.0,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "samples": 1000,
+          "mean_R_Hz": 171.59498029395422,
+          "sd_R_Hz": 36.11359334996733,
+          "min_R_Hz": 122.63537571327697,
+          "max_R_Hz": 259.8350245728504,
+          "fraction_R_below200": 0.804,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 2.4744555018170233,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.6199589601852827,
+          "activation_rectification": 0.6199589601852827,
+          "approximate_G_boundary_term": -1.856102400221355,
+          "approximate_filter_balance_residual": -0.001605858589614595
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "samples": 4000,
+          "mean_R_Hz": 98.1880872381427,
+          "sd_R_Hz": 4.872755588209527,
+          "min_R_Hz": 94.50632371349911,
+          "max_R_Hz": 122.53095247170836,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 0.1002172313137131,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -0.10014204911190952,
+          "approximate_filter_balance_residual": 7.518220180358082e-05
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "samples": 5000,
+          "mean_R_Hz": 98.76987202373749,
+          "sd_R_Hz": 0.1706874227969564,
+          "min_R_Hz": 98.35602274816091,
+          "max_R_Hz": 99.31204042549854,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 2.690311256581956e-05,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -2.688160125703733e-05,
+          "approximate_filter_balance_residual": 2.1511308782228646e-08
+        },
+        {
+          "interval_s": [
+            10,
+            20
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 98.77295427206022,
+          "sd_R_Hz": 0.16834411019376258,
+          "min_R_Hz": 98.28056441008088,
+          "max_R_Hz": 99.3210005714501,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 6.107274361645299e-10,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -6.101781334872918e-10,
+          "approximate_filter_balance_residual": 5.493026772380337e-13
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 98.73238918965619,
+          "sd_R_Hz": 0.18277752365424554,
+          "min_R_Hz": 98.0817256976184,
+          "max_R_Hz": 99.25197777788009,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 1.2588030673745421e-18,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -1.2576708701715386e-18,
+          "approximate_filter_balance_residual": 1.1321972030035016e-21
+        }
+      ]
+    },
+    {
+      "source": "native",
+      "name": "exit_z0.21_k9.5_fields16p7_high",
+      "complete_30s": true,
+      "recorded_prefix_s": 30.0,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "samples": 1000,
+          "mean_R_Hz": 125.332692010365,
+          "sd_R_Hz": 69.9387504260668,
+          "min_R_Hz": 0.10072218245178001,
+          "max_R_Hz": 259.69968909230437,
+          "fraction_R_below200": 0.843,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 2.376714648237103,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.502067626207764,
+          "activation_rectification": 0.502067626207764,
+          "approximate_G_boundary_term": -1.8762962402692478,
+          "approximate_filter_balance_residual": -0.001649218239909045
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "samples": 4000,
+          "mean_R_Hz": 0.0003652577929465079,
+          "sd_R_Hz": 0.004201004094701154,
+          "min_R_Hz": 1.5533284142325053e-117,
+          "max_R_Hz": 0.09422630523126926,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 0.09518055167694747,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -0.0951091479537536,
+          "approximate_filter_balance_residual": 7.140372319387744e-05
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "samples": 5000,
+          "mean_R_Hz": 4.506378193902104e-120,
+          "sd_R_Hz": 5.799149625231052e-119,
+          "min_R_Hz": 2.6695372518179427e-262,
+          "max_R_Hz": 1.4531495815625953e-117,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 2.555102612869067e-05,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -2.553059592711418e-05,
+          "approximate_filter_balance_residual": 2.043020157649022e-08
+        },
+        {
+          "interval_s": [
+            10,
+            20
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 3.8723119815411604e-265,
+          "sd_R_Hz": 0.0,
+          "min_R_Hz": 3.7e-322,
+          "max_R_Hz": 2.4973707458777937e-262,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 5.800337280963363e-10,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -5.795120320649056e-10,
+          "approximate_filter_balance_residual": 5.216960314307551e-13
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "samples": 10000,
+          "mean_R_Hz": 3.7e-322,
+          "sd_R_Hz": 0.0,
+          "min_R_Hz": 3.7e-322,
+          "max_R_Hz": 3.7e-322,
+          "fraction_R_below200": 1.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 1.1955386198036663e-18,
+          "G_of_mean_R": 0.0,
+          "sampled_mean_G_target": 0.0,
+          "activation_rectification": 0.0,
+          "approximate_G_boundary_term": -1.194463324138674e-18,
+          "approximate_filter_balance_residual": 1.0752956649921772e-21
+        }
+      ]
+    },
+    {
+      "source": "density_carried_hold",
+      "name": "held_K9p35",
+      "complete_trajectory": true,
+      "windows": [
+        {
+          "interval_s": [
+            7.34,
+            10.34
+          ],
+          "samples": 3000,
+          "mean_R_Hz": 201.1182114221983,
+          "sd_R_Hz": 0.027852273505580984,
+          "min_R_Hz": 201.0138940968572,
+          "max_R_Hz": 201.18558985049805,
+          "fraction_R_below200": 0.0,
+          "fraction_R_above500": 0.0,
+          "mean_Graw": 0.11203524614145126,
+          "G_of_mean_R": 0.11182114221983,
+          "sampled_mean_G_target": 0.11182114221983248,
+          "activation_rectification": 2.4841240175987878e-15,
+          "approximate_G_boundary_term": -0.0002038653143711626,
+          "approximate_filter_balance_residual": 1.0238607247611955e-05
+        }
+      ]
+    }
+  ],
+  "updated_epoch": 1790548312.6568844,
+  "sampling": "1ms R/G samples, not exact0.1ms native updates. Filter boundary/balance are approximate. Means clipped outside200-500 require using mean q, not q(meanR).",
+  "scope": "A native prefix is not a final30s state. Rectification alone cannot establish causal closure error, stability, or a bifurcation.",
+  "producer_sha256": "decfcd6e41c192e828ca4eb8737f6ca6f109c4a6d15b962945429ce0ea6ce795",
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,43 @@
+{
+  "status": "PREDICTIONS_LOCKED_BEFORE_NEW_LIF_TARGETS",
+  "created_local": "2026-09-20T14:58:19.936372+08:00",
+  "parameter_hash": "f5cf0f3128658c02ffca2d92c08cbcb2a4be33c040eae767164a84021cf37044",
+  "rows": [
+    {
+      "kind": "early",
+      "dt_ms": 0.1,
+      "conditions": 10,
+      "steps": 30000,
+      "file": "early_prediction_dt0.1.npz"
+    },
+    {
+      "kind": "early",
+      "dt_ms": 0.05,
+      "conditions": 10,
+      "steps": 60000,
+      "file": "early_prediction_dt0.05.npz"
+    },
+    {
+      "kind": "late",
+      "dt_ms": 0.1,
+      "conditions": 4,
+      "steps": 23700,
+      "file": "late_prediction_dt0.1.npz"
+    },
+    {
+      "kind": "late",
+      "dt_ms": 0.05,
+      "conditions": 4,
+      "steps": 47400,
+      "file": "late_prediction_dt0.05.npz"
+    }
+  ],
+  "prediction_hashes": {
+    "late_prediction_dt0.1.npz": "8b29173405df422a01eb29c9e96a9706ddc94041778c2b742d2d785cc1b8c8a5",
+    "early_prediction_dt0.05.npz": "b35df767366452a1ef9f6db0ff366ad131076aa8841ad8095a4b97cd8178b3c3",
+    "early_prediction_dt0.1.npz": "8083cb2f80c7a522444c04a2c7c15e4235890bea6c8da7d4da844314ed2bbd4d",
+    "late_prediction_dt0.05.npz": "93206b9093840b0fd51737e0a65028332ffc8bbbccfdf2345116c467b05dc316"
+  },
+  "reference_acquired": false,
+  "parent_weights_unchanged": true
+}

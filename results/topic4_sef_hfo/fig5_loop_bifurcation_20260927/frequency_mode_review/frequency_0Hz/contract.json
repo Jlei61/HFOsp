@@ -1,0 +1,10 @@
+{
+  "status": "REGISTERED_BEFORE_MODE_AND_GLOBAL_FEEDBACK_DECOMPOSITION",
+  "created_epoch": 1790540364.308104,
+  "question": "Are the near-unit sampled modes concentrated in recruitment edges, and how much does dynamic globalG contribute to them?",
+  "method": "Build L=A+u*w^T from all measured target channels. A retains the same baselineGraw but holds its perturbation fixed. Compute right/left nearunit eigenvectors, global-rate participation and regional mode mass. Project eight replica-block matrix actions through biorthogonal modes, and compare full/half amplitudes. Separately compute eta=w^T*(I-A)^-1*u, the exact rankone determinant factor1-eta at this frequency.",
+  "limits": "Eigenvalues of L(iomega) are feedback gains, not time-growth rates. eta alone cannot certify full stability because A may have its own modes/poles. Firstorder replica-block SEM excludes finite-record, sourcegroup, fixedM and amplitude errors. No stability or bifurcation labels.",
+  "frequency_Hz": 0.0,
+  "producer_sha256": "a1b87c791f670c34f9f688afab6fa9c7e2fe0e9bd294e07c8b73758abac73924",
+  "formal_bifurcation_allowed": false
+}

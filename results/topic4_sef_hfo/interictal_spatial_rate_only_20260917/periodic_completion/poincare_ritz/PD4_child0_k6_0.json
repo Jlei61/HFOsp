@@ -1,0 +1,138 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.02000_N1024.npz",
+  "J_EE_core": 0.9463109196512791,
+  "T_ms": 593.7951662930823,
+  "dt_ms": 0.049999592985271325,
+  "history_dimension": 679745,
+  "minimum_occupied_delay_ms": 0.1,
+  "multipliers": [
+    [
+      188.06463383516765,
+      0.0
+    ],
+    [
+      0.8282792360124549,
+      -2.000244944924411
+    ],
+    [
+      0.8282792360124549,
+      2.000244944924411
+    ],
+    [
+      1.384085841895021,
+      0.0
+    ],
+    [
+      0.5509842338651909,
+      0.0
+    ],
+    [
+      0.47741716674636175,
+      0.0
+    ]
+  ],
+  "residuals": [
+    7.748355733771379e-09,
+    4.184655365270867e-10,
+    4.184655365270867e-10,
+    8.564603133081679e-10,
+    1.7030031210142113e-06,
+    2.217250312112695e-08
+  ],
+  "phase_tangent_relative_defect": 0.02471027582658689,
+  "phase_overlap": [
+    6.906242795114608e-17,
+    2.6260420096731997e-18,
+    2.6260420096731997e-18,
+    8.883896408192064e-17,
+    6.7996484293294935e-18,
+    2.370893327712721e-16
+  ],
+  "section_time_shift_coefficients": [
+    [
+      -8746.230956693627,
+      0.0
+    ],
+    [
+      -0.07934638168376833,
+      0.11829606474565957
+    ],
+    [
+      -0.07934638168376833,
+      -0.11829606474565957
+    ],
+    [
+      21.687687035342005,
+      0.0
+    ],
+    [
+      0.008344880885519726,
+      0.0
+    ],
+    [
+      34.83918759813712,
+      0.0
+    ]
+  ],
+  "full_state_generalized_eigen_residuals": [
+    7.748347596599354e-09,
+    4.1846553553517574e-10,
+    4.1846553553517574e-10,
+    8.564603600844869e-10,
+    1.703003121014239e-06,
+    2.2172503101673732e-08
+  ],
+  "polynomial_filter_rho": 0.5522275075302883,
+  "transformed_eigenvalues": [
+    [
+      35264.45203555829,
+      0.0
+    ],
+    [
+      -3.772331924928534,
+      -2.208932429253866
+    ],
+    [
+      -3.772331924928534,
+      2.208932429253866
+    ],
+    [
+      1.151363343056601,
+      0.0
+    ],
+    [
+      -0.0006850241878484342,
+      0.0
+    ],
+    [
+      -0.03571574094039199,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.44777249246971174,
+  "smallest_returned_transformed_modulus": 0.0006850309503339611,
+  "method": "Full-history Poincare Rayleigh-Ritz on the entire saved filtered subspace; phase projection, no dropped modes, direct lifted full-monodromy residual checks.",
+  "seconds": 467.10225534439087,
+  "limitation": "Numerical re-extraction at the same orbit and delay step. Filter coverage is inherited only after spectrum matching; paired steps remain mandatory and this is not a rigorous enclosure.",
+  "ritz_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index0_full_k6_20260920_dt0.05.json",
+  "ritz_subspace_dimension": 6,
+  "ritz_basis_diagonal": [
+    1.0,
+    0.9872513417606295,
+    0.4775591458431136,
+    0.21490757167318356,
+    0.04338355994037248,
+    0.018428138791811422
+  ],
+  "subspace_invariance_defect": 4.1842829124786615e-06,
+  "subspace_relative_invariance_defect": 1.0323307512533018e-09,
+  "matched_filter_relative_changes": [
+    3.4546001702085634e-09,
+    5.6933637162198275e-09,
+    5.6933637162198275e-09,
+    7.053026487783733e-08,
+    8.50860698980993e-08,
+    6.762485526960217e-09
+  ],
+  "inherited_filter_spectrum_consistent": true
+}

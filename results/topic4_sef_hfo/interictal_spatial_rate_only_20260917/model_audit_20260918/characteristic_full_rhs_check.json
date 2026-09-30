@@ -1,0 +1,163 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "core": "A",
+      "J_EE_core": 0.938026348558721,
+      "direction": "critical",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 2.6816253703977427e-11,
+          "rate_state_relative_error": 1.0636425631532813e-08,
+          "critical_mode_relative_error": 2.6825382844265368e-11
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 8.248955969822321e-11,
+          "rate_state_relative_error": 1.3471316516675068e-08,
+          "critical_mode_relative_error": 8.249304696703005e-11
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 2.537355221710964e-10,
+          "rate_state_relative_error": 1.470460901985506e-08,
+          "critical_mode_relative_error": 2.5373670724673344e-10
+        }
+      ],
+      "passed": true
+    },
+    {
+      "core": "A",
+      "J_EE_core": 0.938026348558721,
+      "direction": "random_2Hz",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 1.008454692603549e-09,
+          "rate_state_relative_error": 9.045119959679299e-09,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 8.570128948696044e-11,
+          "rate_state_relative_error": 5.163905884734318e-10,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 2.0306778501802994e-10,
+          "rate_state_relative_error": 6.418058826081497e-10,
+          "critical_mode_relative_error": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "core": "A",
+      "J_EE_core": 0.938026348558721,
+      "direction": "random_80Hz",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 1.39923124536071e-12,
+          "rate_state_relative_error": 1.1548036737518314e-10,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 3.0929112102673833e-12,
+          "rate_state_relative_error": 1.006872188060619e-10,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 9.013462674661715e-12,
+          "rate_state_relative_error": 1.1204094820662796e-10,
+          "critical_mode_relative_error": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "core": "B",
+      "J_EE_core": 0.9457572588319144,
+      "direction": "critical",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 2.915631729257715e-11,
+          "rate_state_relative_error": 2.2138940176711353e-08,
+          "critical_mode_relative_error": 2.912406872656918e-11
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 7.030113803609919e-11,
+          "rate_state_relative_error": 1.570342053770271e-08,
+          "critical_mode_relative_error": 7.029066730682554e-11
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 2.1384041456345023e-10,
+          "rate_state_relative_error": 1.7184833181275792e-08,
+          "critical_mode_relative_error": 2.138370424763972e-10
+        }
+      ],
+      "passed": true
+    },
+    {
+      "core": "B",
+      "J_EE_core": 0.9457572588319144,
+      "direction": "random_2Hz",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 7.187854992861486e-10,
+          "rate_state_relative_error": 6.151035205895547e-09,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 8.312261005649697e-11,
+          "rate_state_relative_error": 3.883591637923484e-10,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 2.200354570930666e-10,
+          "rate_state_relative_error": 5.855034987013432e-10,
+          "critical_mode_relative_error": null
+        }
+      ],
+      "passed": true
+    },
+    {
+      "core": "B",
+      "J_EE_core": 0.9457572588319144,
+      "direction": "random_80Hz",
+      "checks": [
+        {
+          "epsilon": 0.001,
+          "full_state_relative_error": 1.6976664993236023e-12,
+          "rate_state_relative_error": 1.4927157984283674e-10,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0003,
+          "full_state_relative_error": 3.476100685190002e-12,
+          "rate_state_relative_error": 9.655461560074015e-11,
+          "critical_mode_relative_error": null
+        },
+        {
+          "epsilon": 0.0001,
+          "full_state_relative_error": 9.75561968463434e-12,
+          "rate_state_relative_error": 1.0510367779510167e-10,
+          "critical_mode_relative_error": null
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "equations_changed": false,
+  "scope": "CPU centered differences of the nonlinear nine-state physical RHS at both first Hopf equilibria; critical eigenvectors and random complex directions at 2 and 80Hz. Checks analytic elimination, adaptation, filters and physical-delay factors. No exhaustive spectrum or SNN correspondence claim."
+}

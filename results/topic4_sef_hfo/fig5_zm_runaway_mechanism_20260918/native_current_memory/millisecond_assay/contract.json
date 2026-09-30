@@ -1,0 +1,44 @@
+{
+  "created_local": "2026-09-20T09:34:30.999062+08:00",
+  "status": "REGISTERED_BEFORE_FINEBIN_REFERENCE",
+  "question": "Are native within-group millisecond coincidences and count fluctuations compatible with the conditional independentGaussianLIF reference, even where50ms mean counts agree?",
+  "physical": "Exactly existing measured_mean_contrast:actualnativeprestepgroupnetmean,privatevarianceforcing,observedZ,groupmeanthreshold. Same groups,replicates,seed andtwo steps; only outputbin changes50msto1ms.",
+  "groups": [
+    279,
+    141,
+    39,
+    594,
+    293,
+    130
+  ],
+  "seed": 920110,
+  "dt_ms": [
+    0.1,
+    0.05
+  ],
+  "replicates": "Reuse exact perconditionmultiplesoforiginalgroupN from prior reference.",
+  "burn_ms": 1000.0,
+  "record_ms": [
+    9000,
+    10350
+  ],
+  "bin_ms": 1,
+  "windows_ms": [
+    [
+      9000,
+      9420
+    ],
+    [
+      9420,
+      9868.5
+    ],
+    [
+      9868.5,
+      10350
+    ]
+  ],
+  "controls": "Sum adjacent50bins must be bitwise identical to previous50ms reference for everyLIFpath at bothsteps. Native1msaggregation must reproduce priornative50msgroupcounts.",
+  "statistics": "For each window and1/5/50ms resolution, samefixedclock completebins only:totalcount, sum k(k-1) coincidences, count residual squared norm and lag1residualcrossmoment. Firsthalf syntheticgrouptrials define reference mean/variance; otherhalf yieldconditional95percent predictive ranges. Robust flag requires same-side exceedance of each step own reference interval; reportall6groups.",
+  "meaning": "Conditionalmodeldiagnostic for one observednativehistory. MC batches are independent under reference inputlaw but not native networkreplicates. Native-derived input is teacherforced; no causalidentification or globalmodelpromotion.",
+  "budget": "Six existingconditions at two steps only. No fitting, new input perturbation, timealignment, native replay or networklaunch."
+}

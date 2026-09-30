@@ -1,0 +1,564 @@
+{
+  "status": "COMPLETE_EXISTING_DATA_ANALYSIS",
+  "source_budget": {
+    "source": "G30_response0.5_s9108405",
+    "episodes": [
+      {
+        "exit_number": 1,
+        "exit_observer_s": 16.7,
+        "window_end_s": 59.74,
+        "first_G_below_global_recovery_block_s": 17.551,
+        "first_core_net_positive_1s_budget_endpoint_s": 17.58,
+        "first_both_Z_at_reference_s": 23.9,
+        "first_post_recovery_brief_s": 49.31,
+        "delay_Z_reference_to_brief_s": 25.410000000000004,
+        "sustained_return_screen": true,
+        "state_at_Z_reference": {
+          "recorded_time_s": 23.9,
+          "mean_Z": 0.7695188125074913,
+          "core_Z": [
+            0.7606490901420017,
+            0.758829779269776
+          ],
+          "mean_K": 2.7182395200064433,
+          "raw_G": 8.147455024084833e-06,
+          "K_current_mV": 30.910506477799903,
+          "G_current_mV": -4.87400432972117e-06,
+          "M_current_mV": 0.00010831825137216839
+        },
+        "state_before_first_brief": {
+          "recorded_time_s": 49.3,
+          "mean_Z": 0.99856650080849,
+          "core_Z": [
+            0.9985113347449243,
+            0.9985000193716707
+          ],
+          "mean_K": 0.01690720249844599,
+          "raw_G": 7.060936259521649e-28,
+          "K_current_mV": 0.6994138587614778,
+          "G_current_mV": 2.048414371245272e-26,
+          "M_current_mV": 2.0747570805080956e-05
+        },
+        "exact_budget_window_s": [
+          16.7,
+          49.3
+        ],
+        "accumulated_recovery": [
+          0.8186580088048534,
+          0.8493126505208209,
+          0.8566658821069476,
+          0.8169184228472257
+        ],
+        "accumulated_consumption": [
+          0.03349555627708354,
+          0.027960022170830046,
+          0.0264037162428559,
+          0.03381558185104998
+        ],
+        "observed_Z_change": [
+          0.7851624525277708,
+          0.8213526283499891,
+          0.8302621658640931,
+          0.7831028409961786
+        ],
+        "balance_error": [
+          9.783840404509192e-16,
+          -1.7763568394002505e-15,
+          1.3634926521177704e-15,
+          2.8171909249863347e-15
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 2,
+        "exit_observer_s": 63.56,
+        "window_end_s": 66.58,
+        "first_G_below_global_recovery_block_s": 64.113,
+        "first_core_net_positive_1s_budget_endpoint_s": 64.14,
+        "first_both_Z_at_reference_s": null,
+        "first_post_recovery_brief_s": null,
+        "delay_Z_reference_to_brief_s": null,
+        "sustained_return_screen": false,
+        "state_at_Z_reference": null,
+        "state_before_first_brief": null,
+        "exact_budget_window_s": [
+          63.559999999999995,
+          66.58
+        ],
+        "accumulated_recovery": [
+          0.2447638120715541,
+          0.2780457633286899,
+          0.2812954088847571,
+          0.242997284614461
+        ],
+        "accumulated_consumption": [
+          0.05560280122825046,
+          0.033542402021576226,
+          0.033009603710668224,
+          0.05673188180115433
+        ],
+        "observed_Z_change": [
+          0.18916101084330378,
+          0.2445033613071136,
+          0.24828580517408916,
+          0.18626540281330678
+        ],
+        "balance_error": [
+          1.457167719820518e-16,
+          -9.71445146547012e-17,
+          2.5673907444456745e-16,
+          1.1796119636642288e-16
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 3,
+        "exit_observer_s": 70.31,
+        "window_end_s": 112.09,
+        "first_G_below_global_recovery_block_s": 71.108,
+        "first_core_net_positive_1s_budget_endpoint_s": 71.12,
+        "first_both_Z_at_reference_s": 76.92,
+        "first_post_recovery_brief_s": 100.86,
+        "delay_Z_reference_to_brief_s": 23.939999999999998,
+        "sustained_return_screen": true,
+        "state_at_Z_reference": {
+          "recorded_time_s": 76.92,
+          "mean_Z": 0.7669256875513313,
+          "core_Z": [
+            0.7610896947907255,
+            0.7598980508977665
+          ],
+          "mean_K": 1.9843957978095887,
+          "raw_G": 2.3872503392196333e-05,
+          "K_current_mV": 27.94355861342193,
+          "G_current_mV": 3.523968266123975e-05,
+          "M_current_mV": 0.00017846540190556045
+        },
+        "state_before_first_brief": {
+          "recorded_time_s": 100.86,
+          "mean_Z": 0.9978711134723428,
+          "core_Z": [
+            0.9980101877076364,
+            0.9980002628629789
+          ],
+          "mean_K": 0.016528228922001297,
+          "raw_G": 3.8359962169426444e-26,
+          "K_current_mV": 0.6354937585487315,
+          "G_current_mV": 9.91547916850534e-25,
+          "M_current_mV": 6.535480369348581e-05
+        },
+        "exact_budget_window_s": [
+          70.32000000000001,
+          100.86
+        ],
+        "accumulated_recovery": [
+          0.7428455201228105,
+          0.7617379258719479,
+          0.7654422167705063,
+          0.7417947690558375
+        ],
+        "accumulated_consumption": [
+          0.04395463871140466,
+          0.04041139346898671,
+          0.03980931502825624,
+          0.044149314723477454
+        ],
+        "observed_Z_change": [
+          0.6988908814114045,
+          0.7213265324029601,
+          0.7256329017422525,
+          0.6976454543323605
+        ],
+        "balance_error": [
+          -1.2628786905111156e-15,
+          -1.1032841307212493e-15,
+          2.4424906541753444e-15,
+          4.0245584642661925e-16
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 4,
+        "exit_observer_s": 119.37,
+        "window_end_s": 162.59,
+        "first_G_below_global_recovery_block_s": 120.224,
+        "first_core_net_positive_1s_budget_endpoint_s": 120.24,
+        "first_both_Z_at_reference_s": 126.7,
+        "first_post_recovery_brief_s": 151.94,
+        "delay_Z_reference_to_brief_s": 25.239999999999995,
+        "sustained_return_screen": true,
+        "state_at_Z_reference": {
+          "recorded_time_s": 126.7,
+          "mean_Z": 0.7705048782143751,
+          "core_Z": [
+            0.7606519070869058,
+            0.7604680717557611
+          ],
+          "mean_K": 2.7814739530737973,
+          "raw_G": 6.3216459842465625e-06,
+          "K_current_mV": 30.987214637821694,
+          "G_current_mV": -4.97612301126139e-06,
+          "M_current_mV": 9.518100249322498e-05
+        },
+        "state_before_first_brief": {
+          "recorded_time_s": 151.94,
+          "mean_Z": 0.9980155755731416,
+          "core_Z": [
+            0.9984629446626967,
+            0.9984617641014754
+          ],
+          "mean_K": 0.0178630845044611,
+          "raw_G": 7.5447477631521425e-28,
+          "K_current_mV": 0.7398339060340756,
+          "G_current_mV": 2.1909083955579618e-26,
+          "M_current_mV": 5.310432059756531e-05
+        },
+        "exact_budget_window_s": [
+          119.38000000000001,
+          151.94
+        ],
+        "accumulated_recovery": [
+          0.8360917049947116,
+          0.871400445583781,
+          0.8725784315499747,
+          0.8342761646967282
+        ],
+        "accumulated_consumption": [
+          0.030569038201125626,
+          0.023555740212350164,
+          0.023250005381198986,
+          0.030931506568820915
+        ],
+        "observed_Z_change": [
+          0.8055226667935875,
+          0.8478447053714315,
+          0.8493284261687758,
+          0.8033446581279085
+        ],
+        "balance_error": [
+          1.5161483180037294e-15,
+          6.453171330633722e-16,
+          6.245004513516506e-17,
+          1.2038980923279041e-15
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 5,
+        "exit_observer_s": 166.47,
+        "window_end_s": 170.24,
+        "first_G_below_global_recovery_block_s": 166.987,
+        "first_core_net_positive_1s_budget_endpoint_s": 167.0,
+        "first_both_Z_at_reference_s": null,
+        "first_post_recovery_brief_s": null,
+        "delay_Z_reference_to_brief_s": null,
+        "sustained_return_screen": false,
+        "state_at_Z_reference": null,
+        "state_before_first_brief": null,
+        "exact_budget_window_s": [
+          166.48,
+          170.24
+        ],
+        "accumulated_recovery": [
+          0.3028136429327137,
+          0.33382182858019255,
+          0.3482702604940227,
+          0.300873095546588
+        ],
+        "accumulated_consumption": [
+          0.05335928546006454,
+          0.04035684803623872,
+          0.029573843846723853,
+          0.05429491234534524
+        ],
+        "observed_Z_change": [
+          0.24945435747264932,
+          0.29346498054395415,
+          0.3186964166472989,
+          0.24657818320124292
+        ],
+        "balance_error": [
+          1.8735013540549517e-16,
+          3.191891195797325e-16,
+          6.245004513516506e-17,
+          1.8041124150158794e-16
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 6,
+        "exit_observer_s": 173.98,
+        "window_end_s": 214.62,
+        "first_G_below_global_recovery_block_s": 174.764,
+        "first_core_net_positive_1s_budget_endpoint_s": 174.78,
+        "first_both_Z_at_reference_s": 180.4,
+        "first_post_recovery_brief_s": 203.46,
+        "delay_Z_reference_to_brief_s": 23.060000000000002,
+        "sustained_return_screen": true,
+        "state_at_Z_reference": {
+          "recorded_time_s": 180.4,
+          "mean_Z": 0.7649183723006144,
+          "core_Z": [
+            0.7607761424619615,
+            0.7591924106348601
+          ],
+          "mean_K": 2.317390917853291,
+          "raw_G": 3.3924611794754366e-05,
+          "K_current_mV": 29.22541456704275,
+          "G_current_mV": 1.2986227948323324e-05,
+          "M_current_mV": 0.00021499306552819644
+        },
+        "state_before_first_brief": {
+          "recorded_time_s": 203.46,
+          "mean_Z": 0.99766529233769,
+          "core_Z": [
+            0.9976241538793682,
+            0.9976084250839365
+          ],
+          "mean_K": 0.023016174950357553,
+          "raw_G": 3.168497591054175e-25,
+          "K_current_mV": 0.9462706136275865,
+          "G_current_mV": 9.105354458367679e-24,
+          "M_current_mV": 1.2972888217398344e-05
+        },
+        "exact_budget_window_s": [
+          173.98,
+          203.46
+        ],
+        "accumulated_recovery": [
+          0.7229673527870442,
+          0.7356653381534839,
+          0.7406648320357929,
+          0.7221963580511312
+        ],
+        "accumulated_consumption": [
+          0.046811228622682076,
+          0.04465872612558557,
+          0.04375118651404673,
+          0.04694347353339116
+        ],
+        "observed_Z_change": [
+          0.6761561241643614,
+          0.691006612027903,
+          0.6969136455217476,
+          0.6752528845177422
+        ],
+        "balance_error": [
+          -6.453171330633722e-16,
+          4.711508960753008e-15,
+          1.429412144204889e-15,
+          2.1441182163073336e-15
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      },
+      {
+        "exit_number": 7,
+        "exit_observer_s": 221.77,
+        "window_end_s": 240.0,
+        "first_G_below_global_recovery_block_s": 222.614,
+        "first_core_net_positive_1s_budget_endpoint_s": 222.64,
+        "first_both_Z_at_reference_s": 229.06,
+        "first_post_recovery_brief_s": null,
+        "delay_Z_reference_to_brief_s": null,
+        "sustained_return_screen": false,
+        "state_at_Z_reference": {
+          "recorded_time_s": 229.06,
+          "mean_Z": 0.7711052532410152,
+          "core_Z": [
+            0.7603630872948817,
+            0.7602441222536026
+          ],
+          "mean_K": 2.7564818817636185,
+          "raw_G": 6.712950255709667e-06,
+          "K_current_mV": 30.416186799850585,
+          "G_current_mV": -5.732590637880249e-06,
+          "M_current_mV": 9.886627623261234e-05
+        },
+        "state_before_first_brief": null,
+        "exact_budget_window_s": [
+          221.78,
+          240.0
+        ],
+        "accumulated_recovery": [
+          0.8042629007182127,
+          0.8419752066100463,
+          0.8425307853519935,
+          0.8023419015072935
+        ],
+        "accumulated_consumption": [
+          0.031107785776290246,
+          0.023988405701597288,
+          0.023859847865938484,
+          0.03147104551935837
+        ],
+        "observed_Z_change": [
+          0.7731551149419227,
+          0.817986800908449,
+          0.8186709374860546,
+          0.7708708559879356
+        ],
+        "balance_error": [
+          2.1510571102112408e-16,
+          -3.8163916471489756e-17,
+          -4.926614671774132e-16,
+          5.065392549852277e-16
+        ],
+        "region_order": [
+          "all_E",
+          "core_A",
+          "core_B",
+          "other_E"
+        ]
+      }
+    ],
+    "quiet_law": {
+      "window_s": [
+        20,
+        40
+      ],
+      "exploratory_window": true,
+      "largest_recorded_q": 0.0,
+      "largest_recorded_causal_R_Hz": 0.0020694906380313216,
+      "fixed_K_decay_tau_s": 5.0,
+      "K_exponential_max_abs_error": 1.184918829721937e-11,
+      "Z_ideal_all_cells_eligible_upper_bound_max_deficit": 1.850741782050136e-13,
+      "Z_above_ideal_upper_bound_max": 0.0,
+      "interpretation": "K exponential is a consequence of the fixed low-rate law, not a fitted recovery timer. The Z formula is an all-eligible upper bound; recurrent inhibition can make actual Z smaller. Neither predicts the first stochastic returned event independently."
+    },
+    "first_brief_identity_matches_current_spatial_review": true,
+    "global_raw_G_block_threshold": 2.669402995841955,
+    "threshold_meaning": "When rawG*(18-EG)>=Ith, nonnegative local II makes all E recovery targets zero. Falling below this bound permits recovery but does not guarantee it; native cell-specific II still matters.",
+    "native_budget_max_abs_error": 1.0824674490095276e-15,
+    "reference_core_Z": [
+      0.7603118191859897,
+      0.7344912026970221
+    ],
+    "timing": "Budget records integrate20ms; net-positive time is a budget endpoint, G crossing uses1ms records, Z and K state use last20ms sample at or before landmark."
+  },
+  "paired_G_kinetics": [
+    {
+      "seed": 9108402,
+      "job_differences": [
+        "global_tau_s",
+        "name"
+      ],
+      "same_network_identity": true,
+      "exact_full_future_input_records": true,
+      "conditions": [
+        {
+          "name": "G30_response0_s9108402",
+          "global_tau_s": 0.0,
+          "entry_count": 1,
+          "exit_count": 0,
+          "full_return_count": 0,
+          "minimum_causal_R_after_entry_Hz": 73.98303995891125,
+          "sampled_K_retention_time_after_entry_s": 0.0,
+          "longest_sampled_K_retention_span_after_entry_s": 0.0,
+          "retention_observation": "1ms samples of the preset causal R<=5Hz rule; approximate duration, not a manual quiet window.",
+          "tail110_120s_R_range_Hz": [
+            85.9319271426368,
+            463.62964705756013
+          ],
+          "tail110_120s_mean_K": 10.614219239674396,
+          "tail110_120s_mean_Z": 0.11302148530783682
+        },
+        {
+          "name": "G30_response0.5_s9108402",
+          "global_tau_s": 0.5,
+          "entry_count": 4,
+          "exit_count": 3,
+          "full_return_count": 2,
+          "minimum_causal_R_after_entry_Hz": 3.7e-322,
+          "sampled_K_retention_time_after_entry_s": 75.79,
+          "longest_sampled_K_retention_span_after_entry_s": 32.035000000000004,
+          "retention_observation": "1ms samples of the preset causal R<=5Hz rule; approximate duration, not a manual quiet window.",
+          "tail110_120s_R_range_Hz": [
+            0.03825043682145487,
+            341.6283108907303
+          ],
+          "tail110_120s_mean_K": 0.6681503753523346,
+          "tail110_120s_mean_Z": 0.7514010506452095
+        }
+      ]
+    },
+    {
+      "seed": 9108403,
+      "job_differences": [
+        "global_tau_s",
+        "name"
+      ],
+      "same_network_identity": true,
+      "exact_full_future_input_records": true,
+      "conditions": [
+        {
+          "name": "G30_response0_s9108403",
+          "global_tau_s": 0.0,
+          "entry_count": 1,
+          "exit_count": 0,
+          "full_return_count": 0,
+          "minimum_causal_R_after_entry_Hz": 85.01823373107464,
+          "sampled_K_retention_time_after_entry_s": 0.0,
+          "longest_sampled_K_retention_span_after_entry_s": 0.0,
+          "retention_observation": "1ms samples of the preset causal R<=5Hz rule; approximate duration, not a manual quiet window.",
+          "tail110_120s_R_range_Hz": [
+            91.97933798216347,
+            458.2563482874626
+          ],
+          "tail110_120s_mean_K": 10.546003158708007,
+          "tail110_120s_mean_Z": 0.12243314262914727
+        },
+        {
+          "name": "G30_response0.5_s9108403",
+          "global_tau_s": 0.5,
+          "entry_count": 5,
+          "exit_count": 5,
+          "full_return_count": 2,
+          "minimum_causal_R_after_entry_Hz": 3.7e-322,
+          "sampled_K_retention_time_after_entry_s": 77.731,
+          "longest_sampled_K_retention_span_after_entry_s": 27.561,
+          "retention_observation": "1ms samples of the preset causal R<=5Hz rule; approximate duration, not a manual quiet window.",
+          "tail110_120s_R_range_Hz": [
+            3.97024207546821e-05,
+            30.449237959602648
+          ],
+          "tail110_120s_mean_K": 0.5181395134820046,
+          "tail110_120s_mean_Z": 0.8930831136682625
+        }
+      ]
+    }
+  ],
+  "statistical_unit": "One selected240s trajectory for the recovery sequence; two paired120s seeds for the sole tauG change. Episodes/samples nested within trajectory.",
+  "interpretation": "Z recovery and event return are separate observations. Matched tauG controls support a role for feedback kinetics in this fixed model; the quiet-interval K decay is equation-consistent. These do not identify an SN/Hopf transition or prove K alone sets return timing.",
+  "producer_sha256": "d789f06d48b7198991f8a2b03c627eeb71e2fb1fb6367aab6b9d119c308b808a",
+  "new_simulations": 0
+}

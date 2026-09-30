@@ -1,0 +1,2287 @@
+{
+  "status": "CURRENT_PARTIAL_BIFURCATION_EVIDENCE",
+  "periodic": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_seed_N1024.npz",
+      "D": 0.14298039269556007,
+      "T_ms": 263.497128273787,
+      "N": 1024,
+      "mean_hz": 27.96276157610083,
+      "min_hz": 0.013975432674709267,
+      "max_hz": 153.95265344295547,
+      "residual": 1.3766765505351941e-11,
+      "iterations": [
+        51.1230595779939,
+        2.9029485982471903,
+        3.763098119224928e-05,
+        1.3766765505351941e-11
+      ],
+      "minimum_group_rate_hz": 4.694050007633977e-05,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_seed_N1024.npz",
+      "plot_stability": "STABLE",
+      "floquet_evidence": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_seed_N1024_endpoint_dt0.05_quotient_chainphase.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_seed_N1024_endpoint_dt0.025_quotient_chainphase.json"
+      ]
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_second_N1024.npz",
+      "D": 0.1435,
+      "T_ms": 263.5219611054569,
+      "N": 1024,
+      "mean_hz": 28.17639493993463,
+      "min_hz": 0.013975251408996244,
+      "max_hz": 154.7632306180174,
+      "residual": 1.3655743202889425e-11,
+      "iterations": [
+        14.659708524808245,
+        107.25310988737796,
+        60.16899795766989,
+        64.20393973412067,
+        0.2870947335205931,
+        4.223243865730808e-06,
+        1.326716514427062e-11
+      ],
+      "minimum_group_rate_hz": 4.6920051389185325e-05,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_second_N1024.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 0,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0000.npz",
+      "D": 0.1436068589467084,
+      "T_ms": 263.52757196899216,
+      "global_mean_hz": 28.22155339070892,
+      "global_min_hz": 0.013976394266632833,
+      "global_max_hz": 154.9264985765401,
+      "regional_mean_hz": [
+        70.79196708186281,
+        70.44684573971118,
+        26.078179401561005
+      ],
+      "residual": 2.8477220581635265e-11,
+      "ds": 0.5,
+      "tangent_D": 0.2031494875785453,
+      "newton_iterations": 4,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0000.npz",
+      "mean_hz": 28.22155339070892,
+      "min_hz": 0.013976394266632833,
+      "max_hz": 154.9264985765401,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 1,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0001.npz",
+      "D": 0.1437245811052311,
+      "T_ms": 263.5343081766945,
+      "global_mean_hz": 28.27184967036476,
+      "global_min_hz": 0.013973209876934655,
+      "global_max_hz": 155.11350983823516,
+      "regional_mean_hz": [
+        71.03238121408147,
+        70.5131096216052,
+        26.12335751325255
+      ],
+      "residual": 1.0658141036401503e-11,
+      "ds": 0.65,
+      "tangent_D": 0.17965300047649374,
+      "newton_iterations": 4,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0001.npz",
+      "mean_hz": 28.27184967036476,
+      "min_hz": 0.013973209876934655,
+      "max_hz": 155.11350983823516,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 2,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0002.npz",
+      "D": 0.1438697878044542,
+      "T_ms": 263.54378268217977,
+      "global_mean_hz": 28.334856094448867,
+      "global_min_hz": 0.013976024334995774,
+      "global_max_hz": 155.3519379431842,
+      "regional_mean_hz": [
+        71.36392041164646,
+        70.58887091240008,
+        26.179387606527765
+      ],
+      "residual": 2.73886469059903e-09,
+      "ds": 0.8450000000000001,
+      "tangent_D": 0.1708412857863536,
+      "newton_iterations": 4,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0002.npz",
+      "mean_hz": 28.334856094448867,
+      "min_hz": 0.013976024334995774,
+      "max_hz": 155.3519379431842,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 3,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0003.npz",
+      "D": 0.14405208807357395,
+      "T_ms": 263.5579492870948,
+      "global_mean_hz": 28.415540768582378,
+      "global_min_hz": 0.013969758425729496,
+      "global_max_hz": 155.65535319688382,
+      "regional_mean_hz": [
+        71.84068918678466,
+        70.67683833984357,
+        26.250079777172772
+      ],
+      "residual": 7.66053886991358e-12,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.1575364896902011,
+      "newton_iterations": 5,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0003.npz",
+      "mean_hz": 28.415540768582378,
+      "min_hz": 0.013969758425729496,
+      "max_hz": 155.65535319688382,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 4,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0004.npz",
+      "D": 0.14422965172009908,
+      "T_ms": 263.5738402511203,
+      "global_mean_hz": 28.494898947738903,
+      "global_min_hz": 0.013968581235174676,
+      "global_max_hz": 155.95887182266395,
+      "regional_mean_hz": [
+        72.37268681186853,
+        70.75816458997993,
+        26.31818263636807
+      ],
+      "residual": 1.681987882307112e-11,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.14117318883033184,
+      "newton_iterations": 5,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0004.npz",
+      "mean_hz": 28.494898947738903,
+      "min_hz": 0.013968581235174676,
+      "max_hz": 155.95887182266395,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 5,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0005.npz",
+      "D": 0.14439581800861115,
+      "T_ms": 263.59190356783984,
+      "global_mean_hz": 28.571078978675327,
+      "global_min_hz": 0.013964271010269338,
+      "global_max_hz": 156.26027042461394,
+      "regional_mean_hz": [
+        72.97003522449786,
+        70.83248660376103,
+        26.381509727110437
+      ],
+      "residual": 9.547918011776346e-12,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.12412343119850336,
+      "newton_iterations": 6,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0005.npz",
+      "mean_hz": 28.571078978675327,
+      "min_hz": 0.013964271010269338,
+      "max_hz": 156.26027042461394,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 6,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0006.npz",
+      "D": 0.1445575804963381,
+      "T_ms": 263.61437615015006,
+      "global_mean_hz": 28.648877866067537,
+      "global_min_hz": 0.013957469321182182,
+      "global_max_hz": 156.56691714516072,
+      "regional_mean_hz": [
+        73.72677499321414,
+        70.89978235011968,
+        26.4427732909417
+      ],
+      "residual": 7.027711745877241e-11,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.10376786976687455,
+      "newton_iterations": 6,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0006.npz",
+      "mean_hz": 28.648877866067537,
+      "min_hz": 0.013957469321182182,
+      "max_hz": 156.56691714516072,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 7,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0007.npz",
+      "D": 0.14477095078498367,
+      "T_ms": 263.6571050781305,
+      "global_mean_hz": 28.768909654350246,
+      "global_min_hz": 0.013949478574002772,
+      "global_max_hz": 157.0166613837017,
+      "regional_mean_hz": [
+        75.35779155798915,
+        70.98378207528995,
+        26.526332284744125
+      ],
+      "residual": 2.758904216193514e-11,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.0814429337972174,
+      "newton_iterations": 9,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0007.npz",
+      "mean_hz": 28.768909654350246,
+      "min_hz": 0.013949478574002772,
+      "max_hz": 157.0166613837017,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "index": 8,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0008.npz",
+      "D": 0.14487391117665893,
+      "T_ms": 263.68833366283224,
+      "global_mean_hz": 28.85038708333569,
+      "global_min_hz": 0.013945078421106484,
+      "global_max_hz": 157.27005065121816,
+      "regional_mean_hz": [
+        77.03990067517203,
+        71.02908110339538,
+        26.569121595876364
+      ],
+      "residual": 1.6049245266103185e-08,
+      "ds": 1.0985000000000003,
+      "tangent_D": 0.060716083844472565,
+      "newton_iterations": 7,
+      "N": 1024,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_up1024/orbits/rate_up1024_0008.npz",
+      "mean_hz": 28.85038708333569,
+      "min_hz": 0.013945078421106484,
+      "max_hz": 157.27005065121816,
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0000.npz",
+      "D": 0.14492441491359717,
+      "T_ms": 264.2999999999999,
+      "N": 2049,
+      "mean_hz": 28.836900061784817,
+      "min_hz": 0.01375309472587141,
+      "max_hz": 160.27191278829406,
+      "residual": 1.1962653090336062e-11,
+      "iterations": [
+        0.5525663745497011,
+        0.9157857754889809,
+        0.00026811364445267216,
+        1.1851630787873546e-11
+      ],
+      "minimum_group_rate_hz": -0.4189793475688733,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.016128692871063777,
+      "D_step": 4.048347812812825e-07,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0001.npz",
+      "D": 0.14492562321798297,
+      "T_ms": 264.350000000006,
+      "N": 2049,
+      "mean_hz": 28.831996702961685,
+      "min_hz": 0.01377495964720304,
+      "max_hz": 160.5352744016667,
+      "residual": 1.3246055484026839e-08,
+      "iterations": [
+        1.7059820864027686,
+        8.206551949460128,
+        0.01399121500102185,
+        1.3246055484026839e-08
+      ],
+      "minimum_group_rate_hz": -0.40132967551847076,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.050000000006093615,
+      "D_step": 1.2083043857968878e-06,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0001.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0002.npz",
+      "D": 0.1449268336630006,
+      "T_ms": 264.39999999999986,
+      "N": 2049,
+      "mean_hz": 28.82702605704853,
+      "min_hz": 0.01373931850438446,
+      "max_hz": 160.8019561999175,
+      "residual": 5.023759186428833e-12,
+      "iterations": [
+        1.6731917354287917,
+        7.781788498214925,
+        0.004479349783148567,
+        2.836067491962524e-08,
+        4.898859096158503e-12
+      ],
+      "minimum_group_rate_hz": -0.36593978548538786,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.04999999999387228,
+      "D_step": 1.210445017635342e-06,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0002.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0003.npz",
+      "D": 0.14492912552943074,
+      "T_ms": 264.49999999999994,
+      "N": 2049,
+      "mean_hz": 28.81695408366355,
+      "min_hz": 0.013710208580421367,
+      "max_hz": 161.34448669784436,
+      "residual": 5.828670879282072e-12,
+      "iterations": [
+        3.3868239076057516,
+        7.1012442265450115,
+        7.56285736824841,
+        0.018662104160238613,
+        2.8704094656717416e-08,
+        5.10702591327572e-12
+      ],
+      "minimum_group_rate_hz": -0.36996106065945383,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.10000000000007958,
+      "D_step": 2.291866430137457e-06,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0003.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0004.npz",
+      "D": 0.14493448400094275,
+      "T_ms": 264.75,
+      "N": 2049,
+      "mean_hz": 28.791352184394153,
+      "min_hz": 0.013654090008472787,
+      "max_hz": 162.74345030862233,
+      "residual": 1.9040324872321435e-11,
+      "iterations": [
+        8.903808768511823,
+        32.846921191507505,
+        31.511948989124292,
+        0.13140011961698672,
+        0.00011934473329033857,
+        1.8707257964933888e-11
+      ],
+      "minimum_group_rate_hz": -0.45200880420661693,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.25000000000005684,
+      "D_step": 5.358471512006968e-06,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_M8192/point0004.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_linear/point0000.npz",
+      "D": 0.14493952938558022,
+      "T_ms": 264.99999999999994,
+      "N": 2049,
+      "mean_hz": 28.764495212524928,
+      "min_hz": 0.013741542285340334,
+      "max_hz": 164.2170400611879,
+      "residual": 5.537237335317968e-12,
+      "iterations": [
+        8.504045435769102,
+        32.48694154264064,
+        34.86939172298653,
+        0.23473518927835668,
+        6.3461241539553015e-06,
+        6.328271240363392e-12
+      ],
+      "minimum_group_rate_hz": -0.41713618342287206,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.24999999999994316,
+      "D_step": 5.045384637469841e-06,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_period_path_G2049_linear/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_physical_fine_G4097_M16384/point0000.npz",
+      "D": 0.14495993850270064,
+      "T_ms": 266.17300827938305,
+      "N": 4097,
+      "mean_hz": 28.540170455593167,
+      "min_hz": 0.013610852010354812,
+      "max_hz": 172.11444292885068,
+      "residual": 6.661338147750939e-12,
+      "iterations": [
+        13.91324044846659,
+        0.005559073728123032,
+        2.8311047950424495e-08,
+        6.994405055138486e-12
+      ],
+      "minimum_group_rate_hz": -0.19931675201234436,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": -5.684341886080802e-14,
+      "D_step": -6.149729966931083e-08,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_physical_fine_G4097_M16384/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0000.npz",
+      "D": 0.14496035442552224,
+      "T_ms": 266.1999999999998,
+      "N": 4097,
+      "mean_hz": 28.530978773488187,
+      "min_hz": 0.013560369363797795,
+      "max_hz": 172.31132969047863,
+      "residual": 3.2392144522219724e-09,
+      "iterations": [
+        1.5565268092345153,
+        10.576070261823778,
+        12.941459570517678,
+        15.838229894264533,
+        15.061057208304918,
+        0.0027312906945575754,
+        3.239464252402513e-09
+      ],
+      "minimum_group_rate_hz": -0.21523338632046915,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.02699172061676336,
+      "D_step": 4.1592282160052285e-07,
+      "predictor": "constant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0001.npz",
+      "D": 0.14496096557899452,
+      "T_ms": 266.24,
+      "N": 4097,
+      "mean_hz": 28.516844574696083,
+      "min_hz": 0.013589881368711948,
+      "max_hz": 172.6002753242433,
+      "residual": 6.841749389252527e-12,
+      "iterations": [
+        127.87724003152279,
+        1.4317063856560397,
+        0.00012756075429276592,
+        6.983996714282625e-12
+      ],
+      "minimum_group_rate_hz": -0.13773592464418383,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.040000000000190994,
+      "D_step": 6.111534722741396e-07,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0001.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0002.npz",
+      "D": 0.14496186998188473,
+      "T_ms": 266.30000000000007,
+      "N": 4097,
+      "mean_hz": 28.494066854224545,
+      "min_hz": 0.013612329084016115,
+      "max_hz": 173.05141165023977,
+      "residual": 1.2013168237956506e-09,
+      "iterations": [
+        129.70671303743885,
+        15.562429554037971,
+        0.0004144852826515333,
+        1.2012613126444194e-09
+      ],
+      "minimum_group_rate_hz": -0.22265024672705003,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.06000000000005912,
+      "D_step": 9.044028902172041e-07,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0002.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0003.npz",
+      "D": 0.14496334389797808,
+      "T_ms": 266.40000000000003,
+      "N": 4097,
+      "mean_hz": 28.449724999806232,
+      "min_hz": 0.01363182958318608,
+      "max_hz": 173.7966862188097,
+      "residual": 6.467049118441537e-12,
+      "iterations": [
+        215.07873958284674,
+        142.87972019776734,
+        0.2545174486013324,
+        9.634204545250213e-08,
+        6.619704784327496e-12
+      ],
+      "minimum_group_rate_hz": -0.13824570622747825,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.0999999999999659,
+      "D_step": 1.4739160933419093e-06,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0003.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G8193_restart80/point0000.npz",
+      "D": 0.1449654651543334,
+      "T_ms": 266.5499999999999,
+      "N": 8193,
+      "mean_hz": 28.35863600350521,
+      "min_hz": 0.013675423649500527,
+      "max_hz": 174.8961842694487,
+      "residual": 5.995204332975845e-12,
+      "iterations": [
+        0.00036689146099000425,
+        2.731759263241429e-08,
+        6.161737786669619e-12
+      ],
+      "minimum_group_rate_hz": -0.04460635805507821,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 32768,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": 0.0,
+      "D_step": 8.714665100661989e-11,
+      "predictor": "constant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G8193_restart80/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0000.npz",
+      "D": 0.14496810035503113,
+      "T_ms": 266.75,
+      "N": 4097,
+      "mean_hz": 28.2235397722019,
+      "min_hz": 0.013661950701552007,
+      "max_hz": 176.49622684640883,
+      "residual": 6.772360450213455e-12,
+      "iterations": [
+        480.52814633406587,
+        305.6807551789993,
+        7.645750584757721,
+        0.016316742379840488,
+        5.6528587366599936e-08,
+        7.16093850883226e-12
+      ],
+      "minimum_group_rate_hz": -0.10323062483209833,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.20000000000010232,
+      "D_step": 2.6354080385204703e-06,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0001.npz",
+      "D": 0.14497095858975378,
+      "T_ms": 267.00000000000006,
+      "N": 4097,
+      "mean_hz": 28.12646819170613,
+      "min_hz": 0.013796979177335805,
+      "max_hz": 180.66985112656405,
+      "residual": 7.105427357601002e-12,
+      "iterations": [
+        528.2612344162467,
+        461.22242212253474,
+        155.22700243074055,
+        4.858514337809427,
+        0.0026341155235642955,
+        2.983324698391243e-08,
+        6.716849298982197e-12
+      ],
+      "minimum_group_rate_hz": -0.1368661670191263,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.25000000000005684,
+      "D_step": 2.858234722652453e-06,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0001.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+      "D": 0.14497187728110808,
+      "T_ms": 267.1,
+      "N": 8193,
+      "mean_hz": 28.08781927537388,
+      "min_hz": 0.01397990057412303,
+      "max_hz": 182.7645794984307,
+      "residual": 5.384581669432009e-12,
+      "iterations": [
+        12.13004904546361,
+        1.3690604205862655e-07,
+        5.051514762044462e-12
+      ],
+      "minimum_group_rate_hz": -0.05088637890296836,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 32768,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": 0.0,
+      "D_step": -7.271801771846498e-10,
+      "predictor": "constant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+      "plot_stability": "STABLE",
+      "floquet_evidence": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.0015625_quotient_chainphase_streamed.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.003125_quotient_chainphase_streamed.json"
+      ]
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_period_G4097/point0001.npz",
+      "D": 0.14497251663785013,
+      "T_ms": 267.1999999999681,
+      "N": 4097,
+      "mean_hz": 28.054947077235006,
+      "min_hz": 0.014081360476415524,
+      "max_hz": 185.1709575727194,
+      "residual": 5.789813073420191e-09,
+      "iterations": [
+        280.99663353296836,
+        203.5539976378422,
+        30.765605399038858,
+        0.014242993072142995,
+        0.00015558805210869053,
+        5.7894244953615726e-09
+      ],
+      "minimum_group_rate_hz": -0.21809760787558405,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": 0.09999999996807674,
+      "D_step": 6.386295618721061e-07,
+      "predictor": "secant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_period_G4097/point0001.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.23036643265897,
+      "D": 0.14497261571091455,
+      "residual": 1.1748657602339563e-09,
+      "mean_hz": 28.047954163911804,
+      "min_hz": 0.014106700389309631,
+      "max_hz": 185.99730535532618,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_002.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_sides_G16385_M65536/point0000.npz",
+      "D": 0.1449726322983944,
+      "T_ms": 267.24,
+      "N": 16385,
+      "mean_hz": 28.04627546786673,
+      "min_hz": 0.014120058874698298,
+      "max_hz": 186.27558128888506,
+      "residual": 6.328271240363392e-12,
+      "iterations": [
+        179.42116966140668,
+        1.2147210553019039,
+        0.01067812055177697,
+        5.882787507127674e-06,
+        6.328271240363392e-12
+      ],
+      "minimum_group_rate_hz": -0.0010356169593874404,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": null,
+      "period_step_ms": -0.017158597874242787,
+      "D_step": -1.0729854060809174e-08,
+      "predictor": "analytic source tangent",
+      "period_constraint": "exact variable elimination",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_sides_G16385_M65536/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.2499677793363,
+      "D": 0.1449726426397434,
+      "residual": 7.521760991835436e-12,
+      "mean_hz": 28.044791194377023,
+      "min_hz": 0.014116480500391014,
+      "max_hz": 186.5666762556187,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_003.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.25665859653793,
+      "D": 0.14497264246600117,
+      "residual": 5.717648576819556e-12,
+      "mean_hz": 28.043935510861406,
+      "min_hz": 0.014134317094888804,
+      "max_hz": 186.76825841995375,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_006.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_center_G16385_M65536/point0000.npz",
+      "D": 0.14497264302824847,
+      "T_ms": 267.25715859787425,
+      "N": 16385,
+      "mean_hz": 28.04387665561682,
+      "min_hz": 0.014136174979626968,
+      "max_hz": 186.78582624498873,
+      "residual": 1.987465747532724e-09,
+      "iterations": [
+        16.76101124946522,
+        5.6643476298301465e-06,
+        1.987104925049721e-09
+      ],
+      "minimum_group_rate_hz": -0.001266443822391753,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": 0.0,
+      "D_step": -8.542663798571937e-11,
+      "predictor": "analytic source tangent",
+      "period_constraint": "augmented linear constraint",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_center_G16385_M65536/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.25779960026216,
+      "D": 0.14497264313301514,
+      "residual": 4.940492459581947e-12,
+      "mean_hz": 28.043802335618384,
+      "min_hz": 0.014116776826064466,
+      "max_hz": 186.80335694732543,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_007.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.2701789946287,
+      "D": 0.14497263005680838,
+      "residual": 4.611588888536744e-10,
+      "mean_hz": 28.042616452763205,
+      "min_hz": 0.014135465505146098,
+      "max_hz": 187.19046897653612,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_005.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_sides_G16385_M65536/point0001.npz",
+      "D": 0.1449726088292538,
+      "T_ms": 267.28,
+      "N": 16385,
+      "mean_hz": 28.042059623808775,
+      "min_hz": 0.014160804276820258,
+      "max_hz": 187.50711371766354,
+      "residual": 2.696731726814505e-10,
+      "iterations": [
+        127.92745093868471,
+        20.92012030697013,
+        0.06855273651668048,
+        4.0510654913950006e-05,
+        2.6922908347160046e-10
+      ],
+      "minimum_group_rate_hz": -0.0013393981628553034,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": null,
+      "period_step_ms": 0.03999999999996362,
+      "D_step": -2.3469140603138428e-08,
+      "predictor": "secant",
+      "period_constraint": "exact variable elimination",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_sides_G16385_M65536/point0001.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "N": 4097,
+      "T_ms": 267.2999838896683,
+      "D": 0.1449725202268176,
+      "residual": 4.884981308350689e-12,
+      "mean_hz": 28.04185496002957,
+      "min_hz": 0.01417594710964488,
+      "max_hz": 188.18404412398812,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_004.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T26735_G8193/point0000.npz",
+      "D": 0.14497189143933634,
+      "T_ms": 267.35,
+      "N": 8193,
+      "mean_hz": 28.046495697399777,
+      "min_hz": 0.014259561546168215,
+      "max_hz": 190.2015211016264,
+      "residual": 5.9396931817445875e-12,
+      "iterations": [
+        12.30322992562255,
+        2.655913733384807e-05,
+        6.5503158452884236e-12
+      ],
+      "minimum_group_rate_hz": -0.053633904622307924,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 32768,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": -1.028297447192017e-10,
+      "D_step": 4.5750078725426135e-10,
+      "predictor": "constant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T26735_G8193/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": []
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+      "D": 0.1449718771100008,
+      "T_ms": 267.35066063917935,
+      "N": 16385,
+      "mean_hz": 28.046633425539206,
+      "min_hz": 0.014264760683032816,
+      "max_hz": 190.23220397703193,
+      "residual": 8.090280832415142e-10,
+      "iterations": [
+        4.383184534178852,
+        1.0330620525689227e-05,
+        8.090280832415142e-10
+      ],
+      "minimum_group_rate_hz": -0.0017270972173112089,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.0001,
+      "period_step_ms": 1.6484591469634324e-12,
+      "D_step": -2.9698465908722937e-15,
+      "predictor": "constant",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+      "plot_stability": "UNRESOLVED",
+      "floquet_evidence": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.003125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json"
+      ]
+    }
+  ],
+  "spatial_panels": [
+    {
+      "number": 1,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.1429804_dt0.05_rate/trajectory.npz"
+      ],
+      "D": 0.1429803926955603,
+      "selection": "Largest 50-ms mean in the final 4-s window",
+      "windows": [
+        {
+          "window_ms": [
+            11304,
+            11354
+          ],
+          "global_E_hz": 120.28672261375601
+        },
+        {
+          "window_ms": [
+            11404,
+            11454
+          ],
+          "global_E_hz": 0.016467948077772465
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D14497_D0.1449700_dt0.05/trajectory.npz"
+      ],
+      "D": 0.14497000000000038,
+      "selection": "Largest 50-ms mean in the final 4-s window",
+      "windows": [
+        {
+          "window_ms": [
+            10360,
+            10410
+          ],
+          "global_E_hz": 128.81983476493588
+        },
+        {
+          "window_ms": [
+            10460,
+            10510
+          ],
+          "global_E_hz": 0.01671000586965033
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_finer_restart_D0.1449750_dt0.05/trajectory.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D144975_D0.1449750_dt0.05/trajectory.npz"
+      ],
+      "D": 0.1449750000000004,
+      "selection": "Peak of the first complete event lasting at least 200 ms; focuses on initial loss of short self-limited events",
+      "windows": [
+        {
+          "window_ms": [
+            9583,
+            9633
+          ],
+          "global_E_hz": 138.08391091237024
+        },
+        {
+          "window_ms": [
+            9683,
+            9733
+          ],
+          "global_E_hz": 68.39677973357817
+        }
+      ]
+    }
+  ],
+  "equilibrium_rows": [
+    {
+      "index": 0,
+      "D": 0.14502,
+      "global_E_hz": 134.00697928807716,
+      "regional_hz": [
+        383.6106988893839,
+        378.3808332414052,
+        121.52244042442975
+      ],
+      "residual_per_ms": 1.6397005281332255e-12,
+      "tangent_D": 0.004942976421410157,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0000.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 1,
+      "D": 0.14507039459450224,
+      "global_E_hz": 134.11751906329167,
+      "regional_hz": [
+        383.67963764654337,
+        378.4126225380248,
+        121.6360420855205
+      ],
+      "residual_per_ms": 8.43769498715119e-15,
+      "tangent_D": 0.005119318951322412,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0001.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 2,
+      "D": 0.14513361926248586,
+      "global_E_hz": 134.25193455936846,
+      "regional_hz": [
+        383.76837727476374,
+        378.4523990212341,
+        121.77403032842835
+      ],
+      "residual_per_ms": 6.8833827526759706e-15,
+      "tangent_D": 0.005453724442770964,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0002.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 3,
+      "D": 0.14521389575111154,
+      "global_E_hz": 134.4159822597462,
+      "regional_hz": [
+        383.88395493840716,
+        378.50266625827066,
+        121.94221387423894
+      ],
+      "residual_per_ms": 9.429956815409923e-15,
+      "tangent_D": 0.005586630782908547,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0003.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 4,
+      "D": 0.14531290712840422,
+      "global_E_hz": 134.6140156417528,
+      "regional_hz": [
+        384.0295704029579,
+        378.56440331789673,
+        122.14506183336808
+      ],
+      "residual_per_ms": 6.494804694057166e-15,
+      "tangent_D": 0.0059765828267870766,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0004.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 5,
+      "D": 0.14544113669739314,
+      "global_E_hz": 134.85739864967422,
+      "regional_hz": [
+        384.2224345456165,
+        378.64385826761975,
+        122.39392542822821
+      ],
+      "residual_per_ms": 5.773159728050814e-15,
+      "tangent_D": 0.0063545543084515535,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0005.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 6,
+      "D": 0.14560360181254672,
+      "global_E_hz": 135.1539180906232,
+      "regional_hz": [
+        384.4716992890795,
+        378.7436555403113,
+        122.69669088579423
+      ],
+      "residual_per_ms": 4.05092626110104e-14,
+      "tangent_D": 0.006707630117865638,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0006.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 7,
+      "D": 0.1457748978423019,
+      "global_E_hz": 135.45699133400322,
+      "regional_hz": [
+        384.73680928468974,
+        378.84656224265655,
+        123.00586902707549
+      ],
+      "residual_per_ms": 9.239831122442865e-14,
+      "tangent_D": 0.006993250616701398,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0007.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 8,
+      "D": 0.14595565581061964,
+      "global_E_hz": 135.76599020811295,
+      "regional_hz": [
+        385.01773768459225,
+        378.95355418793787,
+        123.32077540557167
+      ],
+      "residual_per_ms": 7.145742331182703e-13,
+      "tangent_D": 0.007404862952927288,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0008.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 9,
+      "D": 0.14614297170475496,
+      "global_E_hz": 136.07874277421257,
+      "regional_hz": [
+        385.3091476548928,
+        379.06291768463007,
+        123.63930460088288
+      ],
+      "residual_per_ms": 8.659739592076221e-15,
+      "tangent_D": 0.007567574480485509,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0009.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 10,
+      "D": 0.1463332182068284,
+      "global_E_hz": 136.39379133425788,
+      "regional_hz": [
+        385.6042140371215,
+        379.1708062984305,
+        123.96019341962237
+      ],
+      "residual_per_ms": 3.89757670582469e-14,
+      "tangent_D": 0.007648082350135873,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0010.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 11,
+      "D": 0.14652555097528883,
+      "global_E_hz": 136.71086050999642,
+      "regional_hz": [
+        385.89997175316955,
+        379.27694701628286,
+        124.28323300273136
+      ],
+      "residual_per_ms": 5.930429758382871e-13,
+      "tangent_D": 0.0076817281105278174,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0011.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 12,
+      "D": 0.14671723670664474,
+      "global_E_hz": 137.02872298565788,
+      "regional_hz": [
+        386.19043812285537,
+        379.3782699311771,
+        124.60736129450144
+      ],
+      "residual_per_ms": 2.647534969035803e-13,
+      "tangent_D": 0.007562854677408386,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0012.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 13,
+      "D": 0.14690352750674834,
+      "global_E_hz": 137.34448393294002,
+      "regional_hz": [
+        386.4663544565091,
+        379.47162214642714,
+        124.92984765550821
+      ],
+      "residual_per_ms": 4.176867185456956e-13,
+      "tangent_D": 0.007334741679151074,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0013.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 14,
+      "D": 0.1470776856382492,
+      "global_E_hz": 137.65449739473948,
+      "regional_hz": [
+        386.71478120798935,
+        379.5517063319108,
+        125.24731879264462
+      ],
+      "residual_per_ms": 9.753309271332e-14,
+      "tangent_D": 0.0066733804822232,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0014.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 15,
+      "D": 0.1472380796546435,
+      "global_E_hz": 137.95658879395145,
+      "regional_hz": [
+        386.9334226408761,
+        379.6191838914726,
+        125.5575299473581
+      ],
+      "residual_per_ms": 4.623940119685699e-13,
+      "tangent_D": 0.0061188656833464534,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0015.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 16,
+      "D": 0.1473762713694627,
+      "global_E_hz": 138.24523015378827,
+      "regional_hz": [
+        387.10617086048626,
+        379.66692539008625,
+        125.8552563603352
+      ],
+      "residual_per_ms": 1.395383808500128e-12,
+      "tangent_D": 0.005117715869162139,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0016.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 17,
+      "D": 0.14748788118156775,
+      "global_E_hz": 138.5160507758807,
+      "regional_hz": [
+        387.22591696839237,
+        379.6936494542002,
+        126.13611539602803
+      ],
+      "residual_per_ms": 1.6832819860201909e-12,
+      "tangent_D": 0.003983161157257657,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0017.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 18,
+      "D": 0.14757382701329305,
+      "global_E_hz": 138.7687147854578,
+      "regional_hz": [
+        387.29595908533054,
+        379.70016857306626,
+        126.3996515917886
+      ],
+      "residual_per_ms": 2.7371854782742844e-13,
+      "tangent_D": 0.0031020407167892624,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0018.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 19,
+      "D": 0.14763394632702384,
+      "global_E_hz": 139.00015855669105,
+      "regional_hz": [
+        387.31522535538306,
+        379.69183285890443,
+        126.64253490706024
+      ],
+      "residual_per_ms": 1.932382032165947e-11,
+      "tangent_D": 0.0021442573579469803,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0019.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 20,
+      "D": 0.14768328338919057,
+      "global_E_hz": 139.22289252625055,
+      "regional_hz": [
+        387.31547367106157,
+        379.67370984202455,
+        126.87699139055172
+      ],
+      "residual_per_ms": 4.1005393525139766e-14,
+      "tangent_D": 0.0018205888935907807,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0020.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 21,
+      "D": 0.14772681158903395,
+      "global_E_hz": 139.44294259836312,
+      "regional_hz": [
+        387.30762884187226,
+        379.6447196493616,
+        127.10910903993603
+      ],
+      "residual_per_ms": 1.4390780234130318e-12,
+      "tangent_D": 0.0017079197306995514,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_up/point0021.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 0,
+      "D": 0.14502,
+      "global_E_hz": 134.00697928807716,
+      "regional_hz": [
+        383.6106988893839,
+        378.3808332414052,
+        121.52244042442975
+      ],
+      "residual_per_ms": 1.6397005281332255e-12,
+      "tangent_D": -0.004942976421410157,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0000.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 1,
+      "D": 0.1449718630389481,
+      "global_E_hz": 133.89804318287764,
+      "regional_hz": [
+        383.5466974820248,
+        378.35041030043567,
+        121.41036603593224
+      ],
+      "residual_per_ms": 5.384581669432009e-15,
+      "tangent_D": -0.004672882638934016,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0001.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 2,
+      "D": 0.14491786398365358,
+      "global_E_hz": 133.77011918218227,
+      "regional_hz": [
+        383.4778673623895,
+        378.31621953203035,
+        121.27856051498405
+      ],
+      "residual_per_ms": 1.3357370765021415e-14,
+      "tangent_D": -0.004315602470132402,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0002.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 3,
+      "D": 0.14485942527370507,
+      "global_E_hz": 133.62192557548536,
+      "regional_hz": [
+        383.4089277814111,
+        378.27920292419816,
+        121.12553622356951
+      ],
+      "residual_per_ms": 1.9989565558375944e-13,
+      "tangent_D": -0.003761980054269566,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0003.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 4,
+      "D": 0.14480166639893807,
+      "global_E_hz": 133.45597452646385,
+      "regional_hz": [
+        383.3521762252851,
+        378.2427171886428,
+        120.95354130869023
+      ],
+      "residual_per_ms": 9.506562204109059e-12,
+      "tangent_D": -0.00284033559872218,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0004.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 5,
+      "D": 0.14475820819400062,
+      "global_E_hz": 133.28572101612139,
+      "regional_hz": [
+        383.33612335012765,
+        378.21573715703397,
+        120.77577367381677
+      ],
+      "residual_per_ms": 4.773959005888173e-15,
+      "tangent_D": -0.001217964983324691,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0005.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 6,
+      "D": 0.1447535551606212,
+      "global_E_hz": 133.16587621912404,
+      "regional_hz": [
+        383.3928887597285,
+        378.21397266059796,
+        120.64851012396272
+      ],
+      "residual_per_ms": 6.6058269965196814e-15,
+      "tangent_D": 0.0007936863555347381,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0006.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 7,
+      "D": 0.14479090284157112,
+      "global_E_hz": 133.10992658802618,
+      "regional_hz": [
+        383.52212375052557,
+        378.23935056310086,
+        120.58587787151492
+      ],
+      "residual_per_ms": 7.494005416219807e-15,
+      "tangent_D": 0.0026970071941313195,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0007.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 8,
+      "D": 0.14486173510674763,
+      "global_E_hz": 133.11454632502674,
+      "regional_hz": [
+        383.70323631530727,
+        378.28618831375337,
+        120.58503933698303
+      ],
+      "residual_per_ms": 1.0146680370914929e-11,
+      "tangent_D": 0.003932486506364058,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0008.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 9,
+      "D": 0.1449516881270711,
+      "global_E_hz": 133.15771900214338,
+      "regional_hz": [
+        383.9109133252216,
+        378.3450825877934,
+        120.62373422545522
+      ],
+      "residual_per_ms": 6.991456025229326e-13,
+      "tangent_D": 0.004701203119889309,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0009.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 10,
+      "D": 0.14507956797816088,
+      "global_E_hz": 133.24772451008198,
+      "regional_hz": [
+        384.1866824238189,
+        378.42809263339575,
+        120.7093218964286
+      ],
+      "residual_per_ms": 3.729461184320826e-12,
+      "tangent_D": 0.005452810913932196,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0010.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 11,
+      "D": 0.14522492159010825,
+      "global_E_hz": 133.3692426388029,
+      "regional_hz": [
+        384.4850401104357,
+        378.52157910529206,
+        120.82718591666666
+      ],
+      "residual_per_ms": 1.8018642133910134e-12,
+      "tangent_D": 0.005909349369780278,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0011.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 12,
+      "D": 0.1453803670499643,
+      "global_E_hz": 133.5102891291039,
+      "regional_hz": [
+        384.79473200179154,
+        378.62054666910007,
+        120.96514361523512
+      ],
+      "residual_per_ms": 8.522349492778858e-14,
+      "tangent_D": 0.006487870323854665,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0012.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 13,
+      "D": 0.14554636786248595,
+      "global_E_hz": 133.66462835784833,
+      "regional_hz": [
+        385.118716151427,
+        378.72495479440624,
+        121.1165719305505
+      ],
+      "residual_per_ms": 1.7004453400915054e-13,
+      "tangent_D": 0.006779081958991403,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0013.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 14,
+      "D": 0.1457193281592547,
+      "global_E_hz": 133.82690189396877,
+      "regional_hz": [
+        385.4513246129284,
+        378.8323246777798,
+        121.27604578634653
+      ],
+      "residual_per_ms": 2.2654621234519112e-14,
+      "tangent_D": 0.007012901747228118,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0014.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 15,
+      "D": 0.14589933884707912,
+      "global_E_hz": 133.99060561287905,
+      "regional_hz": [
+        385.79519024656815,
+        378.94189496672044,
+        121.43668669475949
+      ],
+      "residual_per_ms": 1.6919729506348347e-12,
+      "tangent_D": 0.007434754219242251,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0015.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 16,
+      "D": 0.14608922519383835,
+      "global_E_hz": 134.1612941179798,
+      "regional_hz": [
+        386.15334240089436,
+        379.0557765382167,
+        121.60420063184634
+      ],
+      "residual_per_ms": 2.1909557501587074e-14,
+      "tangent_D": 0.007708439447385884,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0016.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 17,
+      "D": 0.14628462773106637,
+      "global_E_hz": 134.3370117341319,
+      "regional_hz": [
+        386.5185585089838,
+        379.17211732966746,
+        121.7767596242721
+      ],
+      "residual_per_ms": 6.994405055138486e-15,
+      "tangent_D": 0.007892036185568845,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0017.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 18,
+      "D": 0.14648170949659467,
+      "global_E_hz": 134.50857312461764,
+      "regional_hz": [
+        386.8871211166621,
+        379.28686525505805,
+        121.944910524469
+      ],
+      "residual_per_ms": 1.5673781716962765e-12,
+      "tangent_D": 0.007851852039236046,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0018.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 19,
+      "D": 0.14667832258439348,
+      "global_E_hz": 134.6732617694349,
+      "regional_hz": [
+        387.25432458807944,
+        379.39850102621006,
+        122.10595515679265
+      ],
+      "residual_per_ms": 9.814371537686384e-14,
+      "tangent_D": 0.007906827730286168,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0019.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 20,
+      "D": 0.14687429661146476,
+      "global_E_hz": 134.8320075137395,
+      "regional_hz": [
+        387.62044528113444,
+        379.50722313838355,
+        122.2608584146723
+      ],
+      "residual_per_ms": 5.664635427393705e-13,
+      "tangent_D": 0.007682549524634936,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0020.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 21,
+      "D": 0.14706165885798436,
+      "global_E_hz": 134.970821046534,
+      "regional_hz": [
+        387.9760750547102,
+        379.6067074575993,
+        122.39531979107565
+      ],
+      "residual_per_ms": 1.3929551956337605e-12,
+      "tangent_D": 0.007204406830148817,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0021.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 22,
+      "D": 0.14723000267009814,
+      "global_E_hz": 135.06676469281723,
+      "regional_hz": [
+        388.31069339466904,
+        379.6955942469098,
+        122.48553743507878
+      ],
+      "residual_per_ms": 5.162537064506978e-15,
+      "tangent_D": 0.006186576750257136,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0022.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 23,
+      "D": 0.1473620961814186,
+      "global_E_hz": 135.0995507638391,
+      "regional_hz": [
+        388.59866493905076,
+        379.7639060433695,
+        122.51108998452787
+      ],
+      "residual_per_ms": 6.106226635438361e-15,
+      "tangent_D": 0.004085429202333419,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0023.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 24,
+      "D": 0.14743072552008415,
+      "global_E_hz": 135.03854839441638,
+      "regional_hz": [
+        388.7972517243211,
+        379.80065263596117,
+        122.44113945664215
+      ],
+      "residual_per_ms": 5.773159728050814e-15,
+      "tangent_D": 0.0013742328861240981,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0024.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 25,
+      "D": 0.14742747413068705,
+      "global_E_hz": 134.88951261417233,
+      "regional_hz": [
+        388.88534412219923,
+        379.8039278052703,
+        122.2823035761797
+      ],
+      "residual_per_ms": 6.050715484207103e-15,
+      "tangent_D": -0.0011513939545308952,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0025.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 26,
+      "D": 0.14738948193488888,
+      "global_E_hz": 134.70764262054297,
+      "regional_hz": [
+        388.91667039517813,
+        379.7905623992498,
+        122.09080802145768
+      ],
+      "residual_per_ms": 1.109139689814409e-11,
+      "tangent_D": -0.0018737794967081257,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0026.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 27,
+      "D": 0.14734292285258616,
+      "global_E_hz": 134.52008265135794,
+      "regional_hz": [
+        388.93617898936907,
+        379.77219349399763,
+        121.8937564609057
+      ],
+      "residual_per_ms": 3.829129721633073e-12,
+      "tangent_D": -0.0018963601918611812,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0027.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 28,
+      "D": 0.14729568062566842,
+      "global_E_hz": 134.33443022305275,
+      "regional_hz": [
+        388.9572724831569,
+        379.752726688035,
+        121.69869798124071
+      ],
+      "residual_per_ms": 1.4266799547302256e-13,
+      "tangent_D": -0.001900868352780651,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0028.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 29,
+      "D": 0.14725362786980872,
+      "global_E_hz": 134.15554326652568,
+      "regional_hz": [
+        388.98992480742373,
+        379.7357711296535,
+        121.51039609704915
+      ],
+      "residual_per_ms": 1.0207112932647533e-13,
+      "tangent_D": -0.0014496065973017727,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0029.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 30,
+      "D": 0.14722725747941598,
+      "global_E_hz": 133.9932717425701,
+      "regional_hz": [
+        389.05337913414434,
+        379.7270305972797,
+        121.33857524115682
+      ],
+      "residual_per_ms": 5.946701464587534e-13,
+      "tangent_D": -0.0006791393364147666,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0030.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 31,
+      "D": 0.1472208129321839,
+      "global_E_hz": 133.8511493875974,
+      "regional_hz": [
+        389.155156647173,
+        379.72879145205894,
+        121.18670263328394
+      ],
+      "residual_per_ms": 5.906941602518145e-13,
+      "tangent_D": 0.00020088799888936802,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0031.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 32,
+      "D": 0.14723623464699034,
+      "global_E_hz": 133.7315579043727,
+      "regional_hz": [
+        389.2973882020937,
+        379.7421941786105,
+        121.05719821441755
+      ],
+      "residual_per_ms": 9.204165207776782e-13,
+      "tangent_D": 0.0009633566943575496,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0032.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 33,
+      "D": 0.14726621723668562,
+      "global_E_hz": 133.62701085708173,
+      "regional_hz": [
+        389.4666016334399,
+        379.76338436950374,
+        120.94262999607918
+      ],
+      "residual_per_ms": 8.481410018745805e-14,
+      "tangent_D": 0.0013912085060174043,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0033.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 34,
+      "D": 0.1473125642484244,
+      "global_E_hz": 133.54007747451317,
+      "regional_hz": [
+        389.6645087696336,
+        379.79307062047275,
+        120.84563644334946
+      ],
+      "residual_per_ms": 1.2705392293810291e-12,
+      "tangent_D": 0.0022796495191065597,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0034.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 35,
+      "D": 0.14737633545870785,
+      "global_E_hz": 133.47161101021456,
+      "regional_hz": [
+        389.8932484884353,
+        379.83181908022146,
+        120.76704639427227
+      ],
+      "residual_per_ms": 5.536196501232382e-14,
+      "tangent_D": 0.002559231252705312,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0035.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 36,
+      "D": 0.14744608170308346,
+      "global_E_hz": 133.40795231827346,
+      "regional_hz": [
+        390.1340629500223,
+        379.8737618105909,
+        120.69312586793535
+      ],
+      "residual_per_ms": 2.0090374676373646e-14,
+      "tangent_D": 0.0029246191936987418,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0036.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 37,
+      "D": 0.14750507263913906,
+      "global_E_hz": 133.32921210532928,
+      "regional_hz": [
+        390.35838525643567,
+        379.91035988938825,
+        120.60390748569029
+      ],
+      "residual_per_ms": 1.028510610012745e-12,
+      "tangent_D": 0.0019033630968235066,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0037.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 38,
+      "D": 0.14754334093909527,
+      "global_E_hz": 133.22570976858773,
+      "regional_hz": [
+        390.55035001960687,
+        379.9364556132003,
+        120.4897470311244
+      ],
+      "residual_per_ms": 2.6699302491106636e-13,
+      "tangent_D": 0.0011440369383208721,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0038.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 39,
+      "D": 0.14755700454898546,
+      "global_E_hz": 133.09357038325,
+      "regional_hz": [
+        390.7034953190092,
+        379.950163930634,
+        120.34678226999314
+      ],
+      "residual_per_ms": 7.617517727709355e-13,
+      "tangent_D": -0.001086110107700289,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0039.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 40,
+      "D": 0.14751257516082222,
+      "global_E_hz": 132.90114072753823,
+      "regional_hz": [
+        390.7566419011346,
+        379.93373841397687,
+        120.143732005725
+      ],
+      "residual_per_ms": 2.9260482925508313e-12,
+      "tangent_D": -0.0027485784604564076,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0040.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 41,
+      "D": 0.1474181556619282,
+      "global_E_hz": 132.66170554931537,
+      "regional_hz": [
+        390.7205766834266,
+        379.89026087431347,
+        119.89420609690016
+      ],
+      "residual_per_ms": 5.5565968493098694e-12,
+      "tangent_D": -0.00506013364884796,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0041.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 42,
+      "D": 0.14726607985008316,
+      "global_E_hz": 132.37618695475092,
+      "regional_hz": [
+        390.5740695905233,
+        379.8127668979349,
+        119.59987850620477
+      ],
+      "residual_per_ms": 8.548717289613705e-15,
+      "tangent_D": -0.006947426183076726,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0042.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 43,
+      "D": 0.14707779024373277,
+      "global_E_hz": 132.06540282334535,
+      "regional_hz": [
+        390.35355978026985,
+        379.71111640133046,
+        119.28146319045581
+      ],
+      "residual_per_ms": 7.128778470311126e-12,
+      "tangent_D": -0.008151829321358195,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0043.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 44,
+      "D": 0.14685811930316847,
+      "global_E_hz": 131.73587216046167,
+      "regional_hz": [
+        390.06454888991567,
+        379.5878207309379,
+        118.94560775368547
+      ],
+      "residual_per_ms": 5.10702591327572e-15,
+      "tangent_D": -0.009217935504963136,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0044.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 45,
+      "D": 0.14661932837151867,
+      "global_E_hz": 131.39745601556135,
+      "regional_hz": [
+        389.7284176135348,
+        379.44918232220994,
+        118.60197991832244
+      ],
+      "residual_per_ms": 1.942964018841753e-12,
+      "tangent_D": -0.009695097278192689,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0045.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 46,
+      "D": 0.1463729825657192,
+      "global_E_hz": 131.0575765307651,
+      "regional_hz": [
+        389.36628634372704,
+        379.3035512763217,
+        118.25763879770595
+      ],
+      "residual_per_ms": 1.0097898212046985e-11,
+      "tangent_D": -0.00990670608073835,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0046.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 47,
+      "D": 0.14612519205730667,
+      "global_E_hz": 130.7214760875445,
+      "regional_hz": [
+        388.98946718401413,
+        379.1527147874692,
+        117.91776568357606
+      ],
+      "residual_per_ms": 5.108205525239384e-13,
+      "tangent_D": -0.009941828823079403,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0047.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 48,
+      "D": 0.14587554190621752,
+      "global_E_hz": 130.38823498978257,
+      "regional_hz": [
+        388.6004297412684,
+        378.9971243869373,
+        117.58132159816134
+      ],
+      "residual_per_ms": 9.127108790973892e-13,
+      "tangent_D": -0.009796940874790577,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0048.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 49,
+      "D": 0.14564092830083727,
+      "global_E_hz": 130.06783680354712,
+      "regional_hz": [
+        388.22982360859754,
+        378.84911689652546,
+        117.25771782114109
+      ],
+      "residual_per_ms": 6.42177803988897e-12,
+      "tangent_D": -0.009084803077237583,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0049.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 50,
+      "D": 0.1454192933960942,
+      "global_E_hz": 129.76011093075383,
+      "regional_hz": [
+        387.8742085051492,
+        378.70727267253494,
+        116.94689692221358
+      ],
+      "residual_per_ms": 8.157016728738142e-14,
+      "tangent_D": -0.00872041934317931,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0050.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 51,
+      "D": 0.1452101608466709,
+      "global_E_hz": 129.4625109079171,
+      "regional_hz": [
+        387.53635800075193,
+        378.57198278884823,
+        116.64610494578939
+      ],
+      "residual_per_ms": 3.2397088484126257e-12,
+      "tangent_D": -0.00790608078964555,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0051.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 52,
+      "D": 0.14500944692068488,
+      "global_E_hz": 129.17137080145775,
+      "regional_hz": [
+        387.2102304492035,
+        378.4411866340315,
+        116.35169334187789
+      ],
+      "residual_per_ms": 2.2062213167473033e-14,
+      "tangent_D": -0.007871532929104226,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0052.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 53,
+      "D": 0.1448183712580468,
+      "global_E_hz": 128.88752773660576,
+      "regional_hz": [
+        386.89821348538,
+        378.3156015437568,
+        116.06446394583108
+      ],
+      "residual_per_ms": 2.584269603866929e-13,
+      "tangent_D": -0.0075881424666235505,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0053.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 54,
+      "D": 0.1446177246390776,
+      "global_E_hz": 128.59469525021268,
+      "regional_hz": [
+        386.5678740462672,
+        378.18313052631686,
+        115.76842187728946
+      ],
+      "residual_per_ms": 1.2740364319085984e-12,
+      "tangent_D": -0.007958036855648094,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0054.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 55,
+      "D": 0.14441032691285638,
+      "global_E_hz": 128.2955345229967,
+      "regional_hz": [
+        386.2235578648854,
+        378.04594485861315,
+        115.46619925958308
+      ],
+      "residual_per_ms": 1.316474707024895e-12,
+      "tangent_D": -0.00841603392638862,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0055.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 56,
+      "D": 0.14419119347792173,
+      "global_E_hz": 127.98633905033185,
+      "regional_hz": [
+        385.85803545342486,
+        377.9005197825835,
+        115.15417210537184
+      ],
+      "residual_per_ms": 3.013440191823591e-13,
+      "tangent_D": -0.009068854785692146,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0056.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 57,
+      "D": 0.14395922032250247,
+      "global_E_hz": 127.66658332066858,
+      "regional_hz": [
+        385.468166999265,
+        377.74642190076395,
+        114.83187723998513
+      ],
+      "residual_per_ms": 4.443667656062189e-14,
+      "tangent_D": -0.009480108557715495,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0057.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 58,
+      "D": 0.1437187453782147,
+      "global_E_hz": 127.34007744101345,
+      "regional_hz": [
+        385.0616509742605,
+        377.58670136792813,
+        114.50304812878024
+      ],
+      "residual_per_ms": 2.681188604469753e-14,
+      "tangent_D": -0.009771358728880361,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0058.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 59,
+      "D": 0.14347388620946377,
+      "global_E_hz": 127.00999393657409,
+      "regional_hz": [
+        384.6435532202045,
+        377.4242187924567,
+        114.17081847903698
+      ],
+      "residual_per_ms": 1.0817735596191369e-14,
+      "tangent_D": -0.009804493580004294,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0059.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 60,
+      "D": 0.1432293238839266,
+      "global_E_hz": 126.67865158038599,
+      "regional_hz": [
+        384.224494176892,
+        377.26283740878716,
+        113.83726171239881
+      ],
+      "residual_per_ms": 1.2010357985925424e-14,
+      "tangent_D": -0.009788047136937449,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0060.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 61,
+      "D": 0.14298779055541255,
+      "global_E_hz": 126.34817012282646,
+      "regional_hz": [
+        383.80852515927853,
+        377.1043057718341,
+        113.50445934417893
+      ],
+      "residual_per_ms": 5.88418203051333e-15,
+      "tangent_D": -0.009544179788794691,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0061.npz",
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "index": 62,
+      "D": 0.1429729065950698,
+      "global_E_hz": 126.32761438639787,
+      "regional_hz": [
+        383.78288414734993,
+        377.09456026293844,
+        113.48375053680104
+      ],
+      "residual_per_ms": 8.655576255733877e-13,
+      "tangent_D": -0.00950560175064931,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_down/point0062.npz",
+      "stability": "NOT_ESTABLISHED"
+    }
+  ],
+  "Z": "held spatial field",
+  "M": "dynamic",
+  "unresolved_bracket": [
+    0.14497,
+    0.144975
+  ],
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "bracket_meaning": "20-s finite-history loss of the regular short cycle at dt=.05ms; not a certified critical point",
+  "cycle_resolution": "Coarse prefix excludes old spurious turns; near-critical branch refined by dealiased Galerkin",
+  "human_visual_acceptance": "PENDING"
+}

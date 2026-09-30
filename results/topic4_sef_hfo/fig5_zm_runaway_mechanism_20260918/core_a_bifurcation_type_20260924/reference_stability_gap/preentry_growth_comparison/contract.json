@@ -1,0 +1,45 @@
+{
+  "question": "Is full-state expansion already present in the still-short-event state at native9507.45ms, compared with the near-nine-burst D_A=.270 record? This distinguishes loss of simple periodicity from the subsequent onset of seconds-long Core-A activity.",
+  "coordinates": {
+    "DA0270": {
+      "D_A": 0.27,
+      "Z_A": 0.73,
+      "native_interpolation_time_ms": 9116.474189515997
+    },
+    "native_midpoint": {
+      "D_A": 0.28764862467548047,
+      "Z_A": 0.7123513753245195,
+      "native_interpolation_time_ms": 9507.453342988189
+    }
+  },
+  "conditions": {
+    "DA0270": {
+      "label": "DA0270",
+      "field": "DA0270",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/from_interictal_history/checkpoint10000.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 10000,
+      "previous_elapsed_ms": 0,
+      "prior_same_field_elapsed_ms": 10000,
+      "tangent": true
+    },
+    "native_midpoint": {
+      "label": "native_midpoint",
+      "field": "native_midpoint",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/from_interictal_history/checkpoint10000.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 10000,
+      "previous_elapsed_ms": 0,
+      "prior_same_field_elapsed_ms": 10000,
+      "tangent": true
+    }
+  },
+  "equations": "Unchanged full3479-group spatial drift, graph, physical delays, private variance and locked response. Only original Core-A Z fields differ; outsideA native9s, eachZ held, everyE M dynamic. Original constant external mean, no future innovations.",
+  "controls": "Resume the exact existing full10s checkpoint at each field; integrate the same10--20s exposure with a passive tangent. These are deterministic conditions, not independent replicates. Exact nominal/passive replay and centered full-state derivative checks precede each run.",
+  "readout": "One complete delayed-state direction, fixed cell-weighted norm,100ms renormalization,first2s discarded,all1s blocks. Compare with the already audited nominal event record; rates/M histories are saved by the same producer.",
+  "budget": "Two10s coarse-step growth runs only. A material positive difference warrants a separate time-step control before interpretation.",
+  "interpretation": "Finite-time growth cannot alone certify asymptotic chaos, stable periodicity, or a bifurcation. If expansion precedes prolonged events, do not equate a first periodic instability with the requested onset threshold.",
+  "model_promoted": false
+}

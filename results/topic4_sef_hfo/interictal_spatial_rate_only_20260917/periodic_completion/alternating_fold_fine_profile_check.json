@@ -1,0 +1,179 @@
+{
+  "rows": [
+    {
+      "label": "LPC_double_low",
+      "J_EE_core": 0.9381101414696122,
+      "T_ms": 852.7423753155158,
+      "N": 3072,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_low_N3072.npz",
+      "coordinate": "core_B_mean_Hz",
+      "coordinate_value": 10.787829481760795,
+      "dJ_dcoordinate": -5.871763882900099e-14,
+      "d2J_dcoordinate2": 0.0012549730026891058,
+      "residual_hz": 6.3976601794024646e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed bordered BVP null tangent; nonzero parameter curvature",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -0.00017754034215287972,
+          "phase_index": 7736,
+          "group": 895
+        },
+        "slow": {
+          "minimum_Hz": 4.499197575521069e-05,
+          "phase_index": 7342,
+          "group": 16
+        },
+        "positive": false,
+        "N": 3072,
+        "check_N": 12288
+      }
+    },
+    {
+      "label": "LPC_double_high",
+      "J_EE_core": 0.9449471475293998,
+      "T_ms": 760.6705290765454,
+      "N": 3072,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_high_N3072.npz",
+      "coordinate": "core_A_mean_Hz",
+      "coordinate_value": 13.913379565627556,
+      "dJ_dcoordinate": 8.832318656089371e-13,
+      "d2J_dcoordinate2": -0.0022954698859341104,
+      "residual_hz": 1.1050188541972261e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed bordered BVP null tangent; nonzero parameter curvature",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -8.00441386261255e-05,
+          "phase_index": 7936,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 3.195823425821324e-05,
+          "phase_index": 1628,
+          "group": 379
+        },
+        "positive": false,
+        "N": 3072,
+        "check_N": 12288
+      }
+    },
+    {
+      "label": "LPC_double_secondary1",
+      "J_EE_core": 0.9391433309540169,
+      "T_ms": 875.8164824803579,
+      "N": 4096,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N4096.npz",
+      "coordinate": "core_B_mean_Hz",
+      "coordinate_value": 9.617372569033591,
+      "dJ_dcoordinate": -3.543017954344246e-14,
+      "d2J_dcoordinate2": -0.00025220006060854407,
+      "residual_hz": 1.061650767297806e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed bordered BVP null tangent; nonzero parameter curvature",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -1.4267044601428444e-05,
+          "phase_index": 10172,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 3.276229232034695e-05,
+          "phase_index": 3248,
+          "group": 379
+        },
+        "positive": false,
+        "N": 4096,
+        "check_N": 16384
+      }
+    },
+    {
+      "label": "LPC_double_secondary2",
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "N": 2048,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+      "coordinate": "core_B_mean_Hz",
+      "coordinate_value": 8.641237245025174,
+      "dJ_dcoordinate": 1.405753105685055e-11,
+      "d2J_dcoordinate2": 0.0062246306695890995,
+      "residual_hz": 9.17668718791731e-13,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed bordered BVP null tangent; nonzero parameter curvature",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -0.021943007444109718,
+          "phase_index": 1196,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 4.009308207197741e-05,
+          "phase_index": 4846,
+          "group": 16
+        },
+        "positive": false,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    {
+      "label": "LPC_double_secondary3",
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "N": 2048,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+      "coordinate": "core_B_mean_Hz",
+      "coordinate_value": 7.773727249626686,
+      "dJ_dcoordinate": 1.0087304132800805e-14,
+      "d2J_dcoordinate2": -0.0004072711673907332,
+      "residual_hz": 1.2038980923279041e-12,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed bordered BVP null tangent; nonzero parameter curvature",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -0.01757712940037503,
+          "phase_index": 1348,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 4.955285910560183e-05,
+          "phase_index": 2044,
+          "group": 10
+        },
+        "positive": false,
+        "N": 2048,
+        "check_N": 8192
+      }
+    },
+    {
+      "label": "LPC_double_secondary4",
+      "J_EE_core": 0.940343489690564,
+      "T_ms": 856.8099149281564,
+      "N": 4096,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N4096.npz",
+      "dJ_dlogT": 4.513651618655833e-11,
+      "d2J_dlogT2": 3.2608141145596754,
+      "residual_hz": 7.511352650979575e-13,
+      "type": "fold of periodic orbits",
+      "check": "phase-fixed BVP has a non-phase null tangent; parameter curvature nonzero",
+      "floquet_status": "check matching monodromy files separately",
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -5.170040531836872e-06,
+          "phase_index": 2936,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 5.1660105943190124e-05,
+          "phase_index": 3247,
+          "group": 237
+        },
+        "positive": false,
+        "N": 4096,
+        "check_N": 16384
+      }
+    }
+  ],
+  "status": "CHECK_FINISHED",
+  "scope": "Latest available critical roots, exact full-rate-filter reconstruction on a fourfold temporal grid. Does not replace independent critical-mode checks."
+}

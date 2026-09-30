@@ -1,0 +1,19 @@
+{
+  "stage": "A_COMPLETE__B_RUNNING__C_RUNNING",
+  "updated": "2026-09-18 12:03",
+  "task_complete": false,
+  "transfer_table": "COMPLETE (E 53325 + I 43450 conditions, CRN, low-rate refinement 2048 replicates)",
+  "transfer_table_validation": "COMPLETE: rates 72/72 PASS; gains PASS outside the quantised-ISI regime, not assessable inside it (14/72 flagged)",
+  "response_closure": "FROZEN V3 (response_closure/closure_frozen_v3.*)",
+  "dynamic_closure_validation": "COMPLETE: mean channel PASS; variance_E FAIL (median 0.16), variance_I marginal (0.08)",
+  "Z_closure_native_check": "COMPLETE (<0.5 % integrated depletion drive; per-bin transition-regime error up to 0.08)",
+  "A4_network_comparison": "COMPLETE: skeleton 4/6, primary stochastic 4/6, noise-only 5/6 (a4_comparison/acceptance.json)",
+  "equilibrium_continuation_1mm": "RUNNING (lower_cont D~0.19, upper_cont D~0.33 after fold at 0.346)",
+  "equilibrium_stability_sampling": "RUNNING (lower, upper)",
+  "periodic_orbits": "RUNNING (cycle branch from D=0.10 up/down)",
+  "stage_B": "RUNNING (stage_b_entry.py on A4_det_meandrive checkpoints)",
+  "grid_0p5mm": "RUNNING (g40 equilibria lower/upper)",
+  "figures": "A4 comparison figures produced; main bifurcation figure NOT YET",
+  "human_visual_acceptance": "PENDING",
+  "own_jobs": ["equilibria_v3 lower_cont/upper_cont/g40_lower/g40_upper", "branch_stability_v3 lower/upper", "continue_periodic_v3 cycleUp/cycleDown", "floquet_v3 test", "stage_b_entry"]
+}

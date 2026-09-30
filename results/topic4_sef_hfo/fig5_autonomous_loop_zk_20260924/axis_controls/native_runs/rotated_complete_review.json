@@ -1,0 +1,335 @@
+{
+  "condition": "rotated",
+  "name": "rotated_s9108405",
+  "observed_s": 120.0,
+  "run_status": "COMPLETE",
+  "full120s": true,
+  "entries": [
+    {
+      "onset_s": 89.64,
+      "confirmation_s": 89.84
+    }
+  ],
+  "exits": [
+    {
+      "start_s": 90.34,
+      "confirmation_s": 92.34,
+      "mechanism": "AUTONOMOUS",
+      "all_and_core_means_Hz": [
+        [
+          43.347281250000016,
+          47.29973474801061,
+          46.82061068702289,
+          43.15981615233093
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quiet_fraction": [
+        [
+          0.82,
+          0.87,
+          0.87,
+          0.82
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "complete_activity_episodes": [
+    {
+      "start_s": 0.05,
+      "end_s": 7.43,
+      "duration_s": 7.38,
+      "quiet_gap_s": 0.05,
+      "peak_s": 5.665,
+      "peak_Hz": 451.52671755725186,
+      "onset_interval_s": null,
+      "interevent_gap_s": null
+    },
+    {
+      "start_s": 29.66,
+      "end_s": 29.810000000000002,
+      "duration_s": 0.15,
+      "quiet_gap_s": 22.23,
+      "peak_s": 29.775000000000002,
+      "peak_Hz": 350.89058524173026,
+      "onset_interval_s": 29.61,
+      "interevent_gap_s": 22.23
+    },
+    {
+      "start_s": 30.02,
+      "end_s": 37.22,
+      "duration_s": 7.2,
+      "quiet_gap_s": 0.21,
+      "peak_s": 35.475,
+      "peak_Hz": 448.4732824427481,
+      "onset_interval_s": 0.35999999999999943,
+      "interevent_gap_s": 0.2099999999999973
+    },
+    {
+      "start_s": 57.01,
+      "end_s": 64.38,
+      "duration_s": 7.37,
+      "quiet_gap_s": 19.79,
+      "peak_s": 61.775,
+      "peak_Hz": 450.25445292620867,
+      "onset_interval_s": 26.99,
+      "interevent_gap_s": 19.79
+    },
+    {
+      "start_s": 82.94,
+      "end_s": 83.08,
+      "duration_s": 0.14,
+      "quiet_gap_s": 18.56,
+      "peak_s": 83.045,
+      "peak_Hz": 342.6208651399491,
+      "onset_interval_s": 25.93,
+      "interevent_gap_s": 18.560000000000002
+    },
+    {
+      "start_s": 83.60000000000001,
+      "end_s": 90.52,
+      "duration_s": 6.92,
+      "quiet_gap_s": 0.52,
+      "peak_s": 88.285,
+      "peak_Hz": 449.10941475826974,
+      "onset_interval_s": 0.6600000000000108,
+      "interevent_gap_s": 0.5200000000000102
+    },
+    {
+      "start_s": 114.86,
+      "end_s": 115.01,
+      "duration_s": 0.15,
+      "quiet_gap_s": 0.15,
+      "peak_s": 114.985,
+      "peak_Hz": 336.38676844783714,
+      "onset_interval_s": 31.25999999999999,
+      "interevent_gap_s": 24.340000000000003
+    }
+  ],
+  "right_censored_activity_episode": {
+    "start_s": 115.04,
+    "observed_end_s": 120.0,
+    "observed_duration_lower_bound_s": 4.96,
+    "right_censored": true,
+    "left_boundary_confirmed": true,
+    "mean_Hz_allE_A_B_other": [
+      40.67213331653223,
+      45.43750534782235,
+      47.230002872855614,
+      40.384950913943186
+    ],
+    "peak_Hz_allE_A_B_other": [
+      81.021875,
+      437.9310344827586,
+      443.2569974554707,
+      80.18056467498359
+    ],
+    "interpretation": "Activity since the last qualifying20ms jointquiet interval; no following qualifying quiet interval observed. Not counted as a complete brief event."
+  },
+  "initial_short_events": {
+    "window_s": [
+      0.5,
+      8.0
+    ],
+    "finite_events": [],
+    "brief_events": [],
+    "finite_count": 0,
+    "brief_count": 0,
+    "event_span_s": 0.0,
+    "brief_fraction": 0.0,
+    "event_rate_Hz": 0.0
+  },
+  "initial_features": {
+    "duration_ms": null,
+    "interval_ms": null,
+    "peak_Hz": null,
+    "core_peak_Hz": null,
+    "active_cell_fraction": null
+  },
+  "own_initial_comparison_estimable": false,
+  "initial_core_recruitment": null,
+  "initial_event_metrics": [],
+  "common_current_graph_Z_reference": [
+    0.7603118191859897,
+    0.7344912026970221
+  ],
+  "own_preentry_Z_reference": [
+    0.660637776862684,
+    0.5942425808134909
+  ],
+  "own_reference_time_s": 7.98,
+  "episodes": [
+    {
+      "exit": {
+        "start_s": 90.34,
+        "confirmation_s": 92.34,
+        "mechanism": "AUTONOMOUS",
+        "all_and_core_means_Hz": [
+          [
+            43.347281250000016,
+            47.29973474801061,
+            46.82061068702289,
+            43.15981615233093
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "quiet_fraction": [
+          [
+            0.82,
+            0.87,
+            0.87,
+            0.82
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ]
+      },
+      "window_end_s": 120.0,
+      "peak_joint_core_Z": 0.9968318096887563,
+      "first_recovered_current_graph_reference_s": 93.22,
+      "first_recovered_own_preentry_reference_s": 91.48,
+      "short_events_after_recovery": {
+        "window_s": [
+          93.22,
+          120.0
+        ],
+        "finite_events": [
+          {
+            "start_s": 114.86,
+            "end_s": 115.01,
+            "duration_s": 0.15,
+            "quiet_gap_s": 0.15,
+            "peak_s": 114.985,
+            "peak_Hz": 336.38676844783714,
+            "onset_interval_s": 31.25999999999999,
+            "interevent_gap_s": 24.340000000000003
+          }
+        ],
+        "brief_events": [
+          {
+            "start_s": 114.86,
+            "end_s": 115.01,
+            "duration_s": 0.15,
+            "quiet_gap_s": 0.15,
+            "peak_s": 114.985,
+            "peak_Hz": 336.38676844783714,
+            "onset_interval_s": 31.25999999999999,
+            "interevent_gap_s": 24.340000000000003
+          }
+        ],
+        "finite_count": 1,
+        "brief_count": 1,
+        "event_span_s": 0.15000000000000568,
+        "brief_fraction": 1.0,
+        "event_rate_Hz": 0.037341299477221805
+      },
+      "features": {
+        "duration_ms": 150.0,
+        "interval_ms": null,
+        "peak_Hz": 59.146874999999994,
+        "core_peak_Hz": [
+          272.54641909814325,
+          336.38676844783714
+        ],
+        "active_cell_fraction": 0.9925
+      },
+      "ratios_to_own_initial": {
+        "duration_ms": null,
+        "interval_ms": null,
+        "peak_Hz": null
+      },
+      "brief_recurrence_after_common_Z_screen": false,
+      "temporal_return_screen": null,
+      "own_initial_comparison_status": "NOT_ESTIMABLE_OWN_INITIAL_EVENTS",
+      "core_recruitment": {
+        "n": 1,
+        "core_over100": 1,
+        "median_peak_5ms_Hz": [
+          60.81875,
+          287.53315649867375,
+          402.5445292620865,
+          63.893630991464214
+        ],
+        "median_core_to_other_peak_ratio": 6.300229350181459,
+        "core_recruitment_order": {
+          "A_first": 1,
+          "B_first": 0,
+          "same_5ms_bin": 0,
+          "both_reach100Hz_for10ms": 1
+        }
+      },
+      "event_metrics": [
+        {
+          "start_s": 114.86,
+          "end_s": 115.01,
+          "peak_5ms_Hz": [
+            60.81875,
+            287.53315649867375,
+            402.5445292620865,
+            63.893630991464214
+          ],
+          "core_to_other_peak_ratio": 6.300229350181459,
+          "core_peak_over100": true,
+          "order": {
+            "25": {
+              "onset_ms_A_B_other": [
+                5.0,
+                105.0,
+                20.0
+              ],
+              "core_precedes_other": true
+            },
+            "50": {
+              "onset_ms_A_B_other": [
+                10.0,
+                105.0,
+                30.0
+              ],
+              "core_precedes_other": true
+            },
+            "100": {
+              "onset_ms_A_B_other": [
+                10.0,
+                110.0,
+                null
+              ],
+              "core_precedes_other": null
+            }
+          }
+        }
+      ],
+      "next_entry_censored": true
+    }
+  ],
+  "temporal_returns": null,
+  "temporal_return_comparison_status": "NOT_ESTIMABLE_OWN_INITIAL_EVENTS",
+  "brief_recurrence_episodes_after_common_Z": 0,
+  "return_readout_definition": "Brief recurrence requires at least10 complete20-200ms events spanning5s and80percent brief, after both cores regain the common current-graph Z reference. Comparison to own initial events additionally requires duration, interval and peak ratios within0.5-2. Missing own initial features makes that comparison null, not failure; no substitute baseline is silently used. All counts refer only to the observed window; propagation reviewed separately.",
+  "paired_exogenous_records_exact": true,
+  "spike_field_integrity": "PASS",
+  "autonomous": true,
+  "externally_clamped": false,
+  "certified_bifurcation": false,
+  "scientific_unit": "One trajectory per fixed graph, common seed9108405; events nested within trajectory.",
+  "human_spatial_review": "PENDING"
+}

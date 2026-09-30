@@ -1,0 +1,28 @@
+{
+  "created_local": "2026-09-19T18:50:19.285797",
+  "question": "Does the frozen rate model reproduce LIF population output when driven by the actual nonstationary mean/variance input waveforms of its native-path candidate cycle?",
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "selection": "One group each CoreA E, CoreB E, surround E, and I; largest original-cell-count weighted phase-removed family-deformation energy within each class. A family tangent is not a certifiedcriticalmode.",
+  "dt_ms": 0.1,
+  "wave_samples": 32768,
+  "phase_bins": 128,
+  "burn_cycles": 5,
+  "record_cycles": 20,
+  "replicates": 2048,
+  "seed": 919781,
+  "drive": "Mean includes reconstructed AMPA/GABA mean and imposed M; noise intensities use raw delayed second moments plus externalvariance, avoiding double synaptic filtering. Z held and included in inhibitory variance.",
+  "reference": "Same coloredGaussian rise/decay LIF assay and native membrane/reset/refractory convention as transfer calibration",
+  "statistical_unit": "Independent noise path; repeatedcycles combinedwithin eachreplicate",
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1,
+    "all_selected_groups_required": true
+  },
+  "verification": [
+    "Constant-wave perreplicate counts bitwiseequal toexisting staticLIFassay",
+    "Allintensitysamples nonnegative",
+    "Selected field/state/source identity",
+    "Phasebin expectedrates sampled at the actual discreteLIFclock"
+  ],
+  "scope": "Open-loop local closure validation understrong time-varying input. Not autonomous SNN validation, a newrate model, or a bifurcation certificate. Frozenmodelandassaysunchanged."
+}

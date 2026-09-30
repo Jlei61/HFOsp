@@ -1,0 +1,13 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "dt_ms": 0.025,
+  "source_dt_ms": 0.05,
+  "duration_ms": 5000,
+  "target_native_time_ms": 4000.0,
+  "question": "Does the exact natural short-event history change to long CoreA activity when only its withinCoreA Z field is depleted to the specified adjacent native field?",
+  "method": "Restore the entire saved fast/M/delay state and run the unchanged original deterministic physical-delay model without section resets or interpolation. Record passive relative1ms group rates,10ms M and20x20 spatial rates.",
+  "resource": "Every Z frozen, every E M dynamic; constant original external mean and private variance. No parameter or state clamp beyond the existing frozen-Z family.",
+  "definitions": "For each region:10ms-smoothed E rate, quiet<5Hz foratleast20ms; intervals between qualified quiet intervals are activities, with edge censoring. Spatial persistent fraction: E-cell weight whose50Hz threshold duty>=90% inlast1s.",
+  "scope": "Finite-time nonlinear-state readout, not a new periodic root, stability certificate or bifurcation type. A return to quiet refutes sustained activity over that observed interval only.",
+  "model_promoted": false
+}

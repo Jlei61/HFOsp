@@ -1,0 +1,130 @@
+{
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_regional_Z_feedback/result.json",
+  "rows": [
+    {
+      "arm": "all_dynamic",
+      "global_high_entry_s": 9.87,
+      "broad_entry_s": 10.39,
+      "regions": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.391527538054047,
+          "tail_rate_Hz": 473.16578249336874,
+          "M_feedback_final_mv": 0.2231182163710237
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.3983770785011802,
+          "tail_rate_Hz": 471.8091603053436,
+          "M_feedback_final_mv": 0.22053243127827266
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.46310365750725707,
+          "tail_rate_Hz": 447.14560078791857,
+          "M_feedback_final_mv": 0.19836566988764195
+        }
+      ]
+    },
+    {
+      "arm": "all_held",
+      "global_high_entry_s": null,
+      "broad_entry_s": null,
+      "regions": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.7442783003859391,
+          "tail_rate_Hz": 110.88063660477454,
+          "M_feedback_final_mv": 0.07252218067864286
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.739900296770452,
+          "tail_rate_Hz": 106.18702290076335,
+          "M_feedback_final_mv": 0.047136687762289596
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.7856316433020321,
+          "tail_rate_Hz": 37.983322390019694,
+          "M_feedback_final_mv": 0.019387535482339822
+        }
+      ]
+    },
+    {
+      "arm": "cores_dynamic",
+      "global_high_entry_s": null,
+      "broad_entry_s": null,
+      "regions": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.42529934343112374,
+          "tail_rate_Hz": 452.1949602122016,
+          "M_feedback_final_mv": 0.2073339955077381
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.4670569054160757,
+          "tail_rate_Hz": 441.4185750636132,
+          "M_feedback_final_mv": 0.18000591212130537
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.7856316433020321,
+          "tail_rate_Hz": 62.11382140512148,
+          "M_feedback_final_mv": 0.02899972094485406
+        }
+      ]
+    },
+    {
+      "arm": "surround_dynamic",
+      "global_high_entry_s": 10.03,
+      "broad_entry_s": 10.52,
+      "regions": [
+        {
+          "region": "Core A",
+          "cells": 754,
+          "Z_initial": 0.7442783003859391,
+          "Z_final": 0.7442783003859391,
+          "tail_rate_Hz": 386.28912466843497,
+          "M_feedback_final_mv": 0.18274124255683805
+        },
+        {
+          "region": "Core B",
+          "cells": 786,
+          "Z_initial": 0.739900296770452,
+          "Z_final": 0.739900296770452,
+          "tail_rate_Hz": 385.80534351145036,
+          "M_feedback_final_mv": 0.18156586394224047
+        },
+        {
+          "region": "Surround",
+          "cells": 30460,
+          "Z_initial": 0.7856316433020321,
+          "Z_final": 0.47323280714252797,
+          "tail_rate_Hz": 441.4690413657255,
+          "M_feedback_final_mv": 0.19406962545100548
+        }
+      ]
+    }
+  ],
+  "interpretation": "From the original9s history, holding both coreZ at9s values while allowing surroundZ to evolve still permits global entry. Further core depletion after9s is not necessary in this tested window. This does not remove earlier core depletion or prove global onset without cores. Core-only changes can sustain local activity without global entry. AllMdynamic, one native history."
+}

@@ -1,0 +1,5937 @@
+{
+  "status": "MATCHED_LOCAL_RESPONSE_DIAGNOSTIC_COMPLETE",
+  "conditions": 282,
+  "AC_counted": 146,
+  "AC_failed": 40,
+  "DC_counted": 76,
+  "DC_failed": 2,
+  "low_frequency_sign_failed": 5,
+  "analytic_correct_dt_AC_failed": 37,
+  "independent_demodulation_max_difference": 2.171059292380466e-13,
+  "rows": [
+    {
+      "id": 0,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.3424812423700576,
+        0.0
+      ],
+      "analytic_gain": [
+        3.3407856655305253,
+        0.0
+      ],
+      "error": 0.022609090219685456,
+      "analytic_error": 0.023104901944456083,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0004958117247706275
+    },
+    {
+      "id": 1,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.0156238045606956,
+        -0.6434121577101715
+      ],
+      "analytic_gain": [
+        3.010296542818634,
+        -0.6478455910514566
+      ],
+      "error": 0.03608180833072923,
+      "analytic_error": 0.034741456503940754,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0020266485169114228
+    },
+    {
+      "id": 2,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.146706542328169,
+        -0.6972914159336179
+      ],
+      "analytic_gain": [
+        2.1457269747884578,
+        -0.6967505934788409
+      ],
+      "error": 0.11644719531778999,
+      "analytic_error": 0.11626911848382496,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0003271965212489927
+    },
+    {
+      "id": 3,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.6591157150846173,
+        0.0
+      ],
+      "analytic_gain": [
+        0.6598202952220475,
+        0.0
+      ],
+      "error": 0.012715959770593163,
+      "analytic_error": 0.011660574943881485,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0010553848267116773
+    },
+    {
+      "id": 4,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.6778243497627403,
+        -0.027752174705213146
+      ],
+      "analytic_gain": [
+        0.678086658368053,
+        -0.027453162102116475
+      ],
+      "error": 0.07842236114403615,
+      "analytic_error": 0.07797663826691492,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0005958039439061993
+    },
+    {
+      "id": 5,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.6576921440968406,
+        -0.3468819685507971
+      ],
+      "analytic_gain": [
+        0.65785433496292,
+        -0.34742915588213896
+      ],
+      "error": 0.19521555739989016,
+      "analytic_error": 0.1946659238059469,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0008548748978710483
+    },
+    {
+      "id": 6,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.2786345723875627,
+        0.0
+      ],
+      "analytic_gain": [
+        0.27967641009805605,
+        0.0
+      ],
+      "error": 0.04020090357719125,
+      "analytic_error": 0.04409030078497427,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0038893972077830206
+    },
+    {
+      "id": 7,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.22480341416144387,
+        -0.12096205451788004
+      ],
+      "analytic_gain": [
+        0.22436563475661273,
+        -0.12153289695521328
+      ],
+      "error": 0.017626740666058453,
+      "analytic_error": 0.019006261635380616,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0026856065867710928
+    },
+    {
+      "id": 8,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.005687859982182426,
+        -0.12241640681088782
+      ],
+      "analytic_gain": [
+        0.005268037233093029,
+        -0.12253902764318572
+      ],
+      "error": 0.1751270384943364,
+      "analytic_error": 0.17418589804930387,
+      "passed": false,
+      "low_frequency_sign_ok": false,
+      "finite_vs_infinitesimal_difference": 0.0016327698164177523
+    },
+    {
+      "id": 9,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.821101824016944,
+        0.0
+      ],
+      "analytic_gain": [
+        1.8223842101630672,
+        0.0
+      ],
+      "error": 0.02163299973679262,
+      "analytic_error": 0.020944051831510713,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0006889479052819078
+    },
+    {
+      "id": 10,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.7575878332988253,
+        -0.2442425896872851
+      ],
+      "analytic_gain": [
+        1.7559507341029366,
+        -0.24574117257875822
+      ],
+      "error": 0.05560230641866647,
+      "analytic_error": 0.054621631510122545,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0011923614144813916
+    },
+    {
+      "id": 11,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.2966240406827263,
+        -0.45094726021644393
+      ],
+      "analytic_gain": [
+        1.286900036298619,
+        -0.46560046061224775
+      ],
+      "error": 0.10617007790840452,
+      "analytic_error": 0.0973591097308159,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00944796442143858
+    },
+    {
+      "id": 12,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.34595528057191854,
+        0.0
+      ],
+      "analytic_gain": [
+        0.3463159661372751,
+        0.0
+      ],
+      "error": 0.020217819861176572,
+      "analytic_error": 0.01919631994654759,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0010214999146289838
+    },
+    {
+      "id": 13,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.3438724020125662,
+        -0.03592875613853616
+      ],
+      "analytic_gain": [
+        0.3440081606834732,
+        -0.035984062904213424
+      ],
+      "error": 0.06120801748719088,
+      "analytic_error": 0.06086410050342952,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00041516454024599056
+    },
+    {
+      "id": 14,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.3004055816853618,
+        -0.15884350685937565
+      ],
+      "analytic_gain": [
+        0.3005410389893826,
+        -0.15913986135274813
+      ],
+      "error": 0.20503371766024164,
+      "analytic_error": 0.2047641949055086,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.000922826433894412
+    },
+    {
+      "id": 15,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.11946980532363247,
+        0.0
+      ],
+      "analytic_gain": [
+        0.1197435099998221,
+        0.0
+      ],
+      "error": 0.05159105026609911,
+      "analytic_error": 0.04941825050486172,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0021727997612373895
+    },
+    {
+      "id": 16,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.09910336530933019,
+        -0.05266006772092619
+      ],
+      "analytic_gain": [
+        0.0989935749735176,
+        -0.05294882453285207
+      ],
+      "error": 0.03722402381597192,
+      "analytic_error": 0.03477705148840385,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0024523925817182646
+    },
+    {
+      "id": 17,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.007384419746668846,
+        -0.04912461372941619
+      ],
+      "analytic_gain": [
+        0.007229771412970671,
+        -0.04916741962000939
+      ],
+      "error": 0.29826402085636267,
+      "analytic_error": 0.2969938899535895,
+      "passed": false,
+      "low_frequency_sign_ok": false,
+      "finite_vs_infinitesimal_difference": 0.0012738346102492259
+    },
+    {
+      "id": 18,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.2677625753253707,
+        0.0
+      ],
+      "analytic_gain": [
+        3.2727314297621506,
+        0.0
+      ],
+      "error": 0.013590455675289517,
+      "analytic_error": 0.012090553118779025,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0014999025565104926
+    },
+    {
+      "id": 19,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.068195925092437,
+        -0.35065511551198875
+      ],
+      "analytic_gain": [
+        3.0655806631715063,
+        -0.3525028657023577
+      ],
+      "error": 0.02017390734374853,
+      "analytic_error": 0.020101587584829498,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0009666041986909051
+    },
+    {
+      "id": 20,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.4606300223521678,
+        -0.38735368946791454
+      ],
+      "analytic_gain": [
+        2.4580793965010224,
+        -0.38813446454941003
+      ],
+      "error": 0.029755270500068196,
+      "analytic_error": 0.029103012082629946,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0008051993930994467
+    },
+    {
+      "id": 21,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.051474354486225025,
+        0.0
+      ],
+      "analytic_gain": [
+        0.05137512545213841,
+        0.0
+      ],
+      "error": 0.003501314970098288,
+      "analytic_error": 0.005422302673024421,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0019209877029261332
+    },
+    {
+      "id": 22,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.06106518415107753,
+        0.012189411162937374
+      ],
+      "analytic_gain": [
+        0.06113088427172817,
+        0.01228769077276108
+      ],
+      "error": 0.046088511061578824,
+      "analytic_error": 0.04389270787769829,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0022885887097023566
+    },
+    {
+      "id": 23,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.08745441633152132,
+        -0.01585675611842313
+      ],
+      "analytic_gain": [
+        0.08747777120076583,
+        -0.015916509426472495
+      ],
+      "error": 0.11634301508663066,
+      "analytic_error": 0.11599510611526846,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0012419915370054792
+    },
+    {
+      "id": 24,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0209621377043679,
+        0.0
+      ],
+      "analytic_gain": [
+        0.0209198300011934,
+        0.0
+      ],
+      "error": 0.0389792731286912,
+      "analytic_error": 0.04091889303914247,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0019396199104512685
+    },
+    {
+      "id": 25,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.02146686758943996,
+        -0.007859872176006472
+      ],
+      "analytic_gain": [
+        0.021463739901734818,
+        -0.007885621862592368
+      ],
+      "error": 0.0174591031663847,
+      "analytic_error": 0.017958838815749296,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0011891851243272865
+    },
+    {
+      "id": 26,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0017462157533333742,
+        -0.011975603595399485
+      ],
+      "analytic_gain": [
+        0.0017071396957971596,
+        -0.01199344875391462
+      ],
+      "error": 0.07666108772381044,
+      "analytic_error": 0.0775566365829888,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0019694321606164434
+    },
+    {
+      "id": 27,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.711189458845786,
+        0.0
+      ],
+      "analytic_gain": [
+        7.708325134125389,
+        0.0
+      ],
+      "error": 0.004385761955428104,
+      "analytic_error": 0.004755583302605474,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00036982134717737007
+    },
+    {
+      "id": 28,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.769461504694313,
+        0.031159495191541653
+      ],
+      "analytic_gain": [
+        7.770010574706125,
+        0.03136234038711641
+      ],
+      "error": 0.003008917778967774,
+      "analytic_error": 0.0030691780766867473,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 7.557508566226115e-05
+    },
+    {
+      "id": 29,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.693004608662048,
+        0.15619013552668012
+      ],
+      "analytic_gain": [
+        7.693082782724651,
+        0.15616654630829627
+      ],
+      "error": 0.020084441358056405,
+      "analytic_error": 0.02008822149021339,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 1.0542792120764794e-05
+    },
+    {
+      "id": 30,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.054981945522442385,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.054988073112655286,
+        0.0
+      ],
+      "error": 0.0009566149229787987,
+      "analytic_error": 0.0010681688503427734,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00011155392736397468
+    },
+    {
+      "id": 31,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.05440096967691663,
+        0.00924516388696316
+      ],
+      "analytic_gain": [
+        -0.054391316222974016,
+        0.009255899036144188
+      ],
+      "error": 0.03964775179829048,
+      "analytic_error": 0.0393931036401763,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00026283183962708606
+    },
+    {
+      "id": 32,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.03829331490520981,
+        0.029729862354418927
+      ],
+      "analytic_gain": [
+        -0.03841896383413939,
+        0.029567317405734646
+      ],
+      "error": 0.06934387328000546,
+      "analytic_error": 0.07294727180336126,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0037402030538087124
+    },
+    {
+      "id": 33,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.009588146548793785,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.009550705914538007,
+        0.0
+      ],
+      "error": 0.0020013325462430826,
+      "analytic_error": 0.005898405135375592,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0038970725891325094
+    },
+    {
+      "id": 34,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.007690014467864435,
+        0.004877034396143212
+      ],
+      "analytic_gain": [
+        -0.0076749220961579235,
+        0.004911667797498685
+      ],
+      "error": 0.05476355411575798,
+      "analytic_error": 0.058638556393264665,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003932291047597309
+    },
+    {
+      "id": 35,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0005322308902167963,
+        0.004361906072913157
+      ],
+      "analytic_gain": [
+        -0.0005205623521640958,
+        0.004367355775088357
+      ],
+      "error": 0.1401936165593164,
+      "analytic_error": 0.13986530048495205,
+      "passed": false,
+      "low_frequency_sign_ok": false,
+      "finite_vs_infinitesimal_difference": 0.001340473762323516
+    },
+    {
+      "id": 36,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.782513440795181,
+        0.0
+      ],
+      "analytic_gain": [
+        3.7711919056395606,
+        0.0
+      ],
+      "error": 0.02640290824274858,
+      "analytic_error": 0.02931700593843906,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002914097695690479
+    },
+    {
+      "id": 37,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.90456433187172,
+        0.018725394319462678
+      ],
+      "analytic_gain": [
+        3.904937806084729,
+        0.018186292895365073
+      ],
+      "error": 0.009081318856739939,
+      "analytic_error": 0.009160731649696429,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00016880691801292324
+    },
+    {
+      "id": 38,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.8512987054338494,
+        0.3142486874673398
+      ],
+      "analytic_gain": [
+        3.851416247126618,
+        0.3145549946352775
+      ],
+      "error": 0.020914475843280985,
+      "analytic_error": 0.020996361286660055,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 8.444732480423445e-05
+    },
+    {
+      "id": 39,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.049961803984738734,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.050139648196108624,
+        0.0
+      ],
+      "error": 0.004178853021390837,
+      "analytic_error": 0.007753331561926749,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0035744785405359115
+    },
+    {
+      "id": 40,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.04707419301132018,
+        0.014184848656300942
+      ],
+      "analytic_gain": [
+        -0.04706636291022218,
+        0.014207369168866802
+      ],
+      "error": 0.018984638122452744,
+      "analytic_error": 0.018755826230126577,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00047921684046283743
+    },
+    {
+      "id": 41,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.02022432743968939,
+        0.04457621409159824
+      ],
+      "analytic_gain": [
+        -0.020372426968562164,
+        0.044597363494844625
+      ],
+      "error": 0.045944301250007445,
+      "analytic_error": 0.04895074672822737,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003006840906868429
+    },
+    {
+      "id": 42,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.009881541773384508,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.009996075770273347,
+        0.0
+      ],
+      "error": 0.032860104940775646,
+      "analytic_error": 0.04483167767292984,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.011971572732154191
+    },
+    {
+      "id": 43,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0060020650112286664,
+        0.005302100529472393
+      ],
+      "analytic_gain": [
+        -0.005988199891535057,
+        0.0053310347881157915
+      ],
+      "error": 0.10861005780265222,
+      "analytic_error": 0.10794499375748506,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003353635103729123
+    },
+    {
+      "id": 44,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0022946000163789255,
+        0.0034651395511133003
+      ],
+      "analytic_gain": [
+        0.002302674305513763,
+        0.0034706692765216706
+      ],
+      "error": 0.16534759062445775,
+      "analytic_error": 0.16579724633053394,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0010229068541900957
+    },
+    {
+      "id": 45,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.626231546366757,
+        0.0
+      ],
+      "analytic_gain": [
+        7.624052372276082,
+        0.0
+      ],
+      "error": 0.0003590322303082585,
+      "analytic_error": 7.318246674479745e-05,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.000285849763563461
+    },
+    {
+      "id": 46,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.670227102304494,
+        0.04979596045401455
+      ],
+      "analytic_gain": [
+        7.670707931310199,
+        0.050017516200065504
+      ],
+      "error": 0.010203220180398456,
+      "analytic_error": 0.01022567376761748,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 6.94455884349319e-05
+    },
+    {
+      "id": 47,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.635479106101754,
+        0.21748862155027832
+      ],
+      "analytic_gain": [
+        7.635655253663442,
+        0.2175142558953255
+      ],
+      "error": 0.034789310628874054,
+      "analytic_error": 0.034785400207786844,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 2.334927155484879e-05
+    },
+    {
+      "id": 48,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.07420505294583689,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.07424726385322566,
+        0.0
+      ],
+      "error": 0.012958987306173377,
+      "analytic_error": 0.013535200330817652,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0005762130246442758
+    },
+    {
+      "id": 49,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0742647982469083,
+        0.008945613617802368
+      ],
+      "analytic_gain": [
+        -0.07427738381655154,
+        0.00894736205801029
+      ],
+      "error": 0.02729567627063453,
+      "analytic_error": 0.027382652783959745,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0001734531766034576
+    },
+    {
+      "id": 50,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.060979223593067594,
+        0.033467453776524124
+      ],
+      "analytic_gain": [
+        -0.0611120039922454,
+        0.033327731356804
+      ],
+      "error": 0.036520601730672154,
+      "analytic_error": 0.03845643430647989,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0026312084916653364
+    },
+    {
+      "id": 51,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.013905042392155134,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.013896507226712236,
+        0.0
+      ],
+      "error": 0.026618557263053625,
+      "analytic_error": 0.02598840030373845,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0006301569593151777
+    },
+    {
+      "id": 52,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.011565798686100163,
+        0.0061672242674303155
+      ],
+      "analytic_gain": [
+        -0.011550362333622848,
+        0.006206309901196277
+      ],
+      "error": 0.04750726963736606,
+      "analytic_error": 0.050447604905334224,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003102617063025032
+    },
+    {
+      "id": 53,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0017225669312184435,
+        0.006643866093840431
+      ],
+      "analytic_gain": [
+        -0.0017062942046998843,
+        0.006653358678518237
+      ],
+      "error": 0.03533018922003031,
+      "analytic_error": 0.03499727700045746,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.001390901565567351
+    },
+    {
+      "id": 54,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        3.8253963245711917,
+        0.0
+      ],
+      "analytic_gain": [
+        3.814418557844389,
+        0.0
+      ],
+      "error": 0.016909546453397314,
+      "analytic_error": 0.01973072803948848,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0028211815860911685
+    },
+    {
+      "id": 55,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        3.8539718223910944,
+        0.27836078250666635
+      ],
+      "analytic_gain": [
+        3.8539420084206255,
+        0.27860970736188556
+      ],
+      "error": 0.021159805305035837,
+      "analytic_error": 0.021217191363089853,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 6.44285222308638e-05
+    },
+    {
+      "id": 56,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.045331837310971346,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.04556163561260794,
+        0.0
+      ],
+      "error": 0.005552245454796291,
+      "analytic_error": 0.01064963863185268,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.005097393177056391
+    },
+    {
+      "id": 57,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.00811936907384274,
+        0.0469234829098447
+      ],
+      "analytic_gain": [
+        -0.008110298902944721,
+        0.04699251036588223
+      ],
+      "error": 0.11534955270675076,
+      "analytic_error": 0.11680363592269069,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0015443310839454321
+    },
+    {
+      "id": 58,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.008490096700356584,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.008609040888180224,
+        0.0
+      ],
+      "error": 0.08962044572490493,
+      "analytic_error": 0.10488576289700942,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.015265317172104487
+    },
+    {
+      "id": 59,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        0.0034360056593027823,
+        0.002083938216464753
+      ],
+      "analytic_gain": [
+        0.0034472842643982157,
+        0.0020843296295379797
+      ],
+      "error": 0.4318166439849981,
+      "analytic_error": 0.4332521444650052,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.001448369483758203
+    },
+    {
+      "id": 60,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        7.822161517990599,
+        0.0
+      ],
+      "analytic_gain": [
+        7.819143792845534,
+        0.0
+      ],
+      "error": 0.0020717340811976224,
+      "analytic_error": 0.001685143103481129,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0003865909777164935
+    },
+    {
+      "id": 61,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        7.800526160127052,
+        0.16566940381236048
+      ],
+      "analytic_gain": [
+        7.800589927733674,
+        0.16563368855638655
+      ],
+      "error": 0.02004308992946094,
+      "analytic_error": 0.020052104807648546,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 9.363094091207875e-06
+    },
+    {
+      "id": 62,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.05374576184145498,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.053761617770101855,
+        0.0
+      ],
+      "error": 0.024434365408462784,
+      "analytic_error": 0.024146556685273424,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0002878087231893583
+    },
+    {
+      "id": 63,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.036183696939369375,
+        0.030214429733182568
+      ],
+      "analytic_gain": [
+        -0.03619736080532936,
+        0.030204168269192203
+      ],
+      "error": 0.09489641542536538,
+      "analytic_error": 0.09520354767488765,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0003101721925786297
+    },
+    {
+      "id": 64,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.009537618703012252,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.009494445228387374,
+        0.0
+      ],
+      "error": 0.019277527893203156,
+      "analytic_error": 0.02371691660038412,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004439388707180962
+    },
+    {
+      "id": 65,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "dt_ms": 0.05,
+      "counted": true,
+      "gain": [
+        -0.0003750558346494937,
+        0.004309214584632155
+      ],
+      "analytic_gain": [
+        -0.0003629792936273388,
+        0.004314734026131404
+      ],
+      "error": 0.06666377172510306,
+      "analytic_error": 0.0653519337272227,
+      "passed": true,
+      "low_frequency_sign_ok": false,
+      "finite_vs_infinitesimal_difference": 0.0013653407234457036
+    },
+    {
+      "id": 66,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.595447860412708,
+        0.0
+      ],
+      "analytic_gain": [
+        4.607029651988375,
+        0.0
+      ],
+      "error": 0.0024651750177765905,
+      "analytic_error": 0.004991662766432623,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0025264877486560326
+    },
+    {
+      "id": 67,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.116799485026958,
+        -0.38384402955825336
+      ],
+      "analytic_gain": [
+        4.118632459346848,
+        -0.3823883492171095
+      ],
+      "error": 0.02434615440880942,
+      "analytic_error": 0.024682045876802637,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0005106039609553555
+    },
+    {
+      "id": 68,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.008433921002583,
+        -0.07442961775765894
+      ],
+      "analytic_gain": [
+        4.014242629481278,
+        -0.07341892232874046
+      ],
+      "error": 0.09125827573415649,
+      "analytic_error": 0.09251815530270474,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0012861676252642722
+    },
+    {
+      "id": 69,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05640674877112034,
+        0.0
+      ],
+      "analytic_gain": [
+        0.055862223699627296,
+        0.0
+      ],
+      "error": 0.06137182693898738,
+      "analytic_error": 0.05112582654832922,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.010246000390658157
+    },
+    {
+      "id": 70,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.13408980521157585,
+        0.052036996921253596
+      ],
+      "analytic_gain": [
+        0.13455583742317767,
+        0.053596344769051105
+      ],
+      "error": 0.18607150229963484,
+      "analytic_error": 0.21082263500598286,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.030623661405662143
+    },
+    {
+      "id": 71,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.155033884428343,
+        -0.1284239686530175
+      ],
+      "analytic_gain": [
+        0.15741321753811055,
+        -0.12855858967371317
+      ],
+      "error": 0.1518653493601959,
+      "analytic_error": 0.18766254530935156,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.04484208121233369
+    },
+    {
+      "id": 72,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.08413811383048923,
+        0.0
+      ],
+      "analytic_gain": [
+        0.0834650443627042,
+        0.0
+      ],
+      "error": 0.029415469589400462,
+      "analytic_error": 0.03717973697766131,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.00776426738826085
+    },
+    {
+      "id": 73,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.09250158327433342,
+        -0.056134841924066675
+      ],
+      "analytic_gain": [
+        0.0931803252771415,
+        -0.05621166840711397
+      ],
+      "error": 1.6076467087457043,
+      "analytic_error": 1.6028112702395756,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.007879700479341608
+    },
+    {
+      "id": 74,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.00815350846774371,
+        -0.05519242462754582
+      ],
+      "analytic_gain": [
+        0.008472637405269408,
+        -0.05577247540448093
+      ],
+      "error": 1.9950245208462898,
+      "analytic_error": 1.9910607458351832,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.007637081227123773
+    },
+    {
+      "id": 75,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.119210845778425,
+        0.0
+      ],
+      "analytic_gain": [
+        4.108306771869969,
+        0.0
+      ],
+      "error": 0.03042116898907591,
+      "analytic_error": 0.0329877672112215,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0025665982221455925
+    },
+    {
+      "id": 76,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.367305188095928,
+        0.6427095299954367
+      ],
+      "analytic_gain": [
+        4.367278913895327,
+        0.6523441210830365
+      ],
+      "error": 0.04399317694355973,
+      "analytic_error": 0.04612512909620034,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0022677961021143373
+    },
+    {
+      "id": 77,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.415649185881421,
+        1.9813901775273084
+      ],
+      "analytic_gain": [
+        5.426405933159599,
+        2.0044098506160917
+      ],
+      "error": 0.15069604329151245,
+      "analytic_error": 0.15194104433676878,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.005980744132437063
+    },
+    {
+      "id": 78,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.13290232644640812,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.13650506597857773,
+        0.0
+      ],
+      "error": 0.11231536802659688,
+      "analytic_error": 0.14246820775318478,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.030152839726587884
+    },
+    {
+      "id": 79,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.1225901367770244,
+        0.027898098466897756
+      ],
+      "analytic_gain": [
+        -0.1267356051993028,
+        0.021135708430163568
+      ],
+      "error": 0.043862017727270206,
+      "analytic_error": 0.06366126928176621,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.06638529036907033
+    },
+    {
+      "id": 80,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.04221834323114629,
+        0.13331621254144882
+      ],
+      "analytic_gain": [
+        -0.06261334465998937,
+        0.13466244309359013
+      ],
+      "error": 0.48155102312660775,
+      "analytic_error": 0.31984484682294073,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.1710657863551221
+    },
+    {
+      "id": 81,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.027890854650953617,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.027930641086990452,
+        0.0
+      ],
+      "error": 3.1664014199876656,
+      "analytic_error": 3.172344811313412,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.005943391325745928
+    },
+    {
+      "id": 82,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.02209254450168962,
+        0.01634793832061108
+      ],
+      "analytic_gain": [
+        -0.025214145752413212,
+        0.01587510296879664
+      ],
+      "error": 3.6716709024669143,
+      "analytic_error": 3.486629169891594,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.47163127645190456
+    },
+    {
+      "id": 83,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.014957542623631165,
+        0.0009475493106210346
+      ],
+      "analytic_gain": [
+        -0.015670105542686132,
+        0.0038494483074998013
+      ],
+      "error": 19.661065272211285,
+      "analytic_error": 19.561000440823587,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.44636995317758277
+    },
+    {
+      "id": 84,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.786571750071377,
+        0.0
+      ],
+      "analytic_gain": [
+        4.787193749076762,
+        0.0
+      ],
+      "error": 0.011306208356411504,
+      "analytic_error": 0.011177730901744015,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0001284774546674896
+    },
+    {
+      "id": 85,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.056047395301575,
+        -0.7038735553175961
+      ],
+      "analytic_gain": [
+        4.049840984652849,
+        -0.7170515829455586
+      ],
+      "error": 0.029522925173985113,
+      "analytic_error": 0.026589239002383275,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003008772841659988
+    },
+    {
+      "id": 86,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.595492074836486,
+        -0.4138755458393853
+      ],
+      "analytic_gain": [
+        3.5730327016668264,
+        -0.437970595980153
+      ],
+      "error": 0.050831677314618885,
+      "analytic_error": 0.04664739548626114,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006803792795921507
+    },
+    {
+      "id": 87,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.2053774016633869,
+        0.0
+      ],
+      "analytic_gain": [
+        0.205835205874788,
+        0.0
+      ],
+      "error": 0.07444532543130704,
+      "analytic_error": 0.07684035814142431,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0023950327101172697
+    },
+    {
+      "id": 88,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.29966842496917934,
+        0.007770724317114922
+      ],
+      "analytic_gain": [
+        0.30028055234786794,
+        0.008356435099987266
+      ],
+      "error": 0.04393902799985168,
+      "analytic_error": 0.04363670650677652,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004432210709790136
+    },
+    {
+      "id": 89,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.19007248384186298,
+        -0.24887108450098447
+      ],
+      "analytic_gain": [
+        0.18954379271832558,
+        -0.24755906484290238
+      ],
+      "error": 0.08211608760470422,
+      "analytic_error": 0.07807113996449751,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.007400233628317487
+    },
+    {
+      "id": 90,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.07001194218114949,
+        0.0
+      ],
+      "analytic_gain": [
+        0.06990539729031858,
+        0.0
+      ],
+      "error": 0.0681379747188797,
+      "analytic_error": 0.06955609189517736,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0014181171762976611
+    },
+    {
+      "id": 91,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.03720778908143103,
+        -0.05161134497984943
+      ],
+      "analytic_gain": [
+        0.037537875993689754,
+        -0.05172641377933709
+      ],
+      "error": 0.07273580651414686,
+      "analytic_error": 0.06974409502311504,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004652773269311712
+    },
+    {
+      "id": 92,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0013815735177182848,
+        -0.020510127420416732
+      ],
+      "analytic_gain": [
+        -0.0012717445814923302,
+        -0.020576428570724527
+      ],
+      "error": 0.20108667037355915,
+      "analytic_error": 0.20262858009506143,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0017075410557234369
+    },
+    {
+      "id": 93,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.8466930215849073,
+        0.0
+      ],
+      "analytic_gain": [
+        1.8517799962324804,
+        0.0
+      ],
+      "error": 0.006527560400769188,
+      "analytic_error": 0.009300181579273389,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002772621178504202
+    },
+    {
+      "id": 94,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.2652243212998933,
+        -0.4825806463023482
+      ],
+      "analytic_gain": [
+        1.2761500036842912,
+        -0.4788321725927983
+      ],
+      "error": 0.07203077485093098,
+      "analytic_error": 0.07821830492536044,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.006295699929290537
+    },
+    {
+      "id": 95,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.8445701514845472,
+        -0.1415587426384891
+      ],
+      "analytic_gain": [
+        0.8522556766694522,
+        -0.14527511681913224
+      ],
+      "error": 0.03583020192012531,
+      "analytic_error": 0.03900501242748682,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.004652982018190515
+    },
+    {
+      "id": 96,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05611087704206634,
+        0.0
+      ],
+      "analytic_gain": [
+        0.05619096866911378,
+        0.0
+      ],
+      "error": 0.006531699210249721,
+      "analytic_error": 0.00796840392267358,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0014367047124238608
+    },
+    {
+      "id": 97,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0605419037564061,
+        -0.019044413892246693
+      ],
+      "analytic_gain": [
+        0.06063936704082758,
+        -0.018940648638337047
+      ],
+      "error": 0.02292922234491734,
+      "analytic_error": 0.023744707142782397,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0025536880539303876
+    },
+    {
+      "id": 98,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.017860755992376066,
+        -0.03737487161745359
+      ],
+      "analytic_gain": [
+        0.018317243778146346,
+        -0.03773274278104087
+      ],
+      "error": 0.041117721393395174,
+      "analytic_error": 0.03619920469149227,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0104050103707878
+    },
+    {
+      "id": 99,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.024063515130230848,
+        0.0
+      ],
+      "analytic_gain": [
+        0.02417572880742016,
+        0.0
+      ],
+      "error": 0.05109835142992968,
+      "analytic_error": 0.04667340591798835,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004424945511941333
+    },
+    {
+      "id": 100,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.002720322353298044,
+        -0.015112644521082502
+      ],
+      "analytic_gain": [
+        0.0028787987506998336,
+        -0.015093503941238682
+      ],
+      "error": 0.06521790200077138,
+      "analytic_error": 0.06064017772175146,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00629464841231929
+    },
+    {
+      "id": 101,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.00038553500457301395,
+        -0.0005100715126054101
+      ],
+      "analytic_gain": [
+        -0.00042960053957120394,
+        -0.0006693680425205368
+      ],
+      "error": 0.05148761577748345,
+      "analytic_error": 0.05776611872131964,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006517482488453124
+    },
+    {
+      "id": 102,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.695202251875754,
+        0.0
+      ],
+      "analytic_gain": [
+        3.69407819192089,
+        0.0
+      ],
+      "error": 0.023709734439167327,
+      "analytic_error": 0.02339832763665645,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00031140680251087597
+    },
+    {
+      "id": 103,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.078323418847067,
+        -0.7215135091475366
+      ],
+      "analytic_gain": [
+        3.058572185307049,
+        -0.7482190001291611
+      ],
+      "error": 0.05931418054352951,
+      "analytic_error": 0.05739141012242567,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.009202044746572043
+    },
+    {
+      "id": 104,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.2564955351478804,
+        -0.2179807782492349
+      ],
+      "analytic_gain": [
+        2.20392906589327,
+        -0.24608395619732298
+      ],
+      "error": 0.009847222739892417,
+      "analytic_error": 0.02490538536357665,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.016513441253748703
+    },
+    {
+      "id": 105,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.022278604491917063,
+        0.0
+      ],
+      "analytic_gain": [
+        0.02216106255410807,
+        0.0
+      ],
+      "error": 0.039116951723664424,
+      "analytic_error": 0.04418657157095735,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.005069619847292928
+    },
+    {
+      "id": 106,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05318503860688889,
+        0.01002295453866185
+      ],
+      "analytic_gain": [
+        0.05368603324789595,
+        0.010381578506554391
+      ],
+      "error": 0.019439611869790735,
+      "analytic_error": 0.03809576856199316,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.026573547089704146
+    },
+    {
+      "id": 107,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.03594200502694583,
+        -0.03732126991943923
+      ],
+      "analytic_gain": [
+        0.03645913065014012,
+        -0.0375101528697487
+      ],
+      "error": 0.07587373085078301,
+      "analytic_error": 0.08239253299927629,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.02374501349071227
+    },
+    {
+      "id": 108,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.02896989220598596,
+        0.0
+      ],
+      "analytic_gain": [
+        0.027345474006300125,
+        0.0
+      ],
+      "error": 0.5338547856656238,
+      "analytic_error": 0.5599927762552042,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.02613799058958026
+    },
+    {
+      "id": 109,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.024883771344421303,
+        -0.01416040763900613
+      ],
+      "analytic_gain": [
+        0.023469068114377167,
+        -0.014484999886447886
+      ],
+      "error": 0.2918666043966644,
+      "analytic_error": 0.2685457342782982,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.023355026979493737
+    },
+    {
+      "id": 110,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.023862551104515736,
+        -0.00653359688987161
+      ],
+      "analytic_gain": [
+        0.02433793802122385,
+        -0.004735349361711958
+      ],
+      "error": 1.0355025562893259,
+      "analytic_error": 1.0654031074356995,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.029929037388804702
+    },
+    {
+      "id": 111,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.269241409900896,
+        0.0
+      ],
+      "analytic_gain": [
+        5.276188273270067,
+        0.0
+      ],
+      "error": 0.0005167031578801101,
+      "analytic_error": 0.0018357645359280514,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0013190613780479413
+    },
+    {
+      "id": 112,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.137942255197422,
+        -1.10676321560806
+      ],
+      "analytic_gain": [
+        4.127963639539988,
+        -1.123923164260548
+      ],
+      "error": 0.008733706404746265,
+      "analytic_error": 0.00958474474829594,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0037691596499925765
+    },
+    {
+      "id": 113,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        3.24255199903206,
+        -0.7430995061448121
+      ],
+      "analytic_gain": [
+        3.2214350816041226,
+        -0.7594710978062398
+      ],
+      "error": 0.03083776896417826,
+      "analytic_error": 0.03367449002265339,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.005073540412597988
+    },
+    {
+      "id": 114,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.25782429810473867,
+        0.0
+      ],
+      "analytic_gain": [
+        0.25794827315589336,
+        0.0
+      ],
+      "error": 0.047863267289134356,
+      "analytic_error": 0.048367133306108895,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0005038660169745397
+    },
+    {
+      "id": 115,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.38296209026873107,
+        -0.013452751703401912
+      ],
+      "analytic_gain": [
+        0.3840530324404706,
+        -0.012913284508338948
+      ],
+      "error": 0.03083954085472831,
+      "analytic_error": 0.03458296902378185,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004946347735009204
+    },
+    {
+      "id": 116,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.1666810693345696,
+        -0.31878445317281084
+      ],
+      "analytic_gain": [
+        0.16632851663877574,
+        -0.3194526424154348
+      ],
+      "error": 0.10374763825368077,
+      "analytic_error": 0.10681448679695789,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.00307051655450407
+    },
+    {
+      "id": 117,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.10295460245611422,
+        0.0
+      ],
+      "analytic_gain": [
+        0.10228525907080208,
+        0.0
+      ],
+      "error": 0.01928752427635747,
+      "analytic_error": 0.01266078447231235,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006626739804045118
+    },
+    {
+      "id": 118,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.05778965982336373,
+        -0.08459403519861476
+      ],
+      "analytic_gain": [
+        0.05805483403733591,
+        -0.08514854654617204
+      ],
+      "error": 0.8249645477076738,
+      "analytic_error": 0.8256545678079519,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006085300560537206
+    },
+    {
+      "id": 119,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.0018935029562626771,
+        -0.020889107072718852
+      ],
+      "analytic_gain": [
+        -0.001660423592438085,
+        -0.020251331651429748
+      ],
+      "error": 1.1898721942562969,
+      "analytic_error": 1.1851223089054537,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0067226534293003916
+    },
+    {
+      "id": 120,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.662084915646293,
+        0.0
+      ],
+      "analytic_gain": [
+        0.6608610676565451,
+        0.0
+      ],
+      "error": 0.03833339911800844,
+      "analytic_error": 0.0401110166236849,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0017776175056764556
+    },
+    {
+      "id": 121,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.3268531341023961,
+        -0.2581414409716015
+      ],
+      "analytic_gain": [
+        0.32911796262506776,
+        -0.2562750815963319
+      ],
+      "error": 0.05076228453315561,
+      "analytic_error": 0.04839337415847673,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004262669368957833
+    },
+    {
+      "id": 122,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.13317512701395046,
+        -0.08950887969734081
+      ],
+      "analytic_gain": [
+        0.14098622245921008,
+        -0.08546367383075323
+      ],
+      "error": 0.0860991502722763,
+      "analytic_error": 0.07544905063581528,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.012776635642551451
+    },
+    {
+      "id": 123,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.09413069030821619,
+        0.0
+      ],
+      "analytic_gain": [
+        0.09469078884010275,
+        0.0
+      ],
+      "error": 0.012771329365291278,
+      "analytic_error": 0.006897099321420513,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.005874230043870766
+    },
+    {
+      "id": 124,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0838483416761599,
+        -0.03999449612020859
+      ],
+      "analytic_gain": [
+        0.0840446119147501,
+        -0.04004465874520598
+      ],
+      "error": 0.18445658394525535,
+      "analytic_error": 0.18593472452119184,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002124619548251498
+    },
+    {
+      "id": 125,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0007502098975809055,
+        -0.04619352927254444
+      ],
+      "analytic_gain": [
+        0.0012028004223921403,
+        -0.046386990893900554
+      ],
+      "error": 0.0777397757994234,
+      "analytic_error": 0.08024026183554399,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.005162170868874792
+    },
+    {
+      "id": 126,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.048931873653608494,
+        0.0
+      ],
+      "analytic_gain": [
+        0.04937248204766974,
+        0.0
+      ],
+      "error": 0.11595769082289041,
+      "analytic_error": 0.1260063623590458,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0100486715361554
+    },
+    {
+      "id": 127,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.0004038755455610679,
+        -0.025492121215292148
+      ],
+      "analytic_gain": [
+        -0.00030735887890775303,
+        -0.025563501059684267
+      ],
+      "error": 0.18152309479702247,
+      "analytic_error": 0.18321949047856173,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0027377648861179648
+    },
+    {
+      "id": 128,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.0022424294011962327,
+        0.0015007202462022468
+      ],
+      "analytic_gain": [
+        -0.0022059387499172856,
+        0.0012982561841132305
+      ],
+      "error": 0.44456609319466284,
+      "analytic_error": 0.443573988751099,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.004691864496121462
+    },
+    {
+      "id": 129,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.278006374262308,
+        0.0
+      ],
+      "analytic_gain": [
+        4.2638591686083185,
+        0.0
+      ],
+      "error": 0.04724708061739493,
+      "analytic_error": 0.05039779857074737,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003150717953352434
+    },
+    {
+      "id": 130,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.493231969232509,
+        0.5096359313758906
+      ],
+      "analytic_gain": [
+        4.496764072561461,
+        0.5268435414734466
+      ],
+      "error": 0.01631910176100939,
+      "analytic_error": 0.019618379383541978,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003912200090218983
+    },
+    {
+      "id": 131,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.297642862447929,
+        1.645308024976931
+      ],
+      "analytic_gain": [
+        5.321028315725411,
+        1.6803033231308413
+      ],
+      "error": 0.07633662521557329,
+      "analytic_error": 0.06703266896719225,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.009373798355863586
+    },
+    {
+      "id": 132,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.10828547432246824,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.10994335715576688,
+        0.0
+      ],
+      "error": 0.001296010810214895,
+      "analytic_error": 0.013994444438602014,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.01529045524881691
+    },
+    {
+      "id": 133,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.10209579507474202,
+        0.038309602531898336
+      ],
+      "analytic_gain": [
+        -0.10646055103293063,
+        0.03322180508992083
+      ],
+      "error": 0.0629207052419668,
+      "analytic_error": 0.0902935285014682,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.06182548663303747
+    },
+    {
+      "id": 134,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0008689876737278871,
+        0.11288594029670265
+      ],
+      "analytic_gain": [
+        -0.014122094265303291,
+        0.11584535079759627
+      ],
+      "error": 0.37841810710239027,
+      "analytic_error": 0.293380425653363,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.12524214801254316
+    },
+    {
+      "id": 135,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.013377836158882968,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.013016007973249229,
+        0.0
+      ],
+      "error": 0.6452029271836465,
+      "analytic_error": 0.6547990666191007,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.009596139435454263
+    },
+    {
+      "id": 136,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.015525967403675732,
+        0.013914546191663687
+      ],
+      "analytic_gain": [
+        -0.01964559481427497,
+        0.013718764965353977
+      ],
+      "error": 1.9736293480758091,
+      "analytic_error": 1.864690998486825,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.10938102163705281
+    },
+    {
+      "id": 137,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.0026894043395971935,
+        -0.008060019868283353
+      ],
+      "analytic_gain": [
+        -0.0033328374296677983,
+        -0.00553420796038209
+      ],
+      "error": 5.621749223484286,
+      "analytic_error": 5.63508625355826,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.06912710331257821
+    },
+    {
+      "id": 138,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.607747545222766,
+        0.0
+      ],
+      "analytic_gain": [
+        7.585799813987411,
+        0.0
+      ],
+      "error": 0.043250416173397276,
+      "analytic_error": 0.046010560697192594,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0027601445237953196
+    },
+    {
+      "id": 139,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        8.050978754633713,
+        1.1212629862275496
+      ],
+      "analytic_gain": [
+        8.052387000506446,
+        1.1435608768881116
+      ],
+      "error": 0.02958100533899847,
+      "analytic_error": 0.032332959914709206,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00280976746532353
+    },
+    {
+      "id": 140,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        9.883045772933846,
+        3.4792265788746612
+      ],
+      "analytic_gain": [
+        9.909424423326707,
+        3.5291141027531285
+      ],
+      "error": 0.11541217569939656,
+      "analytic_error": 0.11361443604700934,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.007096913541646107
+    },
+    {
+      "id": 141,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.42298601803561076,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.432731479191208,
+        0.0
+      ],
+      "error": 0.01754953256717156,
+      "analytic_error": 0.04099354494749253,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.02344401238032097
+    },
+    {
+      "id": 142,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.39737862968354776,
+        0.10795164200476713
+      ],
+      "analytic_gain": [
+        -0.41242721255778014,
+        0.0865087273079745
+      ],
+      "error": 0.03684219738071984,
+      "analytic_error": 0.038962420791254886,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.06301927401103227
+    },
+    {
+      "id": 143,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.08777686603972719,
+        0.4389163027224598
+      ],
+      "analytic_gain": [
+        -0.14858278329307026,
+        0.4473839567869169
+      ],
+      "error": 0.8635180432696248,
+      "analytic_error": 0.7364946642134838,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.14768830812210856
+    },
+    {
+      "id": 144,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.024971964940917267,
+        0.0
+      ],
+      "analytic_gain": [
+        0.025270950525422893,
+        0.0
+      ],
+      "error": 1.086780877015521,
+      "analytic_error": 1.0878198914182635,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0010390144027426042
+    },
+    {
+      "id": 145,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.023741282435420445,
+        -0.003729190397948548
+      ],
+      "analytic_gain": [
+        -0.03588181010790852,
+        -0.005124246657262623
+      ],
+      "error": 0.521091092842742,
+      "analytic_error": 0.5024473347376338,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.042467563768702074
+    },
+    {
+      "id": 146,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.04190478306599086,
+        -0.02793541875359224
+      ],
+      "analytic_gain": [
+        -0.044201256215213744,
+        -0.018114716647337707
+      ],
+      "error": 3.5287688838854705,
+      "analytic_error": 3.4953432785720984,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.03504890455617762
+    },
+    {
+      "id": 147,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.988610178759158,
+        0.0
+      ],
+      "analytic_gain": [
+        2.9906704167943916,
+        0.0
+      ],
+      "error": 0.02998294423201613,
+      "analytic_error": 0.03069297662514329,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0007100323931271613
+    },
+    {
+      "id": 148,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.4722366236651845,
+        -0.33163096474740567
+      ],
+      "analytic_gain": [
+        2.467762566656671,
+        -0.34065208207905695
+      ],
+      "error": 0.03605670016051604,
+      "analytic_error": 0.034438864284843454,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00347036303058585
+    },
+    {
+      "id": 149,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.2914307173920845,
+        0.13024337126527485
+      ],
+      "analytic_gain": [
+        2.272462315911961,
+        0.11151829751340038
+      ],
+      "error": 0.05353209018819684,
+      "analytic_error": 0.04448338187300536,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.009185884765341185
+    },
+    {
+      "id": 150,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05674075543443796,
+        0.0
+      ],
+      "analytic_gain": [
+        0.05669652665055302,
+        0.0
+      ],
+      "error": 0.030392554962504918,
+      "analytic_error": 0.029589375496860523,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0008031794656443967
+    },
+    {
+      "id": 151,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.08168719694986952,
+        0.00316760164463943
+      ],
+      "analytic_gain": [
+        0.08148980327081927,
+        0.0032066632161875477
+      ],
+      "error": 0.10038571232125064,
+      "analytic_error": 0.09673945675044361,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0036541121056691537
+    },
+    {
+      "id": 152,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.06813606092121147,
+        -0.06369753766562067
+      ],
+      "analytic_gain": [
+        0.06765411327489804,
+        -0.06292745194016729
+      ],
+      "error": 0.23279004535892805,
+      "analytic_error": 0.21807694626491733,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.016497380206549218
+    },
+    {
+      "id": 153,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.023159435779000016,
+        0.0
+      ],
+      "analytic_gain": [
+        0.023223454705029945,
+        0.0
+      ],
+      "error": 0.01276338799733348,
+      "analytic_error": 0.015562939119421347,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002799551122087868
+    },
+    {
+      "id": 154,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.009072854403065241,
+        -0.01577602353291564
+      ],
+      "analytic_gain": [
+        0.00908078205115504,
+        -0.01582148795007186
+      ],
+      "error": 0.02606941424845609,
+      "analytic_error": 0.02589460947256007,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0020181601742916343
+    },
+    {
+      "id": 155,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0007646520260766076,
+        -0.004100677353684471
+      ],
+      "analytic_gain": [
+        -0.0007681428871541289,
+        -0.004089448836660871
+      ],
+      "error": 0.04644530126890671,
+      "analytic_error": 0.046845943090874385,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0005142061367788336
+    },
+    {
+      "id": 156,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.2030650849648277,
+        0.0
+      ],
+      "analytic_gain": [
+        2.205228704342284,
+        0.0
+      ],
+      "error": 0.01826785987133983,
+      "analytic_error": 0.017303705568160008,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0009641543031798232
+    },
+    {
+      "id": 157,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.4945001285362451,
+        -0.4159390316587432
+      ],
+      "analytic_gain": [
+        1.571126516753531,
+        -0.3693423971396965
+      ],
+      "error": 0.043303644555613884,
+      "analytic_error": 0.024621628917699073,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.03996415719700854
+    },
+    {
+      "id": 158,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.3435240477265735,
+        0.0900139779653343
+      ],
+      "analytic_gain": [
+        1.4207140584389177,
+        0.10086015209558785
+      ],
+      "error": 0.08263643133622738,
+      "analytic_error": 0.05932799027539295,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.03473540136347498
+    },
+    {
+      "id": 159,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.08454640298966976,
+        0.0
+      ],
+      "analytic_gain": [
+        0.08474493877722221,
+        0.0
+      ],
+      "error": 0.21415776050814614,
+      "analytic_error": 0.21231240928807635,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0018453512200697871
+    },
+    {
+      "id": 160,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.11623662567642369,
+        -0.01749474677486567
+      ],
+      "analytic_gain": [
+        0.12042476794662034,
+        -0.008169642232402415
+      ],
+      "error": 0.13175017322943486,
+      "analytic_error": 0.1883787739583033,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.09501549867235969
+    },
+    {
+      "id": 161,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.04231281382652081,
+        -0.0963433244512479
+      ],
+      "analytic_gain": [
+        0.06865452762985455,
+        -0.10437106678339919
+      ],
+      "error": 0.33039970212733666,
+      "analytic_error": 0.18390175854891871,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.2559584694834319
+    },
+    {
+      "id": 162,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.04166837257839482,
+        0.0
+      ],
+      "analytic_gain": [
+        0.041821793746872164,
+        0.0
+      ],
+      "error": 0.0026181747160648147,
+      "analytic_error": 0.001054142573631029,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003672317289695844
+    },
+    {
+      "id": 163,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.00840656245130404,
+        -0.025289076090527347
+      ],
+      "analytic_gain": [
+        0.009155041529921946,
+        -0.02523427202762939
+      ],
+      "error": 0.0107689046811219,
+      "analytic_error": 0.015633029319923202,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.017963693984723424
+    },
+    {
+      "id": 164,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0023788340422232117,
+        -0.004084983903050551
+      ],
+      "analytic_gain": [
+        -0.0023538205009770606,
+        -0.004631723726031661
+      ],
+      "error": 0.030208344219853203,
+      "analytic_error": 0.019455227540519194,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.01310055376816347
+    },
+    {
+      "id": 165,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.09338246628848,
+        0.0
+      ],
+      "analytic_gain": [
+        5.085816763651908,
+        0.0
+      ],
+      "error": 0.0336218058248615,
+      "analytic_error": 0.035057262537564235,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0014354567127027294
+    },
+    {
+      "id": 166,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.359411889430478,
+        0.7092842786131579
+      ],
+      "analytic_gain": [
+        5.365600467512321,
+        0.7285213799239867
+      ],
+      "error": 0.01143429189411281,
+      "analytic_error": 0.009493755758268245,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0038341125563293066
+    },
+    {
+      "id": 167,
+      "pop": "E",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        6.786460483262417,
+        2.091504091207852
+      ],
+      "analytic_gain": [
+        6.816977291852631,
+        2.138541935963641
+      ],
+      "error": 0.3791762313243263,
+      "analytic_error": 0.3685871294694699,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.010638261629831692
+    },
+    {
+      "id": 168,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.18937089938933488,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.19262562501857516,
+        0.0
+      ],
+      "error": 0.06022930807846084,
+      "analytic_error": 0.0784515138820047,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.01822220580354387
+    },
+    {
+      "id": 169,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.14020272362405375,
+        0.07832600488302975
+      ],
+      "analytic_gain": [
+        -0.14833157963346638,
+        0.06879679042101369
+      ],
+      "error": 0.3569011449432164,
+      "analytic_error": 0.28765785302328767,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.07012553803907585
+    },
+    {
+      "id": 170,
+      "pop": "E",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.03384195491274963,
+        0.11696893164550415
+      ],
+      "analytic_gain": [
+        0.01127658058692184,
+        0.1290275980243246
+      ],
+      "error": 1.747405664587801,
+      "analytic_error": 1.6446724150346053,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.1432442076964592
+    },
+    {
+      "id": 171,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.05587365269227227,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.056181571895114774,
+        0.0
+      ],
+      "error": 0.4346412856933049,
+      "analytic_error": 0.4315255988491288,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.003115686844176153
+    },
+    {
+      "id": 172,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.026452256727492407,
+        0.032207005646453
+      ],
+      "analytic_gain": [
+        -0.03093437744812428,
+        0.03193885632906094
+      ],
+      "error": 1.179051313904278,
+      "analytic_error": 1.2160938910105754,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.045433521806177074
+    },
+    {
+      "id": 173,
+      "pop": "E",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.013651540177376586,
+        -0.00885157677963799
+      ],
+      "analytic_gain": [
+        -0.014119137571311181,
+        -0.0050478387152364705
+      ],
+      "error": 12.989875726960046,
+      "analytic_error": 13.012822610278647,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.038777929593665585
+    },
+    {
+      "id": 174,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        11.761584789411494,
+        0.0
+      ],
+      "analytic_gain": [
+        11.759430041645778,
+        0.0
+      ],
+      "error": 0.0016829875506775011,
+      "analytic_error": 0.0018658813860377784,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00018289383536027718
+    },
+    {
+      "id": 175,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        11.800983534144583,
+        0.8434138139836197
+      ],
+      "analytic_gain": [
+        11.814950725662198,
+        0.8503343877613683
+      ],
+      "error": 0.009417218190939203,
+      "analytic_error": 0.008097007493537776,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0013230766797824812
+    },
+    {
+      "id": 176,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        12.946492668212445,
+        3.4570823990859267
+      ],
+      "analytic_gain": [
+        12.85752129949142,
+        3.4673572093234
+      ],
+      "error": 0.04587907934557043,
+      "analytic_error": 0.05162820836437339,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0076020334690239996
+    },
+    {
+      "id": 177,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.14781310937996994,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.1512776473850569,
+        0.0
+      ],
+      "error": 0.024014733930295722,
+      "analytic_error": 0.04801624488119965,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.024001510950903925
+    },
+    {
+      "id": 178,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.1273426819145939,
+        0.08270799016296153
+      ],
+      "analytic_gain": [
+        -0.14569087474058662,
+        0.0559603173909016
+      ],
+      "error": 0.18729851941952547,
+      "analytic_error": 0.037914469693565135,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.2247090488424052
+    },
+    {
+      "id": 179,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.06273313365906333,
+        0.14485392505628675
+      ],
+      "analytic_gain": [
+        -0.008764518919286103,
+        0.19260082648452026
+      ],
+      "error": 0.9304261201836367,
+      "analytic_error": 0.6004212362612709,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.595613946360031
+    },
+    {
+      "id": 180,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.03996374203560534,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.03994298042906087,
+        0.0
+      ],
+      "error": 0.11938306167995504,
+      "analytic_error": 0.11880152978340651,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0005815318965485293
+    },
+    {
+      "id": 181,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.02283407042833193,
+        0.034062440399487644
+      ],
+      "analytic_gain": [
+        -0.028665819930426314,
+        0.03144989272319088
+      ],
+      "error": 0.5314137525762485,
+      "analytic_error": 0.6877682050671564,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.17898939873330777
+    },
+    {
+      "id": 182,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.004722139748685253,
+        0.001158622468431882
+      ],
+      "analytic_gain": [
+        0.002443716080070607,
+        0.009137375707998874
+      ],
+      "error": 1.982978371835911,
+      "analytic_error": 1.8359910586571317,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.23241811449016714
+    },
+    {
+      "id": 183,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.678969544514597,
+        0.0
+      ],
+      "analytic_gain": [
+        2.6712827060083053,
+        0.0
+      ],
+      "error": 0.05445417885982,
+      "analytic_error": 0.05716725861180366,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002713079751983659
+    },
+    {
+      "id": 184,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.397412666237495,
+        -0.30482551314469714
+      ],
+      "analytic_gain": [
+        2.399745829928416,
+        -0.30629543526648195
+      ],
+      "error": 0.032242359103360464,
+      "analytic_error": 0.03135444009735922,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0009732963737964605
+    },
+    {
+      "id": 185,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.239763525984226,
+        0.31673796487821354
+      ],
+      "analytic_gain": [
+        2.2750687008604444,
+        0.32616299618487515
+      ],
+      "error": 0.11388511529384236,
+      "analytic_error": 0.12030642276034566,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.01289739635824534
+    },
+    {
+      "id": 186,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.16050822467298828,
+        0.0
+      ],
+      "analytic_gain": [
+        0.16089648940119905,
+        0.0
+      ],
+      "error": 0.024956907343682257,
+      "analytic_error": 0.022598306454940993,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.002358600888741264
+    },
+    {
+      "id": 187,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.16028164315691143,
+        -0.03634849391308517
+      ],
+      "analytic_gain": [
+        0.1593667131305049,
+        -0.03744903825012675
+      ],
+      "error": 0.04458024812385968,
+      "analytic_error": 0.04756717008934114,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.008694062324006536
+    },
+    {
+      "id": 188,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0809503374504187,
+        -0.11900814578405806
+      ],
+      "analytic_gain": [
+        0.07889057770326192,
+        -0.11552275708489164
+      ],
+      "error": 0.28873882523828315,
+      "analytic_error": 0.3024068326393175,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.02459366260807316
+    },
+    {
+      "id": 189,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05074749690901993,
+        0.0
+      ],
+      "analytic_gain": [
+        0.050959045347736855,
+        0.0
+      ],
+      "error": 0.048483346651510655,
+      "analytic_error": 0.044516808897148104,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00396653775436255
+    },
+    {
+      "id": 190,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.016219250153970955,
+        -0.031187331898058317
+      ],
+      "analytic_gain": [
+        0.01613940159265895,
+        -0.03128917956784026
+      ],
+      "error": 0.019513172305350282,
+      "analytic_error": 0.01951714911240644,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0024265701218197013
+    },
+    {
+      "id": 191,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0030822163250096984,
+        -0.006329165802806337
+      ],
+      "analytic_gain": [
+        -0.0030305814063688115,
+        -0.00625784185523676
+      ],
+      "error": 0.02248437684195986,
+      "analytic_error": 0.023783359378263397,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0016509891945823709
+    },
+    {
+      "id": 192,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.75750109153273,
+        0.0
+      ],
+      "analytic_gain": [
+        2.753746726779743,
+        0.0
+      ],
+      "error": 0.021395713711070602,
+      "analytic_error": 0.022728093034816477,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0013323793237458783
+    },
+    {
+      "id": 193,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        2.2654115386246443,
+        -0.8401744228342954
+      ],
+      "analytic_gain": [
+        2.2646044759284862,
+        -0.8478813938634999
+      ],
+      "error": 0.02854292176945365,
+      "analytic_error": 0.030585717407347994,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0027500678938478652
+    },
+    {
+      "id": 194,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        1.1513988195407978,
+        -0.2333945690500226
+      ],
+      "analytic_gain": [
+        1.2140761328883223,
+        -0.2263947875475405
+      ],
+      "error": 0.1173659284107901,
+      "analytic_error": 0.10504396948611598,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.022381715876318216
+    },
+    {
+      "id": 195,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.11274919028754907,
+        0.0
+      ],
+      "analytic_gain": [
+        0.11283955105623968,
+        0.0
+      ],
+      "error": 0.03689076727824813,
+      "analytic_error": 0.03611890106457679,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0007718662136713405
+    },
+    {
+      "id": 196,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.10714042175460635,
+        -0.04435009927192715
+      ],
+      "analytic_gain": [
+        0.10715683324771937,
+        -0.04453347051567428
+      ],
+      "error": 0.04775116121950933,
+      "analytic_error": 0.048643235808417215,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0015726271543475593
+    },
+    {
+      "id": 197,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.008731995241264745,
+        -0.06427764406289926
+      ],
+      "analytic_gain": [
+        0.014879519757924292,
+        -0.06589204753905704
+      ],
+      "error": 0.13515348974908284,
+      "analytic_error": 0.08715337844750477,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.05429301529769299
+    },
+    {
+      "id": 198,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.04156817465315931,
+        0.0
+      ],
+      "analytic_gain": [
+        0.041914451895702594,
+        0.0
+      ],
+      "error": 0.36332302951518847,
+      "analytic_error": 0.35801929059545373,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.00530373891973473
+    },
+    {
+      "id": 199,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.004871849392336943,
+        -0.02776749730659339
+      ],
+      "analytic_gain": [
+        0.004364207988804639,
+        -0.027951209991717803
+      ],
+      "error": 0.2314511341247782,
+      "analytic_error": 0.22318268856339368,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.008268758824524065
+    },
+    {
+      "id": 200,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.004324707676083675,
+        -0.002812855892519814
+      ],
+      "analytic_gain": [
+        -0.004283626593483518,
+        -0.002620992168436545
+      ],
+      "error": 0.32053793056289814,
+      "analytic_error": 0.3230210561456246,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0030052793798058474
+    },
+    {
+      "id": 201,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.876005928254912,
+        0.0
+      ],
+      "analytic_gain": [
+        7.879320302541201,
+        0.0
+      ],
+      "error": 0.015160862709354945,
+      "analytic_error": 0.015588061862131105,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00042719915277615936
+    },
+    {
+      "id": 202,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.448977812392316,
+        -0.7238362963328836
+      ],
+      "analytic_gain": [
+        7.457488031574104,
+        -0.7165656547196902
+      ],
+      "error": 0.016614214593876873,
+      "analytic_error": 0.01535549656772868,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.001442713871970178
+    },
+    {
+      "id": 203,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        6.299593123592895,
+        -0.2876800659381828
+      ],
+      "analytic_gain": [
+        6.314542528121372,
+        -0.2870971237848756
+      ],
+      "error": 0.007173847570385381,
+      "analytic_error": 0.009083391904881982,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.001928335782116184
+    },
+    {
+      "id": 204,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0294080263841404,
+        0.0
+      ],
+      "analytic_gain": [
+        0.029141620073201105,
+        0.0
+      ],
+      "error": 0.03554863038381921,
+      "analytic_error": 0.04428556254320961,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.008736932159390398
+    },
+    {
+      "id": 205,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05120872304563926,
+        0.018274069171184206
+      ],
+      "analytic_gain": [
+        0.05095233786124007,
+        0.01798675836848154
+      ],
+      "error": 0.056224454765542636,
+      "analytic_error": 0.04585415394437017,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.012628652211645152
+    },
+    {
+      "id": 206,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.05886101458155162,
+        -0.044918032791346936
+      ],
+      "analytic_gain": [
+        0.05936127943319506,
+        -0.0445566281839793
+      ],
+      "error": 0.14388166850966094,
+      "analytic_error": 0.13967918651910774,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.020239860724472047
+    },
+    {
+      "id": 207,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.14105233848425341,
+        0.0
+      ],
+      "analytic_gain": [
+        0.14107670598030567,
+        0.0
+      ],
+      "error": 10.51184641252788,
+      "analytic_error": 10.513835141499166,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.001988728971286941
+    },
+    {
+      "id": 208,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.07801629686386448,
+        -0.05940201379121752
+      ],
+      "analytic_gain": [
+        0.07735722373891643,
+        -0.05935488856200029
+      ],
+      "error": 12.02230767165413,
+      "analytic_error": 11.997350167840777,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.05392692443040775
+    },
+    {
+      "id": 209,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.02519401283736632,
+        -0.054748494733556134
+      ],
+      "analytic_gain": [
+        0.02503435330113802,
+        -0.053678211828161515
+      ],
+      "error": 30.05413212114783,
+      "analytic_error": 29.984644494116598,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.08831663740008297
+    },
+    {
+      "id": 210,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.0007371492945370112,
+        0.0
+      ],
+      "analytic_gain": [
+        0.0007189098899896727,
+        0.0
+      ],
+      "error": 0.5470954734364604,
+      "analytic_error": 0.5583017635903451,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.01120629015388479
+    },
+    {
+      "id": 211,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.0006811795371017546,
+        -9.615750725223153e-05
+      ],
+      "analytic_gain": [
+        0.0006674059630040402,
+        -9.640991260571312e-05
+      ],
+      "error": 0.38457440886992794,
+      "analytic_error": 0.39134145810099474,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.00846390473309748
+    },
+    {
+      "id": 212,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.000537106211280565,
+        -5.2983129357423255e-05
+      ],
+      "analytic_gain": [
+        0.0005165507471000766,
+        -5.7046675351035345e-05
+      ],
+      "error": 0.6134838648085041,
+      "analytic_error": 0.6156257949691941,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.01287368894174928
+    },
+    {
+      "id": 213,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.000646723334720052,
+        0.0
+      ],
+      "analytic_gain": [
+        0.0005963845093256681,
+        0.0
+      ],
+      "error": 0.10403732803048583,
+      "analytic_error": 0.17377612680706364,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.06973879877657779
+    },
+    {
+      "id": 214,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.0006045607782069145,
+        -0.00015807107110455312
+      ],
+      "analytic_gain": [
+        0.0005691799878561428,
+        -0.0001489924343634546
+      ],
+      "error": 0.5779180704084815,
+      "analytic_error": 0.5823757789851792,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.050604067812433824
+    },
+    {
+      "id": 215,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.0002867077362452696,
+        -0.0003942887748273354
+      ],
+      "analytic_gain": [
+        0.0002753932708883805,
+        -0.0003794535291615466
+      ],
+      "error": 0.2917843960935958,
+      "analytic_error": 0.2821508660241191,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.025847849712969103
+    },
+    {
+      "id": 216,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.00010625509466818686,
+        0.0
+      ],
+      "analytic_gain": [
+        0.0001067378053934941,
+        0.0
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 217,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        4.4000177347710016e-05,
+        -6.074733042427985e-05
+      ],
+      "analytic_gain": [
+        4.386271948437386e-05,
+        -6.0951197324619175e-05
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 218,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -6.779630009577545e-06,
+        -2.0466586747552648e-05
+      ],
+      "analytic_gain": [
+        -6.811066318059695e-06,
+        -2.04766144821945e-05
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 219,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        9.542963084369775,
+        0.0
+      ],
+      "analytic_gain": [
+        9.531455424984916,
+        0.0
+      ],
+      "error": 0.004930795699980597,
+      "analytic_error": 0.006130728819936081,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0011999331199554837
+    },
+    {
+      "id": 220,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        9.486247032998412,
+        0.12885082583534868
+      ],
+      "analytic_gain": [
+        9.487324922758015,
+        0.1260146208706405
+      ],
+      "error": 0.01606515191123717,
+      "analytic_error": 0.016255244331449994,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0003163758207896675
+    },
+    {
+      "id": 221,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        9.428867016146327,
+        1.2557795735372639
+      ],
+      "analytic_gain": [
+        9.41974248469337,
+        1.2259649887786075
+      ],
+      "error": 0.05284319250565863,
+      "analytic_error": 0.05570283107878693,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0032511752215751283
+    },
+    {
+      "id": 222,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.051347426422465134,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.052380139984055045,
+        0.0
+      ],
+      "error": 0.26150870597342607,
+      "analytic_error": 0.28688051600347103,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.025371810030044965
+    },
+    {
+      "id": 223,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.036153577276146494,
+        0.04174723070104154
+      ],
+      "analytic_gain": [
+        -0.03895901197506378,
+        0.03854099932715033
+      ],
+      "error": 0.1220501887549983,
+      "analytic_error": 0.100083517576764,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.10466813196564266
+    },
+    {
+      "id": 224,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.036178145344027045,
+        0.037969669333046435
+      ],
+      "analytic_gain": [
+        0.027484125649610912,
+        0.0421466484963376
+      ],
+      "error": 0.11608667557338351,
+      "analytic_error": 0.15093150902089866,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.23696837747808397
+    },
+    {
+      "id": 225,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.005449763139259773,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.005504623711111124,
+        0.0
+      ],
+      "error": 0.14183177305355013,
+      "analytic_error": 0.1331929389479385,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.008638834105611639
+    },
+    {
+      "id": 226,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0004125631317483243,
+        0.004082998118878604
+      ],
+      "analytic_gain": [
+        0.00020783701534346898,
+        0.004044914245357065
+      ],
+      "error": 0.33224551943183733,
+      "analytic_error": 0.31751627527278714,
+      "passed": false,
+      "low_frequency_sign_ok": false,
+      "finite_vs_infinitesimal_difference": 0.03279104719506505
+    },
+    {
+      "id": 227,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0017322220087550473,
+        -4.1716650366770196e-05
+      ],
+      "analytic_gain": [
+        0.0016615721514158677,
+        0.00022775648782791594
+      ],
+      "error": 0.27874511050379713,
+      "analytic_error": 0.24753172301571574,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.04386778841503485
+    },
+    {
+      "id": 228,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.6741875823099805,
+        0.0
+      ],
+      "analytic_gain": [
+        5.6677741917587765,
+        0.0
+      ],
+      "error": 0.013100962329440326,
+      "analytic_error": 0.014216429322974584,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0011154669935342578
+    },
+    {
+      "id": 229,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.215315578058038,
+        -0.5020744889734686
+      ],
+      "analytic_gain": [
+        5.218134735916272,
+        -0.5109860261585955
+      ],
+      "error": 0.019184965651179362,
+      "analytic_error": 0.018257453904800013,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0016256729109000118
+    },
+    {
+      "id": 230,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        4.6731701929607485,
+        0.41740905046285887
+      ],
+      "analytic_gain": [
+        4.657638025044362,
+        0.38309045407229037
+      ],
+      "error": 0.04643510186665016,
+      "analytic_error": 0.043991684364358845,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006551827012940637
+    },
+    {
+      "id": 231,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.09496281510490005,
+        0.0
+      ],
+      "analytic_gain": [
+        0.09460809414221821,
+        0.0
+      ],
+      "error": 0.038150945913848405,
+      "analytic_error": 0.041743805098184567,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0035928591843361595
+    },
+    {
+      "id": 232,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.11873852820070413,
+        0.004173298999426684
+      ],
+      "analytic_gain": [
+        0.1154187504728167,
+        5.619220245133428e-05
+      ],
+      "error": 0.07449488424044316,
+      "analytic_error": 0.04517826047715787,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.053568706781525165
+    },
+    {
+      "id": 233,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.09565940226271949,
+        -0.07128987269645042
+      ],
+      "analytic_gain": [
+        0.08761506318103421,
+        -0.06810714212256347
+      ],
+      "error": 0.2892429964820682,
+      "analytic_error": 0.2626350566509777,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.08762410838225877
+    },
+    {
+      "id": 234,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.03328023436131127,
+        0.0
+      ],
+      "analytic_gain": [
+        0.03333184579570588,
+        0.0
+      ],
+      "error": 0.0004184070473116617,
+      "analytic_error": 0.0011317575112261805,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.001550164558537842
+    },
+    {
+      "id": 235,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.013733070964898019,
+        -0.019959434063848033
+      ],
+      "analytic_gain": [
+        0.013503663071392192,
+        -0.020076468914469455
+      ],
+      "error": 0.016384965649586015,
+      "analytic_error": 0.014788099735551426,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.007735189448984773
+    },
+    {
+      "id": 236,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.002257437466020768,
+        -0.005384136175516249
+      ],
+      "analytic_gain": [
+        -0.002310606163491237,
+        -0.005238293391391549
+      ],
+      "error": 0.049600661712863654,
+      "analytic_error": 0.05426290896921298,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.004662443864165267
+    },
+    {
+      "id": 237,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.606339080975812,
+        0.0
+      ],
+      "analytic_gain": [
+        7.6349023615303295,
+        0.0
+      ],
+      "error": 0.012695104036305088,
+      "analytic_error": 0.016497970837907678,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0038028668016025914
+    },
+    {
+      "id": 238,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        6.694736782232746,
+        -1.12224018498137
+      ],
+      "analytic_gain": [
+        6.72080400247352,
+        -1.0819667125055847
+      ],
+      "error": 0.026358007927606515,
+      "analytic_error": 0.02195258001009821,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.006387104794734227
+    },
+    {
+      "id": 239,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        5.5400416938639685,
+        -0.7167018428177656
+      ],
+      "analytic_gain": [
+        5.720150678621369,
+        -0.6312687419736499
+      ],
+      "error": 0.016782605233826353,
+      "analytic_error": 0.020682056012896445,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.026540332851116104
+    },
+    {
+      "id": 240,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.3721159255178061,
+        0.0
+      ],
+      "analytic_gain": [
+        0.3719862381083375,
+        0.0
+      ],
+      "error": 0.011380921425988143,
+      "analytic_error": 0.011725468483664066,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00034454705767592264
+    },
+    {
+      "id": 241,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.4406898342331415,
+        -0.021817808746700997
+      ],
+      "analytic_gain": [
+        0.43924875249002626,
+        -0.022340903321758344
+      ],
+      "error": 0.021794654178431565,
+      "analytic_error": 0.01930779593981316,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.004073019546324189
+    },
+    {
+      "id": 242,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.2780721088055928,
+        -0.3737299246829123
+      ],
+      "analytic_gain": [
+        0.2813669389613047,
+        -0.36318586628691046
+      ],
+      "error": 0.05478772353627453,
+      "analytic_error": 0.04523465673054764,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.029348742951167545
+    },
+    {
+      "id": 243,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.09908265813604522,
+        0.0
+      ],
+      "analytic_gain": [
+        0.09953725542949432,
+        0.0
+      ],
+      "error": 0.13054216958147397,
+      "analytic_error": 0.1265530438967988,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.003989125684675178
+    },
+    {
+      "id": 244,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.04681251892766155,
+        -0.05254370984285399
+      ],
+      "analytic_gain": [
+        0.0475296378947444,
+        -0.05229386344942434
+      ],
+      "error": 0.27365166965955395,
+      "analytic_error": 0.2719648864898654,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.006663760591158713
+    },
+    {
+      "id": 245,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.006391287661486146,
+        -0.028052978553537496
+      ],
+      "analytic_gain": [
+        -0.0059808041708898346,
+        -0.027921454662141236
+      ],
+      "error": 0.32745730704896364,
+      "analytic_error": 0.3308248990418239,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.003782406089836256
+    },
+    {
+      "id": 246,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        7.701974195677283e-07,
+        0.0
+      ],
+      "analytic_gain": [
+        8.183617178714644e-07,
+        0.0
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 247,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -8.194949155667469e-06,
+        -1.47527711281194e-05
+      ],
+      "analytic_gain": [
+        -8.164333118134409e-06,
+        -1.4603529279441576e-05
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 248,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -3.6056462599736046e-05,
+        -4.258568632629271e-06
+      ],
+      "analytic_gain": [
+        -3.554409995169878e-05,
+        -3.954517673051464e-06
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 249,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        1.100004570141523e-06,
+        0.0
+      ],
+      "analytic_gain": [
+        1.1523934358742733e-06,
+        0.0
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 250,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        6.687193289850891e-07,
+        -1.5733989332892508e-06
+      ],
+      "analytic_gain": [
+        6.925296870247221e-07,
+        -1.5749974150000915e-06
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 251,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -3.477308344679724e-06,
+        2.2482679267746152e-08
+      ],
+      "analytic_gain": [
+        -3.426921040140705e-06,
+        1.1143078218826147e-08
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 252,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        4.2376340609967276e-08,
+        0.0
+      ],
+      "analytic_gain": [
+        4.2800817065766767e-08,
+        0.0
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 253,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -6.293638529276806e-07,
+        -2.4061136064881865e-07
+      ],
+      "analytic_gain": [
+        -6.272933655521371e-07,
+        -2.3920100852133123e-07
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 254,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -1.0060630212385774e-07,
+        7.09575089773056e-07
+      ],
+      "analytic_gain": [
+        -9.828225452183204e-08,
+        7.052139255695183e-07
+      ],
+      "error": null,
+      "analytic_error": null,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": null
+    },
+    {
+      "id": 255,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        8.93146266499901,
+        0.0
+      ],
+      "analytic_gain": [
+        8.92465932072091,
+        0.0
+      ],
+      "error": 0.013307441989500622,
+      "analytic_error": 0.014059033237269234,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0007515912477686123
+    },
+    {
+      "id": 256,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        8.86246454765175,
+        0.02008938537239734
+      ],
+      "analytic_gain": [
+        8.867605990355768,
+        0.025256940604299134
+      ],
+      "error": 0.0300396599539135,
+      "analytic_error": 0.029283393982868867,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0008053081855851055
+    },
+    {
+      "id": 257,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        8.653504677786502,
+        0.8677616052033967
+      ],
+      "analytic_gain": [
+        8.662022219709105,
+        0.8535652899952557
+      ],
+      "error": 0.0478168307055061,
+      "analytic_error": 0.04780741340987121,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.001828946563993525
+    },
+    {
+      "id": 258,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.06012901983743236,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.06052194103871153,
+        0.0
+      ],
+      "error": 0.01884391340618584,
+      "analytic_error": 0.012432416441340676,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.006411496964845162
+    },
+    {
+      "id": 259,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.04997462147132153,
+        0.036352549360825624
+      ],
+      "analytic_gain": [
+        -0.051550706626506376,
+        0.03384321566755868
+      ],
+      "error": 0.06332355213830862,
+      "analytic_error": 0.0643602916378492,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.048352732353087347
+    },
+    {
+      "id": 260,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.022515074316427828,
+        0.036540135124780375
+      ],
+      "analytic_gain": [
+        0.015069493958851831,
+        0.03890721648480363
+      ],
+      "error": 0.07588878951129274,
+      "analytic_error": 0.057594027059815256,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.12748536128170404
+    },
+    {
+      "id": 261,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.013190201793288775,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.013450542807997762,
+        0.0
+      ],
+      "error": 0.27429784364721044,
+      "analytic_error": 0.2994492400288325,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.025151396381622067
+    },
+    {
+      "id": 262,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        -0.0009910349047701009,
+        0.014020692730321319
+      ],
+      "analytic_gain": [
+        -0.0020629002317200658,
+        0.013792724590887732
+      ],
+      "error": 1.1479819106465075,
+      "analytic_error": 1.156960367773351,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.10586845059867078
+    },
+    {
+      "id": 263,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.009217377838954204,
+        -0.0019344694686877822
+      ],
+      "analytic_gain": [
+        0.008474858041125997,
+        -0.0005026233144888069
+      ],
+      "error": 1.1482092111295725,
+      "analytic_error": 1.2958665939913816,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.15582352135108685
+    },
+    {
+      "id": 264,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.990570369155765,
+        0.0
+      ],
+      "analytic_gain": [
+        7.987629586622158,
+        0.0
+      ],
+      "error": 0.0064444351511657744,
+      "analytic_error": 0.006810095012263239,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.00036565986109746477
+    },
+    {
+      "id": 265,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.8066934630094105,
+        -0.31001598370978295
+      ],
+      "analytic_gain": [
+        7.810015802270795,
+        -0.3092843526824078
+      ],
+      "error": 0.009621535627702885,
+      "analytic_error": 0.010022068166137254,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0004230011265847753
+    },
+    {
+      "id": 266,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        7.214437601723371,
+        0.06402573742527236
+      ],
+      "analytic_gain": [
+        7.21092222006231,
+        0.052199404688703974
+      ],
+      "error": 0.018434977752710788,
+      "analytic_error": 0.01976218268864994,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.0015340881519883712
+    },
+    {
+      "id": 267,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.005592789649158081,
+        0.0
+      ],
+      "analytic_gain": [
+        0.005330660378970138,
+        0.0
+      ],
+      "error": 0.08766296563635748,
+      "analytic_error": 0.13042342257919542,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.042760456942837956
+    },
+    {
+      "id": 268,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.02468000082408991,
+        0.021241939336007418
+      ],
+      "analytic_gain": [
+        0.024232154805742992,
+        0.02058006247677739
+      ],
+      "error": 0.2617236566917892,
+      "analytic_error": 0.17146106561366162,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.13036387721395928
+    },
+    {
+      "id": 269,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": false,
+      "gain": [
+        0.045922911782620146,
+        -0.01966579263121057
+      ],
+      "analytic_gain": [
+        0.04477779771552508,
+        -0.018593714602768287
+      ],
+      "error": 0.5345095060082666,
+      "analytic_error": 0.32062532837519175,
+      "passed": null,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.2558884246196305
+    },
+    {
+      "id": 270,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.006477078619828139,
+        0.0
+      ],
+      "analytic_gain": [
+        0.006501302009430791,
+        0.0
+      ],
+      "error": 0.0543743985257397,
+      "analytic_error": 0.058317614802961326,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.003943216277221625
+    },
+    {
+      "id": 271,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.0062254062555907085,
+        -0.004270599441954508
+      ],
+      "analytic_gain": [
+        0.006276744267145663,
+        -0.004347122110118076
+      ],
+      "error": 0.1624735679178253,
+      "analytic_error": 0.1736160984458329,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.015000406772764782
+    },
+    {
+      "id": 272,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.0001766764299579467,
+        -0.0031064157066015862
+      ],
+      "analytic_gain": [
+        -0.00019934888302647452,
+        -0.003030092077295268
+      ],
+      "error": 0.23400152635877794,
+      "analytic_error": 0.22236709499745516,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.012960972431118078
+    },
+    {
+      "id": 273,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        11.38163096263806,
+        0.0
+      ],
+      "analytic_gain": [
+        11.382940031581594,
+        0.0
+      ],
+      "error": 0.004750177769817047,
+      "analytic_error": 0.004635708179508197,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0001144695903088505
+    },
+    {
+      "id": 274,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        11.458926766499083,
+        1.0931982692436268
+      ],
+      "analytic_gain": [
+        11.466240298624482,
+        1.0771402625231068
+      ],
+      "error": 0.00833093875863012,
+      "analytic_error": 0.006799397985712017,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0015429440675516462
+    },
+    {
+      "id": 275,
+      "pop": "I",
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        12.879899147656765,
+        4.00104857972895
+      ],
+      "analytic_gain": [
+        12.72887178318848,
+        3.9704297593337925
+      ],
+      "error": 0.040407817281197494,
+      "analytic_error": 0.03790581696371383,
+      "passed": true,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.013475036353033865
+    },
+    {
+      "id": 276,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.22564117632210498,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.2303871988936276,
+        0.0
+      ],
+      "error": 0.018962206632600436,
+      "analytic_error": 0.04039454319028332,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.02143233655768289
+    },
+    {
+      "id": 277,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.2202632426989989,
+        0.0712038325036218
+      ],
+      "analytic_gain": [
+        -0.2443791194908383,
+        0.03523100336977186
+      ],
+      "error": 0.23349536610523644,
+      "analytic_error": 0.03821282135243702,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.195574461358513
+    },
+    {
+      "id": 278,
+      "pop": "I",
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.055225622572449784,
+        0.23055031642547968
+      ],
+      "analytic_gain": [
+        -0.15160225102874358,
+        0.2942093620098501
+      ],
+      "error": 0.9941883735919419,
+      "analytic_error": 0.7079909574497197,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.5215941970407367
+    },
+    {
+      "id": 279,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.03862789221719023,
+        0.0
+      ],
+      "analytic_gain": [
+        -0.0384241481972236,
+        0.0
+      ],
+      "error": 0.011641629272782752,
+      "analytic_error": 0.006305694007282986,
+      "passed": true,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.0053359352654997645
+    },
+    {
+      "id": 280,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        -0.02600237503477722,
+        0.027100820260317227
+      ],
+      "analytic_gain": [
+        -0.03227853975025902,
+        0.024027392970778706
+      ],
+      "error": 0.3043309904462522,
+      "analytic_error": 0.1244207470699427,
+      "passed": false,
+      "low_frequency_sign_ok": true,
+      "finite_vs_infinitesimal_difference": 0.18301918121432012
+    },
+    {
+      "id": 281,
+      "pop": "I",
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "dt_ms": 0.1,
+      "counted": true,
+      "gain": [
+        0.002997475261789448,
+        0.00698742601784284
+      ],
+      "analytic_gain": [
+        9.16060494294315e-05,
+        0.015623284894083104
+      ],
+      "error": 0.8957839912168639,
+      "analytic_error": 0.689832031237331,
+      "passed": false,
+      "low_frequency_sign_ok": null,
+      "finite_vs_infinitesimal_difference": 0.23862867435911023
+    }
+  ],
+  "model_promoted": false,
+  "training_modified": false
+}

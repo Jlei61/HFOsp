@@ -1,0 +1,26 @@
+{
+  "created_local": "2026-09-19T16:18:26.844872",
+  "status": "PRESPECIFIED_BEFORE_FINE_TURN_CENTER",
+  "source": "periodic/native_turn_G8505_M65536/turn.npz",
+  "target": "periodic/native_turn_center_G16875_M262144/point0000.npz",
+  "period_ms": 264.36293204907884,
+  "coarse": {
+    "N": 8505,
+    "M": 65536
+  },
+  "fine": {
+    "N": 16875,
+    "M": 262144
+  },
+  "same_frozen_model": true,
+  "Z": "held native spatial field",
+  "M": "dynamic",
+  "orbit_criteria": {
+    "both_max_residual_hz": 2e-08,
+    "max_period_difference_ms": 1e-08,
+    "max_D_difference": 1e-08,
+    "max_Z_difference": 1e-06,
+    "max_phase_aligned_rate_relative_L2_difference": 0.001
+  },
+  "next": "Recompute tangent and two-step curvature on accepted fine orbit; near-zero derivative and coarse curvature are not joint convergence or Floquet certification."
+}

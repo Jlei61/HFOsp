@@ -1,0 +1,132 @@
+{
+  "status": "COMPLETE",
+  "arms": {
+    "A4_det_meandrive": {
+      "checks": {
+        "self_limited_events": {
+          "passed": true,
+          "n": 27,
+          "median_duration_ms": 80.0,
+          "quiet_fraction": 0.45112
+        },
+        "two_core_participation": {
+          "passed": true,
+          "fraction": 1.0
+        },
+        "surround_recruitment": {
+          "passed": true,
+          "median_area": 0.5307499999999999,
+          "median_surround_cells": 197.0
+        },
+        "propagation": {
+          "passed": false,
+          "forward": 27,
+          "reverse": 0,
+          "median_extent_mm": 13.655776418491799,
+          "note": "deterministic arm cannot alternate ignition side without noise"
+        },
+        "entry": {
+          "passed": true,
+          "high_onset_ms": 8505.0,
+          "native_ms": 9868.5
+        },
+        "D_track": {
+          "passed": false,
+          "D_at_9870ms": 0.3225638892501854,
+          "native": 0.2563444253447549,
+          "D_at_8000ms": 0.14597587435349846,
+          "native_8000": 0.20146039727098164
+        }
+      },
+      "n_passed": 4,
+      "n_total": 6
+    },
+    "A4_stoch_seed9108401": {
+      "checks": {
+        "self_limited_events": {
+          "passed": true,
+          "n": 25,
+          "median_duration_ms": 94.0,
+          "quiet_fraction": 0.24368
+        },
+        "two_core_participation": {
+          "passed": true,
+          "fraction": 0.84
+        },
+        "surround_recruitment": {
+          "passed": true,
+          "median_area": 0.8619687499999997,
+          "median_surround_cells": 331.0
+        },
+        "propagation": {
+          "passed": true,
+          "forward": 9,
+          "reverse": 14,
+          "median_extent_mm": 11.233297978379916,
+          "note": ""
+        },
+        "entry": {
+          "passed": false,
+          "high_onset_ms": 6421.0,
+          "native_ms": 9868.5
+        },
+        "D_track": {
+          "passed": false,
+          "D_at_9870ms": 0.6277595013727906,
+          "native": 0.2563444253447549,
+          "D_at_8000ms": 0.4589346063542584,
+          "native_8000": 0.20146039727098164
+        }
+      },
+      "n_passed": 4,
+      "n_total": 6
+    },
+    "A4_stoch_meandrive": {
+      "checks": {
+        "self_limited_events": {
+          "passed": true,
+          "n": 27,
+          "median_duration_ms": 96.0,
+          "quiet_fraction": 0.41232
+        },
+        "two_core_participation": {
+          "passed": true,
+          "fraction": 0.9629629629629629
+        },
+        "surround_recruitment": {
+          "passed": true,
+          "median_area": 0.655125,
+          "median_surround_cells": 248.0
+        },
+        "propagation": {
+          "passed": true,
+          "forward": 6,
+          "reverse": 21,
+          "median_extent_mm": 14.158336936275296,
+          "note": ""
+        },
+        "entry": {
+          "passed": true,
+          "high_onset_ms": 8297.0,
+          "native_ms": 9868.5
+        },
+        "D_track": {
+          "passed": false,
+          "D_at_9870ms": 0.37757217910453444,
+          "native": 0.2563444253447549,
+          "D_at_8000ms": 0.18417856132218646,
+          "native_8000": 0.20146039727098164
+        }
+      },
+      "n_passed": 5,
+      "n_total": 6
+    }
+  },
+  "native_basis": "native seed-to-seed differences (seed 9108401 vs 9108402): event count 40 vs 42, median duration 100 vs 97.5 ms, median gap 239 vs 189 ms, both-core fraction 32/40 vs 31/42, median area 0.75 vs 0.68, forward:reverse 17:22 vs 15:24, high onset 9868 vs 9869 ms",
+  "roles": {
+    "A4_det_meandrive": "skeleton",
+    "A4_stoch_seed9108401": "primary stochastic contrast",
+    "A4_stoch_meandrive": "noise-only contrast"
+  },
+  "overall": "PARTIAL"
+}

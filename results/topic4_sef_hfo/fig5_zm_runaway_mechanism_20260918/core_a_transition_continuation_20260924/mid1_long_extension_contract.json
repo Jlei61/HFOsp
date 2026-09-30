@@ -1,0 +1,26 @@
+{
+  "created_local": "2026-09-24T09:53:02.972878+08:00",
+  "conditions": [
+    {
+      "label": "mid1_from_lower_ext_long",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 15000,
+      "prior_same_field_elapsed_ms": 15000,
+      "exact_same_Z_continuation": true
+    },
+    {
+      "label": "mid1_from_upper_ext_long",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_upper_ext/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 15000,
+      "prior_same_field_elapsed_ms": 15000,
+      "exact_same_Z_continuation": true
+    }
+  ],
+  "reason": "At15s one history still sustains high CoreA activity, while the other returned to self-limited activity. Test longer persistence versus recurrent switching before attributing distinct attractors.",
+  "budget": "Two15s same-Z continuations to total30s, allMdynamic, then audit. No state reset. Local elapsed0–15s corresponds to total15–30s.",
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

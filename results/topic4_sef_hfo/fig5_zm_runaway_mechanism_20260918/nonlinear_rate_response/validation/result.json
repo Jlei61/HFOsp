@@ -1,0 +1,5857 @@
+{
+  "status": "LOCAL_CANDIDATE_FAIL",
+  "fresh_count": 64,
+  "fresh_passed": 48,
+  "fresh_required_passed": 58,
+  "old_count": 24,
+  "old_passed": 15,
+  "old_required_passed": 24,
+  "numerical_failures": 0,
+  "analytic_AC_counted": 146,
+  "analytic_AC_failed": 69,
+  "analytic_DC_counted": 76,
+  "analytic_DC_failed": 8,
+  "analytic_scope": "Analytic infinitesimal gains compared with original finite-amplitude estimates; not a replacement for the matched finite-amplitude protocol.",
+  "rows": [
+    {
+      "label": "fresh224",
+      "kind": "fresh",
+      "index": 224,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.022826864718338953,
+      "mean_error": 0.013651489471445432,
+      "reference_mean_hz": 70.89996337890635,
+      "predicted_mean_hz": 69.93207327531334,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0009626797672278164,
+      "time_step_error": 0.00015303802912500596,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh225",
+      "kind": "fresh",
+      "index": 225,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.22499063212301817,
+      "mean_error": 0.25386562520037176,
+      "reference_mean_hz": 24.531860351562543,
+      "predicted_mean_hz": 30.75965641704018,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.008952224997111893,
+      "time_step_error": 0.0010104291179892115,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh226",
+      "kind": "fresh",
+      "index": 226,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.08674447956487297,
+      "mean_error": 0.0013043911422532424,
+      "reference_mean_hz": 203.78463745117054,
+      "predicted_mean_hz": 204.05045232718913,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.002637048325062901,
+      "time_step_error": 0.0002896765526168702,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh227",
+      "kind": "fresh",
+      "index": 227,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.025103797063010882,
+      "mean_error": 0.022958559876695667,
+      "reference_mean_hz": 82.0363616943361,
+      "predicted_mean_hz": 80.15292497231042,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00011208538875837171,
+      "time_step_error": 1.6686114109220925e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh228",
+      "kind": "fresh",
+      "index": 228,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.041690678491438295,
+      "mean_error": 0.025969461182407932,
+      "reference_mean_hz": 131.68128967285153,
+      "predicted_mean_hz": 135.10098181346007,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0016866523798242604,
+      "time_step_error": 0.00032905875075083175,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh229",
+      "kind": "fresh",
+      "index": 229,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.4534880316857951,
+      "mean_error": 0.016749106314048214,
+      "reference_mean_hz": 176.54747009277352,
+      "predicted_mean_hz": 173.5904577467134,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0024206970763018384,
+      "time_step_error": 0.000588520706625379,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh230",
+      "kind": "fresh",
+      "index": 230,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.013909844065004503,
+      "mean_error": 0.01139889591697789,
+      "reference_mean_hz": 88.56014251708731,
+      "predicted_mean_hz": 87.55065467014231,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00024438084524514226,
+      "time_step_error": 8.991888497477456e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh231",
+      "kind": "fresh",
+      "index": 231,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.06201023964514631,
+      "mean_error": 0.01610263892841944,
+      "reference_mean_hz": 74.269523620603,
+      "predicted_mean_hz": 75.46545894285128,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.001497059842613354,
+      "time_step_error": 0.0003574115006551414,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh232",
+      "kind": "fresh",
+      "index": 232,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.16860409185837996,
+      "mean_error": 0.01659649986168735,
+      "reference_mean_hz": 288.4506225585879,
+      "predicted_mean_hz": 283.66335184119066,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0013511889297369074,
+      "time_step_error": 0.0003448820239717179,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh233",
+      "kind": "fresh",
+      "index": 233,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.13637923850615438,
+      "mean_error": 0.013651881737528852,
+      "reference_mean_hz": 1.5893554687499996,
+      "predicted_mean_hz": 1.5676577758517298,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00411857198109273,
+      "time_step_error": 0.0010917100837624385,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh234",
+      "kind": "fresh",
+      "index": 234,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.12611927596486935,
+      "mean_error": 0.143422515687426,
+      "reference_mean_hz": 80.043792724609,
+      "predicted_mean_hz": 91.52387484233532,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.006506929072492296,
+      "time_step_error": 0.0006544233312520089,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh235",
+      "kind": "fresh",
+      "index": 235,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.7847699733881548,
+      "mean_error": 0.053676042540675435,
+      "reference_mean_hz": 180.00152587890565,
+      "predicted_mean_hz": 170.33975631844302,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.002870871487436028,
+      "time_step_error": 0.0006165387167279085,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh236",
+      "kind": "fresh",
+      "index": 236,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.04016762758842289,
+      "mean_error": 0.030237016272263786,
+      "reference_mean_hz": 47.87559509277323,
+      "predicted_mean_hz": 46.427979944908735,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0007865812466298694,
+      "time_step_error": 0.00018961823130442956,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh237",
+      "kind": "fresh",
+      "index": 237,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.02093705294681314,
+      "mean_error": 0.0028213289195954078,
+      "reference_mean_hz": 95.66650390624984,
+      "predicted_mean_hz": 95.93641058035713,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0019474682727365624,
+      "time_step_error": 0.0004624592450356476,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh238",
+      "kind": "fresh",
+      "index": 238,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.05081282653337981,
+      "mean_error": 0.023155086904325876,
+      "reference_mean_hz": 250.11192321777344,
+      "predicted_mean_hz": 244.3205598998578,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0015012205578539492,
+      "time_step_error": 0.00021890249275348833,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh239",
+      "kind": "fresh",
+      "index": 239,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.023535084621503156,
+      "mean_error": 0.021974315558670014,
+      "reference_mean_hz": 63.79821777343488,
+      "predicted_mean_hz": 62.39629560400067,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00012446582682731376,
+      "time_step_error": 1.407645409333543e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh240",
+      "kind": "fresh",
+      "index": 240,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.017675025181242535,
+      "mean_error": 0.0016758656953090325,
+      "reference_mean_hz": 98.77182006835706,
+      "predicted_mean_hz": 98.60629176344126,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0005653888857039409,
+      "time_step_error": 0.00015606921201541794,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh241",
+      "kind": "fresh",
+      "index": 241,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.032627226356339065,
+      "mean_error": 0.00993043645767267,
+      "reference_mean_hz": 206.9207000732354,
+      "predicted_mean_hz": 204.865887209381,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00043468042866430013,
+      "time_step_error": 0.00019025631372617641,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh242",
+      "kind": "fresh",
+      "index": 242,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 6.449484754542463e-05,
+      "mean_error": 6.339723686799691e-05,
+      "reference_mean_hz": 0.0,
+      "predicted_mean_hz": 6.339723686799691e-05,
+      "near_zero_mean": true,
+      "passed": true,
+      "quadrature_error": 5.4185583812279995e-08,
+      "time_step_error": 1.3801629782367993e-08,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh243",
+      "kind": "fresh",
+      "index": 243,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.27337382466969035,
+      "mean_error": 0.08794782630517481,
+      "reference_mean_hz": 50.66894531249992,
+      "predicted_mean_hz": 55.125168913910066,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.007033041457612404,
+      "time_step_error": 0.0009355401003534782,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh244",
+      "kind": "fresh",
+      "index": 244,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.7943438852310817,
+      "mean_error": 0.0019348016585717088,
+      "reference_mean_hz": 209.9999999999997,
+      "predicted_mean_hz": 209.59369165169963,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0021910814367633326,
+      "time_step_error": 0.0005422560914643578,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh245",
+      "kind": "fresh",
+      "index": 245,
+      "pop": "E",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.035878398291831266,
+      "mean_error": 0.017992367306881845,
+      "reference_mean_hz": 20.59783935546874,
+      "predicted_mean_hz": 20.227235464057,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0008288607001286106,
+      "time_step_error": 7.855659410121553e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh246",
+      "kind": "fresh",
+      "index": 246,
+      "pop": "E",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.03845859437468604,
+      "mean_error": 0.01500443978750757,
+      "reference_mean_hz": 174.62699890136724,
+      "predicted_mean_hz": 172.00681861107853,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0015464483202374502,
+      "time_step_error": 0.00027291829417818526,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh247",
+      "kind": "fresh",
+      "index": 247,
+      "pop": "E",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.2808557418002972,
+      "mean_error": 0.031149461363016304,
+      "reference_mean_hz": 210.66940307617193,
+      "predicted_mean_hz": 204.107164644681,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0016939519458224728,
+      "time_step_error": 0.0006715529595208182,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh248",
+      "kind": "fresh",
+      "index": 248,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.06851160497296799,
+      "mean_error": 0.01624591475522316,
+      "reference_mean_hz": 14.479458391678106,
+      "predicted_mean_hz": 14.244226344945103,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 1.1502996221016079e-05,
+      "time_step_error": 0.00025800726176818095,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh249",
+      "kind": "fresh",
+      "index": 249,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.00871085992276969,
+      "mean_error": 0.007213886357907004,
+      "reference_mean_hz": 75.65380263552998,
+      "predicted_mean_hz": 75.10804470077375,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 4.960483245510706e-06,
+      "time_step_error": 0.00020505715781219061,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh250",
+      "kind": "fresh",
+      "index": 250,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.2872847007940873,
+      "mean_error": 0.010385288300382975,
+      "reference_mean_hz": 98.170757198313,
+      "predicted_mean_hz": 97.15122558214162,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 7.057477548865325e-05,
+      "time_step_error": 0.0002004654270561575,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh251",
+      "kind": "fresh",
+      "index": 251,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.14052943392192596,
+      "mean_error": 0.00694024768391146,
+      "reference_mean_hz": 94.1091538620255,
+      "predicted_mean_hz": 93.4560130248997,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 1.85336990701926e-05,
+      "time_step_error": 0.00027225051106755983,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh252",
+      "kind": "fresh",
+      "index": 252,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.12105283129371586,
+      "mean_error": 0.010888959449235262,
+      "reference_mean_hz": 100.899818635607,
+      "predicted_mean_hz": 99.80112460204869,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 3.1633362625682116e-06,
+      "time_step_error": 0.00017989545286723008,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh253",
+      "kind": "fresh",
+      "index": 253,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.0411742767265922,
+      "mean_error": 0.015861051852520586,
+      "reference_mean_hz": 43.47866643641154,
+      "predicted_mean_hz": 42.78904905358517,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 7.566860600237935e-06,
+      "time_step_error": 0.00015370276596015893,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh254",
+      "kind": "fresh",
+      "index": 254,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.013384255587427075,
+      "mean_error": 0.0029919439068299015,
+      "reference_mean_hz": 82.51577073227342,
+      "predicted_mean_hz": 82.26888817481363,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 3.986804627088153e-06,
+      "time_step_error": 0.00017379372819465317,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh255",
+      "kind": "fresh",
+      "index": 255,
+      "pop": "E",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.01762153436097067,
+      "mean_error": 0.01602919665326562,
+      "reference_mean_hz": 79.66949835279709,
+      "predicted_mean_hz": 78.39246029643309,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 2.7261257943636797e-06,
+      "time_step_error": 0.00015807151335946615,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh256",
+      "kind": "fresh",
+      "index": 256,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.036836906482124246,
+      "mean_error": 0.016843201895424754,
+      "reference_mean_hz": 46.24160766601558,
+      "predicted_mean_hz": 45.46275093212786,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0016768874396940977,
+      "time_step_error": 0.0001869255720048866,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh257",
+      "kind": "fresh",
+      "index": 257,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.3224391738986544,
+      "mean_error": 0.010510785417298286,
+      "reference_mean_hz": 181.46301269531224,
+      "predicted_mean_hz": 183.37033148292915,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.003797449483583991,
+      "time_step_error": 0.0006220333366755335,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh258",
+      "kind": "fresh",
+      "index": 258,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.434375621587936,
+      "mean_error": 0.029770605672606577,
+      "reference_mean_hz": 399.99816894531176,
+      "predicted_mean_hz": 388.0899811878762,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.004035699893379467,
+      "time_step_error": 0.0013424644227362336,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh259",
+      "kind": "fresh",
+      "index": 259,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.1678005073072202,
+      "mean_error": 0.03461813929764046,
+      "reference_mean_hz": 0.8376312255859374,
+      "predicted_mean_hz": 0.8030130862882969,
+      "near_zero_mean": true,
+      "passed": false,
+      "quadrature_error": 0.0026378067894986218,
+      "time_step_error": 0.0003137599274228132,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh260",
+      "kind": "fresh",
+      "index": 260,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.020471783390882185,
+      "mean_error": 0.0054850689407475615,
+      "reference_mean_hz": 231.86233520507827,
+      "predicted_mean_hz": 233.13411609844084,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0025501658778971925,
+      "time_step_error": 0.00034207677250629995,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh261",
+      "kind": "fresh",
+      "index": 261,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.08541936178449545,
+      "mean_error": 0.018315293675391104,
+      "reference_mean_hz": 290.90950012207117,
+      "predicted_mean_hz": 296.2375930497681,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0018190778307461979,
+      "time_step_error": 0.00023487802957772235,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh262",
+      "kind": "fresh",
+      "index": 262,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.007841322659637764,
+      "mean_error": 0.005525741825780396,
+      "reference_mean_hz": 135.30208587646203,
+      "predicted_mean_hz": 134.55444148141913,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00012311966038978505,
+      "time_step_error": 1.6622137929105706e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh263",
+      "kind": "fresh",
+      "index": 263,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.01832684794648337,
+      "mean_error": 0.0018326606636529723,
+      "reference_mean_hz": 144.69337463378412,
+      "predicted_mean_hz": 144.42820077780158,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0009779466312241658,
+      "time_step_error": 0.000205012632692583,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh264",
+      "kind": "fresh",
+      "index": 264,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.10109671561038946,
+      "mean_error": 0.03123694021657867,
+      "reference_mean_hz": 124.96963500976287,
+      "predicted_mean_hz": 121.06596599207525,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0005623923729406439,
+      "time_step_error": 0.0001646360896134359,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh265",
+      "kind": "fresh",
+      "index": 265,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 9.855673641728216e-05,
+      "mean_error": 8.511010558026856e-05,
+      "reference_mean_hz": 0.0,
+      "predicted_mean_hz": 8.511010558026856e-05,
+      "near_zero_mean": true,
+      "passed": true,
+      "quadrature_error": 3.9280778512491655e-07,
+      "time_step_error": 1.9554159027067233e-07,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh266",
+      "kind": "fresh",
+      "index": 266,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.0861769648244303,
+      "mean_error": 0.05974326691579565,
+      "reference_mean_hz": 76.7599487304684,
+      "predicted_mean_hz": 81.34583883591556,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.008240398351029264,
+      "time_step_error": 0.001214409426601024,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh267",
+      "kind": "fresh",
+      "index": 267,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.05498904134849596,
+      "mean_error": 0.0018758457011117894,
+      "reference_mean_hz": 521.3713073730457,
+      "predicted_mean_hz": 522.3493194986645,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.003154008606677573,
+      "time_step_error": 0.0002490143584967242,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh268",
+      "kind": "fresh",
+      "index": 268,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.37679091316872004,
+      "mean_error": 0.24336422563390595,
+      "reference_mean_hz": 18.961105346679695,
+      "predicted_mean_hz": 14.346650626822077,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.003384692717924677,
+      "time_step_error": 0.0005577570128280236,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh269",
+      "kind": "fresh",
+      "index": 269,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.0194216863552037,
+      "mean_error": 0.007214080141129465,
+      "reference_mean_hz": 204.34715270996168,
+      "predicted_mean_hz": 202.8729759737004,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0019506755707014562,
+      "time_step_error": 0.000141009874987505,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh270",
+      "kind": "fresh",
+      "index": 270,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.20522486427931858,
+      "mean_error": 0.0013761048630149203,
+      "reference_mean_hz": 510.5564117431654,
+      "predicted_mean_hz": 509.8538325821222,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0022685587702832074,
+      "time_step_error": 0.00031895294234194623,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh271",
+      "kind": "fresh",
+      "index": 271,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.011428027250321495,
+      "mean_error": 0.00470332150692719,
+      "reference_mean_hz": 43.335113525389424,
+      "predicted_mean_hz": 43.13129455394033,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0004772278047375343,
+      "time_step_error": 8.075017256813368e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh272",
+      "kind": "fresh",
+      "index": 272,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.018131733449845228,
+      "mean_error": 0.005779047847186533,
+      "reference_mean_hz": 274.7064590454026,
+      "predicted_mean_hz": 273.118917274648,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.000445969565077694,
+      "time_step_error": 0.00012361591738704403,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh273",
+      "kind": "fresh",
+      "index": 273,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 400.0,
+      "dt": 0.1,
+      "burn": 12000,
+      "steps": 32000,
+      "waveform_L2": 0.027251367965555013,
+      "mean_error": 0.012272550104071757,
+      "reference_mean_hz": 302.17163085936784,
+      "predicted_mean_hz": 305.8800473391185,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.000683294874803067,
+      "time_step_error": 0.0001400081819134743,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh274",
+      "kind": "fresh",
+      "index": 274,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.01347029914181822,
+      "mean_error": 1.2204063746789518e-05,
+      "reference_mean_hz": 138.15612792968835,
+      "predicted_mean_hz": 138.15781399588062,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0006330690828817574,
+      "time_step_error": 0.00013383801262822475,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh275",
+      "kind": "fresh",
+      "index": 275,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.28267482474144795,
+      "mean_error": 0.01986865494094265,
+      "reference_mean_hz": 201.83776855468685,
+      "predicted_mean_hz": 205.84801353214976,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.010219562012222266,
+      "time_step_error": 0.0004870265889751414,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh276",
+      "kind": "fresh",
+      "index": 276,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 100.0,
+      "dt": 0.1,
+      "burn": 3000,
+      "steps": 8000,
+      "waveform_L2": 0.15877397026844656,
+      "mean_error": 0.02441488280026227,
+      "reference_mean_hz": 276.6012573242183,
+      "predicted_mean_hz": 269.8480700442423,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.004194090673435298,
+      "time_step_error": 0.0008469542015834005,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh277",
+      "kind": "fresh",
+      "index": 277,
+      "pop": "I",
+      "family": 0,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.026226076068341028,
+      "mean_error": 0.008574261333205453,
+      "reference_mean_hz": 28.378982543945312,
+      "predicted_mean_hz": 28.622311356647575,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0007170886784230894,
+      "time_step_error": 0.00014669218154898656,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh278",
+      "kind": "fresh",
+      "index": 278,
+      "pop": "I",
+      "family": 1,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.14537716646932858,
+      "mean_error": 0.008504462030916832,
+      "reference_mean_hz": 164.65728759765668,
+      "predicted_mean_hz": 163.25696594716865,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0027784427443651553,
+      "time_step_error": 0.000544917306893612,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh279",
+      "kind": "fresh",
+      "index": 279,
+      "pop": "I",
+      "family": 2,
+      "startup": false,
+      "theta": 18.0,
+      "T": 200.0,
+      "dt": 0.1,
+      "burn": 6000,
+      "steps": 16000,
+      "waveform_L2": 0.021896762172965302,
+      "mean_error": 0.004213462700272364,
+      "reference_mean_hz": 586.7541503906247,
+      "predicted_mean_hz": 584.2818836637238,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0016047807590042528,
+      "time_step_error": 0.00013668014547068834,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh280",
+      "kind": "fresh",
+      "index": 280,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.06489348498840532,
+      "mean_error": 0.013361923072239872,
+      "reference_mean_hz": 377.7459593481406,
+      "predicted_mean_hz": 372.6985468984813,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 1.0942450481257396e-05,
+      "time_step_error": 3.976333542790715e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh281",
+      "kind": "fresh",
+      "index": 281,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.015352638158062946,
+      "mean_error": 0.004647534537688809,
+      "reference_mean_hz": 99.80780335755587,
+      "predicted_mean_hz": 99.34394314432078,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 2.399374706247132e-05,
+      "time_step_error": 0.0001352239720750082,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh282",
+      "kind": "fresh",
+      "index": 282,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.0879857075224282,
+      "mean_error": 0.014629314512397322,
+      "reference_mean_hz": 168.36399506463937,
+      "predicted_mean_hz": 165.90094522827505,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 6.106765193588217e-05,
+      "time_step_error": 0.00012397251644552567,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh283",
+      "kind": "fresh",
+      "index": 283,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.07577058987223784,
+      "mean_error": 0.020608935677030933,
+      "reference_mean_hz": 224.66895722895674,
+      "predicted_mean_hz": 220.03876914079956,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 1.7899630987384154e-05,
+      "time_step_error": 6.495549500260682e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh284",
+      "kind": "fresh",
+      "index": 284,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.05830518558441332,
+      "mean_error": 0.012771990854006817,
+      "reference_mean_hz": 105.14138960605244,
+      "predicted_mean_hz": 103.79852473962637,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 2.07859253264397e-05,
+      "time_step_error": 0.00041257879689840163,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh285",
+      "kind": "fresh",
+      "index": 285,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.02409924028019882,
+      "mean_error": 0.003311149094452945,
+      "reference_mean_hz": 280.35709681000407,
+      "predicted_mean_hz": 279.42879266277816,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 2.862049835242042e-05,
+      "time_step_error": 4.457395697568156e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh286",
+      "kind": "fresh",
+      "index": 286,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.03867827250995914,
+      "mean_error": 0.00468137392847862,
+      "reference_mean_hz": 191.62890195227175,
+      "predicted_mean_hz": 190.7318154067294,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 4.471792796493818e-05,
+      "time_step_error": 0.00013176859734530228,
+      "numerical_pass": true
+    },
+    {
+      "label": "fresh287",
+      "kind": "fresh",
+      "index": 287,
+      "pop": "I",
+      "family": 3,
+      "startup": true,
+      "theta": 18.0,
+      "T": 500.0,
+      "dt": 0.1,
+      "burn": 0,
+      "steps": 4999,
+      "waveform_L2": 0.02194685058471751,
+      "mean_error": 0.0054900421726945415,
+      "reference_mean_hz": 127.40536388528993,
+      "predicted_mean_hz": 126.7059030645322,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 6.658238868137033e-06,
+      "time_step_error": 0.00021832147430535668,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_00",
+      "kind": "factorial_waveform",
+      "index": 0,
+      "pop": "E",
+      "theta": 17.955848651430077,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.2550804368283431,
+      "mean_error": 0.12713710691435784,
+      "reference_mean_hz": 72.73045401096931,
+      "predicted_mean_hz": 81.9771935184917,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.003369535782614691,
+      "time_step_error": 0.00118086359434812,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_01",
+      "kind": "factorial_waveform",
+      "index": 1,
+      "pop": "E",
+      "theta": 17.955848651430077,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.15075612473252287,
+      "mean_error": 0.05423790241867441,
+      "reference_mean_hz": 77.6795736880725,
+      "predicted_mean_hz": 81.8927508256904,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.002649177948887798,
+      "time_step_error": 0.0006538702490801569,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_02",
+      "kind": "factorial_waveform",
+      "index": 2,
+      "pop": "E",
+      "theta": 17.955848651430077,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.17871587165606956,
+      "mean_error": 0.03694428301896483,
+      "reference_mean_hz": 180.7710728641656,
+      "predicted_mean_hz": 187.44953054170125,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0014838594989014426,
+      "time_step_error": 0.0007835855017536231,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_03",
+      "kind": "factorial_waveform",
+      "index": 3,
+      "pop": "E",
+      "theta": 17.931614720234382,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.1086944388505405,
+      "mean_error": 0.00840759949714684,
+      "reference_mean_hz": 54.20618654458629,
+      "predicted_mean_hz": 53.750442637851776,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.002405996568345528,
+      "time_step_error": 0.00047462278575327815,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_04",
+      "kind": "factorial_waveform",
+      "index": 4,
+      "pop": "E",
+      "theta": 17.931614720234382,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.027327811996863544,
+      "mean_error": 0.012060700135415691,
+      "reference_mean_hz": 57.38618363815253,
+      "predicted_mean_hz": 58.07830119092819,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0023577451653204818,
+      "time_step_error": 0.0004724800905427576,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_05",
+      "kind": "factorial_waveform",
+      "index": 5,
+      "pop": "E",
+      "theta": 17.931614720234382,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.6570588671260296,
+      "mean_error": 0.24872314235075324,
+      "reference_mean_hz": 7.432452749394904,
+      "predicted_mean_hz": 9.2810757525979,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0032253873061898032,
+      "time_step_error": 0.0019542847179434605,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_06",
+      "kind": "factorial_waveform",
+      "index": 6,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.3223738591911178,
+      "mean_error": 0.1511257602178701,
+      "reference_mean_hz": 64.41225096575907,
+      "predicted_mean_hz": 74.14660136030365,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0030072515501991517,
+      "time_step_error": 0.0009781049098989256,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_07",
+      "kind": "factorial_waveform",
+      "index": 7,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.22308504853847888,
+      "mean_error": 0.08847722605389931,
+      "reference_mean_hz": 68.14260686426734,
+      "predicted_mean_hz": 74.17167569569911,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0031505243433719975,
+      "time_step_error": 0.0006513029313941362,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_08",
+      "kind": "factorial_waveform",
+      "index": 8,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.25443300419493414,
+      "mean_error": 0.08196900702405098,
+      "reference_mean_hz": 148.85550303025983,
+      "predicted_mean_hz": 161.05704080371584,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0017663834349726925,
+      "time_step_error": 0.0015851929532824333,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_09",
+      "kind": "factorial_waveform",
+      "index": 9,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.42270121207462713,
+      "mean_error": 0.2744444826061356,
+      "reference_mean_hz": 89.85250476377324,
+      "predicted_mean_hz": 65.19298058301416,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0024681912427101144,
+      "time_step_error": 0.0019049536781068147,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_10",
+      "kind": "factorial_waveform",
+      "index": 10,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.020850438655231538,
+      "mean_error": 0.003987403597669421,
+      "reference_mean_hz": 98.2839286991349,
+      "predicted_mean_hz": 98.67582639002292,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.003290120517063586,
+      "time_step_error": 0.0004965945829526488,
+      "numerical_pass": true
+    },
+    {
+      "label": "factorial_waveform_11",
+      "kind": "factorial_waveform",
+      "index": 11,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.44612597192707865,
+      "mean_error": 0.2708697547483652,
+      "reference_mean_hz": 20.010453261825973,
+      "predicted_mean_hz": 14.590226694391546,
+      "near_zero_mean": false,
+      "passed": false,
+      "quadrature_error": 0.0008623305103179346,
+      "time_step_error": 0.0014632733630232913,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_00",
+      "kind": "in_domain_waveform",
+      "index": 0,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.014192313160778389,
+      "mean_error": 0.009466298053136415,
+      "reference_mean_hz": 27.32996217055525,
+      "predicted_mean_hz": 27.07124860286783,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 6.208277523618595e-05,
+      "time_step_error": 1.4252693809690808e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_01",
+      "kind": "in_domain_waveform",
+      "index": 1,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.015330040562970345,
+      "mean_error": 0.010547313233771992,
+      "reference_mean_hz": 27.31629439588767,
+      "predicted_mean_hz": 27.028180882508313,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00030565704864818095,
+      "time_step_error": 6.113336158329016e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_02",
+      "kind": "in_domain_waveform",
+      "index": 2,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.01891404710452411,
+      "mean_error": 0.011680019777450569,
+      "reference_mean_hz": 27.25245757670538,
+      "predicted_mean_hz": 26.934148333225327,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0005239848277115988,
+      "time_step_error": 0.00014864487173376956,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_03",
+      "kind": "in_domain_waveform",
+      "index": 3,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.013650724500746732,
+      "mean_error": 0.009290609354742217,
+      "reference_mean_hz": 27.32661448925996,
+      "predicted_mean_hz": 27.072733589052607,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 9.051819490037019e-05,
+      "time_step_error": 1.407786913493072e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_04",
+      "kind": "in_domain_waveform",
+      "index": 4,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.014377068601575513,
+      "mean_error": 0.010524080142571177,
+      "reference_mean_hz": 27.35189525490367,
+      "predicted_mean_hz": 27.064041717189852,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00046702904970615487,
+      "time_step_error": 6.480423612040113e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_05",
+      "kind": "in_domain_waveform",
+      "index": 5,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.01786056852354971,
+      "mean_error": 0.01189106771841869,
+      "reference_mean_hz": 27.394837925312018,
+      "predicted_mean_hz": 27.069084052407028,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0008255691814892681,
+      "time_step_error": 0.0001717283831125684,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_06",
+      "kind": "in_domain_waveform",
+      "index": 6,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.014534414939272027,
+      "mean_error": 0.009443154084137291,
+      "reference_mean_hz": 27.329569683782694,
+      "predicted_mean_hz": 27.071492346205567,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 8.136977154288878e-05,
+      "time_step_error": 1.3919123126968531e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_07",
+      "kind": "in_domain_waveform",
+      "index": 7,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.014722760590006344,
+      "mean_error": 0.010162606755106348,
+      "reference_mean_hz": 27.31273892747755,
+      "predicted_mean_hz": 27.03517030235271,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0004278076730452317,
+      "time_step_error": 6.742302624855992e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_08",
+      "kind": "in_domain_waveform",
+      "index": 8,
+      "pop": "E",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.018687405533683654,
+      "mean_error": 0.011393949086046773,
+      "reference_mean_hz": 27.26580212697215,
+      "predicted_mean_hz": 26.955136965747204,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0007857345409807196,
+      "time_step_error": 0.00016546532573448022,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_09",
+      "kind": "in_domain_waveform",
+      "index": 9,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.01497544503692179,
+      "mean_error": 0.013183638876858236,
+      "reference_mean_hz": 48.55209136161332,
+      "predicted_mean_hz": 49.19218460084106,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00010894747751954493,
+      "time_step_error": 1.3121165883921659e-05,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_10",
+      "kind": "in_domain_waveform",
+      "index": 10,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.0206614592568315,
+      "mean_error": 0.007688020874420533,
+      "reference_mean_hz": 48.60981000463529,
+      "predicted_mean_hz": 48.983523238652545,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.00047193707142541676,
+      "time_step_error": 0.00017694780256281544,
+      "numerical_pass": true
+    },
+    {
+      "label": "in_domain_waveform_11",
+      "kind": "in_domain_waveform",
+      "index": 11,
+      "pop": "I",
+      "theta": 18.0,
+      "T": 264.36293204907884,
+      "dt": 0.1,
+      "burn": 13218,
+      "steps": 52873,
+      "waveform_L2": 0.0830617413868481,
+      "mean_error": 0.009743520866220046,
+      "reference_mean_hz": 48.72834100994524,
+      "predicted_mean_hz": 48.25355540253855,
+      "near_zero_mean": false,
+      "passed": true,
+      "quadrature_error": 0.0006607207864671078,
+      "time_step_error": 0.0008907624851234225,
+      "numerical_pass": true
+    }
+  ],
+  "analytic_rows": [
+    {
+      "id": 0,
+      "pop": "E",
+      "gain": [
+        3.3140344876917407,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.030927341668008576,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 1,
+      "pop": "E",
+      "gain": [
+        2.938033626507871,
+        -0.7365204235811896
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.02267350195850466,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 2,
+      "pop": "E",
+      "gain": [
+        2.0221108819404408,
+        -0.7109621109472755
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.08353064091231852,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 3,
+      "pop": "E",
+      "gain": [
+        0.6695356221111661,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.002891933763951391,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 4,
+      "pop": "E",
+      "gain": [
+        0.6983215578054182,
+        -0.027446095987429003
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.048035361639001656,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 5,
+      "pop": "E",
+      "gain": [
+        0.6352199723693182,
+        -0.2441625338183184
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.3253407862231972,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 6,
+      "pop": "E",
+      "gain": [
+        0.2849353079859021,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.06372286212825512,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 7,
+      "pop": "E",
+      "gain": [
+        0.19847010603822002,
+        -0.1539581696258866
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.16669185582907764,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 8,
+      "pop": "E",
+      "gain": [
+        -0.05219486480588458,
+        -0.1472921310710319
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.21622302678652897,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 9,
+      "pop": "I",
+      "gain": [
+        1.866523464250324,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.002769278771799402,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 10,
+      "pop": "I",
+      "gain": [
+        1.7434136624897834,
+        -0.20480329429855576
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.07549081688179204,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 11,
+      "pop": "I",
+      "gain": [
+        1.4020959106486883,
+        -0.22895036065226196
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.23103283406191916,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 12,
+      "pop": "I",
+      "gain": [
+        0.35538227870098626,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.006480442306677462,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 13,
+      "pop": "I",
+      "gain": [
+        0.3472570577848839,
+        -0.015428279360921398
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.1116063048448044,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 14,
+      "pop": "I",
+      "gain": [
+        0.32713622564616224,
+        -0.058349498958887455
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.4791174333820116,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 15,
+      "pop": "I",
+      "gain": [
+        0.12346174873300912,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.019901077674043924,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 16,
+      "pop": "I",
+      "gain": [
+        0.09957175296857748,
+        -0.05579578639963201
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.018157697145346024,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 17,
+      "pop": "I",
+      "gain": [
+        0.009017445376499128,
+        -0.06274658925098885
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.29361900232047883,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 18,
+      "pop": "E",
+      "gain": [
+        3.139082218549966,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.05243401580686663,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 19,
+      "pop": "E",
+      "gain": [
+        2.9925855386989033,
+        -0.3339965186190311
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.03980265014051067,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 20,
+      "pop": "E",
+      "gain": [
+        2.465597802905361,
+        -0.2967370906999838
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.05459844600450748,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 21,
+      "pop": "E",
+      "gain": [
+        0.047709383345402534,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.07638787816166104,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 22,
+      "pop": "E",
+      "gain": [
+        0.056570237373820755,
+        0.015068628903814536
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.1017983982964479,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 23,
+      "pop": "E",
+      "gain": [
+        0.08804293247307508,
+        -0.01611106021722695
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.10556303127009287,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 24,
+      "pop": "E",
+      "gain": [
+        0.02111820049207064,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.03182448883183963,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 25,
+      "pop": "E",
+      "gain": [
+        0.021614861146600266,
+        -0.008093205641358127
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.02927942779207596,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 26,
+      "pop": "E",
+      "gain": [
+        -0.00032221750793115083,
+        -0.013504793065944138
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.15588532702212968,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 27,
+      "pop": "I",
+      "gain": [
+        7.676798531146076,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.008826075276755562,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 28,
+      "pop": "I",
+      "gain": [
+        7.698289073895522,
+        0.037819284426760594
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.0063162270493000005,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 29,
+      "pop": "I",
+      "gain": [
+        7.622986465634176,
+        0.17829563593560152
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.018769297548208025,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 30,
+      "pop": "I",
+      "gain": [
+        -0.05104590269016038,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.07069978195706089,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 31,
+      "pop": "I",
+      "gain": [
+        -0.05576122365560409,
+        0.007760418167441119
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.07575814378362462,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 32,
+      "pop": "I",
+      "gain": [
+        -0.03214029045598215,
+        0.028879134645456085
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.07972164681502253,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 33,
+      "pop": "I",
+      "gain": [
+        -0.009357573184579339,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02600095635938723,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 34,
+      "pop": "I",
+      "gain": [
+        -0.007579246674410747,
+        0.004745426037545845
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.046400770066647154,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 35,
+      "pop": "I",
+      "gain": [
+        -0.0011971680038459277,
+        0.0035845686635097673
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.160679505080704,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 36,
+      "pop": "E",
+      "gain": [
+        3.888805548904582,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0009560658764034355,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 37,
+      "pop": "E",
+      "gain": [
+        3.790773502655727,
+        -0.014369367980154939
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.03737784707399244,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 38,
+      "pop": "E",
+      "gain": [
+        3.7437094003517886,
+        0.2554267083637833
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.02583074179959671,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 39,
+      "pop": "E",
+      "gain": [
+        -0.05425332168129041,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.09043377126975163,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 40,
+      "pop": "E",
+      "gain": [
+        -0.052214108799782104,
+        0.01527928948663942
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.09102116802125206,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 41,
+      "pop": "E",
+      "gain": [
+        -0.015608078753890227,
+        0.04430364379995885
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.0474471941465108,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 42,
+      "pop": "E",
+      "gain": [
+        -0.01148710731756166,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.20068053564671356,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 43,
+      "pop": "E",
+      "gain": [
+        -0.00548970451499522,
+        0.007720001603072984
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.2323442011361248,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 44,
+      "pop": "E",
+      "gain": [
+        0.0023151953794609235,
+        0.004520768668353666
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.1485675575585278,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 45,
+      "pop": "I",
+      "gain": [
+        7.5850802445076715,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.005038925627709322,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 46,
+      "pop": "I",
+      "gain": [
+        7.623468290106964,
+        0.07333134059433447
+      ],
+      "channel": 0,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.004412386908510628,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 47,
+      "pop": "I",
+      "gain": [
+        7.6217127213272535,
+        0.24730439446460153
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.030981179153218713,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 48,
+      "pop": "I",
+      "gain": [
+        -0.06977790031880991,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.04747522658754105,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 49,
+      "pop": "I",
+      "gain": [
+        -0.07471265530912276,
+        0.007937797665369397
+      ],
+      "channel": 1,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.04206582358123423,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 50,
+      "pop": "I",
+      "gain": [
+        -0.0524292340097999,
+        0.031384932978327625
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.0856482601450077,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 51,
+      "pop": "I",
+      "gain": [
+        -0.013832725496762585,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.021279352626358123,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 52,
+      "pop": "I",
+      "gain": [
+        -0.011605522353506226,
+        0.005880867929604375
+      ],
+      "channel": 2,
+      "frequency_hz": 6.0,
+      "counted": true,
+      "error": 0.026343882272284003,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 53,
+      "pop": "I",
+      "gain": [
+        -0.0031885003176661446,
+        0.005123843490194407
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.15936083040494892,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 54,
+      "pop": "E",
+      "gain": [
+        3.932262357202844,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.010554007012622596,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 55,
+      "pop": "E",
+      "gain": [
+        3.750486265550809,
+        0.22865804355574837
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.020530299801356885,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 56,
+      "pop": "E",
+      "gain": [
+        -0.049755183468781876,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.10367104948424888,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 57,
+      "pop": "E",
+      "gain": [
+        -0.005298433109776885,
+        0.04545762228757977
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.08870104799564472,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 58,
+      "pop": "E",
+      "gain": [
+        -0.010118730166041647,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.2986395400218782,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 59,
+      "pop": "E",
+      "gain": [
+        0.0031707944695486636,
+        0.003692596822546259
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.48076764405665123,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 60,
+      "pop": "I",
+      "gain": [
+        7.787662308373142,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0023478477346834414,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 61,
+      "pop": "I",
+      "gain": [
+        7.723765901775798,
+        0.1777874690380875
+      ],
+      "channel": 0,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.013334739099182253,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 62,
+      "pop": "I",
+      "gain": [
+        -0.04996615819551129,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.09303980150287691,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 63,
+      "pop": "I",
+      "gain": [
+        -0.029858322112591436,
+        0.029361405074799472
+      ],
+      "channel": 1,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.09529399638856623,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 64,
+      "pop": "I",
+      "gain": [
+        -0.009334290117365876,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.04018514848219917,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 65,
+      "pop": "I",
+      "gain": [
+        -0.0011942714900614008,
+        0.003492921334028956
+      ],
+      "channel": 2,
+      "frequency_hz": 25.0,
+      "counted": true,
+      "error": 0.18545471724932622,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 66,
+      "pop": "E",
+      "gain": [
+        4.464282647562774,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02614760920910061,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 67,
+      "pop": "E",
+      "gain": [
+        4.018530168558541,
+        -0.31417077143431477
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.04452175882459395,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 68,
+      "pop": "E",
+      "gain": [
+        3.896158851514931,
+        0.3193227217307056
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.13382083259776179,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 69,
+      "pop": "E",
+      "gain": [
+        0.057320937025659026,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.07857355685650158,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 70,
+      "pop": "E",
+      "gain": [
+        0.13243244050793404,
+        0.03449465658902576
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.25545023193882105,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 71,
+      "pop": "E",
+      "gain": [
+        0.1019246974892489,
+        -0.08434313621976094
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 1.147600328843204,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 72,
+      "pop": "E",
+      "gain": [
+        0.08001976956911591,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.0769230859242195,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 73,
+      "pop": "E",
+      "gain": [
+        0.11182428669514836,
+        -0.048799882225918155
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.3947850114532734,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 74,
+      "pop": "E",
+      "gain": [
+        0.06788950191421955,
+        -0.013814436955103149
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 1.4214287757604795,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 75,
+      "pop": "E",
+      "gain": [
+        4.091072570048601,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.037044349377316085,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 76,
+      "pop": "E",
+      "gain": [
+        4.402084282387065,
+        0.7237644247129453
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.06473529754528537,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 77,
+      "pop": "E",
+      "gain": [
+        5.601291681412029,
+        1.8562994777869146
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.20105801604025808,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 78,
+      "pop": "E",
+      "gain": [
+        -0.1300426467707272,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0883815082068,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 79,
+      "pop": "E",
+      "gain": [
+        -0.1177840774617164,
+        0.030762633183751463
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.061501469354104055,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 80,
+      "pop": "E",
+      "gain": [
+        -0.09594913098723526,
+        0.05068433521012525
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.5951355932554051,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 81,
+      "pop": "E",
+      "gain": [
+        -0.03497920840541117,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 4.225276363675957,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 82,
+      "pop": "E",
+      "gain": [
+        0.00585952824831886,
+        0.027263840373914668
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 7.375794727458515,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 83,
+      "pop": "E",
+      "gain": [
+        0.039529795210494705,
+        0.01688029171161859
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 11.45564171500747,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 84,
+      "pop": "E",
+      "gain": [
+        4.733818672057189,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.022202658560451557,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 85,
+      "pop": "E",
+      "gain": [
+        4.024118962982051,
+        -0.6094799083770219
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.048257259281200976,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 86,
+      "pop": "E",
+      "gain": [
+        3.562331813832022,
+        -0.0738043002075211
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.08140318655665979,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 87,
+      "pop": "E",
+      "gain": [
+        0.19793723881474062,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.035521626288020164,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 88,
+      "pop": "E",
+      "gain": [
+        0.2975828907533231,
+        0.007431213631592599
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.04001782139503653,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 89,
+      "pop": "E",
+      "gain": [
+        0.17550422607599442,
+        -0.18805628487974596
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.27674325356794743,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 90,
+      "pop": "E",
+      "gain": [
+        0.06723550685683159,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.10509245082363676,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 91,
+      "pop": "E",
+      "gain": [
+        0.028663083494248502,
+        -0.06690270172594553
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.19620000302221222,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 92,
+      "pop": "E",
+      "gain": [
+        -0.020289471943236728,
+        -0.013822555355717445
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.0865149076051505,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 93,
+      "pop": "E",
+      "gain": [
+        1.8770556334859492,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02307649697384535,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 94,
+      "pop": "E",
+      "gain": [
+        1.3766448318708833,
+        -0.38145235758889634
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.14719219603060715,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 95,
+      "pop": "E",
+      "gain": [
+        1.0864077856845153,
+        -0.11440050344230784
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.16717127077174582,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 96,
+      "pop": "E",
+      "gain": [
+        0.054383941953982426,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02444651749685618,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 97,
+      "pop": "E",
+      "gain": [
+        0.06353318891863058,
+        -0.013490225576826992
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.1263623454142868,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 98,
+      "pop": "E",
+      "gain": [
+        0.02741574057156632,
+        -0.03300261822807078
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.2108675583410266,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 99,
+      "pop": "E",
+      "gain": [
+        0.02433834597133033,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.040260889122954766,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 100,
+      "pop": "E",
+      "gain": [
+        -0.0012480105978436194,
+        -0.02057153041498984
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.2756463957449749,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 101,
+      "pop": "E",
+      "gain": [
+        -0.008347129702129223,
+        -0.0005016094978632214
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.3171623409000128,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 102,
+      "pop": "E",
+      "gain": [
+        3.5771489394871807,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.00899546458305768,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 103,
+      "pop": "E",
+      "gain": [
+        2.951178039722253,
+        -0.6168842617474141
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.022253989769705645,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 104,
+      "pop": "E",
+      "gain": [
+        2.3812574454463897,
+        -0.23526473581397636
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.02507329109139414,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 105,
+      "pop": "E",
+      "gain": [
+        0.023168548359524196,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0007333996205053123,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 106,
+      "pop": "E",
+      "gain": [
+        0.05460999686291184,
+        0.009876728072691817
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.0795055789387774,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 107,
+      "pop": "E",
+      "gain": [
+        0.03314695111741634,
+        -0.042076617144887925
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.3109991846360199,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 108,
+      "pop": "E",
+      "gain": [
+        0.016584902226980558,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.7331376745090857,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 109,
+      "pop": "E",
+      "gain": [
+        0.09527937255495988,
+        -0.029819369477030573
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.4238504564841985,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 110,
+      "pop": "E",
+      "gain": [
+        0.07314173878722822,
+        -0.004976560882473586
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 1.4496184441413629,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 111,
+      "pop": "E",
+      "gain": [
+        5.274881328111225,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0015876034896195514,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 112,
+      "pop": "E",
+      "gain": [
+        4.185479840045322,
+        -1.0136604582707895
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.021073070079700117,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 113,
+      "pop": "E",
+      "gain": [
+        3.3233804527682196,
+        -0.40808427716908613
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.03833744326004865,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 114,
+      "pop": "E",
+      "gain": [
+        0.25979063080221154,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.05585494154209535,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 115,
+      "pop": "E",
+      "gain": [
+        0.3888032833982627,
+        -0.019132212175757873
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.06221627167320208,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 116,
+      "pop": "E",
+      "gain": [
+        0.18431969303301418,
+        -0.2779230748987866
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.07723352939176699,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 117,
+      "pop": "E",
+      "gain": [
+        0.08414431733799786,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.1669410511498846,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 118,
+      "pop": "E",
+      "gain": [
+        0.04331744465523799,
+        -0.14265701950968204
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.7039635283506371,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 119,
+      "pop": "E",
+      "gain": [
+        -0.04266910764916844,
+        -0.01818870629671861
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 1.0573294997865594,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 120,
+      "pop": "E",
+      "gain": [
+        0.6633871359938045,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.03644194715226127,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 121,
+      "pop": "E",
+      "gain": [
+        0.2610012856473637,
+        -0.28993151571177234
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.1338211440727961,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 122,
+      "pop": "E",
+      "gain": [
+        0.01937911052846722,
+        -0.18830693398325501
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.28656713188997696,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 123,
+      "pop": "E",
+      "gain": [
+        0.09383900703742233,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0158304600986295,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 124,
+      "pop": "E",
+      "gain": [
+        0.08699349697384312,
+        -0.04232939553396709
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.20319945133949582,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 125,
+      "pop": "E",
+      "gain": [
+        0.011625890513864518,
+        -0.07389072168644342
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.3870021662142624,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 126,
+      "pop": "E",
+      "gain": [
+        0.05225472206501029,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.19173975194715315,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 127,
+      "pop": "E",
+      "gain": [
+        -0.038598646074654075,
+        -0.0609413052158571
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.0305115872182873,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 128,
+      "pop": "E",
+      "gain": [
+        -0.07539108306635754,
+        -0.006585222384025026
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 2.1190316794630273,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 129,
+      "pop": "E",
+      "gain": [
+        4.305810233761875,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.041054895288338646,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 130,
+      "pop": "E",
+      "gain": [
+        4.530129480196934,
+        0.6178351839063231
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03898268748026138,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 131,
+      "pop": "E",
+      "gain": [
+        5.56235022861275,
+        1.6127335267905323
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.07891030633961708,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 132,
+      "pop": "E",
+      "gain": [
+        -0.11377312739700396,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.049315957702825555,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 133,
+      "pop": "E",
+      "gain": [
+        -0.09328868018165759,
+        0.05280177206097395
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.15589829428660956,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 134,
+      "pop": "E",
+      "gain": [
+        -0.021883085471987293,
+        0.086864788473492
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.5410683103232511,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 135,
+      "pop": "E",
+      "gain": [
+        -0.020181249970658868,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.46476781967385383,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 136,
+      "pop": "E",
+      "gain": [
+        0.04051801924750781,
+        0.04406418334469415
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 3.5327076115133123,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 137,
+      "pop": "E",
+      "gain": [
+        0.08141715298265459,
+        0.01358882118432491
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 7.896948777969545,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 138,
+      "pop": "E",
+      "gain": [
+        7.585614375272711,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.046033881451733955,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 139,
+      "pop": "E",
+      "gain": [
+        8.12145053532159,
+        1.2833493434634866
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.051693547438283576,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 140,
+      "pop": "E",
+      "gain": [
+        10.248192136699586,
+        3.2964131384455024
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.16508372171440217,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 141,
+      "pop": "E",
+      "gain": [
+        -0.4242038401333369,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02047916677126688,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 142,
+      "pop": "E",
+      "gain": [
+        -0.3667042197209536,
+        0.139418758906108
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.13983941842718828,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 143,
+      "pop": "E",
+      "gain": [
+        -0.2206863477447507,
+        0.22716755360754215
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 1.0852570957169358,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 144,
+      "pop": "E",
+      "gain": [
+        -0.0037974159251456968,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.9868034780139834,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 145,
+      "pop": "E",
+      "gain": [
+        0.17140327962689897,
+        0.1189331114356253
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.259518042242504,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 146,
+      "pop": "E",
+      "gain": [
+        0.3001579271998309,
+        0.05568922031955876
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 3.358777772918895,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 147,
+      "pop": "E",
+      "gain": [
+        2.941762250946517,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.013837457288761807,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 148,
+      "pop": "E",
+      "gain": [
+        2.4561364720971817,
+        -0.35696167511232657
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.031069450523545636,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 149,
+      "pop": "E",
+      "gain": [
+        2.235894977003776,
+        0.06654778232456036
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.02606832310994373,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 150,
+      "pop": "E",
+      "gain": [
+        0.05149563253606134,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.06485706839852673,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 151,
+      "pop": "E",
+      "gain": [
+        0.0905159012660742,
+        0.009319736849262291
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.2713145158015166,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 152,
+      "pop": "E",
+      "gain": [
+        0.04588020791702425,
+        -0.06897700043223917
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.5011838107794047,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 153,
+      "pop": "E",
+      "gain": [
+        0.023415518619822613,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.02396190457409066,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 154,
+      "pop": "E",
+      "gain": [
+        0.010570567269316291,
+        -0.014513244915950173
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.06686956661769007,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 155,
+      "pop": "E",
+      "gain": [
+        -0.00023669453375710662,
+        -0.003097860888525578
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.07134696415460581,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 156,
+      "pop": "E",
+      "gain": [
+        2.2225696799568078,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.009576202092139417,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 157,
+      "pop": "E",
+      "gain": [
+        1.437765104995426,
+        -0.4619766496199584
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.07096247071043651,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 158,
+      "pop": "E",
+      "gain": [
+        1.1551256458323784,
+        -0.01676107207953285
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.15554058905463478,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 159,
+      "pop": "E",
+      "gain": [
+        0.082283579846974,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.23519025796693568,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 160,
+      "pop": "E",
+      "gain": [
+        0.125229045417898,
+        -0.08887909927978117
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.5695990662240603,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 161,
+      "pop": "E",
+      "gain": [
+        -0.12407206799708569,
+        -0.22560689102013684
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 1.9951112606540553,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 162,
+      "pop": "E",
+      "gain": [
+        0.042723286369551465,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.022632435697420697,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 163,
+      "pop": "E",
+      "gain": [
+        0.010296748400159119,
+        -0.024658716358296487
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.04592897277294096,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 164,
+      "pop": "E",
+      "gain": [
+        -0.005967108273999208,
+        -0.004572413572843882
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.10184131022985327,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 165,
+      "pop": "E",
+      "gain": [
+        5.194433466575699,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.014449186485259115,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 166,
+      "pop": "E",
+      "gain": [
+        5.310757940739994,
+        0.5883311342347219
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03266980543798083,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 167,
+      "pop": "E",
+      "gain": [
+        6.423510708170127,
+        1.85098422391405
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.4532458355531538,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 168,
+      "pop": "E",
+      "gain": [
+        -0.19865819116020772,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.11222599267946266,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 169,
+      "pop": "E",
+      "gain": [
+        -0.13123954957464923,
+        0.0393132518936648
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.3184837307849694,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 170,
+      "pop": "E",
+      "gain": [
+        -0.14050403824175842,
+        -0.008951324207085722
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 2.3867335836898698,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 171,
+      "pop": "E",
+      "gain": [
+        -0.06800020022250364,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.311938562847715,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 172,
+      "pop": "E",
+      "gain": [
+        -0.05611154491062396,
+        -0.005375703305851515
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.318351127440664,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 173,
+      "pop": "E",
+      "gain": [
+        -0.044404579014515236,
+        0.009476568986069536
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 12.894819695200779,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 174,
+      "pop": "I",
+      "gain": [
+        11.531069550364453,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.021248997479599463,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 175,
+      "pop": "I",
+      "gain": [
+        11.543899184050735,
+        0.5413140694524816
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.04265240269923013,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 176,
+      "pop": "I",
+      "gain": [
+        12.663499655302036,
+        2.058831830914638
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.15848974368068477,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 177,
+      "pop": "I",
+      "gain": [
+        -0.12264537049381827,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.15034148891919213,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 178,
+      "pop": "I",
+      "gain": [
+        -0.11900230621367017,
+        0.05895914741047204
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.16884686261300225,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 179,
+      "pop": "I",
+      "gain": [
+        -0.03869446007560696,
+        0.025211524027143276
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 1.7705048571672726,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 180,
+      "pop": "I",
+      "gain": [
+        -0.07310450715354805,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 1.0476547708479187,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 181,
+      "pop": "I",
+      "gain": [
+        0.012265683549009065,
+        0.06627550679496622
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 1.0902826564713988,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 182,
+      "pop": "I",
+      "gain": [
+        0.06754955090128298,
+        0.022237980620239444
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 3.553750983301415,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 183,
+      "pop": "I",
+      "gain": [
+        2.700570236345837,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.04683018629275756,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 184,
+      "pop": "I",
+      "gain": [
+        2.2982376104553066,
+        -0.44943814264680176
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.05832238571284744,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 185,
+      "pop": "I",
+      "gain": [
+        1.9052417882448096,
+        -0.03492572852375077
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.0949903936792221,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 186,
+      "pop": "I",
+      "gain": [
+        0.15212178173514043,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.07590222977288873,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 187,
+      "pop": "I",
+      "gain": [
+        0.1619905990445315,
+        -0.0372893882963006
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03276912330441047,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 188,
+      "pop": "I",
+      "gain": [
+        0.0788599844908711,
+        -0.1091324495137482
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.3085003151354284,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 189,
+      "pop": "I",
+      "gain": [
+        0.05065640670991487,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.05019128983461354,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 190,
+      "pop": "I",
+      "gain": [
+        0.022324804437147495,
+        -0.025841222529354568
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.1509543356028409,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 191,
+      "pop": "I",
+      "gain": [
+        0.0010492026336127048,
+        -0.005656546892849002
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.10088924471428144,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 192,
+      "pop": "I",
+      "gain": [
+        2.7649382926812933,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.018756339625480758,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 193,
+      "pop": "I",
+      "gain": [
+        2.044622910602665,
+        -0.7562727222528286
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.0612646377023761,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 194,
+      "pop": "I",
+      "gain": [
+        1.327181062076299,
+        -0.3005627256832312
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.06311631824935762,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 195,
+      "pop": "I",
+      "gain": [
+        0.11514058040505509,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.016463393074178583,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 196,
+      "pop": "I",
+      "gain": [
+        0.10998863705690544,
+        -0.0368666437179462
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03628342930574572,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 197,
+      "pop": "I",
+      "gain": [
+        0.039146506524620664,
+        -0.0872181551416159
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.19027144976876895,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 198,
+      "pop": "I",
+      "gain": [
+        0.02953485617893443,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.547630779734529,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 199,
+      "pop": "I",
+      "gain": [
+        -0.01250991764395764,
+        -0.03893982726141274
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.1030438277702584,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 200,
+      "pop": "I",
+      "gain": [
+        -0.030718064566143722,
+        0.011000688493955435
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 0.46498249956119614,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 201,
+      "pop": "I",
+      "gain": [
+        7.984084408122372,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.029091406167805058,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 202,
+      "pop": "I",
+      "gain": [
+        7.581346453802269,
+        -0.37001653205215995
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03208117227698186,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 203,
+      "pop": "I",
+      "gain": [
+        7.333697377471236,
+        0.5228350401713218
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.17450855191822576,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 204,
+      "pop": "I",
+      "gain": [
+        0.025657212929451993,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.15855848919909557,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 205,
+      "pop": "I",
+      "gain": [
+        0.050812740123428624,
+        0.017742698238937076
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.0406943830622327,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 206,
+      "pop": "I",
+      "gain": [
+        0.05520666616423755,
+        -0.03562455829675708
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.18371618919104693,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 207,
+      "pop": "I",
+      "gain": [
+        0.09708580660153017,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 6.923561611550096,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 208,
+      "pop": "I",
+      "gain": [
+        0.16263242649447401,
+        0.009954715719834237
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 12.883966852506553,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 209,
+      "pop": "I",
+      "gain": [
+        0.15046700389628995,
+        -0.009894964873288727
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 36.276080602679954,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 210,
+      "pop": "I",
+      "gain": [
+        0.0005794147373067499,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.6440075853987328,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 211,
+      "pop": "I",
+      "gain": [
+        0.0004480215155291255,
+        -0.00010202351283679058
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.5056250082343976,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 212,
+      "pop": "I",
+      "gain": [
+        0.00036445590000028607,
+        -1.9941349145800597e-05
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 0.6754852763612627,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 213,
+      "pop": "I",
+      "gain": [
+        0.0004634536112286065,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.3579369823882311,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 214,
+      "pop": "I",
+      "gain": [
+        0.0004540719326856589,
+        -1.7373033545471364e-05
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.7658639419387618,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 215,
+      "pop": "I",
+      "gain": [
+        0.0004235110131853153,
+        -3.505170321073032e-05
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 0.7363283819227715,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 216,
+      "pop": "I",
+      "gain": [
+        8.550591971591263e-05,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 217,
+      "pop": "I",
+      "gain": [
+        5.001529075845193e-05,
+        -3.1780303175789314e-05
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 218,
+      "pop": "I",
+      "gain": [
+        2.3632521675292167e-05,
+        -8.62339418132958e-06
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 219,
+      "pop": "I",
+      "gain": [
+        9.470555199933424,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.012480951276830621,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 220,
+      "pop": "I",
+      "gain": [
+        9.409863774987851,
+        0.11857790572424
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.022134178443627042,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 221,
+      "pop": "I",
+      "gain": [
+        9.745985856082589,
+        0.8385464570797515
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.0802083180554275,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 222,
+      "pop": "I",
+      "gain": [
+        -0.054422861693249634,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.33706630718272396,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 223,
+      "pop": "I",
+      "gain": [
+        -0.034308968833652025,
+        0.04351493823498609
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.16504693793720038,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 224,
+      "pop": "I",
+      "gain": [
+        0.019558731636641215,
+        0.017252530781990492
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.5768004277836919,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 225,
+      "pop": "I",
+      "gain": [
+        -0.005488568091328814,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.1357211997932314,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 226,
+      "pop": "I",
+      "gain": [
+        0.0013189169638819832,
+        0.004626169810820769
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.3938078442126866,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 227,
+      "pop": "I",
+      "gain": [
+        0.0035739284910098223,
+        0.0014519067279606583
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.527327317485563,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 228,
+      "pop": "I",
+      "gain": [
+        5.7362942090537015,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0022988925569443226,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 229,
+      "pop": "I",
+      "gain": [
+        5.183757005083015,
+        -0.6852050385218599
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.034764535446608215,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 230,
+      "pop": "I",
+      "gain": [
+        4.583704579835042,
+        0.22858701893938
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.04545996784099475,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 231,
+      "pop": "I",
+      "gain": [
+        0.07404099763427185,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.2500615797936193,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 232,
+      "pop": "I",
+      "gain": [
+        0.11675699492492236,
+        0.0028558622456749637
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.0635829661164665,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 233,
+      "pop": "I",
+      "gain": [
+        0.06642526977360519,
+        -0.13402611540585183
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.44856209209900316,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 234,
+      "pop": "I",
+      "gain": [
+        0.03236789519901135,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.027820781179178952,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 235,
+      "pop": "I",
+      "gain": [
+        0.01481156147948745,
+        -0.019117374657233892
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.052534769844464674,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 236,
+      "pop": "I",
+      "gain": [
+        -0.0024715598801307134,
+        -0.005955917065161881
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.03745851309891072,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 237,
+      "pop": "I",
+      "gain": [
+        7.837770355133729,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.04350747195279557,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 238,
+      "pop": "I",
+      "gain": [
+        7.032444411395349,
+        -0.7379127115832482
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.048104032574402995,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 239,
+      "pop": "I",
+      "gain": [
+        6.438131613641217,
+        0.15923333900359996
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.16208247631266223,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 240,
+      "pop": "I",
+      "gain": [
+        0.3824750460672208,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.0161406746952976,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 241,
+      "pop": "I",
+      "gain": [
+        0.41442115430800097,
+        -0.05225360627809644
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.08645798427220444,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 242,
+      "pop": "I",
+      "gain": [
+        0.2736713261409131,
+        -0.22273918231012907
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.3588062247216879,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 243,
+      "pop": "I",
+      "gain": [
+        0.08036369100328258,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.29480252408852264,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 244,
+      "pop": "I",
+      "gain": [
+        0.029141114932431336,
+        -0.07580417180743207
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.310980521148387,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 245,
+      "pop": "I",
+      "gain": [
+        -0.034219453295226535,
+        -0.016135070239115205
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 0.09370601253278452,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 246,
+      "pop": "I",
+      "gain": [
+        3.0678083683105485e-06,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 247,
+      "pop": "I",
+      "gain": [
+        -1.1833530820733001e-05,
+        -1.1053226040095134e-05
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 248,
+      "pop": "I",
+      "gain": [
+        -2.070883998667214e-05,
+        -1.5995424809911067e-06
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 249,
+      "pop": "I",
+      "gain": [
+        9.419139036450089e-07,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 250,
+      "pop": "I",
+      "gain": [
+        -2.0037403774980697e-08,
+        -2.481160679545994e-06
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 251,
+      "pop": "I",
+      "gain": [
+        -4.544453922144078e-06,
+        -5.284987659390806e-06
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 252,
+      "pop": "I",
+      "gain": [
+        3.380096163795927e-07,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 253,
+      "pop": "I",
+      "gain": [
+        -2.1771459771332956e-06,
+        -2.06445855461708e-06
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 254,
+      "pop": "I",
+      "gain": [
+        -3.739382270019412e-06,
+        -3.277672588973505e-07
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": null,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 255,
+      "pop": "I",
+      "gain": [
+        8.868689946600421,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.020242182290515328,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 256,
+      "pop": "I",
+      "gain": [
+        8.913855487419546,
+        0.24146235512655703
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.007552381027029825,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 257,
+      "pop": "I",
+      "gain": [
+        9.397637955590112,
+        0.970815258555965
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.04241580645075679,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 258,
+      "pop": "I",
+      "gain": [
+        -0.05522559147145562,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.09885567144684837,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 259,
+      "pop": "I",
+      "gain": [
+        -0.047887112165873345,
+        0.040589835702070205
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.11993703882960549,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 260,
+      "pop": "I",
+      "gain": [
+        0.010138301415395951,
+        0.034230817777647235
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.1588038809433615,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 261,
+      "pop": "I",
+      "gain": [
+        -0.03133215200523305,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 2.0269812670652128,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 262,
+      "pop": "I",
+      "gain": [
+        0.006395354596976047,
+        0.025125987115985196
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 2.2276852253278974,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 263,
+      "pop": "I",
+      "gain": [
+        0.01903970433661103,
+        0.0014965799927367377
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 1.6721393447794557,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 264,
+      "pop": "I",
+      "gain": [
+        7.980713824869281,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.007670007791614138,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 265,
+      "pop": "I",
+      "gain": [
+        7.681262932937149,
+        -0.23773176124584924
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.015858415433509153,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 266,
+      "pop": "I",
+      "gain": [
+        7.547914833739839,
+        0.44054018915717885
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.054497626116817244,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 267,
+      "pop": "I",
+      "gain": [
+        0.0069279089061858225,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": false,
+      "error": 0.13013151974391146,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 268,
+      "pop": "I",
+      "gain": [
+        0.022314785775674688,
+        0.023811088243518238
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": false,
+      "error": 0.7839516981361918,
+      "tolerance": 0.1,
+      "passed": null
+    },
+    {
+      "id": 269,
+      "pop": "I",
+      "gain": [
+        0.04169018304918077,
+        -0.016312269621519344
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": false,
+      "error": 0.4919908210513954,
+      "tolerance": 0.15,
+      "passed": null
+    },
+    {
+      "id": 270,
+      "pop": "I",
+      "gain": [
+        0.006505985097290299,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.05907995354160133,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 271,
+      "pop": "I",
+      "gain": [
+        0.006438845629247287,
+        -0.003132642000713089
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.02609003208852277,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 272,
+      "pop": "I",
+      "gain": [
+        0.0015572871193324535,
+        -0.0017486000885288797
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.246285774923951,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 273,
+      "pop": "I",
+      "gain": [
+        11.099366494985716,
+        0.0
+      ],
+      "channel": 0,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.029432375090663817,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 274,
+      "pop": "I",
+      "gain": [
+        11.210567816189458,
+        0.6738367752024728
+      ],
+      "channel": 0,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.03931941799530184,
+      "tolerance": 0.1,
+      "passed": true
+    },
+    {
+      "id": 275,
+      "pop": "I",
+      "gain": [
+        12.502623311794286,
+        2.2113786257691506
+      ],
+      "channel": 0,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.19121822930475196,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 276,
+      "pop": "I",
+      "gain": [
+        -0.20349535078746747,
+        0.0
+      ],
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.08104506873393985,
+      "tolerance": 0.15,
+      "passed": true
+    },
+    {
+      "id": 277,
+      "pop": "I",
+      "gain": [
+        -0.20958057427208926,
+        0.06176475748369472
+      ],
+      "channel": 1,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.23522988415051882,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 278,
+      "pop": "I",
+      "gain": [
+        -0.11331612326954364,
+        0.05718783109779939
+      ],
+      "channel": 1,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 0.9480721239431661,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 279,
+      "pop": "I",
+      "gain": [
+        -0.0537867664784223,
+        0.0
+      ],
+      "channel": 2,
+      "frequency_hz": 0.0,
+      "counted": true,
+      "error": 0.4086435720489799,
+      "tolerance": 0.15,
+      "passed": false
+    },
+    {
+      "id": 280,
+      "pop": "I",
+      "gain": [
+        -0.007961553778428145,
+        0.03970736588368409
+      ],
+      "channel": 2,
+      "frequency_hz": 15.0,
+      "counted": true,
+      "error": 0.8805948319700468,
+      "tolerance": 0.1,
+      "passed": false
+    },
+    {
+      "id": 281,
+      "pop": "I",
+      "gain": [
+        0.0263681073637634,
+        0.016233309623567817
+      ],
+      "channel": 2,
+      "frequency_hz": 60.0,
+      "counted": true,
+      "error": 1.3042251856442533,
+      "tolerance": 0.15,
+      "passed": false
+    }
+  ],
+  "model_promoted": false,
+  "scope": "Local LIF-calibrated candidate only. Held-out waveform failure rejects this fixed candidate. Even a local pass requires original finite-amplitude response and autonomous spatial/ZM validation before new bifurcation analysis."
+}

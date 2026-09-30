@@ -1,0 +1,122 @@
+{
+  "producer_sha256": "4858a305ce49b3145a7028fd830624c8f7c7fe53c48d55cdbb490a206c7bbab7",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_contact_replay/comparison.json",
+  "representative_events": [
+    {
+      "model": "native9108401",
+      "direction": "A → B",
+      "n_eligible": 14,
+      "selected": {
+        "start_ms": 7352.5,
+        "duration_ms": 80.0,
+        "peak_hz": 164.2875000024049,
+        "n_cells": 304,
+        "area_fraction": 0.7592187499999999,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 290,
+        "direction_axis_mm": 9.478807322714633,
+        "extent_mm": 9.606164341286306
+      }
+    },
+    {
+      "model": "native9108401",
+      "direction": "B → A",
+      "n_eligible": 21,
+      "selected": {
+        "start_ms": 2698.5,
+        "duration_ms": 95.0,
+        "peak_hz": 79.38437508872745,
+        "n_cells": 289,
+        "area_fraction": 0.72228125,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 275,
+        "direction_axis_mm": -11.909608241856684,
+        "extent_mm": 11.942029794690848
+      }
+    },
+    {
+      "model": "R2048_num927612",
+      "direction": "A → B",
+      "n_eligible": 15,
+      "selected": {
+        "start_ms": 5461.0,
+        "duration_ms": 69.0,
+        "peak_hz": 99.66223295652095,
+        "n_cells": 211,
+        "area_fraction": 0.5307499999999998,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 197,
+        "direction_axis_mm": 9.962651109894695,
+        "extent_mm": 10.15300841532483
+      }
+    },
+    {
+      "model": "R2048_num927612",
+      "direction": "B → A",
+      "n_eligible": 16,
+      "selected": {
+        "start_ms": 1535.0,
+        "duration_ms": 88.0,
+        "peak_hz": 86.33047180917961,
+        "n_cells": 222,
+        "area_fraction": 0.5554687499999998,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 208,
+        "direction_axis_mm": -12.451319474475328,
+        "extent_mm": 14.378404375892835
+      }
+    },
+    {
+      "model": "R8192_num927611",
+      "direction": "A → B",
+      "n_eligible": 11,
+      "selected": {
+        "start_ms": 3721.0,
+        "duration_ms": 76.0,
+        "peak_hz": 90.17989233550438,
+        "n_cells": 218,
+        "area_fraction": 0.5480937499999999,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 204,
+        "direction_axis_mm": 12.016005586158112,
+        "extent_mm": 12.07935580909382
+      }
+    },
+    {
+      "model": "R8192_num927611",
+      "direction": "B → A",
+      "n_eligible": 20,
+      "selected": {
+        "start_ms": 1167.0,
+        "duration_ms": 90.0,
+        "peak_hz": 103.42477608728413,
+        "n_cells": 280,
+        "area_fraction": 0.70065625,
+        "coreA": true,
+        "coreB": true,
+        "surround_cells": 268,
+        "direction_axis_mm": -10.159727525202294,
+        "extent_mm": 12.875201603335407
+      }
+    }
+  ],
+  "event_selection": "All complete .5–8s original spatial events in each physical axis direction. Nearest to within-class median(duration,area,extent), scaled by within-classIQR; no matching to another model.",
+  "fixed_contact_window_s": [
+    3,
+    4.5
+  ],
+  "contact_scale": "Each contact native8401 q99.5 over.5–8s, shared across all rows; no candidate normalization",
+  "raw_current_observer": "Separate comparison JSON; contact image here is the original Gaussian-weighted firing envelope, not a raw-current LFP.",
+  "native8402": "Retained in full quantitative comparison; native8401 supplies the recorded forcing and visual reference.",
+  "agent_visual_review": "PASS_RENDERED_PNG",
+  "human_review": "PENDING",
+  "model_promoted": false,
+  "formal_bifurcation": false,
+  "png_sha256": "9e6d676133b6486a6c9cf071000dcae3e4daaf4476a89346292a46431efb17a0",
+  "svg_sha256": "d3d9d4505a5b69ad2f6c5cf3537eec82eebd7d8250212a9681c7bf2126635982"
+}

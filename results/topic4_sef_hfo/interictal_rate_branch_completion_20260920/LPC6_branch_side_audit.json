@@ -1,0 +1,51 @@
+{
+  "status": "BRANCH_SIDE_CORRECTION_CHECKED",
+  "root_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_validation.json",
+  "root_J_EE_core": 1.6265015185605372,
+  "root_T_ms": 239.69812295484667,
+  "full_waveform_association_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/current_interval_root_associations.json",
+  "temporal_association_verification_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/interval_root_temporal_verification.json",
+  "root_continuation_coordinate": 151.57840463999162,
+  "records": [
+    {
+      "site_index": 41,
+      "continuation_index": 150,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256_accuracy_N512_accuracy_N2048.npz",
+      "J_EE_core": 1.6251725691286658,
+      "T_ms": 241.1008347908637,
+      "mean_rates_hz": [
+        74.47081954146489,
+        60.477970113338635,
+        8.183614287163339
+      ],
+      "physical_profile_checked": true,
+      "stability": "NUMERICALLY_STABLE",
+      "evidence": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/041.json",
+      "numerical_unstable_dimension": 0,
+      "paired_evidence_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/current_interval_evidence.json",
+      "branch_side": "incoming"
+    },
+    {
+      "site_index": 40,
+      "continuation_index": 154,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0037_N256_accuracy_N512_accuracy_N2048.npz",
+      "J_EE_core": 1.6264477575618144,
+      "T_ms": 238.00656490221152,
+      "mean_rates_hz": [
+        78.84121822385816,
+        60.715312475765714,
+        8.364012825264245
+      ],
+      "physical_profile_checked": true,
+      "stability": "UNSTABLE",
+      "evidence": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/040.json",
+      "numerical_unstable_dimension": 1,
+      "paired_evidence_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/current_interval_evidence.json",
+      "branch_side": "returning"
+    }
+  ],
+  "correction": "Site 40 is on the returning branch AFTER LPC6 in continuation order. Its J lies below the maximum J at the fold; this does not make it a pre-fold point. Site 40 does not establish an additional instability before LPC6.",
+  "existing_file_alias": "Historical LPC6_left_site40 names mean smaller J only, not the incoming branch.",
+  "scope": "Known LPC6 lies within the current sampled stable-to-unstable bracket. Both displayed samples have paired stability classifications. This does not exclude additional crossings before or after it.",
+  "global_branch_completeness": false
+}

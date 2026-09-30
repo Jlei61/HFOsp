@@ -1,0 +1,112 @@
+{
+  "point": 1,
+  "requested_K": 9.025,
+  "K_mean": 9.01875,
+  "candidate_near_equilibrium": false,
+  "reason": "Nonlinear evaluation limit",
+  "evaluations": [
+    {
+      "status": "RESIDUAL_REQUIRES_CORRECTION",
+      "iteration": 0,
+      "K_mean": 9.01875,
+      "Graw": 4.408232137381918,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.06695960344922422,
+          "combined_SEM_RMS_Hz": 0.008712458537424392,
+          "maximum_residual_Hz": 1.1895956608014444,
+          "outside_6SEM": 47
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.2387820141249734,
+          "combined_SEM_RMS_Hz": 0.17479119239721116,
+          "maximum_residual_Hz": 1.7944924695266877,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.2062076640381231,
+      "E_target_combined_SEM_RMS_Hz": 0.037386259964403125,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.26982164001464,
+        468.8942579679211,
+        474.11249726661896,
+        231.728023608703,
+        308.76595697021486
+      ],
+      "near_equilibrium": false,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    },
+    {
+      "status": "RESIDUAL_REQUIRES_CORRECTION",
+      "iteration": 1,
+      "K_mean": 9.01875,
+      "Graw": 4.407187710808464,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.010431750277808727,
+          "combined_SEM_RMS_Hz": 0.006834079648633518,
+          "maximum_residual_Hz": 0.12395641059559637,
+          "outside_6SEM": 4
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.14066981175954615,
+          "combined_SEM_RMS_Hz": 0.14249348605124004,
+          "maximum_residual_Hz": 1.329134033551611,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.040723853466519744,
+      "E_target_combined_SEM_RMS_Hz": 0.029462789349363035,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.259984664917,
+        468.89416018215354,
+        474.1128240298982,
+        231.71768328340445,
+        308.7378455200195
+      ],
+      "near_equilibrium": false,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    },
+    {
+      "status": "RESIDUAL_REQUIRES_CORRECTION",
+      "iteration": 2,
+      "K_mean": 9.01875,
+      "Graw": 4.407137114865469,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.00868602220567875,
+          "combined_SEM_RMS_Hz": 0.006838959935708676,
+          "maximum_residual_Hz": 0.11487660446096015,
+          "outside_6SEM": 3
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.1354662733461886,
+          "combined_SEM_RMS_Hz": 0.14245077410613316,
+          "maximum_residual_Hz": 0.8900410638011067,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.03419836204086882,
+      "E_target_combined_SEM_RMS_Hz": 0.029484682306898293,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.25953810119628,
+        468.89311497533987,
+        474.11320856691316,
+        231.71723009235987,
+        308.7463806152344
+      ],
+      "near_equilibrium": false,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    }
+  ],
+  "formal_bifurcation_allowed": false
+}

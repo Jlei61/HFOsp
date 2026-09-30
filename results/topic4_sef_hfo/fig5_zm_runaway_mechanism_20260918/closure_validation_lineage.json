@@ -1,0 +1,62 @@
+{
+  "status": "EXISTING_VALIDATION_LINEAGE_REVERIFIED",
+  "updated_local": "2026-09-19T10:07:59.632866",
+  "closure_identity": {
+    "json": {
+      "sha256": "05d41c9732b723d8aa88a6acf55a168b51f3dac497b588c04dcd7075906b50bc",
+      "files": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure_frozen_v3.json",
+        "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/response_closure/closure.json"
+      ]
+    },
+    "npz": {
+      "sha256": "09c8939789cd2a94589625bf1205c688084053ee1f8adb985eb8875b1970292d",
+      "files": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure_frozen_v3.npz",
+        "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/response_closure/closure.npz"
+      ]
+    }
+  },
+  "local_response_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/validation_result.json",
+  "local_response": {
+    "verdict": "FAIL",
+    "n_counted": 146,
+    "n_failed": 65,
+    "by_channel": {
+      "mean": {
+        "counted": 58,
+        "failed": 11,
+        "median_norm_error": 0.04143471669059719
+      },
+      "variance_E": {
+        "counted": 56,
+        "failed": 40,
+        "median_norm_error": 0.16436190823475244
+      },
+      "variance_I": {
+        "counted": 32,
+        "failed": 14,
+        "median_norm_error": 0.07967127670376967
+      }
+    }
+  },
+  "network_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/a4_comparison/acceptance.json",
+  "network_overall": "PARTIAL",
+  "network_failed_checks": {
+    "A4_det_meandrive": [
+      "propagation",
+      "D_track"
+    ],
+    "A4_stoch_seed9108401": [
+      "entry",
+      "D_track"
+    ],
+    "A4_stoch_meandrive": [
+      "D_track"
+    ]
+  },
+  "interpretation": "These pre-existing validation failures apply to the frozen closure used here. Numerically precise conditional bifurcation results cannot certify native-SNN correspondence.",
+  "new_experiment": false
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 170.24086235955312,
+    "max_combined_relative_rms": 0.12006725825174548,
+    "residual_ratio": 0.8040099988900525,
+    "predicted_gain": 0.3748883728041992,
+    "agreement": 0.9431285346091092,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 1.7020823147612978,
+        "projected_step_norm": 1.6458996147440772,
+        "phase_error": -8.0317696937693125e-16
+      },
+      {
+        "projected_negative_coordinates": 13916,
+        "negative_steps_at_exact_zero": 7793,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 20129,
+        "negative_steps_at_exact_zero": 6750,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 29516,
+        "negative_steps_at_exact_zero": 15624,
+        "zero_boundary_projection": true,
+        "refractory_projection": {
+          "status": "PASS",
+          "cycles": 10,
+          "active_halfspaces": 4,
+          "maximum_occupancy": 1.0000000000000018,
+          "phase_error": 0.0,
+          "final_cycle_change": 0.0,
+          "original_step_norm": 2.106189655763608,
+          "projected_step_norm": 2.0684075101547084,
+          "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+        }
+      }
+    ],
+    "radius": 3.620891484959308,
+    "step_norm": 3.6208914849588165,
+    "lagrange_multiplier": 0.5061811424769838,
+    "predicted_relative_residual": 0.79402403652014
+  }
+]

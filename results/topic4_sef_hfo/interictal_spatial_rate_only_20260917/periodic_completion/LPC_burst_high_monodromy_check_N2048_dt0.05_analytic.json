@@ -1,0 +1,22 @@
+{
+  "label": "LPC_burst_high",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N2048.npz",
+  "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_tangent_N2048.npz",
+  "J_EE_core": 1.6265015185605372,
+  "T_ms": 239.69812295484667,
+  "N": 2048,
+  "dt_ms": 0.049999608459500765,
+  "dT_dcoordinate_ms": 239.69812295494657,
+  "dJ_dcoordinate": -3.360865303877006e-11,
+  "seed_method": "analytic harmonic derivative",
+  "analytic_vs_finite_difference_relative_change": 8.32496217217231e-11,
+  "derivative_step": 1.094526065566295e-06,
+  "reconstruction_step_halving_relative_change": 9.484085491537972e-11,
+  "generalized_plus_one_relative_defect": 0.0004425240227954674,
+  "generalized_plus_one_defect_over_tangent": 0.0017052964311845388,
+  "phase_relative_defect": 0.0013840745684900067,
+  "tangent_fraction_orthogonal_to_phase": 0.022441246408711518,
+  "streamed_exact_harmonic_actions": true,
+  "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+  "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+}

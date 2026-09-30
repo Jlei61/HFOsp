@@ -1,0 +1,415 @@
+{
+  "status": "COMPLETE_FOUR_REGISTERED_CONDITIONAL_PROBES",
+  "rows": [
+    {
+      "name": "high_K9p3875",
+      "history": "high",
+      "held_mean_K": 9.3875,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "mean_rate_Hz": [
+            193.4240696765991,
+            466.12757906533517,
+            472.08185198106554,
+            179.48304988111516
+          ],
+          "one_second_min_rate_Hz": [
+            192.65662894761056,
+            464.6695758132328,
+            470.93028563883433,
+            178.7423485381475
+          ],
+          "one_second_max_rate_Hz": [
+            195.076024977853,
+            470.56869760525444,
+            473.7339590906986,
+            181.06595894457178
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -2.4193960302424387,
+            -5.88834569617859,
+            -2.803673451864256,
+            -2.3236104064242795
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.44923625,
+          "causal_R_range_Hz": [
+            193.18366682717735,
+            197.28210718205796
+          ],
+          "G_range": [
+            4.8465968388077826e-39,
+            1.0654010605670633e-34
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "mean_rate_Hz": [
+            192.6622063833917,
+            464.6774214882507,
+            470.92711280658153,
+            178.748362370336
+          ],
+          "one_second_min_rate_Hz": [
+            192.65901420172796,
+            464.65803319117475,
+            470.90575458715495,
+            178.744948780604
+          ],
+          "one_second_max_rate_Hz": [
+            192.66661575690696,
+            464.6934899978919,
+            470.9526495001359,
+            178.7540257416075
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -0.0034551205433217547,
+            0.012682274868893728,
+            0.01630079009879637,
+            -0.004364370113393079
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.4491875,
+          "causal_R_range_Hz": [
+            193.1691478352923,
+            193.5141878452849
+          ],
+          "G_range": [
+            2.200351560690787e-43,
+            4.8369133318649454e-39
+          ]
+        }
+      ],
+      "descriptive_outcome": "ACTIVITY_REMAINS_FINITE_WINDOW",
+      "first100ms_causal_R_le5_s": null,
+      "statistical_unit": "One copied-network conditional trajectory; not an independent native seed.",
+      "stability_certified": false
+    },
+    {
+      "name": "high_K9p425",
+      "history": "high",
+      "held_mean_K": 9.425,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "mean_rate_Hz": [
+            191.14718413229218,
+            464.8881973759649,
+            470.988825570477,
+            177.1499335033976
+          ],
+          "one_second_min_rate_Hz": [
+            190.91334672564585,
+            464.582498603224,
+            470.59325466328295,
+            176.92127172776887
+          ],
+          "one_second_max_rate_Hz": [
+            192.06664215353157,
+            466.06069810866325,
+            472.5030232052547,
+            178.047780902815
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -1.1467265657458654,
+            -1.4599633087856319,
+            -1.9097685419717436,
+            -1.1192829840793195
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.44409875000000004,
+          "causal_R_range_Hz": [
+            191.40096371933774,
+            197.25135867399982
+          ],
+          "G_range": [
+            4.8465968388077826e-39,
+            1.0654010605670633e-34
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "mean_rate_Hz": [
+            190.9172385615534,
+            464.58935377127705,
+            470.583315010844,
+            176.92622375665312
+          ],
+          "one_second_min_rate_Hz": [
+            190.91381017056733,
+            464.5804472144012,
+            470.566536986324,
+            176.9225049543736
+          ],
+          "one_second_max_rate_Hz": [
+            190.9222856983581,
+            464.60029961859664,
+            470.61080785170304,
+            176.93141516426573
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -0.007653767292850944,
+            0.016723439118322858,
+            0.01765262956865854,
+            -0.008910209892121657
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.44390625000000006,
+          "causal_R_range_Hz": [
+            191.4129364168139,
+            191.83309065225518
+          ],
+          "G_range": [
+            2.200351560690787e-43,
+            4.8369133318649454e-39
+          ]
+        }
+      ],
+      "descriptive_outcome": "ACTIVITY_REMAINS_FINITE_WINDOW",
+      "first100ms_causal_R_le5_s": null,
+      "statistical_unit": "One copied-network conditional trajectory; not an independent native seed.",
+      "stability_certified": false
+    },
+    {
+      "name": "high_K9p4625",
+      "history": "high",
+      "held_mean_K": 9.4625,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "mean_rate_Hz": [
+            186.9495865518654,
+            464.62566426400906,
+            470.35841438638914,
+            172.7628793531491
+          ],
+          "one_second_min_rate_Hz": [
+            186.56995608471576,
+            464.45121958005575,
+            470.0618057906542,
+            172.375803783057
+          ],
+          "one_second_max_rate_Hz": [
+            188.36147465843558,
+            465.29654457985475,
+            471.35862108390126,
+            174.20373336456933
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -1.7915185737198271,
+            -0.8362897688055568,
+            -1.2968152932470502,
+            -1.8279295815123362
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.43721125,
+          "causal_R_range_Hz": [
+            187.00047528135278,
+            197.22310299768338
+          ],
+          "G_range": [
+            4.8465968388077826e-39,
+            1.0654010605670633e-34
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "mean_rate_Hz": [
+            186.57212651440514,
+            464.4536858244471,
+            470.06108626331473,
+            172.37826511971036
+          ],
+          "one_second_min_rate_Hz": [
+            186.56963725375144,
+            464.44838081857745,
+            470.04029672013917,
+            172.3754775554797
+          ],
+          "one_second_max_rate_Hz": [
+            186.57416314810695,
+            464.4594260470125,
+            470.09619678896775,
+            172.38061647396333
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            -0.0024818984664420896,
+            0.008268463482920652,
+            0.03248255582496995,
+            -0.003650244953036008
+          ],
+          "mean_core_Zdot_if_released": [
+            -0.03483387712853466,
+            -0.03307375768365634
+          ],
+          "jointquiet_fraction_10ms": 0.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.43678125,
+          "causal_R_range_Hz": [
+            186.99963110915968,
+            187.39348773561687
+          ],
+          "G_range": [
+            2.200351560690787e-43,
+            4.8369133318649454e-39
+          ]
+        }
+      ],
+      "descriptive_outcome": "ACTIVITY_REMAINS_FINITE_WINDOW",
+      "first100ms_causal_R_le5_s": null,
+      "statistical_unit": "One copied-network conditional trajectory; not an independent native seed.",
+      "stability_certified": false
+    },
+    {
+      "name": "quiet_K9p35",
+      "history": "quiet",
+      "held_mean_K": 9.35,
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "one_second_min_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "one_second_max_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mean_core_Zdot_if_released": [
+            0.16516612287147586,
+            0.16692624231633008
+          ],
+          "jointquiet_fraction_10ms": 1.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.0,
+          "causal_R_range_Hz": [
+            3.7e-322,
+            8.319529020986586e-231
+          ],
+          "G_range": [
+            4.8465968388077826e-39,
+            1.0654010605670633e-34
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "mean_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "one_second_min_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "one_second_max_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_minus_first_one_second_rate_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mean_core_Zdot_if_released": [
+            0.16516612287147586,
+            0.16692624231633008
+          ],
+          "jointquiet_fraction_10ms": 1.0,
+          "E_weighted_area_of_100ms_bins_ge100Hz": 0.0,
+          "causal_R_range_Hz": [
+            3.7e-322,
+            3.7e-322
+          ],
+          "G_range": [
+            2.200351560690787e-43,
+            4.8369133318649454e-39
+          ]
+        }
+      ],
+      "descriptive_outcome": "QUIET_FINAL_FIVE_SECONDS",
+      "first100ms_causal_R_le5_s": 0.001,
+      "statistical_unit": "One copied-network conditional trajectory; not an independent native seed.",
+      "stability_certified": false
+    }
+  ],
+  "all_future_numerical_RNGs_paired_bitwise": true,
+  "full_ZK_fields_held_bitwise": true,
+  "regions": [
+    "All E",
+    "Core A E",
+    "Core B E",
+    "Surround E"
+  ],
+  "limits": "Previous K9.35/K9.5 references precede these four probes in the numerical stream. Only the four new probes share the same future random streams. Finite persistence and quiet are descriptive outcomes, not certified stable branches; no autonomous loop was added.",
+  "formal_bifurcation_allowed": false,
+  "agent_visual": "PASS",
+  "human_visual": "PENDING",
+  "producer_sha256": "ad18803ef43e258d8d4daa6e6a3e836c15e543d7b493407a3a5636cd339c9d26",
+  "agent_visual_note": "Both actual PNGs opened; highactivityfields retained across3 points, quietfield zero; original-state references separated and no certified branch interpolation. Zero traces coincide with lower axes; numbers and markers retained."
+}

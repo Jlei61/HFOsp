@@ -1,0 +1,42 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_Z_long_readout.json",
+  "event": {
+    "start_bin": 6556,
+    "end_bin": 6899,
+    "duration_ms": 3430,
+    "peak_hz": 196.06863687284107,
+    "qualifies": true,
+    "start_ms": 65560.0,
+    "end_ms": 68990.0
+  },
+  "windows": [
+    {
+      "panel": "A",
+      "start_sample": 65485,
+      "end_sample_exclusive": 65535
+    },
+    {
+      "panel": "B",
+      "start_sample": 65685,
+      "end_sample_exclusive": 65735
+    },
+    {
+      "panel": "C",
+      "start_sample": 67250,
+      "end_sample_exclusive": 67300
+    },
+    {
+      "panel": "D",
+      "start_sample": 69025,
+      "end_sample_exclusive": 69075
+    }
+  ],
+  "selection": "Last complete event; before onset50ms, onset+150ms, event midpoint, end+60ms; all50ms windows",
+  "time_origin": "Start of the continuous held-native-Z rate continuation; not original Fig.5 time",
+  "D": 0.2196,
+  "global_Z": 0.7804,
+  "Z": "held",
+  "M": "dynamic",
+  "human_visual_acceptance": "PENDING",
+  "agent_png_pdf_visual_review": "PASS"
+}

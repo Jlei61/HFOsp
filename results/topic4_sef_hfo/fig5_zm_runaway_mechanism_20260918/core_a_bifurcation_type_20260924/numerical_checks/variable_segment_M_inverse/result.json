@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "durations_ms": [
+        43,
+        43,
+        43,
+        43
+      ],
+      "relative_error": 1.3174638524331312e-15,
+      "equation_residual": 1.6410800897352524e-15,
+      "equal_duration_relative_difference": 0.0
+    },
+    {
+      "durations_ms": [
+        18,
+        29,
+        48,
+        72
+      ],
+      "relative_error": 3.653759089342292e-16,
+      "equation_residual": 1.125140514522e-15
+    },
+    {
+      "durations_ms": [
+        145,
+        117,
+        102,
+        171
+      ],
+      "relative_error": 1.5759788531799685e-16,
+      "equation_residual": 3.0409444527975647e-16
+    },
+    {
+      "durations_ms": [
+        0.2,
+        0.5,
+        1,
+        2
+      ],
+      "relative_error": 6.114841846597575e-14,
+      "equation_residual": 8.615750119286774e-14
+    },
+    {
+      "durations_ms": [
+        0.001,
+        0.002,
+        0.003,
+        0.004
+      ],
+      "relative_error": 2.1631070007155643e-11,
+      "equation_residual": 1.75880048781298e-11
+    }
+  ],
+  "definition": "Independent dense 4x4 solution of x[j+1]-exp(-h_j/tau)*x[j]=b[j]. Numerical right preconditioner only; complete physical M feedback remains in original operator."
+}

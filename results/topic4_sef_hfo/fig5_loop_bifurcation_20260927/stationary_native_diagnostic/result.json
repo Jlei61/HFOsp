@@ -1,0 +1,210 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE_NO_STABILITY",
+  "rows": [
+    {
+      "name": "exit_z0.21_k6_high",
+      "K": 6.0,
+      "history": "high",
+      "converged": true,
+      "maximum_residual_Hz": 2.8708591059967148e-08,
+      "iterations": 4,
+      "native_allE_Hz": 454.95375000000024,
+      "candidate_allE_Hz": 462.71062207900025,
+      "native_core_Hz": [
+        463.4816976127321,
+        462.5924936386779
+      ],
+      "candidate_core_Hz": [
+        466.49949807285475,
+        465.52116933602247
+      ],
+      "native_I_Hz": 575.657775,
+      "candidate_I_Hz": 582.4009998601125,
+      "candidate_G_raw": 26.271062207900027,
+      "weighted_field_MAE_Hz": 7.757906951030867,
+      "weighted_field_RMS_Hz": 7.900745293985246,
+      "E_cell_fraction_outside_static_training_domain": 0.0,
+      "native_finite_window_state": "sustained_high",
+      "native_brief_events": 0,
+      "trace": [
+        0.03348519717302667,
+        0.0016764775224468176,
+        4.365573435971548e-06,
+        2.8708591059967148e-11
+      ]
+    },
+    {
+      "name": "exit_z0.21_k6_recovery",
+      "K": 6.0,
+      "history": "recovery",
+      "converged": true,
+      "maximum_residual_Hz": 9.62581793786943e-13,
+      "iterations": 4,
+      "native_allE_Hz": 0.0,
+      "candidate_allE_Hz": 0.0011963840738850543,
+      "native_core_Hz": [
+        0.0,
+        0.0
+      ],
+      "candidate_core_Hz": [
+        0.0012632313852979761,
+        0.0013053029662138229
+      ],
+      "native_I_Hz": 0.269475,
+      "candidate_I_Hz": 0.1603407598752281,
+      "candidate_G_raw": 0.0,
+      "weighted_field_MAE_Hz": 0.001196384073885054,
+      "weighted_field_RMS_Hz": 0.0011999588879935859,
+      "E_cell_fraction_outside_static_training_domain": 9.375e-05,
+      "native_finite_window_state": "quiet",
+      "native_brief_events": 0,
+      "trace": [
+        0.00013977204175075243,
+        2.2478126693564857e-06,
+        1.6892932247275158e-09,
+        9.62581793786943e-16
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_high",
+      "K": 9.0,
+      "history": "high",
+      "converged": false,
+      "maximum_residual_Hz": 733.3786466044475,
+      "iterations": 14,
+      "native_allE_Hz": 84.9976625,
+      "candidate_allE_Hz": 85.93079546889282,
+      "native_core_Hz": [
+        54.12095490716201,
+        0.0
+      ],
+      "candidate_core_Hz": [
+        65.97406268004548,
+        0.0002205679216497403
+      ],
+      "native_I_Hz": 109.6600875,
+      "candidate_I_Hz": 118.02829578074228,
+      "candidate_G_raw": 0.0,
+      "weighted_field_MAE_Hz": 1.3735169620041863,
+      "weighted_field_RMS_Hz": 9.622127598476325,
+      "E_cell_fraction_outside_static_training_domain": 0.0003125,
+      "native_finite_window_state": "mixed_or_transient",
+      "native_brief_events": 0,
+      "trace": [
+        0.8427384181368539,
+        0.7899248038607248,
+        0.7396262129859486,
+        0.7337676003627918,
+        0.7334089801998354,
+        0.7333865970199511,
+        0.733381001642108,
+        0.7333796028237218,
+        0.733378903417148,
+        0.7333787285659115,
+        0.7333786848531275,
+        0.7333786629967388,
+        0.7333786520685452,
+        0.7333786466044474
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_recovery",
+      "K": 9.0,
+      "history": "recovery",
+      "converged": true,
+      "maximum_residual_Hz": 9.101064086386446e-13,
+      "iterations": 4,
+      "native_allE_Hz": 0.0,
+      "candidate_allE_Hz": 0.0015029249888174983,
+      "native_core_Hz": [
+        0.0,
+        0.0
+      ],
+      "candidate_core_Hz": [
+        0.0015878370053114877,
+        0.0016440753166251272
+      ],
+      "native_I_Hz": 0.269475,
+      "candidate_I_Hz": 0.16047201869134253,
+      "candidate_G_raw": 0.0,
+      "weighted_field_MAE_Hz": 0.0015029249888174985,
+      "weighted_field_RMS_Hz": 0.0015078132335332062,
+      "E_cell_fraction_outside_static_training_domain": 9.375e-05,
+      "native_finite_window_state": "quiet",
+      "native_brief_events": 0,
+      "trace": [
+        0.00013977204175075243,
+        2.2169246947518475e-06,
+        1.6433476978305536e-09,
+        9.101064086386446e-16
+      ]
+    },
+    {
+      "name": "exit_z0.21_k12_high",
+      "K": 12.0,
+      "history": "high",
+      "converged": true,
+      "maximum_residual_Hz": 8.641362365252592e-13,
+      "iterations": 4,
+      "native_allE_Hz": 0.0,
+      "candidate_allE_Hz": 0.0017819384274037238,
+      "native_core_Hz": [
+        0.0,
+        0.0
+      ],
+      "candidate_core_Hz": [
+        0.0018812021597925184,
+        0.0019500660654737263
+      ],
+      "native_I_Hz": 0.269475,
+      "candidate_I_Hz": 0.16059160643395756,
+      "candidate_G_raw": 0.0,
+      "weighted_field_MAE_Hz": 0.0017819384274037238,
+      "weighted_field_RMS_Hz": 0.001788227265697081,
+      "E_cell_fraction_outside_static_training_domain": 0.000125,
+      "native_finite_window_state": "quiet",
+      "native_brief_events": 0,
+      "trace": [
+        0.00013977204175075243,
+        2.189764335477223e-06,
+        1.6031154124725253e-09,
+        8.641362365252592e-16
+      ]
+    },
+    {
+      "name": "exit_z0.21_k12_recovery",
+      "K": 12.0,
+      "history": "recovery",
+      "converged": true,
+      "maximum_residual_Hz": 8.641362365252592e-13,
+      "iterations": 4,
+      "native_allE_Hz": 0.0,
+      "candidate_allE_Hz": 0.0017819384274037238,
+      "native_core_Hz": [
+        0.0,
+        0.0
+      ],
+      "candidate_core_Hz": [
+        0.0018812021597925184,
+        0.0019500660654737263
+      ],
+      "native_I_Hz": 0.269475,
+      "candidate_I_Hz": 0.16059160643395756,
+      "candidate_G_raw": 0.0,
+      "weighted_field_MAE_Hz": 0.0017819384274037238,
+      "weighted_field_RMS_Hz": 0.001788227265697081,
+      "E_cell_fraction_outside_static_training_domain": 0.000125,
+      "native_finite_window_state": "quiet",
+      "native_brief_events": 0,
+      "trace": [
+        0.00013977204175075243,
+        2.189764335477223e-06,
+        1.6031154124725253e-09,
+        8.641362365252592e-16
+      ]
+    }
+  ],
+  "elapsed_s": 4.76157021522522,
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,681 @@
+{
+  "status": "SAVED_STATE_CONDUCTANCE_RANGE_AUDIT",
+  "quantile_levels": [
+    0,
+    0.1,
+    0.5,
+    0.9,
+    0.99,
+    1
+  ],
+  "rows": [
+    {
+      "time_s": 10.0,
+      "G_raw": 0.13204620248965315,
+      "total_g_quantiles": [
+        0.09052808227408167,
+        0.10168150362852138,
+        0.22263460883646496,
+        0.24144848570617267,
+        0.24894635984116065,
+        0.2600783380481203
+      ],
+      "K_quantiles": [
+        0.0,
+        0.12819931120899053,
+        0.17258880031054516
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl"
+    },
+    {
+      "time_s": 12.0,
+      "G_raw": 4.51130203132469,
+      "total_g_quantiles": [
+        2.480758122982476,
+        3.2420549369550553,
+        6.897929165256233,
+        7.242301512276124,
+        7.361695738670754,
+        7.735658642624607
+      ],
+      "K_quantiles": [
+        0.0,
+        4.710502232487276,
+        5.724464229678228
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl"
+    },
+    {
+      "time_s": 20.0,
+      "G_raw": 0.01988469484437922,
+      "total_g_quantiles": [
+        3.7807582363585386,
+        4.696320329768842,
+        6.245250746092713,
+        6.733003126985148,
+        6.817174189158445,
+        7.224139594056344
+      ],
+      "K_quantiles": [
+        3.7699222379008437,
+        6.235626098779518,
+        7.214708271763202
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit1_checkpoint.pkl"
+    },
+    {
+      "time_s": 30.0,
+      "G_raw": 4.09854108096236e-11,
+      "total_g_quantiles": [
+        0.5102034938903185,
+        0.6341660201540509,
+        0.8439002242831914,
+        0.9099285253180562,
+        0.9213292750747378,
+        0.9764045874772757
+      ],
+      "K_quantiles": [
+        0.5102034938518571,
+        0.8439002242450915,
+        0.9764045874392061
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl"
+    },
+    {
+      "time_s": 40.0,
+      "G_raw": 8.447722795748505e-20,
+      "total_g_quantiles": [
+        0.06904853434949995,
+        0.08582503795231843,
+        0.11420947587289178,
+        0.12314543469517636,
+        0.12468835839262529,
+        0.13214199139604615
+      ],
+      "K_quantiles": [
+        0.06904853434949995,
+        0.11420947587289178,
+        0.13214199139604615
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t40s.pkl"
+    },
+    {
+      "time_s": 50.0,
+      "G_raw": 1.7412054441833889e-28,
+      "total_g_quantiles": [
+        0.006175745807171161,
+        0.0076762471973915395,
+        0.010214969780402865,
+        0.011014207747575784,
+        0.011152207846275833,
+        0.01181886562841028
+      ],
+      "K_quantiles": [
+        0.006175745807171161,
+        0.010214969780402865,
+        0.01181886562841028
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t50s.pkl"
+    },
+    {
+      "time_s": 60.0,
+      "G_raw": 0.7655490230637301,
+      "total_g_quantiles": [
+        0.49925892102540165,
+        0.5845444754150041,
+        1.253284845937131,
+        1.3343176013892826,
+        1.3642473901731111,
+        1.4265427824954968
+      ],
+      "K_quantiles": [
+        2.069099967749601e-08,
+        0.7188434260956951,
+        0.9311282126116309
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry2_checkpoint.pkl"
+    },
+    {
+      "time_s": 66.0,
+      "G_raw": 0.06117059641988788,
+      "total_g_quantiles": [
+        0.038580402120910046,
+        0.7866404800122012,
+        4.1806502716726985,
+        4.4367504237244475,
+        4.524037329493983,
+        4.730172671317632
+      ],
+      "K_quantiles": [
+        7.671361324410835e-12,
+        4.14897717464782,
+        4.6990049364142745
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit2_checkpoint.pkl"
+    },
+    {
+      "time_s": 68.0,
+      "G_raw": 4.937423943070902,
+      "total_g_quantiles": [
+        3.574436551173855,
+        3.891072085338965,
+        6.883606164964069,
+        7.8919962635739385,
+        7.9697291088811815,
+        8.499100783375862
+      ],
+      "K_quantiles": [
+        0.8180812813496204,
+        4.549077924442585,
+        6.311947091088541
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry3_checkpoint.pkl"
+    },
+    {
+      "time_s": 70.0,
+      "G_raw": 4.033677182163255,
+      "total_g_quantiles": [
+        3.265902371942061,
+        4.685490523709327,
+        5.440253265736919,
+        5.791985053513275,
+        5.883736520791943,
+        6.251240951430316
+      ],
+      "K_quantiles": [
+        1.766961371249647,
+        4.185986841112607,
+        5.053506637434623
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t70s.pkl"
+    },
+    {
+      "time_s": 74.0,
+      "G_raw": 0.008206873476188682,
+      "total_g_quantiles": [
+        2.0071492860777584,
+        2.9309514733557624,
+        3.7243744256231017,
+        3.9748046593716735,
+        4.058841079596848,
+        4.294159298605548
+      ],
+      "K_quantiles": [
+        2.0022345558559964,
+        3.7196333671821225,
+        4.289460456413126
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit3_checkpoint.pkl"
+    },
+    {
+      "time_s": 80.0,
+      "G_raw": 5.042477339463355e-08,
+      "total_g_quantiles": [
+        0.6030615034507619,
+        0.8812809975054229,
+        1.1203320846358213,
+        1.1957835654671183,
+        1.2210960978961312,
+        1.291960705639197
+      ],
+      "K_quantiles": [
+        0.6030614591183596,
+        1.120332040638066,
+        1.2919606617063126
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t80s.pkl"
+    },
+    {
+      "time_s": 90.0,
+      "G_raw": 1.0393320434311245e-16,
+      "total_g_quantiles": [
+        0.0816154933797523,
+        0.11926840738972735,
+        0.15162045404045266,
+        0.16183170158710697,
+        0.16525738033389575,
+        0.17484786208448677
+      ],
+      "K_quantiles": [
+        0.0816154933797522,
+        0.15162045404045255,
+        0.17484786208448666
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t90s.pkl"
+    },
+    {
+      "time_s": 100.0,
+      "G_raw": 2.14222300623694e-25,
+      "total_g_quantiles": [
+        0.011045455913164332,
+        0.016141223695443744,
+        0.020519597092251575,
+        0.021901539171192214,
+        0.02236515437467087,
+        0.023663084938777033
+      ],
+      "K_quantiles": [
+        0.011045455913164332,
+        0.020519597092251575,
+        0.023663084938777033
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t100s.pkl"
+    },
+    {
+      "time_s": 110.0,
+      "G_raw": 4.4154507093813595e-34,
+      "total_g_quantiles": [
+        6.27930613168518e-07,
+        9.176233712807273e-07,
+        1.1665324895056786e-06,
+        1.2450954518509815e-06,
+        1.2714518269325434e-06,
+        1.3452387617025342e-06
+      ],
+      "K_quantiles": [
+        6.27930613168518e-07,
+        1.1665324895056786e-06,
+        1.3452387617025342e-06
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t110s.pkl"
+    },
+    {
+      "time_s": 114.0,
+      "G_raw": 2.6204906423115744,
+      "total_g_quantiles": [
+        1.3884521669883652,
+        1.9312236209765314,
+        3.7615673807010768,
+        4.2180628906035045,
+        4.284391985330405,
+        4.491030209716594
+      ],
+      "K_quantiles": [
+        6.717759994222888e-10,
+        2.456772046935813,
+        3.3321507165725803
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry4_checkpoint.pkl"
+    },
+    {
+      "time_s": 120.0,
+      "G_raw": 4.1723067354295935,
+      "total_g_quantiles": [
+        8.002208221266978,
+        9.48112348234991,
+        11.801012137685863,
+        12.538403741764162,
+        12.6380824120506,
+        13.302291937488889
+      ],
+      "K_quantiles": [
+        7.002206756198585,
+        11.178703238614712,
+        12.750246299272666
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t120s.pkl"
+    },
+    {
+      "time_s": 122.0,
+      "G_raw": 0.07641846349917857,
+      "total_g_quantiles": [
+        4.728815771214243,
+        5.7407729150930065,
+        7.523571909139145,
+        8.06335401925863,
+        8.132556140519197,
+        8.576310048696586
+      ],
+      "K_quantiles": [
+        4.6937195551763065,
+        7.493308869543185,
+        8.546745686312791
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit4_checkpoint.pkl"
+    },
+    {
+      "time_s": 130.0,
+      "G_raw": 8.599765141665192e-09,
+      "total_g_quantiles": [
+        0.9476456423026851,
+        1.1520287963723508,
+        1.512872976575002,
+        1.6220005287911665,
+        1.6359527114168735,
+        1.7255582018026208
+      ],
+      "K_quantiles": [
+        0.9476456346417654,
+        1.5128729690323948,
+        1.7255581942673852
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t130s.pkl"
+    },
+    {
+      "time_s": 140.0,
+      "G_raw": 1.7725437073884434e-17,
+      "total_g_quantiles": [
+        0.12824989037357504,
+        0.15591014241999354,
+        0.2047450917672351,
+        0.21951389995684403,
+        0.22140212254372493,
+        0.2335289069649679
+      ],
+      "K_quantiles": [
+        0.128249890373575,
+        0.20474509176723504,
+        0.23352890696496786
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t140s.pkl"
+    },
+    {
+      "time_s": 150.0,
+      "G_raw": 3.653484883418483e-26,
+      "total_g_quantiles": [
+        0.01735673523896058,
+        0.02110014328409935,
+        0.02770923498592639,
+        0.029707975825355823,
+        0.029963518963968063,
+        0.031604700768383925
+      ],
+      "K_quantiles": [
+        0.01735673523896058,
+        0.02770923498592639,
+        0.031604700768383925
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t150s.pkl"
+    },
+    {
+      "time_s": 160.0,
+      "G_raw": 7.530393601991162e-35,
+      "total_g_quantiles": [
+        2.0333728327469793e-06,
+        2.471919835744717e-06,
+        3.2461868468277133e-06,
+        3.480342940508088e-06,
+        3.510280280018931e-06,
+        3.702547687959021e-06
+      ],
+      "K_quantiles": [
+        2.0333728327469793e-06,
+        3.2461868468277133e-06,
+        3.702547687959021e-06
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t160s.pkl"
+    },
+    {
+      "time_s": 164.0,
+      "G_raw": 2.873439089101215,
+      "total_g_quantiles": [
+        1.7216735580001599,
+        2.221564285208207,
+        4.6540256655453645,
+        4.75205793258997,
+        4.835032861703505,
+        5.105325771669224
+      ],
+      "K_quantiles": [
+        2.116642670174574e-09,
+        3.076047664061313,
+        3.6490985403642933
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry5_checkpoint.pkl"
+    },
+    {
+      "time_s": 170.0,
+      "G_raw": 0.006441995571544101,
+      "total_g_quantiles": [
+        0.004425284583921304,
+        0.004744632484114023,
+        2.1829350665037284,
+        2.2875105080955875,
+        2.3381288127040305,
+        2.44465854647077
+      ],
+      "K_quantiles": [
+        3.860537668881231e-12,
+        2.1789402407188003,
+        2.4407993875380507
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit5_checkpoint.pkl"
+    },
+    {
+      "time_s": 172.0,
+      "G_raw": 4.134821650469055,
+      "total_g_quantiles": [
+        2.903710624068316,
+        3.3848427764729045,
+        5.4726194354819535,
+        6.330819907400975,
+        6.447990944083981,
+        6.89019727617341
+      ],
+      "K_quantiles": [
+        0.8732030108288028,
+        3.5439150566837156,
+        5.0431935924817965
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry6_checkpoint.pkl"
+    },
+    {
+      "time_s": 176.0,
+      "G_raw": 0.22506415246454092,
+      "total_g_quantiles": [
+        2.7168799067093774,
+        4.503929990795443,
+        6.015942590051423,
+        6.183262337036627,
+        6.351431736092466,
+        6.776413192389595
+      ],
+      "K_quantiles": [
+        2.610183351513763,
+        5.920310222310896,
+        6.681985961389147
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit6_checkpoint.pkl"
+    },
+    {
+      "time_s": 180.0,
+      "G_raw": 7.550061203244085e-05,
+      "total_g_quantiles": [
+        1.1728886403396441,
+        1.9767015606044012,
+        2.660222845293969,
+        2.735869680190331,
+        2.8115932358660802,
+        3.002465639754514
+      ],
+      "K_quantiles": [
+        1.172830981496803,
+        2.6601668594551233,
+        3.002409830289843
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t180s.pkl"
+    },
+    {
+      "time_s": 190.0,
+      "G_raw": 1.5561835998717049e-13,
+      "total_g_quantiles": [
+        0.15872541307142207,
+        0.2675097004342004,
+        0.360014435385062,
+        0.37025214174954674,
+        0.38050021692931746,
+        0.40633198477923055
+      ],
+      "K_quantiles": [
+        0.15872541307127144,
+        0.36001443538491185,
+        0.40633198477908045
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t190s.pkl"
+    },
+    {
+      "time_s": 200.0,
+      "G_raw": 3.2075334640586023e-22,
+      "total_g_quantiles": [
+        0.02148114873508232,
+        0.036203501077176424,
+        0.048722655582615196,
+        0.05010817847316068,
+        0.0514951046302609,
+        0.05499105424876835
+      ],
+      "K_quantiles": [
+        0.02148114873508232,
+        0.048722655582615196,
+        0.05499105424876835
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t200s.pkl"
+    },
+    {
+      "time_s": 210.0,
+      "G_raw": 6.611219218544802e-31,
+      "total_g_quantiles": [
+        1.4598970703777036e-05,
+        2.4604543179604018e-05,
+        3.3112783223697965e-05,
+        3.405440922042314e-05,
+        3.4996988902055155e-05,
+        3.737289843519475e-05
+      ],
+      "K_quantiles": [
+        1.4598970703777036e-05,
+        3.3112783223697965e-05,
+        3.737289843519475e-05
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t210s.pkl"
+    },
+    {
+      "time_s": 216.0,
+      "G_raw": 2.115216184174851,
+      "total_g_quantiles": [
+        1.1958937996836596,
+        1.6323282805740016,
+        3.1004350055424075,
+        3.478169527918911,
+        3.5264420632953133,
+        3.7339913494575474
+      ],
+      "K_quantiles": [
+        1.1090306056103273e-09,
+        1.9086831712939345,
+        2.685675861856102
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry7_checkpoint.pkl"
+    },
+    {
+      "time_s": 220.0,
+      "G_raw": 7.1465223082143625,
+      "total_g_quantiles": [
+        4.971490603662615,
+        5.051070260662889,
+        9.637685457138717,
+        10.37682778079176,
+        10.470105322468413,
+        10.895124868958819
+      ],
+      "K_quantiles": [
+        2.0747191447592472,
+        7.833133022411068,
+        9.302776526641795
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t220s.pkl"
+    },
+    {
+      "time_s": 224.0,
+      "G_raw": 0.16671458122764837,
+      "total_g_quantiles": [
+        4.831422726298725,
+        6.020164958955427,
+        8.087352576542791,
+        8.64682158359492,
+        8.742468126725317,
+        9.195064287341014
+      ],
+      "K_quantiles": [
+        4.760691479579336,
+        8.027855165641075,
+        9.138148530246768
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/exit7_checkpoint.pkl"
+    },
+    {
+      "time_s": 230.0,
+      "G_raw": 1.0243297894595455e-06,
+      "total_g_quantiles": [
+        1.433893565063452,
+        1.7921107748809417,
+        2.4179443360081256,
+        2.5872318521474726,
+        2.6160977248874624,
+        2.7523582660606336
+      ],
+      "K_quantiles": [
+        1.4338927183584047,
+        2.4179435099762956,
+        2.752357444922241
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t230s.pkl"
+    },
+    {
+      "time_s": 240.0,
+      "G_raw": 2.1113010561187133e-15,
+      "total_g_quantiles": [
+        0.19405627717205903,
+        0.24253570487022275,
+        0.3272330697763312,
+        0.3501436443710722,
+        0.354050215488626,
+        0.3724910743810001
+      ],
+      "K_quantiles": [
+        0.19405627717205698,
+        0.32723306977632916,
+        0.37249107438099804
+      ],
+      "fraction_g_above32": 0.0,
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t240s.pkl"
+    }
+  ],
+  "maximum_total_g": 13.302291937488889,
+  "maximum_fraction_above32": 0.0,
+  "scope": "Complete saved checkpoints, not all timesteps. Checks total conductance only; does not establish coverage of the joint conditional mean/noise domain or validate the rate reduction."
+}

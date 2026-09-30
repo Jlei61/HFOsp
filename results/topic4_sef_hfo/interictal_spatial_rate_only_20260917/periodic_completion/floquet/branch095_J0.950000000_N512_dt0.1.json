@@ -1,0 +1,82 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512.npz",
+  "J_EE_core": 0.95,
+  "T_ms": 312.7455307353431,
+  "dt_ms": 0.09998258655221966,
+  "history_dimension": 345015,
+  "multipliers": [
+    [
+      1.0008128753894585,
+      0.0
+    ],
+    [
+      0.7874635425679194,
+      0.0
+    ],
+    [
+      0.5151463626686023,
+      0.0
+    ],
+    [
+      0.11684040990981716,
+      8.1e-322
+    ]
+  ],
+  "residuals": [
+    5.192520430279776e-15,
+    1.7671096143854995e-13,
+    7.674248458129289e-14,
+    1.1606194328825748e-14
+  ],
+  "phase_multiplier_error": 0.0008128753894585117,
+  "phase_tangent_relative_defect": 0.0007633637974735326,
+  "raw_multipliers_above_1p001": 0,
+  "requested_multipliers": 4,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 315.74546813964844,
+  "polynomial_filter_rho": 0.7314360168743225,
+  "transformed_eigenvalues": [
+    [
+      0.2695958283339048,
+      0.0
+    ],
+    [
+      -0.11142082864693577,
+      0.0
+    ],
+    [
+      -0.0718096026465112,
+      0.0
+    ],
+    [
+      0.0441196338638588,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.26856398312567753,
+  "smallest_returned_transformed_modulus": 0.0441196338638588,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.9999999727521871,
+    0.6132065957428401,
+    0.6127983224898339,
+    0.5129942795774115
+  ],
+  "identified_neutral_index": 0,
+  "nontrivial_multipliers": [
+    [
+      0.7874635425679194,
+      0.0
+    ],
+    [
+      0.5151463626686023,
+      0.0
+    ],
+    [
+      0.11684040990981716,
+      8.1e-322
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 0.7874635425679194,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

@@ -1,0 +1,11 @@
+{
+  "question": "Narrow the short/long region between native4000A andnative8000A while preserving the9s exterior.",
+  "selection": "Native4000 ZA.836589 hasonlyshortAevents<=53ms across5s, native8000 ZA.752430 hascomplete1442ms longAactivity. Choose midpoint ofcontinuousfrozenfieldpath6000ms.",
+  "target_native_time_ms": 6000,
+  "duration_ms": 5000,
+  "dt_ms": 0.025,
+  "initial_state": "Same originalcompletehistory as precedingmatchedarms",
+  "method": "exponential_midpoint_v1",
+  "scope": "Finite-state localization only, doesnotdefine a bifurcation bracket without cycle/stability andmesh tests.",
+  "model_promoted": false
+}

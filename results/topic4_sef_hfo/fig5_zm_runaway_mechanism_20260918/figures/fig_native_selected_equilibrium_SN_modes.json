@@ -1,0 +1,328 @@
+{
+  "status": "DIAGNOSTIC_SELECTED_SN_NOT_ONSET_BIFURCATION",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/native_low_selected_fold_audit/result.json",
+  "selected_rows": [
+    {
+      "D": 0.026021434051552095,
+      "global_E_hz": 0.15759352731664886,
+      "regional_hz": [
+        1.3445145367954738,
+        1.6052815523264412,
+        0.090856126502311
+      ],
+      "zero_eigenvalue": [
+        1.128457333976254e-10,
+        0.0
+      ],
+      "next_eigenvalue_distance": 0.30921645361681727,
+      "transversality": -0.21451777254904236,
+      "quadratic": [
+        -58.211185568999596,
+        -58.211285844185845,
+        -58.21131091282035
+      ],
+      "mode_energy_A_B_surround": [
+        5.0965080745509966e-08,
+        0.7321202746082958,
+        0.2678796744266235
+      ],
+      "static_type": "SN_static_conditions_met",
+      "tangent_D": -5.260445521005114e-10,
+      "bracket": [
+        7,
+        8
+      ],
+      "characteristic_zero": {
+        "right_residual": 1.1284605811515914e-10,
+        "left_residual": 1.1284534271449168e-10,
+        "w_dC_dlambda_v_ms": [
+          -25.95798530089697,
+          -25.957974408636545,
+          -25.9579716857857
+        ],
+        "temporal_simple_zero": true
+      },
+      "equilibrium_residual_hz": 8.132504435501287e-09,
+      "distance_to_path_knot": 0.026021434051552095,
+      "maximal_E_energy_cell_mm": [
+        17.5,
+        3.5
+      ],
+      "effective_E_cells": 6.737398681571738,
+      "adjacent_equilibria": [
+        {
+          "index": 7,
+          "D": 0.02600140653264671,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                0.022684616413199042,
+                0.025013475129560443
+              ],
+              "residual": 1.2792262458565209e-15
+            },
+            {
+              "lambda_per_ms": [
+                -0.019775780864899308,
+                0.06015992196160887
+              ],
+              "residual": 8.821677424176672e-16
+            },
+            {
+              "lambda_per_ms": [
+                -0.20623135364028392,
+                0.15912539404044773
+              ],
+              "residual": 8.524983218972757e-11
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        },
+        {
+          "index": 8,
+          "D": 0.025836757435519386,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                0.022617559975529482,
+                0.02518624430988786
+              ],
+              "residual": 1.1297448017295549e-15
+            },
+            {
+              "lambda_per_ms": [
+                -0.017234815391006582,
+                0.06199083208898318
+              ],
+              "residual": 5.833069692897389e-11
+            },
+            {
+              "lambda_per_ms": [
+                -0.20238298952234046,
+                0.16705065778437866
+              ],
+              "residual": 8.909814730731008e-16
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        }
+      ],
+      "onset_relation": "NOT_ESTABLISHED; a saddle-node on an unstable equilibrium family is not itself loss of the observed bursting attractor"
+    },
+    {
+      "D": 0.013673328269498365,
+      "global_E_hz": 0.2652625361149184,
+      "regional_hz": [
+        1.174653944951968,
+        3.6517368566908015,
+        0.15536595245648846
+      ],
+      "zero_eigenvalue": [
+        4.171837157586951e-11,
+        0.0
+      ],
+      "next_eigenvalue_distance": 0.12147558537789664,
+      "transversality": -1.5650533522225938,
+      "quadratic": [
+        27.402339601363373,
+        27.402351631161125,
+        27.40235393228276
+      ],
+      "mode_energy_A_B_surround": [
+        8.671104948890488e-07,
+        0.47662105093804263,
+        0.5233780819514626
+      ],
+      "static_type": "SN_static_conditions_met",
+      "tangent_D": -2.6656381291512406e-11,
+      "bracket": [
+        18,
+        19
+      ],
+      "characteristic_zero": {
+        "right_residual": 4.17190769447671e-11,
+        "left_residual": 4.1716528614208254e-11,
+        "w_dC_dlambda_v_ms": [
+          -92.93368427141272,
+          -92.93364875960899,
+          -92.93363988448093
+        ],
+        "temporal_simple_zero": true
+      },
+      "equilibrium_residual_hz": 3.0762973548745243e-09,
+      "distance_to_path_knot": 0.013673328269498365,
+      "maximal_E_energy_cell_mm": [
+        15.5,
+        4.5
+      ],
+      "effective_E_cells": 9.367017933546748,
+      "adjacent_equilibria": [
+        {
+          "index": 18,
+          "D": 0.01390906796837521,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                0.018483918945061614,
+                0.03266311302570994
+              ],
+              "residual": 8.223160543744066e-12
+            },
+            {
+              "lambda_per_ms": [
+                0.005139518380949593,
+                0.09025564118583111
+              ],
+              "residual": 1.2668182062904682e-15
+            },
+            {
+              "lambda_per_ms": [
+                -0.10747487457878592,
+                0.23748487239578336
+              ],
+              "residual": 5.318839518329668e-16
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        },
+        {
+          "index": 19,
+          "D": 0.013744609044319955,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                0.018453342183582515,
+                0.03270985256161779
+              ],
+              "residual": 7.964353774098327e-12
+            },
+            {
+              "lambda_per_ms": [
+                0.015559939147346559,
+                0.09593522956662151
+              ],
+              "residual": 8.151450438032817e-16
+            },
+            {
+              "lambda_per_ms": [
+                -0.09096408409274179,
+                0.24452046599333163
+              ],
+              "residual": 5.542038620245738e-16
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        }
+      ],
+      "onset_relation": "NOT_ESTABLISHED; a saddle-node on an unstable equilibrium family is not itself loss of the observed bursting attractor"
+    },
+    {
+      "D": 0.20372630137548883,
+      "global_E_hz": 75.91541014600423,
+      "regional_hz": [
+        322.17562910933697,
+        366.919646522355,
+        62.31036960463311
+      ],
+      "zero_eigenvalue": [
+        5.930235179609471e-11,
+        0.0
+      ],
+      "next_eigenvalue_distance": 0.256241691383138,
+      "transversality": -10.556780306334208,
+      "quadratic": [
+        0.685563353900742,
+        0.6855632404762702,
+        0.6855632115046012
+      ],
+      "mode_energy_A_B_surround": [
+        1.9783281446835513e-05,
+        0.15356741676863647,
+        0.8464127999499166
+      ],
+      "static_type": "SN_static_conditions_met",
+      "tangent_D": -5.6175019708964375e-12,
+      "bracket": [
+        1005,
+        1006
+      ],
+      "characteristic_zero": {
+        "right_residual": 5.93028740317899e-11,
+        "left_residual": 5.930214924669162e-11,
+        "w_dC_dlambda_v_ms": [
+          2.4593094117477694,
+          2.459315281272324,
+          2.4593167485848078
+        ],
+        "temporal_simple_zero": true
+      },
+      "equilibrium_residual_hz": 6.023598286830634e-09,
+      "distance_to_path_knot": 0.0022659041045068606,
+      "maximal_E_energy_cell_mm": [
+        15.5,
+        6.5
+      ],
+      "effective_E_cells": 7.158360250145592,
+      "adjacent_equilibria": [
+        {
+          "index": 1005,
+          "D": 0.2037263013756042,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                9.91201240073918e-07,
+                1.3248654112711105e-14
+              ],
+              "residual": 6.13426644166432e-14
+            },
+            {
+              "lambda_per_ms": [
+                0.008082890935205358,
+                0.1973865171712116
+              ],
+              "residual": 4.095984027727007e-11
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        },
+        {
+          "index": 1006,
+          "D": 0.20374846579918404,
+          "roots": [
+            {
+              "lambda_per_ms": [
+                -0.006586371173292836,
+                0.002897568334933269
+              ],
+              "residual": 2.6199524263410498e-12
+            },
+            {
+              "lambda_per_ms": [
+                0.0077116642832306265,
+                0.19768233591620357
+              ],
+              "residual": 6.128130218634768e-11
+            }
+          ],
+          "status": "UNSTABLE_BY_POSITIVE_ROOT"
+        }
+      ],
+      "onset_relation": "NOT_ESTABLISHED; a saddle-node on an unstable equilibrium family is not itself loss of the observed bursting attractor"
+    }
+  ],
+  "observable": "Cell sum of original-E-count-weighted squared zero-eigenvector components, normalized over all E groups",
+  "spatial_statistical_unit": "One deterministic equilibrium fold and its zero mode per panel",
+  "color_limits": [
+    0,
+    0.3
+  ],
+  "Z": "held native spatial path",
+  "M": "dynamic",
+  "limitation": "Modes, not actual activity snapshots. All three selected folds have unstable adjacent equilibria. No identification with onset, periodic-fold mode, or SNN causal region.",
+  "human_visual_acceptance": "PENDING",
+  "agent_visual_review": {
+    "PNG": "PASS",
+    "same_state_PDF": "PASS",
+    "checked": "Three spatial zero modes, common energy-fraction color scale, core circles, physical D labels, no title or gray annotations, no clipping"
+  }
+}

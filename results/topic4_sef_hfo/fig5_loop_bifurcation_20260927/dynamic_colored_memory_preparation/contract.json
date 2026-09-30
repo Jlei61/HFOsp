@@ -1,0 +1,17 @@
+{
+  "status": "REGISTERED_FIXED_ORDER_NOISE_REPRESENTATION_ONLY",
+  "created_epoch": 1790570578.0637004,
+  "question": "Can a stable finite-memory representation retain the source-derived residual current spectrum well enough for a subsequent physical-time diagnostic?",
+  "evidence": "Same-step Bernoulli variance and native Poisson external counts did not fix spurious G activation. Native refractory identities and filtered variance budgets show independent-time residuals discard a substantial source memory effect; remaining cross-source covariance is still missing.",
+  "design": "Original jumpweights squared times the existing native72-74s source residual PSD and original discrete synaptic filter. For all40000 physical targets and E/I pathways, fit exactly one AR64 representation atdt0.1ms by Yule-Walker covariance equations. Order64 is fixed before fit; no order/amplitude/period search or biological parameter adjustment. Preserve exact projected spectra for review.",
+  "checks": "Levinson solution versus independent CPU Toeplitz solves; positive innovations and reflectionmagnitudes<1; compare resulting PSD with target PSD, including its total variance and fullfrequency discrepancy. Fixed64 numerical memory may fail, which is retained. No relaxation of the native scientific gate.",
+  "representation_guard": "A pathway retains this proposed representation only if weighted relative spectralL1 error median<=0.05 and95thpercentile<=0.15 overtargets. This is numerical fidelity to an approximate conditional input spectrum, not original-network correspondence.",
+  "scope": "Existing native statistics seed only a possible diagnostic noise model. No future neural mean or phaseperiod is prescribed, but no self-generated noise covariance, autonomous physicalnetwork, stablebranch or bifurcation is established by this preparation.",
+  "stop": "Prepare one order and report; no automatic dynamic experiment or alternate order. A future physical model must address initial residual-memory state, actual synaptic state/pending inputs, and covariance self-consistency explicitly.",
+  "order": 64,
+  "dt_ms": 0.1,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/high_history_phase_source_closure",
+  "producer_sha256": "a8395d5a7c43d1b4e63bd4cdc7596c239150bb674551f86fee84e4083b44cdb3",
+  "formal_bifurcation_allowed": false,
+  "zero_spectrum_handling": "13677 targetAMPA spectra are exactlyzero in this conditional native state. Encode exactzero process with zeroAR/innovation, no normalization. Relative spectrum guard applies to nonzero spectra only; no fitting order or threshold changed. Initial implementation stopped before any fit because it incorrectly assumed everytarget variance positive."
+}

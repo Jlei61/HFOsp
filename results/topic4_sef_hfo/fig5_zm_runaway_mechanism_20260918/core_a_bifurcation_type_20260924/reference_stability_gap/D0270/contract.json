@@ -1,0 +1,26 @@
+{
+  "question": "Does the declared recurrent full spatial state correct to an actual periodic orbit of the unchanged model?",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/periodic_predictors/reference_D0270/state.npz",
+  "dt_ms": 0.05,
+  "source_dt_ms": 0.05,
+  "all_M_dynamic": true,
+  "all_Z_held": true,
+  "section": "core_A",
+  "section_orientation": null,
+  "interpolation": "cubic",
+  "target_D_A": 0.27,
+  "cached_derivative": true,
+  "positive_coordinate_proposals": true,
+  "explicit_source_supplied": true,
+  "return_halfwidth_ms": 20.0,
+  "projected_positive_proposal": true,
+  "proposal_method": "Only outward negative numerical coordinates projected to the nonnegative boundary, then exact section restoration; original physical flow is never clipped",
+  "method": "Actual full-state positive Poincare return, full variational derivative including return time, matrix-free Newton-GMRES. Fixed section through source. No rate-only recurrence or projected dynamics.",
+  "gates": "First section derivative must match nonlinear full-state finite differences; no inadmissible states or clipping. Numerical orbit requires combined closure<1e-7 and every block<1e-6. Independent phase, mesh, fundamental period and Floquet checks remain necessary.",
+  "limits": {
+    "nonlinear_iterations": 6,
+    "Krylov_per_step": 20,
+    "admissible_linesearch_returns": 4
+  },
+  "model_promoted": false
+}

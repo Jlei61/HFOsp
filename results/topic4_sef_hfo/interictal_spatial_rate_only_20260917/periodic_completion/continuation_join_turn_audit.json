@@ -1,0 +1,40 @@
+{
+  "status": "EXISTING_JOIN_SCREEN_COMPLETE",
+  "rows": [
+    {
+      "segment": "arcAconnectionFurther",
+      "predecessor": "arcAglobalConnection",
+      "J_values": [
+        1.0615357926771771,
+        1.0618836159141123,
+        1.0622271728831931,
+        1.0626335719451065
+      ],
+      "boundary_turn_indices": [],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAglobalConnection_0118_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAglobalConnection_0119_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionFurther_0000_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionFurther_0001_N512.npz"
+      ]
+    },
+    {
+      "segment": "arcBconnectionFurther",
+      "predecessor": "arcBtoBurstFurther",
+      "J_values": [
+        0.9799867538238308,
+        0.9802026650104526,
+        0.9804450706630614,
+        0.9807368893206255
+      ],
+      "boundary_turn_indices": [],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurstFurther_0118_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurstFurther_0119_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionFurther_0000_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionFurther_0001_N256.npz"
+      ]
+    }
+  ],
+  "scope": "Actual same-mesh endpoint restarts only. Parameter reversals at a join are candidates, not bifurcation certificates."
+}

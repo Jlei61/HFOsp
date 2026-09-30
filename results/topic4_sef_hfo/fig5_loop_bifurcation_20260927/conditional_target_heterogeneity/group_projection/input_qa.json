@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "operator_checks": [
+    {
+      "step": 0,
+      "error": 0.0
+    },
+    {
+      "step": 1,
+      "error": 0.0
+    },
+    {
+      "step": 357,
+      "error": 5.968558980384842e-13
+    },
+    {
+      "step": 358,
+      "error": 5.115907697472721e-13
+    },
+    {
+      "step": 999,
+      "error": 6.536993168992922e-13
+    },
+    {
+      "step": 19999,
+      "error": 5.684341886080801e-13
+    }
+  ],
+  "measured_mean_inversion_error": 2.2737367544323206e-13,
+  "pending_history_ms": 35.9,
+  "initial_cells": 210,
+  "quadrature": "Balanced full joint states, paired original cell pending arrivals; group mean thresholds unchanged."
+}

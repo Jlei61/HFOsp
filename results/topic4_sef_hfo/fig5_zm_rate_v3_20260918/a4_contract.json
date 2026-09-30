@@ -1,0 +1,23 @@
+{
+  "status": "REGISTERED_BEFORE_COMPARISON",
+  "registered": "2026-09-18 11:28",
+  "question": "Does the v3 rate model, started from the same physical zero state and driven by the same external input definition, reproduce the native SNN's early interictal self-limited events, inter-event quiet, two-core participation, surround recruitment, 2-D propagation direction/extent, Z depletion and the entry into broad high activity?",
+  "arms": {
+    "A4_det_meandrive": "deterministic skeleton: mean external drive, no finite-size noise (the object of the bifurcation analysis)",
+    "A4_stoch_seed9108401": "stochastic contrast: native recorded external drive (per cell per 1 ms, seed 9108401) + Poisson finite-size sampling of each group's emitted rate",
+    "A4_stoch_meandrive": "stochastic contrast: mean drive + finite-size sampling only (separates the recorded-drive pairing from the finite-size noise)"
+  },
+  "readouts": "native_readouts.py applied identically: 10-ms all-E rate; quiet <5 Hz >=20 ms; events >=20 ms & peak >=20 Hz; high = >=200 Hz for 200 ms; expansion = neuron-weighted fraction of cells >50 Hz; per-event core A/B participation, surround cells, area, direction (late-early centroid on the A->B axis), extent",
+  "windows": ["1000-4000", "4000-8000", "8000-9420", "1000-9420"],
+  "tolerance_basis": "native seed-to-seed differences (seed 9108401 vs 9108402): event count 40 vs 42, median duration 100 vs 97.5 ms, median gap 239 vs 189 ms, both-core fraction 32/40 vs 31/42, median area 0.75 vs 0.68, forward:reverse 17:22 vs 15:24, high onset 9868 vs 9869 ms",
+  "acceptance": {
+    "self_limited_events": "stochastic arm: events in 1-9.42 s with median duration within 2x of native (50-200 ms) and inter-event quiet present (quiet fraction >= 0.15)",
+    "two_core_participation": "both-core fraction >= 0.5 of events",
+    "surround_recruitment": "median area within [0.3, 1.0] (native 0.68-0.75)",
+    "propagation": "both directions present; median extent within 2x of native (5-20 mm); direction sign not fixed",
+    "entry": "a transition to sustained >=200 Hz activity occurs between 7 and 13 s in the stochastic arm; deterministic arm reported (may not transition without noise)",
+    "D_track": "D at native onset time (9.87 s) within +/-0.05 of native (0.256)"
+  },
+  "not_required": "spike-level or event-level coincidence; the 'basically consistent' propagation standard confirmed by the user",
+  "separation": "deterministic skeleton (no noise, mean drive) is what the bifurcation analysis uses; stochastic arms are contrasts"
+}

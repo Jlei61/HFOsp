@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "allocation_check": {
+    "status": "PASS",
+    "array_and_sliced_block_bitwise": true,
+    "temporary_descriptor_lifetime": "Validated after allocator file handle closes"
+  },
+  "gain_blocks_bitwise_equal": true,
+  "complete_map_bitwise_equal": true,
+  "complete_map_max_error": 0.0,
+  "storage": {
+    "storage": "disk",
+    "nbytes": 632448960,
+    "available_at_allocation": 65169661952,
+    "criterion": "disk if cache bytes exceed 70 percent of currently available RAM",
+    "arithmetic_change": false
+  },
+  "scope": "Only temporary cache backing changes. Float64 gains, delayed interpolation, RK4, frozen equations, timestep, and acceptance gates are identical."
+}

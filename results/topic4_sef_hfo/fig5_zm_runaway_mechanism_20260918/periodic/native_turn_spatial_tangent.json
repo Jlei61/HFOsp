@@ -1,0 +1,63 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/eval_004.npz",
+      "D": 0.2193356519749586,
+      "T_ms": 264.361257078353,
+      "dD_dT": 1.6518151800763124e-07,
+      "region_energy_fraction": {
+        "A": 0.0859496346688311,
+        "B": 0.09401249605910313,
+        "surround": 0.8200378692720659
+      },
+      "phase_component_removed": -0.07393755452966698,
+      "removed_energy_fraction": 0.008007936649667332,
+      "effective_spatial_cell_count": 10.06697052906934,
+      "highest_energy_cell_xy_mm": [
+        19.5,
+        1.5
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/eval_003.npz",
+      "D": 0.21933565182730796,
+      "T_ms": 264.3657094226014,
+      "dD_dT": -2.663696390060917e-07,
+      "region_energy_fraction": {
+        "A": 0.08750118792373282,
+        "B": 0.09326251563574667,
+        "surround": 0.8192362964405204
+      },
+      "phase_component_removed": -0.07406709283830833,
+      "removed_energy_fraction": 0.007944452214674248,
+      "effective_spatial_cell_count": 10.02944950759539,
+      "highest_energy_cell_xy_mm": [
+        19.5,
+        1.5
+      ]
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_G8505_M65536/eval_002.npz",
+      "D": 0.21933562118487218,
+      "T_ms": 264.3314188452028,
+      "dD_dT": 1.785126879083343e-06,
+      "region_energy_fraction": {
+        "A": 0.07237478123275204,
+        "B": 0.1003107847510434,
+        "surround": 0.8273144340162046
+      },
+      "phase_component_removed": -0.07240581706184075,
+      "removed_energy_fraction": 0.00839362802208563,
+      "effective_spatial_cell_count": 10.465034964163054,
+      "highest_energy_cell_xy_mm": [
+        19.5,
+        1.5
+      ]
+    }
+  ],
+  "observable": "E-neuron-count-weighted cycle-average squared waveform derivative along log-period, after projecting out one common phase direction",
+  "numerical_checks": "Accepted BVP and exact tangent residual gates; adding a global phase derivative leaves the readout unchanged",
+  "selection": "Three accepted local derivatives nearest zero, not selected by spatial appearance",
+  "limitation": "BVP family deformation only. No Floquet mode, bifurcation certification, core causality, propagation speed or necessity inferred."
+}

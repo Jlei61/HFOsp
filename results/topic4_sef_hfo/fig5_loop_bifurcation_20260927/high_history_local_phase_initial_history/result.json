@@ -1,0 +1,89 @@
+{
+  "status": "COMPLETE_PAIRED_LOCAL_INITIAL_HISTORY_TEST",
+  "conditions": [
+    "resetV_ref_rateM",
+    "native72s_joint_V_ref_M"
+  ],
+  "rows": [
+    {
+      "region": "selected_all",
+      "targets": 59,
+      "rate_RMS_error_Hz": [
+        0.41045490318597416,
+        0.4103797383769421
+      ],
+      "phase_probability_RMS_from_native": [
+        0.07118367760380839,
+        0.05862676616704861
+      ],
+      "mean_phase_variance": [
+        0.005430360838516145,
+        0.0057928509522478045
+      ],
+      "native_mean_phase_variance": 0.009815356536029657,
+      "paired_rate_difference_RMS_Hz": 0.008308809910265958,
+      "paired_phase_probability_difference_RMS": 0.025659405550462942
+    },
+    {
+      "region": "selected_coreA",
+      "targets": 3,
+      "rate_RMS_error_Hz": [
+        0.46410938030424814,
+        0.4633045518749907
+      ],
+      "phase_probability_RMS_from_native": [
+        0.0029396307792350614,
+        0.0029396965388276135
+      ],
+      "mean_phase_variance": [
+        1.3568368188895111e-05,
+        1.3566915298920016e-05
+      ],
+      "native_mean_phase_variance": 3.282136604619109e-05,
+      "paired_rate_difference_RMS_Hz": 0.0025214735326871203,
+      "paired_phase_probability_difference_RMS": 2.0395547506025997e-05
+    },
+    {
+      "region": "selected_coreB",
+      "targets": 5,
+      "rate_RMS_error_Hz": [
+        0.25602332533430305,
+        0.2586095338366529
+      ],
+      "phase_probability_RMS_from_native": [
+        0.09224856590095276,
+        0.06897830335641779
+      ],
+      "mean_phase_variance": [
+        0.0058921581110601305,
+        0.006748394864303654
+      ],
+      "native_mean_phase_variance": 0.01735552025008183,
+      "paired_rate_difference_RMS_Hz": 0.018436093034240944,
+      "paired_phase_probability_difference_RMS": 0.037213675440506175
+    },
+    {
+      "region": "largest20_errors",
+      "targets": 20,
+      "rate_RMS_error_Hz": [
+        0.31221483571043723,
+        0.31412093344870934
+      ],
+      "phase_probability_RMS_from_native": [
+        0.12215343638595837,
+        0.10054535378092777
+      ],
+      "mean_phase_variance": [
+        0.016017240870569056,
+        0.01708645195821034
+      ],
+      "native_mean_phase_variance": 0.028923828654001275,
+      "paired_rate_difference_RMS_Hz": 0.010089833163951087,
+      "paired_phase_probability_difference_RMS": 0.04406813883241296
+    }
+  ],
+  "elapsed_s": 5.961140155792236,
+  "phase_count_and_exposure_conservation": true,
+  "limits": "Paired finite-burn local test. Neither autonomous network nor infinite-time stationary state; one development sourcephase field.",
+  "producer_sha256": "bacc7aa39f7334c91c15f1a96fcff0452ad3de7d6ac5e7f0ca1dfad526e30f36"
+}

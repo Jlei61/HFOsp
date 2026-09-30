@@ -1,0 +1,44 @@
+{
+  "status": "READY",
+  "cases": [
+    {
+      "case": "S3",
+      "segment": "arcSingleUpperConnect",
+      "core": "B",
+      "label": "LPC_single_upper3"
+    },
+    {
+      "case": "S4",
+      "segment": "arcSingleUpperConnect",
+      "core": "B",
+      "label": "LPC_single_upper4"
+    },
+    {
+      "case": "B1",
+      "segment": "arcBtoBurst",
+      "core": "A",
+      "label": "LPC_B_burst_turn1",
+      "first": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0002_N256.npz",
+      "second": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0004_N256.npz",
+      "meshes": [
+        256,
+        512
+      ],
+      "refinement_radius_Hz": 0.00773071525502651
+    },
+    {
+      "case": "B2",
+      "segment": "arcBtoBurst",
+      "core": "A",
+      "label": "LPC_B_burst_turn2",
+      "first": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0008_N256.npz",
+      "second": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0010_N256.npz",
+      "meshes": [
+        256,
+        512
+      ],
+      "refinement_radius_Hz": 0.007411657269735139
+    }
+  ],
+  "scope": "Checked local brackets only; validation required before critical-point promotion."
+}

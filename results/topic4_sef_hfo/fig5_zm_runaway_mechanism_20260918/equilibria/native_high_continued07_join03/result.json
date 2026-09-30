@@ -1,0 +1,101 @@
+{
+  "status": "JOIN_CONTINUITY_AND_ONE_SIDED_CHECK_PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/native_high_continued07/point1070.npz",
+  "knot_D": 0.22884476056519187,
+  "global_E_hz_at_knot": 192.92282293677965,
+  "knot_static_eigenvalues": [
+    [
+      -0.09699353200113628,
+      0.0
+    ],
+    [
+      -0.11777861076608953,
+      0.0
+    ],
+    [
+      -0.26818784077887303,
+      0.0
+    ],
+    [
+      -0.3092821010471975,
+      0.03415196873878224
+    ]
+  ],
+  "eigen_residuals": [
+    1.8872948519737117e-15,
+    2.634701013513253e-15,
+    3.041750569247959e-15,
+    8.586004734488795e-13
+  ],
+  "one_sided_tangent_cosine": 0.8055641412162285,
+  "rows": [
+    {
+      "offset": 1e-05,
+      "side": -1,
+      "D": 0.22883476056519186,
+      "global_E_hz": 192.90856336986258,
+      "residual_hz": 5.980910211533796e-10,
+      "one_sided_derivative_relative_error": 0.0019248451488727294,
+      "return_to_knot_max_rate_difference_hz": 1.408699545901726e-09,
+      "min_rate_hz": 6.0785103037988144e-05,
+      "max_rate_hz": 590.2948085834439
+    },
+    {
+      "offset": 1e-05,
+      "side": 1,
+      "D": 0.22885476056519188,
+      "global_E_hz": 192.94196553612693,
+      "residual_hz": 5.995204332975845e-12,
+      "one_sided_derivative_relative_error": 0.0027709707260228107,
+      "return_to_knot_max_rate_difference_hz": 1.6986412276764895e-11,
+      "min_rate_hz": 6.14154359243928e-05,
+      "max_rate_hz": 590.3137900228137
+    },
+    {
+      "offset": 5e-06,
+      "side": -1,
+      "D": 0.22883976056519187,
+      "global_E_hz": 192.9156939955937,
+      "residual_hz": 3.581857033196911e-11,
+      "one_sided_derivative_relative_error": 0.0009635464320962835,
+      "return_to_knot_max_rate_difference_hz": 8.35165270274274e-11,
+      "min_rate_hz": 6.0845247127152175e-05,
+      "max_rate_hz": 590.2962868382384
+    },
+    {
+      "offset": 5e-06,
+      "side": 1,
+      "D": 0.22884976056519188,
+      "global_E_hz": 192.93239968062122,
+      "residual_hz": 2.910727214811004e-10,
+      "one_sided_derivative_relative_error": 0.0013816346002544877,
+      "return_to_knot_max_rate_difference_hz": 1.4618584120995592e-09,
+      "min_rate_hz": 6.114800923245435e-05,
+      "max_rate_hz": 590.3057814733256
+    },
+    {
+      "offset": 2.5e-06,
+      "side": -1,
+      "D": 0.22884226056519189,
+      "global_E_hz": 192.91925868077684,
+      "residual_hz": 6.661338147750939e-12,
+      "one_sided_derivative_relative_error": 0.00048203898419119546,
+      "return_to_knot_max_rate_difference_hz": 1.0186296250935811e-11,
+      "min_rate_hz": 6.087614257616151e-05,
+      "max_rate_hz": 590.2970219896289
+    },
+    {
+      "offset": 2.5e-06,
+      "side": 1,
+      "D": 0.22884726056519186,
+      "global_E_hz": 192.92761265345806,
+      "residual_hz": 1.8540724511240114e-11,
+      "one_sided_derivative_relative_error": 0.000689825494257112,
+      "return_to_knot_max_rate_difference_hz": 9.059419880941277e-11,
+      "min_rate_hz": 6.102437366986913e-05,
+      "max_rate_hz": 590.3017703376446
+    }
+  ],
+  "continuation_seed": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/native_high_continued07_join03/continue.npz",
+  "interpretation": "Both parameter segments meet at the same physical equilibrium. Numerical angle-based continuation failure at this known path corner is not an equilibrium saddle-node; temporal stability remains separately determined."
+}

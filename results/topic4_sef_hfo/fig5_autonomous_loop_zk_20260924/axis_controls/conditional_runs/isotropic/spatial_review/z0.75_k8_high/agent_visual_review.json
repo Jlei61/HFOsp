@@ -1,0 +1,17 @@
+{
+  "status": "AGENT_VISUAL_REVIEWED",
+  "human_review": "PENDING",
+  "reviewed_at": "2026-09-24T23:43:37.196915+00:00",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.75_k8_high/figures/full_rate_context.png",
+      "sha256": "f4a8a2e94b42a4e8e2272bd9275b871ca92312f1960ce7fac3127c465d751ac3"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.75_k8_high/figures/conditional_tail_fixed_window.png",
+      "sha256": "e59d6affaaaac13da629716abf2cc28e3c841a344f3f57ebc872883f536c0914"
+    }
+  ],
+  "observation": "Full 30 s E/core/other rates are zero. Fixed final 300 ms E raster and six native E fields are empty; sparse I spikes and contact current fluctuations remain. Tail E quiet fraction is 1; unclamped-law mean dZ is +0.05/s and dK is -1.599984/s. This is suppressed E activity, not an interictal return. Both histories and all three graphs are now complete at Z=0.75, K=8.",
+  "selection": "Prespecified final 10 s; no complete brief event, so the fixed final 300 ms is shown."
+}

@@ -1,0 +1,37 @@
+{
+  "sources": [
+    {
+      "name": "H1",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/g20/hopf_A_calibrated_full/critical.npz"
+    },
+    {
+      "name": "H2",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/g20/hopf_B_calibrated_full/critical.npz"
+    },
+    {
+      "name": "Fold",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/folds/low_arclength_v2_0/fold.npz"
+    },
+    {
+      "name": "Fold",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/folds/low_arclength_v2_1/fold.npz"
+    },
+    {
+      "name": "upper_J1.3",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/modes/upper_J1.3/modes.npz",
+      "vector_index": 4
+    },
+    {
+      "name": "upper_J1.6",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/modes/upper_J1.6/modes.npz",
+      "vector_index": 2
+    },
+    {
+      "name": "upper_J2",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/modes/upper_J2/modes.npz",
+      "vector_index": 2
+    }
+  ],
+  "spatial_observable": "Cellwise neuron-weighted RMS of the E part of the eigenvector, normalized to its own maximum",
+  "meaning": "Infinitesimal modes of the population response approximation, not finite-amplitude propagation frames. High-rate local response calibration is extrapolated."
+}

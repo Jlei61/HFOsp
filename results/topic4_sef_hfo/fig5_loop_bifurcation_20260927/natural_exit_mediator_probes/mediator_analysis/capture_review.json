@@ -1,0 +1,76 @@
+{
+  "status": "COMPLETE_PAIRED_NATIVE_CAPTURE_REVIEW",
+  "rows": [
+    {
+      "name": "original_unmodified",
+      "first_q_reopens_s": null,
+      "R_min_before_q_reopens_Hz": 1.3761140940176693e-287,
+      "R_min_time_s": 26.799,
+      "K_at_R_min": 1.5222422852041473,
+      "continuous_R_lower_bound_Hz": 1.287364347153986e-287,
+      "no_R_at_or_below5_before_q_reopens_certified": false,
+      "core_Z_last_sample_before_q_reopens": null,
+      "core_Z_sample_time_s": null,
+      "K_at_q_reopens": null,
+      "first_low_s": 16.868,
+      "both_core_reference_s": 23.9,
+      "final_core_Z": [
+        0.8659885938133377,
+        0.8649699705358149
+      ],
+      "recurrent_G_is_allowed": true,
+      "counts_as_autonomous_loop": false
+    },
+    {
+      "name": "remove_existing_G_tail_once",
+      "first_q_reopens_s": 17.336,
+      "R_min_before_q_reopens_Hz": 9.183556677142038,
+      "R_min_time_s": 16.941,
+      "K_at_R_min": 9.571255953473887,
+      "continuous_R_lower_bound_Hz": 8.59128141890013,
+      "no_R_at_or_below5_before_q_reopens_certified": true,
+      "core_Z_last_sample_before_q_reopens": [
+        0.25157553390324455,
+        0.2349923223274722
+      ],
+      "core_Z_sample_time_s": 17.32,
+      "K_at_q_reopens": 4.343908153151691,
+      "first_low_s": 17.921,
+      "both_core_reference_s": 24.28,
+      "final_core_Z": [
+        0.8556442029025089,
+        0.851401923005711
+      ],
+      "recurrent_G_is_allowed": true,
+      "counts_as_autonomous_loop": false
+    },
+    {
+      "name": "remove_low_rate_K_retention",
+      "first_q_reopens_s": 19.939,
+      "R_min_before_q_reopens_Hz": 8.769010204501628e-75,
+      "R_min_time_s": 19.449,
+      "K_at_R_min": 0.06346697643264838,
+      "continuous_R_lower_bound_Hz": 8.203470298124808e-75,
+      "no_R_at_or_below5_before_q_reopens_certified": false,
+      "core_Z_last_sample_before_q_reopens": [
+        0.4694370156972291,
+        0.4580262692598379
+      ],
+      "core_Z_sample_time_s": 19.92,
+      "K_at_q_reopens": 0.02414986661990868,
+      "first_low_s": 16.868,
+      "both_core_reference_s": 25.48,
+      "final_core_Z": [
+        0.7842331371287724,
+        0.7838866237216375
+      ],
+      "recurrent_G_is_allowed": true,
+      "counts_as_autonomous_loop": false
+    }
+  ],
+  "existing_G_tail_supports_first_low_rate_capture_at_this_state": true,
+  "shortening_low_K_retention_preserves_initial_low_transition": true,
+  "shortened_K_retention_reactivates_before_both_core_reference": true,
+  "scope": "Two interventions at one complete endogenous state and one shared future noise path. First capture, later recovery and brief propagation return are distinct. G can regenerate after its one-time removal; no claim of universal necessity or formal bifurcation.",
+  "producer_sha256": "784f81325e7122fed12bfde474943d1c9a20cb75bdfdf41ed5cd632375a262f7"
+}

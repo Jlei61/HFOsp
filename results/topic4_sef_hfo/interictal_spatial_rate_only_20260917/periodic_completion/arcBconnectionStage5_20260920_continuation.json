@@ -1,0 +1,731 @@
+{
+  "status": "PHYSICAL_REFINEMENT_REQUIRED",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0000_N2048.npz",
+      "ds": 0.0325,
+      "predictor": {
+        "method": "LINEAR_FIRST_STEP"
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0001_N2048.npz",
+      "ds": 0.0325,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.04919593847683718,
+            "L2": 1.4915006151779584
+          },
+          {
+            "maximum": 0.020753218341130857,
+            "L2": 0.5023792021156961
+          }
+        ],
+        "arc_plane_displacement": -9.596923949972691e-15,
+        "weighted_correction_norm": 0.011614062799299439,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0002_N2048.npz",
+      "ds": 0.039,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.03780883588772304,
+            "L2": 1.0993514456986286
+          },
+          {
+            "maximum": 0.02168599259946922,
+            "L2": 0.6687676823927323
+          }
+        ],
+        "arc_plane_displacement": 2.6031260480507967e-14,
+        "weighted_correction_norm": 0.012688460655582271,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0003_N2048.npz",
+      "ds": 0.0468,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.041078293613446004,
+            "L2": 1.1624600067392836
+          },
+          {
+            "maximum": 0.019664619105244467,
+            "L2": 0.5767055155055673
+          }
+        ],
+        "arc_plane_displacement": 3.7954448611765557e-14,
+        "weighted_correction_norm": 0.009587335410494233,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0004_N2048.npz",
+      "ds": 0.05616,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.04706497655070606,
+            "L2": 1.2995683181122966
+          },
+          {
+            "maximum": 0.02016188808068352,
+            "L2": 0.5702877918391968
+          }
+        ],
+        "arc_plane_displacement": -1.994194739896038e-14,
+        "weighted_correction_norm": 0.008210646380856978,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0005_N2048.npz",
+      "ds": 0.067392,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.05575439173614253,
+            "L2": 1.5041381666663869
+          },
+          {
+            "maximum": 0.020835464820665762,
+            "L2": 0.5676109758247346
+          }
+        ],
+        "arc_plane_displacement": 2.8684520037014494e-14,
+        "weighted_correction_norm": 0.007288313806166519,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0006_N2048.npz",
+      "ds": 0.0808704,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.06836451384079978,
+            "L2": 1.8028866861962014
+          },
+          {
+            "maximum": 0.021910740877068013,
+            "L2": 0.5727348508101773
+          }
+        ],
+        "arc_plane_displacement": 4.1076517187654815e-14,
+        "weighted_correction_norm": 0.006689226510722479,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0007_N2048.npz",
+      "ds": 0.09704447999999999,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.08673044386496923,
+            "L2": 2.2358666302599195
+          },
+          {
+            "maximum": 0.02363755994557815,
+            "L2": 0.5914894160790028
+          }
+        ],
+        "arc_plane_displacement": 2.798477595489235e-14,
+        "weighted_correction_norm": 0.006342569617856729,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0008_N2048.npz",
+      "ds": 0.11645337599999998,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.11382053511982143,
+            "L2": 2.867499808125404
+          },
+          {
+            "maximum": 0.026214847683146865,
+            "L2": 0.6342676428424522
+          }
+        ],
+        "arc_plane_displacement": 3.1686675852626855e-14,
+        "weighted_correction_norm": 0.0062157109175802645,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0009_N2048.npz",
+      "ds": 0.13974405119999997,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.15434982226783825,
+            "L2": 3.804469439550031
+          },
+          {
+            "maximum": 0.030025492877974257,
+            "L2": 0.7383916336595243
+          }
+        ],
+        "arc_plane_displacement": 2.0433958344834302e-15,
+        "weighted_correction_norm": 0.00633835836973485,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0010_N2048.npz",
+      "ds": 0.16769286143999995,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.2184621267514574,
+            "L2": 5.226718812174903
+          },
+          {
+            "maximum": 0.047909573002179184,
+            "L2": 1.0125370155058533
+          }
+        ],
+        "arc_plane_displacement": -3.659328699431863e-14,
+        "weighted_correction_norm": 0.006836955550197426,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0011_N2048.npz",
+      "ds": 0.20123143372799993,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.34607220201357014,
+            "L2": 7.441685688808276
+          },
+          {
+            "maximum": 0.1045704078487357,
+            "L2": 1.685796002241461
+          }
+        ],
+        "arc_plane_displacement": 2.553468233298245e-14,
+        "weighted_correction_norm": 0.0079817933179824,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0012_N2048.npz",
+      "ds": 0.2414777204735999,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.5793066542103646,
+            "L2": 10.979820472132506
+          },
+          {
+            "maximum": 0.22626311504558327,
+            "L2": 3.1661973754820765
+          }
+        ],
+        "arc_plane_displacement": 3.1403373824956393e-15,
+        "weighted_correction_norm": 0.010219757469437148,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0013_N2048.npz",
+      "ds": 0.2414777204735999,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.7600922205507985,
+            "L2": 12.794032746595954
+          },
+          {
+            "maximum": 0.3315704442477035,
+            "L2": 4.366072512285476
+          }
+        ],
+        "arc_plane_displacement": -2.5999168096202396e-16,
+        "weighted_correction_norm": 0.010760372077837371,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0014_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 1.0020479510641418,
+            "L2": 15.575619824407225
+          },
+          {
+            "maximum": 0.4332710408493064,
+            "L2": 5.801834497994426
+          }
+        ],
+        "arc_plane_displacement": 3.156199260279102e-14,
+        "weighted_correction_norm": 0.012319554240051423,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0015_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 1.1159142784685536,
+            "L2": 17.331183332447225
+          },
+          {
+            "maximum": 0.3924678656342757,
+            "L2": 6.201675039877621
+          }
+        ],
+        "arc_plane_displacement": -1.9259333711163507e-14,
+        "weighted_correction_norm": 0.013556198331711273,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0016_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 1.0236059645972646,
+            "L2": 17.71880883001155
+          },
+          {
+            "maximum": 0.3463885906015273,
+            "L2": 5.931545696981003
+          }
+        ],
+        "arc_plane_displacement": -2.2857800721642896e-14,
+        "weighted_correction_norm": 0.01436149816174012,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0017_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.9002495115978835,
+            "L2": 17.054428074844875
+          },
+          {
+            "maximum": 0.35709710897831726,
+            "L2": 5.522563754082994
+          }
+        ],
+        "arc_plane_displacement": 4.319136194530504e-14,
+        "weighted_correction_norm": 0.0145983160110356,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0018_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.9599290476769795,
+            "L2": 15.76575426214228
+          },
+          {
+            "maximum": 0.34856169315392255,
+            "L2": 4.9829642623566635
+          }
+        ],
+        "arc_plane_displacement": -1.2095793117117282e-14,
+        "weighted_correction_norm": 0.014103755152028883,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0019_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.9177039790137023,
+            "L2": 14.277963731966883
+          },
+          {
+            "maximum": 0.2524687528730823,
+            "L2": 4.230177205786424
+          }
+        ],
+        "arc_plane_displacement": 2.861816686405838e-14,
+        "weighted_correction_norm": 0.013337436135215396,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0020_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.7866807644789815,
+            "L2": 12.84273696165699
+          },
+          {
+            "maximum": 0.2111816477764791,
+            "L2": 3.5471956549308747
+          }
+        ],
+        "arc_plane_displacement": 4.2020423599020695e-14,
+        "weighted_correction_norm": 0.012741889514251517,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0021_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.7599994406381214,
+            "L2": 11.607763290230258
+          },
+          {
+            "maximum": 0.2284543671566947,
+            "L2": 2.9330462388157565
+          }
+        ],
+        "arc_plane_displacement": -4.137966011508176e-15,
+        "weighted_correction_norm": 0.012504637565541375,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0022_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.6964647367179505,
+            "L2": 10.564196732406891
+          },
+          {
+            "maximum": 0.20990966432971656,
+            "L2": 2.3327054632910014
+          }
+        ],
+        "arc_plane_displacement": -3.178447088858505e-14,
+        "weighted_correction_norm": 0.012633239939671815,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0023_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.6242741924540546,
+            "L2": 9.61982515237272
+          },
+          {
+            "maximum": 0.16058864012928176,
+            "L2": 1.878659012454023
+          }
+        ],
+        "arc_plane_displacement": 3.871642589858837e-14,
+        "weighted_correction_norm": 0.013008750255756311,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0024_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.5274412271752466,
+            "L2": 8.748589010333628
+          },
+          {
+            "maximum": 0.14015361466539547,
+            "L2": 1.6634263738929034
+          }
+        ],
+        "arc_plane_displacement": -3.571405324254151e-14,
+        "weighted_correction_norm": 0.013487796339707994,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0025_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.4193516673111847,
+            "L2": 8.014787663714843
+          },
+          {
+            "maximum": 0.12910612924845777,
+            "L2": 1.5781168004813078
+          }
+        ],
+        "arc_plane_displacement": -4.5440214091474473e-14,
+        "weighted_correction_norm": 0.013976777832143728,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0026_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.34480738137240147,
+            "L2": 7.493666095399623
+          },
+          {
+            "maximum": 0.1169132688500921,
+            "L2": 1.4906958376927684
+          }
+        ],
+        "arc_plane_displacement": 7.507015842289633e-15,
+        "weighted_correction_norm": 0.014419284522765856,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0027_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.31348355987623894,
+            "L2": 7.2033681697565655
+          },
+          {
+            "maximum": 0.09691984831947542,
+            "L2": 1.3723312377773633
+          }
+        ],
+        "arc_plane_displacement": 7.752696054574848e-15,
+        "weighted_correction_norm": 0.014763589173235052,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0028_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.27821615299475355,
+            "L2": 7.10132731158643
+          },
+          {
+            "maximum": 0.07392783985297242,
+            "L2": 1.2510055132415587
+          }
+        ],
+        "arc_plane_displacement": -3.538142001602296e-14,
+        "weighted_correction_norm": 0.014959799611479658,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0029_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.27054981103681597,
+            "L2": 7.121010446671334
+          },
+          {
+            "maximum": 0.05949908685311603,
+            "L2": 1.153894783266257
+          }
+        ],
+        "arc_plane_displacement": -1.681033784395325e-14,
+        "weighted_correction_norm": 0.014978197467531165,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0030_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.2659755331091626,
+            "L2": 7.203493956061533
+          },
+          {
+            "maximum": 0.06361437287489072,
+            "L2": 1.0887098403063005
+          }
+        ],
+        "arc_plane_displacement": -2.4139761370389756e-14,
+        "weighted_correction_norm": 0.014824930252849935,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0031_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.2671421061670159,
+            "L2": 7.308165334594157
+          },
+          {
+            "maximum": 0.0674079664059711,
+            "L2": 1.0510199674716696
+          }
+        ],
+        "arc_plane_displacement": 3.2034379489342957e-14,
+        "weighted_correction_norm": 0.014544331425766643,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0032_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.29037987434750273,
+            "L2": 7.411326462014152
+          },
+          {
+            "maximum": 0.07096009194846806,
+            "L2": 1.0352066547507883
+          }
+        ],
+        "arc_plane_displacement": 2.8187088080278144e-15,
+        "weighted_correction_norm": 0.014210631307213221,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0033_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.3096407387429539,
+            "L2": 7.502180298898167
+          },
+          {
+            "maximum": 0.07437727697365629,
+            "L2": 1.0385827048591905
+          }
+        ],
+        "arc_plane_displacement": -3.213378727603272e-14,
+        "weighted_correction_norm": 0.013917456394931972,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0034_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.32530888776923816,
+            "L2": 7.579768014838265
+          },
+          {
+            "maximum": 0.07792767137903764,
+            "L2": 1.0615163493515527
+          }
+        ],
+        "arc_plane_displacement": -8.500361872720852e-15,
+        "weighted_correction_norm": 0.013774169580448286,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage5_20260920_0035_N2048.npz",
+      "ds": 0.26,
+      "predictor": {
+        "method": "CURVATURE_INITIAL_GUESS",
+        "residuals": [
+          {
+            "maximum": 0.3381553807608028,
+            "L2": 7.651789051224064
+          },
+          {
+            "maximum": 0.08183701054217951,
+            "L2": 1.1089835494625944
+          }
+        ],
+        "arc_plane_displacement": -1.6997037458055253e-15,
+        "weighted_correction_norm": 0.013919060678832168,
+        "scope": "Initial guess only; the same arc plane, phase reference, full equations and tolerances are used."
+      }
+    }
+  ],
+  "method": "pseudo-arclength",
+  "N": 2048,
+  "failed_index": 36,
+  "withheld_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/diagnostic_arcBconnectionStage5_20260920_0036_N2048.npz",
+  "filter_state_check": {
+    "fast": {
+      "minimum_Hz": -1.0199052973697276e-09,
+      "phase_index": 3252,
+      "group": 554
+    },
+    "slow": {
+      "minimum_Hz": 0.00023778710754394211,
+      "phase_index": 4608,
+      "group": 185
+    },
+    "positive": false,
+    "N": 2048,
+    "check_N": 8192
+  }
+}

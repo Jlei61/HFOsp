@@ -1,0 +1,75 @@
+{
+  "status": "REFRACTORY_CURRENT_CLOSURE_DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "condition": "full",
+      "occupancy_error": 0.0,
+      "reset_charge_overshoot_fraction": 0.12101130925141644,
+      "clamp_covariance_charge_RMS": 0.004526315318695664,
+      "summaries": [
+        {
+          "variant": "exact",
+          "voltage_RMS_error_mv": 2.8197717616928267e-14,
+          "maximum_voltage_error_mv": 1.6342482922482304e-13,
+          "signed_mean_error_mv": 1.0550369497081789e-14
+        },
+        {
+          "variant": "factorized_clamp",
+          "voltage_RMS_error_mv": 0.5229723955285117,
+          "maximum_voltage_error_mv": 1.6087341074759394,
+          "signed_mean_error_mv": 0.27757142404550134
+        },
+        {
+          "variant": "threshold_reset",
+          "voltage_RMS_error_mv": 2.661346675232513,
+          "maximum_voltage_error_mv": 8.938427497246215,
+          "signed_mean_error_mv": 1.2446131375933112
+        },
+        {
+          "variant": "both",
+          "voltage_RMS_error_mv": 2.94904916079836,
+          "maximum_voltage_error_mv": 9.066586818148231,
+          "signed_mean_error_mv": 1.522184561638802
+        }
+      ]
+    },
+    {
+      "condition": "mean_only",
+      "occupancy_error": 0.0,
+      "reset_charge_overshoot_fraction": 0.11346733329913199,
+      "clamp_covariance_charge_RMS": 0.0023536438901546907,
+      "summaries": [
+        {
+          "variant": "exact",
+          "voltage_RMS_error_mv": 2.929472180599609e-14,
+          "maximum_voltage_error_mv": 1.7053025658242404e-13,
+          "signed_mean_error_mv": 1.2784489397328002e-14
+        },
+        {
+          "variant": "factorized_clamp",
+          "voltage_RMS_error_mv": 0.3468867264700962,
+          "maximum_voltage_error_mv": 0.7604427669620026,
+          "signed_mean_error_mv": 0.2800438061973217
+        },
+        {
+          "variant": "threshold_reset",
+          "voltage_RMS_error_mv": 2.6180328877672374,
+          "maximum_voltage_error_mv": 8.777356751539315,
+          "signed_mean_error_mv": 1.2240955253996892
+        },
+        {
+          "variant": "both",
+          "voltage_RMS_error_mv": 2.796394344785628,
+          "maximum_voltage_error_mv": 9.06212017112003,
+          "signed_mean_error_mv": 1.5041393315969993
+        }
+      ]
+    }
+  ],
+  "spike_counts_bitwise": true,
+  "measured_rate_supplied": true,
+  "fitted_parameters": 0,
+  "model_promoted": false,
+  "onset_type": "NOT_ESTABLISHED",
+  "scope": "Descriptive error decomposition with measured rate supplied. No pass of a waveform response gate or autonomous model claim follows from it."
+}

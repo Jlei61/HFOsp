@@ -1,0 +1,37 @@
+{
+  "status": "UNRESOLVED",
+  "reliable_outside_count": 1,
+  "margin": 0.017875800494925865,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0050_N256.npz",
+  "J_EE_core": 0.9652749296795355,
+  "T_ms": 270.68987006832725,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 65
+    }
+  ],
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0050_N256_accuracy_N512.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0050_N256.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0050_N256_accuracy_N512.npz",
+    "N": 512,
+    "check_N": 2048,
+    "J_EE_core": 0.9652749296795355,
+    "T_ms": 270.6899135383441,
+    "maximum_group_defect_Hz": 0.08703872150916947,
+    "regional_defect_Hz": [
+      4.871288938982976e-07,
+      7.446340323512992e-07,
+      5.1405513497434643e-05
+    ],
+    "minimum_rate_Hz": -0.0032142378023002987
+  },
+  "floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleDown_0050_N256_accuracy_N512_dt0.1.json",
+  "elapsed_seconds": 391.4938199520111,
+  "scope": "Full state and delay-history Arnoldi at this orbit; sampled stability, not a continuum completeness certificate.",
+  "classification_basis": "Continuous Fourier-interpolated rate becomes negative beyond roundoff tolerance; temporal resolution must be repaired before retaining the stability classification.",
+  "prior_classification_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/attempt_history/arcSingleDown_0050_N256_before_positivity_1789701391436760294.json",
+  "positivity_review_required": true
+}

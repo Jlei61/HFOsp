@@ -1,0 +1,1449 @@
+{
+  "rows": [
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 24,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9455820663745905,
+          "T_ms": 165.2457728993363,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0015_N64.npz"
+        },
+        {
+          "index": 52,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9458427243306455,
+          "T_ms": 165.80649878481304,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0043_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "TR1",
+          "internal_label": "TR_A_B",
+          "family": "A",
+          "J_EE_core": 0.9458266272237216,
+          "T_ms": 165.7718637725918,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+          "nearest_profiles": [
+            {
+              "index": 46,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0037_N64.npz",
+              "waveform_distance_Hz": 0.001398800401313523,
+              "phase_shift_cycles": 8.420982480650428e-05
+            },
+            {
+              "index": 47,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0038_N64.npz",
+              "waveform_distance_Hz": 0.001735982381046923,
+              "phase_shift_cycles": -1.7110367174346205e-05
+            },
+            {
+              "index": 45,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0036_N64.npz",
+              "waveform_distance_Hz": 0.004226560274877196,
+              "phase_shift_cycles": 0.00017389810203086216
+            }
+          ],
+          "profile_RMS_Hz": 0.34626949103561383,
+          "bracket_profile": {
+            "index": 46,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0037_N64.npz",
+            "waveform_distance_Hz": 0.001398800401313523,
+            "phase_shift_cycles": 8.420982480650428e-05
+          }
+        },
+        {
+          "label": "LPC1",
+          "internal_label": "LPC_resonance_upper",
+          "family": "A",
+          "J_EE_core": 0.9458472114142701,
+          "T_ms": 165.81578803670723,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N128.npz",
+          "nearest_profiles": [
+            {
+              "index": 50,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0041_N64.npz",
+              "waveform_distance_Hz": 0.001996539615084629,
+              "phase_shift_cycles": 8.159893367155207e-05
+            },
+            {
+              "index": 51,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0042_N64.npz",
+              "waveform_distance_Hz": 0.002623690982677614,
+              "phase_shift_cycles": -0.00014065410796429182
+            },
+            {
+              "index": 49,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0040_N64.npz",
+              "waveform_distance_Hz": 0.006318546483815068,
+              "phase_shift_cycles": 0.00028288220241750206
+            }
+          ],
+          "profile_RMS_Hz": 0.3464510234121694,
+          "bracket_profile": {
+            "index": 50,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0041_N64.npz",
+            "waveform_distance_Hz": 0.001996539615084629,
+            "phase_shift_cycles": 8.159893367155207e-05
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 61,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.945755302478177,
+          "T_ms": 165.61976930708667,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0052_N64.npz"
+        },
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "LPC2",
+          "internal_label": "LPC_resonance_lower",
+          "family": "A",
+          "J_EE_core": 0.9457519515972825,
+          "T_ms": 165.61244373063934,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N128.npz",
+          "nearest_profiles": [
+            {
+              "index": 63,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+              "waveform_distance_Hz": 0.00014433615004846864,
+              "phase_shift_cycles": -1.1093569820012326e-06
+            },
+            {
+              "index": 64,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0055_N64.npz",
+              "waveform_distance_Hz": 0.00032361830913973764,
+              "phase_shift_cycles": -2.188195643648525e-05
+            },
+            {
+              "index": 65,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz",
+              "waveform_distance_Hz": 0.0007497349698181581,
+              "phase_shift_cycles": -4.142775470712766e-05
+            }
+          ],
+          "profile_RMS_Hz": 0.34497998681672265,
+          "bracket_profile": {
+            "index": 63,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+            "waveform_distance_Hz": 0.00014433615004846864,
+            "phase_shift_cycles": -1.1093569820012326e-06
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        },
+        {
+          "index": 96,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9460343175647821,
+          "T_ms": 166.22407389846154,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0087_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "LPC2",
+          "internal_label": "LPC_resonance_lower",
+          "family": "A",
+          "J_EE_core": 0.9457519515972825,
+          "T_ms": 165.61244373063934,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N128.npz",
+          "nearest_profiles": [
+            {
+              "index": 63,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+              "waveform_distance_Hz": 0.00014433615004846864,
+              "phase_shift_cycles": -1.1093569820012326e-06
+            },
+            {
+              "index": 64,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0055_N64.npz",
+              "waveform_distance_Hz": 0.00032361830913973764,
+              "phase_shift_cycles": -2.188195643648525e-05
+            },
+            {
+              "index": 65,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz",
+              "waveform_distance_Hz": 0.0007497349698181581,
+              "phase_shift_cycles": -4.142775470712766e-05
+            }
+          ],
+          "profile_RMS_Hz": 0.34497998681672265,
+          "bracket_profile": {
+            "index": 65,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz",
+            "waveform_distance_Hz": 0.0007497349698181581,
+            "phase_shift_cycles": -4.142775470712766e-05
+          }
+        },
+        {
+          "label": "TR2",
+          "internal_label": "TR_A_return",
+          "family": "A",
+          "J_EE_core": 0.9457603915251053,
+          "T_ms": 165.63054658665283,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+          "nearest_profiles": [
+            {
+              "index": 69,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0060_N64.npz",
+              "waveform_distance_Hz": 4.840304859259297e-06,
+              "phase_shift_cycles": -0.0001115293982265616
+            },
+            {
+              "index": 68,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0059_N64.npz",
+              "waveform_distance_Hz": 0.00029438294292508815,
+              "phase_shift_cycles": -7.906372484102407e-05
+            },
+            {
+              "index": 70,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0061_N64.npz",
+              "waveform_distance_Hz": 0.0003036936170756459,
+              "phase_shift_cycles": -0.0001503780465244708
+            }
+          ],
+          "profile_RMS_Hz": 0.3449907610139461,
+          "bracket_profile": {
+            "index": 69,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0060_N64.npz",
+            "waveform_distance_Hz": 4.840304859259297e-06,
+            "phase_shift_cycles": -0.0001115293982265616
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "single",
+      "ends": [
+        {
+          "index": 76,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9575887984733535,
+          "T_ms": 293.99842850141806,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz"
+        },
+        {
+          "index": 80,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9577861497084698,
+          "T_ms": 293.2195886114274,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "LPC5",
+          "internal_label": "LPC_burst_low",
+          "family": "single",
+          "J_EE_core": 0.9568975725617355,
+          "T_ms": 296.7319263629114,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N512.npz",
+          "nearest_profiles": [
+            {
+              "index": 78,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0037_N256.npz",
+              "waveform_distance_Hz": 0.21189209461627842,
+              "phase_shift_cycles": 0.00020447398704493696
+            },
+            {
+              "index": 77,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0038_N256.npz",
+              "waveform_distance_Hz": 4.924283752488713,
+              "phase_shift_cycles": 0.0014368549452171038
+            },
+            {
+              "index": 79,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0036_N256.npz",
+              "waveform_distance_Hz": 5.415498656493065,
+              "phase_shift_cycles": -0.0007031992458641715
+            }
+          ],
+          "profile_RMS_Hz": 30.931931195189023,
+          "bracket_profile": {
+            "index": 78,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0037_N256.npz",
+            "waveform_distance_Hz": 0.21189209461627842,
+            "phase_shift_cycles": 0.00020447398704493696
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "single",
+      "ends": [
+        {
+          "index": 150,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 1.6251725691286658,
+          "T_ms": 241.1009511826622,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256.npz"
+        },
+        {
+          "index": 154,
+          "status": "UNSTABLE",
+          "J_EE_core": 1.6264477575618144,
+          "T_ms": 237.99630517469956,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0037_N256.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "LPC6",
+          "internal_label": "LPC_burst_high",
+          "family": "single",
+          "J_EE_core": 1.6265015184765392,
+          "T_ms": 239.69812231617996,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N512.npz",
+          "nearest_profiles": [
+            {
+              "index": 152,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0035_N256.npz",
+              "waveform_distance_Hz": 0.6389609790500993,
+              "phase_shift_cycles": -0.000168384037066284
+            },
+            {
+              "index": 151,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0034_N256.npz",
+              "waveform_distance_Hz": 0.8750256444466767,
+              "phase_shift_cycles": -3.5156651722701766e-05
+            },
+            {
+              "index": 153,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0036_N256.npz",
+              "waveform_distance_Hz": 1.9401979857297786,
+              "phase_shift_cycles": -0.0002947637518698188
+            }
+          ],
+          "profile_RMS_Hz": 60.49669964846624,
+          "bracket_profile": {
+            "index": 152,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0035_N256.npz",
+            "waveform_distance_Hz": 0.6389609790500993,
+            "phase_shift_cycles": -0.000168384037066284
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "double",
+      "ends": [
+        {
+          "index": 48,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9383727453059275,
+          "T_ms": 835.883152944345,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0076_N512.npz"
+        },
+        {
+          "index": 72,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9388905024897037,
+          "T_ms": 821.4792785199052,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0052_N512.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "PD1",
+          "internal_label": "PD_double_low",
+          "family": "double",
+          "J_EE_core": 0.9387254732490684,
+          "T_ms": 825.3654037556493,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547325_N2048.npz",
+          "nearest_profiles": [
+            {
+              "index": 65,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0059_N512.npz",
+              "waveform_distance_Hz": 0.07435314458729872,
+              "phase_shift_cycles": -2.8135079640120985e-08
+            },
+            {
+              "index": 64,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0060_N512.npz",
+              "waveform_distance_Hz": 0.34583409470652454,
+              "phase_shift_cycles": 3.0445674779158867e-06
+            },
+            {
+              "index": 66,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0058_N512.npz",
+              "waveform_distance_Hz": 0.4393202556091464,
+              "phase_shift_cycles": -3.141690659306386e-06
+            }
+          ],
+          "profile_RMS_Hz": 39.43442215285981,
+          "bracket_profile": {
+            "index": 65,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0059_N512.npz",
+            "waveform_distance_Hz": 0.07435314458729872,
+            "phase_shift_cycles": -2.8135079640120985e-08
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "double",
+      "ends": [
+        {
+          "index": 72,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9388905024897037,
+          "T_ms": 821.4792785199052,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0052_N512.npz"
+        },
+        {
+          "index": 143,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9447374960718655,
+          "T_ms": 761.9892166833886,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0016_N512.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "PD2",
+          "internal_label": "PD_double_upper",
+          "family": "double",
+          "J_EE_core": 0.944728374157131,
+          "T_ms": 761.9648707070426,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+          "nearest_profiles": [
+            {
+              "index": 151,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz",
+              "waveform_distance_Hz": 0.005555101903922435,
+              "phase_shift_cycles": -3.275425761492517e-08
+            },
+            {
+              "index": 150,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0004_N1024.npz",
+              "waveform_distance_Hz": 0.049435913045192854,
+              "phase_shift_cycles": 5.28778578030578e-07
+            },
+            {
+              "index": 142,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0015_N512.npz",
+              "waveform_distance_Hz": 0.051512274676354275,
+              "phase_shift_cycles": 3.2215042985029104e-07
+            }
+          ],
+          "profile_RMS_Hz": 39.17052746163172,
+          "bracket_profile": {
+            "index": 142,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0015_N512.npz",
+            "waveform_distance_Hz": 0.051512274676354275,
+            "phase_shift_cycles": 3.2215042985029104e-07
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "double",
+      "ends": [
+        {
+          "index": 148,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9447179976417638,
+          "T_ms": 761.9313452777848,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024.npz"
+        },
+        {
+          "index": 168,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9447720644904876,
+          "T_ms": 761.9427234452309,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "PD2",
+          "internal_label": "PD_double_upper",
+          "family": "double",
+          "J_EE_core": 0.944728374157131,
+          "T_ms": 761.9648707070426,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+          "nearest_profiles": [
+            {
+              "index": 151,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz",
+              "waveform_distance_Hz": 0.005555101903922435,
+              "phase_shift_cycles": -3.275425761492517e-08
+            },
+            {
+              "index": 150,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0004_N1024.npz",
+              "waveform_distance_Hz": 0.049435913045192854,
+              "phase_shift_cycles": 5.28778578030578e-07
+            },
+            {
+              "index": 142,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0015_N512.npz",
+              "waveform_distance_Hz": 0.051512274676354275,
+              "phase_shift_cycles": 3.2215042985029104e-07
+            }
+          ],
+          "profile_RMS_Hz": 39.17052746163172,
+          "bracket_profile": {
+            "index": 151,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz",
+            "waveform_distance_Hz": 0.005555101903922435,
+            "phase_shift_cycles": -3.275425761492517e-08
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    },
+    {
+      "family": "Bleading",
+      "ends": [
+        {
+          "index": 72,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9488489167801094,
+          "T_ms": 317.8388709160101,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz"
+        },
+        {
+          "index": 75,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9488490067214715,
+          "T_ms": 317.8385772668172,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0074_N512.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up.",
+      "known_critical_profiles": [
+        {
+          "label": "LPC7",
+          "internal_label": "LPC_Bleading_low",
+          "family": "Bleading",
+          "J_EE_core": 0.9488485317651113,
+          "T_ms": 317.8404242674791,
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N1024.npz",
+          "nearest_profiles": [
+            {
+              "index": 73,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0072_N512.npz",
+              "waveform_distance_Hz": 0.06070145020154929,
+              "phase_shift_cycles": -8.417346328833898e-06
+            },
+            {
+              "index": 74,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0073_N512.npz",
+              "waveform_distance_Hz": 0.10239889463496159,
+              "phase_shift_cycles": 1.3707217028270243e-05
+            },
+            {
+              "index": 72,
+              "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz",
+              "waveform_distance_Hz": 0.22410105580357276,
+              "phase_shift_cycles": -3.0484749823908616e-05
+            }
+          ],
+          "profile_RMS_Hz": 41.655234208189896,
+          "bracket_profile": {
+            "index": 73,
+            "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0072_N512.npz",
+            "waveform_distance_Hz": 0.06070145020154929,
+            "phase_shift_cycles": -8.417346328833898e-06
+          }
+        }
+      ],
+      "assessment": "KNOWN_CRITICAL_PROFILES_IN_BRACKET",
+      "scope": "Continuation-order localization with full waveforms, not a proof of unique crossings or absence of additional points."
+    }
+  ],
+  "critical_profile_locations": [
+    {
+      "label": "TR1",
+      "internal_label": "TR_A_B",
+      "family": "A",
+      "J_EE_core": 0.9458266272237216,
+      "T_ms": 165.7718637725918,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_B_highorder_half_eval_J0.9458266272237_N128.npz",
+      "nearest_profiles": [
+        {
+          "index": 46,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0037_N64.npz",
+          "waveform_distance_Hz": 0.001398800401313523,
+          "phase_shift_cycles": 8.420982480650428e-05
+        },
+        {
+          "index": 47,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0038_N64.npz",
+          "waveform_distance_Hz": 0.001735982381046923,
+          "phase_shift_cycles": -1.7110367174346205e-05
+        },
+        {
+          "index": 45,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0036_N64.npz",
+          "waveform_distance_Hz": 0.004226560274877196,
+          "phase_shift_cycles": 0.00017389810203086216
+        }
+      ],
+      "profile_RMS_Hz": 0.34626949103561383
+    },
+    {
+      "label": "LPC1",
+      "internal_label": "LPC_resonance_upper",
+      "family": "A",
+      "J_EE_core": 0.9458472114142701,
+      "T_ms": 165.81578803670723,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N128.npz",
+      "nearest_profiles": [
+        {
+          "index": 50,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0041_N64.npz",
+          "waveform_distance_Hz": 0.001996539615084629,
+          "phase_shift_cycles": 8.159893367155207e-05
+        },
+        {
+          "index": 51,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0042_N64.npz",
+          "waveform_distance_Hz": 0.002623690982677614,
+          "phase_shift_cycles": -0.00014065410796429182
+        },
+        {
+          "index": 49,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0040_N64.npz",
+          "waveform_distance_Hz": 0.006318546483815068,
+          "phase_shift_cycles": 0.00028288220241750206
+        }
+      ],
+      "profile_RMS_Hz": 0.3464510234121694
+    },
+    {
+      "label": "LPC2",
+      "internal_label": "LPC_resonance_lower",
+      "family": "A",
+      "J_EE_core": 0.9457519515972825,
+      "T_ms": 165.61244373063934,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N128.npz",
+      "nearest_profiles": [
+        {
+          "index": 63,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0054_N64.npz",
+          "waveform_distance_Hz": 0.00014433615004846864,
+          "phase_shift_cycles": -1.1093569820012326e-06
+        },
+        {
+          "index": 64,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0055_N64.npz",
+          "waveform_distance_Hz": 0.00032361830913973764,
+          "phase_shift_cycles": -2.188195643648525e-05
+        },
+        {
+          "index": 65,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz",
+          "waveform_distance_Hz": 0.0007497349698181581,
+          "phase_shift_cycles": -4.142775470712766e-05
+        }
+      ],
+      "profile_RMS_Hz": 0.34497998681672265
+    },
+    {
+      "label": "LPC3",
+      "internal_label": "LPC_A1",
+      "family": "A",
+      "J_EE_core": 0.9614345887728242,
+      "T_ms": 164.6106857336651,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A1_N128.npz",
+      "nearest_profiles": [
+        {
+          "index": 142,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0029_N64.npz",
+          "waveform_distance_Hz": 0.0012657437451724473,
+          "phase_shift_cycles": -0.000253751632617333
+        },
+        {
+          "index": 143,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0030_N64.npz",
+          "waveform_distance_Hz": 0.007170290847016268,
+          "phase_shift_cycles": 0.0024595382407886996
+        },
+        {
+          "index": 141,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0028_N64.npz",
+          "waveform_distance_Hz": 0.009580288869631965,
+          "phase_shift_cycles": 0.9970841722457466
+        }
+      ],
+      "profile_RMS_Hz": 0.44476338978960345
+    },
+    {
+      "label": "LPC5",
+      "internal_label": "LPC_burst_low",
+      "family": "single",
+      "J_EE_core": 0.9568975725617355,
+      "T_ms": 296.7319263629114,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N512.npz",
+      "nearest_profiles": [
+        {
+          "index": 78,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0037_N256.npz",
+          "waveform_distance_Hz": 0.21189209461627842,
+          "phase_shift_cycles": 0.00020447398704493696
+        },
+        {
+          "index": 77,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0038_N256.npz",
+          "waveform_distance_Hz": 4.924283752488713,
+          "phase_shift_cycles": 0.0014368549452171038
+        },
+        {
+          "index": 79,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0036_N256.npz",
+          "waveform_distance_Hz": 5.415498656493065,
+          "phase_shift_cycles": -0.0007031992458641715
+        }
+      ],
+      "profile_RMS_Hz": 30.931931195189023
+    },
+    {
+      "label": "LPC6",
+      "internal_label": "LPC_burst_high",
+      "family": "single",
+      "J_EE_core": 1.6265015184765392,
+      "T_ms": 239.69812231617996,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N512.npz",
+      "nearest_profiles": [
+        {
+          "index": 152,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0035_N256.npz",
+          "waveform_distance_Hz": 0.6389609790500993,
+          "phase_shift_cycles": -0.000168384037066284
+        },
+        {
+          "index": 151,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0034_N256.npz",
+          "waveform_distance_Hz": 0.8750256444466767,
+          "phase_shift_cycles": -3.5156651722701766e-05
+        },
+        {
+          "index": 153,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0036_N256.npz",
+          "waveform_distance_Hz": 1.9401979857297786,
+          "phase_shift_cycles": -0.0002947637518698188
+        }
+      ],
+      "profile_RMS_Hz": 60.49669964846624
+    },
+    {
+      "label": "LPC7",
+      "internal_label": "LPC_Bleading_low",
+      "family": "Bleading",
+      "J_EE_core": 0.9488485317651113,
+      "T_ms": 317.8404242674791,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 73,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0072_N512.npz",
+          "waveform_distance_Hz": 0.06070145020154929,
+          "phase_shift_cycles": -8.417346328833898e-06
+        },
+        {
+          "index": 74,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0073_N512.npz",
+          "waveform_distance_Hz": 0.10239889463496159,
+          "phase_shift_cycles": 1.3707217028270243e-05
+        },
+        {
+          "index": 72,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz",
+          "waveform_distance_Hz": 0.22410105580357276,
+          "phase_shift_cycles": -3.0484749823908616e-05
+        }
+      ],
+      "profile_RMS_Hz": 41.655234208189896
+    },
+    {
+      "label": "LPC8",
+      "internal_label": "LPC_double_high",
+      "family": "double",
+      "J_EE_core": 0.9449471475478515,
+      "T_ms": 760.6705300055709,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_high_N1536.npz",
+      "nearest_profiles": [
+        {
+          "index": 210,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0014_N1536.npz",
+          "waveform_distance_Hz": 0.1366572985922297,
+          "phase_shift_cycles": -6.56249424803495e-06
+        },
+        {
+          "index": 211,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0015_N1536.npz",
+          "waveform_distance_Hz": 0.4211872065361176,
+          "phase_shift_cycles": 1.959477607684818e-05
+        },
+        {
+          "index": 209,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0013_N1536.npz",
+          "waveform_distance_Hz": 0.6959174795275345,
+          "phase_shift_cycles": -3.1678096801421375e-05
+        }
+      ],
+      "profile_RMS_Hz": 38.49822173075239
+    },
+    {
+      "label": "LPC9",
+      "internal_label": "LPC_A2",
+      "family": "A",
+      "J_EE_core": 0.939333107388464,
+      "T_ms": 136.67317551384602,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A2_N256.npz",
+      "nearest_profiles": [
+        {
+          "index": 187,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0074_N64.npz",
+          "waveform_distance_Hz": 0.006640102667855843,
+          "phase_shift_cycles": 0.00020606361191420454
+        },
+        {
+          "index": 186,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0073_N64.npz",
+          "waveform_distance_Hz": 0.018962075259028637,
+          "phase_shift_cycles": -0.0006069465849866275
+        },
+        {
+          "index": 185,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0072_N64.npz",
+          "waveform_distance_Hz": 0.0372489927676072,
+          "phase_shift_cycles": -0.001260863453516285
+        }
+      ],
+      "profile_RMS_Hz": 0.5994190838037337
+    },
+    {
+      "label": "LPC10",
+      "internal_label": "LPC_A3",
+      "family": "A",
+      "J_EE_core": 0.9394710284040595,
+      "T_ms": 135.84855186173525,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A3_N256.npz",
+      "nearest_profiles": [
+        {
+          "index": 189,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0076_N64.npz",
+          "waveform_distance_Hz": 0.00276583871774784,
+          "phase_shift_cycles": 8.057645121264793e-05
+        },
+        {
+          "index": 188,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0075_N64.npz",
+          "waveform_distance_Hz": 0.026686747170370555,
+          "phase_shift_cycles": -0.0007037388051186902
+        },
+        {
+          "index": 190,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0077_N64.npz",
+          "waveform_distance_Hz": 0.027853715716807368,
+          "phase_shift_cycles": 0.0007253285026528045
+        }
+      ],
+      "profile_RMS_Hz": 0.6249208651914138
+    },
+    {
+      "label": "LPC11",
+      "internal_label": "LPC_A4",
+      "family": "A",
+      "J_EE_core": 0.9382319284104846,
+      "T_ms": 134.71776774727965,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A4_N256.npz",
+      "nearest_profiles": [
+        {
+          "index": 200,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0087_N64.npz",
+          "waveform_distance_Hz": 0.030008470059926177,
+          "phase_shift_cycles": 0.0006335446988467616
+        },
+        {
+          "index": 199,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0086_N64.npz",
+          "waveform_distance_Hz": 0.04892724035406717,
+          "phase_shift_cycles": -0.0007586820631871876
+        },
+        {
+          "index": 198,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0085_N64.npz",
+          "waveform_distance_Hz": 0.08720703795495087,
+          "phase_shift_cycles": -0.0012197431008468236
+        }
+      ],
+      "profile_RMS_Hz": 0.7455626856202339
+    },
+    {
+      "label": "LPC12",
+      "internal_label": "LPC_A5",
+      "family": "A",
+      "J_EE_core": 0.9406839080905371,
+      "T_ms": 133.80024380913872,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A5_N256.npz",
+      "nearest_profiles": [
+        {
+          "index": 219,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0106_N64.npz",
+          "waveform_distance_Hz": 0.004815178582086036,
+          "phase_shift_cycles": 0.000196932920516794
+        },
+        {
+          "index": 218,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0105_N64.npz",
+          "waveform_distance_Hz": 0.02742089885745806,
+          "phase_shift_cycles": -0.0002809086719511362
+        },
+        {
+          "index": 220,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0107_N64.npz",
+          "waveform_distance_Hz": 0.037362284802427405,
+          "phase_shift_cycles": 0.0009731396110878592
+        }
+      ],
+      "profile_RMS_Hz": 0.9563434850865168
+    },
+    {
+      "label": "LPC20",
+      "internal_label": "LPC_double_low",
+      "family": "double",
+      "J_EE_core": 0.9381101414526141,
+      "T_ms": 852.7425253105705,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_low_N1536.npz",
+      "nearest_profiles": [
+        {
+          "index": 41,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0003_N512.npz",
+          "waveform_distance_Hz": 1.1637423271455076,
+          "phase_shift_cycles": 2.9873712184085394e-05
+        },
+        {
+          "index": 40,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0004_N512.npz",
+          "waveform_distance_Hz": 1.256912507689757,
+          "phase_shift_cycles": -2.81620745640482e-05
+        },
+        {
+          "index": 42,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0002_N512.npz",
+          "waveform_distance_Hz": 3.5720692679262034,
+          "phase_shift_cycles": 8.100837813752792e-05
+        }
+      ],
+      "profile_RMS_Hz": 36.48967576613157
+    },
+    {
+      "label": "LPC21",
+      "internal_label": "LPC_double_secondary1",
+      "family": "double",
+      "J_EE_core": 0.9391433309651367,
+      "T_ms": 875.8164641079585,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N2048.npz",
+      "nearest_profiles": [
+        {
+          "index": 25,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0019_N512.npz",
+          "waveform_distance_Hz": 0.6248945277155791,
+          "phase_shift_cycles": -5.387341721987592e-05
+        },
+        {
+          "index": 26,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0018_N512.npz",
+          "waveform_distance_Hz": 1.6949405199205105,
+          "phase_shift_cycles": 0.00013453256790391859
+        },
+        {
+          "index": 24,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0020_N512.npz",
+          "waveform_distance_Hz": 2.9422371381382275,
+          "phase_shift_cycles": -0.0002450216903131346
+        }
+      ],
+      "profile_RMS_Hz": 35.258259532995794
+    },
+    {
+      "label": "LPC22",
+      "internal_label": "LPC_double_secondary2",
+      "family": "double",
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+      "nearest_profiles": [
+        {
+          "index": 21,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0023_N512.npz",
+          "waveform_distance_Hz": 0.3329667910573373,
+          "phase_shift_cycles": 0.00013744617215203115
+        },
+        {
+          "index": 20,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0024_N512.npz",
+          "waveform_distance_Hz": 2.5581120164823874,
+          "phase_shift_cycles": -4.142056525661786e-05
+        },
+        {
+          "index": 22,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0022_N512.npz",
+          "waveform_distance_Hz": 2.9649755225183743,
+          "phase_shift_cycles": 0.00030252906409591564
+        }
+      ],
+      "profile_RMS_Hz": 34.75561597528225
+    },
+    {
+      "label": "LPC23",
+      "internal_label": "LPC_double_secondary3",
+      "family": "double",
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+      "nearest_profiles": [
+        {
+          "index": 8,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0036_N512.npz",
+          "waveform_distance_Hz": 0.8614223376916278,
+          "phase_shift_cycles": -7.223992005622807e-05
+        },
+        {
+          "index": 9,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0035_N512.npz",
+          "waveform_distance_Hz": 1.6682680949334103,
+          "phase_shift_cycles": 8.504299372361078e-05
+        },
+        {
+          "index": 7,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0037_N512.npz",
+          "waveform_distance_Hz": 3.5030249751857707,
+          "phase_shift_cycles": -0.00023431172799232575
+        }
+      ],
+      "profile_RMS_Hz": 31.97899136293892
+    },
+    {
+      "label": "LPC24",
+      "internal_label": "LPC_double_secondary4",
+      "family": "double",
+      "J_EE_core": 0.940343489690564,
+      "T_ms": 856.8099149281564,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N4096.npz",
+      "nearest_profiles": [
+        {
+          "index": 2,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0042_N512.npz",
+          "waveform_distance_Hz": 0.6921475745587634,
+          "phase_shift_cycles": -3.9905827479276416e-05
+        },
+        {
+          "index": 1,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0043_N512.npz",
+          "waveform_distance_Hz": 2.3359068039466853,
+          "phase_shift_cycles": -4.432391938375399e-05
+        },
+        {
+          "index": 3,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0041_N512.npz",
+          "waveform_distance_Hz": 3.486302348731687,
+          "phase_shift_cycles": -1.4560572203775045e-05
+        }
+      ],
+      "profile_RMS_Hz": 32.67528447641828
+    },
+    {
+      "label": "LPC25",
+      "internal_label": "LPC_A_low_extension",
+      "family": "A",
+      "J_EE_core": 0.7057755003569962,
+      "T_ms": 115.45814851312022,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_low_extension_N512.npz",
+      "nearest_profiles": [
+        {
+          "index": 418,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAlowExtension_0019_N256.npz",
+          "waveform_distance_Hz": 0.0008843372559126859,
+          "phase_shift_cycles": -2.2003903405012913e-06
+        },
+        {
+          "index": 419,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAlowExtension_0020_N256.npz",
+          "waveform_distance_Hz": 0.005324240524856617,
+          "phase_shift_cycles": -1.331752739670261e-05
+        },
+        {
+          "index": 417,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAlowExtension_0018_N256.npz",
+          "waveform_distance_Hz": 0.0054193602611335755,
+          "phase_shift_cycles": 1.3481334180128435e-05
+        }
+      ],
+      "profile_RMS_Hz": 2.194488625169952
+    },
+    {
+      "label": "LPC26",
+      "internal_label": "LPC_A_return_exchange",
+      "family": "A",
+      "J_EE_core": 0.9459767886094599,
+      "T_ms": 122.72015595663247,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_exchange_N512.npz",
+      "nearest_profiles": [
+        {
+          "index": 553,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0054_N512.npz",
+          "waveform_distance_Hz": 0.2840327916164386,
+          "phase_shift_cycles": -0.00011632000453486628
+        },
+        {
+          "index": 552,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0053_N512.npz",
+          "waveform_distance_Hz": 0.4598126174052401,
+          "phase_shift_cycles": 0.0001615995800151794
+        },
+        {
+          "index": 554,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0055_N512.npz",
+          "waveform_distance_Hz": 0.48466174930112166,
+          "phase_shift_cycles": -0.00025060833233291703
+        }
+      ],
+      "profile_RMS_Hz": 3.65162131657044
+    },
+    {
+      "label": "LPC27",
+      "internal_label": "LPC_A_return_recruitment",
+      "family": "A",
+      "J_EE_core": 0.9438163372922354,
+      "T_ms": 118.53333633226788,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512.npz",
+      "nearest_profiles": [
+        {
+          "index": 575,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0076_N512.npz",
+          "waveform_distance_Hz": 1.1613388462716228,
+          "phase_shift_cycles": -1.6129463678776162e-05
+        },
+        {
+          "index": 576,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0077_N512.npz",
+          "waveform_distance_Hz": 1.4534015747320923,
+          "phase_shift_cycles": 2.3426665156045717e-05
+        },
+        {
+          "index": 574,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0075_N512.npz",
+          "waveform_distance_Hz": 3.7375305487816854,
+          "phase_shift_cycles": -5.159381353495431e-05
+        }
+      ],
+      "profile_RMS_Hz": 28.537088284705327
+    },
+    {
+      "label": "LPC28",
+      "internal_label": "LPC_A_large_return1",
+      "family": "A",
+      "J_EE_core": 1.0761836153250073,
+      "T_ms": 110.67709588969598,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return1_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 630,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0131_N512.npz",
+          "waveform_distance_Hz": 1.014375704975335,
+          "phase_shift_cycles": -7.300425601885509e-05
+        },
+        {
+          "index": 631,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0132_N512.npz",
+          "waveform_distance_Hz": 1.5227264025961316,
+          "phase_shift_cycles": 9.748936596859263e-05
+        },
+        {
+          "index": 629,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0130_N512.npz",
+          "waveform_distance_Hz": 3.552568157774753,
+          "phase_shift_cycles": -0.00023242266737824919
+        }
+      ],
+      "profile_RMS_Hz": 54.63215176809386
+    },
+    {
+      "label": "LPC29",
+      "internal_label": "LPC_A_large_return2",
+      "family": "A",
+      "J_EE_core": 1.0717683543624708,
+      "T_ms": 101.20897953462885,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return2_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 644,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0145_N512.npz",
+          "waveform_distance_Hz": 0.733759853925648,
+          "phase_shift_cycles": -0.00023966564902283338
+        },
+        {
+          "index": 645,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0146_N512.npz",
+          "waveform_distance_Hz": 1.8741481968268658,
+          "phase_shift_cycles": 0.0004281263009988373
+        },
+        {
+          "index": 643,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0144_N512.npz",
+          "waveform_distance_Hz": 3.1729081476643257,
+          "phase_shift_cycles": -0.0008254404938944286
+        }
+      ],
+      "profile_RMS_Hz": 42.17767443580068
+    },
+    {
+      "label": "LPC30",
+      "internal_label": "LPC_A_large_return3",
+      "family": "A",
+      "J_EE_core": 1.0866976587440011,
+      "T_ms": 101.41226624841781,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return3_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 651,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0152_N512.npz",
+          "waveform_distance_Hz": 0.830902823365622,
+          "phase_shift_cycles": 0.00029928928446012554
+        },
+        {
+          "index": 650,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0151_N512.npz",
+          "waveform_distance_Hz": 2.246304129141545,
+          "phase_shift_cycles": -0.0002046101413050557
+        },
+        {
+          "index": 649,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0150_N512.npz",
+          "waveform_distance_Hz": 3.7328677133231802,
+          "phase_shift_cycles": -0.0008454892141947038
+        }
+      ],
+      "profile_RMS_Hz": 40.027851428298014
+    },
+    {
+      "label": "LPC31",
+      "internal_label": "LPC_single_upper1",
+      "family": "single",
+      "J_EE_core": 1.569234886663887,
+      "T_ms": 137.40287021828732,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper1_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 194,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0010_N512.npz",
+          "waveform_distance_Hz": 0.057457619422424354,
+          "phase_shift_cycles": -3.443175611555297e-05
+        },
+        {
+          "index": 193,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0009_N512.npz",
+          "waveform_distance_Hz": 0.38434424177318627,
+          "phase_shift_cycles": 0.00016248948552860268
+        },
+        {
+          "index": 195,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0011_N512.npz",
+          "waveform_distance_Hz": 0.6945694423870356,
+          "phase_shift_cycles": -0.000221346534793238
+        }
+      ],
+      "profile_RMS_Hz": 74.69606452226306
+    },
+    {
+      "label": "LPC32",
+      "internal_label": "LPC_single_upper2",
+      "family": "single",
+      "J_EE_core": 1.5757028697657414,
+      "T_ms": 141.79218622554177,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper2_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 204,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0020_N512.npz",
+          "waveform_distance_Hz": 0.07104609697275119,
+          "phase_shift_cycles": -1.7457262119738128e-05
+        },
+        {
+          "index": 205,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0021_N512.npz",
+          "waveform_distance_Hz": 0.22678463547218278,
+          "phase_shift_cycles": -1.6439093773366506e-05
+        },
+        {
+          "index": 206,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUpperConnect_0022_N512.npz",
+          "waveform_distance_Hz": 0.312895097591915,
+          "phase_shift_cycles": -1.5170907847129988e-05
+        }
+      ],
+      "profile_RMS_Hz": 74.46229482792437
+    },
+    {
+      "label": "LPC35",
+      "internal_label": "LPC_A_global_turn1",
+      "family": "A",
+      "J_EE_core": 1.0387480258884794,
+      "T_ms": 122.57781285229113,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_global_turn1_N1024.npz",
+      "nearest_profiles": [
+        {
+          "index": 719,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAglobalConnection_0060_N512.npz",
+          "waveform_distance_Hz": 0.0939409327278488,
+          "phase_shift_cycles": -4.205276787985379e-06
+        },
+        {
+          "index": 718,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAglobalConnection_0059_N512.npz",
+          "waveform_distance_Hz": 0.3580619452675262,
+          "phase_shift_cycles": 1.9157564962623694e-05
+        },
+        {
+          "index": 720,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAglobalConnection_0061_N512.npz",
+          "waveform_distance_Hz": 0.5440808575021726,
+          "phase_shift_cycles": -2.7254402394919462e-05
+        }
+      ],
+      "profile_RMS_Hz": 39.54094295001242
+    },
+    {
+      "label": "TR2",
+      "internal_label": "TR_A_return",
+      "family": "A",
+      "J_EE_core": 0.9457603915251053,
+      "T_ms": 165.63054658665283,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR_A_return_eval_J0.9457603915251_N128.npz",
+      "nearest_profiles": [
+        {
+          "index": 69,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0060_N64.npz",
+          "waveform_distance_Hz": 4.840304859259297e-06,
+          "phase_shift_cycles": -0.0001115293982265616
+        },
+        {
+          "index": 68,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0059_N64.npz",
+          "waveform_distance_Hz": 0.00029438294292508815,
+          "phase_shift_cycles": -7.906372484102407e-05
+        },
+        {
+          "index": 70,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0061_N64.npz",
+          "waveform_distance_Hz": 0.0003036936170756459,
+          "phase_shift_cycles": -0.0001503780465244708
+        }
+      ],
+      "profile_RMS_Hz": 0.3449907610139461
+    },
+    {
+      "label": "PD1",
+      "internal_label": "PD_double_low",
+      "family": "double",
+      "J_EE_core": 0.9387254732490684,
+      "T_ms": 825.3654037556493,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547325_N2048.npz",
+      "nearest_profiles": [
+        {
+          "index": 65,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0059_N512.npz",
+          "waveform_distance_Hz": 0.07435314458729872,
+          "phase_shift_cycles": -2.8135079640120985e-08
+        },
+        {
+          "index": 64,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0060_N512.npz",
+          "waveform_distance_Hz": 0.34583409470652454,
+          "phase_shift_cycles": 3.0445674779158867e-06
+        },
+        {
+          "index": 66,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0058_N512.npz",
+          "waveform_distance_Hz": 0.4393202556091464,
+          "phase_shift_cycles": -3.141690659306386e-06
+        }
+      ],
+      "profile_RMS_Hz": 39.43442215285981
+    },
+    {
+      "label": "PD2",
+      "internal_label": "PD_double_upper",
+      "family": "double",
+      "J_EE_core": 0.944728374157131,
+      "T_ms": 761.9648707070426,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+      "nearest_profiles": [
+        {
+          "index": 151,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0005_N1024.npz",
+          "waveform_distance_Hz": 0.005555101903922435,
+          "phase_shift_cycles": -3.275425761492517e-08
+        },
+        {
+          "index": 150,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0004_N1024.npz",
+          "waveform_distance_Hz": 0.049435913045192854,
+          "phase_shift_cycles": 5.28778578030578e-07
+        },
+        {
+          "index": 142,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0015_N512.npz",
+          "waveform_distance_Hz": 0.051512274676354275,
+          "phase_shift_cycles": 3.2215042985029104e-07
+        }
+      ],
+      "profile_RMS_Hz": 39.17052746163172
+    }
+  ],
+  "scope": "Do not count an opposite-stability bracket as an additional bifurcation before checking the known critical points and the interior continuation path."
+}

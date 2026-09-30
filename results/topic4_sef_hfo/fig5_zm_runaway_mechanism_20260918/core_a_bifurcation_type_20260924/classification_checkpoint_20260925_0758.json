@@ -1,0 +1,53 @@
+{
+  "time": "2026-09-25T07:58:23.893577+08:00",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "previous_checkpoint": "classification_checkpoint_20260925_0736.json",
+  "mesh_counterevidence": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step_fine",
+    "status": "INDEPENDENT_AUDIT_PASS_CONTRAST_NOT_MESH_QUALIFIED",
+    "ZA": [
+      0.7015321738308213,
+      0.6999999999999997
+    ],
+    "max_complete_A_ms": [
+      3566,
+      1170
+    ],
+    "interpretation": "Both.025arms develop longCoreA activity. HeldZA.701532 has3.566s complete event, although.05hadonly<=103ms. The coarseZbracket isnot a mesh-qualified bifurcation interval."
+  },
+  "natural_recurrence": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/natural_period_check",
+    "T_ms": [
+      791.4759379584747,
+      1582.9557934536585
+    ],
+    "closure": [
+      0.0003000171044012492,
+      0.00013290529286568667
+    ],
+    "interpretation": "Neither return passesphysicalperiodicgate; no doubledperiodcertificate."
+  },
+  "transverse_growth": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/uninterrupted_transverse_growth",
+    "finite_2to5s_per_s": 0.9818857721342166,
+    "nominal_checkpoints_bitwise": true,
+    "phase_direction_order_disagreement_max": 0.09685021433461412,
+    "interpretation": "Finite diagnostic only; phase-directionapproximationerror substantial. No asymptoticchaos/crisis/type claim."
+  },
+  "fine_shooting_stop": {
+    "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9507_fine/implicit_period_correction_refine",
+    "last_evaluated_closure": 0.008024240458394455,
+    "last_period_ms": 793.2582195210807,
+    "status": "STOPPED_NUMERICAL_QUALIFICATION_NOT_PASSED"
+  },
+  "numerical_repair": {
+    "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/numerical_checks/exponential_midpoint",
+    "physics": "OriginalfixedZ/dynamicM spatialrenewalrateequations. No response/graph/parameterrefit.",
+    "method": "Exponentialmidpoint filters and positive exponentialrenewaloccupancy bin update.",
+    "scalar_check": "Ordinary manufacturedcases showfourfolderrorreduction perhalving; near-saturationcase approachesquadraticorder onlyasstepbecomessmall. Stationaryflux unchanged.",
+    "full_spatial_identity": "PASS_CPU_GPU_AND_BASELINE_STATIC_ROOT",
+    "convergence_test": "RUNNING_120MS_EIGHT_METHOD_MESH_COMBINATIONS"
+  },
+  "new_solver_promoted": false,
+  "model_promoted": false
+}

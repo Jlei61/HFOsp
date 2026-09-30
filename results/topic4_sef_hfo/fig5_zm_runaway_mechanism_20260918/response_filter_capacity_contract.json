@@ -1,0 +1,27 @@
+{
+  "created_local": "2026-09-19T18:42:55.303100",
+  "question": "Is finite temporal-filter capacity a plausible cause of the remaining local dynamic-response error?",
+  "source": "Existing training shapes only, not the held-out validation rows",
+  "eligible": "DC SNR>=10, sixfinite nonzero-frequency estimates",
+  "bases_ms": [
+    [
+      4.0
+    ],
+    [
+      0.25,
+      4.0,
+      64.0
+    ],
+    [
+      0.25,
+      1.0,
+      4.0,
+      16.0,
+      64.0
+    ]
+  ],
+  "model": "H(w)=1+sum b_k i*w*tau_k/(1+i*w*tau_k), realunboundedweights fittedperworkpoint/channel",
+  "evaluation": "Leaveone nonzero training frequencyout; endpointsreportedseparately frominterior frequencies. Sameeligibleworkpoints for everybasis.",
+  "weighting": "ComplexSEM/DC, multipliedbytheknownsynapticvariancefilter inverse magnitude forvariancechannels; floor.005. Minimum-normweightedrealLS, no fitting to held-out validation.",
+  "scope": "Capacitydiagnostic only. Not a deployed nonlinear closure, newnetwork, validationpass, or bifurcation result."
+}

@@ -1,0 +1,52 @@
+{
+  "status": "COMPLETE_FIXED_POWER_RANDOM_PHASE_RESPONSE",
+  "rows": [
+    {
+      "region": "selected_all",
+      "targets": 59,
+      "native_rate_mean_Hz": 258.0,
+      "response_rate_mean_Hz": 258.59249205508473,
+      "native_development_rate_RMS_error_Hz": 1.1512653936870738,
+      "output_rate_MCSEM_RMS_Hz": 0.03328035394830535,
+      "paired_RMS_difference_from_jointGaussian_Hz": 2.896972882921561,
+      "paired_RMS_difference_from_waveform_Hz": 0.8264586075711652
+    },
+    {
+      "region": "selected_coreA",
+      "targets": 3,
+      "native_rate_mean_Hz": 475.1666666666667,
+      "response_rate_mean_Hz": 475.1800130208333,
+      "native_development_rate_RMS_error_Hz": 0.36146226747041005,
+      "output_rate_MCSEM_RMS_Hz": 0.015561226869789294,
+      "paired_RMS_difference_from_jointGaussian_Hz": 0.046582474829736355,
+      "paired_RMS_difference_from_waveform_Hz": 0.12679026011575714
+    },
+    {
+      "region": "selected_coreB",
+      "targets": 5,
+      "native_rate_mean_Hz": 467.5,
+      "response_rate_mean_Hz": 467.97578125,
+      "native_development_rate_RMS_error_Hz": 0.8086166304884775,
+      "output_rate_MCSEM_RMS_Hz": 0.02304315942904805,
+      "paired_RMS_difference_from_jointGaussian_Hz": 3.1645641842820047,
+      "paired_RMS_difference_from_waveform_Hz": 0.5323534109158778
+    },
+    {
+      "region": "largest20_errors",
+      "targets": 20,
+      "native_rate_mean_Hz": 454.65,
+      "response_rate_mean_Hz": 456.320849609375,
+      "native_development_rate_RMS_error_Hz": 1.8898940383635443,
+      "output_rate_MCSEM_RMS_Hz": 0.04936424522461335,
+      "paired_RMS_difference_from_jointGaussian_Hz": 4.975673477555785,
+      "paired_RMS_difference_from_waveform_Hz": 1.4185497092141668
+    }
+  ],
+  "QA": {
+    "each_replica_input_power_Parseval_max_error": 3.979039320256561e-13,
+    "same_marginal_and_EI_crossperiodogram_exact_by_construction": true
+  },
+  "scope": "Only crossfrequency phase relationships differ from circularlyshifted waveform at the level of finite-record source statistics; perfrequency secondorder powers/crosspowers and inputmeans fixed. Local data-conditioned diagnosis, not an autonomous network or formal bifurcation.",
+  "elapsed_s": 3.440887689590454,
+  "producer_sha256": "5e9914d6e5022538c618d18b9fab78343426404c24ae61ee137ae90bd725e847"
+}

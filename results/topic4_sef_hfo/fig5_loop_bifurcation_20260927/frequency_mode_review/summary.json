@@ -1,0 +1,146 @@
+{
+  "status": "COMPLETE_FIXED_THREE_SAMPLES",
+  "rows": [
+    {
+      "frequency_Hz": 0,
+      "nearest_sampled_mode": {
+        "eigenvalue": [
+          0.9603197625723676,
+          -8.317345400922623e-18
+        ],
+        "distance_to_one": 0.03968023742763238,
+        "eigen_residual": 2.152862754742755e-15,
+        "left_eigen_residual": 1.8521922182582103e-15,
+        "eigenvalue_condition": 2.1002358884576915,
+        "firstorder_MC_eigenvalue_SEM": 0.0003796671349558399,
+        "half_amplitude_eigenvalue": [
+          0.9602266111491515,
+          5.529948443455213e-18
+        ],
+        "amplitude_eigenvalue_difference": 9.315142321608683e-05,
+        "global_rate_participation": 0.053134637517585674,
+        "source_mode_absolute_mass_A_B_surround_I": [
+          0.0018716628821474008,
+          0.0006010442652071145,
+          0.7093501542740526,
+          0.288177138578593
+        ],
+        "sensitivity_to_global_feedback_multiplier": [
+          -0.002055452056097337,
+          -1.3881654663136906e-18
+        ]
+      },
+      "rank_one_global_feedback": {
+        "eta": [
+          -1.195291285377169,
+          0.0
+        ],
+        "one_minus_eta": [
+          2.195291285377169,
+          0.0
+        ],
+        "firstorder_MC_SEM": 0.008546286617402244,
+        "half_amplitude_eta": [
+          -1.1912836913844702,
+          0.0
+        ],
+        "amplitude_difference": 0.004007593992698899
+      }
+    },
+    {
+      "frequency_Hz": 1,
+      "nearest_sampled_mode": {
+        "eigenvalue": [
+          0.9647265420142294,
+          -0.04023454705194324
+        ],
+        "distance_to_one": 0.05350734169017333,
+        "eigen_residual": 2.357779838488167e-15,
+        "left_eigen_residual": 1.945299513766308e-15,
+        "eigenvalue_condition": 2.3491717484498014,
+        "firstorder_MC_eigenvalue_SEM": 0.0006197642092994577,
+        "half_amplitude_eigenvalue": [
+          0.963942372193556,
+          -0.040830422126469805
+        ],
+        "amplitude_eigenvalue_difference": 0.0009848804049715132,
+        "global_rate_participation": 0.1324844132452703,
+        "source_mode_absolute_mass_A_B_surround_I": [
+          0.0024248011524822645,
+          0.00047534058092594384,
+          0.7079225693404326,
+          0.28917728892615935
+        ],
+        "sensitivity_to_global_feedback_multiplier": [
+          -0.003744521090312238,
+          0.0021130400124375975
+        ]
+      },
+      "rank_one_global_feedback": {
+        "eta": [
+          0.10844454037798887,
+          0.23073699656214935
+        ],
+        "one_minus_eta": [
+          0.8915554596220111,
+          -0.23073699656214935
+        ],
+        "firstorder_MC_SEM": 0.0015078153896496524,
+        "half_amplitude_eta": [
+          0.10746076199774793,
+          0.23076472410626064
+        ],
+        "amplitude_difference": 0.0009841690495702108
+      }
+    },
+    {
+      "frequency_Hz": 5,
+      "nearest_sampled_mode": {
+        "eigenvalue": [
+          0.9172065272783216,
+          -0.20671736334754398
+        ],
+        "distance_to_one": 0.22268099926728327,
+        "eigen_residual": 2.8143996343619967e-15,
+        "left_eigen_residual": 1.830156153618525e-15,
+        "eigenvalue_condition": 2.1932812777567623,
+        "firstorder_MC_eigenvalue_SEM": 0.0004432803018453135,
+        "half_amplitude_eigenvalue": [
+          0.9166371633724308,
+          -0.20585448920150268
+        ],
+        "amplitude_eigenvalue_difference": 0.0010337925561918757,
+        "global_rate_participation": 0.1886467610240444,
+        "source_mode_absolute_mass_A_B_surround_I": [
+          0.00020622651200632555,
+          0.00048424243271285005,
+          0.6829917685297836,
+          0.3163177625254972
+        ],
+        "sensitivity_to_global_feedback_multiplier": [
+          0.0006108428618374171,
+          0.0013884955415293715
+        ]
+      },
+      "rank_one_global_feedback": {
+        "eta": [
+          0.01672239172646256,
+          0.005470583363089402
+        ],
+        "one_minus_eta": [
+          0.9832776082735375,
+          -0.005470583363089402
+        ],
+        "firstorder_MC_SEM": 2.1914834220154602e-05,
+        "half_amplitude_eta": [
+          0.016741307963168073,
+          0.005485186660496508
+        ],
+        "amplitude_difference": 2.3897286587799267e-05
+      }
+    }
+  ],
+  "full_dynamic_stability": false,
+  "formal_bifurcation": false,
+  "selection": "Minimum complex distance to1 among the8computedmodes, not maximum realpart; frequencies0/1/5only."
+}

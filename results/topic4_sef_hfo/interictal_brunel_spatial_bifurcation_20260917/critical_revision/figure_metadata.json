@@ -1,0 +1,1411 @@
+{
+  "states": [
+    {
+      "label": "L",
+      "role": "Low-activity reference",
+      "J_EE_core": 0.6,
+      "dynamics": [
+        {
+          "mean_rate_hz": 0.3700963283540416,
+          "quiet_fraction": 1.0,
+          "high_rate_fraction": 0.0,
+          "peak_times_ms": [],
+          "peak_count": 0,
+          "IEI_ms": [],
+          "burst_windows_ms": [],
+          "oscillation_peak_count": 0,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": null,
+          "median_IEI_ms": null
+        },
+        {
+          "mean_rate_hz": 0.33507432703897144,
+          "quiet_fraction": 1.0,
+          "high_rate_fraction": 0.0,
+          "peak_times_ms": [],
+          "peak_count": 0,
+          "IEI_ms": [],
+          "burst_windows_ms": [],
+          "oscillation_peak_count": 0,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": null,
+          "median_IEI_ms": null
+        }
+      ],
+      "eligible_events": {
+        "firing": 0,
+        "current_hfo": 0
+      },
+      "change_from_before_H1": {
+        "firing": null,
+        "current_hfo": null
+      },
+      "selection": {
+        "anchor_ms": 5000,
+        "event_index": null,
+        "window_ms": [
+          4950,
+          5150
+        ],
+        "kind": "fixed observation window",
+        "core_peaks_ms": null
+      },
+      "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/native/J0.6000_s199771/trajectory.npz"
+    },
+    {
+      "label": "H1−",
+      "role": "Before H1",
+      "J_EE_core": 0.948,
+      "dynamics": [
+        {
+          "mean_rate_hz": 10.375820187072456,
+          "quiet_fraction": 0.916,
+          "high_rate_fraction": 0.02031578947368421,
+          "peak_times_ms": [
+            772,
+            1043,
+            1447,
+            1700,
+            1981,
+            2705,
+            3513,
+            3948,
+            4660,
+            5795,
+            6416,
+            7182,
+            7688,
+            8263,
+            8577,
+            9081,
+            9468
+          ],
+          "peak_count": 17,
+          "IEI_ms": [
+            271,
+            404,
+            253,
+            281,
+            724,
+            808,
+            435,
+            712,
+            1135,
+            621,
+            766,
+            506,
+            575,
+            314,
+            504,
+            387
+          ],
+          "burst_windows_ms": [
+            [
+              750,
+              794
+            ],
+            [
+              1020,
+              1064
+            ],
+            [
+              1425,
+              1469
+            ],
+            [
+              1677,
+              1721
+            ],
+            [
+              1944,
+              1999
+            ],
+            [
+              2683,
+              2727
+            ],
+            [
+              3487,
+              3530
+            ],
+            [
+              3923,
+              3967
+            ],
+            [
+              4637,
+              4682
+            ],
+            [
+              5769,
+              5816
+            ],
+            [
+              6372,
+              6433
+            ],
+            [
+              7159,
+              7204
+            ],
+            [
+              7661,
+              7708
+            ],
+            [
+              8240,
+              8285
+            ],
+            [
+              8553,
+              8598
+            ],
+            [
+              9058,
+              9101
+            ],
+            [
+              9443,
+              9487
+            ]
+          ],
+          "oscillation_peak_count": 17,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.44469515139555243,
+          "median_IEI_ms": 505.0
+        },
+        {
+          "mean_rate_hz": 9.931967322887372,
+          "quiet_fraction": 0.917578947368421,
+          "high_rate_fraction": 0.01905263157894737,
+          "peak_times_ms": [
+            728,
+            995,
+            1402,
+            1654,
+            2016,
+            2660,
+            3562,
+            3995,
+            4610,
+            5831,
+            6397,
+            7139,
+            7730,
+            8229,
+            8537,
+            9136,
+            9519
+          ],
+          "peak_count": 17,
+          "IEI_ms": [
+            267,
+            407,
+            252,
+            362,
+            644,
+            902,
+            433,
+            615,
+            1221,
+            566,
+            742,
+            591,
+            499,
+            308,
+            599,
+            383
+          ],
+          "burst_windows_ms": [
+            [
+              700,
+              747
+            ],
+            [
+              970,
+              1015
+            ],
+            [
+              1372,
+              1419
+            ],
+            [
+              1629,
+              1673
+            ],
+            [
+              1994,
+              2038
+            ],
+            [
+              2628,
+              2677
+            ],
+            [
+              3539,
+              3583
+            ],
+            [
+              3972,
+              4016
+            ],
+            [
+              4584,
+              4628
+            ],
+            [
+              5809,
+              5852
+            ],
+            [
+              6370,
+              6415
+            ],
+            [
+              7114,
+              7159
+            ],
+            [
+              7708,
+              7752
+            ],
+            [
+              8187,
+              8249
+            ],
+            [
+              8510,
+              8556
+            ],
+            [
+              9113,
+              9158
+            ],
+            [
+              9496,
+              9541
+            ]
+          ],
+          "oscillation_peak_count": 17,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.4594379250616283,
+          "median_IEI_ms": 532.5
+        }
+      ],
+      "eligible_events": {
+        "firing": 16,
+        "current_hfo": 17
+      },
+      "change_from_before_H1": {
+        "firing": {
+          "mean_rank_difference": 0.0,
+          "within_shaft_order_difference": 0.0,
+          "participation_difference": 0.0
+        },
+        "current_hfo": {
+          "mean_rank_difference": 0.0,
+          "within_shaft_order_difference": 0.0,
+          "participation_difference": 0.0
+        }
+      },
+      "selection": {
+        "anchor_ms": 4610,
+        "event_index": 7,
+        "window_ms": [
+          4560,
+          4760
+        ],
+        "kind": "isolated contact event",
+        "core_peaks_ms": [
+          4659,
+          4609
+        ]
+      },
+      "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/critical_revision/native/J0.9480_s199771/trajectory.npz"
+    },
+    {
+      "label": "H1+ / H2−",
+      "role": "Between H1 and H2",
+      "J_EE_core": 0.955,
+      "dynamics": [
+        {
+          "mean_rate_hz": 12.540834845735027,
+          "quiet_fraction": 0.8982105263157895,
+          "high_rate_fraction": 0.02631578947368421,
+          "peak_times_ms": [
+            772,
+            1042,
+            1447,
+            1704,
+            1991,
+            2704,
+            3064,
+            3944,
+            4378,
+            4658,
+            5356,
+            5703,
+            6419,
+            7197,
+            7713,
+            8254,
+            8705,
+            9079,
+            9634,
+            9931
+          ],
+          "peak_count": 20,
+          "IEI_ms": [
+            270,
+            405,
+            257,
+            287,
+            713,
+            360,
+            880,
+            434,
+            280,
+            698,
+            347,
+            716,
+            778,
+            516,
+            541,
+            451,
+            374,
+            555,
+            297
+          ],
+          "burst_windows_ms": [
+            [
+              749,
+              794
+            ],
+            [
+              1020,
+              1064
+            ],
+            [
+              1424,
+              1469
+            ],
+            [
+              1681,
+              1725
+            ],
+            [
+              1946,
+              2011
+            ],
+            [
+              2682,
+              2726
+            ],
+            [
+              3041,
+              3086
+            ],
+            [
+              3918,
+              3963
+            ],
+            [
+              4355,
+              4399
+            ],
+            [
+              4635,
+              4680
+            ],
+            [
+              5333,
+              5377
+            ],
+            [
+              5670,
+              5723
+            ],
+            [
+              6371,
+              6436
+            ],
+            [
+              7174,
+              7218
+            ],
+            [
+              7673,
+              7731
+            ],
+            [
+              8232,
+              8276
+            ],
+            [
+              8680,
+              8726
+            ],
+            [
+              9054,
+              9099
+            ],
+            [
+              9612,
+              9654
+            ],
+            [
+              9889,
+              9949
+            ]
+          ],
+          "oscillation_peak_count": 20,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.40122629009733013,
+          "median_IEI_ms": 434.0
+        },
+        {
+          "mean_rate_hz": 11.515200214276149,
+          "quiet_fraction": 0.9033684210526316,
+          "high_rate_fraction": 0.02231578947368421,
+          "peak_times_ms": [
+            726,
+            995,
+            1400,
+            1658,
+            2030,
+            2657,
+            3007,
+            3991,
+            4322,
+            4609,
+            5300,
+            5758,
+            6397,
+            7147,
+            7749,
+            8217,
+            8760,
+            9132,
+            9626,
+            9961
+          ],
+          "peak_count": 20,
+          "IEI_ms": [
+            269,
+            405,
+            258,
+            372,
+            627,
+            350,
+            984,
+            331,
+            287,
+            691,
+            458,
+            639,
+            750,
+            602,
+            468,
+            543,
+            372,
+            494,
+            335
+          ],
+          "burst_windows_ms": [
+            [
+              699,
+              745
+            ],
+            [
+              970,
+              1015
+            ],
+            [
+              1372,
+              1418
+            ],
+            [
+              1633,
+              1678
+            ],
+            [
+              2007,
+              2051
+            ],
+            [
+              2628,
+              2674
+            ],
+            [
+              2962,
+              3028
+            ],
+            [
+              3968,
+              4012
+            ],
+            [
+              4298,
+              4340
+            ],
+            [
+              4583,
+              4627
+            ],
+            [
+              5277,
+              5322
+            ],
+            [
+              5734,
+              5780
+            ],
+            [
+              6371,
+              6416
+            ],
+            [
+              7121,
+              7166
+            ],
+            [
+              7726,
+              7770
+            ],
+            [
+              8181,
+              8236
+            ],
+            [
+              8737,
+              8781
+            ],
+            [
+              9109,
+              9154
+            ],
+            [
+              9603,
+              9648
+            ],
+            [
+              9939,
+              9982
+            ]
+          ],
+          "oscillation_peak_count": 20,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.39319575772920395,
+          "median_IEI_ms": 458.0
+        }
+      ],
+      "eligible_events": {
+        "firing": 19,
+        "current_hfo": 19
+      },
+      "change_from_before_H1": {
+        "firing": {
+          "mean_rank_difference": 0.030168997968106744,
+          "within_shaft_order_difference": 0.03257305259240244,
+          "participation_difference": 0.1028708133971292
+        },
+        "current_hfo": {
+          "mean_rank_difference": 0.02744813710550278,
+          "within_shaft_order_difference": 0.04091190472910145,
+          "participation_difference": 0.06825218125527724
+        }
+      },
+      "selection": {
+        "anchor_ms": 5300,
+        "event_index": 10,
+        "window_ms": [
+          5250,
+          5450
+        ],
+        "kind": "isolated contact event",
+        "core_peaks_ms": [
+          5355,
+          5299
+        ]
+      },
+      "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/critical_revision/native/J0.9550_s199771/trajectory.npz"
+    },
+    {
+      "label": "H2+",
+      "role": "After H2",
+      "J_EE_core": 0.963,
+      "dynamics": [
+        {
+          "mean_rate_hz": 13.119084182605054,
+          "quiet_fraction": 0.8956842105263157,
+          "high_rate_fraction": 0.027473684210526317,
+          "peak_times_ms": [
+            773,
+            1043,
+            1528,
+            1810,
+            2208,
+            2708,
+            3025,
+            3359,
+            3945,
+            4377,
+            4662,
+            5435,
+            6041,
+            6419,
+            7052,
+            7693,
+            7990,
+            8282,
+            8571,
+            8988,
+            9471
+          ],
+          "peak_count": 21,
+          "IEI_ms": [
+            270,
+            485,
+            282,
+            398,
+            500,
+            317,
+            334,
+            586,
+            432,
+            285,
+            773,
+            606,
+            378,
+            633,
+            641,
+            297,
+            292,
+            289,
+            417,
+            483
+          ],
+          "burst_windows_ms": [
+            [
+              750,
+              794
+            ],
+            [
+              1021,
+              1065
+            ],
+            [
+              1502,
+              1547
+            ],
+            [
+              1784,
+              1829
+            ],
+            [
+              2185,
+              2230
+            ],
+            [
+              2685,
+              2729
+            ],
+            [
+              3003,
+              3047
+            ],
+            [
+              3336,
+              3381
+            ],
+            [
+              3920,
+              3964
+            ],
+            [
+              4354,
+              4399
+            ],
+            [
+              4639,
+              4683
+            ],
+            [
+              5412,
+              5457
+            ],
+            [
+              6018,
+              6063
+            ],
+            [
+              6380,
+              6437
+            ],
+            [
+              6998,
+              7071
+            ],
+            [
+              7665,
+              7714
+            ],
+            [
+              7964,
+              8008
+            ],
+            [
+              8256,
+              8303
+            ],
+            [
+              8545,
+              8589
+            ],
+            [
+              8965,
+              9010
+            ],
+            [
+              9446,
+              9491
+            ]
+          ],
+          "oscillation_peak_count": 21,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.3418573256218703,
+          "median_IEI_ms": 407.5
+        },
+        {
+          "mean_rate_hz": 12.665863131110218,
+          "quiet_fraction": 0.8968421052631579,
+          "high_rate_fraction": 0.025157894736842105,
+          "peak_times_ms": [
+            736,
+            996,
+            1578,
+            1858,
+            2171,
+            2661,
+            2978,
+            3303,
+            3982,
+            4326,
+            4616,
+            5401,
+            5990,
+            6394,
+            7107,
+            7734,
+            8037,
+            8324,
+            8618,
+            8930,
+            9522
+          ],
+          "peak_count": 21,
+          "IEI_ms": [
+            260,
+            582,
+            280,
+            313,
+            490,
+            317,
+            325,
+            679,
+            344,
+            290,
+            785,
+            589,
+            404,
+            713,
+            627,
+            303,
+            287,
+            294,
+            312,
+            592
+          ],
+          "burst_windows_ms": [
+            [
+              699,
+              755
+            ],
+            [
+              971,
+              1016
+            ],
+            [
+              1555,
+              1600
+            ],
+            [
+              1835,
+              1880
+            ],
+            [
+              2138,
+              2191
+            ],
+            [
+              2629,
+              2678
+            ],
+            [
+              2952,
+              2996
+            ],
+            [
+              3281,
+              3325
+            ],
+            [
+              3953,
+              4001
+            ],
+            [
+              4302,
+              4345
+            ],
+            [
+              4587,
+              4634
+            ],
+            [
+              5368,
+              5420
+            ],
+            [
+              5964,
+              6009
+            ],
+            [
+              6368,
+              6413
+            ],
+            [
+              7084,
+              7129
+            ],
+            [
+              7711,
+              7755
+            ],
+            [
+              8014,
+              8058
+            ],
+            [
+              8302,
+              8346
+            ],
+            [
+              8595,
+              8640
+            ],
+            [
+              8901,
+              8953
+            ],
+            [
+              9499,
+              9544
+            ]
+          ],
+          "oscillation_peak_count": 21,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.39392092084970787,
+          "median_IEI_ms": 334.5
+        }
+      ],
+      "eligible_events": {
+        "firing": 21,
+        "current_hfo": 21
+      },
+      "change_from_before_H1": {
+        "firing": {
+          "mean_rank_difference": 0.02605594441633406,
+          "within_shaft_order_difference": 0.039745670995671,
+          "participation_difference": 0.034496753246753255
+        },
+        "current_hfo": {
+          "mean_rank_difference": 0.01863664041325777,
+          "within_shaft_order_difference": 0.04318891478474929,
+          "participation_difference": 0.021645021645021675
+        }
+      },
+      "selection": {
+        "anchor_ms": 4616,
+        "event_index": 10,
+        "window_ms": [
+          4566,
+          4766
+        ],
+        "kind": "isolated contact event",
+        "core_peaks_ms": [
+          4661,
+          4615
+        ]
+      },
+      "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/critical_revision/native/J0.9630_s199771/trajectory.npz"
+    },
+    {
+      "label": "R",
+      "role": "More regular bursting",
+      "J_EE_core": 1.3,
+      "dynamics": [
+        {
+          "mean_rate_hz": 33.99148401507749,
+          "quiet_fraction": 0.8292631578947368,
+          "high_rate_fraction": 0.08168421052631579,
+          "peak_times_ms": [
+            707,
+            987,
+            1281,
+            1580,
+            1915,
+            2210,
+            2479,
+            2749,
+            3051,
+            3331,
+            3599,
+            3877,
+            4134,
+            4401,
+            4695,
+            4979,
+            5257,
+            5538,
+            5831,
+            6105,
+            6396,
+            6747,
+            7029,
+            7334,
+            7657,
+            7953,
+            8249,
+            8523,
+            8806,
+            9156,
+            9442,
+            9719
+          ],
+          "peak_count": 32,
+          "IEI_ms": [
+            280,
+            294,
+            299,
+            335,
+            295,
+            269,
+            270,
+            302,
+            280,
+            268,
+            278,
+            257,
+            267,
+            294,
+            284,
+            278,
+            281,
+            293,
+            274,
+            291,
+            351,
+            282,
+            305,
+            323,
+            296,
+            296,
+            274,
+            283,
+            350,
+            286,
+            277
+          ],
+          "burst_windows_ms": [
+            [
+              679,
+              730
+            ],
+            [
+              959,
+              1010
+            ],
+            [
+              1253,
+              1304
+            ],
+            [
+              1552,
+              1603
+            ],
+            [
+              1888,
+              1939
+            ],
+            [
+              2185,
+              2234
+            ],
+            [
+              2452,
+              2503
+            ],
+            [
+              2721,
+              2772
+            ],
+            [
+              3027,
+              3075
+            ],
+            [
+              3307,
+              3355
+            ],
+            [
+              3575,
+              3623
+            ],
+            [
+              3853,
+              3901
+            ],
+            [
+              4107,
+              4158
+            ],
+            [
+              4374,
+              4425
+            ],
+            [
+              4668,
+              4719
+            ],
+            [
+              4951,
+              5002
+            ],
+            [
+              5229,
+              5280
+            ],
+            [
+              5510,
+              5562
+            ],
+            [
+              5803,
+              5855
+            ],
+            [
+              6077,
+              6128
+            ],
+            [
+              6368,
+              6419
+            ],
+            [
+              6720,
+              6771
+            ],
+            [
+              7001,
+              7053
+            ],
+            [
+              7306,
+              7357
+            ],
+            [
+              7629,
+              7680
+            ],
+            [
+              7925,
+              7977
+            ],
+            [
+              8221,
+              8272
+            ],
+            [
+              8495,
+              8546
+            ],
+            [
+              8778,
+              8829
+            ],
+            [
+              9128,
+              9179
+            ],
+            [
+              9415,
+              9466
+            ],
+            [
+              9692,
+              9743
+            ]
+          ],
+          "oscillation_peak_count": 32,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.07785128190775717,
+          "median_IEI_ms": 284.0
+        },
+        {
+          "mean_rate_hz": 34.05624748895139,
+          "quiet_fraction": 0.8294736842105264,
+          "high_rate_fraction": 0.08147368421052631,
+          "peak_times_ms": [
+            704,
+            979,
+            1326,
+            1626,
+            1893,
+            2166,
+            2466,
+            2732,
+            3004,
+            3283,
+            3554,
+            3831,
+            4137,
+            4448,
+            4743,
+            5025,
+            5303,
+            5583,
+            5876,
+            6152,
+            6429,
+            6757,
+            7055,
+            7362,
+            7646,
+            7995,
+            8294,
+            8570,
+            8852,
+            9181,
+            9455,
+            9756
+          ],
+          "peak_count": 32,
+          "IEI_ms": [
+            275,
+            347,
+            300,
+            267,
+            273,
+            300,
+            266,
+            272,
+            279,
+            271,
+            277,
+            306,
+            311,
+            295,
+            282,
+            278,
+            280,
+            293,
+            276,
+            277,
+            328,
+            298,
+            307,
+            284,
+            349,
+            299,
+            276,
+            282,
+            329,
+            274,
+            301
+          ],
+          "burst_windows_ms": [
+            [
+              677,
+              728
+            ],
+            [
+              951,
+              1002
+            ],
+            [
+              1301,
+              1350
+            ],
+            [
+              1602,
+              1651
+            ],
+            [
+              1865,
+              1917
+            ],
+            [
+              2138,
+              2190
+            ],
+            [
+              2438,
+              2490
+            ],
+            [
+              2704,
+              2756
+            ],
+            [
+              2976,
+              3027
+            ],
+            [
+              3255,
+              3307
+            ],
+            [
+              3526,
+              3577
+            ],
+            [
+              3803,
+              3855
+            ],
+            [
+              4109,
+              4161
+            ],
+            [
+              4424,
+              4472
+            ],
+            [
+              4718,
+              4767
+            ],
+            [
+              5001,
+              5049
+            ],
+            [
+              5278,
+              5327
+            ],
+            [
+              5559,
+              5607
+            ],
+            [
+              5852,
+              5900
+            ],
+            [
+              6128,
+              6177
+            ],
+            [
+              6401,
+              6453
+            ],
+            [
+              6729,
+              6781
+            ],
+            [
+              7027,
+              7079
+            ],
+            [
+              7334,
+              7386
+            ],
+            [
+              7618,
+              7669
+            ],
+            [
+              7968,
+              8019
+            ],
+            [
+              8267,
+              8318
+            ],
+            [
+              8545,
+              8594
+            ],
+            [
+              8828,
+              8876
+            ],
+            [
+              9153,
+              9205
+            ],
+            [
+              9427,
+              9479
+            ],
+            [
+              9727,
+              9780
+            ]
+          ],
+          "oscillation_peak_count": 32,
+          "event_definition": "Self-limited excursions above 5 Hz, peak >=10 Hz, >=4 ms; gaps <10 ms joined; both boundaries observed",
+          "IEI_CV": 0.0762604925630883,
+          "median_IEI_ms": 282.0
+        }
+      ],
+      "eligible_events": {
+        "firing": 32,
+        "current_hfo": 32
+      },
+      "change_from_before_H1": {
+        "firing": {
+          "mean_rank_difference": 0.0645524601962649,
+          "within_shaft_order_difference": 0.09163817799847211,
+          "participation_difference": 0.09410511363636363
+        },
+        "current_hfo": {
+          "mean_rank_difference": 0.09418485846341086,
+          "within_shaft_order_difference": 0.15107336402456722,
+          "participation_difference": 0.11873328877005349
+        }
+      },
+      "selection": {
+        "anchor_ms": 4979,
+        "event_index": 15,
+        "window_ms": [
+          4929,
+          5129
+        ],
+        "kind": "isolated contact event",
+        "core_peaks_ms": [
+          4978,
+          5024
+        ]
+      },
+      "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/expanded/native/J1.3000_s199771/trajectory.npz"
+    }
+  ],
+  "selection_rule": "Low-activity reference; before both grid estimates of H1; between both grids H1/H2; after both grid estimates of H2; one more-regular bursting reference.",
+  "shared_middle_case": "J=.955 is simultaneously after H1 and before H2. It is not claimed to be a distinct native-SNN attractor.",
+  "branch_points": 2370,
+  "spectral_points": 682,
+  "native_runs": "One paired private-input seed, 10 seconds per case; Z=1, original M; common OU fluctuation zero.",
+  "limits": "Left: spatial population equilibria and linear response approximation. Right: original-neuron SNN at the same J; no nonlinear rate/SNN propagation equivalence or periodic/Floquet continuation asserted.",
+  "human_visual_acceptance": false
+}

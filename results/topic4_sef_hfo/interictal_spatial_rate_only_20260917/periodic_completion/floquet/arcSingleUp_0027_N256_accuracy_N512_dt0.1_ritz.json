@@ -1,0 +1,140 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512.npz",
+  "J_EE_core": 1.566111176505257,
+  "T_ms": 242.88046111322151,
+  "dt_ms": 0.09999195599556258,
+  "history_dimension": 345015,
+  "multipliers": [
+    [
+      1.0002926890928134,
+      0.0
+    ],
+    [
+      0.7832740737547548,
+      0.0
+    ],
+    [
+      0.778636071506692,
+      0.0
+    ],
+    [
+      0.5176984335194634,
+      0.0
+    ],
+    [
+      0.011115954374815204,
+      0.0
+    ],
+    [
+      -0.006829354050848898,
+      0.0
+    ],
+    [
+      0.002959753369472413,
+      0.0
+    ],
+    [
+      0.0012169896524138926,
+      0.0
+    ]
+  ],
+  "residuals": [
+    5.504810704767746e-12,
+    2.4922023856381967e-07,
+    1.1803293452753785e-12,
+    1.059819128215652e-12,
+    1.0520476013919468e-13,
+    1.1133410669084417e-12,
+    3.409597378640651e-14,
+    2.2701974878772904e-09
+  ],
+  "phase_multiplier_error": 0.00029268909281343625,
+  "phase_tangent_relative_defect": 0.00028732973102091656,
+  "raw_multipliers_above_1p001": 0,
+  "requested_multipliers": 8,
+  "method": "Full-delay monodromy Rayleigh-Ritz in the saved filtered Arnoldi subspace; full lifted eigenpair residual checks.",
+  "seconds": 258.1335418224335,
+  "polynomial_filter_rho": 0.7843652703189098,
+  "transformed_eigenvalues": [
+    [
+      0.21599061681760898,
+      0.0
+    ],
+    [
+      -0.1380530036788778,
+      0.0
+    ],
+    [
+      -0.008595404116444117,
+      0.0
+    ],
+    [
+      0.005403348212896507,
+      0.0
+    ],
+    [
+      -0.004460960857817512,
+      0.0
+    ],
+    [
+      -0.002312767611730007,
+      0.0
+    ],
+    [
+      -0.000953083456540113,
+      0.0
+    ],
+    [
+      -0.0008533349159001609,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.2156347296810902,
+  "smallest_returned_transformed_modulus": 0.0008533349159001609,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.9999999956294089,
+    0.9999929931127809,
+    0.000425872238066098,
+    0.0007516311289249434,
+    0.23744722632775817,
+    0.17094258249391214,
+    0.010004920666792209,
+    0.0010771641468926964
+  ],
+  "identified_neutral_index": 0,
+  "nontrivial_multipliers": [
+    [
+      0.7832740737547548,
+      0.0
+    ],
+    [
+      0.778636071506692,
+      0.0
+    ],
+    [
+      0.5176984335194634,
+      0.0
+    ],
+    [
+      0.011115954374815204,
+      0.0
+    ],
+    [
+      -0.006829354050848898,
+      0.0
+    ],
+    [
+      0.002959753369472413,
+      0.0
+    ],
+    [
+      0.0012169896524138926,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 0.7832740737547548,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1.",
+  "ritz_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0027_N256_accuracy_N512_dt0.1.json",
+  "subspace_relative_invariance_defect": 1.144767829368651e-06
+}

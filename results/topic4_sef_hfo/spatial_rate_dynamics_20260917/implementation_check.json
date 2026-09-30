@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "original_calibration_parity": [
+    {
+      "population": "E",
+      "maximum_state_error": 0.0,
+      "spike_counts": [
+        51,
+        0,
+        547
+      ]
+    },
+    {
+      "population": "I",
+      "maximum_state_error": 0.0,
+      "spike_counts": [
+        80,
+        0,
+        1077
+      ]
+    }
+  ],
+  "rate_rhs_jvp_relative_error": 3.2852184105290684e-12,
+  "exact_delay_characteristic_derivative_relative_error": 3.386989408486893e-10,
+  "stationary_characteristic_identity_max_error": 1.1102230246251565e-16,
+  "rate_groups": 935,
+  "dynamic_variables_without_delay_history": 7480,
+  "scope": "Executable continuous rate vector field and analytic tangent checked; spatial dynamics correspondence is a separate requirement"
+}

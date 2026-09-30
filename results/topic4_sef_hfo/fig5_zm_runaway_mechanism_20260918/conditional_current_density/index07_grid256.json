@@ -1,0 +1,33 @@
+{
+  "status": "DENSITY_LOCAL_ASSAY_COMPLETE",
+  "dataset": "factorial_waveform",
+  "source_index": 7,
+  "source_info": {
+    "source_label": "Surround E",
+    "source_group": 39,
+    "pop": "E",
+    "condition": "mean_only",
+    "theta_mv": 18.0
+  },
+  "requested_grid_nodes": 256,
+  "actual_grid_nodes": 257,
+  "elapsed_seconds": 41.77945972199086,
+  "dt_ms": 0.1,
+  "T_ms": 264.36293204907884,
+  "waveform_L2": 0.005136307865991816,
+  "relative_mean_error": 0.00284315110035735,
+  "predicted_mean_hz": 68.33634659195408,
+  "reference_mean_hz": 68.14260686426672,
+  "numerical": {
+    "max_mass_error": 1.2378986724570495e-13,
+    "max_current_moment_error": 1.2378986724570495e-13,
+    "discarded_probability": 1.284442190651123e-20,
+    "lower_edge_probability_sum": 0.0,
+    "worst_relative_negative_covariance": 0.0
+  },
+  "numerical_pass": true,
+  "waveform_pass": true,
+  "grid_convergence": "PENDING_PAIRED_LEVEL",
+  "model_promoted": false,
+  "scope": "Local candidate only, not a particle network or accepted spatial model. No measured future spikes supplied. If viable, it must be compressed to an analyzable response and pass original DC/linear/network gates before spatial use. Old static transfer is a validation target, not silently inherited."
+}

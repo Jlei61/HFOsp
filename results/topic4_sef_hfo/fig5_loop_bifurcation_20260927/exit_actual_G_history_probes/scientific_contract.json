@@ -1,0 +1,29 @@
+{
+  "status": "REGISTERED_BEFORE_NEW_INITIAL_G_BRANCHES",
+  "created_epoch": 1790539806.3220253,
+  "question": "In the actual16.7s exit-field family at heldZmean.21/Kmean9, can changing only the carried initial global conductance alter persistence of the high state that already has a directly corresponding conditional branch?",
+  "reason": "Earlier initialG interventions used the common20s field, whose K9 response differs markedly from the actualexit field. They cannot settle the carried-G explanation here. Natural exit carriesGraw about11.5 whereas the held high state is about4.4.",
+  "design": {
+    "new_branches": 2,
+    "duration_s": 30.0,
+    "baseline_reused": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes/runs/exit_z0.21_k9_fields16p7_high",
+    "initial_G_raw": [
+      0.0,
+      11.495040572672318
+    ],
+    "baseline_initial_G_raw": 4.51130203132469,
+    "Z_mean": 0.21,
+    "K_mean": 9.0,
+    "history": "Identical full12s high endogenous state including voltage, currents, queued spikes, M, refractory and causalR.",
+    "future_input": "Same copied50s exogenous OU/Poisson/RNG state as existing actualK9 high baseline.",
+    "endogenous_G_and_M_remain_dynamic": true,
+    "source_seed": 9108405
+  },
+  "implementation": "Reuse the already verified spatial-probe and ordered CUDA native engine. Before launch independently reconstruct the initial engine and compare every field; only the declared G scalar differs after the usual identical Z/K clamps and futureinput handoff.",
+  "readouts": "First0-1/1-5/5-10s and last20-30s rates in allE/coreA/coreB/surround; full1msR/G and400-cell spatial fields; time spent below5Hz; counterfactualZdrift. Retain truncated events and use the frozen observer. Check recorded futureinputs bitwise against baseline.",
+  "interpretation": "If carriedG changes the final conditional response while a high branch is still present, it supports history-dependent selection; it does not by itself certify a basin boundary or autonomous termination. If both controls reconverge high, initialG alone in this fixedZ/K family is insufficient; natural Z/K evolution and other histories remain distinct possibilities.",
+  "limits": "One shared native noise/history, not new independent seeds. These are explicit conditional initial-state interventions with heldZ/K, do not count as autonomous exits or recovery, and do not require every seed to exit. No additionalGscan/extension is automatic.",
+  "producer_sha256": "fcacef30a7bb251d91cec78c20ba627507b4369314d913d34a9889681360ca40",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false
+}

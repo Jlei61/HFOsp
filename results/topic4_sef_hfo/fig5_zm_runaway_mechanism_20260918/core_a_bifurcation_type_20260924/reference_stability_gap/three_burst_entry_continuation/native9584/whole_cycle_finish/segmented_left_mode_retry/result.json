@@ -1,0 +1,58 @@
+{
+  "status": "VERIFIED_NUMERICAL_LEFT_RIGHT_MODE",
+  "multiplier": -1.4222121150929221,
+  "right_relative_residual": 4.575463277906026e-14,
+  "left_relative_residual": 4.274179633857015e-09,
+  "raw_overlap": -0.000888396765878804,
+  "checks": [
+    {
+      "direction": 0,
+      "relative_bilinear_error": 2.1171448070046296e-12,
+      "nominal_state_bitwise_unchanged": true
+    },
+    {
+      "direction": 1,
+      "relative_bilinear_error": 6.287725965860409e-13,
+      "nominal_state_bitwise_unchanged": true
+    }
+  ],
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.900758094007948,
+        "difference_rms": 8.011797788719262e-12,
+        "relative_rms": 5.038626297785407e-13
+      },
+      "GABA": {
+        "reference_rms": 8.23042374762567,
+        "difference_rms": 9.589206015323416e-12,
+        "relative_rms": 1.165092625770299e-12
+      },
+      "M": {
+        "reference_rms": 0.021092989858940696,
+        "difference_rms": 3.408497636883167e-13,
+        "relative_rms": 1.6159385936642857e-11
+      },
+      "covariance": {
+        "reference_rms": 37.56208210407482,
+        "difference_rms": 4.491083345427805e-12,
+        "relative_rms": 1.1956428115417495e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.08868808975881101,
+        "difference_rms": 4.762232267192753e-13,
+        "relative_rms": 5.369641267664843e-12
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004709493985330944,
+        "difference_rms": 6.394094953978731e-15,
+        "relative_rms": 1.3577031787056009e-12
+      }
+    },
+    "combined_relative_rms": 6.993184457120699e-12
+  },
+  "seconds": 935.0430369377136,
+  "prior_physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

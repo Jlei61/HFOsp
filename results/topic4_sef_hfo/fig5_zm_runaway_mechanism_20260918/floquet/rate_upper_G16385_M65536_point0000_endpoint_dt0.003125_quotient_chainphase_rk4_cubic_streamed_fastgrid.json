@@ -1,0 +1,40 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+  "N": 16385,
+  "D": 0.1449718771100008,
+  "T_ms": 267.35066063917935,
+  "dt_ms": 0.003094336349990502,
+  "multipliers": [
+    [
+      1.0763387118044234,
+      0.0
+    ]
+  ],
+  "eigen_residuals": [
+    5.5469293797506035e-09
+  ],
+  "phase_index": null,
+  "phase_defect": 0.002599767470766476,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 1.0763387118044234,
+  "phase_projection": 1.0025991870626687,
+  "phase_quotient": true,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "RK4 with cubic delayed history",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "UNSTABLE",
+  "calls": 11,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": null,
+  "time_grid": {
+    "requested_maximum_dt_ms": 0.003125,
+    "steps": 86400,
+    "fft_friendly": true
+  }
+}

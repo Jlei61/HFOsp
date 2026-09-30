@@ -1,0 +1,190 @@
+{
+  "status": "PASS",
+  "contrasts": [
+    {
+      "history": "high",
+      "names": [
+        "z0.95_k0.02_high",
+        "z0.95_k2_high"
+      ],
+      "job_differences": {
+        "target_K": [
+          0.02,
+          2.0
+        ],
+        "name": [
+          "z0.95_k0.02_high",
+          "z0.95_k2_high"
+        ]
+      },
+      "same_network_and_nonjob_configuration": true,
+      "identical_recorded_Z_state_columns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "identical_future_exogenous_input": true,
+      "results": [
+        {
+          "name": "z0.95_k0.02_high",
+          "duration_s": 30.0,
+          "tail_mean_Hz": [
+            1.126846875,
+            2.516843501326269,
+            3.052544529262074,
+            1.0427478660538387
+          ],
+          "tail_brief_events": 5,
+          "tail_joint_quiet_fraction": 0.954,
+          "counterfactual_drift_mean_allE_A_B_other": [
+            [
+              0.007016438750000098,
+              -0.00572381036860313
+            ],
+            [
+              0.004702225867656323,
+              -0.006200520292069351
+            ],
+            [
+              0.004785564010203313,
+              -0.0065838538631121145
+            ],
+            [
+              0.00713129049191631,
+              -0.005689817149004446
+            ]
+          ]
+        },
+        {
+          "name": "z0.95_k2_high",
+          "duration_s": 30.0,
+          "tail_mean_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tail_brief_events": 0,
+          "tail_joint_quiet_fraction": 1.0,
+          "counterfactual_drift_mean_allE_A_B_other": [
+            [
+              0.010000000000000054,
+              -0.39999600002449387
+            ],
+            [
+              0.010723477857046236,
+              -0.43330983299220055
+            ],
+            [
+              0.0108860932722897,
+              -0.4600982632891323
+            ],
+            [
+              0.009959226145232054,
+              -0.3976204580355331
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "history": "interictal",
+      "names": [
+        "z0.95_k0.02_interictal",
+        "z0.95_k2_interictal"
+      ],
+      "job_differences": {
+        "target_K": [
+          0.02,
+          2.0
+        ],
+        "name": [
+          "z0.95_k0.02_interictal",
+          "z0.95_k2_interictal"
+        ]
+      },
+      "same_network_and_nonjob_configuration": true,
+      "identical_recorded_Z_state_columns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "identical_future_exogenous_input": true,
+      "results": [
+        {
+          "name": "z0.95_k0.02_interictal",
+          "duration_s": 30.0,
+          "tail_mean_Hz": [
+            1.126846875,
+            2.516843501326269,
+            3.052544529262074,
+            1.0427478660538387
+          ],
+          "tail_brief_events": 5,
+          "tail_joint_quiet_fraction": 0.954,
+          "counterfactual_drift_mean_allE_A_B_other": [
+            [
+              0.007016438750000098,
+              -0.00572381036860313
+            ],
+            [
+              0.004702225867656323,
+              -0.006200520292069351
+            ],
+            [
+              0.004785564010203313,
+              -0.0065838538631121145
+            ],
+            [
+              0.00713129049191631,
+              -0.005689817149004446
+            ]
+          ]
+        },
+        {
+          "name": "z0.95_k2_interictal",
+          "duration_s": 30.0,
+          "tail_mean_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tail_brief_events": 0,
+          "tail_joint_quiet_fraction": 1.0,
+          "counterfactual_drift_mean_allE_A_B_other": [
+            [
+              0.010000000000000054,
+              -0.39999600002449387
+            ],
+            [
+              0.010723477857046236,
+              -0.43330983299220055
+            ],
+            [
+              0.0108860932722897,
+              -0.4600982632891323
+            ],
+            [
+              0.009959226145232054,
+              -0.3976204580355331
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "full_Z_K_fields": "Common prescribed spatial template as frozen protocol; this added audit checks recordedZstate summaries, jobs, configuration and inputs rather than independently unpickling fullstate arrays.",
+  "independent_unit": "One common noise seed, two carried histories; histories and events are not independent seeds.",
+  "interpretation": "At prescribed meanZ.95, changing onlytargetK from.02to2 removes last10s brief propagation in both histories. Thus highZ does not ensure events when K remains high. Conditional30s evidence, not an autonomous intervention-free return or a certified bifurcation."
+}

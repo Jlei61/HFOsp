@@ -1,0 +1,15 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/multiple_nine_burst_fixed_grid_retry/iteration01/node00.npz",
+  "dt_ms": 0.05,
+  "period_ms": 2369.0337184833256,
+  "shifts_ms": [
+    50.0,
+    150.0,
+    300.0
+  ],
+  "question": "Does the same whole-cycle root return at its original period from three independently generated physical phases, including deep quiet and subsequent activity?",
+  "method": "Generate the shifted states by one uninterrupted original integer-step flow. Preserve their actual physical clocks and every fast, covariance, input memory, M and lag-history value. From each, run the unchanged original fixed-time return at T with its existing cubic endpoint readout. No shifted root correction or state clipping.",
+  "acceptance": "Same combined six-block closure<1e-7 and each block<1e-6. Record negative endpoint history count and magnitude separately so interpolation failures cannot be mislabeled physical bifurcations.",
+  "limits": "Phase check at one dt only; independent corrected mesh, Floquet and critical crossing remain required. These phase choices are numerical checks, not three SNN samples.",
+  "model_promoted": false
+}

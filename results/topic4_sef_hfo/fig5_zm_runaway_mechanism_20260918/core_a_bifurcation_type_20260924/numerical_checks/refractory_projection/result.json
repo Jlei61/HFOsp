@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "toy_rows": [
+    {
+      "trial": 0,
+      "relative_to_independent_SLSQP": 8.54457846573545e-11,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 27,
+        "active_halfspaces": 4,
+        "maximum_occupancy": 1.0,
+        "phase_error": 7.706644697402787e-11,
+        "final_cycle_change": 5.635836161834445e-10,
+        "original_step_norm": 7.318915957894395,
+        "projected_step_norm": 6.325479574706744,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    },
+    {
+      "trial": 1,
+      "relative_to_independent_SLSQP": 6.187548218285689e-14,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 20,
+        "active_halfspaces": 2,
+        "maximum_occupancy": 1.0000000000000002,
+        "phase_error": 4.5449755070592346e-14,
+        "final_cycle_change": 1.343381282821319e-12,
+        "original_step_norm": 7.694090416455591,
+        "projected_step_norm": 6.966552157146402,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    },
+    {
+      "trial": 2,
+      "relative_to_independent_SLSQP": 6.676326925023755e-16,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 2,
+        "active_halfspaces": 0,
+        "maximum_occupancy": 0.9065435582807465,
+        "phase_error": 1.1102230246251565e-16,
+        "final_cycle_change": 0.0,
+        "original_step_norm": 8.092867540875261,
+        "projected_step_norm": 7.148955043379189,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    },
+    {
+      "trial": 3,
+      "relative_to_independent_SLSQP": 5.989704433831311e-14,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 23,
+        "active_halfspaces": 5,
+        "maximum_occupancy": 1.0000000000000004,
+        "phase_error": 2.8005375796169574e-14,
+        "final_cycle_change": 1.4857676586685114e-12,
+        "original_step_norm": 9.066439416052129,
+        "projected_step_norm": 7.949488681320372,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    },
+    {
+      "trial": 4,
+      "relative_to_independent_SLSQP": 9.264929100804394e-11,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 30,
+        "active_halfspaces": 5,
+        "maximum_occupancy": 1.0000000000000002,
+        "phase_error": 1.1598860760742014e-11,
+        "final_cycle_change": 7.517116212533538e-10,
+        "original_step_norm": 8.169601855438927,
+        "projected_step_norm": 7.491215291365107,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    },
+    {
+      "trial": 5,
+      "relative_to_independent_SLSQP": 7.644062972764263e-14,
+      "refractory_projection": {
+        "status": "PASS",
+        "cycles": 21,
+        "active_halfspaces": 4,
+        "maximum_occupancy": 1.0,
+        "phase_error": 6.378925165861915e-14,
+        "final_cycle_change": 1.5770530093248276e-12,
+        "original_step_norm": 7.762111276179082,
+        "projected_step_norm": 6.705462946652139,
+        "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+      }
+    }
+  ],
+  "actual_proposal": {
+    "refractory_projection": {
+      "status": "PASS",
+      "cycles": 114,
+      "active_halfspaces": 28,
+      "maximum_occupancy": 1.0000000000000018,
+      "phase_error": 4.2943426592501055e-13,
+      "final_cycle_change": 2.6749463130602776e-09,
+      "original_step_norm": 2.8324135136431488,
+      "projected_step_norm": 2.7696580303925438,
+      "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+    }
+  },
+  "actual_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/multiple_single_B_cyclicM/iteration01",
+  "scope": "Independent convex-QP numerical geometry only. No network flow was changed or clipped; a projected initial-state proposal still requires actual nonlinear residual and variational prediction acceptance.",
+  "model_promoted": false
+}

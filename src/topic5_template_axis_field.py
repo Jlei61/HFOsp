@@ -684,9 +684,11 @@ def _pearson(a: np.ndarray, b: np.ndarray) -> float:
 def _template_projection_z(template: np.ndarray, activation: np.ndarray) -> float:
     """Project activation onto a standardized frozen template.
 
-    The result has the same units as ``activation``. Unlike Pearson
-    correlation, it retains spatial-contrast amplitude while remaining
-    insensitive to a spatially uniform offset.
+    The result has the same units as ``activation`` (baseline robust-z for the
+    ictal-field consumer).  Unlike Pearson correlation, it retains the spatial
+    contrast amplitude while remaining insensitive to a spatially uniform
+    offset.  Algebraically this is ``corr(template, activation) *
+    std(activation)`` on the pairwise-finite support.
     """
     t = np.asarray(template, float)
     a = np.asarray(activation, float)
@@ -701,7 +703,15 @@ def _template_projection_z(template: np.ndarray, activation: np.ndarray) -> floa
 
 
 def score_field(scorer: Mapping[str, object], activation: Sequence[float]) -> Dict[str, object]:
-    """Score morphology and amplitude-aware expression of one frozen field."""
+    """Score morphology and amplitude-aware expression of one frozen field.
+
+    ``signed_r`` / ``abs_r`` preserve the historical scale-free morphology
+    contract. ``signed_projection_z`` / ``abs_projection_z`` quantify how
+    strongly that morphology is expressed in the activation field.  When a
+    correlation candidate exists, both readouts use the same abs-correlation
+    selected identity/mirror orientation so amplitude cannot reselect the
+    geometry after looking at energy.
+    """
     value = np.asarray(activation, float)
     if "weight_id" in scorer:
         act_id = _smooth_from_weights(value, np.asarray(scorer["weight_id"], float))
@@ -777,7 +787,12 @@ def _row_pearson(template: np.ndarray, values: np.ndarray) -> np.ndarray:
 
 
 def _row_template_projection_z(template: np.ndarray, values: np.ndarray) -> np.ndarray:
-    """Batch counterpart of :func:`_template_projection_z`."""
+    """Batch counterpart of :func:`_template_projection_z`.
+
+    Each row is evaluated on its own pairwise-finite support.  The frozen
+    template is standardized on that support and the activation is left in its
+    native units, so the result retains robust-z spatial-contrast amplitude.
+    """
     t = np.asarray(template, float)
     y = np.asarray(values, float)
     if y.ndim != 2:
@@ -792,7 +807,10 @@ def _row_template_projection_z(template: np.ndarray, values: np.ndarray) -> np.n
     out = np.full(len(y), np.nan)
     ok = (n >= 3) & np.isfinite(t_sd) & (t_sd > 1e-12)
     if np.any(ok):
-        out[ok] = (((tc[ok] / t_sd[ok, None]) * yy[ok]).sum(axis=1) / n[ok])
+        out[ok] = (
+            ((tc[ok] / t_sd[ok, None]) * yy[ok]).sum(axis=1)
+            / n[ok]
+        )
     return out
 
 

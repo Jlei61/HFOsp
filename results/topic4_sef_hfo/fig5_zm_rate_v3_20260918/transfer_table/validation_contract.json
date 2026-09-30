@@ -1,0 +1,21 @@
+{
+  "status": "REGISTERED_BEFORE_VALIDATION",
+  "registered": "2026-09-18 10:05",
+  "science_question": "Does the smooth spline interpolant of the CRN Monte-Carlo transfer table reproduce the colored-noise LIF stationary rate and its zero-frequency mean/variance gains at workpoints NOT on the grid, across interictal, depleted-middle and high-rate regimes, for E and I cell parameters?",
+  "primary_readout": "relative rate error |phi_spline - phi_MC| / phi_MC at held-out workpoints; zero-frequency gain sign agreement for mean, AMPA-variance and GABA-variance channels; gain relative error",
+  "statistical_unit": "independent noise path (replicate) of the held-out MC run; held-out runs use a DIFFERENT seed (not CRN with the table)",
+  "held_out_workpoints": [
+    "the 8 v2-assayed (state, group) workpoints SN1/SN7/upper_D0228 (mean, variance_E, variance_I, thresholds 16.22 and 18)",
+    "24 random draws per population in the joint range x in [-2, 20], sigma_E in [0.1, 4], sigma_I in [0, 6] (log-uniform sigma), seed 7",
+    "8 draws per population in the extreme mean-driven range x in [20, 200]"
+  ],
+  "tolerance_basis": "native SNN variability: interictal group rates across the two native seeds differ by ~2-4 % (events_4_8s mean_rate 24.0 vs 24.5 Hz); the v1 native small-set assay showed local closure vs isolated-LIF disagreements of 2-3x, so the acceptance bar targets the closure's own consistency, not the diffusion assumption",
+  "tolerances": {
+    "rate": "relative error <= 3 % for MC rate >= 1 Hz, or absolute <= 0.05 Hz for MC rate < 1 Hz, after accounting for 3 SEM of the held-out MC",
+    "gain_sign": "sign of each channel gain must match when |gain| > 3 SEM",
+    "gain_magnitude": "relative error <= 15 % when |gain| > 10 SEM (derivative of an interpolant is less precise than its value)",
+    "smoothness": "no sign change of d(phi)/d(mu) anywhere on the grid; second differences of log-rate along x bounded by the MC-implied curvature (reported, not gated)"
+  },
+  "failure_action": "if any tolerance fails at more than 2 held-out points per population: refine grid / replicates in that region and re-validate with a new seed; do not widen the tolerance",
+  "not_covered": "this validates the interpolant against the same Gaussian-diffusion LIF; the diffusion assumption itself is tested in stage A4 against the native network"
+}

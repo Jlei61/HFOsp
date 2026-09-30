@@ -1,0 +1,87 @@
+{
+  "status": "COMPLETE_PHASE_PILOT_REVIEW_NATIVE_UPPER_POINT_RUNNING",
+  "rows": [
+    {
+      "generation": 1,
+      "matched_native_field_RMS_Hz": 0.09601191472579726,
+      "causal_R_range_Hz": [
+        197.15206587496377,
+        197.20305571445047
+      ],
+      "rates_Hz": [
+        196.52386126120308,
+        472.35902500357196,
+        474.1803578322255,
+        182.5311587081312,
+        251.2706016483604
+      ],
+      "rate_residual_RMS_Hz": [
+        0.332826728852806,
+        0.5440238861690985,
+        0.3589153148224713,
+        0.32515202701259766,
+        0.9086834120968856
+      ],
+      "recurrent_phase_wave_RMS_E_I_mV": [
+        2.4869747172788443,
+        0.05747885476880975
+      ]
+    },
+    {
+      "generation": 2,
+      "matched_native_field_RMS_Hz": 0.19812139400097473,
+      "causal_R_range_Hz": [
+        197.18808201395623,
+        197.2291935390848
+      ],
+      "rates_Hz": [
+        196.553947021976,
+        472.49517394659256,
+        474.3847843154906,
+        182.554120258553,
+        251.07760627907282
+      ],
+      "rate_residual_RMS_Hz": [
+        0.4097641431893588,
+        1.0330760787996036,
+        1.0604459542176305,
+        0.3477918532591296,
+        1.2695101101442787
+      ],
+      "recurrent_phase_wave_RMS_E_I_mV": [
+        2.2747153161676246,
+        0.0394108577592258
+      ]
+    },
+    {
+      "generation": 3,
+      "matched_native_field_RMS_Hz": 0.3963932627638004,
+      "causal_R_range_Hz": [
+        197.2588500168646,
+        197.307189195166
+      ],
+      "rates_Hz": [
+        196.62609910862486,
+        472.72674155297807,
+        474.5445204971267,
+        182.62006616002327,
+        252.70321012999415
+      ],
+      "rate_residual_RMS_Hz": [
+        0.4709999584294877,
+        0.7843478925449936,
+        0.7347422590684247,
+        0.4515505360060103,
+        5.162058237749484
+      ],
+      "recurrent_phase_wave_RMS_E_I_mV": [
+        2.1510015980007764,
+        0.037224509966739226
+      ]
+    }
+  ],
+  "formal_bifurcation": "NOT_ESTABLISHED",
+  "conclusion": "Self-generatedphase statistics retain doublecore activity and the correct coreZ consumption but are not selfconsistent or temporally validated. Preserve the phase-resolved representation as a partial repair, not a certified branch. Do not extend the old Gaussian root search.",
+  "native_upper_point": "native_K9p5_held_history/supervisor.json",
+  "updated_epoch": 1790562926.4025276
+}

@@ -1,0 +1,144 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "normal",
+      "relative_error": 1.0210704332098214e-16,
+      "maximum_absolute_error": 2.2737367544323206e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "T",
+      "relative_error": 1.042397987541984e-16,
+      "maximum_absolute_error": 2.2737367544323206e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "J",
+      "relative_error": 1.2723057270312187e-16,
+      "maximum_absolute_error": 5.684341886080802e-14
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "normal",
+      "relative_error": 9.940357948746013e-17,
+      "maximum_absolute_error": 2.2737367544323206e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "T",
+      "relative_error": 1.1666857705381733e-16,
+      "maximum_absolute_error": 5.684341886080802e-14
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 128,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "J",
+      "relative_error": 1.7558343376860502e-16,
+      "maximum_absolute_error": 1.1368683772161603e-13
+    },
+    {
+      "kind": "antiperiodic_independently_differenced_gains",
+      "N": 128,
+      "relative_error": 1.9476634599647885e-12,
+      "gain_relative_difference": 3.0698292021254474e-11,
+      "maximum_absolute_error": 1.0154432850129069e-10
+    },
+    {
+      "kind": "antiperiodic_same_gains",
+      "N": 128,
+      "relative_error": 6.21158479363298e-17,
+      "maximum_absolute_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "normal",
+      "relative_error": 9.895054269513677e-17,
+      "maximum_absolute_error": 2.2737367544323206e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "T",
+      "relative_error": 1.0598838652685435e-16,
+      "maximum_absolute_error": 2.2737367544323206e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 105.39979415446177,
+      "J": 1.0758067726710216,
+      "mode": "J",
+      "relative_error": 1.4429272530414633e-16,
+      "maximum_absolute_error": 8.526512829121202e-14
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "normal",
+      "relative_error": 1.0565732685527017e-16,
+      "maximum_absolute_error": 3.410605131648481e-13
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "T",
+      "relative_error": 1.2045539375400367e-16,
+      "maximum_absolute_error": 5.684341886080802e-14
+    },
+    {
+      "kind": "periodic_moments",
+      "N": 256,
+      "T_ms": 1531.73,
+      "J": 0.944731,
+      "mode": "J",
+      "relative_error": 1.7646099921480984e-16,
+      "maximum_absolute_error": 1.1368683772161603e-13
+    },
+    {
+      "kind": "antiperiodic_independently_differenced_gains",
+      "N": 256,
+      "relative_error": 1.2257888152579029e-12,
+      "gain_relative_difference": 3.057604473775976e-11,
+      "maximum_absolute_error": 5.885381071379925e-11
+    },
+    {
+      "kind": "antiperiodic_same_gains",
+      "N": 256,
+      "relative_error": 5.2006315311373406e-17,
+      "maximum_absolute_error": 1.7763568394002505e-15
+    }
+  ],
+  "criteria": {
+    "identical_coefficient_action_relative_error": 1e-12,
+    "independently_finite_differenced_gain_action_relative_error": 1e-10
+  },
+  "scope": "Same full 935-group delay operators, including log-period and J derivatives; numerical storage/action equivalence only, not orbit or bifurcation validation."
+}

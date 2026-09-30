@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "exact_nominal10ms_preserved": true,
+  "dt_ms": 0.05,
+  "rows": [
+    {
+      "epsilon": 0.0001,
+      "relative_errors": {
+        "syn": 2.3850635071527996e-05,
+        "local": 4.9082529835481595e-05,
+        "history": 0.00021918321821777837
+      }
+    },
+    {
+      "epsilon": 5e-05,
+      "relative_errors": {
+        "syn": 6.044477153568896e-06,
+        "local": 1.253865863528823e-05,
+        "history": 5.580590031152791e-05
+      }
+    },
+    {
+      "epsilon": 2.5e-05,
+      "relative_errors": {
+        "syn": 1.5693871725946788e-06,
+        "local": 3.197945784362612e-06,
+        "history": 1.4059216456913947e-05
+      }
+    }
+  ],
+  "scope": "Variational implementation only; no Floquet spectrum or bifurcation type. Initial direction perturbs synaptic currents and M; all transported/history tangent states are produced by the actual flow."
+}

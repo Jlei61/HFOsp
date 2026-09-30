@@ -1,0 +1,42 @@
+{
+  "status": "NUMERICALLY_STABLE",
+  "reliable_outside_count": 0,
+  "margin": 0.002,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256.npz",
+  "J_EE_core": 1.566111176505257,
+  "T_ms": 242.8804640679872,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 144
+    }
+  ],
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256_accuracy_N512.npz",
+    "N": 512,
+    "check_N": 2048,
+    "J_EE_core": 1.566111176505257,
+    "T_ms": 242.88046111321893,
+    "maximum_group_defect_Hz": 0.04115910376756293,
+    "regional_defect_Hz": [
+      1.2606837409572533e-05,
+      0.00011429686478965104,
+      0.00020830235868675881
+    ],
+    "minimum_rate_Hz": 4.9151621209672885e-05
+  },
+  "floquet_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0027_N256_accuracy_N512_dt0.1_ritz.json",
+  "elapsed_seconds": 8.554797649383545,
+  "scope": "Full state and delay-history Arnoldi at this orbit; sampled stability, not a continuum completeness certificate.",
+  "original_monodromy_classification": {
+    "status": "UNRESOLVED",
+    "margin": 0.002,
+    "reliable_outside_count": 0,
+    "floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0027_N256_accuracy_N512_dt0.1.json"
+  },
+  "ritz_refinement": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0027_N256_accuracy_N512_dt0.1_ritz.json",
+  "classification_method": "Full-delay monodromy Rayleigh-Ritz in the saved filtered Arnoldi subspace; full lifted eigenpair residual checks."
+}

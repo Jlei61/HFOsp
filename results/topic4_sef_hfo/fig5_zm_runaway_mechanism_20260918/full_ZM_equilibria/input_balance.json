@@ -1,0 +1,111 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "root": "low",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/low.npz",
+      "regions": [
+        {
+          "region": "all_E",
+          "Z": 0.9999999999999999,
+          "rate_hz": 0.12368770774896289,
+          "recurrent_AMPA_mv": 0.39566820543863707,
+          "raw_GABA_mv": 0.7067391420717544,
+          "effective_GABA_mv": 0.7067391420717544,
+          "M_feedback_mv": 6.184385387448144e-05,
+          "external_mean_mv": 12.865650752144017,
+          "total_mean_mv": 12.554517971657026
+        },
+        {
+          "region": "core_A",
+          "Z": 1.0,
+          "rate_hz": 1.0535137700898705,
+          "recurrent_AMPA_mv": 2.0050282509868684,
+          "raw_GABA_mv": 1.8210723327604577,
+          "effective_GABA_mv": 1.8210723327604577,
+          "M_feedback_mv": 0.0005267568850449352,
+          "external_mean_mv": 12.865650752144017,
+          "total_mean_mv": 13.049079913485379
+        },
+        {
+          "region": "core_B",
+          "Z": 0.9999999999999998,
+          "rate_hz": 1.0092006491671193,
+          "recurrent_AMPA_mv": 2.0024171495694865,
+          "raw_GABA_mv": 1.7888760650868902,
+          "effective_GABA_mv": 1.7888760650868902,
+          "M_feedback_mv": 0.0005046003245835596,
+          "external_mean_mv": 12.865650752144015,
+          "total_mean_mv": 13.078687236302029
+        },
+        {
+          "region": "surround",
+          "Z": 0.9999999999999999,
+          "rate_hz": 0.07782093089539376,
+          "recurrent_AMPA_mv": 0.31436938257487435,
+          "raw_GABA_mv": 0.6512313663899033,
+          "effective_GABA_mv": 0.6512313663899033,
+          "M_feedback_mv": 3.8910465447696876e-05,
+          "external_mean_mv": 12.865650752144015,
+          "total_mean_mv": 12.52874985786354
+        }
+      ],
+      "M_balance_max_error_mv": 0.0
+    },
+    {
+      "root": "high",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/high.npz",
+      "regions": [
+        {
+          "region": "all_E",
+          "Z": 0.0,
+          "rate_hz": 489.8110851925823,
+          "recurrent_AMPA_mv": 1534.823587540231,
+          "raw_GABA_mv": 1737.7424302641755,
+          "effective_GABA_mv": 0.0,
+          "M_feedback_mv": 0.24490554259629116,
+          "external_mean_mv": 12.865650752144017,
+          "total_mean_mv": 1547.4443327497793
+        },
+        {
+          "region": "core_A",
+          "Z": 0.0,
+          "rate_hz": 491.4175498995269,
+          "recurrent_AMPA_mv": 1537.3696986046912,
+          "raw_GABA_mv": 1740.4531860173995,
+          "effective_GABA_mv": 0.0,
+          "M_feedback_mv": 0.24570877494976343,
+          "external_mean_mv": 12.865650752144017,
+          "total_mean_mv": 1549.9896405818854
+        },
+        {
+          "region": "core_B",
+          "Z": 0.0,
+          "rate_hz": 491.31971546614324,
+          "recurrent_AMPA_mv": 1537.3400646487405,
+          "raw_GABA_mv": 1740.3838170704412,
+          "effective_GABA_mv": 0.0,
+          "M_feedback_mv": 0.2456598577330716,
+          "external_mean_mv": 12.865650752144015,
+          "total_mean_mv": 1549.9600555431512
+        },
+        {
+          "region": "surround",
+          "Z": 0.0,
+          "rate_hz": 489.7323899271832,
+          "recurrent_AMPA_mv": 1534.6956256640033,
+          "raw_GABA_mv": 1737.6071695987894,
+          "effective_GABA_mv": 0.0,
+          "M_feedback_mv": 0.2448661949635916,
+          "external_mean_mv": 12.865650752144015,
+          "total_mean_mv": 1547.3164102211842
+        }
+      ],
+      "M_balance_max_error_mv": 0.0
+    }
+  ],
+  "Z": "dynamic",
+  "M": "dynamic",
+  "stability_evidence": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/stability.json",
+  "scope": "Input balance at previously solved full-system equilibria only; no transient current-budget, onset type, or SNN correspondence inferred."
+}

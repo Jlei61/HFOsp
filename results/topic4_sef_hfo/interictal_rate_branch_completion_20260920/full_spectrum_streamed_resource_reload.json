@@ -1,0 +1,30 @@
+{
+  "timestamp": 1789859814.4874742,
+  "previous_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 486937,
+    "device": 0,
+    "requested_indices": [
+      19,
+      24,
+      25,
+      27,
+      28,
+      40,
+      41
+    ],
+    "completed": [
+      {
+        "index": 19,
+        "status": "NUMERICALLY_STABLE",
+        "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/019.json"
+      }
+    ],
+    "timestamp": 1789859789.1720066,
+    "stage": "PROFILE_CHECK",
+    "index": 24,
+    "free_mib": 5928.0
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_positive_stability.py --device 0 --require-dimension --min-free-gib 6 --indices 19 24 25 27 28 40 41 ",
+  "reason": "The first full spectrum is complete. Reload only the waiting coordinator with exact streamed profile operators and host Krylov so the remaining short-period survey can fit a 4 GiB gate. Preserve completed spectra and all model/mesh/acceptance settings."
+}

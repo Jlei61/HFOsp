@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "label": "reference",
+      "replayed10ms_bitwise": true,
+      "Z_held": true,
+      "M_dynamic": true,
+      "full_initial_fast_M_history_preserved": true
+    },
+    {
+      "label": "coreA_depleted",
+      "replayed10ms_bitwise": true,
+      "Z_held": true,
+      "M_dynamic": true,
+      "full_initial_fast_M_history_preserved": true
+    }
+  ],
+  "constant_mean_external": true,
+  "count_innovations_disabled": true,
+  "private_Q_retained": true,
+  "only_core_A_Z_changed": true,
+  "non_core_A_Z_bitwise": true,
+  "paired_full_initial_state_bitwise_except_core_A_Z": true
+}

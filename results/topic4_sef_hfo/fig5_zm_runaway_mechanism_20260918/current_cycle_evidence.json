@@ -1,0 +1,56 @@
+{
+  "updated_local": "2026-09-19T08:57:44.443808+08:00",
+  "lower_cycle": {
+    "status": "STABLE_WITH_STEP_REFINEMENT",
+    "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+    "D": 0.14497187728110808,
+    "T_ms": 267.1,
+    "sources": [
+      "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.003125_quotient_chainphase_streamed.json",
+      "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.0015625_quotient_chainphase_streamed.json"
+    ],
+    "max_transverse_moduli": [
+      0.93286963526233,
+      0.9328952081612201
+    ],
+    "step_refinement_difference": 2.5572898890047213e-05,
+    "phase_defects": [
+      0.0013918020002845176,
+      0.002833188415222612
+    ],
+    "scope": "This near-critical lower orbit only; not an extrapolation to unassessed branch segments"
+  },
+  "upper_cycle": {
+    "status": "PHASE_REFINEMENT_FAILED",
+    "sources": [
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.003125_quotient_chainphase_rk4_cubic_streamed_fastgrid.json",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_upper_G16385_M65536_point0000_endpoint_dt0.0018_quotient_chainphase_rk4_cubic_streamed_fastgrid.json"
+    ],
+    "completed_spectra": 1,
+    "scope": "This upper orbit only; stability is not copied to unsampled segments",
+    "failed_refinement": {
+      "status": "PHASE_CHECK_FAILED",
+      "phase_defect": 0.016109925563858176,
+      "phase_projection": 1.0161063830031194,
+      "phase_valid": false,
+      "dt_ms": 0.001782337737594529,
+      "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz"
+    },
+    "interpretation": "Coarse instability is not yet a converged stability result"
+  },
+  "conditional_timescale": {
+    "baseline_cycle_relaxation_seconds": 1.0011276262905153,
+    "baseline_mean_D_drift_per_second": 0.013402329238260006,
+    "baseline_D": 0.14298039269556007,
+    "affine_turn_candidate_D": 0.14497264302824847,
+    "constant_initial_drift_time_to_affine_D_seconds": 0.14864955913790512,
+    "time_ratio": 0.14848212678806727,
+    "interpretation": "Local timescale comparison only. The drift and its spatial direction change. This does not predict the actual onset time and does not establish rate-induced tipping. Quasistatic tracking of the conditional branch is not justified by these scales."
+  },
+  "bifurcation_candidate": "LIMIT_CYCLE_FOLD",
+  "bifurcation_acceptance": "PENDING_CRITICAL_GEOMETRY_AND_TRANSVERSE_CHECKS",
+  "fine_actual_Z_path": "Separate held-field controls; no certified fold on that curved trajectory",
+  "native_SNN_bifurcation": "NOT_ESTABLISHED",
+  "Z": "held for conditional spectra",
+  "M": "dynamic"
+}

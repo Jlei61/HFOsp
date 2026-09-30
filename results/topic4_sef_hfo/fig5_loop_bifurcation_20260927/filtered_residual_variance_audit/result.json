@@ -1,0 +1,119 @@
+{
+  "status": "COMPLETE_READONLY_FILTERED_MEMORY_AUDIT",
+  "rows": [
+    {
+      "population": "allE",
+      "independent_colored_mean_IE_II_mV2": [
+        3.5822178409674974,
+        1.517947729986313
+      ],
+      "independent_white_mean_IE_II_mV2": [
+        185.60020739708926,
+        220.24723567743573
+      ],
+      "finite_zeroDC_white_mean_IE_II_mV2": [
+        184.83045646858756,
+        215.49851074135745
+      ],
+      "white_to_colored_ratio": [
+        51.811535656625985,
+        145.09540172336608
+      ]
+    },
+    {
+      "population": "coreA",
+      "independent_colored_mean_IE_II_mV2": [
+        7.867681844563651,
+        1.6625146198687206
+      ],
+      "independent_white_mean_IE_II_mV2": [
+        495.5603848000225,
+        503.8270582230648
+      ],
+      "finite_zeroDC_white_mean_IE_II_mV2": [
+        493.50511734273795,
+        492.9641018390919
+      ],
+      "white_to_colored_ratio": [
+        62.986835841924766,
+        303.0512046040528
+      ]
+    },
+    {
+      "population": "coreB",
+      "independent_colored_mean_IE_II_mV2": [
+        9.33770819706768,
+        1.5191461460703863
+      ],
+      "independent_white_mean_IE_II_mV2": [
+        590.0599579656358,
+        517.094003385585
+      ],
+      "finite_zeroDC_white_mean_IE_II_mV2": [
+        587.6127667319341,
+        505.94499994578877
+      ],
+      "white_to_colored_ratio": [
+        63.19108988123363,
+        340.38463298818556
+      ]
+    },
+    {
+      "population": "otherE",
+      "independent_colored_mean_IE_II_mV2": [
+        3.3276198344472734,
+        1.5143382293292733
+      ],
+      "independent_white_mean_IE_II_mV2": [
+        167.49070845721036,
+        205.56763142208422
+      ],
+      "finite_zeroDC_white_mean_IE_II_mV2": [
+        166.79606414534086,
+        201.13541171961154
+      ],
+      "white_to_colored_ratio": [
+        50.333486633106034,
+        135.74750174083218
+      ]
+    },
+    {
+      "population": "I",
+      "independent_colored_mean_IE_II_mV2": [
+        2.5522367108816955,
+        0.7536950870265804
+      ],
+      "independent_white_mean_IE_II_mV2": [
+        131.88621834971215,
+        108.26055982658299
+      ],
+      "finite_zeroDC_white_mean_IE_II_mV2": [
+        131.33923868597833,
+        105.92636653484473
+      ],
+      "white_to_colored_ratio": [
+        51.67475955008528,
+        143.63973135831915
+      ]
+    }
+  ],
+  "selected_target_diagnostic": {
+    "targets": 59,
+    "native_actual_residual_IE_II_mean_mV2": [
+      8.651013154731507,
+      5.128343017643112
+    ],
+    "independent_colored_IE_II_mean_mV2": [
+      5.899358545386348,
+      2.6773317366240494
+    ],
+    "independent_white_IE_II_mean_mV2": [
+      269.93944369937543,
+      335.7416937404382
+    ],
+    "limitation": "These59 targets were selected in earlier error diagnostics, not a random spatial sample; native residual includes sourcecross correlations and finitephase/filtereffects."
+  },
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "efcc51f1d5420f74475cd3895b494c571fea5d7fea39bfa923550b031a3207ed",
+  "elapsed_s": 5.503046751022339
+}

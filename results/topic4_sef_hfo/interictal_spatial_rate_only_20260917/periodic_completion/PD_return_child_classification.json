@@ -1,0 +1,29 @@
+{
+  "status": "SUPERCRITICAL_PD",
+  "label": "PD3",
+  "child_stability": "UNSTABLE",
+  "full_physical_child_checks": true,
+  "display_title": "Supercritical PD3 | unstable doubled child",
+  "J_EE_core": 1.0758067726710216,
+  "parent_T_ms": 105.39979415446477,
+  "child_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_3_20260920_a60.00822_N4096.npz",
+  "child_T_ms": 210.7316277406053,
+  "child_side": "J < J_PD3; parent flip direction is unstable on this side",
+  "child_mu": 0.9917647557575069,
+  "critical_mode_phase_quotient_seed_overlap": 0.9690517188516318,
+  "inherited_unstable_multiplier": [
+    73394.79148845268,
+    0.0
+  ],
+  "radial_mode_mesh_difference": 0.0,
+  "physical_mode_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD3_child_followup/physical_mode_result.json",
+  "physical_parent_crossing_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD3_parent_witnesses/result.json",
+  "departure_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_return_child_departure.json",
+  "segmented_mode_checks_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3child_physical_radial_20260920_segmented_checks_N8192.json",
+  "core_A_B_peaks_per_full_child_period": [
+    2,
+    2
+  ],
+  "criticality_basis": "Positive corrected children depart quadratically onto the parent flip-unstable side. The matched child radial multiplier is inside the unit circle. Independent full-delay propagation and finer temporal meshes agree. Other verified growing modes keep the child unstable.",
+  "scope": "Local supercritical flip within an already unstable periodic family. No stable burst onset, global branch connection or exhaustive unstable-dimension count is asserted."
+}

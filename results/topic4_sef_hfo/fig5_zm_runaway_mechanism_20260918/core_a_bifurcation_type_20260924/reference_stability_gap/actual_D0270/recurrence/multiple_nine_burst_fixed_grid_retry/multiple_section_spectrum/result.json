@@ -1,0 +1,83 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "divisor": 1,
+    "actual_time_ms": 2369.0337184833256,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.911069058545742,
+        "difference_rms": 3.092736722018368e-10,
+        "relative_rms": 1.943764250308044e-11
+      },
+      "GABA": {
+        "reference_rms": 8.845558942775606,
+        "difference_rms": 5.893973886931314e-10,
+        "relative_rms": 6.663201189502076e-11
+      },
+      "M": {
+        "reference_rms": 0.02093132560753269,
+        "difference_rms": 4.4532624730259577e-13,
+        "relative_rms": 2.127558739721355e-11
+      },
+      "covariance": {
+        "reference_rms": 37.544357971423835,
+        "difference_rms": 2.2744551573288024e-10,
+        "relative_rms": 6.0580478138951265e-12
+      },
+      "input_memory": {
+        "reference_rms": 0.0994063048899731,
+        "difference_rms": 1.510939311290284e-11,
+        "relative_rms": 1.519963258832176e-10
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004800782948964039,
+        "difference_rms": 2.1372299978917725e-13,
+        "relative_rms": 4.451836337139477e-11
+      }
+    },
+    "combined_relative_rms": 7.11708803712732e-11
+  },
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 0.0005187515051601289,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 0.00041214308213208115,
+      "pass_gate": true
+    }
+  ],
+  "verified": [
+    {
+      "real": -1.1886199329585603,
+      "imag": 0.0,
+      "relative_residual": 1.5384915690574542e-13,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.09615679237470662,
+      "imag": 0.0,
+      "relative_residual": 3.3279779081040284e-08,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.09276364257531816,
+      "imag": 0.0024324280621828274,
+      "relative_residual": 1.032464262599887e-08,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.09078904179700947,
+      "imag": 0.0009757321347341491,
+      "relative_residual": 1.3528308810965213e-08,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 2902.228682279587,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_SHIFT_AND_MESH",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

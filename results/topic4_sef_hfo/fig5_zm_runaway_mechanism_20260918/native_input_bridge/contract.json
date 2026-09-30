@@ -1,0 +1,56 @@
+{
+  "created_local": "2026-09-20T07:24:09.032180+08:00",
+  "design": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/next_native_input_bridge.md",
+  "design_sha256": "76d0c20e1ce158fab87ed942ce3a620c5fcb2d8a883e0b8fff6ae4026e2a373e",
+  "status": "REGISTERED_BEFORE_RECORDING",
+  "start_ms": 8000,
+  "stop_ms": 10370,
+  "dt_ms": 0.1,
+  "groups": 935,
+  "geometry_sha256": "47955806d05ea54d6f868d543c401debd1e6bdbde3e2cecb7584618b8000226c",
+  "moment_names": [
+    "ampa",
+    "ampa2",
+    "gaba",
+    "gaba2",
+    "zgaba",
+    "zgaba2",
+    "mcurrent",
+    "mcurrent2",
+    "net",
+    "net2",
+    "voltage",
+    "voltage2",
+    "z",
+    "z2",
+    "ampa_gaba",
+    "ampa_zgaba",
+    "ampa_m",
+    "zgaba_m",
+    "net_voltage",
+    "below_reset"
+  ],
+  "selected_groups": [
+    279,
+    141,
+    39,
+    594,
+    293,
+    130
+  ],
+  "selection": "Four prior groups plus each core minimum threshold group having at least10original cells; geometry only.",
+  "primary_window_ms": [
+    9000,
+    10370
+  ],
+  "preparation_ms": [
+    8000,
+    9000
+  ],
+  "fixed_count_windows_ms": 50,
+  "native_sampling": "Single native trajectory; group/time windows are descriptive, not independent trials.",
+  "ordering": "Current observer before membrane and slow updates; spike observer after this step threshold and reset. Pre-step Z/M apply to recorded currents.",
+  "acceptance": "Four complete original500ms chunks and full10370ms engine bitwise identical; every group count sum agrees with native count records.",
+  "scope": "Input/response localization only, no autonomous correspondence claim or new bifurcation classification.",
+  "budget": "One2.370s replay. No parameter or RNG change; no new training or response fit."
+}

@@ -1,0 +1,21 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/below_high_A/periodic_fast_hookstep_bounds/right_precondition_source.npz",
+  "period_seed_ms": 32.79834680891999,
+  "dt_ms": 0.05,
+  "source_dt_ms": 0.05,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "section": "flow",
+  "interpolation": "cubic",
+  "method": "Full-state Newton-GMRES hookstep. Actual update norm is bounded, including any right preconditioning. Nonnegative solver proposals use a rational retraction at positive coordinates and project outward steps at exact zero onto the coordinate boundary. This only constrains numerical proposals; the physical flow is unchanged and never clipped. The predicted residual is recomputed from the actual retracted step with the full variational derivative. Only an actual residual decrease with adequate prediction agreement is accepted.",
+  "reference": "https://arxiv.org/pdf/1207.4682 section3.3; positivity and physical M preconditioning are explicit solver additions.",
+  "M_right_precondition": true,
+  "initial_radius_fraction": 0.02,
+  "relative_positive_precondition": true,
+  "relative_positive_precondition_definition": "Right-coordinate scale for positive variables = max(current physical value / source row RMS scale,1e-4); signed input-memory variables unscaled. This changes only the numerical linear-system coordinates. Actual full-state norm, derivative and residual remain unchanged.",
+  "maximum_iterations": 10,
+  "Krylov_per_iteration": 40,
+  "maximum_trial_returns": 5,
+  "closure_gate": "combined<1e-7 and every block<1e-6; nontrivial amplitude, independent phase/mesh, stability and bifurcation checks remain separate.",
+  "model_promoted": false
+}

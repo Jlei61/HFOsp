@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "updated": "2026-09-30",
+  "default_bifurcation_model": "SPATIAL_RATE_INTERICTAL",
+  "models": [
+    {
+      "id": "SPATIAL_RATE_INTERICTAL",
+      "default": true,
+      "space": true,
+      "cells": 400,
+      "populations": 935,
+      "local_states": 8415,
+      "description": "默认空间rate DDE：20×20格、935群体、每群体9状态和物理延迟；固定Z=1，动态M。",
+      "code": [
+        "scripts/topic4_brunel_spatial_bifurcation"
+      ],
+      "results": [
+        "interictal_brunel_spatial_bifurcation_20260917",
+        "interictal_spatial_rate_only_20260917",
+        "interictal_rate_branch_completion_20260920",
+        "interictal_rate_summary_20260923"
+      ]
+    },
+    {
+      "id": "REGIONAL_SIX_RATE",
+      "default": false,
+      "space": false,
+      "populations": 6,
+      "description": "历史区域简化rate DDE：Core A、Core B、Surround各E/I；六群体、滤波及延迟，无二维传播或Z/M状态。",
+      "code": [
+        "scripts/topic4_core_bifurcation_v2",
+        "scripts/topic4_core_branch_connections_v5",
+        "scripts/topic4_core_bifurcation_layout_v9",
+        "scripts/topic4_core_spatial_readout_v10"
+      ],
+      "results": [
+        "core_burst_bifurcation_v2_20260915",
+        "core_bifurcation_composite_v9_20260916",
+        "core_spatial_readout_v10_20260916"
+      ]
+    },
+    {
+      "id": "REGIONAL_SIX_RATE_HETEROGENEITY",
+      "default": false,
+      "space": false,
+      "populations": 6,
+      "description": "六群体闭合的Core A阈值异质性与均值分析；不是默认空间网格模型。",
+      "code": [
+        "scripts/topic4_core_heterogeneity_v11"
+      ],
+      "results": [
+        "core_heterogeneity_bifurcation_20260918"
+      ]
+    },
+    {
+      "id": "SPATIAL_RATE_ZM_V3",
+      "default": false,
+      "space": true,
+      "states_per_group": 14,
+      "description": "Fig5空间Z/M状态闭合，实际NS=14；与默认间期9状态rate闭合不同。",
+      "code": [
+        "scripts/topic4_zm_onset_rate_v3",
+        "scripts/topic4_zm_runaway_mechanism"
+      ],
+      "results": [
+        "fig5_zm_rate_v3_20260918",
+        "fig5_zm_runaway_mechanism_20260918"
+      ]
+    },
+    {
+      "id": "SPATIAL_RATE_TRANSFER_RESTART",
+      "default": false,
+      "space": true,
+      "description": "早期局部响应表驱动的空间rate闭合；名称spatial_rate_model不等于当前默认Brunel RateField。",
+      "code": [
+        "scripts/topic4_spatial_rate_model"
+      ],
+      "results": [
+        "fig5_spatial_rate_model_20260917"
+      ]
+    },
+    {
+      "id": "NATIVE_SPATIAL_ZGK_LOOP",
+      "default": false,
+      "space": true,
+      "formal_bifurcation": "NOT_ESTABLISHED",
+      "description": "原生空间Z/G/K闭环及复制/密度近似；有限窗条件转换不是已认证分岔。",
+      "code": [
+        "scripts/topic4_loop_bifurcation"
+      ],
+      "results": [
+        "fig5_loop_bifurcation_20260927",
+        "fig5_autonomous_loop_zk_20260924"
+      ]
+    }
+  ]
+}

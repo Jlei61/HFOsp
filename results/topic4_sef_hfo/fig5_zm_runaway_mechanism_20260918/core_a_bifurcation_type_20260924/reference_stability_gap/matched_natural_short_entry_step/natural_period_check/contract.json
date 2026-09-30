@@ -1,0 +1,9 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/held_short_field/final_state.npz",
+  "dt_ms": 0.05,
+  "period_seed_ms": 791.4775732403746,
+  "question": "Does the actual short-event trajectory repeat after three bursts or only after six, following the candidate negative-mode crossing?",
+  "method": "Two original uninterrupted flow returns from exactly the same full trajectory state, at T and2T. Cubic interpolation only at each terminal crossing; no intermediate state reset. Original full phase plane and full canonical delay/M coordinates.",
+  "scope": "Measured recurrence errors only; phase/interpolation/mesh qualification and Floquet remain required. A closer2T return does not by itself prove period doubling.",
+  "model_promoted": false
+}

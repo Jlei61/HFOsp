@@ -1,0 +1,127 @@
+{
+  "status": "INTERRUPTED_EXIT143",
+  "conditions": 20,
+  "workers": 4,
+  "finished": [
+    {
+      "dataset": "factorial_waveform",
+      "index": 5,
+      "exit_code": 0,
+      "result": "conditional_current_density/index05_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 4,
+      "exit_code": 0,
+      "result": "conditional_current_density/index04_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 2,
+      "exit_code": 0,
+      "result": "conditional_current_density/index02_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 1,
+      "exit_code": 0,
+      "result": "conditional_current_density/index01_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 8,
+      "exit_code": 0,
+      "result": "conditional_current_density/index08_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 7,
+      "exit_code": 0,
+      "result": "conditional_current_density/index07_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 11,
+      "exit_code": 0,
+      "result": "conditional_current_density/index11_grid256.json"
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 10,
+      "exit_code": 0,
+      "result": "conditional_current_density/index10_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 0,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index00_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 1,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index01_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 2,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index02_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 3,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index03_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 4,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index04_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 5,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index05_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 6,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index06_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 7,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index07_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 8,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index08_grid256.json"
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 9,
+      "exit_code": 0,
+      "result": "conditional_current_density/moderate_index09_grid256.json"
+    }
+  ],
+  "started_unix": 1789843040.9248846,
+  "interruption": "Wrapper and remaining two children absent from ps; 18of20completed, causes not established. Retry only missing moderate10/11 with same inputs and script; no scientific-gate change.",
+  "recovery": {
+    "status": "COMPLETE",
+    "method": "Only absent moderate10and11 rerun with unchanged inputs after processabsence andexit143verified",
+    "results": [
+      "moderate_index10_grid256.json",
+      "moderate_index11_grid256.json"
+    ],
+    "all20extensionoutputs_independently_audited": true
+  },
+  "current_status": "RECOVERED_COMPLETE"
+}

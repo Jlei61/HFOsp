@@ -1,0 +1,449 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "below_extend_to60s",
+  "D": 0.21852623041452024,
+  "observed_ms": 60000.0,
+  "spatial_reconstruction_errors_hz": [
+    2.929687502728484e-05,
+    3.0110677130323893e-05,
+    2.812404261476331e-05,
+    2.848307292424579e-05,
+    2.782485069019458e-05,
+    3.0110677130323893e-05,
+    3.0517578125e-05,
+    3.0517578125e-05,
+    2.6328890953664086e-05,
+    2.9296874913598003e-05,
+    2.699631909308664e-05,
+    2.9703776021960948e-05
+  ],
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        5000
+      ],
+      "mean_rates_global_A_B_surround": [
+        53.58842450805777,
+        370.69535950847916,
+        126.97232524576916,
+        43.845207995577205
+      ],
+      "smoothed_global_range_hz": [
+        0.011757772327676884,
+        179.96174254677788
+      ],
+      "quiet_fraction": 0.0378,
+      "longest_quiet_ms": 141,
+      "complete_events": {
+        "n": 1,
+        "median_duration_ms": 116.0,
+        "iqr_duration_ms": [
+          116.0,
+          116.0
+        ],
+        "median_gap_ms": null,
+        "both_cores": 1,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6651874999999999,
+        "median_surround_cells": 252.0,
+        "forward": 0,
+        "reverse": 1,
+        "undirected": 0,
+        "median_extent_mm": 8.88329857497115
+      },
+      "persistent_spatial_fraction": 0.048499999999999995,
+      "group_rate_relative_variation": 0.6371182338897305,
+      "M_mean_global_A_B_surround": [
+        0.025794645512590298,
+        0.16682927784398574,
+        0.06407275334106795,
+        0.021315764831990946
+      ]
+    },
+    {
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "mean_rates_global_A_B_surround": [
+        52.761630888830034,
+        395.5541521734486,
+        126.52248875240367,
+        42.372872013932806
+      ],
+      "smoothed_global_range_hz": [
+        16.698878213154043,
+        85.88688129550673
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.075875,
+      "group_rate_relative_variation": 0.5877594735633721,
+      "M_mean_global_A_B_surround": [
+        0.02615717453892945,
+        0.19793192116226332,
+        0.060861768265655265,
+        0.021009572121884108
+      ]
+    },
+    {
+      "window_ms": [
+        10000,
+        15000
+      ],
+      "mean_rates_global_A_B_surround": [
+        54.181485508250155,
+        395.57319970642425,
+        127.59909573344167,
+        43.83625917396157
+      ],
+      "smoothed_global_range_hz": [
+        10.150234484601862,
+        108.05845572335348
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07828125,
+      "group_rate_relative_variation": 0.6073140811160955,
+      "M_mean_global_A_B_surround": [
+        0.02667667745337586,
+        0.19787172932516753,
+        0.06195669563578687,
+        0.02152857622544724
+      ]
+    },
+    {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_rates_global_A_B_surround": [
+        54.86426681075104,
+        392.72789440491925,
+        137.7010414813368,
+        44.363318678870364
+      ],
+      "smoothed_global_range_hz": [
+        12.164170630094862,
+        80.86894613259507
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07296875,
+      "group_rate_relative_variation": 0.5825566815070227,
+      "M_mean_global_A_B_surround": [
+        0.027969429478889134,
+        0.19703856571085962,
+        0.07169916550532231,
+        0.022655913351650687
+      ]
+    },
+    {
+      "window_ms": [
+        20000,
+        25000
+      ],
+      "mean_rates_global_A_B_surround": [
+        54.49961390291274,
+        397.41479945144135,
+        128.14390253231826,
+        44.11082661577199
+      ],
+      "smoothed_global_range_hz": [
+        13.310842719176424,
+        93.39507819607648
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07828125,
+      "group_rate_relative_variation": 0.590443162089031,
+      "M_mean_global_A_B_surround": [
+        0.027241849006046696,
+        0.1973869977183476,
+        0.0654587380783013,
+        0.022043952849123947
+      ]
+    },
+    {
+      "window_ms": [
+        25000,
+        30000
+      ],
+      "mean_rates_global_A_B_surround": [
+        52.76863307846332,
+        393.3291856589395,
+        127.4380516775714,
+        42.41167905139227
+      ],
+      "smoothed_global_range_hz": [
+        7.908051964970528,
+        97.6628260547171
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07296875,
+      "group_rate_relative_variation": 0.6007060123683869,
+      "M_mean_global_A_B_surround": [
+        0.026004988431761987,
+        0.1978864930377174,
+        0.05774430865980069,
+        0.0209312602580217
+      ]
+    },
+    {
+      "window_ms": [
+        30000,
+        35000
+      ],
+      "mean_rates_global_A_B_surround": [
+        52.09075834907381,
+        395.37695217702395,
+        111.86614508651178,
+        42.05066497671979
+      ],
+      "smoothed_global_range_hz": [
+        9.927467042592715,
+        103.27821044612706
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07828125,
+      "group_rate_relative_variation": 0.6087972016900846,
+      "M_mean_global_A_B_surround": [
+        0.0263078288338361,
+        0.19721379946923256,
+        0.05874553397977398,
+        0.02124022745157095
+      ]
+    },
+    {
+      "window_ms": [
+        35000,
+        40000
+      ],
+      "mean_rates_global_A_B_surround": [
+        52.997523245349576,
+        397.87118772243934,
+        115.7507434953448,
+        42.84129297180323
+      ],
+      "smoothed_global_range_hz": [
+        16.996295584450685,
+        85.02461456434074
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07828125,
+      "group_rate_relative_variation": 0.5851162406315656,
+      "M_mean_global_A_B_surround": [
+        0.02684163756588701,
+        0.1985495096848118,
+        0.06238912077384722,
+        0.021673940343985277
+      ]
+    },
+    {
+      "window_ms": [
+        40000,
+        45000
+      ],
+      "mean_rates_global_A_B_surround": [
+        54.374535624911836,
+        395.0188017556067,
+        129.76098818999827,
+        43.99700678779097
+      ],
+      "smoothed_global_range_hz": [
+        15.043040502529369,
+        86.33694220182797
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07525,
+      "group_rate_relative_variation": 0.5816938190518572,
+      "M_mean_global_A_B_surround": [
+        0.026578201391390156,
+        0.19758552217211572,
+        0.059774752468944224,
+        0.021488509696852266
+      ]
+    },
+    {
+      "window_ms": [
+        45000,
+        50000
+      ],
+      "mean_rates_global_A_B_surround": [
+        50.239065357487796,
+        396.7937863133959,
+        105.67310389442741,
+        40.23008919561025
+      ],
+      "smoothed_global_range_hz": [
+        12.78108810633084,
+        87.33778730892371
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.075625,
+      "group_rate_relative_variation": 0.5996888663395248,
+      "M_mean_global_A_B_surround": [
+        0.02566063795506158,
+        0.198865319847372,
+        0.054818223262806776,
+        0.02062077609692995
+      ]
+    },
+    {
+      "window_ms": [
+        50000,
+        55000
+      ],
+      "mean_rates_global_A_B_surround": [
+        52.390587561679624,
+        393.84213528758113,
+        118.80340514618554,
+        42.22463412744607
+      ],
+      "smoothed_global_range_hz": [
+        13.199393972962653,
+        88.4330430452986
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07296875,
+      "group_rate_relative_variation": 0.5872551680960404,
+      "M_mean_global_A_B_surround": [
+        0.025755216678779586,
+        0.19661798169296132,
+        0.058210669986208295,
+        0.020688226819280855
+      ]
+    },
+    {
+      "window_ms": [
+        55000,
+        60000
+      ],
+      "mean_rates_global_A_B_surround": [
+        50.27268417797284,
+        394.4936353064988,
+        103.74328593631546,
+        40.37214280788208
+      ],
+      "smoothed_global_range_hz": [
+        11.556831523179877,
+        96.87668491198372
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.07321875,
+      "group_rate_relative_variation": 0.614311291826903,
+      "M_mean_global_A_B_surround": [
+        0.02596309080690507,
+        0.19779103310556062,
+        0.056535614577534116,
+        0.020920796907466465
+      ]
+    }
+  ],
+  "original_high_onset_elapsed_ms": null,
+  "complete_events_all": {
+    "n": 1,
+    "median_duration_ms": 116.0,
+    "iqr_duration_ms": [
+      116.0,
+      116.0
+    ],
+    "median_gap_ms": null,
+    "both_cores": 1,
+    "coreA_only": 0,
+    "coreB_only": 0,
+    "median_area": 0.6651874999999999,
+    "median_surround_cells": 252.0,
+    "forward": 0,
+    "reverse": 1,
+    "undirected": 0,
+    "median_extent_mm": 8.88329857497115
+  },
+  "recurrence": {
+    "status": "RATE_RECURRENCE_ONLY",
+    "best_local_minima": [
+      {
+        "lag_ms": 35,
+        "relative_MSE": 1.4419136197603757
+      },
+      {
+        "lag_ms": 1649,
+        "relative_MSE": 1.5924312506950726
+      },
+      {
+        "lag_ms": 69,
+        "relative_MSE": 1.616549052251705
+      },
+      {
+        "lag_ms": 976,
+        "relative_MSE": 1.6777458331623936
+      },
+      {
+        "lag_ms": 1010,
+        "relative_MSE": 1.6814532413892136
+      },
+      {
+        "lag_ms": 1750,
+        "relative_MSE": 1.6860714531713614
+      },
+      {
+        "lag_ms": 1884,
+        "relative_MSE": 1.6876397728703947
+      },
+      {
+        "lag_ms": 136,
+        "relative_MSE": 1.711300235822101
+      }
+    ],
+    "direct_formula_errors": [
+      3.552713678800501e-15,
+      6.439293542825908e-15,
+      4.884981308350689e-15
+    ],
+    "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied."
+  },
+  "scope": "Longer finite-time state/recurrence readout; no certified attractor, periodic stability, separatrix or bifurcation.",
+  "model_promoted": false
+}

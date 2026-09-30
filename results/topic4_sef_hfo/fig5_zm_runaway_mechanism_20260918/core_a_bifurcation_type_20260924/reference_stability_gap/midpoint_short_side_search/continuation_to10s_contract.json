@@ -1,0 +1,16 @@
+{
+  "question": "Distinguish large transient excursions from persistent changes of the short-activity attractor before assigning a bifurcation.",
+  "reason": "native6000 has640/579ms completeAactivities early butreturns to regularshortevents late. native8000 has1442ms longactivity followedbyshortevents. A5sinitialwindow cannotdeclare either a newattractor.",
+  "conditions": [
+    "native6000_fine",
+    "native8000_fine"
+  ],
+  "source": "Each exact5sfinal_state, allfast/M/delayhistory retained, allZ unchanged",
+  "additional_duration_ms": 5000,
+  "total_duration_ms": 10000,
+  "dt_ms": 0.025,
+  "numerical_method": "exponential_midpoint_v1",
+  "controls": "No sectionresets, no newZintervention, allE Mdynamic, sameconstantinput/privateQ",
+  "interpretation": "Late shortrecurrence nominates the same shortcycle for fullstatecorrection; late repeatedlongactivity supports further invariantsetsearch butdoesnotitself establishcrisis/type.",
+  "model_promoted": false
+}

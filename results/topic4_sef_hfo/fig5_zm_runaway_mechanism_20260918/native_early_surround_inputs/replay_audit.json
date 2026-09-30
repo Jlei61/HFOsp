@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "chunk": "0000000000_0000005000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    },
+    {
+      "chunk": "0000005000_0000010000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    },
+    {
+      "chunk": "0000010000_0000015000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    },
+    {
+      "chunk": "0000015000_0000020000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    },
+    {
+      "chunk": "0000020000_0000025000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    },
+    {
+      "chunk": "0000025000_0000030000.npz",
+      "original_keys_bitwise": 16,
+      "raw_fields_bitwise": true,
+      "group_counts_restrict_exactly": true
+    }
+  ],
+  "samples": 30000,
+  "selected_groups": [
+    531,
+    833,
+    1140,
+    342,
+    682,
+    973,
+    185,
+    549,
+    788,
+    945,
+    364,
+    2613,
+    2498,
+    2386,
+    2272,
+    2237
+  ],
+  "full_terminal_engine_comparison": "No independently stored3s engine. Original sixchunk records andpercell10msfields matchbitwise; new3s fullengine saved forrecord identity.",
+  "scope": "Unchanged observational replay only; no rate-response or autonomous validation inferred."
+}

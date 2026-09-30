@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "mode": "homogeneous",
+      "operator_max_error": 2.7711166694643907e-13,
+      "local": [
+        {
+          "tick": 0,
+          "max_state_error": 7.105427357601002e-15
+        },
+        {
+          "tick": 358,
+          "max_state_error": 7.105427357601002e-15
+        },
+        {
+          "tick": 359,
+          "max_state_error": 7.105427357601002e-15
+        }
+      ],
+      "captured_bitwise": {
+        "state": true,
+        "ref": true,
+        "rng": true,
+        "history": true,
+        "clock": true,
+        "global_state": true,
+        "output": true,
+        "global_output": true,
+        "accumulator": true
+      },
+      "held_fields_bitwise": true
+    },
+    {
+      "mode": "individual",
+      "operator_max_error": 1.8474111129762605e-13,
+      "local": [
+        {
+          "tick": 0,
+          "max_state_error": 7.105427357601002e-15
+        },
+        {
+          "tick": 358,
+          "max_state_error": 7.105427357601002e-15
+        },
+        {
+          "tick": 359,
+          "max_state_error": 7.105427357601002e-15
+        }
+      ],
+      "captured_bitwise": {
+        "state": true,
+        "ref": true,
+        "rng": true,
+        "history": true,
+        "clock": true,
+        "global_state": true,
+        "output": true,
+        "global_output": true,
+        "accumulator": true
+      },
+      "held_fields_bitwise": true
+    }
+  ],
+  "physical_engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "producer_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd"
+}

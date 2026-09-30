@@ -1,0 +1,107 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "D": 0.16,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_postcritical_broad_D0.1600000_dt0.05/trajectory.npz",
+      "attempts": [
+        {
+          "seed": "tail_mean",
+          "converged": false,
+          "trace": [
+            0.24463557882758474,
+            0.2250682328641263,
+            0.21099523545337825,
+            0.19780823099639727,
+            0.18543898692139385,
+            0.18525786326546878,
+            0.18521263119595927,
+            0.18520132617105609,
+            0.18519850015311748,
+            0.18519814691357975,
+            0.18519813587490855,
+            0.18519813035557361,
+            0.18519812966565682,
+            0.18519812932069843
+          ]
+        },
+        {
+          "seed": "final_instantaneous",
+          "converged": false,
+          "trace": [
+            0.8068800936538476,
+            0.8068800455600594,
+            0.8068800335366091,
+            0.806880030530744
+          ]
+        }
+      ],
+      "converged": false,
+      "tail_field_relative_std": 0.27290835976600647
+    },
+    {
+      "D": 0.2,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_postcritical_broad_D0.2000000_dt0.05/trajectory.npz",
+      "attempts": [
+        {
+          "seed": "tail_mean",
+          "converged": true,
+          "trace": [
+            0.12352963339498874,
+            0.07837182122538679,
+            0.057737817385471686,
+            0.026637719616969924,
+            0.013508702899083791,
+            0.0006431623424658431,
+            9.987712783002256e-07,
+            7.46650311023167e-12
+          ]
+        }
+      ],
+      "converged": true,
+      "tail_field_relative_std": 0.09497249126434326,
+      "global_E_hz": 212.21293126703284,
+      "regional_hz": [
+        441.2233320749237,
+        405.29945351081386,
+        201.56159020686337
+      ],
+      "full_rhs_max": 3.723361896579291e-15,
+      "rate_consistency_hz": 7.46650311023167e-09,
+      "stability": "NOT_ESTABLISHED",
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/rate_postcritical/rate_D0.20000.npz"
+    },
+    {
+      "D": 0.3,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_postcritical_broad_D0.3000000_dt0.05/trajectory.npz",
+      "attempts": [
+        {
+          "seed": "tail_mean",
+          "converged": false,
+          "trace": [
+            0.14280776647420323,
+            0.07682181780264588,
+            0.07682123169875313,
+            0.07682093864902763,
+            0.07682086538687274,
+            0.07682086080799165,
+            0.07682086066490144
+          ]
+        },
+        {
+          "seed": "final_instantaneous",
+          "converged": false,
+          "trace": [
+            0.7877015363606512,
+            0.7877015246229837,
+            0.7877015216885662,
+            0.7877015202213571
+          ]
+        }
+      ],
+      "converged": false,
+      "tail_field_relative_std": 0.06205976754426956
+    }
+  ],
+  "path_scope": "Physical extrapolation of the local rate 7.7--7.8 s spatial Z direction; not the later actual autonomous Z trajectory"
+}

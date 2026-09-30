@@ -1,0 +1,31 @@
+{
+  "status": "LOCAL_CURVATURE_NEEDS_REFINEMENT",
+  "D": 0.1449726431136751,
+  "T_ms": 267.25715859787425,
+  "N": 4097,
+  "M": 16384,
+  "tangent_relative_residual": 4.865444523794536e-10,
+  "relative_step_difference": 0.07215118258194332,
+  "rows": [
+    {
+      "h_logT": 0.0001,
+      "d2D_dT2": -0.00010973542193074098,
+      "linear_relative_residual": 1.8246069573234127e-15,
+      "symmetric_remainder_before": 1987.7306196422783,
+      "symmetric_remainder_after": 234.65256034330022
+    },
+    {
+      "h_logT": 5e-05,
+      "d2D_dT2": -0.00010235069802980329,
+      "linear_relative_residual": 1.0971428030021597e-15,
+      "symmetric_remainder_before": 932.524539025275,
+      "symmetric_remainder_after": 51.389734214251
+    }
+  ],
+  "d2D_dT2": -0.00010235069802980329,
+  "directional_steps_logT": [
+    0.0001,
+    5e-05
+  ],
+  "quadrature_time_step_ms": 0.016312082433952286
+}

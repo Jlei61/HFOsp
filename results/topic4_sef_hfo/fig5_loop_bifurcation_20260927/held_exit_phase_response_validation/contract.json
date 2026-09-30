@@ -1,0 +1,56 @@
+{
+  "status": "REGISTERED_BEFORE_PHASE_REPAIR_COUNTS",
+  "created_epoch": 1790545496.9850528,
+  "question": "Does randomizing the counted starting phase remove the demonstrated high-rate finite-window bias, and do stationary DC gains depend on burn/count protocol?",
+  "prior_evidence": "Four coretarget counts changed476.0→476.25Hz when4s counting start shifted0.5ms, despite countSEM0. All four16s starts gave476.1875Hz. Original fixed4s estimator is not adequate for subSEM stationary-root claims at these inputs.",
+  "design": {
+    "selected_targets": [
+      6591,
+      2822,
+      16370,
+      26748,
+      16813,
+      4558,
+      16011,
+      15699,
+      7066,
+      29742,
+      1770,
+      9850,
+      4104,
+      31678,
+      35049,
+      39578,
+      34905,
+      38604,
+      36402,
+      38502,
+      39972
+    ],
+    "replicas": 2048,
+    "record_ms": [
+      4000,
+      16000
+    ],
+    "burn_ms": 1000,
+    "extra_burn_uniform_discrete_ms": [
+      0,
+      1000
+    ],
+    "seed": 929371,
+    "device": 0,
+    "derivative_protocols": [
+      "original4s",
+      "phase4s_step_at_count_start",
+      "phase4s_modulated_burn",
+      "phase16s_modulated_burn"
+    ]
+  },
+  "implementation": "Same local cell/synaptic/reset/refractory update. Add a reproducible perreplica extra burn, generated without consuming the physics RNG; same paths across amplitude pairs. Optional constant DC perturbation during burn approaches the perturbed stationary law before counting. No network-engine changes.",
+  "qa": "With extra burn0 and original modulation timing, unmodulated and original mean/variance/shunt paired counts must reproduce prior kernels bitwise. Every recording still has exactly T/.1ms counted steps.",
+  "readouts": "Full selected-cell4/16s count response, paired duration differences, four-channelfull/half-amplitude DC comparisons. Zero or weak gains remain unestimable; 10%/2SEM amplitude rule unchanged.",
+  "limits": "Selected cells only; randomphase finite-record convergence is not proof of alltarget stationarity. Any failed case remains in outputs. No new branch/root gate relaxation or automatic alltarget replacement.",
+  "producer_sha256": "c6513db217beab9383c7b43a36bd371b06851f0418a11b614a24d3f873846ce3",
+  "observer_sha256": "8d04426e279f4a1934113f68fb9913e26c6990c3c8bbd2c0be373052abb98fde",
+  "formal_bifurcation_allowed": false
+}

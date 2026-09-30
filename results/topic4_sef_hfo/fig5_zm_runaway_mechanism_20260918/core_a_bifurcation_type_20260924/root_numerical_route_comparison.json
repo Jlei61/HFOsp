@@ -1,0 +1,26 @@
+{
+  "status": "TWO_NUMERICAL_HOMOTOPIES_REACH_SAME_PHYSICAL_ROOT",
+  "max_rate_difference_per_ms": 2.450817326860033e-14,
+  "max_Z_difference": 0.0,
+  "not_independent_simulations": true,
+  "third_lowB_numerical_seed": {
+    "result": {
+      "status": "ROOT_PASS",
+      "auxiliary_endpoint": 1.0005197651877429,
+      "accepted_points": 65,
+      "trials": 68,
+      "model_promoted": false,
+      "stability": "NOT_COMPUTED",
+      "residual_per_ms": 1.2156942119645464e-14,
+      "global_rate_hz": 101.216383631596,
+      "regional_rates_hz": [
+        433.01916715261876,
+        367.8621666160867,
+        86.12239531246729
+      ]
+    },
+    "maximum_rate_difference_per_ms": 2.7894353493707058e-14,
+    "identical_Z": true,
+    "scope": "Third numerical solver route gives the same root; not a proof of uniqueness or a biological replicate."
+  }
+}

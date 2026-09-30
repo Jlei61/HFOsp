@@ -1,0 +1,15 @@
+{
+  "status": "REGISTERED_AFTER_BASELINE_RESOLUTION_AND_CONTACT_REVIEW",
+  "created_epoch": 1790520368.4897285,
+  "question": "Does finer spatial grouping improve systematically narrow recruitment and slow resource consumption with the same local distribution equations?",
+  "evidence": "Coarse8192 retains39events,median86ms,area.601 andquiet.612 vsnative40/42events,100/97.5ms,area.746/.676 andquiet.518/.492. D9870=.212 vsnative.256. All3densityruns pass originalbroadA4, but numericalentry shifts.543s with4xparticlecount. Fixedcontactobserver mostlyretains order; directionalnativepositiveclass has only1/3events and cannot certifyequivalence.",
+  "bounded_design": "Exactlyone12.5s run, g40=3479 original spatialgroups,2048numericalparticles/group,seed927611,dt.1ms,G/Koff,same recorded8401one-mmexternalforcing. Unchanged originaldensitykernel. No fit, biologicalparameterchange, newnative seed, or automatic further refinement.",
+  "comparison": "Originalg20 8192-particle run hassimilar totalquadraturecount. This is a spatial-resolution diagnostic, not an exactly noise-paired causal estimate or convergence certificate.",
+  "implementation_gate": "Finegroupsnestedincoarsegroups; originalgraphandpositions; projectedthresholdmeans; all4delayedmean/squaredweightoperators contract exactly on coarseconstant rate fields. Only observation/forcing group_cell remapped to original1mmcells; finephysicsoperatorsunchanged.",
+  "decision_rule": "If eventarea/Z/contacts remain biased, do not certify continuation or fit an onset correction; inspect input/correlation approximation. If they improve, still require numericalconvergence and actualG/Knative correspondence. No new broadergrid follows automatically.",
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "source_sha256": "a2c193583ed0e902e7c31c6ea074f15fd0feb467b6c0a5508aa053ff7d258343",
+  "device": 1,
+  "formal_bifurcation_allowed": false,
+  "human_review": "PENDING"
+}

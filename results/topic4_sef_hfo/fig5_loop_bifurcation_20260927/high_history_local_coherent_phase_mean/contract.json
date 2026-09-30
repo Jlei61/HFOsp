@@ -1,0 +1,18 @@
+{
+  "status": "REGISTERED_BEFORE_LOCAL_PHASE_MEAN_BRIDGE",
+  "created_epoch": 1790561099.7963538,
+  "question": "Can an explicit2.2ms coherent current mean plus Gaussian residual represent the local response without supplying the entire native waveform?",
+  "motivation": "Exactphase decomposition explains235.64 of239.61mV2 recurrentIEvariance on20diagnosticcells. This component should be represented as a time-dependent mean, not Gaussianized as stationarynoise. It explains only36.65percentofallEsourcebinaryvariance and5.77percentincoreB, so onephasecomponent is not assumed a complete network description.",
+  "design": "Exactly59targets x512replicas, originalmembrane/ref/M/ZK/Poisson kernel unchanged. Add a22step periodicinputmean, zero-centered overuniformphase, with jointlyGaussian E/I residual from the originalrecord after subtracting itsphaseaverage. OriginalsuppliedDC held fixed.3-4sburn,2srecord. Periodicmean advancescontinuously without resetting every2s; residual retains the declared2speriodic spectral convention.",
+  "centering": "Finite nativewindow hasunequalphasecounts. Uniformphasecentering changes no specifiedDC; offset from the originalempiricalcyclemean is recorded, max0.002212mV. No meanfit or gain multiplier.",
+  "QA": "The modifiedkernel changes only inputgeneration. Zero phasewave must reproduce originalkernel spikes and allstatistics bitwise at the same residualcurrents/Poisson streams. Save outputspike probability conditionalonknowninputphase for future model design, not as a certifiedautonomous orbit.",
+  "reference": "Native72-74s pertarget rates are a development comparison under time-varying expected background. Fourlocalconditions alluse the samefixedmean. Changes betweenlocalconditions isolate represented inputstructure; closeness to that one nativewindow is not an independent network validation.",
+  "period_steps": 22,
+  "replicas": 512,
+  "stop": "One localresponse only. No free-coupledmodel, spontaneousoscillation, root, Floquet or bifurcationclaim.",
+  "original_sampler_sha256": "7de8f5cb04ac657aa40650426b60f4011b1212d1e2206d5401f1a7139a8ed3d2",
+  "phase_sampler_sha256": "80aa1ce3a147c5c74ef9cf384a74f7a90a04d543d7d0acbc83779e9d07864c62",
+  "producer_sha256": "74899333224a228e70a94c19f7935416522e8ab208c7608677e4ab7de9a41b0d",
+  "formal_bifurcation_allowed": false,
+  "autonomous_closure": false
+}

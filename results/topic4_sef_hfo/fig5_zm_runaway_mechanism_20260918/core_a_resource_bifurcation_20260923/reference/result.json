@@ -1,0 +1,70 @@
+{
+  "status": "COMPLETE",
+  "label": "reference",
+  "D": 0.2164660210396102,
+  "conditions": {
+    "label": "reference",
+    "field": "reference9000",
+    "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9000_from_lower/final_state.npz",
+    "previous_elapsed_ms": 0,
+    "duration_ms": 10000
+  },
+  "windows": [
+    {
+      "window_ms": [
+        0.0,
+        5000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.02666410475384,
+        102.56511051478418,
+        90.53625225564971,
+        30.87188653155071
+      ],
+      "global_range_hz": [
+        0.008760280063108953,
+        180.7227765380518
+      ],
+      "quiet_fraction": 0.5616,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.01713859446667657,
+        0.051479987577310496,
+        0.04566869434417084,
+        0.015552315119692697
+      ],
+      "M_start_end_weighted_abs_change": 0.0008519275313586736,
+      "group_rate_relative_variation": 0.9147260202666494
+    },
+    {
+      "window_ms": [
+        5000.0,
+        10000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.38887126733119,
+        103.03514866111593,
+        91.04546808255469,
+        31.227631009560962
+      ],
+      "global_range_hz": [
+        0.008961302211762077,
+        180.65037215608257
+      ],
+      "quiet_fraction": 0.5488,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.017173062847975748,
+        0.051497967123723225,
+        0.045484630968319034,
+        0.015592830728261247
+      ],
+      "M_start_end_weighted_abs_change": 0.0007725166228077532,
+      "group_rate_relative_variation": 0.9147988989588838
+    }
+  ],
+  "seconds": 570.7521567344666,
+  "dt_ms": 0.05,
+  "scope": "Finite-duration state continuation; no certified branch, attractor or bifurcation yet.",
+  "model_promoted": false
+}

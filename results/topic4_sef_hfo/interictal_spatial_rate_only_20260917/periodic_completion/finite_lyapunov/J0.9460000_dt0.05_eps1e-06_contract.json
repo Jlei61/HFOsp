@@ -1,0 +1,12 @@
+{
+  "J_EE_core": 0.946,
+  "dt_ms": 0.05,
+  "epsilon": 1e-06,
+  "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/periodic_gap_long/J0.9460000/trajectory.npz",
+  "initial_history_interpolation": "Cubic on saved physical-time history; endpoint fixed to current rate",
+  "norm": "RMS over all nine local states and every delayed rate. Local scaling [1000,1000,1,1,1,1,.1,.1,1], delayed rate scaling 1000.",
+  "block_ms": 717,
+  "block_steps": 14340,
+  "requested_duration_ms": 40000,
+  "scope": "Finite-time largest Lyapunov estimate. Compare perturbation amplitudes, integration steps and periodic control before an attractor claim."
+}

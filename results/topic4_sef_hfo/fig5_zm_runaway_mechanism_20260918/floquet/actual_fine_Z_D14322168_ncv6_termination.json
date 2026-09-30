@@ -1,0 +1,11 @@
+{
+  "status": "STOPPED_FOR_KRYLOV_CONFIGURATION",
+  "phase_defect": 0.00024361414458229477,
+  "phase_projection": 1.0000759177731569,
+  "dt": 0.024408945623651274,
+  "updated_local": "2026-09-19T10:48:11.056286",
+  "reason": "Phase check passed, but two-eigenpair/ncv6 Arnoldi has not completed after >30 maps. Only the leading transverse modulus is needed for this stability check; retry requests one pair with a larger basis and Ritz diagnostics.",
+  "pid": 2944083,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/endpoint_floquet.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/actual_fine_Z_fixedD_G8193_M65536/point0004.npz --family fine --dt .025 --method rk4 --fast-time-grid --cpu-orbit-fft --stream-orbit --quotient --nev 2 --ncv 6 --eigen-tol 1e-6 --map-progress --harmonic-block 129 --device 0 ",
+  "accepted_eigenvalues": []
+}

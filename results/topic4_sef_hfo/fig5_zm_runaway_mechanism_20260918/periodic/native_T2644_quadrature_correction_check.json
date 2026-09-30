@@ -1,0 +1,28 @@
+{
+  "status": "ORBIT_QUADRATURE_CHECK_PASS",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_T2644_quadrature_correction_contract.json",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M131072/point0000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M262144/point0000.npz"
+  ],
+  "values": {
+    "residuals_hz": [
+      5.440092820663267e-12,
+      2.444988655980751e-09
+    ],
+    "D_difference": 4.548186827157963e-11,
+    "max_Z_difference": 1.143518613133665e-10,
+    "period_difference_ms": 0.0,
+    "phase_aligned_relative_L2": 6.10527478601084e-08,
+    "phase_shift_cycles": 0.999999999999998,
+    "unaligned_relative_L2": 3.4445437365728186e-08
+  },
+  "checks": {
+    "residual": true,
+    "period": true,
+    "D": true,
+    "Z": true,
+    "waveform": true
+  },
+  "scope": "Orbit comparison only. Does not accept phase invariance, Floquet spectrum, a fold, or native-SNN correspondence."
+}

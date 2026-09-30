@@ -1,0 +1,93 @@
+{
+  "status": "PASS",
+  "duration_ms_each": 100,
+  "rows": [
+    {
+      "D": 0.219,
+      "checks": {
+        "group_rate_hz": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "global_E_hz": {
+          "bitwise_equal": false,
+          "max_absolute_difference": 5.684341886080802e-14,
+          "scaled_difference": 7.771561172376096e-15,
+          "rounding_allowance": 4.1522341120989473e-13,
+          "pass_check": true
+        },
+        "field_E_hz": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "Z_every50ms": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "M_every50ms": {
+          "bitwise_equal": false,
+          "max_absolute_difference": 2.0816681711721685e-17,
+          "scaled_difference": 2.222614453595284e-15,
+          "rounding_allowance": 7.105427357601002e-15,
+          "pass_check": true
+        }
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+      "label": "native_spatial_coarse_prefix_D0.2190000",
+      "reconstructed_vs_original_Z_max_difference": 0.0
+    },
+    {
+      "D": 0.22884476056519154,
+      "checks": {
+        "group_rate_hz": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "global_E_hz": {
+          "bitwise_equal": false,
+          "max_absolute_difference": 1.5631940186722204e-13,
+          "scaled_difference": 2.203359563895197e-15,
+          "rounding_allowance": 4.1522341120989473e-13,
+          "pass_check": true
+        },
+        "field_E_hz": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "Z_every50ms": {
+          "bitwise_equal": true,
+          "max_absolute_difference": 0.0,
+          "scaled_difference": 0.0,
+          "rounding_allowance": 0.0,
+          "pass_check": true
+        },
+        "M_every50ms": {
+          "bitwise_equal": false,
+          "max_absolute_difference": 5.551115123125783e-17,
+          "scaled_difference": 2.0057740190981832e-15,
+          "rounding_allowance": 7.105427357601002e-15,
+          "pass_check": true
+        }
+      },
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+      "label": "native_spatial_coarse_prefix_D0.2288448_exactZ",
+      "reconstructed_vs_original_Z_max_difference": 3.3306690738754696e-16
+    }
+  ],
+  "scope": "Verification of current complete initial/history against existing comparison-run prefixes; not new independent dynamics evidence."
+}

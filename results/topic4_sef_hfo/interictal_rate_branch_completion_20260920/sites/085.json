@@ -1,0 +1,114 @@
+{
+  "index": 85,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096.npz",
+  "memberships": [
+    {
+      "family": "Bleading",
+      "index": 0
+    }
+  ],
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096.npz",
+    "N": 4096,
+    "check_N": 16384,
+    "J_EE_core": 0.95,
+    "T_ms": 312.74553082469765,
+    "maximum_group_defect_Hz": 1.2559397966072083e-12,
+    "regional_defect_Hz": [
+      2.7840126129875793e-13,
+      1.2390251392027728e-13,
+      2.1057464091414568e-14
+    ],
+    "minimum_rate_Hz": 4.389173576894572e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -7.077671781985373e-13,
+        "phase_index": 6044,
+        "group": 895
+      },
+      "slow": {
+        "minimum_Hz": 6.002228461692396e-05,
+        "phase_index": 2541,
+        "group": 16
+      },
+      "positive": true,
+      "N": 4096,
+      "check_N": 16384
+    }
+  },
+  "J_EE_core": 0.95,
+  "T_ms": 312.74553082469765,
+  "relative_waveform_refinement_change": 5.0888124567595915e-05,
+  "relative_period_change": 2.85710122227556e-10,
+  "status": "NUMERICALLY_STABLE",
+  "attempts": [
+    {
+      "nev": 2,
+      "requested_steps_ms": [
+        0.1,
+        0.05
+      ],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_085_k2_branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_085_k2_branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096_dt0.05.json"
+      ],
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.5150076399762067,
+            0.0
+          ],
+          [
+            0.11678666826086247,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.0030393883752760135,
+          0.0030393883752760135
+        ],
+        "paired_absolute_changes": [
+          0.0001214477116104895,
+          6.582748759144386e-05
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.5150076399762067,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "classification": {
+    "status": "NUMERICALLY_STABLE",
+    "multipliers": [
+      [
+        0.5150076399762067,
+        0.0
+      ],
+      [
+        0.11678666826086247,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.0030393883752760135,
+      0.0030393883752760135
+    ],
+    "paired_absolute_changes": [
+      0.0001214477116104895,
+      6.582748759144386e-05
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": 0,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.5150076399762067,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

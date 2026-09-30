@@ -1,0 +1,271 @@
+{
+  "status": "REGISTERED_BEFORE_REPLAY",
+  "created_epoch": 1790524749.7897632,
+  "question": "Record actual inputs and joint local states across the natural G/K-mediated exit so that the new density closure can be tested in its relevant conductance/transient domain.",
+  "scope": "Exactlyone3.3s read-only continuation16.7to20s from independently verified complete originalstate; no interventions, newnoise, parameterchanges orautonomous replicate. Existing16 geometric g40targets reused independentlyofexitactivity.",
+  "observation": "Every0.1ms all3479groupcounts;16target current/V/Z/M/K/eligibility moments,global causalR/G,actualmembermean externalrate; initialjointstatesandpendingdelayinput forselectednativecells.",
+  "gate": "Original observationarrays slicedexactly tosameclock plus entire20s engine must matchbitwise; normalizeonlythedeclaredConditionalSlowmetadata classname. No downstreamresponse/scientific acceptance beforegate.",
+  "downstream": "Conditional local test will prescribe actualG/R/incomingcounts. This cannot certifyautonomousGfeedback, spatialpropagation or derivatives. No automatic networkcampaign.",
+  "initial_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+  "initial_sha256": "3dcd816a47951b7344427afb61afd36b67f9c56d49203481963f72e5d03f94f9",
+  "producer_sha256": "0cc6628b00d6f22846dffca743698b409e815ac9417e29994bd78b4f696e6885",
+  "selected_groups": [
+    {
+      "group": 531,
+      "role": "surround_u0.2_offset-3",
+      "target_mm": [
+        5.492405429959297,
+        5.33074318906289
+      ],
+      "position_mm": [
+        5.228589500280818,
+        5.25620655863897
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 13,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 833,
+      "role": "surround_u0.2_offset0",
+      "target_mm": [
+        6.6552120608631675,
+        8.096223389521029
+      ],
+      "position_mm": [
+        6.731458066361272,
+        8.235907011729665
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 16,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 1140,
+      "role": "surround_u0.2_offset3",
+      "target_mm": [
+        7.818018691767038,
+        10.861703589979168
+      ],
+      "position_mm": [
+        7.787111618084896,
+        10.762389484711127
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 17,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 342,
+      "role": "surround_u0.5_offset-3",
+      "target_mm": [
+        9.17640204729925,
+        3.7817262428700853
+      ],
+      "position_mm": [
+        9.23440142425542,
+        3.7388367870258636
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 16,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 682,
+      "role": "surround_u0.5_offset0",
+      "target_mm": [
+        10.339208678203121,
+        6.547206443328225
+      ],
+      "position_mm": [
+        10.231140679982538,
+        6.764765446024706
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 16,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 973,
+      "role": "surround_u0.5_offset3",
+      "target_mm": [
+        11.502015309106993,
+        9.312686643786364
+      ],
+      "position_mm": [
+        11.25128172001858,
+        9.248686462262336
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 14,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 185,
+      "role": "surround_u0.8_offset-3",
+      "target_mm": [
+        12.860398664639208,
+        2.232709296677282
+      ],
+      "position_mm": [
+        12.710641753742754,
+        2.201567318756966
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 19,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 549,
+      "role": "surround_u0.8_offset0",
+      "target_mm": [
+        14.023205295543079,
+        4.998189497135422
+      ],
+      "position_mm": [
+        14.21914858810024,
+        5.275142025253961
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 24,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 788,
+      "role": "surround_u0.8_offset3",
+      "target_mm": [
+        15.18601192644695,
+        7.763669697593562
+      ],
+      "position_mm": [
+        15.224524819384067,
+        7.8195209374590915
+      ],
+      "population": 0,
+      "region": 2,
+      "N": 23,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 945,
+      "role": "core_A",
+      "target_mm": [
+        4.199214315969863,
+        9.128901353649564
+      ],
+      "position_mm": [
+        4.236054835640872,
+        9.320865221104356
+      ],
+      "population": 0,
+      "region": 0,
+      "N": 6,
+      "theta_mv": 17.875562239798878
+    },
+    {
+      "group": 364,
+      "role": "core_B",
+      "target_mm": [
+        16.47920304043638,
+        3.965511533006886
+      ],
+      "position_mm": [
+        16.23397810067011,
+        3.705550521498234
+      ],
+      "population": 0,
+      "region": 1,
+      "N": 14,
+      "theta_mv": 17.838709336652403
+    },
+    {
+      "group": 2613,
+      "role": "I_u0",
+      "target_mm": [
+        4.199214315969863,
+        9.128901353649564
+      ],
+      "position_mm": [
+        4.239203615352212,
+        9.227349060600268
+      ],
+      "population": 1,
+      "region": 2,
+      "N": 10,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 2498,
+      "role": "I_u0.2",
+      "target_mm": [
+        6.6552120608631675,
+        8.096223389521029
+      ],
+      "position_mm": [
+        6.672522496049163,
+        7.828722357988553
+      ],
+      "population": 1,
+      "region": 2,
+      "N": 5,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 2386,
+      "role": "I_u0.5",
+      "target_mm": [
+        10.339208678203121,
+        6.547206443328225
+      ],
+      "position_mm": [
+        10.839817454732083,
+        6.22076307486355
+      ],
+      "population": 1,
+      "region": 2,
+      "N": 5,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 2272,
+      "role": "I_u0.8",
+      "target_mm": [
+        14.023205295543079,
+        4.998189497135422
+      ],
+      "position_mm": [
+        13.757610352970545,
+        4.67264567167218
+      ],
+      "population": 1,
+      "region": 2,
+      "N": 7,
+      "theta_mv": 18.0
+    },
+    {
+      "group": 2237,
+      "role": "I_u1",
+      "target_mm": [
+        16.47920304043638,
+        3.965511533006886
+      ],
+      "position_mm": [
+        16.265480055092162,
+        4.187317221213642
+      ],
+      "population": 1,
+      "region": 2,
+      "N": 5,
+      "theta_mv": 18.0
+    }
+  ],
+  "human_review": "PENDING"
+}

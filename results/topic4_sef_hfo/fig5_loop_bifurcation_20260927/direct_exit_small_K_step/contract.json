@@ -1,0 +1,42 @@
+{
+  "status": "REGISTERED_BEFORE_K_STEP",
+  "created_epoch": 1790537658.4884977,
+  "question": "Does the directly corresponding K9 high state extend along the same actual Z/K field family, when a measured DC tangent is tested by fresh nonlinear cell responses?",
+  "design": {
+    "initial_K": 9.0,
+    "requested_delta_K": 0.00625,
+    "maximum_predictor_halvings": 0,
+    "maximum_nonlinear_evaluations": 3,
+    "replicas_per_stream": 256,
+    "streams": 2,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "evaluation_seeds": [
+      [
+        928911,
+        928912
+      ],
+      [
+        928913,
+        928914
+      ],
+      [
+        928915,
+        928916
+      ]
+    ],
+    "devices": [
+      0,
+      1
+    ]
+  },
+  "physics": "Actual16.7s spatial Z remains fixed atmean.21; K scales its own fixedactualfield. Graph/externalmean unchanged. Source rates, localM and causalR/G follow selfconsistency. Original density cell equations evaluate every nonlinear residual.",
+  "predictor": "Measured all-target DC Jacobian atK9, implicitM and physicalG included. Kderivative uses the different K reversal potential. Finite-difference same-equation parameter check before sampling. Halve requestedstep only if projection would change anyrate by>5Hz or anypredictedchange exceeds100Hz.",
+  "correction": "At most two frozen-Jacobian quasi-Newton corrections at the chosenK, each followed by fresh independent direct counts. Reject a correction that increases both source-population RMS residuals; retain every attempted array. No neural transfer fit and no automatic nextK.",
+  "numerical_stopping": "Near-equilibrium candidate only if each E/I source weightedRMS residual and E individualtargetRMS is <=2 times its combined prediction/newcount samplingSEM (absolute roundoff floor1e-7Hz), and no source group exceeds6 combinedSEM+1e-7Hz. These numerical criteria do not certify exactroot/nativecorrespondence or dynamical stability. All inherited amplitude failures and unestimable components remain.",
+  "limits": "Frozen local derivatives are predictors, not claimed accurate throughout the step. Finite4s record, reset phase, fixedM approximation and source averaging remain distinct from MC sampling error. Full delays/G/M stability and native edge correspondence still required.",
+  "producer_sha256": "697b66d33399111024d6ac2ff68692ad407c01b3e84caa7f8fc8bcfdbb153336",
+  "system_sha256": "432bcd2268c5d93493aab5d8c1b478bf267ffb61977917197633dd116d0456df",
+  "baseline_sha256": "15de01892ece042343770c5081236a7a4a318cff64a5f2dd3ea6a1629735c430",
+  "formal_bifurcation_allowed": false
+}

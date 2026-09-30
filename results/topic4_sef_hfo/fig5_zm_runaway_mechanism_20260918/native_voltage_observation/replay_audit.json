@@ -1,0 +1,26 @@
+{
+  "status": "NATIVE_VOLTAGE_REPLAY_PASS",
+  "final_engine_difference_keys": [],
+  "rows": [
+    {
+      "chunk": "0000090000_0000095000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    },
+    {
+      "chunk": "0000095000_0000100000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    }
+  ],
+  "voltage_samples": 1370,
+  "spike_steps": 13700,
+  "neuron_counts": [
+    754,
+    786,
+    30460,
+    102
+  ],
+  "source": "Original native reference; no reduced-model input",
+  "scope": "Native membrane/input description. Does not validate a population closure or identify a bifurcation; no input waveform from a reduced model is supplied."
+}

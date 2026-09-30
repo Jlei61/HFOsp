@@ -1,0 +1,191 @@
+{
+  "status": "FINITE_DIRECTION_AND_EVALUATION_CHECK_COMPLETE",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/TR2_saddle_directions/result.json",
+  "exact_parameter_eigenvectors": false,
+  "parameter_offset": 5.895689492163569e-10,
+  "fine_mode_indices": [
+    0,
+    1
+  ],
+  "coarse_mode_indices": [
+    0,
+    1
+  ],
+  "paired_history_interpolated_mode_angles_degrees": [
+    0.03505396521845093,
+    0.2792543890158031
+  ],
+  "pure_mode_controls": [
+    {
+      "norm": 0.02196395394216443,
+      "coefficients": [
+        0.0219639539421567,
+        3.056111909848473e-18
+      ],
+      "relative_two_mode_residual": 4.858421128895741e-16,
+      "angles_to_unstable_stable_degrees": [
+        4.932163050233013e-12,
+        83.53841291235274
+      ],
+      "normalized_basis_condition": 1.1196496096688477
+    },
+    {
+      "norm": 0.027946536754177666,
+      "coefficients": [
+        5.959357104885735e-18,
+        0.02794653675416678
+      ],
+      "relative_two_mode_residual": 1.4133203299986499e-15,
+      "angles_to_unstable_stable_degrees": [
+        83.53841291235271,
+        3.0089544330738803e-12
+      ],
+      "normalized_basis_condition": 1.1196496096688477
+    }
+  ],
+  "history_direct_evaluation_checks": [
+    {
+      "slow_index": 0,
+      "maximum_history_evaluation_difference_per_ms": 8.673617379884035e-18,
+      "Taylor_remainder_bound_per_ms": 6.724979963743718e-21,
+      "order": 6
+    },
+    {
+      "slow_index": 158,
+      "maximum_history_evaluation_difference_per_ms": 1.0408340855860843e-17,
+      "Taylor_remainder_bound_per_ms": 6.724979963743718e-21,
+      "order": 6
+    },
+    {
+      "slow_index": 248,
+      "maximum_history_evaluation_difference_per_ms": 1.0408340855860843e-17,
+      "Taylor_remainder_bound_per_ms": 6.724979963743718e-21,
+      "order": 6
+    }
+  ],
+  "exploratory_local_slope_checks": [
+    {
+      "side": "approach_stable",
+      "minimum_distance_over_closest": 5,
+      "n": 11,
+      "slow_indices": [
+        88,
+        96,
+        104,
+        112,
+        120,
+        126,
+        128,
+        130,
+        132,
+        134,
+        136
+      ],
+      "fitted_exponent_per_s": -0.024284230580957987,
+      "log_fit_RMS": 0.0027244869499479032,
+      "maximum_mode_angle_degrees": 4.8738708797009735,
+      "maximum_two_mode_relative_residual": 0.0005793071800255669
+    },
+    {
+      "side": "departure_unstable",
+      "minimum_distance_over_closest": 5,
+      "n": 13,
+      "slow_indices": [
+        184,
+        186,
+        188,
+        190,
+        192,
+        200,
+        208,
+        216,
+        224,
+        232,
+        240,
+        248,
+        0
+      ],
+      "fitted_exponent_per_s": 0.01938332250125767,
+      "log_fit_RMS": 0.004529668668083542,
+      "maximum_mode_angle_degrees": 1.317410712366683,
+      "maximum_two_mode_relative_residual": 0.001139135764595022
+    },
+    {
+      "side": "approach_stable",
+      "minimum_distance_over_closest": 10,
+      "n": 7,
+      "slow_indices": [
+        88,
+        96,
+        104,
+        112,
+        120,
+        126,
+        128
+      ],
+      "fitted_exponent_per_s": -0.024259097772732444,
+      "log_fit_RMS": 0.0028336471375793345,
+      "maximum_mode_angle_degrees": 4.8738708797009735,
+      "maximum_two_mode_relative_residual": 0.0005793071800255669
+    },
+    {
+      "side": "departure_unstable",
+      "minimum_distance_over_closest": 10,
+      "n": 8,
+      "slow_indices": [
+        200,
+        208,
+        216,
+        224,
+        232,
+        240,
+        248,
+        0
+      ],
+      "fitted_exponent_per_s": 0.019339751224937956,
+      "log_fit_RMS": 0.004466511973957515,
+      "maximum_mode_angle_degrees": 1.317410712366683,
+      "maximum_two_mode_relative_residual": 0.001139135764595022
+    },
+    {
+      "side": "approach_stable",
+      "minimum_distance_over_closest": 20,
+      "n": 5,
+      "slow_indices": [
+        88,
+        96,
+        104,
+        112,
+        120
+      ],
+      "fitted_exponent_per_s": -0.02422059005353002,
+      "log_fit_RMS": 0.002550218650790092,
+      "maximum_mode_angle_degrees": 4.8738708797009735,
+      "maximum_two_mode_relative_residual": 0.0005793071800255669
+    },
+    {
+      "side": "departure_unstable",
+      "minimum_distance_over_closest": 20,
+      "n": 7,
+      "slow_indices": [
+        208,
+        216,
+        224,
+        232,
+        240,
+        248,
+        0
+      ],
+      "fitted_exponent_per_s": 0.019316177291654184,
+      "log_fit_RMS": 0.004129613185533703,
+      "maximum_mode_angle_degrees": 1.317410712366683,
+      "maximum_two_mode_relative_residual": 0.001139135764595022
+    }
+  ],
+  "reference_exponents_per_s": [
+    0.019420995185460272,
+    -0.024421489495719574
+  ],
+  "selection": "Exploratory sensitivity: within 5 degrees of the relevant right mode, rate distance below 1e-3 Hz and above 5/10/20 times its sampled minimum; at least three samples.",
+  "scope": "Full 935-group state and history projection on two nearby-J right Floquet vectors. Least-squares coefficients are not adjoint modal coordinates. Common fast-phase alignment followed by linear section projection is not a solved nonlinear Poincare return. This does not establish invariant-manifold connection, exact-J eigendirections or torus stability."
+}

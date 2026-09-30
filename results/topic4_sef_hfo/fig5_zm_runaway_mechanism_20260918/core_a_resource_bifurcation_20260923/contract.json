@@ -1,0 +1,42 @@
+{
+  "created_local": "2026-09-23T18:28:54.832825+08:00",
+  "question": "Can Core A resource depletion alone change Core A from self-limited activity to sustained local activity while resources outside Core A remain at the same interictal level?",
+  "priority": "User explicitly prioritizes the Core A resource bifurcation over global-mean-Z continuation. Registered global native_mid9420_q pair is deferred, not run.",
+  "network": "Entire unchanged g40/3479group spatial model; original connections, physical delays and locked conditioned39+transient response. No isolated-core replacement or physical parameter refit.",
+  "controls": "Only Core A E-cell-group Z changes. Core B, surround and I Z are bitwise identical in both conditions and held. M is dynamic everywhere. Same full fast/local/M/delay initial state, original constant external mean, no future count innovations, private Q retained.",
+  "field_family": "Actual native Core A spatial Z patterns; all outside-Core-A values held at native9000ms. First screen uses Core A9000ms and10370ms. Native9s is a late-interictal background, not the earlier4.025s figure state; any later background sensitivity is separate.",
+  "primary": "Core A mean E rate in Hz/neuron,10ms-smoothed local rate, local quiet<5Hz, complete local activity episodes bounded by20ms quiet, local50Hz duty. Same readouts for B and surround to identify spread; original global-onset readout remains separate.",
+  "axes": "D_A=1-cell-count-weighted mean Z over Core A only; y=Core A E rate. A field varies internally as recorded, not replaced by a uniformscalar. D_global is audit metadata only.",
+  "coordinates": {
+    "reference9000": {
+      "D_A": 0.2557216996140609,
+      "D_global": 0.2164660210396102,
+      "Z_A": 0.7442783003859391
+    },
+    "coreA10370_background9000": {
+      "D_A": 0.40052149864164854,
+      "D_global": 0.2198778663041978,
+      "Z_A": 0.5994785013583515
+    }
+  },
+  "conditions": {
+    "reference": {
+      "label": "reference",
+      "field": "reference9000",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9000_from_lower/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    },
+    "coreA_depleted": {
+      "label": "coreA_depleted",
+      "field": "coreA10370_background9000",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9000_from_lower/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    }
+  },
+  "budget": "Two10s paired continuations, exact replay/non-Core-A field checks and independent local/global readout. No parameter campaign or bifurcation label from these two traces.",
+  "interpretation": "A local state contrast justifies local-parameter continuation. If absent, report that this tested Core-A-only intervention is insufficient at this background; do not claim no local bifurcation anywhere. Regionally localized activity does not prove an isolated-core bifurcation.",
+  "correspondence": "Current conditional drift remains only partially linked to native SNN. Earlier native two-core Z interventions support separating local persistence from global recruitment, but are not an A-only control.",
+  "model_promoted": false
+}

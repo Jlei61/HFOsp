@@ -1,0 +1,35 @@
+{
+  "rows": [
+    {
+      "lead_core": "A",
+      "peak_threshold_hz": 10.0,
+      "common_active_surround_cells": 130,
+      "centroid_order_spearman": 0.9540455284108754,
+      "median_absolute_centroid_difference_ms": 21.665935254947577
+    },
+    {
+      "lead_core": "A",
+      "peak_threshold_hz": 20.0,
+      "common_active_surround_cells": 121,
+      "centroid_order_spearman": 0.9626202411597343,
+      "median_absolute_centroid_difference_ms": 22.48495087485466
+    },
+    {
+      "lead_core": "B",
+      "peak_threshold_hz": 10.0,
+      "common_active_surround_cells": 173,
+      "centroid_order_spearman": 0.9917721607001314,
+      "median_absolute_centroid_difference_ms": 20.092910291143298
+    },
+    {
+      "lead_core": "B",
+      "peak_threshold_hz": 20.0,
+      "common_active_surround_cells": 166,
+      "centroid_order_spearman": 0.9940500160686296,
+      "median_absolute_centroid_difference_ms": 20.282566856196244
+    }
+  ],
+  "definition": "Native 0.5mm E-rate field averaged to 1mm by actual E-cell counts. Means conditioned on leading-core identity, aligned to leading peak, 5ms smoothing, no temporal warping.",
+  "unit": "Single native seed; direction means from all detected paired core events, not independent network replicates.",
+  "limitation": "Exploratory spatial check; 10/20Hz common-participation thresholds are sensitivity diagnostics, not predeclared acceptance thresholds. Cells intersecting either core excluded from spatial-order correlation."
+}

@@ -1,19 +1,19 @@
 {
   "status": "PASS",
-  "source_root": "/tmp/hfosp-six-rate-publish-20260917",
+  "source_root": "/home/honglab/leijiaxin/HFOsp/.worktrees/main-cherry",
   "model_source": "results/topic4_sef_hfo/core_burst_bifurcation_v2_20260915",
   "coupling_scaling": "Only AA/BB EE first moments scale by g; second moments by g^2",
   "no_direct_core_AB_edges": true,
-  "fold_g_error": 2.162714451969805e-13,
-  "fold_rate_error_hz": 5.783706846784753e-13,
-  "fold_residual": 5.878630915390204e-13,
-  "fold_zero_mode_error": 5.878630915390204e-13,
+  "fold_g_error": 0.0,
+  "fold_rate_error_hz": 0.0,
+  "fold_residual": 1.7499335314141717e-12,
+  "fold_zero_mode_error": 1.7498225091117092e-12,
   "periodic_orbit_checks": [
     {
       "condition": "20b",
       "file": "results/topic4_sef_hfo/core_network_bifurcation_v7_20260916/periodic/condition_20b/g1.12183000_N4096.npz",
       "period_ms": 836.719772031536,
-      "residual": 7.216449660063518e-14,
+      "residual": 6.938893903907228e-14,
       "mean_error_hz": 0.0
     },
     {

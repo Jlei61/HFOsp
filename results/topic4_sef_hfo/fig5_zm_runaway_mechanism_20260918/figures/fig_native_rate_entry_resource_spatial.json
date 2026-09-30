@@ -1,0 +1,30 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/shared_variance_network_sensitivity/entry_resource_coordinates.json",
+  "panels": [
+    {
+      "label": "Native SNN",
+      "time_ms": 9870.0,
+      "field_window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "global_D": 0.2563444253447549,
+      "field_mean_E_Hz": 220.11124928295706
+    },
+    {
+      "label": "Rate model",
+      "time_ms": 8930.0,
+      "field_window_ms": [
+        8905.0,
+        8955.0
+      ],
+      "global_D": 0.26130457515083255,
+      "field_mean_E_Hz": 202.588750015073
+    }
+  ],
+  "human_visual_acceptance": "PENDING",
+  "agent_PNG_PDF_check": "PASS: both PNG and rendered same PDF inspected; labels/colorbars complete, common spatial axes and row scales.",
+  "selection": "Native measured9.870s checkpoint; last stored rate resource sample before its operational entry. No time rescaling or coordinate interpolation.",
+  "scope": "This event-aligned post-hoc description does not replace or relax the registered same-clock D criterion. One realization; resource proximity does not imply identical vector field, basin or bifurcation.",
+  "Z_and_M": "Dynamic in both trajectories; distinct histories and state-dependent output noise."
+}

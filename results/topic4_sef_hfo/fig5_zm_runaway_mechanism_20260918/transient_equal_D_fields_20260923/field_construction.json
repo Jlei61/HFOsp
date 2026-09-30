@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "sample_bracket_ms": [
+        7670.0,
+        7675.0
+      ],
+      "interpolation_weight": 0.882167298087254,
+      "interpolated_time_ms": 7674.410836490436,
+      "arm": "native_shape",
+      "D": 0.20000000000000062,
+      "regional_Z": {
+        "Core A": 0.7561822425560153,
+        "Core B": 0.7644071824168441,
+        "Surround": 0.8020031038651708
+      }
+    },
+    {
+      "sample_bracket_ms": [
+        7550.0,
+        7560.0
+      ],
+      "interpolation_weight": 0.1829389784703761,
+      "interpolated_time_ms": 7551.829389784703,
+      "arm": "free_rate_shape",
+      "D": 0.19999999999999962,
+      "regional_Z": {
+        "Core A": 0.6009414636802597,
+        "Core B": 0.5797871243365689,
+        "Surround": 0.8106098968042204
+      }
+    }
+  ],
+  "weighted_spatial_RMS": 0.14406170926658463
+}

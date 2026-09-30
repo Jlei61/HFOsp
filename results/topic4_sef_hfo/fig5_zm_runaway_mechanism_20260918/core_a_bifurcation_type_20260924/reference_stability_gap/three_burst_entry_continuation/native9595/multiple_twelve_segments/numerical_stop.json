@@ -1,0 +1,26 @@
+{
+  "time": "2026-09-25T06:01:36.241920+08:00",
+  "status": "STOPPED_PROCESS_EXITED",
+  "pid": 3283145,
+  "retained_source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/multiple_twelve_segments/iteration00",
+  "accepted_period": {
+    "period_ms": 791.5794863177907,
+    "durations_ms": [
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      65.95,
+      66.12948631779068
+    ],
+    "fixed_grid_segment_ms": 65.95
+  },
+  "reason": "First 40-dimensional full cyclic linear solve ended at relative residual0.02196, above its0.001 target. One actual nonlinear update was accepted and all12 node checkpoints preserved. Continue those exact nonlinear nodes with independently tested exact LINEAR block condensation; physical model, matching equations, positivity/refractory constraints and all original gates unchanged. No bifurcation interpretation of the numerical stop.",
+  "exit_code": 130
+}

@@ -1,0 +1,15 @@
+{
+  "status": "BOUNDED_RECONSTRUCTION_RETRY_RUNNING",
+  "at": "2026-09-20T00:11:42.540915+08:00",
+  "pid": 456104,
+  "previous_pid": 247078,
+  "requested_dt_max_ms": 0.000390625,
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "parity": "bounded_reconstruction_parity.json",
+  "model_changed": false,
+  "numerical_grid_changed": false,
+  "criteria_changed": false,
+  "state_storage": "disk, component-major",
+  "gain_storage": "disk explicitly to avoid anonymous-memory allocation heuristic",
+  "scope": "Complete same registered two-map diagnostic with bounded exact Fourier reconstruction and reclaimable large caches."
+}

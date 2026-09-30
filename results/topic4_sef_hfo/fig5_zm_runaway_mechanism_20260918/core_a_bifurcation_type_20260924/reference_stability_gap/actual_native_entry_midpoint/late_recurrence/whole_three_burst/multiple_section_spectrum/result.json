@@ -1,0 +1,65 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "divisor": 1,
+    "actual_time_ms": 790.2861378603747,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.912982809870543,
+        "difference_rms": 1.9304953869987213e-11,
+        "relative_rms": 1.2131574639804606e-12
+      },
+      "GABA": {
+        "reference_rms": 8.277515829135869,
+        "difference_rms": 1.9756534300039134e-11,
+        "relative_rms": 2.386770947691636e-12
+      },
+      "M": {
+        "reference_rms": 0.02080475215086039,
+        "difference_rms": 5.821158230343222e-13,
+        "relative_rms": 2.7979945101641046e-11
+      },
+      "covariance": {
+        "reference_rms": 37.568485274080594,
+        "difference_rms": 1.0947522640227853e-11,
+        "relative_rms": 2.914017576263798e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.08879064795733531,
+        "difference_rms": 2.3693234087268053e-12,
+        "relative_rms": 2.668438020483065e-11
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004700838862190439,
+        "difference_rms": 1.4377476438016054e-14,
+        "relative_rms": 3.0584916563841997e-12
+      }
+    },
+    "combined_relative_rms": 1.587209914489616e-11
+  },
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 0.00033016133604326964,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 0.00030042132735049896,
+      "pass_gate": true
+    }
+  ],
+  "verified": [
+    {
+      "real": -0.14838720794791896,
+      "imag": 0.0,
+      "relative_residual": 2.130393503395521e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    }
+  ],
+  "seconds": 1030.5172610282898,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_SHIFT_AND_MESH",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

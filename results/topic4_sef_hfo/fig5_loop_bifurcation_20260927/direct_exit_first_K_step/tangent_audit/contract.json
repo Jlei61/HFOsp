@@ -1,0 +1,9 @@
+{
+  "status": "REGISTERED_AFTER_PREDICTOR_GUARD_FAILURE",
+  "created_epoch": 1790537562.1552668,
+  "question": "Is the large local K tangent reproducible across measured full/half amplitudes and independent replica halves, and which cells carry it?",
+  "design": "Reassemble the identical DC system with full amplitude, half amplitude, and each independent 128-replica half of the full-amplitude measurements. Solve the same implicit tangent. Save residual and localization. No new nonlinear counts, no stability labels.",
+  "limits": "Numerical perturbation audit of the existing measured derivative, not independent physiological data or native noise. Agreement would not certify a bifurcation, and disagreement requires diagnosing the contributing cells before continuing.",
+  "producer_sha256": "7f38c3d98f64804afefbc1090cce1792456af8f90c8961de56bbacbf545e7df7",
+  "formal_bifurcation_allowed": false
+}

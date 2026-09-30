@@ -1,0 +1,9 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/multiple_nine_burst_refine/iteration00",
+  "segments": [
+    2
+  ],
+  "question": "Does the near-root residual, now almost entirely in rate history, come from negative cubic interpolation values at quiet shooting nodes rather than physical lack of periodicity?",
+  "method": "Retain the same original full-step flow and four actual adjacent states. Compare its cubic interpolation with their convex linear interpolation only as a diagnostic. Quantify the minimum mismatch contributed by negative values in physically nonnegative coordinates. No clipping of accepted flow, no solver-gate change and no bifurcation label.",
+  "model_promoted": false
+}

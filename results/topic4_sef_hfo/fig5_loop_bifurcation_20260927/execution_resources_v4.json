@@ -1,0 +1,13 @@
+{
+  "stage": "RESOURCE_ONLY_AMENDMENT",
+  "created_epoch": 1790520681.1893914,
+  "global_native_cap": 13,
+  "per_GPU_cap": {
+    "0": 7,
+    "1": 6
+  },
+  "per_worker_reserved_GPU_GiB": 3,
+  "host_available_gate_GiB": 70,
+  "reason": "GPU0 observed49percent utilization,17.1GiBfree; host167GiB available. Allow exactlyoneadditionalalreadyfrozenentry-noise worker onGPU0. GPU1 remains6nativeplusonebounded densityjob; no scientificcoordinates,seeds,horizons or runningworker state changed.",
+  "coexistence": "Existingexit/noisev2controllers keepglobal12/device6; sharednative_dispatch.lock and liveworker accounting bound mixedcontrollers by13globally and7/6perGPU. Only idleentrynoisecontroller replaced; existingnativeworkers untouched."
+}

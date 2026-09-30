@@ -1,0 +1,68 @@
+{
+  "status": "LOCAL_FLIP_CANDIDATE_HAS_NO_OBSERVED_ONSET_LINK_IN_PAIRED_4S_FLOW",
+  "rows": [
+    {
+      "label": "uninterrupted_root_control",
+      "regions": [
+        {
+          "region": "Global E",
+          "mean_hz": 35.24294924222429,
+          "complete_events": 14,
+          "max_complete_duration_ms": 128
+        },
+        {
+          "region": "Core A",
+          "mean_hz": 120.16918867765634,
+          "complete_events": 14,
+          "max_complete_duration_ms": 103
+        },
+        {
+          "region": "Core B",
+          "mean_hz": 91.96888110218924,
+          "complete_events": 14,
+          "max_complete_duration_ms": 133
+        },
+        {
+          "region": "Surround",
+          "mean_hz": 31.67692931522993,
+          "complete_events": 14,
+          "max_complete_duration_ms": 125
+        }
+      ],
+      "spatial_persistent_fraction_last1s": 0.0
+    },
+    {
+      "label": "uninterrupted_from_return09",
+      "regions": [
+        {
+          "region": "Global E",
+          "mean_hz": 34.99667822310868,
+          "complete_events": 14,
+          "max_complete_duration_ms": 138
+        },
+        {
+          "region": "Core A",
+          "mean_hz": 114.94742931545994,
+          "complete_events": 15,
+          "max_complete_duration_ms": 113
+        },
+        {
+          "region": "Core B",
+          "mean_hz": 92.51678211166549,
+          "complete_events": 14,
+          "max_complete_duration_ms": 139
+        },
+        {
+          "region": "Surround",
+          "mean_hz": 31.53332733735562,
+          "complete_events": 14,
+          "max_complete_duration_ms": 135
+        }
+      ],
+      "spatial_persistent_fraction_last1s": 0.0
+    }
+  ],
+  "interpretation": "Both original uninterrupted trajectories retain short terminating CoreA activity. The local numerical section-map jump cannot be equated with onset; a CoreB timing change/section intersection change remains relevant. This finite control does not exclude all later long episodes or disprove every flip bifurcation. No reason to promote this candidate as the desired onset boundary.",
+  "decision": "Stop additional criticality/daughter refinements at this numerical flip until an onset link and physical mesh qualification exist. Keep core onset investigation active.",
+  "target_entry_type": "NOT_ESTABLISHED"
+}

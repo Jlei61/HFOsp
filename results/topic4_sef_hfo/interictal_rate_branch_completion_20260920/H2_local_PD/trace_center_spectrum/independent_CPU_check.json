@@ -1,0 +1,54 @@
+{
+  "status": "FULL_ORIGINAL_RHS_CHECKED",
+  "timestamp": 1789894397.3558547,
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/trace_center_spectrum/physical_child.json",
+  "profile_fingerprint": {
+    "path": "/data/hfosp/rate_periodic_arrays/orbits/PD4_child_trace_center_20260920_a0.03590_N1024.npz",
+    "size": 6795825,
+    "mtime_ns": 1789894238292358107
+  },
+  "check": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD4_child_trace_center_20260920_a0.03590_N1024.npz",
+    "J": 0.9463110017234515,
+    "T_ms": 593.7951175833829,
+    "N": 1024,
+    "check_N": 4096,
+    "stored_collocation_error_Hz": 1.156626218510024e-13,
+    "original_mesh_CPU_collocation_error_Hz": 3.9898639947466563e-14,
+    "oversampled_residual_at_original_nodes_Hz": 3.8163916471489756e-14,
+    "between_nodes_integrated_error_Hz": 3.8163916471489756e-14,
+    "between_nodes_regional_error_A_B_surround_Hz": [
+      1.832431085552921e-15,
+      4.0276179558928755e-15,
+      1.9405830710053664e-16
+    ],
+    "full_RHS_rate_error_Hz_per_ms": 1.3791051634015616e-13,
+    "full_RHS_linear_state_max_abs": 9.381384558082573e-15,
+    "transfer_48_vs_96_quadrature_max_Hz": 2.2551405187698492e-14,
+    "minimum_interpolated_group_rate_Hz": 0.004831342233116757,
+    "refractory_rate_bound_excess_Hz": 0.0,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 4.406837915981435e-05,
+        "phase_index": 2751,
+        "group": 18
+      },
+      "slow": {
+        "minimum_Hz": 0.005693685209140143,
+        "phase_index": 2918,
+        "group": 17
+      },
+      "positive": true,
+      "N": 1024,
+      "check_N": 4096
+    }
+  },
+  "proper_subperiod_relative_distances": {
+    "2": 0.006916492122857344,
+    "3": 1.5580490445988824,
+    "4": 1.5548279318965588
+  },
+  "stability_status": "FULL_HISTORY_SPECTRUM_PENDING",
+  "model_changed": false,
+  "scope": "Independent CPU reconstruction of all 935 populations, nine local states, and original physical delays; positive physical periodic profile, not a stability classification or new bifurcation."
+}

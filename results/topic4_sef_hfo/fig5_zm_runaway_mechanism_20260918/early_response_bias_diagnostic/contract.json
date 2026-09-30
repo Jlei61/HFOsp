@@ -1,0 +1,29 @@
+{
+  "created_local": "2026-09-20T14:27:16.319234+08:00",
+  "question": "Can the measured local response underbias account for missing early surround recruitment in closed feedback?",
+  "hypothesis": "One constant E and one constant I log-hazard offset may remove systematic local bias; if transferred inputs improve but network recruitment does not, this simple local bias is insufficient.",
+  "new_candidate": "Exploratory additive ell offsets; all parent weights immutable. This modifies the response function including its stationary gain. It does not fix the previous candidate by definition or inherit its branches.",
+  "fit_groups": {
+    "E": [
+      833,
+      682,
+      549
+    ],
+    "I": [
+      2386
+    ]
+  },
+  "fit_ms": [
+    500,
+    1500
+  ],
+  "fit_target": "Conditional independentGaussianLIF dt0.1 ensemble mean on these inputs, 50ms bins. No native output or onset target enters the objective.",
+  "fit": "One bounded scalar least-squares minimization per population, offset in [-log(2),log(2)], equal relative waveform weight per training group. No group-specific coefficients or subsequent retuning.",
+  "transfer": "All16 groups: full0.5-3s and later1.5-3s. Off-axis E, both cores and other I groups not used in fit. These profiles have already been inspected, so this is development transfer, not blind validation.",
+  "local_gate": "Every group: 50ms waveform relativeL2<=.15 and total-countrelativeerror<=.10 in full and later windows, versus both0.1and0.05LIF references. Passing only permits a diagnostic network run, not promotion.",
+  "network": "If localgate passes: one0-3s trajectory using PhysicalDelayCountEngine, same graph/groups/fineinput/seed1/dt0.05/ZM laws andinitialstate. Only E/I final logitbias differs. Existing unmodified baseline reused.",
+  "observations": "Original20x20 spatialfields, groupcounts, Z/M, strictcompleteevents/quietfraction and regionalrate. No event time alignment. Shortwindow cannot validate onset or entireinterictalstate.",
+  "numerical": "Invert saved own expected flux to logits and reconstruct to roundoff. Verify last-layeronly modification and restored-parent100msbitwise prefix before one network run.",
+  "budget": "Two scalar fits, fixed local transfer checks and at most one3s network diagnostic. No other parameter search, fulltrajectory extension, newseed or branch launch. Failure preserved, no automatic retuning.",
+  "scientific_acceptance": "Current original local/native failures retained; goal remains incomplete."
+}

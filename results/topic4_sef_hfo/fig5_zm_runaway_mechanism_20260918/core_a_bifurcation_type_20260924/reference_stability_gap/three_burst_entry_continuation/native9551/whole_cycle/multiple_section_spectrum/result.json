@@ -1,0 +1,83 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "divisor": 1,
+    "actual_time_ms": 790.979087721665,
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.90865989643874,
+        "difference_rms": 3.197426294655263e-11,
+        "relative_rms": 2.0098652655029906e-12
+      },
+      "GABA": {
+        "reference_rms": 8.24845758057432,
+        "difference_rms": 4.85458207278525e-11,
+        "relative_rms": 5.88544224827939e-12
+      },
+      "M": {
+        "reference_rms": 0.020976214379426594,
+        "difference_rms": 1.254029328456372e-12,
+        "relative_rms": 5.978339588702526e-11
+      },
+      "covariance": {
+        "reference_rms": 37.565874021929396,
+        "difference_rms": 3.196044660586805e-11,
+        "relative_rms": 8.507840543577096e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.08875591366040757,
+        "difference_rms": 2.1223734285481944e-12,
+        "relative_rms": 2.391247344564205e-11
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004706135296053763,
+        "difference_rms": 3.5760346675795224e-14,
+        "relative_rms": 7.598665237223706e-12
+      }
+    },
+    "combined_relative_rms": 2.659261283956873e-11
+  },
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 0.0003742158052190786,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 0.00013864838577153291,
+      "pass_gate": true
+    }
+  ],
+  "verified": [
+    {
+      "real": 0.4421189700977788,
+      "imag": 0.0,
+      "relative_residual": 3.2741414471848086e-07,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.4207277046783039,
+      "imag": 0.0,
+      "relative_residual": 2.5690487976591345e-08,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": -0.2767674730685351,
+      "imag": 0.0,
+      "relative_residual": 5.068602274612631e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.06835276634354068,
+      "imag": 0.0327465375794138,
+      "relative_residual": 1.863450595204484e-09,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 1322.3929016590118,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_SHIFT_AND_MESH",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

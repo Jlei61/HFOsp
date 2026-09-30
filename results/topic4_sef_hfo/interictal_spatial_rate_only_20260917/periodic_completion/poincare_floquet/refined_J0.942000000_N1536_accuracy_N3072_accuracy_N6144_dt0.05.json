@@ -1,0 +1,57 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/refined_J0.942000000_N1536_accuracy_N3072_accuracy_N6144.npz",
+  "J_EE_core": 0.942,
+  "T_ms": 784.9764952519879,
+  "dt_ms": 0.049998502882292226,
+  "history_dimension": 679745,
+  "minimum_occupied_delay_ms": 0.1,
+  "multipliers": [
+    [
+      0.44014559349696714,
+      -0.006873493000378872
+    ],
+    [
+      0.44014559349696714,
+      0.006873493000378872
+    ]
+  ],
+  "residuals": [
+    1.2490102153863561e-12,
+    1.2490102153863561e-12
+  ],
+  "phase_tangent_relative_defect": 0.0005290672722802553,
+  "phase_overlap": [
+    3.504512467946526e-13,
+    3.504512467946526e-13
+  ],
+  "section_time_shift_coefficients": [
+    [
+      -4.554221092909681,
+      2.658816885745861
+    ],
+    [
+      -4.554221092909681,
+      -2.658816885745861
+    ]
+  ],
+  "full_state_generalized_eigen_residuals": [
+    1.2490236949429216e-12,
+    1.2490236949429216e-12
+  ],
+  "polynomial_filter_rho": 0.45613042289029104,
+  "transformed_eigenvalues": [
+    [
+      -0.0070828971280077375,
+      0.0029154660422901543
+    ],
+    [
+      -0.0070828971280077375,
+      -0.0029154660422901543
+    ]
+  ],
+  "filter_coverage_threshold": 0.543869577109709,
+  "smallest_returned_transformed_modulus": 0.007659463034030993,
+  "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+  "seconds": 303.04241394996643,
+  "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+}

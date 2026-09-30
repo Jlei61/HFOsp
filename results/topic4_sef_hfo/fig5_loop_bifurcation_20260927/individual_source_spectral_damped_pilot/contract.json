@@ -1,0 +1,17 @@
+{
+  "status": "REGISTERED_BEFORE_NUMERICAL_DAMPING",
+  "created_epoch": 1790554088.5725217,
+  "question": "Does numerical underrelaxation remove the growing inhibitory residual of parallel-Jacobi stationary spectral iteration while preserving the relevant native conditional field?",
+  "trigger": "The completed three-generation pilot retains E field within0.11Hz but inhibitory cell update RMS grows0.926 to5.241Hz. That is a numerical map observation, not physical-time instability.",
+  "equation": "X_next=(1-alpha)*X+alpha*F(X), X=(individual source means, diagonal source PSDs), alpha0.1. F is the unchanged original pilot map. For nonzero alpha its exact fixed points are the same; intermediate convex states need not be exact finite-window binary-spike spectra.",
+  "design": "At most12 updates,40000targets x16 independent replicas per local assay. Same physical equations, actual thresholds, original weights, stationary G/M treatment, external Poisson,2s FFT,3-4s burn and common streams as previous pilot. Start solely from original pilot generation1 predicted output, not a fresh native spectrum.",
+  "stop": "Stop at12 updates; stop earlier if whole-E field discrepancy from the development native reference exceeds10Hz or either core mean differs by10Hz. These are relevance guards, not accuracy acceptance criteria. No automatic continuation, damping-factor search or physical stability claim.",
+  "reference": "One native developmenttrajectory with time-varying external drive; pilot still uses fixed percell mean external expected rates. This mismatch and omitted source crosscorrelations remain.",
+  "diagnostics": "Always report the undamped F(X)-X residual, not alpha times it. Save raw outputs separately from mixed numerical states. Observe full spectra, inhibitory/E residuals, fields, G segment and counterfactual core Z drift.",
+  "alpha": 0.1,
+  "max_updates": 12,
+  "producer_sha256": "b48a3cb0693bffd64d0ac881e04b75f1b4e4ede329df8bc4f0898bd305cc66bd",
+  "unchanged_map_sha256": "84e1917e21a5159e3abcd09785e0a02c1c07faaa90ae7bfd41117267e83827d7",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

@@ -1,0 +1,13 @@
+{
+  "status": "REGISTERED_SHARED_COUNT_IDENTITY_CHECK",
+  "created_epoch": 1790571955.4929388,
+  "question": "At one replica, does free recurrent-mean feedback reduce to the original native spike network with identical external counts?",
+  "design": "One100ms native continuation from complete72s highhistory at heldZ/K and fixedpercell expectednu; record actual externalPoissoncounts and everycellspike. Replay those same externalcounts in the R=1 model with own freely generated recurrent spikes. No neural teacherforcing, parameter fit or spectrum approximation.",
+  "justification": "At R=1 each source probability is the actual0/1 source spike; averaging over replicas becomes identity. The delayed meanoperator should then yield the actual native weighted synaptic increments. This tests local arithmetic, recurrentdelay timing, complete pendinghistory and global/M updates together beyond max35.8ms delay.",
+  "checks": "Every native/model spike and ref exact; final V/sE/IE/sI/II/M/Z/K differences<1e-7 nativeunits, R/G<1e-8. Roundoff need not be bitwise because sparse addition order and exponential evaluation differ. Failure is investigated, not redefined as pass.",
+  "scope": "One conditional100ms implementation equivalence assay. It does not prove largerR converges, native correspondence near a boundary, or a deterministic bifurcation. Native and model engines remain untouched.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/runs/exit_z0.21_k9.35_fields16p7_held_K9_history/checkpoint.pkl",
+  "source_sha256": "e6f898b416a18b43b881a1ae83a892b630b07be1d59ec156a0e8e1e5a6551f12",
+  "producer_sha256": "d30362fc9444f926860ecf2d63c17565b656d808ccd02d9cdf03c94dc09d67e6",
+  "formal_bifurcation_allowed": false
+}

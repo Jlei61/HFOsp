@@ -1,0 +1,88 @@
+{
+  "status": "COMPLETE",
+  "stop_reason": "MINIMUM_PATH_STEP",
+  "rows": [
+    {
+      "index": 0,
+      "native_Z_time_ms": 0.0,
+      "D": -2.220446049250313e-16,
+      "global_rate_hz": 0.09702911695912818,
+      "regional_rates_hz": [
+        0.8699136233243624,
+        0.7988748633883669,
+        0.059786645701978884
+      ],
+      "residual_per_ms": 2.862293735361732e-17,
+      "stability": "NOT_COMPUTED"
+    },
+    {
+      "index": 1,
+      "native_Z_time_ms": 250.0,
+      "D": 0.00834611178954936,
+      "global_rate_hz": 0.10167599797119216,
+      "regional_rates_hz": [
+        0.9383913247265249,
+        0.8693666102644391,
+        0.061154390038296126
+      ],
+      "residual_per_ms": 4.2034951908132e-14,
+      "stability": "NOT_COMPUTED"
+    },
+    {
+      "index": 2,
+      "native_Z_time_ms": 437.5,
+      "D": 0.01764923638307614,
+      "global_rate_hz": 0.10640664974474964,
+      "regional_rates_hz": [
+        0.9901718285187894,
+        0.9536717256264651,
+        0.06266701433967233
+      ],
+      "residual_per_ms": 4.575531793726828e-12,
+      "stability": "NOT_COMPUTED"
+    },
+    {
+      "index": 3,
+      "native_Z_time_ms": 578.125,
+      "D": 0.019362768368217376,
+      "global_rate_hz": 0.10961833813679431,
+      "regional_rates_hz": [
+        1.0351708890887885,
+        1.006912338461648,
+        0.0635533444508738
+      ],
+      "residual_per_ms": 1.3737160280830052e-12,
+      "stability": "NOT_COMPUTED"
+    },
+    {
+      "index": 4,
+      "native_Z_time_ms": 604.4921875,
+      "D": 0.020997524985916227,
+      "global_rate_hz": 0.11360830123167179,
+      "regional_rates_hz": [
+        1.047508926589011,
+        1.1112697236512938,
+        0.06474674674903036
+      ],
+      "residual_per_ms": 4.117253413205013e-13,
+      "stability": "NOT_COMPUTED"
+    },
+    {
+      "index": 5,
+      "native_Z_time_ms": 609.43603515625,
+      "D": 0.021389582591256784,
+      "global_rate_hz": 0.11546613584632483,
+      "regional_rates_hz": [
+        1.0562174392137607,
+        1.156431114342407,
+        0.06531758181359444
+      ],
+      "residual_per_ms": 1.001282390333813e-14,
+      "stability": "NOT_COMPUTED"
+    }
+  ],
+  "trials": 15,
+  "interpretation": "Accepted static points only, stability uncomputed. A natural-parameter solver stop is not a certified bifurcation.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

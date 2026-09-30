@@ -1,0 +1,1060 @@
+{
+  "updated_local": "2026-09-25T10:09:37.280974+08:00",
+  "scientific_status": "ACTUAL_ONSET_BIFURCATION_NOT_ESTABLISHED",
+  "workers": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3912939
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native5000_continued_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3925546
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4500_continued_root/section_spectrum_segmented",
+      "jobs": {
+        "status": "LAUNCHING"
+      }
+    }
+  ],
+  "derivative_caching_checks": {
+    "exact_cached_tangent": {
+      "status": "PASS",
+      "period_ms": 32.822865979962614,
+      "dt_ms": 0.05,
+      "cache_bytes": 805792064,
+      "cache_construction_seconds": 6.465067625045776,
+      "nominal_terminal_bitwise": true,
+      "rows": [
+        {
+          "direction": 0,
+          "relative_full_state_error": 1.5616796839437567e-14,
+          "relative_return_time_error": 2.7755575615628914e-16,
+          "original_seconds": 4.313068151473999,
+          "cached_seconds": 0.5709173679351807,
+          "speedup": 7.554627681187806
+        },
+        {
+          "direction": 1,
+          "relative_full_state_error": 1.1925675025777712e-14,
+          "relative_return_time_error": 1.1102230246251565e-15,
+          "original_seconds": 3.9705822467803955,
+          "cached_seconds": 0.5594596862792969,
+          "speedup": 7.09717311927669
+        },
+        {
+          "direction": 2,
+          "relative_full_state_error": 7.582794967747221e-15,
+          "relative_return_time_error": 1.8735013540549517e-16,
+          "original_seconds": 4.203993558883667,
+          "cached_seconds": 0.6132602691650391,
+          "speedup": 6.855153953813856
+        }
+      ],
+      "scope": "Derivative evaluation implementation only. No new orbit, stability or bifurcation evidence.",
+      "model_promoted": false
+    },
+    "exact_cached_tangent_fine": {
+      "status": "PASS",
+      "period_ms": 261.41632307550736,
+      "dt_ms": 0.025,
+      "cache_bytes": 12806950464,
+      "cache_construction_seconds": 64.20224523544312,
+      "nominal_terminal_bitwise": true,
+      "rows": [
+        {
+          "direction": 0,
+          "relative_full_state_error": 5.1060642461028094e-14,
+          "relative_return_time_error": 1.482177417391996e-14,
+          "original_seconds": 65.70828413963318,
+          "cached_seconds": 6.520082712173462,
+          "speedup": 10.077829843623165
+        },
+        {
+          "direction": 1,
+          "relative_full_state_error": 4.02787400636288e-14,
+          "relative_return_time_error": 3.901486405662877e-15,
+          "original_seconds": 65.701669216156,
+          "cached_seconds": 6.437790393829346,
+          "speedup": 10.205624165572614
+        }
+      ],
+      "scope": "Derivative evaluation implementation only. No new orbit, stability or bifurcation evidence.",
+      "model_promoted": false
+    }
+  },
+  "latest_review": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/current_core_a_classification.md",
+  "candidate_transition_bracket": "WITHDRAWN_AS_ASYMPTOTIC_BRACKET",
+  "late_return_counterexample": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/late_return_counterexample/result.json",
+  "completed_controls": {
+    "above_SN_70s": "AUDIT_PASS; no qualified A quiet after39ms through70s, right-censored",
+    "returning_coarse": "AUDIT_PASS; positive finite-time growth8.635/s; A quiet returns",
+    "fine_D0343158": "NUMERICAL_PERIODIC_ROOT;T261.627179ms;fullstateclosure5.79e-8;independentphasequarter1.23e-6 fails unchanged1e-6 gate",
+    "returning_fine": "AUDIT_PASS;common2--5sgrowth6.753/s,8qualifiedAquietintervalsinfirst5s",
+    "fine_D0353158": "NUMERICAL_PERIODIC_ROOT;T261.904626ms,closure1.49e-8",
+    "fine_D0363158": "NUMERICAL_PERIODIC_ROOT in fine_D0363158_projected_finish;T262.582741ms;fullstateclosure3.715e-9;Aquiet57.7percent. Independentquarterphase3.312e-6 fails unchanged1e-6 gate; no Floquet accepted."
+  },
+  "strong_depletion_70s": "REGISTERED_NOT_RUN; nearerD_A=.36316 has completed70s, prioritize refined critical branch and returning-state mesh control before further stronger-endpoint exposure",
+  "new_seed": "above70s_A_sustained_B_cycle/exact_seed: exact original all-group replay PASS,537ms,Acontinuous/Bintermittent,closure.0891; not a periodic root",
+  "above70s_correction": "Two exact original seeds,172ms oneBburst and537ms threeBbursts, undergoing four-segment full-state matching. Exact cyclic intrinsic-M inverse preconditions numerical updates only. Previous unsolved jobs stopped with states retained; no orbit or criticality evidence from their stopping.",
+  "adjoint_gate": "Full actual10ms transpose PASS and whole cubic Poincare transpose PASS; no physical flow change. Verified numerical left/right mode atD_A.334:mu=-33.057464; independent phase/mesh and crisis correspondence remain pending.",
+  "actual_low_activity_access": "Audited whole histories after2s:5Hz time occupation9.239percent atD_A.32812,0.6015percent atD_A.34316,none observed atD_A.36316;same qualitative result1/10/50Hz. Dependent time samples, no lifetime-law fit or criticality certificate.",
+  "multiple_candidate_whole_flow": "Saved accepted candidates remain sustained A and intermittent B in original unsegmented flows. WholeT return errors.203(single) and.701(three), despite smaller segment errors; neither is a periodic root. Exact tested T/2,T/3,T/4 mismatches also large and cannot validate full period.",
+  "multiphase_solver_gate": "Unequal-duration intrinsic-M inverse and four-node original derivative/FD checks PASS. Independent dense state/phase/time cyclic preconditioner test PASS; full actual-operator test required in every use. No physical model change or bifurcation evidence.",
+  "reference_stability_gap": "D_A.300 short-burst numerical root:T261.525118827ms,closure2.962e-10; spectrum running. Correcting D_A.270. Existence at higherD never excluded an earlier instability. Initial unpredictedD.300 section miss retained as solver failure, not bifurcation.",
+  "new_intermediate_actual_return": "D_A.348157641, same original60s complete history, new-field quiet10546--10571ms and10618--10783ms independently reconstructed. Prefix15s PASS, full70s RUNNING. Threshold1/10/50Hz also returns; not a permanent-activity endpoint.",
+  "short_cycle_correspondence": "SameD_A.34315764: actual risingA~1.077Hz crossings have M_A.120--.185mVeq vs short numerical cycle.0575. Sampled rate/M diagnostic only; distant manifold mediation not excluded.",
+  "mode_localization": "D_A.334 negative section multiplier-33.057: chosen-section rate squared amplitude~92percentCoreB. Not whole-cycle localization. Autonomous-phase lift neutraldefect.00978 FAIL; no physicalFloquet promotion.",
+  "entry_scope": "Primary: separated short events accessing prolonged A activity. Later loss of all quiet returns is a distinct possible event; finite returns do not negate entry into onset-like prolonged activity.",
+  "reference_bridge": {
+    "D0300": {
+      "root_error": 2.9617868730925536e-10,
+      "period_ms": 261.5251188271353,
+      "verified_numerical_multiplier": -30.885897135263352
+    },
+    "D0270": {
+      "root_error": 9.1056980584e-08,
+      "period_ms": 261.91945421260067,
+      "verified_numerical_multiplier": -37.68741926348024
+    },
+    "D0255722": {
+      "root_error": 1.0991574109945114e-09,
+      "period_ms": 261.6037351225716,
+      "spectrum": "COMPLETE_VERIFIED_NUMERICAL_UNSTABLE_EIGENPAIR",
+      "verified_numerical_multiplier": -32.87766136278292,
+      "field_identity": "SAME_MEAN_DIFFERENT_NATIVE_A_FIELD_9015p710MS_NOT_EXACT9000"
+    },
+    "physical_floquet": "NOT_ACCEPTED",
+    "critical_crossing": "NOT_ESTABLISHED"
+  },
+  "active_jobs_2133": [
+    "reference_stability_gap/actual_D0300/from_interictal_history",
+    "reference_stability_gap/D0255722/section_spectrum_cached",
+    "near_returns/above70s_A_sustained_B_cycle/multiphase_single_B_bordered",
+    "near_returns/above70s_A_sustained_B_cycle/multiple_three_B_refine",
+    "local_return_neighborhood/DA0348158"
+  ],
+  "actual_onset_bifurcation_type": "NOT_ESTABLISHED",
+  "current_priority_entry_interval": {
+    "D_A": [
+      0.2557216996140609,
+      0.3
+    ],
+    "status": "FINITE_TIME_STATE_CONTRAST_NOT_CERTIFIED_BRACKET"
+  },
+  "D0300_actual20s": {
+    "status": "AUDIT_PASS",
+    "source": "reference_stability_gap/actual_D0300/from_interictal_history/whole_record_audit.json",
+    "longest_complete_activity_ms": 4545,
+    "initial_complete_events_about_ms": 100,
+    "whole_M_dynamic": true,
+    "only_A_Z_changed": true
+  },
+  "D0348158_actual70s": {
+    "status": "AUDIT_PASS",
+    "quiet_intervals_ms": [
+      [
+        10546,
+        10571
+      ],
+      [
+        10618,
+        10783
+      ]
+    ],
+    "last_activity_right_censored_ms": 59217,
+    "scope": "Later persistence question, not first entry into prolonged activity."
+  },
+  "phase_derivative_diagnostic": {
+    "source": "near_returns/mid_lower/coarse_D0334_positive_cubic/neutral_derivative_refinement_no_thp/result.json",
+    "orders": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "neutral_errors": [
+      0.009778411846275457,
+      0.011234841041991829,
+      0.011235306904606522,
+      0.01123541775237394
+    ],
+    "status": "ORIGINAL_NEUTRAL_GATE_STILL_FAILED",
+    "physical_Floquet": "NOT_PROMOTED"
+  },
+  "active_jobs_current": [
+    "reference_stability_gap/actual_D0270/from_interictal_history",
+    "reference_stability_gap/actual_D0300_fine/from_interictal_history",
+    "reference_stability_gap/actual_reference_recurrence/multiple_six_burst_no_thp",
+    "near_returns/above70s_A_sustained_B_cycle/multiple_three_B_refine"
+  ],
+  "parameter_path_audit": "reference_stability_gap/parameter_path_audit.json",
+  "continuous_path_definition": "reference_stability_gap/path_definition_continuous.md",
+  "current_priority_native_path_time_ms": [
+    9116.474189515997,
+    9594.906685976377
+  ],
+  "actual_D0270": {
+    "status": "AUDIT_PASS",
+    "observed_ms": 20000,
+    "longest_complete_activity_ms": 94
+  },
+  "latest_entry_investigation": {
+    "updated_local": "2026-09-25T02:25:04.917470+08:00",
+    "onset_type": "NOT_ESTABLISHED",
+    "fixed_model": "3479-group spatial rate drift; frozen conditionalZ; allE M dynamic; CoreA native spatialpath only, outsideA native9s.",
+    "actual_entry_evidence": {
+      "DA0270": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.27,
+        "Z_A": 0.73,
+        "native_interpolation_time_ms": 9116.474189515997,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 94,
+        "complete_A_activities_ge_1000ms": []
+      },
+      "DA0300": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.3,
+        "Z_A": 0.7,
+        "native_interpolation_time_ms": 9594.906685976377,
+        "complete_A_activity_count": 34,
+        "longest_complete_A_activity_ms": 4545,
+        "complete_A_activities_ge_1000ms": [
+          3290,
+          2428,
+          4545
+        ]
+      },
+      "DA0300_dt025": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 10000,
+        "D_A": 0.3,
+        "Z_A": 0.7,
+        "native_interpolation_time_ms": 9594.906685976377,
+        "complete_A_activity_count": 21,
+        "longest_complete_A_activity_ms": 2867,
+        "complete_A_activities_ge_1000ms": [
+          2867,
+          1919
+        ]
+      },
+      "native9420": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.27512138314687007,
+        "Z_A": 0.7248786168531299,
+        "native_interpolation_time_ms": 9420.0,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 96,
+        "complete_A_activities_ge_1000ms": []
+      },
+      "native_midpoint": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.28764862467548047,
+        "Z_A": 0.7123513753245195,
+        "native_interpolation_time_ms": 9507.453342988189,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 104,
+        "complete_A_activities_ge_1000ms": []
+      }
+    },
+    "parameter_path": "NativeTimeFamily continuous per-group native-time interpolation; D_A is display only. Prior first-upcrossing meanD lookup has3field jumps and cannot define one continuous branch.",
+    "source_correction": "D0255722 shortcycle spectrum belongs to native9015.710msAfield, not exactnative9000 reference. Original reference sixburstseed usesexact9sfield.",
+    "periodic_work": {
+      "high_A_three_B": "multiple_three_B_refine COMPLETE ITERATION_LIMIT_NOT_A_PERIODIC_ROOT; acceptediteration07T534.739122693926ms maxmatching.0005176222; no furtherbatch, prioritizeearlierentry.",
+      "reference_six_burst": "K12 stopped intentionally after first accepted complete iterate T1576.5360852ms, maxmatching.00942961713; preserved restart nodes and scheduling_stop.json. Original KeyboardInterrupt worker status retained. Not a root or bifurcation.",
+      "DA0270_nine_burst": "Fixedgridretryall6cachechecksPASS; fullborderedFD3.5364e-5PASS. Iteration00Krylov17relative7.34694e-5reachedlineartolerance; actualnonlineartrialpending. Originalshape-copyfailureandsolverfloorstopretained.",
+      "midpoint_three_burst": "FixedgridK6RUNNING, all6cachechecksPASS andFDpassed; iteration00Krylov15relative.00471719. Originalequalpartition6iterationbatchcompletenotroot."
+    },
+    "known_SN": "Generic high-equilibrium surround-dominated saddle-node remainscertified and unlinked to onset.",
+    "model_promoted": false,
+    "replay_precision_note": "Newmidpoint exactreplayFAILretained(max10ms outputdelta3.375e-14Hz). Fiveindependent graph/manual/synchronizedreplaysstartfromidenticalbits and differabout1.6--2.8e-15 inphysicalblocknorm. Causeunattributed. SeparatepredeclaredFP64componentbound<=1e-14+1e-12*abs(reference),combined<1e-12/blocks<1e-11implementationcheckPASS; latest3repeatswerealsoexact. Thisonlyamendsthefinite-runreplaygate; nochange toperiodicclosure,derivative,phase,mesh,stabilityorclassificationgates. Allfailuresandarrayspreserved.",
+    "entry_neighborhood": {
+      "native_path_time_ms": [
+        9507.453342988189,
+        9594.906685976377
+      ],
+      "Z_A": [
+        0.7123513753245195,
+        0.7
+      ],
+      "scope": "Same complete initial history,20s each; finite-window short-to-prolonged local activity contrast, not a bifurcation or permanence bracket.",
+      "mesh_status": "NOT_VALIDATED: finer same-field run already has a complete1.679slongactivity at the former coarse short endpoint. Retain coarse finite-window observations; withdraw any mesh-independent boundary interpretation."
+    },
+    "preentry_growth": {
+      "DA0270": {
+        "tangent_result.json": {
+          "status": "COMPLETE",
+          "dt_ms": 0.05,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 10000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": -1.1555437528830668,
+          "one_second_blocks_per_s": [
+            1.0851771280130347,
+            9.006652472113911,
+            0.38549787893695964,
+            -4.174510742498409,
+            -6.03248044735197,
+            8.021643550567253,
+            2.7485440317215124,
+            -0.2681852628178145,
+            -5.49256523897568,
+            -4.43229379264638
+          ],
+          "log_growth": [
+            10.068823330540786,
+            -2.0083594130768443,
+            -5.59150715605731,
+            7.99832460863659,
+            -9.917569696103723,
+            9.402487468677295,
+            0.20109704041750576,
+            -8.533715879190284,
+            9.107617597312677,
+            -9.642020773143658,
+            3.148922650142272,
+            6.035223179882287,
+            -7.652373428109384,
+            7.627872822330511,
+            -0.5817909081923527,
+            -7.69610056965254,
+            8.890146707844309,
+            -10.248113557633516,
+            7.267657998417706,
+            2.2152075770846196,
+            -7.356606314921642,
+            7.878709083702823,
+            -0.7874697397399696,
+            -7.290475079776749,
+            8.318516714538793,
+            -9.515259982909315,
+            8.022929005240695,
+            0.5361804558886589,
+            -8.602629021634247,
+            9.181602758547912,
+            -1.0676867241409311,
+            -6.418047879546655,
+            7.493733527033816,
+            -10.117333701947164,
+            9.582850402829854,
+            0.9499276853891296,
+            -8.91415683623509,
+            8.650678226546432,
+            -2.2412520099212436,
+            -2.093223432506557,
+            3.911327571550726,
+            -9.819289291981507,
+            9.875314817814845,
+            0.32562961835926796,
+            -8.51873337124049,
+            8.292733202189128,
+            -10.100530734591983,
+            8.074277117555441,
+            1.9885390058857262,
+            -10.061748382893123,
+            9.97411342710362,
+            -0.5454966836191082,
+            -6.4815560901005425,
+            7.408982548599026,
+            -3.110926431422516,
+            1.9481996122453111,
+            0.7187940654615702,
+            -8.969722322367703,
+            9.20076656958981,
+            -2.121511144922213,
+            -2.1311330665004387,
+            4.303223888990451,
+            -9.161259253457922,
+            8.72976794341339,
+            -0.5724651104519728,
+            -7.798419288493008,
+            8.768051558816085,
+            0.5239197906556246,
+            -2.301381241987269,
+            2.3882388107365724,
+            -10.355825619890066,
+            9.94356639773697,
+            -0.567662040538224,
+            -7.638554388883838,
+            8.25473132928769,
+            -10.529637420326011,
+            8.960574151967606,
+            1.2862514634593951,
+            -8.353659972800353,
+            8.732030837169017,
+            -9.039765908329793,
+            1.0135161488523998,
+            8.045007075165126,
+            -8.527543308415504,
+            7.674558233758585,
+            0.3166505511854826,
+            -8.408727273165287,
+            8.862187300623933,
+            -9.788522655771613,
+            4.360074597120991,
+            5.378234405864327,
+            -1.4051499390927493,
+            0.5828472546607535,
+            0.07487617736873903,
+            -8.538406056546348,
+            9.180334148414591,
+            -8.9032300223966,
+            5.67270066481588,
+            2.7964912751914435,
+            -9.270991700926416
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        },
+        "local_state_audit.json": {
+          "status": "AUDIT_PASS",
+          "label": "DA0270",
+          "coordinates": {
+            "D_A": 0.27,
+            "Z_A": 0.73,
+            "native_interpolation_time_ms": 9116.474189515997
+          },
+          "window_ms": [
+            5000.0,
+            10000.0
+          ],
+          "rows": [
+            {
+              "region": "Global E",
+              "mean_rate_hz": 34.64578527548828,
+              "quiet_fraction": 0.5516,
+              "duty_above50": 0.252,
+              "range_10ms_hz": [
+                0.009368502480332464,
+                178.68426024233145
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                121,
+                122,
+                93,
+                127,
+                119,
+                93,
+                154,
+                113,
+                117,
+                121,
+                123,
+                93,
+                127,
+                119,
+                93,
+                155,
+                114,
+                117,
+                121
+              ]
+            },
+            {
+              "region": "Core A",
+              "mean_rate_hz": 108.7789601253035,
+              "quiet_fraction": 0.652,
+              "duty_above50": 0.2974,
+              "range_10ms_hz": [
+                1.5340948546387993e-05,
+                473.92511714459715
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                93,
+                88,
+                93,
+                93,
+                89,
+                93,
+                92,
+                91,
+                92,
+                93,
+                88,
+                93,
+                93,
+                89,
+                93,
+                92,
+                91,
+                92,
+                92
+              ]
+            },
+            {
+              "region": "Core B",
+              "mean_rate_hz": 90.22315117955475,
+              "quiet_fraction": 0.6184,
+              "duty_above50": 0.3184,
+              "range_10ms_hz": [
+                1.5208488074579502e-05,
+                474.79691567845674
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                94,
+                137,
+                82,
+                93,
+                137,
+                81,
+                90,
+                91,
+                104,
+                95,
+                138,
+                81,
+                93,
+                137,
+                80,
+                90,
+                90,
+                101,
+                94
+              ]
+            },
+            {
+              "region": "Surround",
+              "mean_rate_hz": 31.376572424622985,
+              "quiet_fraction": 0.5634,
+              "duty_above50": 0.24,
+              "range_10ms_hz": [
+                0.009840867977002076,
+                165.8636938893517
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                118,
+                117,
+                91,
+                125,
+                113,
+                90,
+                152,
+                111,
+                114,
+                119,
+                117,
+                91,
+                124,
+                114,
+                91,
+                152,
+                111,
+                114,
+                119
+              ]
+            }
+          ],
+          "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+          "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+          "model_promoted": false
+        }
+      },
+      "native_midpoint": {
+        "tangent_result.json": {
+          "status": "COMPLETE",
+          "dt_ms": 0.05,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 10000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": 1.2899451350992859,
+          "one_second_blocks_per_s": [
+            7.713329772077533,
+            3.0587958911792574,
+            5.204380228485142,
+            -9.076803409285795,
+            -2.2861139496817646,
+            14.750007426016753,
+            5.3952918589632235,
+            -1.1220441316091065,
+            -7.569213846503299,
+            5.024056904409118
+          ],
+          "log_growth": [
+            9.171131900949351,
+            -0.7222626111319594,
+            -7.124657232552517,
+            8.615258771954744,
+            -4.275492543230576,
+            3.0218052954905734,
+            1.3517110199706575,
+            -8.535695835481604,
+            9.12554430347678,
+            -2.9140132973679167,
+            -5.491464376292137,
+            8.456814590827975,
+            -9.717567845936097,
+            8.714272126684023,
+            0.6051147969477839,
+            -8.981288945028846,
+            9.310787570876734,
+            -9.196757560468198,
+            1.6137403824202325,
+            7.745145151147787,
+            2.241727100499819,
+            0.9654504527713719,
+            -0.1364985332097795,
+            -6.617584640800172,
+            7.103741317579978,
+            -2.4503047970332092,
+            -2.390620992403048,
+            7.8434061955781536,
+            -9.629135377120848,
+            8.274199502622878,
+            0.3946930227186208,
+            -7.5780106225930846,
+            7.814600347928329,
+            -10.484870788690339,
+            4.298578584810081,
+            4.765664802171511,
+            -6.395514137751118,
+            6.047074812460342,
+            -0.29835069010472715,
+            -7.640668740235407,
+            8.608753985928148,
+            -9.467651574350665,
+            6.955635045921823,
+            0.704110940853927,
+            -8.893290544449012,
+            8.448276505348524,
+            1.4610993070854326,
+            -7.267492052873926,
+            7.761712174107201,
+            -10.597267737253217,
+            9.267761776707273,
+            3.5165955675195493,
+            3.3432095144300065,
+            -1.0494581265675997,
+            -9.149226393756773,
+            6.457469065417189,
+            3.4379932913476825,
+            -9.239750180244512,
+            8.050746588095786,
+            0.11466632306814906,
+            -5.933111607110408,
+            9.006690133946025,
+            -1.8134323922229834,
+            -1.7560994853655445,
+            3.214709374735639,
+            -9.68264499894202,
+            9.960326923562633,
+            -0.5674169716329237,
+            -5.89279244554112,
+            8.859063327533926,
+            -9.633046223224001,
+            7.366896238145302,
+            1.761230334778758,
+            -9.197050862253407,
+            9.6375608183988,
+            -1.247311130972057,
+            -6.988069883934864,
+            8.351424516375339,
+            -10.527184044746171,
+            9.353506105823197,
+            0.9239165327941649,
+            -8.511575592718941,
+            8.813244911251635,
+            -1.6573180606500517,
+            -5.800927096132187,
+            7.3213156822291605,
+            -10.410713555285488,
+            9.8786890327839,
+            0.2345891119120274,
+            -8.360434812687517,
+            8.840046391330464,
+            -2.1779894583837573,
+            -2.2697745650719585,
+            4.077668634503782,
+            -10.080624809749581,
+            10.021212045746987,
+            -0.16172440359470724,
+            -7.842928886658807,
+            8.481720054067422,
+            -3.8635480977807233
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        },
+        "local_state_audit.json": {
+          "status": "AUDIT_PASS",
+          "label": "native_midpoint",
+          "coordinates": {
+            "D_A": 0.28764862467548047,
+            "Z_A": 0.7123513753245195,
+            "native_interpolation_time_ms": 9507.453342988189
+          },
+          "window_ms": [
+            5000.0,
+            10000.0
+          ],
+          "rows": [
+            {
+              "region": "Global E",
+              "mean_rate_hz": 35.08597143174994,
+              "quiet_fraction": 0.5362,
+              "duty_above50": 0.262,
+              "range_10ms_hz": [
+                0.011736618624339227,
+                178.88838237190572
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                128,
+                204,
+                110,
+                131,
+                128,
+                120,
+                129,
+                97,
+                127,
+                121,
+                95,
+                127,
+                120,
+                95,
+                126,
+                120,
+                94,
+                127,
+                120
+              ]
+            },
+            {
+              "region": "Core A",
+              "mean_rate_hz": 113.90231168772709,
+              "quiet_fraction": 0.6328,
+              "duty_above50": 0.3142,
+              "range_10ms_hz": [
+                1.7657785555329367e-05,
+                474.91729204496534
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                100,
+                93,
+                96,
+                90,
+                104,
+                100,
+                91,
+                100,
+                100,
+                92,
+                99,
+                100,
+                92,
+                99,
+                99,
+                92,
+                98,
+                99,
+                92
+              ]
+            },
+            {
+              "region": "Core B",
+              "mean_rate_hz": 90.61005923655144,
+              "quiet_fraction": 0.6006,
+              "duty_above50": 0.334,
+              "range_10ms_hz": [
+                1.8350887121939993e-05,
+                474.74123378297475
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                92,
+                92,
+                103,
+                136,
+                93,
+                99,
+                137,
+                90,
+                90,
+                134,
+                83,
+                94,
+                134,
+                82,
+                94,
+                134,
+                81,
+                94,
+                135
+              ]
+            },
+            {
+              "region": "Surround",
+              "mean_rate_hz": 31.702207361901586,
+              "quiet_fraction": 0.5456,
+              "duty_above50": 0.2444,
+              "range_10ms_hz": [
+                0.012327865618217377,
+                165.78898412314499
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                125,
+                205,
+                108,
+                129,
+                125,
+                118,
+                127,
+                94,
+                125,
+                117,
+                92,
+                125,
+                117,
+                92,
+                124,
+                116,
+                93,
+                124,
+                116
+              ]
+            }
+          ],
+          "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+          "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+          "model_promoted": false
+        }
+      }
+    },
+    "midpoint_recurrence": "Late10--20s3burstT790.276ms candidate. Initial source replay failure retained. Independent5s replay passes original storedprecision and endpoint combined1.4467e-11; newsource acceptance rechecked6nodesx3shortreplays. This source is only a recurrence seed; no root/type.",
+    "numerical_discrepancy": "One-step compute-sanitizer memcheck/racecheck report0errors; limited coverage. Six full131.8ms graph/manual-synchronized nominal+tangent trajectories from exactpacked node1 matchbitwise. CPU coordinate alignment/copy roundtrips matchexactly. None explains rare prior nominal drift; no physical model/kernel/tolerance changes.",
+    "prolonged_entry_growth": {
+      "status": "BOTH_FINITE_GROWTH_RUNS_COMPLETE",
+      "rows": [
+        {
+          "label": "coarse",
+          "dt_ms": 0.05,
+          "common_2to5s_growth_per_s": 8.826087567041453,
+          "full_post_alignment_growth_per_s": 5.974600889028986,
+          "one_second_blocks_per_s": [
+            11.472031012348866,
+            3.183916144909826,
+            8.263819743458669,
+            14.063395790804606,
+            4.151047166861088,
+            -2.3161845524623796,
+            0.07175264279031346,
+            5.1176877357712796,
+            9.667271739518915,
+            8.77801684548941
+          ],
+          "duration_ms": 10000
+        },
+        {
+          "label": "fine",
+          "dt_ms": 0.025,
+          "common_2to5s_growth_per_s": 6.546396556153304,
+          "full_post_alignment_growth_per_s": 6.546396556153304,
+          "one_second_blocks_per_s": [
+            12.256701802446734,
+            11.86830573064901,
+            10.472918317422259,
+            7.79282292999611,
+            1.3734484210415436
+          ],
+          "duration_ms": 5000
+        }
+      ],
+      "same_initial_state": true,
+      "independent_replicates": false,
+      "observation": "Growth is positive in both discretizations over the common2--5s window; detailed waveforms and growth values differ.",
+      "inference_limit": "Finite directional growth is not an asymptotic Lyapunov certificate, does not rule out eventual stable dynamics, and does not identify a bifurcation. The short-event midpoint already has positive finite growth over10s, so its mere sign cannot explain onset of long activities.",
+      "bifurcation_type": "NOT_ESTABLISHED",
+      "model_promoted": false
+    },
+    "M_diagnostic": {
+      "status": "EARLY_AND_LATE_PAIRED_INTERVENTIONS_COMPLETE",
+      "comparison": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/M_intervention_comparison.json",
+      "early": {
+        "start_ms": 2800,
+        "normal_long_duration_ms": 3290,
+        "held_M_long_duration_ms": 4823,
+        "normal_return_ms": 6143,
+        "held_return_ms": 7676,
+        "held_M_A": 0.06128392929944654,
+        "normal_original_replay_bitwise": true,
+        "source_replay_bitwise": true
+      },
+      "late": {
+        "start_ms": 5000,
+        "normal_return_ms": 6143,
+        "held_return_ms": 6134,
+        "held_M_A": 0.15588242138778013,
+        "normal_original_replay_bitwise": true
+      },
+      "implication": "A complete long activity and return occurs in the fixed fast spatial network even with both entireZ andeveryMheld frombeforeentry. M evolution changes duration but isnotnecessaryforthisone localactivitytermination. No general M irrelevance, no CoreA-M-only attribution and no bifurcationtype fromtheseinterventions."
+    },
+    "entry_stationary_screen": "Two full dynamic-M stationary root guesses (shortfieldlast5smean, firstlong1smean) bothROOT_FAIL, residuals.25865/.36352perms. No nonexistence/type conclusion.",
+    "new_spectrum_driver": "core_a_multiple_spectrum.py written/compiled,NOTRUN. Requiresclosedmultiple-shootingroot andindependentwholeflowresidual; thenper-nodecached/originalQA andautonomousneutralgate; onlythenboundedfull-stateArnoldi. No tolerance orphysicalmodelchange.",
+    "same_field_history_control": {
+      "status": "RUNNING",
+      "destination": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_entry_carried_history",
+      "session": 95310,
+      "check": "PASS_10MS_BITWISE",
+      "condition": "Only nativeCoreAZ .712351 to.700; complete20snearbyshort-history carried unchanged,allMdynamic,allZheld,one10s continuation. Finitehistorycontrolnotbasincertificate."
+    },
+    "new_figure": {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/first_long_M_intervention_from2800/figures/fig_M_clamp_spatial_return.png",
+      "PDF": "samebasename.pdf",
+      "meaning": "EarlyMclamp pairedactivitybars andsame-time50ms spatialEfields; no bifurcationdiagram orcriticalsymbol. AllZheld botharms.",
+      "agent_visual": "PNG_and_PDF_PASS",
+      "human_visual": "PENDING"
+    },
+    "carried_history_control": {
+      "status": "COMPLETE_AUDIT_PASS",
+      "path": "reference_stability_gap/actual_entry_carried_history/from_nearby_short_history",
+      "duration_ms": 10000,
+      "changed": "OnlyA Z toexactDA0300, fromnearbyshortfield20sfullstate; allMdynamic",
+      "complete_long_activity_ms": [
+        522,
+        553,
+        276
+      ],
+      "final_activity_observed_ms": 1060,
+      "final_activity_right_censored": true,
+      "interpretation": "SameDA0300canaccess>1slocalactivityfromnearbyshort-historyseedtoo; time/durationdependsontheinitialhistory. Notcoexistenceorbasinproof."
+    },
+    "M_controls_latest": "Both independent audits PASS. Early allM clampfrom2.8s: firstcompleteAactivity normal2853--6143ms=3290ms, held2853--7676ms=4823ms. HoldingMdoesnotpreventeventtermination, changesitsduration; doesnotexcludeparameterbifurcationornativeMrole. Late5sclampreturns6134msversus6143normal.",
+    "spatial_control_figure": {
+      "path": "reference_stability_gap/first_long_M_intervention_from2800/figures/fig_M_clamp_spatial_return.png",
+      "agent_visual": "PNG_AND_PDF_CHECKED",
+      "human_visual": "PENDING",
+      "bifurcation_figure": false
+    },
+    "preentry_fine_control": {
+      "status": "RUNNING",
+      "path": "reference_stability_gap/preentry_fine_growth",
+      "source": "Samefull10scheckpointascompletedcoarse",
+      "duration_ms": 10000,
+      "dt_ms": 0.025,
+      "implementation": "PASS: exactnominal/passiveflowandcenteredFD, finestFDhistory1.878e-6",
+      "amendment": "Initial5splanreplacedBEFOREANYFINEGROWTHRUNby10stomatchcoarse2--10sinterval. Coarse2--5sgrowth-2.05285/s,2--10s+1.28995/s. Bothwindowsandallblocksretained."
+    },
+    "native9420_recurrence": {
+      "status": "PASSIVE_SCREEN_COMPLETE_NOT_A_CYCLE",
+      "path": "reference_stability_gap/actual_native9420/late_recurrence",
+      "discard_ms": 10000,
+      "best_burst_count": 9,
+      "period_ms": 2369.269582896908,
+      "all_group_history_M_distance": 0.00026829924366056417,
+      "exact_full_state_replay": "NOT_RUN",
+      "interpretation": "Actualnative9420stillshort-eventstateprovidesaneighboringnine-burstseed; neitherperiodicitynorstabilitycertified."
+    },
+    "mesh_counterexample": {
+      "status": "INDEPENDENT_MATCHED_5S_PREFIX_READOUT_PASS",
+      "path": "reference_stability_gap/preentry_fine_growth/prefix5s_comparison.json",
+      "Z_A": 0.7123513753245195,
+      "coarse_max_complete_ms": 100,
+      "fine_complete_long_ms": [
+        309,
+        1679
+      ],
+      "fine_observed_prefix_ms": 5000,
+      "interpretation": "Samecompletecoarse10scheckpoint; coarseinitialhistoryretained/finehistorylinearlyregriddedbyphysicallag underexistingdeclaredinitializer. Coarse5smaxcomplete100ms; fine5scomplete309msand1679ms. The coarse short/long fieldcontrast is not a mesh-validated bifurcation bracket. This can reflect discretization or sensitivity to refined initialhistory/basin access; alone doesnot identifywhich. No type or nativeclaim."
+    },
+    "relative_period_readout": {
+      "status": "PASS",
+      "path": "numerical_checks/relative_rate_recorder/result.json",
+      "proof": "New relative1msbins andexactT perstepfluxquadrature matchmanualoriginalsteppingbitwise; alloriginalphysicalandreadoutbuffersalsobitwiseunchanged. Originalabsoluteclockbinsarecyclicallymisorderedfromfractional-ms shootingphases(max difference641Hz). Newperiodicprofilesmustuserelativerecorder. Originalcomplete-stateclosures/derivativesandactualentryrunsfromaligned10mscheckpointsunaffected."
+    },
+    "new_numerical_driver": {
+      "path": "scripts/topic4_zm_runaway_mechanism/core_a_whole_cycle_newton.py",
+      "status": "COMPILED_NOT_RUN",
+      "method": "Single startingstate+period shooting; allintermediatenodesfromoriginalflow andsegmentedcachedfullvariationalproduct. No modelreduction. Allactualcache/wholeFD/nonlinear/physicalgatesrequiredonfirstuse.",
+      "priority": "Do not automatically expandcoarsebranches before resolving the new mesh sensitivity."
+    }
+  },
+  "current_entry_checkpoint": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/classification_checkpoint_20260925_0704.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "negative_multiplier_crossing_bracket": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/negative_multiplier_crossing_bracket.json",
+  "latest_checkpoint": "classification_checkpoint_20260925_1009.json",
+  "numerical_flip_onset_link": "NOT_SUPPORTED_BY_PAIRED_4S_FLOW",
+  "matched_small_Z_step": "COARSE_CONTRAST_NOT_MESH_QUALIFIED",
+  "active_priority": "NUMERICAL_CONVERGENCE_OF_SAME_PHYSICAL_EQUATIONS",
+  "latest_numerical_control": {
+    "time": "2026-09-25T08:53:21.373577+08:00",
+    "previous_checkpoint": "classification_checkpoint_20260925_0837.json",
+    "target_entry_type": "NOT_ESTABLISHED",
+    "numerical_method": "exponential_midpoint_v1",
+    "frozen_model_unchanged": true,
+    "all_Z_held": true,
+    "all_E_M_dynamic": true,
+    "outside_A_Z": "native9s",
+    "new_short_side": {
+      "label": "native4000_fine",
+      "Z_A": 0.8365893776571304,
+      "maximum_complete_A_ms": 53,
+      "duration_ms": 5000,
+      "source_audit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/independent_audit.json"
+    },
+    "first_numerical_cycle": {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root",
+      "Z_A": 1.0,
+      "dt_ms": 0.025,
+      "period_ms": 232.3550271307739,
+      "whole_closure": 3.0725661612719554e-08,
+      "independent_phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+      "phase_errors": [
+        {
+          "phase": 0.0,
+          "combined": 3.1071840337437925e-08,
+          "max_block": 7.370104550288311e-08
+        },
+        {
+          "phase": 0.25,
+          "combined": 1.1467678500802996e-06,
+          "max_block": 2.807961176163234e-06
+        },
+        {
+          "phase": 0.5,
+          "combined": 5.44764761520969e-06,
+          "max_block": 1.3317552144670139e-05
+        }
+      ],
+      "physical_periodic_branch": "NOT_YET_QUALIFIED"
+    },
+    "active": [
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root_tight",
+        "purpose": "Tighten only numerical root closure to1e-11, originalphasegateunchanged. Distinguish amplified rootresidualfrom true meshphase defect."
+      },
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root",
+        "purpose": "Correct actualshorttrajectoryoneburstseedatZA.836589."
+      },
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine",
+        "purpose": "5s actualmidfieldflowbetween native4000short andnative8000long, same originalcompletehistory."
+      }
+    ],
+    "figure": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/figures/fig_local_resource_recovery.png",
+    "figure_scope": "Finite5s controls, agentcheckedPNGandPDF; humanpending, notbifurcationplot.",
+    "model_promoted": false
+  }
+}

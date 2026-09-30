@@ -1,0 +1,72 @@
+{
+  "status": "ACTUAL_STATE_GAUSSIAN_FLUX_DIAGNOSIS_COMPLETE",
+  "rows": [
+    {
+      "population": "E",
+      "source_case_id": 56,
+      "amplitude_mv2": 2.470160923041403,
+      "observed_rate_hz": [
+        114.02133178710936,
+        114.24771118164061
+      ],
+      "gaussian_flux_rate_hz": [
+        104.07174078304877,
+        104.02865029703699
+      ],
+      "observed_gain_hz_per_mv2": -0.04582280296388925,
+      "gaussian_flux_gain_hz_per_mv2": 0.00872220218728145,
+      "gain_relative_difference": 1.1903463259145235,
+      "observed_gain_path_SEM": 0.0006252190099511506,
+      "gaussian_minus_actual_gain": 0.0545450051511707,
+      "paired_block_bootstrap_difference_95percent": [
+        0.04001169896447209,
+        0.06785124727109648
+      ],
+      "paired_block_bootstrap_difference_sd": 0.007361196976139371,
+      "exact_count_parity": true,
+      "activity_weighted_abs_skew": [
+        0.13966678032577975,
+        0.13832828218015214
+      ],
+      "activity_weighted_abs_excess_kurtosis": [
+        0.5587077087816289,
+        0.5639588828896214
+      ]
+    },
+    {
+      "population": "I",
+      "source_case_id": 62,
+      "amplitude_mv2": 4.235421421002949,
+      "observed_rate_hz": [
+        249.72064208984372,
+        250.17984008789062
+      ],
+      "gaussian_flux_rate_hz": [
+        252.42913793840165,
+        252.8184550140943
+      ],
+      "observed_gain_hz_per_mv2": -0.05420924536219648,
+      "gaussian_flux_gain_hz_per_mv2": -0.0459596622147289,
+      "gain_relative_difference": 0.15218037241338414,
+      "observed_gain_path_SEM": 0.0004890742563206634,
+      "gaussian_minus_actual_gain": 0.008249583147467578,
+      "paired_block_bootstrap_difference_95percent": [
+        -0.003417756532243979,
+        0.020529383535165785
+      ],
+      "paired_block_bootstrap_difference_sd": 0.006321157920788318,
+      "exact_count_parity": true,
+      "activity_weighted_abs_skew": [
+        0.2352335909981756,
+        0.22959133564625822
+      ],
+      "activity_weighted_abs_excess_kurtosis": [
+        0.19162348637021523,
+        0.19835842293914074
+      ]
+    }
+  ],
+  "model_promoted": false,
+  "statistical_unit": "8192independent noise paths per workpoint, paired across+/-; bootstrap32pathblocks,300draws. Time steps are not independent samples.",
+  "scope": "Gaussian tail reconstruction using measured LIF moments, not an autonomous model or newly blind validation. Conditional distributions are pooled across the fixed4s recording, including the original modulation-on transient. This cannot by itself certify an instantaneous closure at every time or a network bifurcation."
+}

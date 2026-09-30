@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "N": 512,
+      "state_relative_error": 3.6018034941282115e-16,
+      "derivative_relative_error": 6.585061490156364e-14,
+      "rate_history_bitwise": true
+    },
+    {
+      "N": 513,
+      "state_relative_error": 4.387586648731745e-16,
+      "derivative_relative_error": 6.736052486871648e-14,
+      "rate_history_bitwise": true
+    }
+  ],
+  "model_change": false,
+  "claim": "Identical Fourier state and derivative; direct padding, bounded component FFT workspace"
+}

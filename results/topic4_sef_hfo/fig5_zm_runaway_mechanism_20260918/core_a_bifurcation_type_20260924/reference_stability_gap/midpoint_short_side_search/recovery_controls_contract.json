@@ -1,0 +1,23 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "fields": [
+    {
+      "label": "native8000_fine",
+      "native_time_ms": 8000,
+      "dt_ms": 0.025,
+      "device": 0
+    },
+    {
+      "label": "restored_A_fine",
+      "native_time_ms": 0,
+      "dt_ms": 0.025,
+      "device": 1
+    }
+  ],
+  "duration_ms": 5000,
+  "numerical_method": "exponential_midpoint_v1",
+  "question": "Does reducing localCoreA depletion restore shortactivity at all when outsideA is fixednative9s? Both9000and9420 fields showedlongactivity with the improvedintegration. FullyrestoringonlyA distinguishes an Aresource-controlled entry from recruitment already supported by the fixedbackground.",
+  "control": "Same entireoriginal fast/M/history source as all previous matched arms; only withinA Z field changed; Mdynamic.",
+  "stop_rule": "Read out original activity and spatialstate. A fullyrestoredA longresponse would refute assuming the native9s exterior defines a cleanA-dependent interictal reference in this initialcondition. No automatic critical-type claim.",
+  "model_promoted": false
+}

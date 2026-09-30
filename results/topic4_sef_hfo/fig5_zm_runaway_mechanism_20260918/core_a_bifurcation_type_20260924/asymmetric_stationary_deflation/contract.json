@@ -1,0 +1,16 @@
+{
+  "question": "Have previous searches missed an asymmetric high-A/low-B equilibrium because they all converged to the same high-both root?",
+  "equations": "Same original stationary physical-private-Q interface and native Core-A-only Z field at the existing stronger endpoint. All dynamical M impose their stationary law; no M clamp or new physical parameter. Original full temporal dynamics remain required for stability.",
+  "known_root": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/numerical_root_homotopy/physical_candidate.npz",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/block01.npz",
+  "instant_source_bin": 508,
+  "numerical_seeds": [
+    "Actual high-A/B-quiet spatial instantaneous rates",
+    "Actual spatial mean with only initial B guess100mHz"
+  ],
+  "method": "Shifted norm deflation G=(1+1/rho^2)*F, rho=RMS(q-q_known), in original logit-rate coordinates. Sherman-Morrison gives delta=delta_Newton/(1-grad(log factor) dot delta_Newton). Numerical merit descent and full actual derivative checks; no deflated object is a new physical branch.",
+  "reference": "https://arxiv.org/abs/1410.5620",
+  "gates": "Original physical residual<1e-11/ms and RMS logit separation from known root>1e-3. New roots with A>200Hz and B<50Hz are relevant asymmetric candidates, not automatic onset certificates. Do not continue additional high-both peripheral roots.",
+  "budget": "Two numerical initial guesses at one already studied Z field, maximum80iterations each; no physical parameter sweep. Failure does not prove absence or uniqueness.",
+  "model_promoted": false
+}

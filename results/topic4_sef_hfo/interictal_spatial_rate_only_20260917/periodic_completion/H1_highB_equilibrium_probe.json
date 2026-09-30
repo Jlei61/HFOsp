@@ -1,0 +1,81 @@
+{
+  "status": "NO_CONVERGED_EQUILIBRIUM",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0126_N2048.npz",
+  "J_EE_core": 1.301447399391231,
+  "cycle_T_ms": 81.84086963073466,
+  "cycle_mean_regional_Hz": [
+    4.561794441747913,
+    177.90568562801244,
+    6.912116690579735
+  ],
+  "residual_Hz": 118.33053400723311,
+  "comparison_to_existing_branch": [
+    {
+      "index": 1756,
+      "seed_J": 1.291962026739391,
+      "converged": true,
+      "residual_Hz": 1.9845236565174673e-12,
+      "regional_rates_Hz": [
+        196.31350784906846,
+        206.10115335394605,
+        9.084614951355395
+      ],
+      "distance_from_failed_trial_Hz": 47.44547364620749
+    },
+    {
+      "index": 1757,
+      "seed_J": 1.2925312468536636,
+      "converged": true,
+      "residual_Hz": 1.8596235662471372e-12,
+      "regional_rates_Hz": [
+        196.3135078490685,
+        206.10115335394622,
+        9.084614951355402
+      ],
+      "distance_from_failed_trial_Hz": 47.445473646207525
+    },
+    {
+      "index": 1758,
+      "seed_J": 1.293104097550885,
+      "converged": true,
+      "residual_Hz": 2.6645352591003757e-12,
+      "regional_rates_Hz": [
+        196.31350784906869,
+        206.1011533539461,
+        9.084614951355402
+      ],
+      "distance_from_failed_trial_Hz": 47.44547364620754
+    },
+    {
+      "index": 1759,
+      "seed_J": 1.2936805573462797,
+      "converged": true,
+      "residual_Hz": 1.8318679906315083e-12,
+      "regional_rates_Hz": [
+        196.31350784906857,
+        206.10115335394622,
+        9.084614951355407
+      ],
+      "distance_from_failed_trial_Hz": 47.44547364620754
+    },
+    {
+      "index": 1760,
+      "seed_J": 1.2942606036134183,
+      "converged": true,
+      "residual_Hz": 6.8468911096353224e-09,
+      "regional_rates_Hz": [
+        196.31350784907164,
+        206.10115335444965,
+        9.08461495137082
+      ],
+      "distance_from_failed_trial_Hz": 47.4454736462499
+    }
+  ],
+  "scope": "Stationary solve seeded by the extended H1-cycle mean, compared after correcting existing branch points to the same parameter. Not proof of a Hopf endpoint or equilibrium stability.",
+  "failed_trial_regional_Hz": [
+    1.6719922545689627,
+    185.68047379900744,
+    3.8459263746282897
+  ],
+  "meaning": "The cycle mean did not yield a converged stationary state; no new equilibrium or endpoint is established."
+}

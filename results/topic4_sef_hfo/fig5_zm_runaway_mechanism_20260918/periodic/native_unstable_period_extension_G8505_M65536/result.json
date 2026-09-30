@@ -1,0 +1,70 @@
+{
+  "status": "STOPPED_AFTER_TWO_ACCEPTED_POINTS",
+  "family": "native",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_unstable_period_extension_G8505_M65536/point0000.npz",
+      "D": 0.219335646678985,
+      "T_ms": 264.35,
+      "N": 8505,
+      "mean_hz": 31.324844719844464,
+      "min_hz": 0.015474364404838863,
+      "max_hz": 185.77245484506608,
+      "residual": 6.410011410551419e-10,
+      "iterations": [
+        5.8476646687348754,
+        22.198544991929218,
+        23.226418466805022,
+        0.5571664582171634,
+        0.004144905728392656,
+        6.745681770115031e-06,
+        6.410011410551419e-10
+      ],
+      "minimum_group_rate_hz": -0.037084659309317494,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "native-checkpoint piecewise linear spatial Z path",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.0001,
+      "period_step_ms": 0.0639492389605607,
+      "D_step": 1.2328857021404183e-07,
+      "predictor": "constant",
+      "period_constraint": "exact variable elimination"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_unstable_period_extension_G8505_M65536/point0001.npz",
+      "D": 0.21933559052485513,
+      "T_ms": 264.4,
+      "N": 8505,
+      "mean_hz": 31.32180621539684,
+      "min_hz": 0.015398873580280366,
+      "max_hz": 186.02304671052613,
+      "residual": 7.16093850883226e-12,
+      "iterations": [
+        4.607889523475072,
+        20.288152452974312,
+        21.398286547650414,
+        0.08274825444794763,
+        0.003134265946641568,
+        1.2017743050707352e-07,
+        7.049916206369744e-12
+      ],
+      "minimum_group_rate_hz": -0.03697051793020229,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "native-checkpoint piecewise linear spatial Z path",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.0001,
+      "period_step_ms": 0.049999999999954525,
+      "D_step": -5.6154129873808856e-08,
+      "predictor": "constant",
+      "period_constraint": "exact variable elimination"
+    }
+  ]
+}

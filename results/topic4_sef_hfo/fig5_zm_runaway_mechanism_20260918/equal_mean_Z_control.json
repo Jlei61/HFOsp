@@ -1,0 +1,717 @@
+{
+  "status": "COMPLETE",
+  "shared_initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449700_dt0.05/trajectory.npz",
+  "D": 0.1446362846679986,
+  "global_Z": 0.8553637153320014,
+  "spatial_Z_weighted_RMS_difference": 0.0015395421387350231,
+  "region_Z_actual": [
+    0.7353220941691563,
+    0.7361063496908765,
+    0.8614125555076649
+  ],
+  "region_Z_affine": [
+    0.7378070421189477,
+    0.7338334492005475,
+    0.8614096943465108
+  ],
+  "rows": [
+    {
+      "condition": "actual7770",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/actual_fine_Z_t7770_matched_history_dt005/trajectory.npz",
+      "readout": {
+        "label": "actual_fine_Z_t7770_matched_history_dt005",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 400,
+          "hi_bin": 800,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 87.59619417119367,
+          "max_rate_hz": 142.36669711948872,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.218375,
+            "20Hz_duty90": 0.17584375,
+            "50Hz_duty80": 0.20040625,
+            "50Hz_duty90": 0.16871875,
+            "100Hz_duty80": 0.18334375,
+            "100Hz_duty90": 0.15340625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2820340625
+        },
+        "subwindows": [
+          {
+            "lo_bin": 400,
+            "hi_bin": 500,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 83.91729384153153,
+            "max_rate_hz": 112.63144732504723,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.21784375,
+              "20Hz_duty90": 0.18496875,
+              "50Hz_duty80": 0.2024375,
+              "50Hz_duty90": 0.1713125,
+              "100Hz_duty80": 0.18715625,
+              "100Hz_duty90": 0.15884375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.26977312500000006
+          },
+          {
+            "lo_bin": 500,
+            "hi_bin": 600,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 83.87598060676956,
+            "max_rate_hz": 105.8789241461005,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.21303125,
+              "20Hz_duty90": 0.1864375,
+              "50Hz_duty80": 0.19984375,
+              "50Hz_duty90": 0.16390625,
+              "100Hz_duty80": 0.18390625,
+              "100Hz_duty90": 0.15365625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.271426875
+          },
+          {
+            "lo_bin": 600,
+            "hi_bin": 700,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 95.02153828794977,
+            "max_rate_hz": 127.65618957278618,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.22803125,
+              "20Hz_duty90": 0.1865,
+              "50Hz_duty80": 0.22325,
+              "50Hz_duty90": 0.1754375,
+              "100Hz_duty80": 0.2015625,
+              "100Hz_duty90": 0.16421875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.30512656250000003
+          },
+          {
+            "lo_bin": 700,
+            "hi_bin": 800,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 87.56996394852384,
+            "max_rate_hz": 142.36669711948872,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.2106875,
+              "20Hz_duty90": 0.1739375,
+              "50Hz_duty80": 0.19578125,
+              "50Hz_duty90": 0.15609375,
+              "100Hz_duty80": 0.17821875,
+              "100Hz_duty90": 0.14328125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2818096875
+          }
+        ],
+        "events": [],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 8000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      }
+    },
+    {
+      "condition": "affine_same_global_D",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/equal_global_D_actual7770_affine_matched_history_dt005/trajectory.npz",
+      "readout": {
+        "label": "equal_global_D_actual7770_affine_matched_history_dt005",
+        "category": "SELF_LIMITED",
+        "tail": {
+          "lo_bin": 400,
+          "hi_bin": 800,
+          "n_bins": 400,
+          "quiet_fraction": 0.6475,
+          "longest_quiet_ms": 170,
+          "quiet_runs_ge20ms": 16,
+          "n_events": 15,
+          "event_durations_ms": [
+            90,
+            100,
+            90,
+            90,
+            100,
+            90,
+            100,
+            100,
+            90,
+            100,
+            90,
+            90,
+            100,
+            90,
+            90
+          ],
+          "event_peaks_hz": [
+            151.01483792736735,
+            153.27852497165185,
+            151.05640648119106,
+            151.98931785709783,
+            153.1396263470122,
+            149.89879944602797,
+            152.67512610317218,
+            152.69389575890148,
+            149.33650219823602,
+            153.09382309140528,
+            152.0284026896199,
+            150.8807825935391,
+            153.2513974827156,
+            151.1412062136743,
+            151.89685078622665
+          ],
+          "inter_onset_ms": [
+            260,
+            270,
+            260,
+            260,
+            270,
+            260,
+            260,
+            270,
+            260,
+            270,
+            260,
+            260,
+            270,
+            260
+          ],
+          "activity_duty": 0.3525,
+          "mean_rate_hz": 28.366094161084384,
+          "max_rate_hz": 153.27852497165185,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.096846484375
+        },
+        "subwindows": [
+          {
+            "lo_bin": 400,
+            "hi_bin": 500,
+            "n_bins": 100,
+            "quiet_fraction": 0.67,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              90,
+              100,
+              90
+            ],
+            "event_peaks_hz": [
+              151.01483792736735,
+              153.27852497165185,
+              151.05640648119106
+            ],
+            "inter_onset_ms": [
+              260,
+              270
+            ],
+            "activity_duty": 0.33,
+            "mean_rate_hz": 27.62455908516524,
+            "max_rate_hz": 153.27852497165185,
+            "trailing_activity_ms": 50,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.09356343750000001
+          },
+          {
+            "lo_bin": 500,
+            "hi_bin": 600,
+            "n_bins": 100,
+            "quiet_fraction": 0.67,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              100,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              153.1396263470122,
+              149.89879944602797,
+              152.67512610317218
+            ],
+            "inter_onset_ms": [
+              270,
+              260
+            ],
+            "activity_duty": 0.33,
+            "mean_rate_hz": 25.332679691898765,
+            "max_rate_hz": 153.1396263470122,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.08726874999999999
+          },
+          {
+            "lo_bin": 600,
+            "hi_bin": 700,
+            "n_bins": 100,
+            "quiet_fraction": 0.62,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 4,
+            "event_durations_ms": [
+              100,
+              90,
+              100,
+              90
+            ],
+            "event_peaks_hz": [
+              152.69389575890148,
+              149.33650219823602,
+              153.09382309140528,
+              152.0284026896199
+            ],
+            "inter_onset_ms": [
+              270,
+              260,
+              270
+            ],
+            "activity_duty": 0.38,
+            "mean_rate_hz": 30.251276734965067,
+            "max_rate_hz": 153.09382309140528,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.10294031249999999
+          },
+          {
+            "lo_bin": 700,
+            "hi_bin": 800,
+            "n_bins": 100,
+            "quiet_fraction": 0.63,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 5,
+            "n_events": 4,
+            "event_durations_ms": [
+              90,
+              100,
+              90,
+              90
+            ],
+            "event_peaks_hz": [
+              150.8807825935391,
+              153.2513974827156,
+              151.1412062136743,
+              151.89685078622665
+            ],
+            "inter_onset_ms": [
+              260,
+              270,
+              260
+            ],
+            "activity_duty": 0.37,
+            "mean_rate_hz": 30.255861132308475,
+            "max_rate_hz": 153.2513974827156,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.1036134375
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 20,
+            "end_bin": 29,
+            "duration_ms": 90,
+            "peak_hz": 174.24475439855274,
+            "qualifies": true,
+            "start_ms": 200.0,
+            "end_ms": 290.0
+          },
+          {
+            "start_bin": 47,
+            "end_bin": 56,
+            "duration_ms": 90,
+            "peak_hz": 166.0011077466699,
+            "qualifies": true,
+            "start_ms": 470.0,
+            "end_ms": 560.0
+          },
+          {
+            "start_bin": 73,
+            "end_bin": 82,
+            "duration_ms": 90,
+            "peak_hz": 162.82675778878098,
+            "qualifies": true,
+            "start_ms": 730.0,
+            "end_ms": 820.0
+          },
+          {
+            "start_bin": 99,
+            "end_bin": 109,
+            "duration_ms": 100,
+            "peak_hz": 158.91499430696985,
+            "qualifies": true,
+            "start_ms": 990.0,
+            "end_ms": 1090.0
+          },
+          {
+            "start_bin": 126,
+            "end_bin": 135,
+            "duration_ms": 90,
+            "peak_hz": 153.82701691933102,
+            "qualifies": true,
+            "start_ms": 1260.0,
+            "end_ms": 1350.0
+          },
+          {
+            "start_bin": 152,
+            "end_bin": 162,
+            "duration_ms": 100,
+            "peak_hz": 155.55349238329765,
+            "qualifies": true,
+            "start_ms": 1520.0,
+            "end_ms": 1620.0
+          },
+          {
+            "start_bin": 179,
+            "end_bin": 188,
+            "duration_ms": 90,
+            "peak_hz": 152.22593282687396,
+            "qualifies": true,
+            "start_ms": 1790.0,
+            "end_ms": 1880.0
+          },
+          {
+            "start_bin": 205,
+            "end_bin": 214,
+            "duration_ms": 90,
+            "peak_hz": 152.64012299372166,
+            "qualifies": true,
+            "start_ms": 2050.0,
+            "end_ms": 2140.0
+          },
+          {
+            "start_bin": 231,
+            "end_bin": 241,
+            "duration_ms": 100,
+            "peak_hz": 153.58571737260965,
+            "qualifies": true,
+            "start_ms": 2310.0,
+            "end_ms": 2410.0
+          },
+          {
+            "start_bin": 258,
+            "end_bin": 267,
+            "duration_ms": 90,
+            "peak_hz": 150.08492565051392,
+            "qualifies": true,
+            "start_ms": 2580.0,
+            "end_ms": 2670.0
+          },
+          {
+            "start_bin": 284,
+            "end_bin": 294,
+            "duration_ms": 100,
+            "peak_hz": 152.86742987425416,
+            "qualifies": true,
+            "start_ms": 2840.0,
+            "end_ms": 2940.0
+          },
+          {
+            "start_bin": 310,
+            "end_bin": 320,
+            "duration_ms": 100,
+            "peak_hz": 152.7759203754868,
+            "qualifies": true,
+            "start_ms": 3100.0,
+            "end_ms": 3200.0
+          },
+          {
+            "start_bin": 337,
+            "end_bin": 346,
+            "duration_ms": 90,
+            "peak_hz": 149.5130079160292,
+            "qualifies": true,
+            "start_ms": 3370.0,
+            "end_ms": 3460.0
+          },
+          {
+            "start_bin": 363,
+            "end_bin": 373,
+            "duration_ms": 100,
+            "peak_hz": 153.17053200313092,
+            "qualifies": true,
+            "start_ms": 3630.0,
+            "end_ms": 3730.0
+          },
+          {
+            "start_bin": 390,
+            "end_bin": 399,
+            "duration_ms": 90,
+            "peak_hz": 152.00194139914947,
+            "qualifies": true,
+            "start_ms": 3900.0,
+            "end_ms": 3990.0
+          },
+          {
+            "start_bin": 416,
+            "end_bin": 425,
+            "duration_ms": 90,
+            "peak_hz": 151.01483792736735,
+            "qualifies": true,
+            "start_ms": 4160.0,
+            "end_ms": 4250.0
+          },
+          {
+            "start_bin": 442,
+            "end_bin": 452,
+            "duration_ms": 100,
+            "peak_hz": 153.27852497165185,
+            "qualifies": true,
+            "start_ms": 4420.0,
+            "end_ms": 4520.0
+          },
+          {
+            "start_bin": 469,
+            "end_bin": 478,
+            "duration_ms": 90,
+            "peak_hz": 151.05640648119106,
+            "qualifies": true,
+            "start_ms": 4690.0,
+            "end_ms": 4780.0
+          },
+          {
+            "start_bin": 495,
+            "end_bin": 504,
+            "duration_ms": 90,
+            "peak_hz": 151.98931785709783,
+            "qualifies": true,
+            "start_ms": 4950.0,
+            "end_ms": 5040.0
+          },
+          {
+            "start_bin": 521,
+            "end_bin": 531,
+            "duration_ms": 100,
+            "peak_hz": 153.1396263470122,
+            "qualifies": true,
+            "start_ms": 5210.0,
+            "end_ms": 5310.0
+          },
+          {
+            "start_bin": 548,
+            "end_bin": 557,
+            "duration_ms": 90,
+            "peak_hz": 149.89879944602797,
+            "qualifies": true,
+            "start_ms": 5480.0,
+            "end_ms": 5570.0
+          },
+          {
+            "start_bin": 574,
+            "end_bin": 584,
+            "duration_ms": 100,
+            "peak_hz": 152.67512610317218,
+            "qualifies": true,
+            "start_ms": 5740.0,
+            "end_ms": 5840.0
+          },
+          {
+            "start_bin": 600,
+            "end_bin": 610,
+            "duration_ms": 100,
+            "peak_hz": 152.69389575890148,
+            "qualifies": true,
+            "start_ms": 6000.0,
+            "end_ms": 6100.0
+          },
+          {
+            "start_bin": 627,
+            "end_bin": 636,
+            "duration_ms": 90,
+            "peak_hz": 149.33650219823602,
+            "qualifies": true,
+            "start_ms": 6270.0,
+            "end_ms": 6360.0
+          },
+          {
+            "start_bin": 653,
+            "end_bin": 663,
+            "duration_ms": 100,
+            "peak_hz": 153.09382309140528,
+            "qualifies": true,
+            "start_ms": 6530.0,
+            "end_ms": 6630.0
+          },
+          {
+            "start_bin": 680,
+            "end_bin": 689,
+            "duration_ms": 90,
+            "peak_hz": 152.0284026896199,
+            "qualifies": true,
+            "start_ms": 6800.0,
+            "end_ms": 6890.0
+          },
+          {
+            "start_bin": 706,
+            "end_bin": 715,
+            "duration_ms": 90,
+            "peak_hz": 150.8807825935391,
+            "qualifies": true,
+            "start_ms": 7060.0,
+            "end_ms": 7150.0
+          },
+          {
+            "start_bin": 732,
+            "end_bin": 742,
+            "duration_ms": 100,
+            "peak_hz": 153.2513974827156,
+            "qualifies": true,
+            "start_ms": 7320.0,
+            "end_ms": 7420.0
+          },
+          {
+            "start_bin": 759,
+            "end_bin": 768,
+            "duration_ms": 90,
+            "peak_hz": 151.1412062136743,
+            "qualifies": true,
+            "start_ms": 7590.0,
+            "end_ms": 7680.0
+          },
+          {
+            "start_bin": 785,
+            "end_bin": 794,
+            "duration_ms": 90,
+            "peak_hz": 151.89685078622665,
+            "qualifies": true,
+            "start_ms": 7850.0,
+            "end_ms": 7940.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 15,
+          "every_subwindow_has_quiet": true,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.6475,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "SELF_LIMITED",
+          "20Hz_duty90": "SELF_LIMITED",
+          "50Hz_duty80": "SELF_LIMITED",
+          "50Hz_duty90": "SELF_LIMITED",
+          "100Hz_duty80": "SELF_LIMITED",
+          "100Hz_duty90": "SELF_LIMITED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 8000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      }
+    }
+  ],
+  "Z": "held in both conditions",
+  "M": "dynamic in both conditions",
+  "question": "Is the global mean depletion sufficient to predict the held-field finite-time state at this matched history?",
+  "limit": "One matched deterministic history and finite 8-s window; this control does not classify a bifurcation or test all fields at this D."
+}

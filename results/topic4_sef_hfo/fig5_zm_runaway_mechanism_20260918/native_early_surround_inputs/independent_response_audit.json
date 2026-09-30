@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "native_fixed_bins_exact": true,
+  "rate_bins_exact": true,
+  "original_raw_current_moment_checks": 16500,
+  "maximum_quantization_bound_ratio": 0.8498389235247509,
+  "current_GPU_local_response_parity": [
+    {
+      "label": "native_mean_private_variance",
+      "dt_ms": 0.1,
+      "steps": 30000,
+      "maximum_rate_difference_hz": 1.6564172256039456e-10,
+      "relative_L2": 3.54439264767356e-14
+    },
+    {
+      "label": "projected_mean_private_variance",
+      "dt_ms": 0.1,
+      "steps": 30000,
+      "maximum_rate_difference_hz": 1.2988721209694631e-10,
+      "relative_L2": 3.1434152527925864e-14
+    }
+  ],
+  "scope": "Numerical readout identity for the actual input waveforms and prescribed nativeZ, plus independent fixedbin reconstruction. No native/model scientific acceptance or bifurcation claim."
+}

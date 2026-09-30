@@ -1,0 +1,105 @@
+{
+  "status": "LOCKED_READOUT_DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "group": 279,
+      "N": 35,
+      "theta_mv": 17.955848651430077,
+      "native_count": 14373,
+      "measured_marginals": {
+        "expected_count": 14286.412768746883,
+        "absolute_window_count_error": 10.26114695294816,
+        "count_waveform_L2_descriptive": 0.021471206668005807
+      },
+      "projected_private": {
+        "expected_count": 14148.851287938247,
+        "absolute_window_count_error": 10.100977911867883,
+        "count_waveform_L2_descriptive": 0.026720287022668224
+      }
+    },
+    {
+      "group": 141,
+      "N": 51,
+      "theta_mv": 17.931614720234382,
+      "native_count": 14718,
+      "measured_marginals": {
+        "expected_count": 14679.128651680465,
+        "absolute_window_count_error": 10.846676953375972,
+        "count_waveform_L2_descriptive": 0.023164236143632243
+      },
+      "projected_private": {
+        "expected_count": 14544.7695723934,
+        "absolute_window_count_error": 17.668474876777488,
+        "count_waveform_L2_descriptive": 0.04742116476667495
+      }
+    },
+    {
+      "group": 39,
+      "N": 102,
+      "theta_mv": 18.0,
+      "native_count": 35841,
+      "measured_marginals": {
+        "expected_count": 35981.05637671334,
+        "absolute_window_count_error": 31.559457827017944,
+        "count_waveform_L2_descriptive": 0.031033822006178848
+      },
+      "projected_private": {
+        "expected_count": 35694.69968459267,
+        "absolute_window_count_error": 19.88694089705083,
+        "count_waveform_L2_descriptive": 0.016142518823800515
+      }
+    },
+    {
+      "group": 594,
+      "N": 23,
+      "theta_mv": 18.0,
+      "native_count": 10870,
+      "measured_marginals": {
+        "expected_count": 10791.712246636405,
+        "absolute_window_count_error": 9.886375540514099,
+        "count_waveform_L2_descriptive": 0.03408021229649159
+      },
+      "projected_private": {
+        "expected_count": 10541.935140671358,
+        "absolute_window_count_error": 14.858939836468641,
+        "count_waveform_L2_descriptive": 0.04918228872902474
+      }
+    },
+    {
+      "group": 293,
+      "N": 13,
+      "theta_mv": 16.221142872756225,
+      "native_count": 5431,
+      "measured_marginals": {
+        "expected_count": 5346.525989756215,
+        "absolute_window_count_error": 6.2146558631552224,
+        "count_waveform_L2_descriptive": 0.03562558619689917
+      },
+      "projected_private": {
+        "expected_count": 5377.732649844574,
+        "absolute_window_count_error": 5.542988491230766,
+        "count_waveform_L2_descriptive": 0.04329317457154095
+      }
+    },
+    {
+      "group": 130,
+      "N": 13,
+      "theta_mv": 16.709919434540062,
+      "native_count": 4364,
+      "measured_marginals": {
+        "expected_count": 4304.45803563501,
+        "absolute_window_count_error": 3.041483574375754,
+        "count_waveform_L2_descriptive": 0.022386903054246635
+      },
+      "projected_private": {
+        "expected_count": 4288.759220389089,
+        "absolute_window_count_error": 2.9318259415491417,
+        "count_waveform_L2_descriptive": 0.023058590595635163
+      }
+    }
+  ],
+  "preprocessing": "Already-filtered current variances converted to effective static variance units; no second synaptic filtering. Input history initialized at8s instantaneous values;1s preparation excluded.",
+  "data_used": "Only supplied input means,variances,Z/M; native future firing is not fed to refractory readout history. Projected inputs upstream were calculated from native group spikes.",
+  "boundaries": "Counts are descriptive one-history comparison. No finiteNnoise acceptance, no localGaussianLIF reference, no autonomous model promotion or parameter fitting.",
+  "weights": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_rate/fit/locked_weights.json"
+}

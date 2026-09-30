@@ -1,0 +1,141 @@
+{
+  "status": "UNIT_CORRECTION_AUDIT_PASS",
+  "reference_threshold_mv": 18.0,
+  "reset_mv": 11.0,
+  "rows": [
+    {
+      "pop": "E",
+      "CPU_CUDA_max_error": 6.800116025829084e-16,
+      "finite_difference_relative_errors": [
+        5.640781888358894e-09,
+        6.745281874829383e-11,
+        6.80977828635335e-11
+      ],
+      "scaling": [
+        {
+          "channel": 0,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 0,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 0,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.23774987478785833,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.31832913285065373,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.3320345664372645,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.19940857783574584,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.33267461990445146,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.41198359410027025,
+          "corrected_relative_error": 0.0
+        }
+      ]
+    },
+    {
+      "pop": "I",
+      "CPU_CUDA_max_error": 1.1102230246251565e-15,
+      "finite_difference_relative_errors": [
+        1.069644507418955e-08,
+        8.345927083415333e-11,
+        8.1269833379855e-11
+      ],
+      "scaling": [
+        {
+          "channel": 0,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 0,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 0,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.0,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.12558894096903092,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.2725620801501971,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 1,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.3193622909225036,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 6.0,
+          "original_relative_error": 0.11211674921797966,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 25.0,
+          "original_relative_error": 0.25468517762376014,
+          "corrected_relative_error": 0.0
+        },
+        {
+          "channel": 2,
+          "frequency_hz": 60.0,
+          "original_relative_error": 0.34840213805961706,
+          "corrected_relative_error": 0.0
+        }
+      ]
+    }
+  ],
+  "nonlinear_LIF_scaling_counts_bitwise": true,
+  "replicates": 256,
+  "statistical_unit": "Independent noise path",
+  "scope": "Unit correctness, CPU/GPU parity, derivatives and LIF voltage equivariance only; not a validated replacement network."
+}

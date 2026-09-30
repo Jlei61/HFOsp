@@ -1,0 +1,22 @@
+{
+  "status": "OLD_WAITING_WORKER_EXITED",
+  "pid": 501115,
+  "previous_state": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 501115,
+    "completed": 13,
+    "expected": 58,
+    "index": 98,
+    "free_mib": 2003.0,
+    "next_stage": "PROFILE",
+    "N": 0,
+    "required_free_gib": 2.5
+  },
+  "wchan_before": "hrtimer_nanosleep",
+  "process_stopped_for_consistent_inspection": true,
+  "device_from": 1,
+  "device_to": 0,
+  "new_device_free_mib": 5191.0,
+  "reason": "The existing N2048 correction has a measured own-process 1.74 GiB peak; GPU 1 stays below the unchanged 2.5 GiB gate, GPU 0 has headroom. No active calculation interrupted.",
+  "timestamp": 1789868294.583658
+}

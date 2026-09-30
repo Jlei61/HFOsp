@@ -1,0 +1,1700 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "label": "rate_critical_finer_restart_D0.1449750_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_finer_restart_D0.1449750_dt0.05/trajectory.npz",
+      "D": 0.1449750000000004,
+      "category": "SELF_LIMITED",
+      "tail": {
+        "lo_bin": 400,
+        "hi_bin": 800,
+        "n_bins": 400,
+        "quiet_fraction": 0.6825,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          90,
+          80,
+          80,
+          90,
+          90,
+          80,
+          80,
+          90,
+          90,
+          80,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          180.6958411237544,
+          175.52826142295226,
+          182.27378517575116,
+          184.024098563542,
+          181.2431039067992,
+          178.13306186496612,
+          184.11112042897759,
+          185.3413795455241,
+          182.39991920263188,
+          179.98999995801034,
+          185.8952797447128,
+          187.11981427568134,
+          184.73065411919467,
+          180.89708850836791
+        ],
+        "inter_onset_ms": [
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.3175,
+        "mean_rate_hz": 27.627841923994836,
+        "max_rate_hz": 187.7680430325347,
+        "trailing_activity_ms": 40,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09614242187500001
+      },
+      "returns": [
+        {
+          "lag_ms": 535,
+          "relative_field_error": 0.02575162909749172,
+          "relative_global_error": 0.009531626203715431
+        },
+        {
+          "lag_ms": 268,
+          "relative_field_error": 0.045585622862600816,
+          "relative_global_error": 0.02309464231066582
+        },
+        {
+          "lag_ms": 1070,
+          "relative_field_error": 0.046698639871052695,
+          "relative_global_error": 0.016892705381511254
+        },
+        {
+          "lag_ms": 803,
+          "relative_field_error": 0.05351177604874286,
+          "relative_global_error": 0.026145471973229608
+        },
+        {
+          "lag_ms": 1605,
+          "relative_field_error": 0.06459048347739374,
+          "relative_global_error": 0.022756065188831897
+        },
+        {
+          "lag_ms": 1338,
+          "relative_field_error": 0.06558027040492202,
+          "relative_global_error": 0.03032429589973761
+        },
+        {
+          "lag_ms": 1872,
+          "relative_field_error": 0.0900652092792015,
+          "relative_global_error": 0.033728933084937324
+        }
+      ],
+      "peaks_ms": [
+        251,
+        518,
+        785,
+        1053,
+        1320,
+        1588,
+        1855,
+        2123,
+        2390,
+        2658,
+        2926,
+        3193,
+        3461,
+        3728,
+        3996
+      ],
+      "peak_rates_hz": [
+        186.6563838355233,
+        187.13646072284433,
+        187.31854073209726,
+        187.8919354530792,
+        188.14584101094275,
+        188.6545627196949,
+        188.96309004110395,
+        189.47689374181346,
+        189.80275639348872,
+        190.38388496238952,
+        190.72889298121981,
+        191.38072133734767,
+        191.96568532777357,
+        192.5232009962768,
+        193.32722022706957
+      ],
+      "IEI_ms": [
+        267,
+        267,
+        268,
+        267,
+        268,
+        267,
+        268,
+        267,
+        268,
+        268,
+        267,
+        268,
+        267,
+        268
+      ]
+    },
+    {
+      "label": "rate_critical_finer_restart_D0.1449775_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_finer_restart_D0.1449775_dt0.05/trajectory.npz",
+      "D": 0.14497750000000031,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 400,
+        "hi_bin": 800,
+        "n_bins": 400,
+        "quiet_fraction": 0.2775,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 6,
+        "n_events": 5,
+        "event_durations_ms": [
+          80,
+          80,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          188.9680901808473,
+          190.04990913314586,
+          189.0819328109336,
+          186.81948066351265,
+          189.1300085056876
+        ],
+        "inter_onset_ms": [
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.7225,
+        "mean_rate_hz": 62.80484525323787,
+        "max_rate_hz": 195.8531566815476,
+        "trailing_activity_ms": 2430,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.20868984375
+      },
+      "returns": [
+        {
+          "lag_ms": 268,
+          "relative_field_error": 0.7247456717896108,
+          "relative_global_error": 0.33274191704936856
+        },
+        {
+          "lag_ms": 537,
+          "relative_field_error": 0.7752559836733237,
+          "relative_global_error": 0.44360465799198323
+        },
+        {
+          "lag_ms": 806,
+          "relative_field_error": 0.8067910631177649,
+          "relative_global_error": 0.5238842327154143
+        },
+        {
+          "lag_ms": 1073,
+          "relative_field_error": 0.8490109220647103,
+          "relative_global_error": 0.6029850059570842
+        },
+        {
+          "lag_ms": 1344,
+          "relative_field_error": 0.8607262600771256,
+          "relative_global_error": 0.6874028525663957
+        },
+        {
+          "lag_ms": 1459,
+          "relative_field_error": 0.9013214991933628,
+          "relative_global_error": 0.7595280417729169
+        },
+        {
+          "lag_ms": 655,
+          "relative_field_error": 0.9123030808441356,
+          "relative_global_error": 0.7465665512983956
+        },
+        {
+          "lag_ms": 1187,
+          "relative_field_error": 0.9142967565086896,
+          "relative_global_error": 0.7646156525750201
+        },
+        {
+          "lag_ms": 382,
+          "relative_field_error": 0.9217712538158387,
+          "relative_global_error": 0.7381004959707499
+        },
+        {
+          "lag_ms": 1610,
+          "relative_field_error": 0.9237105045235502,
+          "relative_global_error": 0.775322418381097
+        },
+        {
+          "lag_ms": 1727,
+          "relative_field_error": 0.9312603468395751,
+          "relative_global_error": 0.8034695332371716
+        },
+        {
+          "lag_ms": 929,
+          "relative_field_error": 0.9327118439017308,
+          "relative_global_error": 0.7554481847331862
+        }
+      ],
+      "peaks_ms": [
+        255,
+        523,
+        791,
+        1060,
+        1329,
+        1601,
+        1730,
+        1901,
+        2029,
+        2153,
+        2346,
+        2475,
+        2618,
+        2783,
+        3085,
+        3216,
+        3368,
+        3570,
+        3693,
+        3841,
+        3996
+      ],
+      "peak_rates_hz": [
+        193.41802987647964,
+        194.67039456265104,
+        196.1569273339606,
+        198.0343689966558,
+        201.0238585812659,
+        206.63971641446807,
+        98.79366835722205,
+        102.36115847873754,
+        91.33541511087688,
+        124.23644581547882,
+        67.00047704565027,
+        104.76990786681296,
+        96.17344092313083,
+        124.70721044571064,
+        115.84743196505634,
+        121.9850743570967,
+        110.59912321393226,
+        97.94701291574177,
+        103.54412801129041,
+        110.74334124123752,
+        79.06187935607366
+      ],
+      "IEI_ms": [
+        268,
+        268,
+        269,
+        269,
+        272,
+        129,
+        171,
+        128,
+        124,
+        193,
+        129,
+        143,
+        165,
+        302,
+        131,
+        152,
+        202,
+        123,
+        148,
+        155
+      ]
+    },
+    {
+      "label": "rate_critical_near_restart_D0.1449700_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449700_dt0.05/trajectory.npz",
+      "D": 0.14497000000000038,
+      "category": "SELF_LIMITED",
+      "tail": {
+        "lo_bin": 400,
+        "hi_bin": 800,
+        "n_bins": 400,
+        "quiet_fraction": 0.6725,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          80,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          80,
+          90,
+          90,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          167.83199581963683,
+          173.91775074535224,
+          175.31519606868238,
+          169.7801829263973,
+          173.08801961343892,
+          175.83256627576418,
+          171.51382686563485,
+          171.95653942137756,
+          176.03667280926572,
+          173.03118029042696,
+          170.58034590160588,
+          175.88144185367224,
+          174.3170614487437,
+          168.89363959366756
+        ],
+        "inter_onset_ms": [
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.3275,
+        "mean_rate_hz": 28.146342401444286,
+        "max_rate_hz": 176.03667280926572,
+        "trailing_activity_ms": 60,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09726132812499999
+      },
+      "returns": [
+        {
+          "lag_ms": 267,
+          "relative_field_error": 0.011333384800771427,
+          "relative_global_error": 0.005176093085567916
+        },
+        {
+          "lag_ms": 1868,
+          "relative_field_error": 0.016730788115048342,
+          "relative_global_error": 0.00675131288276922
+        },
+        {
+          "lag_ms": 534,
+          "relative_field_error": 0.022594970237828367,
+          "relative_global_error": 0.010337392676865077
+        },
+        {
+          "lag_ms": 1601,
+          "relative_field_error": 0.02694822249779019,
+          "relative_global_error": 0.011628882804110535
+        },
+        {
+          "lag_ms": 801,
+          "relative_field_error": 0.033742705572848544,
+          "relative_global_error": 0.01548168661717705
+        },
+        {
+          "lag_ms": 1334,
+          "relative_field_error": 0.037644677607049926,
+          "relative_global_error": 0.016666711753576487
+        },
+        {
+          "lag_ms": 1068,
+          "relative_field_error": 0.04474633029710691,
+          "relative_global_error": 0.02060929318893911
+        }
+      ],
+      "peaks_ms": [
+        238,
+        505,
+        772,
+        1038,
+        1305,
+        1572,
+        1839,
+        2106,
+        2373,
+        2640,
+        2907,
+        3173,
+        3440,
+        3707,
+        3974
+      ],
+      "peak_rates_hz": [
+        177.3034136277707,
+        177.4058622580867,
+        177.47420315165436,
+        177.60285848363515,
+        177.7488345737773,
+        177.85766060662752,
+        177.932816515833,
+        177.98605291661067,
+        178.0140984364088,
+        178.02038701643653,
+        178.01903139516253,
+        178.07016590310658,
+        178.15951992471403,
+        178.22134788373654,
+        178.26423774320645
+      ],
+      "IEI_ms": [
+        267,
+        267,
+        266,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        266,
+        267,
+        267,
+        267
+      ]
+    },
+    {
+      "label": "rate_critical_near_restart_D0.1449800_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449800_dt0.05/trajectory.npz",
+      "D": 0.14498000000000044,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 400,
+        "hi_bin": 800,
+        "n_bins": 400,
+        "quiet_fraction": 0.1475,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 4,
+        "n_events": 3,
+        "event_durations_ms": [
+          80,
+          80,
+          80
+        ],
+        "event_peaks_hz": [
+          190.70721592732548,
+          190.5719577875967,
+          193.5125930716293
+        ],
+        "inter_onset_ms": [
+          270,
+          270
+        ],
+        "activity_duty": 0.8525,
+        "mean_rate_hz": 71.83551034693653,
+        "max_rate_hz": 193.5125930716293,
+        "trailing_activity_ms": 3140,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0250625,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0196875,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.00721875,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.24063468749999997
+      },
+      "returns": [
+        {
+          "lag_ms": 268,
+          "relative_field_error": 0.8020392686084443,
+          "relative_global_error": 0.377529914450249
+        },
+        {
+          "lag_ms": 665,
+          "relative_field_error": 0.842180147469117,
+          "relative_global_error": 0.5140916712637097
+        },
+        {
+          "lag_ms": 535,
+          "relative_field_error": 0.8618598563099484,
+          "relative_global_error": 0.43887718397917735
+        },
+        {
+          "lag_ms": 881,
+          "relative_field_error": 0.88550315395157,
+          "relative_global_error": 0.5684281369852597
+        },
+        {
+          "lag_ms": 388,
+          "relative_field_error": 0.88573337972006,
+          "relative_global_error": 0.5306169809813787
+        },
+        {
+          "lag_ms": 790,
+          "relative_field_error": 0.896947797892007,
+          "relative_global_error": 0.557967127827091
+        },
+        {
+          "lag_ms": 1202,
+          "relative_field_error": 0.922239103692703,
+          "relative_global_error": 0.6122432354368893
+        },
+        {
+          "lag_ms": 940,
+          "relative_field_error": 0.9248274402225651,
+          "relative_global_error": 0.5719979471372402
+        },
+        {
+          "lag_ms": 1044,
+          "relative_field_error": 0.9291826852036521,
+          "relative_global_error": 0.600498099489049
+        },
+        {
+          "lag_ms": 1149,
+          "relative_field_error": 0.9375909062465541,
+          "relative_global_error": 0.6278903759093897
+        },
+        {
+          "lag_ms": 1370,
+          "relative_field_error": 0.9441148042335913,
+          "relative_global_error": 0.6622290502775533
+        },
+        {
+          "lag_ms": 1463,
+          "relative_field_error": 0.9674950599282875,
+          "relative_global_error": 0.6708593892293688
+        }
+      ],
+      "peaks_ms": [
+        252,
+        521,
+        791,
+        917,
+        1133,
+        1344,
+        1467,
+        1587,
+        1717,
+        1842,
+        1975,
+        2182,
+        2364,
+        2488,
+        2690,
+        2821,
+        2998,
+        3189,
+        3345,
+        3559,
+        3711,
+        3844,
+        3968
+      ],
+      "peak_rates_hz": [
+        196.38913246261725,
+        198.85194220673563,
+        202.77674988486052,
+        102.6050323679847,
+        82.26382742131133,
+        98.28016336294564,
+        154.9156718606357,
+        90.82700760432596,
+        109.70404816121334,
+        108.50686864040239,
+        128.52326429002005,
+        112.5863992294966,
+        143.2638265901885,
+        127.08167629970086,
+        94.09007507970355,
+        78.92650551971786,
+        103.59134296259722,
+        98.65336253815774,
+        83.69258326445816,
+        116.73673439678441,
+        76.99004359155478,
+        74.1134117165317,
+        121.98650016677244
+      ],
+      "IEI_ms": [
+        269,
+        270,
+        126,
+        216,
+        211,
+        123,
+        120,
+        130,
+        125,
+        133,
+        207,
+        182,
+        124,
+        202,
+        131,
+        177,
+        191,
+        156,
+        214,
+        152,
+        133,
+        124
+      ]
+    },
+    {
+      "label": "rate_critical_near_restart_D0.1449900_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449900_dt0.05/trajectory.npz",
+      "D": 0.14499000000000029,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 400,
+        "hi_bin": 800,
+        "n_bins": 400,
+        "quiet_fraction": 0.2575,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 6,
+        "n_events": 5,
+        "event_durations_ms": [
+          780,
+          90,
+          90,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          142.97769750628618,
+          177.52407575949877,
+          181.40435463127858,
+          185.07203086201707,
+          188.28657048925857
+        ],
+        "inter_onset_ms": [
+          950,
+          270,
+          270,
+          270
+        ],
+        "activity_duty": 0.7425,
+        "mean_rate_hz": 64.48500978688018,
+        "max_rate_hz": 189.2909974328216,
+        "trailing_activity_ms": 1480,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.211376953125
+      },
+      "returns": [
+        {
+          "lag_ms": 270,
+          "relative_field_error": 0.7929634224994175,
+          "relative_global_error": 0.5221126884674308
+        },
+        {
+          "lag_ms": 537,
+          "relative_field_error": 0.8833221274361297,
+          "relative_global_error": 0.6485297474715842
+        },
+        {
+          "lag_ms": 811,
+          "relative_field_error": 0.9543767174151976,
+          "relative_global_error": 0.7442475118109806
+        },
+        {
+          "lag_ms": 377,
+          "relative_field_error": 0.9565696863957266,
+          "relative_global_error": 0.8075077754843285
+        },
+        {
+          "lag_ms": 1888,
+          "relative_field_error": 0.9921446806106762,
+          "relative_global_error": 0.8286813441633102
+        },
+        {
+          "lag_ms": 640,
+          "relative_field_error": 0.9957939149535802,
+          "relative_global_error": 0.8218529753760013
+        },
+        {
+          "lag_ms": 1750,
+          "relative_field_error": 1.0054533779673227,
+          "relative_global_error": 0.803156411724782
+        },
+        {
+          "lag_ms": 933,
+          "relative_field_error": 1.0227437377917288,
+          "relative_global_error": 0.8231076581492356
+        },
+        {
+          "lag_ms": 1080,
+          "relative_field_error": 1.0426762812803356,
+          "relative_global_error": 0.8834075680818652
+        },
+        {
+          "lag_ms": 1617,
+          "relative_field_error": 1.07478979110553,
+          "relative_global_error": 0.9309114474459177
+        },
+        {
+          "lag_ms": 1205,
+          "relative_field_error": 1.0918184976417016,
+          "relative_global_error": 0.8941992198425697
+        },
+        {
+          "lag_ms": 1477,
+          "relative_field_error": 1.0961745787449493,
+          "relative_global_error": 0.8984419539405528
+        }
+      ],
+      "peaks_ms": [
+        19,
+        259,
+        527,
+        658,
+        852,
+        973,
+        1143,
+        1483,
+        1754,
+        2025,
+        2295,
+        2559,
+        2688,
+        2921,
+        3108,
+        3231,
+        3384,
+        3520,
+        3755,
+        3909
+      ],
+      "peak_rates_hz": [
+        132.2604527381953,
+        109.53827904361239,
+        147.3394540210337,
+        89.1213406112784,
+        143.6160503228025,
+        87.92737220968237,
+        130.1777184362218,
+        180.71654333048957,
+        185.7870510063444,
+        189.7715599238792,
+        192.4675307414657,
+        193.3940593997901,
+        107.75930530494485,
+        127.85676410818161,
+        110.82950481333847,
+        124.00387802760719,
+        110.87623111780141,
+        110.06476413550267,
+        108.11070658701277,
+        133.06374701475156
+      ],
+      "IEI_ms": [
+        240,
+        268,
+        131,
+        194,
+        121,
+        170,
+        340,
+        271,
+        271,
+        270,
+        264,
+        129,
+        233,
+        187,
+        123,
+        153,
+        136,
+        235,
+        154
+      ]
+    },
+    {
+      "label": "rate_near_cycle_restart_D0.1450200_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_near_cycle_restart_D0.1450200_dt0.05/trajectory.npz",
+      "D": 0.14502000000000037,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.225,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 5,
+        "n_events": 4,
+        "event_durations_ms": [
+          100,
+          90,
+          80,
+          80
+        ],
+        "event_peaks_hz": [
+          148.1654883804176,
+          164.6759601327788,
+          174.86408752330078,
+          181.95523820145405
+        ],
+        "inter_onset_ms": [
+          280,
+          280,
+          270
+        ],
+        "activity_duty": 0.775,
+        "mean_rate_hz": 66.4391712671511,
+        "max_rate_hz": 181.95523820145405,
+        "trailing_activity_ms": 10,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.22075109375000002
+      },
+      "returns": [
+        {
+          "lag_ms": 274,
+          "relative_field_error": 0.7873593044627598,
+          "relative_global_error": 0.3651851548192522
+        },
+        {
+          "lag_ms": 548,
+          "relative_field_error": 0.8353535440054197,
+          "relative_global_error": 0.46479660466452055
+        },
+        {
+          "lag_ms": 825,
+          "relative_field_error": 0.9067804489301727,
+          "relative_global_error": 0.5726234107285152
+        },
+        {
+          "lag_ms": 1126,
+          "relative_field_error": 1.0284801337290295,
+          "relative_global_error": 0.6762432532078887
+        },
+        {
+          "lag_ms": 1422,
+          "relative_field_error": 1.1347828648735443,
+          "relative_global_error": 0.8066038496834896
+        },
+        {
+          "lag_ms": 1542,
+          "relative_field_error": 1.1700986873164259,
+          "relative_global_error": 0.8560479613278746
+        },
+        {
+          "lag_ms": 1689,
+          "relative_field_error": 1.2019986727012022,
+          "relative_global_error": 0.8529046470791255
+        },
+        {
+          "lag_ms": 1845,
+          "relative_field_error": 1.2561189846498961,
+          "relative_global_error": 0.9259472184948366
+        }
+      ],
+      "peaks_ms": [
+        90,
+        308,
+        429,
+        553,
+        746,
+        978,
+        1101,
+        1268,
+        1388,
+        1614,
+        1746,
+        1928,
+        2078,
+        2207,
+        2406,
+        2644,
+        2941,
+        3218,
+        3490,
+        3761
+      ],
+      "peak_rates_hz": [
+        113.70087362298152,
+        90.79363145539452,
+        69.44407690391347,
+        96.27387993751341,
+        107.69183066324636,
+        108.6097367074271,
+        81.07511099310909,
+        124.02456148688027,
+        123.38639331960796,
+        110.6808588680262,
+        95.8150338210416,
+        85.21639062806287,
+        125.1921454560581,
+        116.48582178876032,
+        118.8603960368329,
+        110.57444922297366,
+        148.7003925218591,
+        171.90227939835518,
+        182.16754130363307,
+        188.82720172327387
+      ],
+      "IEI_ms": [
+        218,
+        121,
+        124,
+        193,
+        232,
+        123,
+        167,
+        120,
+        226,
+        132,
+        182,
+        150,
+        129,
+        199,
+        238,
+        297,
+        277,
+        272,
+        271
+      ]
+    },
+    {
+      "label": "rate_near_cycle_restart_D0.1450800_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_near_cycle_restart_D0.1450800_dt0.05/trajectory.npz",
+      "D": 0.14508000000000043,
+      "category": "PERSISTENT",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 91.16994778763038,
+        "max_rate_hz": 127.85693527749328,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.22415625,
+          "20Hz_duty90": 0.16271875,
+          "50Hz_duty80": 0.211625,
+          "50Hz_duty90": 0.1409375,
+          "100Hz_duty80": 0.1938125,
+          "100Hz_duty90": 0.120625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.296246171875
+      },
+      "returns": [
+        {
+          "lag_ms": 245,
+          "relative_field_error": 0.6073414518914004,
+          "relative_global_error": 0.18763250291286904
+        },
+        {
+          "lag_ms": 344,
+          "relative_field_error": 0.6413185092663375,
+          "relative_global_error": 0.20946623776562798
+        },
+        {
+          "lag_ms": 530,
+          "relative_field_error": 0.6455174961977795,
+          "relative_global_error": 0.20905897076217186
+        },
+        {
+          "lag_ms": 897,
+          "relative_field_error": 0.6473307301422907,
+          "relative_global_error": 0.2036429218949425
+        },
+        {
+          "lag_ms": 775,
+          "relative_field_error": 0.6497658348776735,
+          "relative_global_error": 0.18770650272899597
+        },
+        {
+          "lag_ms": 1281,
+          "relative_field_error": 0.6511086252070035,
+          "relative_global_error": 0.20296680034650472
+        },
+        {
+          "lag_ms": 1131,
+          "relative_field_error": 0.652449873522586,
+          "relative_global_error": 0.2064566104422757
+        },
+        {
+          "lag_ms": 1188,
+          "relative_field_error": 0.6551449742597364,
+          "relative_global_error": 0.211635310858322
+        },
+        {
+          "lag_ms": 1025,
+          "relative_field_error": 0.6570790402257126,
+          "relative_global_error": 0.1977216100831829
+        },
+        {
+          "lag_ms": 1388,
+          "relative_field_error": 0.6591596664625848,
+          "relative_global_error": 0.2104878197189144
+        },
+        {
+          "lag_ms": 648,
+          "relative_field_error": 0.6659552255708446,
+          "relative_global_error": 0.19716822952312651
+        },
+        {
+          "lag_ms": 1638,
+          "relative_field_error": 0.6852498993592361,
+          "relative_global_error": 0.21119650518829705
+        }
+      ],
+      "peaks_ms": [
+        39,
+        232,
+        470,
+        678,
+        810,
+        1049,
+        1177,
+        1343,
+        1463,
+        1596,
+        1817,
+        2057,
+        2294,
+        2414,
+        2632,
+        2774,
+        2946,
+        3102,
+        3262,
+        3413,
+        3536,
+        3666,
+        3798,
+        3954
+      ],
+      "peak_rates_hz": [
+        95.96922221931766,
+        97.70044770216,
+        98.96642909488284,
+        105.7223129607431,
+        131.10560337080122,
+        117.52233315300309,
+        97.16136191079582,
+        114.21215095676308,
+        92.57319300085581,
+        118.35830856820832,
+        104.47016102122991,
+        105.20303866754719,
+        108.47834859884007,
+        99.75178211918049,
+        108.02961444082376,
+        97.21332434119631,
+        108.29388813481353,
+        109.07891365297908,
+        129.57449534792715,
+        98.43748265397316,
+        114.72858644947972,
+        122.70980841755897,
+        126.20749811542501,
+        114.55228272503746
+      ],
+      "IEI_ms": [
+        193,
+        238,
+        208,
+        132,
+        239,
+        128,
+        166,
+        120,
+        133,
+        221,
+        240,
+        237,
+        120,
+        218,
+        142,
+        172,
+        156,
+        160,
+        151,
+        123,
+        130,
+        132,
+        156
+      ]
+    },
+    {
+      "label": "rate_tail_D144975_D0.1449750_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D144975_D0.1449750_dt0.05/trajectory.npz",
+      "D": 0.1449750000000004,
+      "category": "PERSISTENT",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 82.78568069228649,
+        "max_rate_hz": 138.2212287404542,
+        "trailing_activity_ms": 4000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.16296875,
+          "20Hz_duty90": 0.09846875,
+          "50Hz_duty80": 0.14775,
+          "50Hz_duty90": 0.0809375,
+          "100Hz_duty80": 0.12315625,
+          "100Hz_duty90": 0.06346875
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.27691851562500003
+      },
+      "returns": [
+        {
+          "lag_ms": 226,
+          "relative_field_error": 0.8201478548709077,
+          "relative_global_error": 0.2708825415126224
+        },
+        {
+          "lag_ms": 335,
+          "relative_field_error": 0.8298044482051418,
+          "relative_global_error": 0.27606744397395827
+        },
+        {
+          "lag_ms": 452,
+          "relative_field_error": 0.8318429851295757,
+          "relative_global_error": 0.2997217117682746
+        },
+        {
+          "lag_ms": 1286,
+          "relative_field_error": 0.8348260996089412,
+          "relative_global_error": 0.3329189553589645
+        },
+        {
+          "lag_ms": 1173,
+          "relative_field_error": 0.8386392864437145,
+          "relative_global_error": 0.33584083091390876
+        },
+        {
+          "lag_ms": 580,
+          "relative_field_error": 0.8668967802027656,
+          "relative_global_error": 0.31969080701212127
+        },
+        {
+          "lag_ms": 818,
+          "relative_field_error": 0.8812496657115914,
+          "relative_global_error": 0.3413372368322339
+        },
+        {
+          "lag_ms": 697,
+          "relative_field_error": 0.8870337998851354,
+          "relative_global_error": 0.3328879864316777
+        },
+        {
+          "lag_ms": 938,
+          "relative_field_error": 0.8924941652633572,
+          "relative_global_error": 0.34714660143251946
+        },
+        {
+          "lag_ms": 1062,
+          "relative_field_error": 0.8960974075794794,
+          "relative_global_error": 0.35780579062177803
+        },
+        {
+          "lag_ms": 1616,
+          "relative_field_error": 0.8979413651337379,
+          "relative_global_error": 0.3610305845713993
+        },
+        {
+          "lag_ms": 1401,
+          "relative_field_error": 0.9024250780725338,
+          "relative_global_error": 0.3585216326444236
+        }
+      ],
+      "peaks_ms": [
+        37,
+        211,
+        343,
+        466,
+        612,
+        757,
+        954,
+        1209,
+        1431,
+        1663,
+        1784,
+        2031,
+        2359,
+        2489,
+        2702,
+        2929,
+        3114,
+        3342,
+        3517,
+        3640,
+        3841,
+        3962
+      ],
+      "peak_rates_hz": [
+        107.913563805997,
+        69.44965014551337,
+        121.03584398842341,
+        56.92534076850308,
+        139.99253310470743,
+        133.3749113914202,
+        122.76382943111705,
+        127.12972394043382,
+        102.72162422625536,
+        109.13486375942028,
+        91.2953339678738,
+        125.09135761871634,
+        114.19776482811662,
+        121.8077645686,
+        94.6921688808456,
+        110.14571011101447,
+        99.88282168350045,
+        114.45939435894904,
+        83.96201256869969,
+        88.37952678185493,
+        118.89524761844798,
+        100.54942214322158
+      ],
+      "IEI_ms": [
+        174,
+        132,
+        123,
+        146,
+        145,
+        197,
+        255,
+        222,
+        232,
+        121,
+        247,
+        328,
+        130,
+        213,
+        227,
+        185,
+        228,
+        175,
+        123,
+        201,
+        121
+      ]
+    },
+    {
+      "label": "rate_tail_D144975_fine_D0.1449750_dt0.025",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D144975_fine_D0.1449750_dt0.025/trajectory.npz",
+      "D": 0.1449750000000004,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.21,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 5,
+        "n_events": 4,
+        "event_durations_ms": [
+          100,
+          100,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          147.50949459340137,
+          170.68123186584089,
+          182.64910272169993,
+          187.64271781387944
+        ],
+        "inter_onset_ms": [
+          270,
+          280,
+          270
+        ],
+        "activity_duty": 0.79,
+        "mean_rate_hz": 68.40602228165808,
+        "max_rate_hz": 189.6016300204887,
+        "trailing_activity_ms": 2460,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.22507406249999998
+      },
+      "returns": [
+        {
+          "lag_ms": 270,
+          "relative_field_error": 0.7811623124536198,
+          "relative_global_error": 0.42109292791199066
+        },
+        {
+          "lag_ms": 541,
+          "relative_field_error": 0.8147734765305163,
+          "relative_global_error": 0.5404169457798936
+        },
+        {
+          "lag_ms": 817,
+          "relative_field_error": 0.8571137769359299,
+          "relative_global_error": 0.6242168207090406
+        },
+        {
+          "lag_ms": 1795,
+          "relative_field_error": 0.8989600891418532,
+          "relative_global_error": 0.7378758666328908
+        },
+        {
+          "lag_ms": 725,
+          "relative_field_error": 0.9037418758553633,
+          "relative_global_error": 0.7235114506997813
+        },
+        {
+          "lag_ms": 1654,
+          "relative_field_error": 0.907301353549677,
+          "relative_global_error": 0.730927930334359
+        },
+        {
+          "lag_ms": 396,
+          "relative_field_error": 0.9107860938590326,
+          "relative_global_error": 0.7114111058348692
+        },
+        {
+          "lag_ms": 1092,
+          "relative_field_error": 0.9110680841504585,
+          "relative_global_error": 0.7085317218016924
+        },
+        {
+          "lag_ms": 929,
+          "relative_field_error": 0.9122965083312301,
+          "relative_global_error": 0.7273143684646904
+        },
+        {
+          "lag_ms": 664,
+          "relative_field_error": 0.9135536066894814,
+          "relative_global_error": 0.7207459998392074
+        },
+        {
+          "lag_ms": 1401,
+          "relative_field_error": 0.9232066064548906,
+          "relative_global_error": 0.7389941519375111
+        },
+        {
+          "lag_ms": 1522,
+          "relative_field_error": 0.9236576939938436,
+          "relative_global_error": 0.7278747857562512
+        }
+      ],
+      "peaks_ms": [
+        55,
+        186,
+        493,
+        770,
+        1042,
+        1314,
+        1579,
+        1707,
+        1850,
+        1985,
+        2184,
+        2307,
+        2432,
+        2636,
+        2757,
+        2886,
+        3020,
+        3171,
+        3295,
+        3474,
+        3710,
+        3868,
+        3997
+      ],
+      "peak_rates_hz": [
+        112.52131667591136,
+        113.55875098496122,
+        148.21129408370876,
+        176.18892203861003,
+        187.6065823525011,
+        192.87368388860034,
+        197.53994726985542,
+        105.4703821195417,
+        96.22728181013665,
+        122.16157281095113,
+        125.20930899902987,
+        109.86039669528377,
+        112.56470575657931,
+        120.6352860768381,
+        108.88856036982232,
+        106.0399090283203,
+        64.13018392866559,
+        105.13984659600106,
+        85.61865430823688,
+        107.09150194635481,
+        109.76685486380569,
+        99.03305330690915,
+        91.29517931384564
+      ],
+      "IEI_ms": [
+        131,
+        307,
+        277,
+        272,
+        272,
+        265,
+        128,
+        143,
+        135,
+        199,
+        123,
+        125,
+        204,
+        121,
+        129,
+        134,
+        151,
+        124,
+        179,
+        236,
+        158,
+        129
+      ]
+    },
+    {
+      "label": "rate_tail_D14497_D0.1449700_dt0.05",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D14497_D0.1449700_dt0.05/trajectory.npz",
+      "D": 0.14497000000000038,
+      "category": "SELF_LIMITED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.6725,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          80,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          80,
+          90,
+          90,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          167.8683875996855,
+          174.99976570226622,
+          175.80153599194483,
+          169.83798544863797,
+          173.90704408375223,
+          176.2222074072116,
+          171.58033366885132,
+          172.57348816028505,
+          176.35582835831488,
+          173.09248567682616,
+          171.04939029254336,
+          176.1433113013312,
+          174.37797255618653,
+          169.26117892885605
+        ],
+        "inter_onset_ms": [
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.3275,
+        "mean_rate_hz": 28.087063159910123,
+        "max_rate_hz": 176.35582835831488,
+        "trailing_activity_ms": 50,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09711390624999999
+      },
+      "returns": [
+        {
+          "lag_ms": 267,
+          "relative_field_error": 0.010474041683462202,
+          "relative_global_error": 0.004741497997838735
+        },
+        {
+          "lag_ms": 1868,
+          "relative_field_error": 0.020428290042461144,
+          "relative_global_error": 0.0092560551313139
+        },
+        {
+          "lag_ms": 534,
+          "relative_field_error": 0.020903211281980746,
+          "relative_global_error": 0.00947688831666781
+        },
+        {
+          "lag_ms": 1601,
+          "relative_field_error": 0.030801046263192647,
+          "relative_global_error": 0.013991655910840492
+        },
+        {
+          "lag_ms": 801,
+          "relative_field_error": 0.031269210221692524,
+          "relative_global_error": 0.014210339579560107
+        },
+        {
+          "lag_ms": 1334,
+          "relative_field_error": 0.041088925460392924,
+          "relative_global_error": 0.018728243751726815
+        },
+        {
+          "lag_ms": 1068,
+          "relative_field_error": 0.041550728091278175,
+          "relative_global_error": 0.018943616482305702
+        }
+      ],
+      "peaks_ms": [
+        248,
+        514,
+        781,
+        1048,
+        1315,
+        1582,
+        1849,
+        2116,
+        2383,
+        2650,
+        2916,
+        3183,
+        3450,
+        3717,
+        3984
+      ],
+      "peak_rates_hz": [
+        178.34065801875443,
+        178.30731999014486,
+        178.37648618368692,
+        178.422128563089,
+        178.446688302448,
+        178.44986581776814,
+        178.44358985302816,
+        178.4201922906255,
+        178.38514063699336,
+        178.33756947025205,
+        178.31539038029902,
+        178.38219028383264,
+        178.4269931200921,
+        178.4490022970399,
+        178.45279335758494
+      ],
+      "IEI_ms": [
+        266,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        267,
+        266,
+        267,
+        267,
+        267,
+        267
+      ]
+    }
+  ],
+  "claim": "Finite-window full-field recurrence screen and original event definitions; not a bifurcation classification"
+}

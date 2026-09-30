@@ -1,0 +1,329 @@
+{
+  "label": "cond_D0.05",
+  "duration_ms": 5000.0,
+  "n_events": 19,
+  "quiet_fraction": 0.7278,
+  "high_onset_ms": null,
+  "mean_allE_hz": 11.804748250763724,
+  "expansion_first_ms": {
+    "0.25": 101.0,
+    "0.5": null,
+    "0.75": null
+  },
+  "windows": {
+    "1000-4000": {
+      "n": 11,
+      "median_duration_ms": 75.0,
+      "iqr_duration_ms": [
+        74.0,
+        75.0
+      ],
+      "median_gap_ms": 265.0,
+      "both_cores": 11,
+      "coreA_only": 0,
+      "coreB_only": 0,
+      "median_area": 0.4680312499999999,
+      "median_surround_cells": 173.0,
+      "forward": 11,
+      "reverse": 0,
+      "undirected": 0,
+      "median_extent_mm": 14.108561666142107
+    },
+    "4000-8000": {
+      "n": 4,
+      "median_duration_ms": 74.5,
+      "iqr_duration_ms": [
+        74.0,
+        75.0
+      ],
+      "median_gap_ms": 265.0,
+      "both_cores": 4,
+      "coreA_only": 0,
+      "coreB_only": 0,
+      "median_area": 0.4680312499999999,
+      "median_surround_cells": 173.0,
+      "forward": 4,
+      "reverse": 0,
+      "undirected": 0,
+      "median_extent_mm": 14.08864289784086
+    },
+    "8000-9420": {
+      "n": 0
+    },
+    "1000-9420": {
+      "n": 15,
+      "median_duration_ms": 75.0,
+      "iqr_duration_ms": [
+        74.0,
+        75.0
+      ],
+      "median_gap_ms": 265.0,
+      "both_cores": 15,
+      "coreA_only": 0,
+      "coreB_only": 0,
+      "median_area": 0.4680312499999999,
+      "median_surround_cells": 173.0,
+      "forward": 15,
+      "reverse": 0,
+      "undirected": 0,
+      "median_extent_mm": 14.108561666142107
+    },
+    "1000-5000.0": {
+      "n": 15,
+      "median_duration_ms": 75.0,
+      "iqr_duration_ms": [
+        74.0,
+        75.0
+      ],
+      "median_gap_ms": 265.0,
+      "both_cores": 15,
+      "coreA_only": 0,
+      "coreB_only": 0,
+      "median_area": 0.4680312499999999,
+      "median_surround_cells": 173.0,
+      "forward": 15,
+      "reverse": 0,
+      "undirected": 0,
+      "median_extent_mm": 14.108561666142107
+    }
+  },
+  "status": "COMPLETE",
+  "D_final": 0.05000000000000038,
+  "seconds": 144.72331595420837,
+  "regional_mean_hz": [
+    31.26272710171151,
+    36.03219323264476,
+    10.697916740278725
+  ],
+  "SNN_equivalence": "NOT_ASSESSED_HERE",
+  "events": [
+    {
+      "start_ms": 88.0,
+      "duration_ms": 104.0,
+      "peak_hz": 104.91677304284444,
+      "n_cells": 249,
+      "area_fraction": 0.62071875,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 235,
+      "direction_axis_mm": -5.55846787445285,
+      "extent_mm": 8.888560268234643
+    },
+    {
+      "start_ms": 351.0,
+      "duration_ms": 52.0,
+      "peak_hz": 100.13977704800097,
+      "n_cells": 176,
+      "area_fraction": 0.441125,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 162,
+      "direction_axis_mm": 5.925259201974312,
+      "extent_mm": 5.9623907374295015
+    },
+    {
+      "start_ms": 615.0,
+      "duration_ms": 53.0,
+      "peak_hz": 92.91728562586528,
+      "n_cells": 174,
+      "area_fraction": 0.43584375,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 160,
+      "direction_axis_mm": 7.855562076125994,
+      "extent_mm": 7.885195718543731
+    },
+    {
+      "start_ms": 879.0,
+      "duration_ms": 55.0,
+      "peak_hz": 85.23181111477251,
+      "n_cells": 175,
+      "area_fraction": 0.43818749999999995,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 161,
+      "direction_axis_mm": 9.165464130246534,
+      "extent_mm": 9.169104187775032
+    },
+    {
+      "start_ms": 1144.0,
+      "duration_ms": 59.0,
+      "peak_hz": 77.44410322294215,
+      "n_cells": 179,
+      "area_fraction": 0.4479687499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 165,
+      "direction_axis_mm": 11.78456543483095,
+      "extent_mm": 11.821787037513854
+    },
+    {
+      "start_ms": 1408.0,
+      "duration_ms": 67.0,
+      "peak_hz": 66.61277507987894,
+      "n_cells": 183,
+      "area_fraction": 0.457375,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 169,
+      "direction_axis_mm": 13.702713668719644,
+      "extent_mm": 13.702734700475117
+    },
+    {
+      "start_ms": 1673.0,
+      "duration_ms": 73.0,
+      "peak_hz": 59.310748030206604,
+      "n_cells": 186,
+      "area_fraction": 0.46581249999999996,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 172,
+      "direction_axis_mm": 14.033570721403642,
+      "extent_mm": 14.042485494590496
+    },
+    {
+      "start_ms": 1938.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.294749459970376,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.239206530800995,
+      "extent_mm": 14.248553138499457
+    },
+    {
+      "start_ms": 2203.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.2878347179961,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.241257782638698,
+      "extent_mm": 14.246844906577051
+    },
+    {
+      "start_ms": 2468.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.28133871535492,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.241257782638698,
+      "extent_mm": 14.246844906577051
+    },
+    {
+      "start_ms": 2733.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.27557137487406,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.256058800814095,
+      "extent_mm": 14.264000849230312
+    },
+    {
+      "start_ms": 2998.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.26861414764685,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.239206530800995,
+      "extent_mm": 14.248553138499457
+    },
+    {
+      "start_ms": 3263.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.25962150943985,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.096877297780633,
+      "extent_mm": 14.108561666142107
+    },
+    {
+      "start_ms": 3528.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.247244709843436,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.078888838020813,
+      "extent_mm": 14.086033920405177
+    },
+    {
+      "start_ms": 3793.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.24852451108298,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 13.91970733498735,
+      "extent_mm": 13.93044088910467
+    },
+    {
+      "start_ms": 4059.0,
+      "duration_ms": 74.0,
+      "peak_hz": 59.25860165442036,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 13.91970733498735,
+      "extent_mm": 13.93044088910467
+    },
+    {
+      "start_ms": 4324.0,
+      "duration_ms": 74.0,
+      "peak_hz": 59.26341008471013,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 13.91970733498735,
+      "extent_mm": 13.93044088910467
+    },
+    {
+      "start_ms": 4589.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.26294294199511,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.241257782638698,
+      "extent_mm": 14.246844906577051
+    },
+    {
+      "start_ms": 4854.0,
+      "duration_ms": 75.0,
+      "peak_hz": 59.25577461274723,
+      "n_cells": 187,
+      "area_fraction": 0.4680312499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 173,
+      "direction_axis_mm": 14.239206530800995,
+      "extent_mm": 14.248553138499457
+    }
+  ]
+}

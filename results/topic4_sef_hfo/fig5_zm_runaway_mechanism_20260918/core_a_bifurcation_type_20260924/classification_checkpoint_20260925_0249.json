@@ -1,0 +1,55 @@
+{
+  "updated_local": "2026-09-25T02:49:28.591188+08:00",
+  "onset_type": "NOT_ESTABLISHED",
+  "model": "Locked 3479-group spatial field; all Z held, all E M dynamic; Core A native-time field path only",
+  "nine_burst": {
+    "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/multiple_nine_burst_fixed_grid_retry",
+    "period_ms": 2369.0337184833256,
+    "root_status": "NUMERICAL_MULTIPLE_SHOOTING_ROOT",
+    "whole_closure": 7.11708803712732e-11,
+    "fundamental_tested_divisors": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      9
+    ],
+    "spectrum_status": "RUNNING"
+  },
+  "short_mesh": {
+    "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/entry_short_mesh_convergence",
+    "status": "SHORT_MESH_COMPARISON_COMPLETE",
+    "error_ratios": [
+      {
+        "ms": 10,
+        "ratio": 1.974340672472524
+      },
+      {
+        "ms": 20,
+        "ratio": 1.9730441686739357
+      },
+      {
+        "ms": 50,
+        "ratio": 2.0207378630379447
+      },
+      {
+        "ms": 100,
+        "ratio": 2.14542814521653
+      },
+      {
+        "ms": 200,
+        "ratio": 2.4180764714921748
+      }
+    ],
+    "coarse_original_prefix_bitwise": true
+  },
+  "mesh_counterexample": "At the same Z_A=.712351 field and full starting coarse state, the independently audited fine .025ms first5s has a complete1.679s Core A activity; coarse matched5s maximum100ms. The old .712351-.700 coarse finite-window contrast is not a converged onset-bifurcation bracket.",
+  "running": [
+    "Midpoint whole-cycle Newton",
+    "Nine-burst original full-state neutral/Floquet check",
+    "Matched10s fine preentry growth"
+  ],
+  "native_onset_correspondence": "NOT_ACCEPTED",
+  "model_promoted": false
+}

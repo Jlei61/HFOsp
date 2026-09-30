@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "coarse": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+  "fine": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.025.npz",
+  "source_equal": true,
+  "state_max_error": 9.094947017729282e-13,
+  "Z_max_error": 0.0,
+  "shared_history_max_error": 0.0,
+  "ticks": [
+    0,
+    0
+  ],
+  "time_steps_ms": [
+    0.05,
+    0.025
+  ],
+  "history_definition": "history[-lag] at tick0 is time -lag*dt; compare coarse lag j against fine lag2j, including initial time; fine added nodes reconstructed from identical Fourier orbit",
+  "tolerance": 2e-12
+}

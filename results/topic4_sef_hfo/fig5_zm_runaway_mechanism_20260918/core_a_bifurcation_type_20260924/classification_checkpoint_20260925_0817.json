@@ -1,0 +1,37 @@
+{
+  "time": "2026-09-25T08:16:10.542395+08:00",
+  "previous_checkpoint": "classification_checkpoint_20260925_0758.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "physics": "OriginalfixedZ/dynamicM spatialrenewalrateequations. No response/graph/parameterrefit.",
+  "numerical_method": "exponential_midpoint_v1",
+  "short_spatial_order": "PASS_4MESH_20_60_120MS_SECOND_ORDER_AND_SAME_OLD_METHOD_LIMIT",
+  "matching_full_variational_check": "PASS_TWO_MESHES_ALL_BLOCKS_NOMINAL_BITWISE",
+  "long_control": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_short_history_numerical_limit/independent_audit.json",
+  "long_control_conclusion": "All refined/newmethod arms develop longA activity. Oldcoarse remains short. History interpolation changes individual long-event endtimes, but conservative refinement also changes oldcoarse classification. New.05/.025 agree that longactivityexists, not its fulltrajectory or endtime. No narrowZcriticalbracketcertified.",
+  "short_side_search": {
+    "question": "Find a genuine short-activity side of the same localCoreA frozenZ family using the qualified second-order flow, before any critical-type continuation.",
+    "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+    "initial_state": "Same complete naturally evolved original source, conservative bin-history subdivision, no M reset.",
+    "fields": [
+      {
+        "label": "native9000_fine",
+        "native_time_ms": 9000,
+        "dt_ms": 0.025,
+        "device": 0
+      },
+      {
+        "label": "native9420_fine",
+        "native_time_ms": 9420,
+        "dt_ms": 0.025,
+        "device": 1
+      }
+    ],
+    "duration_ms": 5000,
+    "equations": "Original3479group spatial renewal rate; allZheld, allE Mdynamic; outsideA original9s; lockedresponse/no fit; originalconstantinput/privateQ.",
+    "numerical_method": "exponential_midpoint_v1",
+    "next_decision": "Independently reconstruct events, then test recurrence and mesh convergence of the short side. No automatic Floquet certificate from a finite trace.",
+    "model_promoted": false
+  },
+  "new_solver_promoted": false,
+  "model_promoted": false
+}

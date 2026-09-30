@@ -1,0 +1,465 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "stream": "chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "spikes_1ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "regions_1ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "field_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "field_5ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "raster",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "slow_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "Z",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "M",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "currents",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "regional_currents",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "inputs",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "lfp_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "lfp_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "spikes_1ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "regions_1ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "field_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "field_5ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "raster",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "slow_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "Z",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "M",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "currents",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "regional_currents",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "inputs",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "lfp_time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "chunks",
+      "key": "lfp_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "contact_current",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "field_current",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "contact_current",
+      "bitwise": true
+    },
+    {
+      "stream": "actual_current_chunks",
+      "key": "field_current",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "R_global_Hz",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "gate",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "G_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "G_applied_mean",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "K_mean",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "R_global_Hz",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "gate",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "G_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "G_applied_mean",
+      "bitwise": true
+    },
+    {
+      "stream": "feedback_chunks",
+      "key": "K_mean",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "q",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "s",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "G_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "q",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "s",
+      "bitwise": true
+    },
+    {
+      "stream": "global_response_chunks",
+      "key": "G_raw",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_mean_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_max_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_outward_current_mV_equiv",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_mean_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_max_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "intrinsic_adaptation_chunks",
+      "key": "sahp_outward_current_mV_equiv",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_E_rate_Hz",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_raw_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_applied_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "phi_mean_mV",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "phi_max_mV",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_outward_current_mV_equiv",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_E_rate_Hz",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_raw_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_applied_conductance_ratio",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "phi_mean_mV",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "phi_max_mV",
+      "bitwise": true
+    },
+    {
+      "stream": "mechanism_chunks",
+      "key": "global_outward_current_mV_equiv",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "region_names",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "keys",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "values",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "region_names",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "keys",
+      "bitwise": true
+    },
+    {
+      "stream": "regional_chunks",
+      "key": "values",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "values",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "keys",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "region_names",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "time_ms",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "values",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "keys",
+      "bitwise": true
+    },
+    {
+      "stream": "z_budget_chunks",
+      "key": "region_names",
+      "bitwise": true
+    }
+  ]
+}

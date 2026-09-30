@@ -1,0 +1,68 @@
+{
+  "created_local": "2026-09-20T05:14:16.375422+08:00",
+  "status": "LOCKED_BEFORE_ADDITIONAL_TARGETS_AND_FIT",
+  "model": "Continuous refractory renewal flux r=rho*(1-integral of r over tref),rho=exp(ell)/0.1ms.6exact current-covariance states,36linear input-history states,39-to64tanh-to64tanh-to1 residual log-intensity readout, separate E/I. No particle or voltage grid in network state.",
+  "numerical_bridge": "Implicit Euler: p=sigmoid(ell+log(dt/0.1)); flux=p times own available fraction/dt. At0.1ms this agrees with native decrement-before-membrane refractory bookkeeping. It is an approximate conditional LIF response, not an exact derivation.",
+  "training_sources": "Original static and dynamic calibration plus224existing TRAIN profiles and256additional TRAIN profiles. Observed availability used only as local conditional-flux calibration labels. No native spatial future firing, onset time, Z/M or propagation targets.",
+  "validation_sources": "Original24waveforms and32workpoints; previous64validationprofiles are reused diagnostics and no longer novel.64additional unseen profiles are independent validation. Predictions and weights locked before scoring.",
+  "new_data": {
+    "train_periodic_per_pop": 120,
+    "train_startup_per_pop": 8,
+    "validation_periodic_per_pop": 24,
+    "validation_startup_per_pop": 8,
+    "W": 2048,
+    "B": 128,
+    "dt": 0.1,
+    "periods": [
+      100.0,
+      200.0,
+      400.0
+    ],
+    "burn_cycles": 3,
+    "record_cycles": 8,
+    "train_R": 4096,
+    "validation_R": 8192,
+    "train_generator_seed": 920061,
+    "validation_generator_seed": 920062,
+    "train_noise_seed": 920063,
+    "validation_noise_seed": 920064,
+    "mean": "1.3 times existing normalized-mean waveform about reset; approximate range -50to120 in normalized units",
+    "variance": "Smooth sigma_E plateaus0.2to4; sigma_I between [0,.001,.01,.1] and[1,3,5,8], balanced deterministic assignment; random phase,width and smoothness independent of targets."
+  },
+  "training": {
+    "seed": 920065,
+    "steps_per_pop": 12000,
+    "threads": 2,
+    "optimizer": "AdamW,weight_decay1e-6,clipnorm10",
+    "learning_rate": [
+      [
+        0,
+        0.001
+      ],
+      [
+        4000,
+        0.0003
+      ],
+      [
+        8000,
+        0.0001
+      ]
+    ],
+    "sample": "2048 equally spaced record steps/profile; all profiles equally represented; no validation checkpoint selection",
+    "batch": {
+      "flux": 512,
+      "static": 128,
+      "linear": 64
+    },
+    "loss": "10*mean((available*softplus(ell)-fired*ell-empirical_entropy)/max(profile_mean_fired,.001)) + static squared asinh(rate/.1)/.1 difference + original normalized complex gain error. Static/linear evaluated on same readout, covariance and refractory dynamics.",
+    "boundary": "Fixed schedule and architecture; no automatic extra training or architecture enlargement after validation."
+  },
+  "acceptance": {
+    "original_waveforms": "24/24 waveformL2<=.15,meanerror<=.10",
+    "fresh_waveforms": "At least58/64 with same thresholds",
+    "numerical": "Per-profile0.1to0.05ms prediction difference<=.02",
+    "linear": "Original finite-amplitude and per-row DC/AC gates unchanged; analytic gains only preliminary diagnostics",
+    "spatial": "Original interictal,propagation,Z/M-path gates remain required; local pass does not promote model or certify bifurcation."
+  },
+  "invariant": "Spatial graph,geometry,thresholds,mean/variance synapses,delays,external-input definition and Z/M laws remain fixed."
+}

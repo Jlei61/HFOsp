@@ -1,0 +1,101 @@
+{
+  "status": "RADIAL_HISTORY_IDENTITY_PASS",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "parent_witnesses": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_parent_witnesses/result.json",
+  "child_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+  "child_amplitude_Hz": 40.0,
+  "spectra_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_physical_20260920_child_k6_dt0.05.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_physical_20260920_child_k6_dt0.025.json"
+  ],
+  "fine_mode_index": 0,
+  "coarse_mode_index": 0,
+  "multiplier": 1.017217126086245,
+  "paired_spectrum": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.017217126086245,
+        0.0
+      ],
+      [
+        0.19128119499872873,
+        0.0
+      ],
+      [
+        0.1902297078684823,
+        0.0
+      ],
+      [
+        0.1899424394760947,
+        0.0
+      ],
+      [
+        0.144688120697635,
+        0.0
+      ],
+      [
+        0.0023036242018664803,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006108536097427564,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343
+    ],
+    "reliable_mode_mask": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010180893495712606,
+      1.299894826556347e-06,
+      9.412130547170605e-08,
+      2.6865511537632614e-08,
+      3.991334707187377e-06,
+      3.91946666943822e-05
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.017217126086245,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "parent_antiperiodic_full_state_history_cosine": 0.9973549596602048,
+  "paired_time_step_mode_cosine": 0.9999999998509641,
+  "tangent_comparisons": [
+    {
+      "earlier_amplitude_Hz": 10.0,
+      "earlier_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+      "full_state_history_tangent_cosine": 0.9996218557209307
+    },
+    {
+      "earlier_amplitude_Hz": 20.0,
+      "earlier_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a20.00000_N16384.npz",
+      "full_state_history_tangent_cosine": 0.9998348426468744
+    }
+  ],
+  "spatial_cells": 400,
+  "populations": 935,
+  "local_states": 8415,
+  "history_samples": 1434,
+  "history_end_ms": 35.84993629634714,
+  "scope": "Complete state and delay-history identity at the common reference phase, after removing the autonomous phase. Parent and secant endpoints use their own unchanged J and period; all Fourier harmonics are retained. Confirms radial-direction identity only when the recorded comparisons pass; no canonical criticality promotion, total unstable-dimension count, or global connection is inferred here."
+}

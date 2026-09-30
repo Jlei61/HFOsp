@@ -1,0 +1,38 @@
+{
+  "status": "DESCRIPTIVE_PRECISION_AUDIT_COMPLETE",
+  "rows": [
+    {
+      "band": "inside",
+      "n": 126,
+      "median_AC_SEM_over_DC": 0.03050696926898746,
+      "AC_SEM_above_one_third_gate": 54,
+      "methods": {
+        "real5": {
+          "original_failures": 30,
+          "beyond_three_AC_SEM_margin": 0
+        },
+        "real3_pair": {
+          "original_failures": 32,
+          "beyond_three_AC_SEM_margin": 0
+        }
+      }
+    },
+    {
+      "band": "above",
+      "n": 126,
+      "median_AC_SEM_over_DC": 0.07854831007144208,
+      "AC_SEM_above_one_third_gate": 73,
+      "methods": {
+        "real5": {
+          "original_failures": 74,
+          "beyond_three_AC_SEM_margin": 25
+        },
+        "real3_pair": {
+          "original_failures": 66,
+          "beyond_three_AC_SEM_margin": 19
+        }
+      }
+    }
+  ],
+  "scope": "Original decisions unchanged. Three-SEM subtraction is a conservative descriptive margin for MC precision, not a simultaneous confidence interval, significance test or model acceptance. DC uncertainty and training-parameter uncertainty are not included, so this is not a full uncertainty bound. In-band nominal failures alone do not isolate approximation bias; above-band measurable mismatch persists."
+}

@@ -1,0 +1,17 @@
+{
+  "created_local": "2026-09-19T21:26:47.692329+08:00",
+  "question": "Does mean memory of a saturating rate response improve burst readout relative to storing large depolarizing mean input?",
+  "variants": [
+    [
+      "rate_coordinate_instantaneous",
+      false
+    ],
+    [
+      "rate_coordinate_history",
+      true
+    ]
+  ],
+  "definition": "p_dot=-p/tau_s+Phi_mu(mu+cross,vEeff,vIeff)*mu_dot; r=Phi(mu+cross,vEeff,vIeff)-(1-alpha)*p. Existing filters/coefficients, voltage correction, static Phi and no fitted parameters.",
+  "negative_tolerance_Hz": 1e-05,
+  "scope": "Two fixed diagnostic constructions on already observed selected waveforms. Same steady and local first-order response; constantvariance nonlinear rate-filter identity independently checked. Positivity forvaryingvariance is not guaranteed and testedwithoutclipping; any physical oraccuracy failure rejects deployment. No network run or model acceptance."
+}

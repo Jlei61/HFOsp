@@ -1,0 +1,63 @@
+{
+  "status": "COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/rate_seed_N1024_dt0.05.npz",
+  "rows": [
+    {
+      "category": "SUSTAINED_PARTIAL",
+      "tail_ms": 3000,
+      "tail_mean_hz": 154.5827036259215,
+      "tail_global_cv": 0.022658958085998843,
+      "longest_quiet_ms": 0,
+      "quiet_fraction": 0.0,
+      "occupation_50Hz": 0.4322894895833333,
+      "self_limited_events": [],
+      "fraction_global_above_200": 0.0,
+      "group_rate_temporal_relative_std": 0.2712700363919097,
+      "label": "rate_postcritical_broad_D0.1600000_dt0.05",
+      "status": "COMPLETE",
+      "D_initial": 0.16000000000000136,
+      "D_final": 0.16000000000000136,
+      "seconds": 344.99341106414795,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 8000
+    },
+    {
+      "category": "SUSTAINED_PARTIAL",
+      "tail_ms": 3000,
+      "tail_mean_hz": 211.1299403941905,
+      "tail_global_cv": 0.0015300428927880211,
+      "longest_quiet_ms": 0,
+      "quiet_fraction": 0.0,
+      "occupation_50Hz": 0.5320363645833335,
+      "self_limited_events": [],
+      "fraction_global_above_200": 1.0,
+      "group_rate_temporal_relative_std": 0.09496788176014424,
+      "label": "rate_postcritical_broad_D0.2000000_dt0.05",
+      "status": "COMPLETE",
+      "D_initial": 0.20000000000000373,
+      "D_final": 0.20000000000000373,
+      "seconds": 336.9448940753937,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 8000
+    },
+    {
+      "category": "SUSTAINED_PARTIAL",
+      "tail_ms": 3000,
+      "tail_mean_hz": 282.9499225825066,
+      "tail_global_cv": 0.003371560400095295,
+      "longest_quiet_ms": 0,
+      "quiet_fraction": 0.0,
+      "occupation_50Hz": 0.6565552187500002,
+      "self_limited_events": [],
+      "fraction_global_above_200": 1.0,
+      "group_rate_temporal_relative_std": 0.06212010270150539,
+      "label": "rate_postcritical_broad_D0.3000000_dt0.05",
+      "status": "COMPLETE",
+      "D_initial": 0.3000000000000097,
+      "D_final": 0.3000000000000097,
+      "seconds": 322.9114661216736,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 8000
+    }
+  ]
+}

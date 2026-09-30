@@ -1,0 +1,2049 @@
+{
+  "status": "COMPLETE",
+  "initial": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+  "rows": [
+    {
+      "D": 0.21899999999999997,
+      "global_Z": 0.781,
+      "canonical": {
+        "label": "endpoint_D0.2190000_dt0.05",
+        "category": "SELF_LIMITED",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.655,
+          "longest_quiet_ms": 180,
+          "quiet_runs_ge20ms": 16,
+          "n_events": 15,
+          "event_durations_ms": [
+            90,
+            90,
+            100,
+            90,
+            90,
+            90,
+            90,
+            100,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            100
+          ],
+          "event_peaks_hz": [
+            178.09583994865756,
+            179.8636300595846,
+            180.37400722875128,
+            176.52431192322,
+            181.25519810314375,
+            176.38230146711643,
+            180.88698863544505,
+            179.3786458885886,
+            178.4698337465801,
+            180.91976704968653,
+            174.39132887637038,
+            181.29754937428598,
+            177.95670321274923,
+            179.9769523661694,
+            180.30473360342447
+          ],
+          "inter_onset_ms": [
+            260,
+            260,
+            270,
+            260,
+            270,
+            260,
+            260,
+            270,
+            260,
+            270,
+            260,
+            270,
+            260,
+            260
+          ],
+          "activity_duty": 0.345,
+          "mean_rate_hz": 30.62595349809645,
+          "max_rate_hz": 181.29754937428598,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.10372953125
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.66,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              90,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              178.09583994865756,
+              179.8636300595846,
+              180.37400722875128
+            ],
+            "inter_onset_ms": [
+              260,
+              260
+            ],
+            "activity_duty": 0.34,
+            "mean_rate_hz": 31.606245176708086,
+            "max_rate_hz": 180.37400722875128,
+            "trailing_activity_ms": 60,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.10614218750000001
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.69,
+            "longest_quiet_ms": 180,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              90,
+              90,
+              90
+            ],
+            "event_peaks_hz": [
+              181.25519810314375,
+              176.38230146711643,
+              180.88698863544505
+            ],
+            "inter_onset_ms": [
+              270,
+              260
+            ],
+            "activity_duty": 0.31,
+            "mean_rate_hz": 25.628871477467072,
+            "max_rate_hz": 181.25519810314375,
+            "trailing_activity_ms": 10,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.08791968750000001
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.64,
+            "longest_quiet_ms": 180,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              90,
+              90,
+              90
+            ],
+            "event_peaks_hz": [
+              178.4698337465801,
+              180.91976704968653,
+              174.39132887637038
+            ],
+            "inter_onset_ms": [
+              260,
+              270
+            ],
+            "activity_duty": 0.36,
+            "mean_rate_hz": 32.60251425973163,
+            "max_rate_hz": 180.91976704968653,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.110170625
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.63,
+            "longest_quiet_ms": 180,
+            "quiet_runs_ge20ms": 5,
+            "n_events": 4,
+            "event_durations_ms": [
+              90,
+              90,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              181.29754937428598,
+              177.95670321274923,
+              179.9769523661694,
+              180.30473360342447
+            ],
+            "inter_onset_ms": [
+              270,
+              260,
+              260
+            ],
+            "activity_duty": 0.37,
+            "mean_rate_hz": 32.66618307847903,
+            "max_rate_hz": 181.29754937428598,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.11068562499999998
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 22,
+            "end_bin": 31,
+            "duration_ms": 90,
+            "peak_hz": 180.71262874343012,
+            "qualifies": true,
+            "start_ms": 220.0,
+            "end_ms": 310.0
+          },
+          {
+            "start_bin": 48,
+            "end_bin": 58,
+            "duration_ms": 100,
+            "peak_hz": 179.55255730705892,
+            "qualifies": true,
+            "start_ms": 480.0,
+            "end_ms": 580.0
+          },
+          {
+            "start_bin": 75,
+            "end_bin": 84,
+            "duration_ms": 90,
+            "peak_hz": 178.08514568953487,
+            "qualifies": true,
+            "start_ms": 750.0,
+            "end_ms": 840.0
+          },
+          {
+            "start_bin": 101,
+            "end_bin": 110,
+            "duration_ms": 90,
+            "peak_hz": 180.9879330256656,
+            "qualifies": true,
+            "start_ms": 1010.0,
+            "end_ms": 1100.0
+          },
+          {
+            "start_bin": 128,
+            "end_bin": 137,
+            "duration_ms": 90,
+            "peak_hz": 174.85439660522854,
+            "qualifies": true,
+            "start_ms": 1280.0,
+            "end_ms": 1370.0
+          },
+          {
+            "start_bin": 154,
+            "end_bin": 163,
+            "duration_ms": 90,
+            "peak_hz": 181.2376146907421,
+            "qualifies": true,
+            "start_ms": 1540.0,
+            "end_ms": 1630.0
+          },
+          {
+            "start_bin": 181,
+            "end_bin": 190,
+            "duration_ms": 90,
+            "peak_hz": 178.32481151497115,
+            "qualifies": true,
+            "start_ms": 1810.0,
+            "end_ms": 1900.0
+          },
+          {
+            "start_bin": 207,
+            "end_bin": 216,
+            "duration_ms": 90,
+            "peak_hz": 179.64099483710095,
+            "qualifies": true,
+            "start_ms": 2070.0,
+            "end_ms": 2160.0
+          },
+          {
+            "start_bin": 233,
+            "end_bin": 242,
+            "duration_ms": 90,
+            "peak_hz": 180.4879258901605,
+            "qualifies": true,
+            "start_ms": 2330.0,
+            "end_ms": 2420.0
+          },
+          {
+            "start_bin": 260,
+            "end_bin": 269,
+            "duration_ms": 90,
+            "peak_hz": 176.15091194202847,
+            "qualifies": true,
+            "start_ms": 2600.0,
+            "end_ms": 2690.0
+          },
+          {
+            "start_bin": 286,
+            "end_bin": 295,
+            "duration_ms": 90,
+            "peak_hz": 181.2819249635637,
+            "qualifies": true,
+            "start_ms": 2860.0,
+            "end_ms": 2950.0
+          },
+          {
+            "start_bin": 313,
+            "end_bin": 322,
+            "duration_ms": 90,
+            "peak_hz": 176.69165888155618,
+            "qualifies": true,
+            "start_ms": 3130.0,
+            "end_ms": 3220.0
+          },
+          {
+            "start_bin": 339,
+            "end_bin": 348,
+            "duration_ms": 90,
+            "peak_hz": 180.75278215293673,
+            "qualifies": true,
+            "start_ms": 3390.0,
+            "end_ms": 3480.0
+          },
+          {
+            "start_bin": 365,
+            "end_bin": 375,
+            "duration_ms": 100,
+            "peak_hz": 179.58209168281996,
+            "qualifies": true,
+            "start_ms": 3650.0,
+            "end_ms": 3750.0
+          },
+          {
+            "start_bin": 392,
+            "end_bin": 401,
+            "duration_ms": 90,
+            "peak_hz": 178.16220561058938,
+            "qualifies": true,
+            "start_ms": 3920.0,
+            "end_ms": 4010.0
+          },
+          {
+            "start_bin": 418,
+            "end_bin": 427,
+            "duration_ms": 90,
+            "peak_hz": 180.9948857561875,
+            "qualifies": true,
+            "start_ms": 4180.0,
+            "end_ms": 4270.0
+          },
+          {
+            "start_bin": 445,
+            "end_bin": 454,
+            "duration_ms": 90,
+            "peak_hz": 174.75883223103793,
+            "qualifies": true,
+            "start_ms": 4450.0,
+            "end_ms": 4540.0
+          },
+          {
+            "start_bin": 471,
+            "end_bin": 480,
+            "duration_ms": 90,
+            "peak_hz": 181.26549015744263,
+            "qualifies": true,
+            "start_ms": 4710.0,
+            "end_ms": 4800.0
+          },
+          {
+            "start_bin": 498,
+            "end_bin": 507,
+            "duration_ms": 90,
+            "peak_hz": 178.23114745438562,
+            "qualifies": true,
+            "start_ms": 4980.0,
+            "end_ms": 5070.0
+          },
+          {
+            "start_bin": 524,
+            "end_bin": 533,
+            "duration_ms": 90,
+            "peak_hz": 179.7468550836375,
+            "qualifies": true,
+            "start_ms": 5240.0,
+            "end_ms": 5330.0
+          },
+          {
+            "start_bin": 550,
+            "end_bin": 559,
+            "duration_ms": 90,
+            "peak_hz": 180.43955716997698,
+            "qualifies": true,
+            "start_ms": 5500.0,
+            "end_ms": 5590.0
+          },
+          {
+            "start_bin": 577,
+            "end_bin": 586,
+            "duration_ms": 90,
+            "peak_hz": 176.33103725078252,
+            "qualifies": true,
+            "start_ms": 5770.0,
+            "end_ms": 5860.0
+          },
+          {
+            "start_bin": 603,
+            "end_bin": 612,
+            "duration_ms": 90,
+            "peak_hz": 181.27202160776812,
+            "qualifies": true,
+            "start_ms": 6030.0,
+            "end_ms": 6120.0
+          },
+          {
+            "start_bin": 630,
+            "end_bin": 639,
+            "duration_ms": 90,
+            "peak_hz": 176.54373222588416,
+            "qualifies": true,
+            "start_ms": 6300.0,
+            "end_ms": 6390.0
+          },
+          {
+            "start_bin": 656,
+            "end_bin": 665,
+            "duration_ms": 90,
+            "peak_hz": 180.82166419578746,
+            "qualifies": true,
+            "start_ms": 6560.0,
+            "end_ms": 6650.0
+          },
+          {
+            "start_bin": 682,
+            "end_bin": 692,
+            "duration_ms": 100,
+            "peak_hz": 179.4845319856642,
+            "qualifies": true,
+            "start_ms": 6820.0,
+            "end_ms": 6920.0
+          },
+          {
+            "start_bin": 709,
+            "end_bin": 718,
+            "duration_ms": 90,
+            "peak_hz": 178.31601310538403,
+            "qualifies": true,
+            "start_ms": 7090.0,
+            "end_ms": 7180.0
+          },
+          {
+            "start_bin": 735,
+            "end_bin": 744,
+            "duration_ms": 90,
+            "peak_hz": 180.95896676130013,
+            "qualifies": true,
+            "start_ms": 7350.0,
+            "end_ms": 7440.0
+          },
+          {
+            "start_bin": 762,
+            "end_bin": 771,
+            "duration_ms": 90,
+            "peak_hz": 174.57779636887128,
+            "qualifies": true,
+            "start_ms": 7620.0,
+            "end_ms": 7710.0
+          },
+          {
+            "start_bin": 788,
+            "end_bin": 797,
+            "duration_ms": 90,
+            "peak_hz": 181.28356777863246,
+            "qualifies": true,
+            "start_ms": 7880.0,
+            "end_ms": 7970.0
+          },
+          {
+            "start_bin": 815,
+            "end_bin": 824,
+            "duration_ms": 90,
+            "peak_hz": 178.09583994865756,
+            "qualifies": true,
+            "start_ms": 8150.0,
+            "end_ms": 8240.0
+          },
+          {
+            "start_bin": 841,
+            "end_bin": 850,
+            "duration_ms": 90,
+            "peak_hz": 179.8636300595846,
+            "qualifies": true,
+            "start_ms": 8410.0,
+            "end_ms": 8500.0
+          },
+          {
+            "start_bin": 867,
+            "end_bin": 877,
+            "duration_ms": 100,
+            "peak_hz": 180.37400722875128,
+            "qualifies": true,
+            "start_ms": 8670.0,
+            "end_ms": 8770.0
+          },
+          {
+            "start_bin": 894,
+            "end_bin": 903,
+            "duration_ms": 90,
+            "peak_hz": 176.52431192322,
+            "qualifies": true,
+            "start_ms": 8940.0,
+            "end_ms": 9030.0
+          },
+          {
+            "start_bin": 920,
+            "end_bin": 929,
+            "duration_ms": 90,
+            "peak_hz": 181.25519810314375,
+            "qualifies": true,
+            "start_ms": 9200.0,
+            "end_ms": 9290.0
+          },
+          {
+            "start_bin": 947,
+            "end_bin": 956,
+            "duration_ms": 90,
+            "peak_hz": 176.38230146711643,
+            "qualifies": true,
+            "start_ms": 9470.0,
+            "end_ms": 9560.0
+          },
+          {
+            "start_bin": 973,
+            "end_bin": 982,
+            "duration_ms": 90,
+            "peak_hz": 180.88698863544505,
+            "qualifies": true,
+            "start_ms": 9730.0,
+            "end_ms": 9820.0
+          },
+          {
+            "start_bin": 999,
+            "end_bin": 1009,
+            "duration_ms": 100,
+            "peak_hz": 179.3786458885886,
+            "qualifies": true,
+            "start_ms": 9990.0,
+            "end_ms": 10090.0
+          },
+          {
+            "start_bin": 1026,
+            "end_bin": 1035,
+            "duration_ms": 90,
+            "peak_hz": 178.4698337465801,
+            "qualifies": true,
+            "start_ms": 10260.0,
+            "end_ms": 10350.0
+          },
+          {
+            "start_bin": 1052,
+            "end_bin": 1061,
+            "duration_ms": 90,
+            "peak_hz": 180.91976704968653,
+            "qualifies": true,
+            "start_ms": 10520.0,
+            "end_ms": 10610.0
+          },
+          {
+            "start_bin": 1079,
+            "end_bin": 1088,
+            "duration_ms": 90,
+            "peak_hz": 174.39132887637038,
+            "qualifies": true,
+            "start_ms": 10790.0,
+            "end_ms": 10880.0
+          },
+          {
+            "start_bin": 1105,
+            "end_bin": 1114,
+            "duration_ms": 90,
+            "peak_hz": 181.29754937428598,
+            "qualifies": true,
+            "start_ms": 11050.0,
+            "end_ms": 11140.0
+          },
+          {
+            "start_bin": 1132,
+            "end_bin": 1141,
+            "duration_ms": 90,
+            "peak_hz": 177.95670321274923,
+            "qualifies": true,
+            "start_ms": 11320.0,
+            "end_ms": 11410.0
+          },
+          {
+            "start_bin": 1158,
+            "end_bin": 1167,
+            "duration_ms": 90,
+            "peak_hz": 179.9769523661694,
+            "qualifies": true,
+            "start_ms": 11580.0,
+            "end_ms": 11670.0
+          },
+          {
+            "start_bin": 1184,
+            "end_bin": 1194,
+            "duration_ms": 100,
+            "peak_hz": 180.30473360342447,
+            "qualifies": true,
+            "start_ms": 11840.0,
+            "end_ms": 11940.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 15,
+          "every_subwindow_has_quiet": true,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.655,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "SELF_LIMITED",
+          "20Hz_duty90": "SELF_LIMITED",
+          "50Hz_duty80": "SELF_LIMITED",
+          "50Hz_duty90": "SELF_LIMITED",
+          "100Hz_duty80": "SELF_LIMITED",
+          "100Hz_duty90": "SELF_LIMITED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2190000_dt0.05/trajectory.npz",
+        "D": 0.21899999999999997,
+        "global_Z": 0.781,
+        "global_mean_hz": 30.625953482203368,
+        "global_std_hz": 55.550013450193354,
+        "weighted_spatial_temporal_RMS_hz": 95.79832583122764,
+        "temporal_RMS_over_spatial_mean_RMS": 2.3368991880207095,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 264,
+            "correlation": 0.9998384260179745,
+            "normalized_return_error": 0.017976316754507258
+          },
+          {
+            "lag_ms": 528,
+            "correlation": 0.9993585981405141,
+            "normalized_return_error": 0.03581624937072296
+          },
+          {
+            "lag_ms": 793,
+            "correlation": 0.9987719721013433,
+            "normalized_return_error": 0.049558609719369685
+          },
+          {
+            "lag_ms": 940,
+            "correlation": -0.18392143855039353,
+            "normalized_return_error": 1.5387050829625568
+          },
+          {
+            "lag_ms": 676,
+            "correlation": -0.18401022062659778,
+            "normalized_return_error": 1.5387741391870844
+          }
+        ],
+        "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.2195999999999999,
+      "global_Z": 0.7804000000000001,
+      "canonical": {
+        "label": "endpoint_D0.2196000_dt0.05",
+        "category": "UNRESOLVED",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.1375,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 3,
+          "n_events": 2,
+          "event_durations_ms": [
+            2270,
+            230
+          ],
+          "event_peaks_hz": [
+            202.43457989832584,
+            209.495424381437
+          ],
+          "inter_onset_ms": [
+            2460
+          ],
+          "activity_duty": 0.8625,
+          "mean_rate_hz": 66.1086854217567,
+          "max_rate_hz": 215.51761102379504,
+          "trailing_activity_ms": 350,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.22135179687500003
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.17,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 1,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 0.83,
+            "mean_rate_hz": 62.86437416401373,
+            "max_rate_hz": 202.43457989832584,
+            "trailing_activity_ms": 230,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.01325,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.01028125,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0075,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.21243125000000002
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 76.73305615455025,
+            "max_rate_hz": 169.5078638154319,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.056625,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.04615625,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0356875,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.25280125000000003
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 73.8153392327182,
+            "max_rate_hz": 144.93642493819516,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0729375,
+              "20Hz_duty90": 0.05834375,
+              "50Hz_duty80": 0.070375,
+              "50Hz_duty90": 0.05590625,
+              "100Hz_duty80": 0.0634375,
+              "100Hz_duty90": 0.0510625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.24576218749999998
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.38,
+            "longest_quiet_ms": 190,
+            "quiet_runs_ge20ms": 2,
+            "n_events": 1,
+            "event_durations_ms": [
+              230
+            ],
+            "event_peaks_hz": [
+              209.495424381437
+            ],
+            "inter_onset_ms": [],
+            "activity_duty": 0.62,
+            "mean_rate_hz": 51.021972135744655,
+            "max_rate_hz": 215.51761102379504,
+            "trailing_activity_ms": 350,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.1744125
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 22,
+            "end_bin": 159,
+            "duration_ms": 1370,
+            "peak_hz": 181.2907363153686,
+            "qualifies": true,
+            "start_ms": 220.0,
+            "end_ms": 1590.0
+          },
+          {
+            "start_bin": 178,
+            "end_bin": 382,
+            "duration_ms": 2040,
+            "peak_hz": 204.57772407636142,
+            "qualifies": true,
+            "start_ms": 1780.0,
+            "end_ms": 3820.0
+          },
+          {
+            "start_bin": 393,
+            "end_bin": 523,
+            "duration_ms": 1300,
+            "peak_hz": 169.18781482652398,
+            "qualifies": true,
+            "start_ms": 3930.0,
+            "end_ms": 5230.0
+          },
+          {
+            "start_bin": 541,
+            "end_bin": 601,
+            "duration_ms": 600,
+            "peak_hz": 188.1925265284105,
+            "qualifies": true,
+            "start_ms": 5410.0,
+            "end_ms": 6010.0
+          },
+          {
+            "start_bin": 616,
+            "end_bin": 721,
+            "duration_ms": 1050,
+            "peak_hz": 170.5868936542538,
+            "qualifies": true,
+            "start_ms": 6160.0,
+            "end_ms": 7210.0
+          },
+          {
+            "start_bin": 740,
+            "end_bin": 860,
+            "duration_ms": 1200,
+            "peak_hz": 210.62386194365666,
+            "qualifies": true,
+            "start_ms": 7400.0,
+            "end_ms": 8600.0
+          },
+          {
+            "start_bin": 877,
+            "end_bin": 1104,
+            "duration_ms": 2270,
+            "peak_hz": 202.43457989832584,
+            "qualifies": true,
+            "start_ms": 8770.0,
+            "end_ms": 11040.0
+          },
+          {
+            "start_bin": 1123,
+            "end_bin": 1146,
+            "duration_ms": 230,
+            "peak_hz": 209.495424381437,
+            "qualifies": true,
+            "start_ms": 11230.0,
+            "end_ms": 11460.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 2,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 350,
+          "quiet_fraction_tail": 0.1375,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "UNRESOLVED",
+          "20Hz_duty90": "UNRESOLVED",
+          "50Hz_duty80": "UNRESOLVED",
+          "50Hz_duty90": "UNRESOLVED",
+          "100Hz_duty80": "UNRESOLVED",
+          "100Hz_duty90": "UNRESOLVED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2196000_dt0.05/trajectory.npz",
+        "D": 0.2195999999999999,
+        "global_Z": 0.7804000000000001,
+        "global_mean_hz": 66.10868539435256,
+        "global_std_hz": 42.07829172011542,
+        "weighted_spatial_temporal_RMS_hz": 119.46617724484592,
+        "temporal_RMS_over_spatial_mean_RMS": 1.2452489977577468,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 104,
+            "correlation": 0.317315307433969,
+            "normalized_return_error": 1.168499966823667
+          },
+          {
+            "lag_ms": 360,
+            "correlation": 0.0955076384168557,
+            "normalized_return_error": 1.3449939564012687
+          },
+          {
+            "lag_ms": 240,
+            "correlation": 0.07376080785508221,
+            "normalized_return_error": 1.3610585908855295
+          },
+          {
+            "lag_ms": 414,
+            "correlation": 0.06939493413772695,
+            "normalized_return_error": 1.3642682800899033
+          },
+          {
+            "lag_ms": 473,
+            "correlation": 0.059814839614761924,
+            "normalized_return_error": 1.371271238649653
+          }
+        ],
+        "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.22199999999999986,
+      "global_Z": 0.7780000000000001,
+      "canonical": {
+        "label": "endpoint_D0.2220000_dt0.05",
+        "category": "UNRESOLVED",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0275,
+          "longest_quiet_ms": 110,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9725,
+          "mean_rate_hz": 79.73032192322403,
+          "max_rate_hz": 210.73659683592115,
+          "trailing_activity_ms": 220,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.05790625,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.05321875,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.041,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2625915625
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 82.25127902249544,
+            "max_rate_hz": 148.42533693853437,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.12275,
+              "20Hz_duty90": 0.05853125,
+              "50Hz_duty80": 0.11340625,
+              "50Hz_duty90": 0.05596875,
+              "100Hz_duty80": 0.0859375,
+              "100Hz_duty90": 0.045375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.26956125
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 87.52569864664416,
+            "max_rate_hz": 190.67617657534026,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.11396875,
+              "20Hz_duty90": 0.07878125,
+              "50Hz_duty80": 0.10915625,
+              "50Hz_duty90": 0.07621875,
+              "100Hz_duty80": 0.098125,
+              "100Hz_duty90": 0.06840625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2865140625
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 81.02367054893124,
+            "max_rate_hz": 163.3902852600003,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.1085,
+              "20Hz_duty90": 0.08621875,
+              "50Hz_duty80": 0.10078125,
+              "50Hz_duty90": 0.0683125,
+              "100Hz_duty80": 0.093,
+              "100Hz_duty90": 0.063375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.26814531249999995
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.11,
+            "longest_quiet_ms": 110,
+            "quiet_runs_ge20ms": 1,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 0.89,
+            "mean_rate_hz": 68.12063947482524,
+            "max_rate_hz": 210.73659683592115,
+            "trailing_activity_ms": 220,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.002375,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.22614562500000002
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 204,
+            "end_bin": 1167,
+            "duration_ms": 9630,
+            "peak_hz": 190.67617657534026,
+            "qualifies": true,
+            "start_ms": 2040.0,
+            "end_ms": 11670.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 220,
+          "quiet_fraction_tail": 0.0275,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "UNRESOLVED",
+          "20Hz_duty90": "UNRESOLVED",
+          "50Hz_duty80": "UNRESOLVED",
+          "50Hz_duty90": "UNRESOLVED",
+          "100Hz_duty80": "UNRESOLVED",
+          "100Hz_duty90": "UNRESOLVED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2220000_dt0.05/trajectory.npz",
+        "D": 0.22199999999999986,
+        "global_Z": 0.7780000000000001,
+        "global_mean_hz": 79.73032188356488,
+        "global_std_hz": 32.942971125957406,
+        "weighted_spatial_temporal_RMS_hz": 117.85538356025667,
+        "temporal_RMS_over_spatial_mean_RMS": 0.9814516613627101,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 97,
+            "correlation": 0.2668703319667162,
+            "normalized_return_error": 1.210891971278869
+          },
+          {
+            "lag_ms": 195,
+            "correlation": 0.17742190373274422,
+            "normalized_return_error": 1.2826364256582639
+          },
+          {
+            "lag_ms": 292,
+            "correlation": 0.12672716284721666,
+            "normalized_return_error": 1.3215694479983304
+          },
+          {
+            "lag_ms": 380,
+            "correlation": 0.10365933572701812,
+            "normalized_return_error": 1.3389116298864725
+          },
+          {
+            "lag_ms": 492,
+            "correlation": 0.07580819756228256,
+            "normalized_return_error": 1.3595585718915544
+          }
+        ],
+        "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.22884476056519154,
+      "global_Z": 0.7711552394348085,
+      "canonical": {
+        "label": "endpoint_D0.2288448_dt0.05",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 114.99707324635767,
+          "max_rate_hz": 209.6009061791949,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.2590625,
+            "20Hz_duty90": 0.24175,
+            "50Hz_duty80": 0.254125,
+            "50Hz_duty90": 0.23009375,
+            "100Hz_duty80": 0.24471875,
+            "100Hz_duty90": 0.2125625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.35468226562499994
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 110.95483816530403,
+            "max_rate_hz": 152.73991127137526,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.2525,
+              "20Hz_duty90": 0.2376875,
+              "50Hz_duty80": 0.25009375,
+              "50Hz_duty90": 0.22728125,
+              "100Hz_duty80": 0.23765625,
+              "100Hz_duty90": 0.2128125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.3429615624999999
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 119.14096259899961,
+            "max_rate_hz": 209.6009061791949,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.25875,
+              "20Hz_duty90": 0.24309375,
+              "50Hz_duty80": 0.25875,
+              "50Hz_duty90": 0.229125,
+              "100Hz_duty80": 0.249375,
+              "100Hz_duty90": 0.21696875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.366064375
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 115.61935654337879,
+            "max_rate_hz": 200.23633787760238,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.2685625,
+              "20Hz_duty90": 0.23378125,
+              "50Hz_duty80": 0.25315625,
+              "50Hz_duty90": 0.2289375,
+              "100Hz_duty80": 0.24609375,
+              "100Hz_duty90": 0.224125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.35669437499999995
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 114.27313567774829,
+            "max_rate_hz": 179.53547984338707,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.25640625,
+              "20Hz_duty90": 0.244375,
+              "50Hz_duty80": 0.25446875,
+              "50Hz_duty90": 0.23478125,
+              "100Hz_duty80": 0.24715625,
+              "100Hz_duty90": 0.210375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.35300875
+          }
+        ],
+        "events": [],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2288448_dt0.05/trajectory.npz",
+        "D": 0.22884476056519154,
+        "global_Z": 0.7711552394348085,
+        "global_mean_hz": 114.99707324954429,
+        "global_std_hz": 21.84565529604413,
+        "weighted_spatial_temporal_RMS_hz": 93.28199191762211,
+        "temporal_RMS_over_spatial_mean_RMS": 0.515031416784568,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 132,
+            "correlation": 0.1761758325223551,
+            "normalized_return_error": 1.2836088026428005
+          },
+          {
+            "lag_ms": 500,
+            "correlation": 0.14007534132438973,
+            "normalized_return_error": 1.3114302579284778
+          },
+          {
+            "lag_ms": 99,
+            "correlation": 0.13005619768045765,
+            "normalized_return_error": 1.3190495002366593
+          },
+          {
+            "lag_ms": 234,
+            "correlation": 0.12363431245850363,
+            "normalized_return_error": 1.3239091994501637
+          },
+          {
+            "lag_ms": 878,
+            "correlation": 0.12230075942040776,
+            "normalized_return_error": 1.324916005202569
+          }
+        ],
+        "initial_history": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.23999999999999988,
+      "global_Z": 0.7600000000000001,
+      "canonical": {
+        "label": "endpoint_D0.2400000_dt0.05",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 181.93141353180042,
+          "max_rate_hz": 187.12439539601985,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.49146875,
+            "20Hz_duty90": 0.489125,
+            "50Hz_duty80": 0.489125,
+            "50Hz_duty90": 0.482,
+            "100Hz_duty80": 0.4728125,
+            "100Hz_duty90": 0.468125
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.5049946875000001
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 181.85465854717833,
+            "max_rate_hz": 187.12439539601985,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.49146875,
+              "20Hz_duty90": 0.489125,
+              "50Hz_duty80": 0.489125,
+              "50Hz_duty90": 0.4840625,
+              "100Hz_duty80": 0.474875,
+              "100Hz_duty90": 0.46834375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5046025000000001
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 181.8150470128104,
+            "max_rate_hz": 186.64855440520563,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.49146875,
+              "20Hz_duty90": 0.489125,
+              "50Hz_duty80": 0.489125,
+              "50Hz_duty90": 0.482,
+              "100Hz_duty80": 0.4774375,
+              "100Hz_duty90": 0.46834375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5052815625
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 182.52836828100814,
+            "max_rate_hz": 187.01743940150578,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.49146875,
+              "20Hz_duty90": 0.489125,
+              "50Hz_duty80": 0.489125,
+              "50Hz_duty90": 0.48665625,
+              "100Hz_duty80": 0.48209375,
+              "100Hz_duty90": 0.468125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5057540624999999
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 181.5275802862048,
+            "max_rate_hz": 186.5941832458234,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.49146875,
+              "20Hz_duty90": 0.48653125,
+              "50Hz_duty80": 0.489125,
+              "50Hz_duty90": 0.47265625,
+              "100Hz_duty80": 0.4703125,
+              "100Hz_duty90": 0.468
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.504340625
+          }
+        ],
+        "events": [],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2400000_dt0.05/trajectory.npz",
+        "D": 0.23999999999999988,
+        "global_Z": 0.7600000000000001,
+        "global_mean_hz": 181.93141354484496,
+        "global_std_hz": 2.4921648933456493,
+        "weighted_spatial_temporal_RMS_hz": 32.50774540244848,
+        "temporal_RMS_over_spatial_mean_RMS": 0.12555078358296293,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 43,
+            "correlation": 0.8522914659318682,
+            "normalized_return_error": 0.5435236125394084
+          },
+          {
+            "lag_ms": 87,
+            "correlation": 0.6590303769652226,
+            "normalized_return_error": 0.8257980464708595
+          },
+          {
+            "lag_ms": 132,
+            "correlation": 0.540120843076839,
+            "normalized_return_error": 0.9590420227804631
+          },
+          {
+            "lag_ms": 355,
+            "correlation": 0.4960650523540152,
+            "normalized_return_error": 1.0039302262293766
+          },
+          {
+            "lag_ms": 177,
+            "correlation": 0.4867184542538867,
+            "normalized_return_error": 1.0131964171656713
+          }
+        ],
+        "initial_history": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.24999999999999978,
+      "global_Z": 0.7500000000000002,
+      "canonical": {
+        "label": "endpoint_D0.2500000_dt0.05",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 199.92523483843942,
+          "max_rate_hz": 202.1540214081894,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.52346875,
+            "20Hz_duty90": 0.52109375,
+            "50Hz_duty80": 0.52109375,
+            "50Hz_duty90": 0.51396875,
+            "100Hz_duty80": 0.51140625,
+            "100Hz_duty90": 0.5091875
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.5288387499999999
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 199.95289051629763,
+            "max_rate_hz": 201.9445824652293,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52346875,
+              "20Hz_duty90": 0.52109375,
+              "50Hz_duty80": 0.52109375,
+              "50Hz_duty90": 0.51859375,
+              "100Hz_duty80": 0.51140625,
+              "100Hz_duty90": 0.5091875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.529058125
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 199.90396451118403,
+            "max_rate_hz": 201.9193230827387,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52346875,
+              "20Hz_duty90": 0.52109375,
+              "50Hz_duty80": 0.51859375,
+              "50Hz_duty90": 0.51396875,
+              "100Hz_duty80": 0.51140625,
+              "100Hz_duty90": 0.5091875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5286559375
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 199.9313021524408,
+            "max_rate_hz": 201.99747002685092,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52346875,
+              "20Hz_duty90": 0.52346875,
+              "50Hz_duty80": 0.52109375,
+              "50Hz_duty90": 0.51396875,
+              "100Hz_duty80": 0.51140625,
+              "100Hz_duty90": 0.5091875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5289815625
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 199.9127821738353,
+            "max_rate_hz": 202.1540214081894,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52346875,
+              "20Hz_duty90": 0.52109375,
+              "50Hz_duty80": 0.52109375,
+              "50Hz_duty90": 0.51859375,
+              "100Hz_duty80": 0.51140625,
+              "100Hz_duty90": 0.51140625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.528659375
+          }
+        ],
+        "events": [],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2500000_dt0.05/trajectory.npz",
+        "D": 0.24999999999999978,
+        "global_Z": 0.7500000000000002,
+        "global_mean_hz": 199.92523483506946,
+        "global_std_hz": 0.9480428939573798,
+        "weighted_spatial_temporal_RMS_hz": 19.965242060335658,
+        "temporal_RMS_over_spatial_mean_RMS": 0.07191677176638214,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 244,
+            "correlation": 0.8696334407806646,
+            "normalized_return_error": 0.5106203302225258
+          },
+          {
+            "lag_ms": 40,
+            "correlation": 0.8404995388734968,
+            "normalized_return_error": 0.5648016678112906
+          },
+          {
+            "lag_ms": 284,
+            "correlation": 0.7546814982924115,
+            "normalized_return_error": 0.700454858525873
+          },
+          {
+            "lag_ms": 205,
+            "correlation": 0.7523699731755885,
+            "normalized_return_error": 0.7037473843806928
+          },
+          {
+            "lag_ms": 80,
+            "correlation": 0.7328595462485227,
+            "normalized_return_error": 0.7309453152232924
+          }
+        ],
+        "initial_history": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    },
+    {
+      "D": 0.25634442534475477,
+      "global_Z": 0.7436555746552452,
+      "canonical": {
+        "label": "endpoint_D0.2563444_dt0.05",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 205.9968046922426,
+          "max_rate_hz": 207.1332096459268,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.52853125,
+            "20Hz_duty90": 0.52853125,
+            "50Hz_duty80": 0.52596875,
+            "50Hz_duty90": 0.52596875,
+            "100Hz_duty80": 0.51878125,
+            "100Hz_duty90": 0.51628125
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.53412578125
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 205.9915212455912,
+            "max_rate_hz": 207.1332096459268,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52853125,
+              "20Hz_duty90": 0.52853125,
+              "50Hz_duty80": 0.52596875,
+              "50Hz_duty90": 0.52596875,
+              "100Hz_duty80": 0.51878125,
+              "100Hz_duty90": 0.51628125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5342009375
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 206.0005382023308,
+            "max_rate_hz": 207.098032575436,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52853125,
+              "20Hz_duty90": 0.52853125,
+              "50Hz_duty80": 0.52596875,
+              "50Hz_duty90": 0.52596875,
+              "100Hz_duty80": 0.51878125,
+              "100Hz_duty90": 0.51628125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.5339034375
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 205.9943600798792,
+            "max_rate_hz": 207.04118051090379,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.52853125,
+              "20Hz_duty90": 0.52853125,
+              "50Hz_duty80": 0.52596875,
+              "50Hz_duty90": 0.52596875,
+              "100Hz_duty80": 0.51878125,
+              "100Hz_duty90": 0.51628125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.534248125
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 206.0007992411691,
+            "max_rate_hz": 207.0892828448297,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.53059375,
+              "20Hz_duty90": 0.52853125,
+              "50Hz_duty80": 0.52596875,
+              "50Hz_duty90": 0.52596875,
+              "100Hz_duty80": 0.51878125,
+              "100Hz_duty90": 0.51628125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.534150625
+          }
+        ],
+        "events": [],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": true
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": {
+          "onset_bin": 9,
+          "confirmation_bin": 29
+        },
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2563444_dt0.05/trajectory.npz",
+        "D": 0.25634442534475477,
+        "global_Z": 0.7436555746552452,
+        "global_mean_hz": 205.99680466713323,
+        "global_std_hz": 0.6311152977498152,
+        "weighted_spatial_temporal_RMS_hz": 17.4947162904907,
+        "temporal_RMS_over_spatial_mean_RMS": 0.061485191663386334,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 688,
+            "correlation": 0.9328374334802987,
+            "normalized_return_error": 0.36650393325668223
+          },
+          {
+            "lag_ms": 38,
+            "correlation": 0.883214628283062,
+            "normalized_return_error": 0.4832915991539819
+          },
+          {
+            "lag_ms": 650,
+            "correlation": 0.8758186124800876,
+            "normalized_return_error": 0.4983601635284881
+          },
+          {
+            "lag_ms": 726,
+            "correlation": 0.7775796567987218,
+            "normalized_return_error": 0.6669638148670131
+          },
+          {
+            "lag_ms": 448,
+            "correlation": 0.7530955630972634,
+            "normalized_return_error": 0.7027153637495238
+          }
+        ],
+        "initial_history": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "first_broad75_and200Hz200ms_start_ms": null
+    }
+  ],
+  "model": "Frozen v3 spatial rate; native checkpoint Z path; M dynamic",
+  "statistical_unit": "One deterministic complete-history continuation per held spatial Z field",
+  "scope": "Matched 12 s observations. Neither a continued periodic branch nor a bifurcation certificate; no asymptotic claim."
+}

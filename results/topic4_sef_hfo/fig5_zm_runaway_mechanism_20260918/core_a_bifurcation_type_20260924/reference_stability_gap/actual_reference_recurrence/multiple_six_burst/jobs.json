@@ -1,0 +1,8 @@
+{
+  "status": "STOPPED_BEFORE_FIRST_UPDATE_FOR_HOST_ALLOCATION_FIX",
+  "pid": 2393733,
+  "iteration": 0,
+  "stage": "MATCHING",
+  "last_residual": 0.011952224189349625,
+  "reason": "Extended kernel time while allocating/copying multi-GB host Jacobian buffers under NumPy MADV_HUGEPAGE; compact_stall rose with no compact_success. No numerical accept step yet. Restart identical scientific solve with per-process NumPy hugepage advice disabled, not a system-wide setting."
+}

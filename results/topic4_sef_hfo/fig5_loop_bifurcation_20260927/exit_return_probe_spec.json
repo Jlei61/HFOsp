@@ -1,0 +1,113 @@
+{
+  "stage": "ACTUAL_EXIT_FIELDS_G_MEMORY_AND_RETURN_REFINEMENT",
+  "question": "Does trueexit spatialstructure or carriedG change the conditionaltermination, and where do brief events reappear?",
+  "rows": [
+    {
+      "name": "exit_z0.21_k12_fields16p7_high",
+      "Z": 0.21,
+      "K": 12.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Test actualexit Z/K spatialfield family at matchedmeans; same fast/G/Mhistories andfutureinput as originalcut. Bothfields change jointly, not a single-field attribution."
+    },
+    {
+      "name": "exit_z0.21_k12_fields16p7_recovery",
+      "Z": 0.21,
+      "K": 12.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl",
+      "history_label": "recovery",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Test actualexit Z/K spatialfield family at matchedmeans; same fast/G/Mhistories andfutureinput as originalcut. Bothfields change jointly, not a single-field attribution."
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "Z": 0.21,
+      "K": 9.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Test actualexit Z/K spatialfield family at matchedmeans; same fast/G/Mhistories andfutureinput as originalcut. Bothfields change jointly, not a single-field attribution."
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_recovery",
+      "Z": 0.21,
+      "K": 9.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl",
+      "history_label": "recovery",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "reason": "Test actualexit Z/K spatialfield family at matchedmeans; same fast/G/Mhistories andfutureinput as originalcut. Bothfields change jointly, not a single-field attribution."
+    },
+    {
+      "name": "exit_z0.21_k9_G0_high",
+      "Z": 0.21,
+      "K": 9.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "G_raw_override": 0.0,
+      "reason": "Change only initialglobalfeedback memoryG; fixedcommonZ/Kfield andsamefutureinput. Distinguish laggedglobalinhibition pushingthe faststate between conditionalresponses. Diagnosticintervention,never anautonomousexit."
+    },
+    {
+      "name": "exit_z0.21_k9_G11.495_high",
+      "Z": 0.21,
+      "K": 9.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "G_raw_override": 11.495040572672318,
+      "reason": "Change only initialglobalfeedback memoryG; fixedcommonZ/Kfield andsamefutureinput. Distinguish laggedglobalinhibition pushingthe faststate between conditionalresponses. Diagnosticintervention,never anautonomousexit."
+    },
+    {
+      "name": "exit_z0.21_k9_G11.495_recovery",
+      "Z": 0.21,
+      "K": 9.0,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl",
+      "history_label": "recovery",
+      "cut": "exit",
+      "duration_s": 30.0,
+      "G_raw_override": 11.495040572672318,
+      "reason": "Change only initialglobalfeedback memoryG; fixedcommonZ/Kfield andsamefutureinput. Distinguish laggedglobalinhibition pushingthe faststate between conditionalresponses. Diagnosticintervention,never anautonomousexit."
+    },
+    {
+      "name": "return_z0.995_k0.02_recovery",
+      "Z": 0.995,
+      "K": 0.02,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t30s.pkl",
+      "history_label": "recovery",
+      "cut": "return",
+      "duration_s": 30.0,
+      "reason": "OnelocalreturnrefinementbetweenK.01frequentand.03rarebriefpopulations; naturalfirstreturnK.0169 motivateslocation,not anindependentprediction."
+    }
+  ],
+  "max_workers": 1,
+  "allocation": {
+    "entry_Zfield_probes": 4,
+    "these_probes": 8,
+    "local_maximum": 12
+  },
+  "dispatch_gate": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_continuation_qa/gate.json",
+  "interpretation": "Conditionaldiagnostics. Finitewindowhistorydependence is not certifiedbistability; future noise paired."
+}

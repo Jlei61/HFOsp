@@ -1,0 +1,292 @@
+{
+  "time": "2026-09-25T04:51:05.693352+08:00",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "model": "Locked3479group0.5mm spatial delayed rate; only native CoreA Z varied, outsideA native9s; allZheld,allE Mdynamic",
+  "nine_burst": {
+    "numerical_root": true,
+    "period_ms": 2369.0337184833256,
+    "whole_closure": 7.11708803712732e-11,
+    "spectrum": [
+      {
+        "real": -1.1886199329585603,
+        "imag": 0.0,
+        "relative_residual": 1.5384915690574542e-13,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09615679237470662,
+        "imag": 0.0,
+        "relative_residual": 3.3279779081040284e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09276364257531816,
+        "imag": 0.0024324280621828274,
+        "relative_residual": 1.032464262599887e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09078904179700947,
+        "imag": 0.0009757321347341491,
+        "relative_residual": 1.3528308810965213e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      }
+    ],
+    "phase": "Original Poincare shifted-phase gates failed, physical Floquet pending",
+    "fine_attempt": "Stopped before any Newton update; no valid fine period bracket; not orbit nonexistence"
+  },
+  "three_burst_midpoint": {
+    "numerical_root": true,
+    "period_ms": 790.2861378603747,
+    "whole_closure": 1.587209914489616e-11,
+    "spectrum": [
+      {
+        "real": -0.14838720794791896,
+        "imag": 0.0,
+        "relative_residual": 2.130393503395521e-06,
+        "status": "FAILED_FULL_RESIDUAL"
+      }
+    ],
+    "interpretation": "12D bounded spectrum found no unstable direction; no stable certificate. Mesh and phase pending."
+  },
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9507_fine/small_step_correction",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3078731,
+        "iteration": 3,
+        "stage": "KRYLOV",
+        "last_residual": 0.026991359887142515
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9573/whole_cycle/multiple_section_spectrum",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3189583
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/implicit_period_correction",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3174834,
+        "iteration": 0,
+        "last_residual": 0.003856288676480425
+      }
+    }
+  ],
+  "mesh_counterexample": "Same midpoint Z_A=.7123513753: fine10s has complete1.679/1.719s long activities and last2.178s rightcensored. Coarse20s had onlyshort events. Old finitewindow contrast is not converged bifurcation bracket. Early200ms three-mesh errors reduce about2x.",
+  "early_M_equilibrium": "Bounded known-high-root homotopy stopped at auxiliary.458782 without target root; numerical stall is not a bifurcation. No fast-M type established.",
+  "scientific_status": "Investigation in progress; no type assigned to actual local onset",
+  "native9551": {
+    "theta_ms": 9551.180014482,
+    "Z_A": 0.7061486994565256,
+    "numerical_root_status": "NUMERICAL_SEGMENTED_SINGLE_SHOOTING_ROOT",
+    "period_ms": 790.979087721665,
+    "independent_whole_closure": 2.659261283956873e-11,
+    "fundamental_subperiod_T_over3_closure": 6.5204661125221755,
+    "profile": "Three quiet intervals in A and B; A mean115.696655Hz, GlobalE34.282364Hz. Still self-limited three-burst orbit.",
+    "spectrum": [
+      {
+        "real": 0.4421189700977788,
+        "imag": 0.0,
+        "relative_residual": 3.2741414471848086e-07,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.4207277046783039,
+        "imag": 0.0,
+        "relative_residual": 2.5690487976591345e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": -0.2767674730685351,
+        "imag": 0.0,
+        "relative_residual": 5.068602274612631e-14,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.06835276634354068,
+        "imag": 0.0327465375794138,
+        "relative_residual": 1.863450595204484e-09,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      }
+    ],
+    "bounded_spectrum": "24D search found no unstable direction; unresolved largest slow-M cluster near.455; no mathematical completeness or physical mesh qualification.",
+    "phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "phase_errors": [
+      {
+        "phase": 0.0,
+        "closure": 2.6591757520563554e-11
+      },
+      {
+        "phase": 0.25,
+        "closure": 1.489753737679016e-07
+      },
+      {
+        "phase": 0.5,
+        "closure": 2.9075014084096508e-05
+      }
+    ]
+  },
+  "native9507_fine_first_attempt": {
+    "status": "NO_ACCEPTED_SHOOTING_STEP_NOT_A_BIFURCATION",
+    "initial_closure": 0.02943959584560604,
+    "trials": "All4updatesrejected by original nonlinear residual. No accepted Newton update, no bifurcation interpretation.",
+    "response": "Same initial seed, period,dt,physicalmodel retried with initial radius.001 instead of.03; at most7iterations,24Krylov,6trialreturns periteration. This only changes numerical trust-region budget."
+  },
+  "native9573_seed": {
+    "theta_ms": 9573.043350229,
+    "D_A": 0.2969323231116018,
+    "period_guess_ms": 791.2583205955916,
+    "closure": 0.003604273299968175,
+    "status": "INITIAL_GUESS_ONLY"
+  },
+  "native9573": {
+    "theta_ms": 9573.043350229,
+    "D_A": 0.2969323231116018,
+    "Z_A": 0.7030676768883982,
+    "period_ms": 791.3190112247611,
+    "numerical_root_status": "NUMERICAL_SEGMENTED_SINGLE_SHOOTING_ROOT",
+    "independent_whole_closure": 1.0639147349308182e-10,
+    "profile": [
+      {
+        "region": "Global E",
+        "mean_hz": 34.37703662909102,
+        "complete_1ms_bins_mean_hz": 34.38959573019325,
+        "min_10ms_hz": 0.012242313290925472,
+        "max_10ms_hz": 178.62681263847077,
+        "quiet_intervals_relative_ms": [
+          [
+            127,
+            257
+          ],
+          [
+            377,
+            527
+          ],
+          [
+            623,
+            791
+          ]
+        ]
+      },
+      {
+        "region": "Core A",
+        "mean_hz": 116.54259443861481,
+        "complete_1ms_bins_mean_hz": 116.55000929337966,
+        "min_10ms_hz": 1.9239067047262338e-05,
+        "max_10ms_hz": 475.32845004615183,
+        "quiet_intervals_relative_ms": [
+          [
+            92,
+            256
+          ],
+          [
+            349,
+            516
+          ],
+          [
+            617,
+            781
+          ]
+        ]
+      },
+      {
+        "region": "Core B",
+        "mean_hz": 89.08456586306505,
+        "complete_1ms_bins_mean_hz": 89.11729730167639,
+        "min_10ms_hz": 2.257037190326738e-05,
+        "max_10ms_hz": 474.53309768612024,
+        "quiet_intervals_relative_ms": [
+          [
+            91,
+            246
+          ],
+          [
+            379,
+            536
+          ],
+          [
+            620,
+            791
+          ]
+        ]
+      },
+      {
+        "region": "Surround",
+        "mean_hz": 30.931437529738275,
+        "complete_1ms_bins_mean_hz": 30.943603436633563,
+        "min_10ms_hz": 0.012859116206833554,
+        "max_10ms_hz": 165.39782569181122,
+        "quiet_intervals_relative_ms": [
+          [
+            128,
+            260
+          ],
+          [
+            377,
+            530
+          ],
+          [
+            623,
+            791
+          ]
+        ]
+      }
+    ],
+    "phase": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "phase_errors": [
+      [
+        0.0,
+        1.013020391481111e-10
+      ],
+      [
+        0.25,
+        2.2733636304687246e-07
+      ],
+      [
+        0.5,
+        2.4683762057973085e-05
+      ]
+    ],
+    "spectrum": "RUNNING24D"
+  },
+  "native9595_fixed_period_correction": {
+    "status": "NO_ACCEPTED_SHOOTING_STEP_NOT_A_BIFURCATION",
+    "accepted_updates": 2,
+    "last_whole_closure": 0.003845439670566655,
+    "interpretation": "Subsequent4bounded smaller updates failed; not a bifurcation. Independent replays on twoGPUs, both fixed and shared-prefix readouts, are bitwise equal.",
+    "replay": {
+      "status": "PASS",
+      "all_saved_endpoint_arrays_cross_device_bitwise": {
+        "first": true,
+        "repeat": true,
+        "shared": true,
+        "coordinate_scale": true,
+        "coordinate_weight": true
+      },
+      "within_device_replay_bitwise": true,
+      "expected_previous_closure": 0.003845439670566655,
+      "replayed_closure": [
+        0.0038454396705628366,
+        0.0038454396705628366
+      ],
+      "shared_prefix_relative_errors": [
+        0.0,
+        0.0
+      ],
+      "scope": "At this saved nonconverged iterate, three original flow readouts and both devices agree. This rules out a replay mismatch at this point, not every possible numerical error; large rejected Newton proposals still do not prove a bifurcation.",
+      "model_promoted": false
+    }
+  },
+  "implicit_period_method": {
+    "code": "scripts/topic4_zm_runaway_mechanism/onset_segmented_poincare.py and new optional modes of core_a_periodic_hookstep.py",
+    "purpose": "Eliminate the period as an independent Newton variable by the original nonlinear Poincare section return; retain all physical states. Segmentation onlystores the exact full variational flow.",
+    "gate": "Compare every composed implicit return derivative against original unsegmented uncachedCubicSectionDerivative at1e-10, plus full nonlinearPoincare finite difference at1e-3 beforefirstupdate.",
+    "status": "First coarseD_A=.300 implementation andcorrection RUNNING; no pass claimed yet",
+    "budget": "3iterations24Krylov/5trialreturns,cycleRMScoordinates,exact existingpositive/phase/refractory numerical-proposalprojection,Mprecondition"
+  }
+}

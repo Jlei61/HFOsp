@@ -1,0 +1,186 @@
+{
+  "status": "COMPLETE_PREFIXES",
+  "rows": [
+    {
+      "name": "exit_z0.21_k10.5_fields16p7_high",
+      "prefix_complete_s": 10.0,
+      "full_declared_s": 30.0,
+      "native_full_complete": false,
+      "paired_input_records_bitwise": 100,
+      "native_windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "rates_Hz": [
+            7.1051625,
+            17.282758620689652,
+            19.98524173027988,
+            6.520866710439924
+          ],
+          "Graw_mean": 0.49809461658553367,
+          "dZ_per_s": [
+            0.144993624000001,
+            0.1519149928055334,
+            0.1527881099305628,
+            0.1446211624760072
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 2.2722708833675438e-05,
+          "dZ_per_s": [
+            0.15800000000000108,
+            0.16516612277900802,
+            0.16692624224608452,
+            0.15759227567364337
+          ]
+        }
+      ],
+      "candidate_comparison": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "rates_Hz": [
+            7.006639455782353,
+            16.991029105132252,
+            19.828860540125888,
+            6.4286192467244545
+          ],
+          "Graw_mean": 0.4967503812052482,
+          "dZ_per_s": [
+            0.1450929337094685,
+            0.15202265113496902,
+            0.15288642137305544,
+            0.1447202912852294
+          ],
+          "field_RMS_Hz": 0.16632762646246074
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 2.2655086498743578e-05,
+          "dZ_per_s": [
+            0.15799999976528886,
+            0.1651661225868916,
+            0.1669262420509436,
+            0.15759227543686352
+          ],
+          "field_RMS_Hz": 0.0
+        }
+      ]
+    },
+    {
+      "name": "exit_z0.21_k10.5_fields16p7_recovery",
+      "prefix_complete_s": 10.0,
+      "full_declared_s": 30.0,
+      "native_full_complete": false,
+      "paired_input_records_bitwise": 100,
+      "native_windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 4.10245472861113e-12,
+          "dZ_per_s": [
+            0.15800000000000108,
+            0.16516612277900802,
+            0.16692624224608452,
+            0.15759227567364337
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 1.8625115653282594e-16,
+          "dZ_per_s": [
+            0.15800000000000108,
+            0.16516612277900802,
+            0.16692624224608452,
+            0.15759227567364337
+          ]
+        }
+      ],
+      "candidate_comparison": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 4.0942580185961596e-12,
+          "dZ_per_s": [
+            0.15799999976528886,
+            0.1651661225868916,
+            0.1669262420509436,
+            0.15759227543686352
+          ],
+          "field_RMS_Hz": 0.0
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "Graw_mean": 1.8587902647386263e-16,
+          "dZ_per_s": [
+            0.15799999976528886,
+            0.1651661225868916,
+            0.1669262420509436,
+            0.15759227543686352
+          ],
+          "field_RMS_Hz": 0.0
+        }
+      ]
+    }
+  ],
+  "interpretation": "Both complete ten-second prefixes; do not imply complete thirty-second observation, stationary states, or independent native repetitions.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "1e65a4b6ea33a9dbaa52626492ea1b60fdce677584325b838567856817a78788"
+}

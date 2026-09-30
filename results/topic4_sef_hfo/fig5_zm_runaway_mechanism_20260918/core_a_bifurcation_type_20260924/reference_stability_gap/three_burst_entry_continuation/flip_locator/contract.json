@@ -1,0 +1,14 @@
+{
+  "question": "Locate the already observed numerical negative-mode crossing of -1 on the same three-burst branch.",
+  "initial_parameter_interval_ms": [
+    9573.043350229,
+    9583.9750181025
+  ],
+  "precomputed_next_point": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9576/whole_cycle",
+  "maximum_new_parameter_points": 3,
+  "negative_multiplier_target_tolerance": 0.0001,
+  "method": "Bracket-preserving safeguarded secant updates of the native spatial-field time parameter. At each point correct the full delayed spatial cycle and evaluate the original numerical Poincare spectrum with independent eigenvector residuals. Neighboring physical right-mode overlaps are reported to check branch identity.",
+  "equation": "Unchanged3479-group0.5mm physical-delay conditional rate, only withinCoreA nativeZ varied, outsideA native9s, everyZheld and allE Mdynamic.",
+  "scope": "Numerical crossing refinement only. Prior phase/mesh failures are retained. No complete spectrum, normal-form nondegeneracy, physical bifurcation type, global onset or native-SNN attribution is certified.",
+  "model_promoted": false
+}

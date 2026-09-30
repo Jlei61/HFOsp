@@ -1,0 +1,30 @@
+{
+  "status": "PROPOSAL_GEOMETRY_DIAGNOSTIC_ONLY",
+  "rows": [
+    {
+      "pop": "E",
+      "maximum_occupancy": 0.9258931457613984,
+      "bad_windows": 0,
+      "bad_groups": 0,
+      "bad_groups_per_region": [
+        0,
+        0,
+        0
+      ],
+      "overshoot_max": -0.07410685423860164
+    },
+    {
+      "pop": "I",
+      "maximum_occupancy": 1.0208199661347537,
+      "bad_windows": 28,
+      "bad_groups": 4,
+      "bad_groups_per_region": [
+        0,
+        0,
+        4
+      ],
+      "overshoot_max": 0.020819966134753676
+    }
+  ],
+  "scope": "Original full physical dynamics unchanged. These are rejected Newton initial-state coordinates, not a network trajectory or bifurcation."
+}

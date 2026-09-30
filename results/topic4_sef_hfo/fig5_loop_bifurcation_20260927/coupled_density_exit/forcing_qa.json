@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "interval_s": [
+    10,
+    20
+  ],
+  "sampling_ms": 0.1,
+  "groups": 3479,
+  "dtype": "float64",
+  "endpoint_checks": [
+    {
+      "native_step": 167000,
+      "global_xi_rng_bitwise": true,
+      "spatial_complete_state_bitwise": true
+    },
+    {
+      "native_step": 200000,
+      "global_xi_rng_bitwise": true,
+      "spatial_complete_state_bitwise": true
+    }
+  ],
+  "sparse_original_records_bitwise": 100,
+  "selected16_original_steps_bitwise": 33000,
+  "max_sparse_error": 0.0,
+  "max_selected_error": 0.0,
+  "elapsed_s": 254.7931351661682,
+  "neural_simulations": 0,
+  "source_sha256": "e1a2c5d03a26ac7c78cf2f42c26ee2d8d15f312b4298dea1aabf7cc080a80469",
+  "initial_sha256": "4866822869ffc7e779aba7b3bf40dd4e9a08b7b3403d3b4c47fb0dea4d9bde50"
+}

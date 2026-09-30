@@ -1,0 +1,21 @@
+{
+  "created_local": "2026-09-20T12:47:45.177424+08:00",
+  "question": "Does the observed nativeZfield ordering survive removal of count innovations alone, with the SAME private diffusion operators and shared refractory history?",
+  "model": "Current conditioned39 g40 finite-count rate model; construct with private-Q split, then replace each Binomial count by its conditional mean. Physicalgraph,thresholds,delays,responseweights,externaldrive andZM laws unchanged.",
+  "mathematical_object": "Private-Q deterministic conditional drift under recorded external forcing, NOT existing full-Q expected rate, NOT exact ensemble mean and NOT an autonomous constant-input bifurcation system.",
+  "initial": "Use saved own-rate full9000ms checkpoint without replay. Same complete fast/covariance/refractory/M history and future9-12.5s original external forcing as completedcount interventions.",
+  "arms": [
+    "native_Z9000_held",
+    "native_Z9420_held",
+    "native_Z9870_held"
+  ],
+  "duration_ms": 3500.0,
+  "dt_ms": 0.05,
+  "control": "Completed count runs atsamefields reused exactly. First10ms count prefixes must replay bitwise before intervention implementation accepted. Atcommoninitialstate count and drift conditionalexpectedrate/localupdate must agree; only emission and subsequentcount-drivenM differ.",
+  "innovation_change": "Keep private operators and share local/transport history; set count sampling off BEFORE CUDAgraph capture. Expected future emission drives the same refractory,delayandM equations. No changes to variance allocation.",
+  "Z": "Entire prescribed native spatialfield fixed; originalgroup cellcountweightedD retained, I Z1.",
+  "M": "Dynamic in all conditions, same actual9000ms initialvalue.",
+  "readout": "Same >=200Hz for200ms entry, <5Hz quiet, completeevents with20msquietbefore/after, final1srate andspatialpersistentfraction. Originalthreecountarms arepairedcontrols, notindependentreplicates.",
+  "interpretation": "Preservedordering supports analyzing this conditionaldrift afterconstant-input andequationchecks; alteredordering shows countinnovations matter tothisboundary and forbids transferringfull-Q criticalpoints. Censoring andonehistory limit remain.",
+  "budget": "Three3500ms continuations. Noresponsefit, parametersearch, newseed, extendedobservationorbranchsearch. Readouts and numericalidentity checks do not waive originalmodelacceptancefailures."
+}

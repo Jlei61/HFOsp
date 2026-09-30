@@ -1,0 +1,6 @@
+{
+  "updated_local": "2026-09-19T11:53:50.239029",
+  "jobs": [
+    "3142843       01:54  101 3343764 /home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/endpoint_floquet.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz --family native --dt .025 --method rk4 --fast-time-grid --cpu-orbit-fft --stream-orbit --nev 3 --ncv 16 --eigen-tol 1e-6 --ritz-progress --allow-invalid-phase --output-tag UNVALIDATED_diagnostic --map-progress --harmonic-block 129 --device 0"
+  ]
+}

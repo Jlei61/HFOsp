@@ -1,0 +1,19 @@
+{
+  "timestamp": 1789860254.4312303,
+  "previous_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "rows": [],
+    "pid": 458977,
+    "label": "LPC_B_stage4_turn1",
+    "stage": "N4096",
+    "free_mib": 7569.0,
+    "required_free_gib": 11.0
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/refine_rate_remaining_turns.py B41 B42 --device 1 --after-pid 458835 --cached-host-krylov --min-free-gib 11 ",
+  "reason": "Reload only the waiting N4096 coordinator. The checked cached-host solver automatically switches to exact streamed harmonic actions when the bank reserve does not fit. Existing streamed N4096 continuation uses about 3.6 GiB; a 6 GiB launch gate preserves headroom and permits these two fixed meshes. The completed N2048 roots are reused. No active numerical solve is interrupted.",
+  "same_cases": [
+    "B41",
+    "B42"
+  ],
+  "same_accepted_model": true
+}

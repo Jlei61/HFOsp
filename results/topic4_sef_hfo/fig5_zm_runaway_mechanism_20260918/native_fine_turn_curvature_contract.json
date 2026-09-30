@@ -1,0 +1,24 @@
+{
+  "created_local": "2026-09-19T16:42:54.111554",
+  "status": "PRESPECIFIED_BEFORE_FINE_TANGENT_OR_CURVATURE",
+  "source": "periodic/native_turn_center_G16875_M262144/point0000.npz",
+  "tangent_output": "periodic/native_turn_center_fine_tangent/point_with_tangent.npz",
+  "N": 16875,
+  "M": 262144,
+  "Z": "held native spatial path",
+  "M_state": "dynamic",
+  "log_period_directional_steps": [
+    2.5e-05,
+    1.25e-05
+  ],
+  "criteria": {
+    "full_jacobian_relative_linear_residual": 1e-06,
+    "relative_step_curvature_difference": 0.05,
+    "negative_nonzero_curvature": true,
+    "quadratic_predictor_reduces_symmetric_remainder": true
+  },
+  "method": "Exact elimination of the prescribed log-period second derivative; test the recovered vector against the full augmented Jacobian. Same frozen residual and analytic first derivative.",
+  "interpretation": "A fine-center derivative is recomputed first; the coarse center is not assumed to remain the exact fine-grid turn. A failed step or mesh test remains failed and is not promoted to a bifurcation type.",
+  "coarse_reference": "periodic/native_turn_G8505_M65536/result.json",
+  "scope": "Local BVP curvature only. Independent Floquet crossing and branch connectivity remain required."
+}

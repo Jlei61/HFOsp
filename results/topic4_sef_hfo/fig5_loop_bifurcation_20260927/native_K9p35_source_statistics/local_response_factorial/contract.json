@@ -1,0 +1,21 @@
+{
+  "status": "FROZEN_BEFORE_LOCAL_FACTORIAL",
+  "created_epoch": 1790550563.8212132,
+  "question": "At selected targets on the missed recruitment edge, how much do source averaging and excessive white-input variance independently change the local frozen-M response?",
+  "design": "Four conditions per target: native observed means or their exact group-source bias, crossed with group-white predicted variance or measured total variance. Native thresholds/refractory/Z/K, measured mean M and G, original discrete synaptic filters and membrane. Same Gaussian streams and randomized count phase for all conditions; no fitted scale.",
+  "selection": "Native rate 25/50/75 percentiles within each of the previously selected ten display-edge cells, plus coreA/coreB/I controls; selected before fresh local counts. Duplicate targets retained once.",
+  "limits": "Measured moments prescribe data and are not an autonomous closure. Measured-variance conditions still omit native autocorrelation, E/I cross-covariance, non-Gaussian currents and M dynamics. Two seconds of native data is not stationary ground truth; target selection is development-only. Numerical replicas estimate Monte Carlo precision, not independent native seed uncertainty. This is a local response diagnosis, not a network causal experiment or new bifurcation.",
+  "targets": 39,
+  "conditions": 156,
+  "replicas": 1024,
+  "duration_ms": 16000,
+  "burn_ms": 1000,
+  "extra_burn_phase_ms": 1000,
+  "seed": 929471,
+  "device": 1,
+  "source_sha256": "f93aa7380bedea2db5656c194f9ef4ae137dfb20398480ea233937aae019afef",
+  "observer_sha256": "c0798ed42fd0c95bf56f82135a6afcd52cebf08c53430ac17ac68a01d9cdc197",
+  "producer_sha256": "46d316f50912da6becefa48ac5a7f61c6c902ee7be0bb4d571782fe7b62b81c1",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

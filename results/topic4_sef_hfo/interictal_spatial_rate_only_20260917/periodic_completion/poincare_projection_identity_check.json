@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "case": "ordinary",
+      "maximum_eigenvalue_error": 8.881784197001252e-16,
+      "phase_annihilation_error": 1.1394982742867316e-16
+    },
+    {
+      "case": "cycle_fold",
+      "maximum_eigenvalue_error": 1.3322676295501878e-15,
+      "phase_annihilation_error": 1.1467329042496297e-16
+    }
+  ],
+  "meaning": "Independent nonnormal matrices, including an autonomous Jordan block at the cycle fold. Projected spectrum retains the nontrivial +1 and removes only phase."
+}

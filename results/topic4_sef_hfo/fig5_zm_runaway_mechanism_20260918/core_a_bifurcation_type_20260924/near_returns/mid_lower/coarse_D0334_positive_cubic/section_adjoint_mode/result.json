@@ -1,0 +1,57 @@
+{
+  "status": "VERIFIED_NUMERICAL_LEFT_RIGHT_MODE",
+  "multiplier": -33.057464006826095,
+  "right_residual": 1.0741032284798823e-14,
+  "left_relative_residual": 1.4020240220339954e-09,
+  "checks": [
+    {
+      "direction": 0,
+      "relative_bilinear_error": 5.1931779803168344e-14,
+      "nominal_unchanged": true
+    },
+    {
+      "direction": 1,
+      "relative_bilinear_error": 2.1951825899577432e-14,
+      "nominal_unchanged": true
+    }
+  ],
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 13.015478645098463,
+        "difference_rms": 3.936252658679643e-10,
+        "relative_rms": 3.024285749308196e-11
+      },
+      "GABA": {
+        "reference_rms": 0.6935455300013968,
+        "difference_rms": 8.667422540060173e-10,
+        "relative_rms": 1.2497265377865988e-09
+      },
+      "M": {
+        "reference_rms": 0.022528735197197745,
+        "difference_rms": 9.666072415375116e-10,
+        "relative_rms": 4.290552634564872e-08
+      },
+      "covariance": {
+        "reference_rms": 36.86943754072063,
+        "difference_rms": 3.8081599732645584e-10,
+        "relative_rms": 1.0328771544341075e-11
+      },
+      "input_memory": {
+        "reference_rms": 0.10290947026287499,
+        "difference_rms": 1.8058082668416445e-10,
+        "relative_rms": 1.7547542147761858e-09
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0002877281694646943,
+        "difference_rms": 3.764499995062849e-13,
+        "relative_rms": 1.3083529506570513e-09
+      }
+    },
+    "combined_relative_rms": 1.754631005144255e-08
+  },
+  "seconds": 128.17493796348572,
+  "physical_Floquet": "PENDING_EXISTING_PHASE_AND_MESH_GATES",
+  "meaning": "left dot delta_state is a local linear unstable coordinate only. No global stable manifold or collision has been computed.",
+  "model_promoted": false
+}

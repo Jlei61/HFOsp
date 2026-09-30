@@ -1,0 +1,107 @@
+{
+  "status": "COMPLETE_MODEL_CANDIDATE_NATIVE_REVIEW_PENDING",
+  "points": [
+    {
+      "name": "high_K9p3875",
+      "K": 9.3875,
+      "history": "high",
+      "rate": [
+        192.6622063833917,
+        464.6774214882507,
+        470.92711280658153,
+        178.748362370336
+      ],
+      "Zdot": [
+        0.04072146374446034,
+        -0.03483387712853466,
+        -0.03307375768365634,
+        0.044495980194255345
+      ]
+    },
+    {
+      "name": "high_K9p425",
+      "K": 9.425,
+      "history": "high",
+      "rate": [
+        190.9172385615534,
+        464.58935377127705,
+        470.583315010844,
+        176.92622375665312
+      ],
+      "Zdot": [
+        0.04155180123403224,
+        -0.03483387712853466,
+        -0.03307375768365634,
+        0.04536829797712902
+      ]
+    },
+    {
+      "name": "high_K9p4625",
+      "K": 9.4625,
+      "history": "high",
+      "rate": [
+        186.57212651440514,
+        464.4536858244471,
+        470.06108626331473,
+        172.37826511971036
+      ],
+      "Zdot": [
+        0.04314253872525422,
+        -0.03483387712853466,
+        -0.03307375768365634,
+        0.047039460147812184
+      ]
+    },
+    {
+      "name": "quiet_K9p35",
+      "K": 9.35,
+      "history": "quiet",
+      "rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Zdot": [
+        0.1579999999703068,
+        0.16516612287147586,
+        0.16692624231633008,
+        0.15759227563831668
+      ]
+    },
+    {
+      "name": "high_K9p5",
+      "K": 9.5,
+      "history": "high",
+      "rate": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "Zdot": [
+        0.1579999999703068,
+        0.16516612287147586,
+        0.16692624231633008,
+        0.15759227563831668
+      ]
+    }
+  ],
+  "observation_s": 10,
+  "tail_s": [
+    5,
+    10
+  ],
+  "paired_future_numerical_streams": true,
+  "measured_transition_interval": [
+    9.4625,
+    9.5
+  ],
+  "limitations": "Actual heldK is a conductance state, not the k100 increment parameter. FixedZ does not recover; drift is counterfactual. The high-state source and fixedinputlaws are identical across the fourhighKresponses, and thequiet source has pairedfuturenumericalstreams. No infinite-time equilibrium, stable/unstable branch, criticaltype or newautonomousloop is certified.",
+  "agent_visual": "PASS",
+  "human_visual": "PENDING",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "216af18f1a2e32fe8cddc273cb8e515d80f84d73ba3945d097796508b9984726",
+  "agent_PDF_visual": "PASS",
+  "agent_visual_basis": "Actual PNG and rasterized same-state PDF opened; exact coordinates, shared population colors, concentric overlappingzero markers, units and finite-transition qualifier verified."
+}

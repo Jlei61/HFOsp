@@ -1,0 +1,657 @@
+{
+  "status": "SAVED_SPECTRAL_ROUTE_AUDITED",
+  "timestamp": 1789901197.0362892,
+  "rows": [
+    {
+      "amplitude_Hz": 0.03,
+      "J_EE_core": 0.9463109658336102,
+      "orbit": "/data/hfosp/rate_periodic_arrays/orbits/PD4_child_midpoint_20260920_a0.03000_N1024.npz",
+      "selection_rule": "The two positive real growing eigenpairs at the lower sample.",
+      "spectra": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_midpoint_20260920_k6_dt0.05.json",
+          "dt_ms": 0.04999959067727816,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              79.85275269371164,
+              0.0
+            ],
+            [
+              3.1256813027335695,
+              0.0
+            ]
+          ],
+          "trace": 82.9784339964452,
+          "determinant": 249.59425606654213,
+          "discriminant": 5887.043484236245,
+          "block_characteristic_at_minus_one": 333.57269006298736,
+          "moduli": [
+            79.85275269371164,
+            3.1256813027335695
+          ],
+          "phase_tangent_relative_defect": 0.0009742020602526902,
+          "normalized_eigen_residuals": [
+            5.411841222207526e-13,
+            1.7200842605366158e-10
+          ],
+          "phase_overlaps": [
+            1.4651609775750671e-12,
+            4.2778726115095146e-11
+          ]
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_midpoint_20260920_k6_dt0.025.json",
+          "dt_ms": 0.02499979533863908,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              79.58202063265382,
+              0.0
+            ],
+            [
+              3.1378025999215007,
+              0.0
+            ]
+          ],
+          "trace": 82.71982323257532,
+          "determinant": 249.71267124814767,
+          "discriminant": 5843.718470635918,
+          "block_characteristic_at_minus_one": 333.432494480723,
+          "moduli": [
+            79.58202063265382,
+            3.1378025999215007
+          ],
+          "phase_tangent_relative_defect": 0.0002835436226351105,
+          "normalized_eigen_residuals": [
+            1.158263792580955e-12,
+            3.5019214673087967e-10
+          ],
+          "phase_overlaps": [
+            2.8303434357959383e-12,
+            1.532450097009326e-11
+          ]
+        }
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            79.58202063265382,
+            0.0
+          ],
+          [
+            3.1378025999215007,
+            0.0
+          ],
+          [
+            0.8299009004566352,
+            2.003670412648451
+          ],
+          [
+            0.8299009004566352,
+            -2.003670412648451
+          ],
+          [
+            0.5509842394810486,
+            0.0
+          ],
+          [
+            0.49533146121749577,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          1.624392366346882,
+          0.07272778312758721,
+          0.0038968082410107607,
+          0.0038968082410107607,
+          0.0038968082410107607,
+          0.0038968082410107607
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.27073206105781367,
+          0.012121297187931201,
+          5.1441988055435325e-05,
+          5.1441988055435325e-05,
+          5.328585239716688e-09,
+          6.207249769712986e-05
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 79.58202063265382,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "time_step_pair_available": true,
+      "selected_pair_reliable": true,
+      "selected_pair_phase_projected": true
+    },
+    {
+      "amplitude_Hz": 0.03589661039700412,
+      "J_EE_core": 0.9463110017234515,
+      "orbit": "/data/hfosp/rate_periodic_arrays/orbits/PD4_child_trace_center_20260920_a0.03590_N1024.npz",
+      "selection_rule": "The larger-modulus complex pair at the intervening sample.",
+      "spectra": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_trace_center_20260920_k6_dt0.05.json",
+          "dt_ms": 0.049999588883747295,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              0.11841758874595418,
+              15.633330081815435
+            ],
+            [
+              0.11841758874595418,
+              -15.633330081815435
+            ]
+          ],
+          "trace": 0.23683517749190836,
+          "determinant": 244.4150321723198,
+          "discriminant": -977.6040377879816,
+          "block_characteristic_at_minus_one": 245.6518673498117,
+          "moduli": [
+            15.63377856349257,
+            15.63377856349257
+          ],
+          "phase_tangent_relative_defect": 0.013028420655755062,
+          "normalized_eigen_residuals": [
+            5.498267157534476e-10,
+            5.498267157534476e-10
+          ],
+          "phase_overlaps": [
+            2.157438633987457e-12,
+            2.157438633987457e-12
+          ]
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_trace_center_20260920_k6_dt0.025.json",
+          "dt_ms": 0.024999794441873648,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              -0.0019939434598397567,
+              15.63767166088517
+            ],
+            [
+              -0.0019939434598397567,
+              -15.63767166088517
+            ]
+          ],
+          "trace": -0.0039878869196795135,
+          "determinant": 244.53677894946168,
+          "discriminant": -978.1470998946046,
+          "block_characteristic_at_minus_one": 245.532791062542,
+          "moduli": [
+            15.63767178800801,
+            15.63767178800801
+          ],
+          "phase_tangent_relative_defect": 0.0032585852276187832,
+          "normalized_eigen_residuals": [
+            3.6962966225917814e-10,
+            3.6962966225917814e-10
+          ],
+          "phase_overlaps": [
+            4.153840016842512e-12,
+            4.153840016842512e-12
+          ]
+        }
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            -0.0019939434598397567,
+            15.63767166088517
+          ],
+          [
+            -0.0019939434598397567,
+            -15.63767166088517
+          ],
+          [
+            0.834469417092585,
+            2.0026510425420074
+          ],
+          [
+            0.834469417092585,
+            -2.0026510425420074
+          ],
+          [
+            0.5509842497356452,
+            0.0
+          ],
+          [
+            0.5048211148593994,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.7229386628827964,
+          0.7229386628827964,
+          0.05211368262302025,
+          0.05211368262302025,
+          0.05211368262302025,
+          0.05211368262302025
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.12048977714713273,
+          0.12048977714713273,
+          3.917864528618258e-05,
+          3.917864528618258e-05,
+          4.4160242129720473e-10,
+          6.39309805794408e-05
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 15.63767178800801,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "time_step_pair_available": true,
+      "selected_pair_reliable": true,
+      "selected_pair_phase_projected": true
+    },
+    {
+      "amplitude_Hz": 0.04,
+      "J_EE_core": 0.9463110304889113,
+      "orbit": "/data/hfosp/rate_periodic_arrays/orbits/PD_H2_after_LPC13_child_a0.04000_N1024.npz",
+      "selection_rule": "The two negative real eigenpairs at each later sample.",
+      "spectra": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.05.json",
+          "dt_ms": 0.04999958744630702,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              -62.18059675195521,
+              0.0
+            ],
+            [
+              -3.8910660116584,
+              0.0
+            ]
+          ],
+          "trace": -66.0716627636136,
+          "determinant": 241.9488066061696,
+          "discriminant": 3397.6693939240063,
+          "block_characteristic_at_minus_one": 176.877143842556,
+          "moduli": [
+            62.18059675195521,
+            3.8910660116584
+          ],
+          "phase_tangent_relative_defect": 0.022768271980476464,
+          "normalized_eigen_residuals": [
+            3.299240283112494e-12,
+            1.2236819074206832e-10
+          ],
+          "phase_overlaps": [
+            2.738061045552678e-12,
+            1.0110066326402322e-10
+          ]
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.025.json",
+          "dt_ms": 0.02499979372315351,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "multipliers": [
+            [
+              -62.42137727283916,
+              0.0
+            ],
+            [
+              -3.8779653233604052,
+              0.0
+            ]
+          ],
+          "trace": -66.29934259619957,
+          "determinant": 242.06793650046757,
+          "discriminant": 3427.3310826863717,
+          "block_characteristic_at_minus_one": 176.768593904268,
+          "moduli": [
+            62.42137727283916,
+            3.8779653233604052
+          ],
+          "phase_tangent_relative_defect": 0.005722561238025534,
+          "normalized_eigen_residuals": [
+            2.396082840932626e-12,
+            1.9764993259801285e-09
+          ],
+          "phase_overlaps": [
+            5.4841934336962506e-12,
+            1.7868756677001975e-10
+          ]
+        }
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            -62.42137727283916,
+            0.0
+          ],
+          [
+            -3.8779653233604052,
+            0.0
+          ],
+          [
+            0.8349285377073657,
+            1.9999045897114203
+          ],
+          [
+            0.8349285377073558,
+            -1.999904589711423
+          ],
+          [
+            0.5509842134428051,
+            0.0
+          ],
+          [
+            0.5105800881487893,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          1.4446831253037118,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.24078052088395197,
+          0.013100688297994711,
+          5.087577750478379e-05,
+          5.087577751103423e-05,
+          2.7748578101949306e-08,
+          6.271399843582603e-05
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 62.42137727283916,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "time_step_pair_available": true,
+      "selected_pair_reliable": true,
+      "selected_pair_phase_projected": true
+    },
+    {
+      "amplitude_Hz": 0.08,
+      "J_EE_core": 0.9463114738407228,
+      "orbit": "/data/hfosp/rate_periodic_arrays/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+      "selection_rule": "The two negative real eigenpairs at each later sample.",
+      "spectra": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index2_full_k6_20260920_dt0.05.json",
+          "dt_ms": 0.04999956529754814,
+          "selected_indices": [
+            0,
+            5
+          ],
+          "multipliers": [
+            [
+              -1087.875095141392,
+              0.0
+            ],
+            [
+              -0.20837619254323914,
+              0.0
+            ]
+          ],
+          "trace": -1088.0834713339352,
+          "determinant": 226.68727028817727,
+          "discriminant": 1183018.8915089539,
+          "block_characteristic_at_minus_one": -860.396201045758,
+          "moduli": [
+            1087.875095141392,
+            0.20837619254323914
+          ],
+          "phase_tangent_relative_defect": 0.11769720543492065,
+          "normalized_eigen_residuals": [
+            1.9187684394259102e-13,
+            1.8609139129004778e-07
+          ],
+          "phase_overlaps": [
+            2.1560776491918883e-12,
+            2.8154121923738103e-07
+          ]
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index2_full_k6_20260920_dt0.025.json",
+          "dt_ms": 0.02499978264877407,
+          "selected_indices": [
+            0,
+            5
+          ],
+          "multipliers": [
+            [
+              -1087.9415770914231,
+              0.0
+            ],
+            [
+              -0.20845921245533774,
+              0.0
+            ]
+          ],
+          "trace": -1088.1500363038786,
+          "determinant": 226.79144435789618,
+          "discriminant": 1183163.3357307008,
+          "block_characteristic_at_minus_one": -860.3585919459823,
+          "moduli": [
+            1087.9415770914231,
+            0.20845921245533774
+          ],
+          "phase_tangent_relative_defect": 0.029741262300883444,
+          "normalized_eigen_residuals": [
+            3.032705286038633e-13,
+            4.5604650832240466e-07
+          ],
+          "phase_overlaps": [
+            4.149165491527468e-12,
+            7.661544938188839e-07
+          ]
+        }
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            -1087.9415770914231,
+            0.0
+          ],
+          [
+            0.8314915113911732,
+            -1.997480778425534
+          ],
+          [
+            0.8314915113911732,
+            1.997480778425534
+          ],
+          [
+            0.5509828131246494,
+            0.0
+          ],
+          [
+            0.5385111548393342,
+            0.0
+          ],
+          [
+            -0.20845921245533774,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.4707888217396826,
+          0.4707888217396826,
+          0.4707888217396826,
+          0.4707888217396826,
+          0.4707888217396826,
+          0.4707888217396826
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.06648195003117507,
+          5.4464887719840114e-05,
+          5.4464887719840114e-05,
+          1.9349978996885397e-06,
+          3.28760054554289e-05,
+          8.30199120986086e-05
+        ],
+        "reliable_outside_count": 3,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 1087.9415770914231,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "time_step_pair_available": true,
+      "selected_pair_reliable": true,
+      "selected_pair_phase_projected": true
+    }
+  ],
+  "adjacent_reference_phase_subspace_checks": [
+    {
+      "amplitude_interval_Hz": [
+        0.03,
+        0.03589661039700412
+      ],
+      "block_principal_angles_degrees": [
+        0.2572285390202711,
+        39.86628845681425
+      ],
+      "four_principal_angles_degrees": [
+        8.306651593689608e-05,
+        0.00015347516376583675,
+        0.07860522395135204,
+        0.3680654647150574
+      ]
+    },
+    {
+      "amplitude_interval_Hz": [
+        0.03589661039700412,
+        0.04
+      ],
+      "block_principal_angles_degrees": [
+        0.15857180254708783,
+        61.27673557312104
+      ],
+      "four_principal_angles_degrees": [
+        5.77166140412315e-05,
+        0.00010693323201945046,
+        0.0667112600405787,
+        0.2832428475492021
+      ]
+    },
+    {
+      "amplitude_interval_Hz": [
+        0.04,
+        0.08
+      ],
+      "block_principal_angles_degrees": [
+        1.8280794418987296,
+        33.28347979077484
+      ],
+      "four_principal_angles_degrees": [
+        0.0005693607704417914,
+        0.0010529642680057307,
+        0.6373346694672255,
+        2.829258183125367
+      ]
+    }
+  ],
+  "complex_pair_at_intermediate_sample": true,
+  "complex_probe_time_step_pair_available": true,
+  "all_selected_pairs_have_paired_residual_and_phase_checks": true,
+  "later_negative_flip_candidate_time_step_pair_available": true,
+  "sampled_complex_pair_is_outside_unit_circle": true,
+  "intermediate_eigenvalue_collisions_located": false,
+  "later_minus_one_crossing_located": false,
+  "new_period_doubling_established": false,
+  "scope": "Actual sampled eigenpairs on physical cycles; a complex point distinguishes a possible detour from an inferred direct positive-to-negative jump. Paired-step availability and residual/phase checks are stated separately for the selected pair; total unstable dimensions remain subject to the full spectra. Same-phase subspace angles are descriptive and do not establish cross-amplitude mode continuation, absence of intervening unit-circle crossings, or a new dynamical bifurcation."
+}

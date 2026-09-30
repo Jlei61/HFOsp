@@ -1,0 +1,67 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/seed_N512.npz",
+      "family": "native",
+      "D": 0.21646602103961032,
+      "T_ms": 264.1932483378814,
+      "mean_D_drift_per_s": 0.0015497442763071764,
+      "Z_drift_A_B_surround_per_s": [
+        -0.02067322254640374,
+        -0.018446087658848875,
+        -0.0006403671090606049
+      ],
+      "conditional_Z_A_B_surround": [
+        0.7442783003859391,
+        0.7399002967704519,
+        0.7856316433020323
+      ],
+      "drift_direction_cosine_with_parameter_path": 0.07501577539447309,
+      "tangent_projected_D_drift_per_s": 0.0017713345937097474,
+      "interpretation": "Cycle-averaged original Z vector field at a held-Z cycle; direction diagnostic, not a scalar closed slow model."
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_near_N2048.npz",
+      "family": "native",
+      "D": 0.21932195093353557,
+      "T_ms": 264.55296754034435,
+      "mean_D_drift_per_s": 0.001451652254071704,
+      "Z_drift_A_B_surround_per_s": [
+        -0.02045223161132173,
+        -0.017573272178448215,
+        -0.0005653085214411556
+      ],
+      "conditional_Z_A_B_surround": [
+        0.7398025509754647,
+        0.7344612581499123,
+        0.7828824654558613
+      ],
+      "drift_direction_cosine_with_parameter_path": 0.18241360225415373,
+      "tangent_projected_D_drift_per_s": 0.004019435016464535,
+      "interpretation": "Cycle-averaged original Z vector field at a held-Z cycle; direction diagnostic, not a scalar closed slow model."
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_seed_N1024.npz",
+      "family": "rate",
+      "D": 0.14298039269556007,
+      "T_ms": 263.497128273787,
+      "mean_D_drift_per_s": 0.013402329238260006,
+      "Z_drift_A_B_surround_per_s": [
+        -0.019550475726767033,
+        -0.01766184889328732,
+        -0.013140225334741105
+      ],
+      "conditional_Z_A_B_surround": [
+        0.7415373409789844,
+        0.7349879876270826,
+        0.8630271740108022
+      ],
+      "drift_direction_cosine_with_parameter_path": 0.9378858170003217,
+      "tangent_projected_D_drift_per_s": 0.011722098187061636,
+      "interpretation": "Cycle-averaged original Z vector field at a held-Z cycle; direction diagnostic, not a scalar closed slow model."
+    }
+  ],
+  "equation": "dZ/dt = E*(Phi((theta_Z-I_G)/sd)-Z)/tau_Z; evaluated without modifying the frozen-Z orbit",
+  "tau_Z_ms": 5000.0
+}

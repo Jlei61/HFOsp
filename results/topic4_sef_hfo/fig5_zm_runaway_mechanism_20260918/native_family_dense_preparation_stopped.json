@@ -1,0 +1,11 @@
+{
+  "at": "2026-09-20T00:07:03.839154+08:00",
+  "status": "STOPPED_PREPARATION_FOR_BOUNDED_HOST_MEMORY",
+  "pid": 247078,
+  "session": 21081,
+  "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/native_family_flow_consistency.py --dt .000390625 --device 0 ",
+  "memory_pressure": "some avg10=66.36 avg60=80.27 avg300=83.00 total=6278290393\nfull avg10=66.36 avg60=80.27 avg300=82.99 total=6277258345\n",
+  "reason": "No phase map result after dense preparation. About190GB resident and dominant kernel CPU; even2048-point small reconstruction parity stalled in CPU FFT under the same memory pressure. Preserve source and numerical contract; validate bounded layout before identical-step retry.",
+  "scientific_failure": false,
+  "acceptance_changed": false
+}

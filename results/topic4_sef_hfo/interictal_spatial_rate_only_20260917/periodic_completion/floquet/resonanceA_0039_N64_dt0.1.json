@@ -1,0 +1,138 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0039_N64.npz",
+  "J_EE_core": 0.9458381477591895,
+  "T_ms": 165.79636337513392,
+  "dt_ms": 0.09999780661950176,
+  "history_dimension": 345015,
+  "multipliers": [
+    [
+      1.000219944159013,
+      0.004544921826315767
+    ],
+    [
+      1.000219944159013,
+      -0.004544921826315767
+    ],
+    [
+      1.0000252472637596,
+      0.0
+    ],
+    [
+      0.5395263092071921,
+      0.0
+    ],
+    [
+      0.0220592510808806,
+      0.0
+    ],
+    [
+      0.014018857723224407,
+      0.0
+    ],
+    [
+      -0.00045137299991472764,
+      0.008563035604605449
+    ],
+    [
+      -0.00045137299991472764,
+      -0.008563035604605449
+    ]
+  ],
+  "residuals": [
+    9.203737914393102e-15,
+    9.203737914393102e-15,
+    2.4396652812151977e-15,
+    3.214329443937687e-15,
+    6.65054087020086e-15,
+    1.9731640837583353e-14,
+    1.3086263615508603e-13,
+    1.3086263615508603e-13
+  ],
+  "phase_multiplier_error": 2.5247263759631267e-05,
+  "phase_tangent_relative_defect": 6.116175549851801e-06,
+  "raw_multipliers_above_1p001": 0,
+  "requested_multipliers": 8,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 266.87313199043274,
+  "polynomial_filter_rho": 0.8472187413894313,
+  "transformed_eigenvalues": [
+    [
+      -0.16600816230626744,
+      0.0
+    ],
+    [
+      0.15301419817604853,
+      0.005241299961244554
+    ],
+    [
+      0.15301419817604853,
+      -0.005241299961244554
+    ],
+    [
+      0.15281036382048785,
+      0.0
+    ],
+    [
+      -0.018202400378496877,
+      0.0
+    ],
+    [
+      -0.011680510624143305,
+      0.0
+    ],
+    [
+      0.0003092898237036582,
+      0.007262494493544782
+    ],
+    [
+      0.0003092898237036582,
+      -0.007262494493544782
+    ]
+  ],
+  "filter_coverage_threshold": 0.15278125861056868,
+  "smallest_returned_transformed_modulus": 0.007269077414900389,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.1094812305785532,
+    0.1094812305785532,
+    0.9999995886421547,
+    0.9951509623498368,
+    0.8762777752856893,
+    0.780279113835302,
+    0.010580726956070088,
+    0.010580726956070088
+  ],
+  "identified_neutral_index": 2,
+  "nontrivial_multipliers": [
+    [
+      1.000219944159013,
+      0.004544921826315767
+    ],
+    [
+      1.000219944159013,
+      -0.004544921826315767
+    ],
+    [
+      0.5395263092071921,
+      0.0
+    ],
+    [
+      0.0220592510808806,
+      0.0
+    ],
+    [
+      0.014018857723224407,
+      0.0
+    ],
+    [
+      -0.00045137299991472764,
+      0.008563035604605449
+    ],
+    [
+      -0.00045137299991472764,
+      -0.008563035604605449
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 1.0002302699917986,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

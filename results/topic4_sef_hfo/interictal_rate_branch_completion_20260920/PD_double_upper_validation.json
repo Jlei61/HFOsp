@@ -1,0 +1,102 @@
+{
+  "status": "VALIDATED_PD",
+  "label": "PD2",
+  "internal_label": "PD_double_upper",
+  "J_EE_core": 0.944728374157131,
+  "T_ms": 761.9648707070426,
+  "N": 2048,
+  "mesh_J_difference": 1.0311589693223766e-08,
+  "lower_mesh_N": 1024,
+  "antiperiodic_relative_residual": 5.781373169720209e-11,
+  "crossing_border_slope": 2916.344344407034,
+  "monodromy_checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PD_double_upper_eval_J0.94472837416_N2048_dt0.05.json",
+      "J_EE_core": 0.944728374157131,
+      "dt_ms": 0.04999769492828363,
+      "multiplier": [
+        -1.000165301224821,
+        0.0
+      ],
+      "distance_from_minus_one": 0.00016530122482105725,
+      "phase_multiplier_error": 0.000514672453927334
+    }
+  ],
+  "E_rate_mode_energy_A_B_surround": [
+    0.03880621119602613,
+    0.04312159173471089,
+    0.918072197069263
+  ],
+  "criticality": "NOT_COMPUTED",
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mean_squared_mode_relative_to_network": [
+    1.6469479552690136,
+    1.7555864319475172,
+    0.9644881912743406
+  ],
+  "meaning": "Simple antiperiodic mode and independently checked multiplier -1 on the two-burst cycle; child-branch side and stability require separate calculation Critical-mode evidence is retained, but full physical parent-waveform acceptance is withheld until its constituent filters are resolved.",
+  "direct_monodromy_checks": [
+    {
+      "J_EE_core": 0.944728374157131,
+      "T_ms": 761.9648707070426,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+      "mode": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_mode_N2048.npz",
+      "dt_ms": 0.02499966766321213,
+      "recovered_multiplier": -1.0000363103773673,
+      "minus_one_relative_defect": 3.710635442398214e-05,
+      "rayleigh_eigen_residual": 7.644477359297646e-06,
+      "phase_relative_defect": 0.00012270716769432677,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 0.944728374157131,
+      "T_ms": 761.9648707070426,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+      "mode": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_upper_mode_N2048.npz",
+      "dt_ms": 0.04999769492828363,
+      "recovered_multiplier": -1.0001442605805662,
+      "minus_one_relative_defect": 0.0001478617858149923,
+      "rayleigh_eigen_residual": 3.243443539230092e-05,
+      "phase_relative_defect": 0.0004869069380584754,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    }
+  ],
+  "minus_one_defect_coarse_to_fine_ratio": 3.984810367666516,
+  "continuous_orbit_check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 0.944728374157131,
+    "T_ms": 761.9648707070426,
+    "maximum_group_defect_Hz": 0.01481112031009868,
+    "regional_defect_Hz": [
+      4.7564400992700884e-05,
+      0.00010887796779851874,
+      4.7282503135864994e-05
+    ],
+    "minimum_rate_Hz": 2.0279435065245766e-05,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -0.006824847572230012,
+        "phase_index": 5252,
+        "group": 915
+      },
+      "slow": {
+        "minimum_Hz": 3.282805336596306e-05,
+        "phase_index": 1078,
+        "group": 379
+      },
+      "positive": false,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "eigenmode_validation_status": "VALIDATED_PD",
+  "full_physical_profile_status": "TEMPORAL_REFINEMENT_REQUIRED",
+  "full_acceptance": false,
+  "child_validation_status": "VALIDATION_INCOMPLETE"
+}

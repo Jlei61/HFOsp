@@ -1,0 +1,229 @@
+{
+  "status": "UNIFIED_FINITE_CATALOG_CONNECTION_SCREEN_CHECKED",
+  "timestamp": 1789892537.426476,
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/period_multiple_1_to_8_all_pair_bounds.json",
+  "catalog": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/period_multiple_bounds/period_multiple_1_to_8_all_pair_bounds_catalog.json",
+  "moments": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/period_multiple_bounds/period_multiple_1_to_8_all_pair_bounds_moments.json",
+  "full_population_profiles": 1793,
+  "period_multiples": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "window_pair_count": 196754,
+  "pairs_excluded_by_bound": 196754,
+  "minimum_normalized_lower_bound": 0.44771817813928794,
+  "candidate_threshold": 0.05,
+  "unexcluded_candidates": [],
+  "analytic_controls": {
+    "continuous_norm_error": 1.1102230246251565e-16,
+    "equality_case_error": 0.0,
+    "nyquist_only_sigma": 0.7071067811865476,
+    "nonzero_Nyquist_correction": 0.01327038804572058
+  },
+  "weakest_pair_phase_controls": [
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 2,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0017_N512.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0022_N256.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.5404770992934667,
+      "normalized_phase_minimized_distance": 1.305664287345047,
+      "common_phase_cycles": 0.301457836827711
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 3,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0084_N2048.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0006_N256.npz",
+      "phase_mesh": 12288,
+      "normalized_lower_bound": 0.5576931838041636,
+      "normalized_phase_minimized_distance": 1.259665011820493,
+      "common_phase_cycles": 0.22862703555618252
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 2,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0069_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.0540600148461734,
+      "normalized_phase_minimized_distance": 1.0608923082337571,
+      "common_phase_cycles": 0.042881216870712384
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 3,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0027_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.4509050905506152,
+      "normalized_phase_minimized_distance": 1.2339473595475172,
+      "common_phase_cycles": 0.053820200712772465
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 4,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0014_N64.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0007_N1024.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.0320754350542918,
+      "normalized_phase_minimized_distance": 1.0366296896096552,
+      "common_phase_cycles": 0.22901104661665458
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 5,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0002_N64.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.0254447513767004,
+      "normalized_phase_minimized_distance": 1.0298107270986,
+      "common_phase_cycles": 0.6726183665919508
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 6,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0053_N1536.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.44771817813928794,
+      "normalized_phase_minimized_distance": 1.264687985937063,
+      "common_phase_cycles": 0.4706874108708166
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 7,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0053_N1536.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.44771817813928794,
+      "normalized_phase_minimized_distance": 1.2611801123892925,
+      "common_phase_cycles": 0.7468348133671915
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 8,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.45003440420571317,
+      "normalized_phase_minimized_distance": 1.252188223768969,
+      "common_phase_cycles": 0.09073013660406815
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 1,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.8674546671177735,
+      "normalized_phase_minimized_distance": 1.0365458805786945,
+      "common_phase_cycles": 0.17467932131877428
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 1,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0016_N1024.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 0.9062422038028134,
+      "normalized_phase_minimized_distance": 1.0486821870908491,
+      "common_phase_cycles": 0.48402751632781943
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 2,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0068_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.0593711223612687,
+      "normalized_phase_minimized_distance": 1.0614548462079372,
+      "common_phase_cycles": 0.19798535046440266
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 3,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0023_N512.npz",
+      "phase_mesh": 12288,
+      "normalized_lower_bound": 0.864916429433402,
+      "normalized_phase_minimized_distance": 1.0156850421438623,
+      "common_phase_cycles": 0.31291193705130194
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 4,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0025_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.029455900132378,
+      "normalized_phase_minimized_distance": 1.032845934152085,
+      "common_phase_cycles": 0.19875433150981964
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 5,
+      "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+      "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+      "phase_mesh": 8192,
+      "normalized_lower_bound": 1.0259861672196078,
+      "normalized_phase_minimized_distance": 1.0298227971939715,
+      "common_phase_cycles": 0.7168046036830019
+    }
+  ],
+  "scope": "Every pairing in one frozen catalog within |delta J|<=0.01 and a 10 percent integer-period-ratio window was bounded in all 935 populations. The weakest-bound pair in each nonempty family/ratio window was also compared after a common phase shift at sufficient temporal resolution. These are cached waveform identity checks, not physical-profile validation of all catalog entries, identical-J continuation, basin boundary location, or proof of global disconnection.",
+  "interval_completeness": false,
+  "global_disconnection_proved": false
+}

@@ -1,0 +1,34 @@
+{
+  "status": "SEGMENT_COMPLETE",
+  "family": "rate",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+      "D": 0.1449718771100008,
+      "T_ms": 267.35066063917935,
+      "N": 16385,
+      "mean_hz": 28.046633425539206,
+      "min_hz": 0.014264760683032816,
+      "max_hz": 190.23220397703193,
+      "residual": 8.090280832415142e-10,
+      "iterations": [
+        4.383184534178852,
+        1.0330620525689227e-05,
+        8.090280832415142e-10
+      ],
+      "minimum_group_rate_hz": -0.0017270972173112089,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 65536,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.0001,
+      "period_step_ms": 1.6484591469634324e-12,
+      "D_step": -2.9698465908722937e-15,
+      "predictor": "constant"
+    }
+  ],
+  "bifurcation_type": "NOT_INFERRED_FROM_NUMERICAL_TURNS"
+}

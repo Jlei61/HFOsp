@@ -1,0 +1,765 @@
+{
+  "parent": {
+    "label": "PD_double_low",
+    "N": 8192,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+    "source_root_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547383858_N6144.npz",
+    "source_root_N": 6144,
+    "J_EE_core": 0.9387254738385757,
+    "T_ms": 825.3653884974744,
+    "continuous_check": {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+      "N": 8192,
+      "check_N": 32768,
+      "J_EE_core": 0.9387254738385757,
+      "T_ms": 825.3653884974744,
+      "maximum_group_defect_Hz": 1.2490009027033011e-11,
+      "regional_defect_Hz": [
+        3.9917965779294425e-13,
+        3.722284002090895e-13,
+        7.502539677770398e-14
+      ],
+      "minimum_rate_Hz": 5.269390454358536e-06,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -2.0836807214548447e-12,
+          "phase_index": 21264,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 7.384111423876238e-06,
+          "phase_index": 4845,
+          "group": 237
+        },
+        "positive": true,
+        "N": 8192,
+        "check_N": 32768
+      }
+    },
+    "relative_waveform_change": 2.102199557809008e-11,
+    "relative_period_change": 1.4086509736443986e-12,
+    "antiperiodic_relative_residual": 2.708244177778004e-10,
+    "status": "FILTER_AND_CRITICAL_MODE_RECHECKED",
+    "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+    "monodromy_checks": [
+      {
+        "J_EE_core": 0.9387254738385757,
+        "T_ms": 825.3653884974744,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+        "dt_ms": 0.04999790334973797,
+        "recovered_multiplier": -1.0005659693294937,
+        "minus_one_relative_defect": 0.0005662296083956354,
+        "rayleigh_eigen_residual": 1.7166464297484812e-05,
+        "phase_relative_defect": 0.0006150273022143628,
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      },
+      {
+        "J_EE_core": 0.9387254738385757,
+        "T_ms": 825.3653884974744,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+        "dt_ms": 0.024999708874677402,
+        "recovered_multiplier": -1.0001391232324595,
+        "minus_one_relative_defect": 0.0001391780587302253,
+        "rayleigh_eigen_residual": 3.906177382234677e-06,
+        "phase_relative_defect": 0.0001503582796958772,
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      },
+      {
+        "J_EE_core": 0.9387254738385757,
+        "T_ms": 825.3653884974744,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+        "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+        "dt_ms": 0.012499854437338701,
+        "recovered_multiplier": -1.000035405184653,
+        "minus_one_relative_defect": 3.541955346567702e-05,
+        "rayleigh_eigen_residual": 1.0087949801983425e-06,
+        "phase_relative_defect": 3.907864989885573e-05,
+        "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+      }
+    ],
+    "successive_error_reduction": [
+      4.068382714643133,
+      3.92941313800284
+    ],
+    "scope": "Same previously located J, refined physical parent, prolonged antiperiodic mode independently residual-checked on that parent, and full nine-state plus delay-history monodromy at three time steps. Root slope and inter-mesh J agreement remain sourced from the located roots; no new root or child criticality inferred."
+  },
+  "rows": [
+    {
+      "amplitude_hz": 10.0,
+      "J_EE_core": 0.9387255555312313,
+      "J_shift": 8.169265552915306e-08,
+      "J_shift_over_amplitude_squared": 8.169265552915306e-10,
+      "T_ms": 1650.727135368106,
+      "parent_T_ms": 825.3653884974744,
+      "half_period_relative_mismatch": 0.008507120909705068,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+      "minimum_group_rate_hz": 5.1236061050098755e-06,
+      "first_harmonic_relative_norm": 0.0005338367179424269,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387255555312313,
+        "T_ms": 1650.727135368106,
+        "maximum_group_defect_Hz": 1.6653345369377348e-11,
+        "regional_defect_Hz": [
+          2.468299842442596e-13,
+          2.6643854571208185e-13,
+          4.0288241092230644e-14
+        ],
+        "minimum_rate_Hz": 5.123606103765388e-06,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.7948141108373953e-12,
+            "phase_index": 54044,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 7.181388356783348e-06,
+            "phase_index": 37604,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    },
+    {
+      "amplitude_hz": 20.0,
+      "J_EE_core": 0.9387258019235192,
+      "J_shift": 3.2808494343505856e-07,
+      "J_shift_over_amplitude_squared": 8.202123585876464e-10,
+      "T_ms": 1650.7161769294646,
+      "parent_T_ms": 825.3653884974744,
+      "half_period_relative_mismatch": 0.017014042402747575,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a20.00000_N16384.npz",
+      "minimum_group_rate_hz": 4.984171213265974e-06,
+      "first_harmonic_relative_norm": 0.0010679764822836965,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a20.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387258019235192,
+        "T_ms": 1650.7161769294646,
+        "maximum_group_defect_Hz": 1.7319479184152442e-11,
+        "regional_defect_Hz": [
+          1.5902718701505398e-13,
+          1.618716602305012e-13,
+          4.3054896091764345e-14
+        ],
+        "minimum_rate_Hz": 4.984141369972049e-06,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.4217168498790837e-12,
+            "phase_index": 21268,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 6.987362385034706e-06,
+            "phase_index": 37595,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    },
+    {
+      "amplitude_hz": 40.0,
+      "J_EE_core": 0.9387268026049526,
+      "J_shift": 1.3287663768180025e-06,
+      "J_shift_over_amplitude_squared": 8.304789855112515e-10,
+      "T_ms": 1650.6720668332723,
+      "parent_T_ms": 825.3653884974744,
+      "half_period_relative_mismatch": 0.03402704863852606,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+      "minimum_group_rate_hz": 4.723977984031619e-06,
+      "first_harmonic_relative_norm": 0.0021380503333830528,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387268026049526,
+        "T_ms": 1650.6720668332723,
+        "maximum_group_defect_Hz": 1.5654144647214707e-11,
+        "regional_defect_Hz": [
+          1.7542991488225292e-13,
+          3.344462994645005e-13,
+          4.531213994475701e-14
+        ],
+        "minimum_rate_Hz": 4.723830925475568e-06,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.966598745287672e-12,
+            "phase_index": 54028,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 6.6249792732487505e-06,
+            "phase_index": 37577,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      },
+      "physical_pass": true
+    }
+  ],
+  "branch_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD1_physical_20260920_branch_N16384.json",
+  "scope": "Fine-parent local branch switch, physical child waveforms, and exact child Poincare stability. No global branch connection or irregular-attractor claim.",
+  "status": "PHYSICAL_CHILD_BRANCH_CHECKED",
+  "full_physical_child_checks": true,
+  "coefficient_relative_spread": 0.01647633155408965,
+  "child_classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.017217126086245,
+        0.0
+      ],
+      [
+        0.19128119499872873,
+        0.0
+      ],
+      [
+        0.1902297078684823,
+        0.0
+      ],
+      [
+        0.1899424394760947,
+        0.0
+      ],
+      [
+        0.144688120697635,
+        0.0
+      ],
+      [
+        0.0023036242018664803,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006108536097427564,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343
+    ],
+    "reliable_mode_mask": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010180893495712606,
+      1.299894826556347e-06,
+      9.412130547170605e-08,
+      2.6865511537632614e-08,
+      3.991334707187377e-06,
+      3.91946666943822e-05
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.017217126086245,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "attempts": [
+    {
+      "steps_ms": [
+        0.1,
+        0.05
+      ],
+      "classification": {
+        "status": "UNRESOLVED",
+        "multipliers": [
+          [
+            1.0182352157091132,
+            0.0
+          ],
+          [
+            0.14468412934219624,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.02379708816175352,
+          0.013680354978363878
+        ],
+        "reliable_mode_mask": [
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.0039661813602922535,
+          1.5076151997833742e-05
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 1.0182352157091132,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "spectra": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+          "J_EE_core": 0.9387268026049526,
+          "T_ms": 1650.6720668332723,
+          "dt_ms": 0.09999830779870796,
+          "history_dimension": 345015,
+          "minimum_occupied_delay_ms": 0.1,
+          "multipliers": [
+            [
+              1.0222013970694055,
+              0.0
+            ],
+            [
+              0.1446690531901984,
+              0.0
+            ]
+          ],
+          "residuals": [
+            1.8336995568306537e-14,
+            5.771738930469799e-12
+          ],
+          "phase_tangent_relative_defect": 0.0034200887445909696,
+          "phase_overlap": [
+            8.784994186893198e-15,
+            2.7789675212501964e-11
+          ],
+          "section_time_shift_coefficients": [
+            [
+              0.22879424534743212,
+              0.0
+            ],
+            [
+              -177.8377782237091,
+              0.0
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            1.8340177091306144e-14,
+            5.7719487561391434e-12
+          ],
+          "polynomial_filter_rho": 0.19192088160908122,
+          "transformed_eigenvalues": [
+            [
+              0.848713902862695,
+              0.0
+            ],
+            [
+              -0.00683587728007322,
+              0.0
+            ]
+          ],
+          "filter_coverage_threshold": 0.8080791183909188,
+          "smallest_returned_transformed_modulus": 0.00683587728007322,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 1089.8457522392273,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+          "J_EE_core": 0.9387268026049526,
+          "T_ms": 1650.6720668332723,
+          "dt_ms": 0.04999915389935398,
+          "history_dimension": 679745,
+          "minimum_occupied_delay_ms": 0.1,
+          "multipliers": [
+            [
+              1.0182352157091132,
+              0.0
+            ],
+            [
+              0.14468412934219624,
+              0.0
+            ]
+          ],
+          "residuals": [
+            3.173130082612707e-14,
+            2.3297071504925753e-11
+          ],
+          "phase_tangent_relative_defect": 0.0008687693839145468,
+          "phase_overlap": [
+            1.716010425539858e-14,
+            2.2475329601955516e-10
+          ],
+          "section_time_shift_coefficients": [
+            [
+              0.2225000837682014,
+              0.0
+            ],
+            [
+              -128.64471726123907,
+              0.0
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            3.173370094896718e-14,
+            2.329732776160722e-11
+          ],
+          "polynomial_filter_rho": 0.19192088160908122,
+          "transformed_eigenvalues": [
+            [
+              0.84138235422529,
+              0.0
+            ],
+            [
+              -0.006834408375014773,
+              0.0
+            ]
+          ],
+          "filter_coverage_threshold": 0.8080791183909188,
+          "smallest_returned_transformed_modulus": 0.006834408375014773,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 2171.057881116867,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        }
+      ]
+    },
+    {
+      "steps_ms": [
+        0.05,
+        0.025
+      ],
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            1.017217126086245,
+            0.0
+          ],
+          [
+            0.19128119499872873,
+            0.0
+          ],
+          [
+            0.1902297078684823,
+            0.0
+          ],
+          [
+            0.1899424394760947,
+            0.0
+          ],
+          [
+            0.144688120697635,
+            0.0
+          ],
+          [
+            0.0023036242018664803,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          0.006108536097427564,
+          0.0034750799581254343,
+          0.0034750799581254343,
+          0.0034750799581254343,
+          0.0034750799581254343,
+          0.0034750799581254343
+        ],
+        "reliable_mode_mask": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.0010180893495712606,
+          1.299894826556347e-06,
+          9.412130547170605e-08,
+          2.6865511537632614e-08,
+          3.991334707187377e-06,
+          3.91946666943822e-05
+        ],
+        "reliable_outside_count": 1,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 1.017217126086245,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "spectra": [
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+          "J_EE_core": 0.9387268026049526,
+          "T_ms": 1650.6720668332723,
+          "dt_ms": 0.04999915389935398,
+          "history_dimension": 679745,
+          "minimum_occupied_delay_ms": 0.1,
+          "multipliers": [
+            [
+              1.0182352154358163,
+              0.0
+            ],
+            [
+              0.19127989510390217,
+              0.0
+            ],
+            [
+              0.19022980198978778,
+              0.0
+            ],
+            [
+              0.18994241261058317,
+              0.0
+            ],
+            [
+              0.14468412936292782,
+              0.0
+            ],
+            [
+              0.002264429535172098,
+              0.0
+            ]
+          ],
+          "residuals": [
+            3.225988212701653e-14,
+            1.013493819829407e-06,
+            1.6850174218225665e-08,
+            1.4444733618741612e-08,
+            2.3337700630446112e-11,
+            2.9113310039237085e-13
+          ],
+          "phase_tangent_relative_defect": 0.0008687699895313586,
+          "phase_overlap": [
+            1.7185440230735565e-14,
+            2.7627641384943426e-08,
+            7.055850923657573e-09,
+            3.5270226616900404e-09,
+            2.263461743556179e-10,
+            9.849873947220405e-11
+          ],
+          "section_time_shift_coefficients": [
+            [
+              -0.22250008324728549,
+              0.0
+            ],
+            [
+              -2.7724273629517944,
+              0.0
+            ],
+            [
+              -10.516694558780053,
+              0.0
+            ],
+            [
+              -2.8932167655863976,
+              0.0
+            ],
+            [
+              128.64471375116761,
+              0.0
+            ],
+            [
+              -0.5958209985834483,
+              0.0
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            3.2262099366293766e-14,
+            1.0134938198434765e-06,
+            1.6850174225931753e-08,
+            1.4444733629142937e-08,
+            2.3337507670552492e-11,
+            2.9113164529670545e-13
+          ],
+          "polynomial_filter_rho": 0.19192088160908122,
+          "transformed_eigenvalues": [
+            [
+              0.8413823537218089,
+              0.0
+            ],
+            [
+              -0.00683440837478429,
+              0.0
+            ],
+            [
+              -0.000429463671540453,
+              0.0
+            ],
+            [
+              -0.00037579944396966665,
+              0.0
+            ],
+            [
+              -0.0003216911288479126,
+              0.0
+            ],
+            [
+              -0.00012249102004256317,
+              0.0
+            ]
+          ],
+          "filter_coverage_threshold": 0.8080791183909188,
+          "smallest_returned_transformed_modulus": 0.00012249102004256317,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 5830.2138776779175,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        },
+        {
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+          "J_EE_core": 0.9387268026049526,
+          "T_ms": 1650.6720668332723,
+          "dt_ms": 0.024999955576253233,
+          "history_dimension": 1349205,
+          "minimum_occupied_delay_ms": 0.1,
+          "bounded_harmonic_indices": true,
+          "multipliers": [
+            [
+              1.017217126086245,
+              0.0
+            ],
+            [
+              0.19128119499872873,
+              0.0
+            ],
+            [
+              0.1902297078684823,
+              0.0
+            ],
+            [
+              0.1899424394760947,
+              0.0
+            ],
+            [
+              0.144688120697635,
+              0.0
+            ],
+            [
+              0.0023036242018664803,
+              0.0
+            ]
+          ],
+          "residuals": [
+            6.801971869635016e-14,
+            1.1331835651732284e-06,
+            6.558024927155681e-09,
+            3.9507173832467175e-09,
+            3.569476151698406e-11,
+            5.404053392362278e-13
+          ],
+          "phase_tangent_relative_defect": 0.00021957191616405708,
+          "phase_overlap": [
+            3.4856556567921114e-14,
+            5.2415136487244526e-08,
+            1.662244080754119e-08,
+            7.941044118328602e-09,
+            3.785131016867747e-10,
+            1.712664653912201e-10
+          ],
+          "section_time_shift_coefficients": [
+            [
+              -0.22087076201741163,
+              0.0
+            ],
+            [
+              -2.7701885556875006,
+              0.0
+            ],
+            [
+              -10.551938096238812,
+              0.0
+            ],
+            [
+              -2.897407465030016,
+              0.0
+            ],
+            [
+              120.1024288608169,
+              0.0
+            ],
+            [
+              -0.5940775229583611,
+              0.0
+            ]
+          ],
+          "full_state_generalized_eigen_residuals": [
+            6.801595325344536e-14,
+            1.1331835651802452e-06,
+            6.558024888277527e-09,
+            3.950717376999876e-09,
+            3.56938402853854e-11,
+            5.404065413616492e-13
+          ],
+          "polynomial_filter_rho": 0.19192088160908122,
+          "transformed_eigenvalues": [
+            [
+              0.8395054739778771,
+              0.0
+            ],
+            [
+              -0.006834019407979013,
+              0.0
+            ],
+            [
+              -0.00043680690305421504,
+              0.0
+            ],
+            [
+              -0.0003757912094673021,
+              0.0
+            ],
+            [
+              -0.00032171060913643997,
+              0.0
+            ],
+            [
+              -0.000122491480900818,
+              0.0
+            ]
+          ],
+          "filter_coverage_threshold": 0.8080791183909188,
+          "smallest_returned_transformed_modulus": 0.000122491480900818,
+          "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+          "seconds": 10180.35392999649,
+          "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+        }
+      ]
+    }
+  ],
+  "proposed_local_criticality": "SUBCRITICAL_PD",
+  "promotion_requirement": "Parent-side witnesses and crossing direction must be matched to physical corrected cycles before updating the canonical criticality."
+}

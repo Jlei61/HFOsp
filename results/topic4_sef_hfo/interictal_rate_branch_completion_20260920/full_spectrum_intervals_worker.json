@@ -1,0 +1,23 @@
+{
+  "status": "RUNNING_FULL_SPECTRUM_SAMPLES",
+  "pid": 488306,
+  "exit_code": -15,
+  "indices": [
+    19,
+    24,
+    25,
+    27,
+    28,
+    40,
+    41
+  ],
+  "scientific_purpose": "Resolve the physical spectrum around the first H1 departure, the tightly folded resonance interval, and both sides of the A-leading upper fold. Count reliable unstable directions, so already unstable branches do not mask additional unit-circle crossings.",
+  "minimum_modes": 6,
+  "maximum_modes": 16,
+  "physical_delays_preserved": true,
+  "interval_completeness": false,
+  "child_pid": null,
+  "timestamp": 1789859826.4986074,
+  "worker_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/worker_gpu0.json",
+  "restart_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/full_spectrum_streamed_resource_reload.json"
+}

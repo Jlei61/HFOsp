@@ -1,0 +1,1377 @@
+{
+  "status": "FROZEN_BEFORE_FRESH_TARGETS",
+  "created_epoch": 1790511698.030208,
+  "question": "Does adding the static conductance residual to the existing conditioned input-history hazard preserve local DC and dynamic gains at constant conductance?",
+  "candidate": "Exact staticv3 at equilibrium, original39 parent features/history and own refractory integral. Residual responds to instantaneous effective current features; no fitted transient parameter.",
+  "limitation": "Constant g only; no dynamic-conductance, shot-noise correlation, heterogeneous spatial or native propagation qualification.",
+  "design": {
+    "primary_points": 81,
+    "linearity_sensitivity_points": 9,
+    "replicates": 8192,
+    "burn_ms": 500,
+    "record_ms": 2000,
+    "dt_ms": 0.1,
+    "seed": 927393,
+    "device": 1
+  },
+  "gate": "Use measured paired DC gain SNR>=10. For every estimable primary channel/frequency, complex error<=max(10%abs(DC),2SEM,1e-7) at0/10Hz and15% at50Hz. Nonestimable channels are reported, never silently passed. Half-amplitude agreement at the center uses combined2SEM and10%DC to expose nonlinear finite-difference bias.",
+  "unit": "One synthetic colored-LIF input/g condition; replicas are independent noise histories. Not native-network seeds.",
+  "source_sha256": "bece67dc854c187a9eb708ec997acbf041f33cf0f51bd9dd2baf8e26385928bb",
+  "static_weights_sha256": "a951a19ae1faf937c44b687bdd13ea9e6724bf508da00634cf5970f2e696bb63",
+  "MC_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/lif_mc.py",
+  "MC_source_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f",
+  "kernel_change": "Existing exact colored-current assay; only p18=exp(-dt*(1+g)/20). Reset, refractory, current filters and paired noise unchanged.",
+  "resources": "One existing GPU context onGPU1, batches3 conditions, small output buffers; no native worker, no native physics modification.",
+  "rows": [
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        1.8475547453885548,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        1.490446628370838,
+        -0.4172196151833485
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.9275115487201819,
+        -0.2021748916129419
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.035021772511602565,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.04098217401242949,
+        -0.004204351791450876
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.0197759636369745,
+        -0.025255200432627464
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.015929985284184968,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        0.008300743659701926,
+        -0.010399891956316017
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 19.101966757701522,
+      "predicted_gain": [
+        -0.0012084623393428706,
+        -0.0016077322493798754
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        2.4558663207854226,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        2.0764480105812417,
+        -0.4474270775719694
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        1.4788806983266174,
+        -0.1772000264816449
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        0.032093783634868187,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        0.04323282490438513,
+        0.0026506801337312673
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        0.02769277898380606,
+        -0.029510789813768763
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        0.014891440373113497,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        0.009895899708987852,
+        -0.00997840618357424
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 34.07975973596162,
+      "predicted_gain": [
+        -0.001317289351475382,
+        -0.001685142212804387
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        3.0206429804230392,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        2.658967887129694,
+        -0.4461070981929666
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        1.9909752017200923,
+        -0.10875566466382963
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        0.024377079666959935,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        0.03785786605468676,
+        0.007736503337989182
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        0.03746200397363057,
+        -0.024943970390524317
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        0.012009650424070985,
+        0.0
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        0.010315602959387455,
+        -0.0076949172830241535
+      ]
+    },
+    {
+      "g": 0.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 47.212076569749634,
+      "predicted_gain": [
+        -0.0008277034590285143,
+        -0.002782451298701273
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        3.6464550488466316,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        2.7162497507437413,
+        -1.0840389578918725
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        1.250317676959101,
+        -0.5193430370516331
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        0.08398528191021948,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        0.09980031261612986,
+        -0.009354397448698294
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        0.04843103116499317,
+        -0.060792324121638625
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        0.02561836721307339,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        0.011171208629691273,
+        -0.01891871642998115
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 53.91963584783273,
+      "predicted_gain": [
+        -0.002637148219853891,
+        0.00020899582979161957
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        4.4789982406067725,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.1,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        4.4789982406067725,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        3.6636532082319437,
+        -0.951245758549448
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.1,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        3.6636532082319437,
+        -0.951245758549448
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        2.382552659894831,
+        -0.33507263194752307
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.1,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        2.382552659894831,
+        -0.33507263194752307
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.06072739026634217,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.06072739026634217,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.08498975876033432,
+        0.00762322559464803
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.08498975876033432,
+        0.00762322559464803
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.05639613785785076,
+        -0.05743001935693502
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.05639613785785076,
+        -0.05743001935693502
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.022224392464961155,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.022224392464961155,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.01488798157587474,
+        -0.016386437919642265
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        0.01488798157587474,
+        -0.016386437919642265
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        -0.0025255697572128546,
+        -0.0009337827924366345
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.025,
+      "primary": false,
+      "predicted_rate_Hz": 82.30358148221352,
+      "predicted_gain": [
+        -0.0025255697572128546,
+        -0.0009337827924366345
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        5.065176154637678,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        4.369285728728278,
+        -0.8411473558982685
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        3.083963037060153,
+        -0.12969873890301922
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        0.0355504566849246,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        0.06186188096409879,
+        0.017322390481961217
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        0.0670816032092408,
+        -0.03948968323092194
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        0.016491508014735402,
+        0.0
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        0.0155861387688992,
+        -0.011344180965803164
+      ]
+    },
+    {
+      "g": 2.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 105.18414514848578,
+      "predicted_gain": [
+        -0.001295415936145631,
+        -0.0035611832445975595
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        5.329660309036436,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        3.738949258724438,
+        -1.8513437554482484
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        1.2294351138548225,
+        -0.892743190980678
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        0.12744701493932092,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        0.1551306629995725,
+        -0.012471054578231701
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        0.07568978837606054,
+        -0.09286757766378645
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        0.027624544470623624,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        0.008436976059639478,
+        -0.02410719647891838
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": -0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 104.86911971314686,
+      "predicted_gain": [
+        -0.004246428538582968,
+        0.004873658724556928
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        6.522952874006118,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        5.3115819377588425,
+        -1.3891010865097166
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        3.4111243203525534,
+        -0.3875683570769957
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        0.07199930067653623,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        0.1086567681460439,
+        0.015188354931216778
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        0.07544010957583969,
+        -0.07276651875725851
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        0.020539622873524406,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        0.013954946407505513,
+        -0.01796555595614316
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 0.5,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 145.4382671864535,
+      "predicted_gain": [
+        -0.003585251206241198,
+        0.002070594621037363
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        7.082318154650225,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        6.1320781275127505,
+        -1.1077838583068222
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 0,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.2,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        4.372212482529227,
+        0.015404590491409378
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        0.027019462534834237,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        0.0635424027104331,
+        0.027829714682179624
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 1,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        0.08042353276776644,
+        -0.03875523200485683
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 0.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        0.009604357931029095,
+        0.0
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 10.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        0.012825050666753228,
+        -0.008878482811567051
+      ]
+    },
+    {
+      "g": 8.0,
+      "x": 1.2,
+      "sigma_E": 2.0,
+      "sigma_I": 3.0,
+      "channel": 2,
+      "frequency_Hz": 50.0,
+      "amplitude": 0.05,
+      "primary": true,
+      "predicted_rate_Hz": 178.42621200774596,
+      "predicted_gain": [
+        -0.0014829620817384905,
+        -0.0012808284004913108
+      ]
+    }
+  ]
+}

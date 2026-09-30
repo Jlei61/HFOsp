@@ -1,0 +1,199 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_seed_N1024.npz",
+      "D": 0.14298039269556007,
+      "T_ms": 263.497128273787,
+      "N": 1024,
+      "sampled_times": 1024,
+      "negative_effective_variance_E": {
+        "E_cell_time_fraction": 0.0,
+        "E_rate_mass_fraction": 0.0,
+        "active_E_cell_time_fraction": 0.0
+      },
+      "negative_effective_variance_I": {
+        "E_cell_time_fraction": 0.000864898681640625,
+        "E_rate_mass_fraction": 0.002610245501689952,
+        "active_E_cell_time_fraction": 0.007157141082569079
+      },
+      "min_effective_variance_E": 4.294538158883224,
+      "min_effective_variance_I": -39.34178345465378,
+      "response_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.2524873352050781,
+        "E_rate_mass_fraction": 0.5738458396097379,
+        "active_E_cell_time_fraction": 0.5026813533947826
+      },
+      "response_outside_components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.223351318359375,
+          "E_rate_mass_fraction": 0.11984439451188739,
+          "active_E_cell_time_fraction": 0.1954362927553899
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.029069061279296874,
+          "E_rate_mass_fraction": 0.4532026048801192,
+          "active_E_cell_time_fraction": 0.30653900094806374
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 4.241943359375e-06,
+          "E_rate_mass_fraction": 6.775762504707414e-05,
+          "active_E_cell_time_fraction": 4.473213176605674e-05
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 0.00019769287109375,
+          "E_rate_mass_fraction": 0.002793979588283201,
+          "active_E_cell_time_fraction": 0.0020847104286368027
+        },
+        "table_bounds": {
+          "x": [
+            -3.0,
+            39.99999999999999
+          ],
+          "sigma_E_max": 5.0,
+          "sigma_I_max": 5.5
+        }
+      },
+      "response_outside_rate_weighted_weights": [
+        0.8603842760424767,
+        0.3491652653019195,
+        -0.4265588887980294,
+        -0.0025854506298001886,
+        -0.0008842132664536828
+      ],
+      "static_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.060906951904296874,
+        "E_rate_mass_fraction": 5.387292137532592e-06,
+        "active_E_cell_time_fraction": 3.861766771170366e-06
+      },
+      "static_outside_components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.060906585693359376,
+          "E_rate_mass_fraction": 2.1781319962891415e-07,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.0,
+          "E_rate_mass_fraction": 0.0,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 0.0,
+          "E_rate_mass_fraction": 0.0,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 3.662109375e-07,
+          "E_rate_mass_fraction": 5.169478937903678e-06,
+          "active_E_cell_time_fraction": 3.861766771170366e-06
+        },
+        "table_bounds": {
+          "x": [
+            -24.999999999999996,
+            218.51345327087003
+          ],
+          "sigma_E_max": 6.5,
+          "sigma_I_max": 8.5
+        }
+      },
+      "claim": "Support and nonsmooth-clipping audit; boundary clipping is not by itself a proven onset mechanism"
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0000.npz",
+      "D": 0.14496035442552224,
+      "T_ms": 266.1999999999998,
+      "N": 4097,
+      "sampled_times": 16384,
+      "negative_effective_variance_E": {
+        "E_cell_time_fraction": 0.0,
+        "E_rate_mass_fraction": 0.0,
+        "active_E_cell_time_fraction": 0.0
+      },
+      "negative_effective_variance_I": {
+        "E_cell_time_fraction": 0.0008823013305664062,
+        "E_rate_mass_fraction": 0.002188762630611234,
+        "active_E_cell_time_fraction": 0.006195814016522568
+      },
+      "min_effective_variance_E": 4.219985805430749,
+      "min_effective_variance_I": -37.21254543318966,
+      "response_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.24545810890197753,
+        "E_rate_mass_fraction": 0.550776411493768,
+        "active_E_cell_time_fraction": 0.4760475967216724
+      },
+      "response_outside_components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.21694003677368165,
+          "E_rate_mass_fraction": 0.1159775498846253,
+          "active_E_cell_time_fraction": 0.18866924955162012
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.02844568061828613,
+          "E_rate_mass_fraction": 0.4339538803080301,
+          "active_E_cell_time_fraction": 0.28664885352117725
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 4.255294799804687e-06,
+          "E_rate_mass_fraction": 6.642119523917684e-05,
+          "active_E_cell_time_fraction": 4.2880864484378555e-05
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 0.0001961822509765625,
+          "E_rate_mass_fraction": 0.0027128672612763472,
+          "active_E_cell_time_fraction": 0.0019769404739602156
+        },
+        "table_bounds": {
+          "x": [
+            -3.0,
+            39.99999999999999
+          ],
+          "sigma_E_max": 5.0,
+          "sigma_I_max": 5.5
+        }
+      },
+      "response_outside_rate_weighted_weights": [
+        0.8584412557000858,
+        0.34649543002654054,
+        -0.4327420528428219,
+        -0.0026356042457856606,
+        -0.001018474905916
+      ],
+      "static_outside_tabulated_domain": {
+        "E_cell_time_fraction": 0.04950018310546875,
+        "E_rate_mass_fraction": 1.0907583426463364e-06,
+        "active_E_cell_time_fraction": 7.880391949168628e-07
+      },
+      "static_outside_components": {
+        "mu_low": {
+          "E_cell_time_fraction": 0.04950010490417481,
+          "E_rate_mass_fraction": 1.7349599288953447e-07,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "mu_high": {
+          "E_cell_time_fraction": 0.0,
+          "E_rate_mass_fraction": 0.0,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "sigma_E_high": {
+          "E_cell_time_fraction": 0.0,
+          "E_rate_mass_fraction": 0.0,
+          "active_E_cell_time_fraction": 0.0
+        },
+        "sigma_I_high": {
+          "E_cell_time_fraction": 7.82012939453125e-08,
+          "E_rate_mass_fraction": 9.172623497568019e-07,
+          "active_E_cell_time_fraction": 7.880391949168628e-07
+        },
+        "table_bounds": {
+          "x": [
+            -24.999999999999996,
+            218.51345327087003
+          ],
+          "sigma_E_max": 6.5,
+          "sigma_I_max": 8.5
+        }
+      },
+      "claim": "Support and nonsmooth-clipping audit; boundary clipping is not by itself a proven onset mechanism"
+    }
+  ]
+}

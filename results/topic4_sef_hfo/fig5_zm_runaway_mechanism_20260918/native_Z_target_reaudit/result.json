@@ -1,0 +1,130 @@
+{
+  "status": "NATIVE_CURRENT_TARGET_AUDIT_COMPLETE",
+  "source_files": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000030000_0000035000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000035000_0000040000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000040000_0000045000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000045000_0000050000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000050000_0000055000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000055000_0000060000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000060000_0000065000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000065000_0000070000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000070000_0000075000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000075000_0000080000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000080000_0000085000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000085000_0000090000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000090000_0000095000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000095000_0000100000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000100000_0000105000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000105000_0000110000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000110000_0000115000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000115000_0000120000.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields/0000120000_0000125000.npz"
+  ],
+  "samples": 1110,
+  "sample_range_ms": [
+    3000.0,
+    12490.0
+  ],
+  "old_global_target_reproduction_max_error": 3.3306690738754696e-16,
+  "windows": [
+    {
+      "window_ms": [
+        3000,
+        8000
+      ],
+      "covered_ms": 5000.0,
+      "target_above_native_stationary_measured": [
+        0.2584411875000001,
+        0.2595473454993058,
+        0.2585071564663917
+      ],
+      "E_weighted_absolute_group_target_error": [
+        0.00912601725193818,
+        0.002212268664872979
+      ]
+    },
+    {
+      "window_ms": [
+        8000,
+        9420
+      ],
+      "covered_ms": 1420.0,
+      "target_above_native_stationary_measured": [
+        0.31035805457746474,
+        0.3122246360330469,
+        0.3104960564125124
+      ],
+      "E_weighted_absolute_group_target_error": [
+        0.01242485911294688,
+        0.003111813804597049
+      ]
+    },
+    {
+      "window_ms": [
+        9420,
+        9870
+      ],
+      "covered_ms": 450.0,
+      "target_above_native_stationary_measured": [
+        0.5457083333333335,
+        0.5499210936363909,
+        0.5460479244394877
+      ],
+      "E_weighted_absolute_group_target_error": [
+        0.01694487132423928,
+        0.004378668283185425
+      ]
+    },
+    {
+      "window_ms": [
+        9870,
+        10400
+      ],
+      "covered_ms": 530.0,
+      "target_above_native_stationary_measured": [
+        0.806422169811321,
+        0.8093351211823483,
+        0.8065600040147327
+      ],
+      "E_weighted_absolute_group_target_error": [
+        0.011705143450011899,
+        0.0029513711026300004
+      ]
+    },
+    {
+      "window_ms": [
+        10400,
+        12500
+      ],
+      "covered_ms": 2090.0,
+      "target_above_native_stationary_measured": [
+        0.9735379784688996,
+        0.9742241100444821,
+        0.973609891415698
+      ],
+      "E_weighted_absolute_group_target_error": [
+        0.002386587447164674,
+        0.0005975843505149749
+      ]
+    }
+  ],
+  "deltaD_at_last_sample": [
+    0.0011449989585499407,
+    8.289824606101971e-05
+  ],
+  "max_absolute_deltaD": [
+    0.0014673172728446797,
+    0.00010908721389881983
+  ],
+  "conservative_sampled_absolute_error_bound": [
+    0.0015289448947015392,
+    0.0002696981344882773
+  ],
+  "quadrature_method_max_difference": 1.2044356677003262e-05,
+  "interpretation_order": [
+    "stationary_variance_surrogate",
+    "native_measured_variance"
+  ],
+  "scope": "Descriptive algebraic audit using existing original per-cell currents at5/10ms. No new simulation or fit. Exact native threshold target, Gaussian using measured group moments, and original stationary mean-to-variance surrogate. Propagate only target difference through same linear Z equation with equal initialZ at3s; compare left-hold and linear sample interpolation. Not a full0.1ms current reconstruction, autonomous response test, actual rate variance-state validation, native bifurcation or proof excluding localized effects."
+}

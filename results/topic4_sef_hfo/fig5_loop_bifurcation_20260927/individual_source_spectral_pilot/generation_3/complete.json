@@ -1,0 +1,138 @@
+{
+  "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+  "generation": 3,
+  "rows": [
+    {
+      "region": "allE",
+      "targets": 32000,
+      "input_rate_Hz": 98.4898525390625,
+      "output_rate_Hz": 98.5100380859375,
+      "native_reference_rate_Hz": 98.481484375,
+      "individual_rate_RMS_change_Hz": 0.21356680174735435,
+      "mean_first_second_1s_Hz": [
+        98.510046875,
+        98.510029296875
+      ],
+      "mean_M_start_end": [
+        98.51166118733069,
+        98.5102920001896
+      ],
+      "mean_M": 98.51072267950809,
+      "counterfactual_mean_Zdot_per_s": 0.08062465890625001,
+      "mean_PSD_L1_change": 0.0006322888301484539,
+      "mean_spike_variance": 0.009421280220883791,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.0278471176757812
+      ]
+    },
+    {
+      "region": "coreA",
+      "targets": 754,
+      "input_rate_Hz": 392.7241379310345,
+      "output_rate_Hz": 392.7674900530504,
+      "native_reference_rate_Hz": 392.64522546419096,
+      "individual_rate_RMS_change_Hz": 0.21130520130090735,
+      "mean_first_second_1s_Hz": [
+        392.77039124668437,
+        392.76458885941645
+      ],
+      "mean_M_start_end": [
+        392.776402629077,
+        392.76795060508994
+      ],
+      "mean_M": 392.7717160650441,
+      "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+      "mean_PSD_L1_change": 0.0020113618994666844,
+      "mean_spike_variance": 0.03751913524743038,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "coreB",
+      "targets": 786,
+      "input_rate_Hz": 132.4924856870229,
+      "output_rate_Hz": 132.62511927480915,
+      "native_reference_rate_Hz": 132.47582697201017,
+      "individual_rate_RMS_change_Hz": 0.5821827586523068,
+      "mean_first_second_1s_Hz": [
+        132.62857824427482,
+        132.6216603053435
+      ],
+      "mean_M_start_end": [
+        132.6286403033137,
+        132.6241336932777
+      ],
+      "mean_M": 132.62737257982718,
+      "counterfactual_mean_Zdot_per_s": -0.015151009662313263,
+      "mean_PSD_L1_change": 0.001773828824247433,
+      "mean_spike_variance": 0.012713171766261133,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "region": "surroundE",
+      "targets": 30460,
+      "input_rate_Hz": 90.32902782337491,
+      "output_rate_Hz": 90.34573826329613,
+      "native_reference_rate_Hz": 90.3226198292843,
+      "individual_rate_RMS_change_Hz": 0.19510377471466822,
+      "mean_first_second_1s_Hz": [
+        90.34558642481943,
+        90.34589010177282
+      ],
+      "mean_M_start_end": [
+        90.34713194792694,
+        90.34601904684536
+      ],
+      "mean_M": 90.3462947138369,
+      "counterfactual_mean_Zdot_per_s": 0.08595412088047295,
+      "mean_PSD_L1_change": 0.0005686948862998741,
+      "mean_spike_variance": 0.008640807159666367,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.029255015286441182
+      ]
+    },
+    {
+      "region": "I",
+      "targets": 8000,
+      "input_rate_Hz": 128.8732265625,
+      "output_rate_Hz": 130.46046484375,
+      "native_reference_rate_Hz": 129.05975,
+      "individual_rate_RMS_change_Hz": 5.241338732982937,
+      "mean_first_second_1s_Hz": [
+        130.4621015625,
+        130.458828125
+      ],
+      "mean_M_start_end": [
+        0.0,
+        0.0
+      ],
+      "mean_M": 0.0,
+      "counterfactual_mean_Zdot_per_s": null,
+      "mean_PSD_L1_change": 0.0056618934661609175,
+      "mean_spike_variance": 0.012343109380839844,
+      "mean_negative_IE_II_fractions": [
+        0.0,
+        0.02812904179687497
+      ]
+    }
+  ],
+  "G_used": 0.0,
+  "G_implied_by_output": 0.0,
+  "output_causal_R_DC_Hz": 98.83876973127995,
+  "development_native_field_weighted_RMS_Hz": 0.10935903789372242,
+  "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+  "formal_bifurcation_allowed": false,
+  "root_established": false,
+  "physical_stability_established": false,
+  "elapsed_worker_s": [
+    53.064215898513794,
+    54.700668811798096
+  ]
+}

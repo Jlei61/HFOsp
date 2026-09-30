@@ -1,0 +1,121 @@
+{
+  "status": "STABLE_ALEADING_NO_SCL_AT_CHECKED_POINT",
+  "J_EE_core": 1.3267733664936305,
+  "T_ms": 248.5770189886239,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256_accuracy_N1024_accuracy_N2048.npz",
+  "stability_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/sites/044.json",
+  "paired_classification": {
+    "status": "NUMERICALLY_STABLE",
+    "multipliers": [
+      [
+        0.7787877420343751,
+        -7.005077299251087e-05
+      ],
+      [
+        0.7787877420343751,
+        7.005077299251087e-05
+      ],
+      [
+        0.7745237451240603,
+        0.0
+      ],
+      [
+        0.3755944502608147,
+        0.0
+      ],
+      [
+        -0.008641992926583063,
+        0.0
+      ],
+      [
+        0.005348117321227349,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.00027385521898060826,
+      0.00027385521898060826,
+      0.00027385521898060826,
+      0.00027385521898060826,
+      0.00027385521898060826,
+      0.00027385521898060826
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      9.016632266709565e-09,
+      9.016632266709565e-09,
+      4.120375435290313e-07,
+      2.3089836067025082e-05,
+      5.852230885450282e-07,
+      2.6169183525714956e-07
+    ],
+    "reliable_outside_count": 0,
+    "numerical_unstable_dimension": 0,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 0.7787877451848554,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "observer": {
+    "family": "single",
+    "index": 120,
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256_accuracy_N1024_accuracy_N2048.npz",
+    "J_EE_core": 1.3267733664936305,
+    "T_ms": 248.5770189886239,
+    "profile_evidence": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Aleading_profile_gaps/corrected_site_044.json",
+    "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/SCL_branch_scan/points/single_0120.json",
+    "SCL_contacts": [
+      [],
+      [],
+      [],
+      []
+    ],
+    "SCL_count": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "SCL_peak_threshold_ratio_min": [
+      0.0018843523452307803,
+      0.0018725006655775085,
+      0.001955548183518156,
+      0.0019499782077530335
+    ],
+    "SCL_peak_threshold_ratio_max": [
+      0.0018843531066772656,
+      0.001872501452597244,
+      0.0019555489510671956,
+      0.0019499788033030222
+    ],
+    "qualified_groups": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "SCL_fraction": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "association_brackets_unchanged": true,
+  "scope": "One physically verified stable A-leading periodic solution with no individual SCL contact recruitment under the unchanged detector at four bin origins. No qualified group events at this point, so group-conditional propagation metrics are undefined; no interval exclusivity or stability-completeness claim."
+}

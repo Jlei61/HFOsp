@@ -1,0 +1,59 @@
+{
+  "seed": 9108401,
+  "total_new": 24,
+  "adopted": {
+    "eta0.0031622777_tau100_s9108401": {
+      "pid": 2318524,
+      "create_time": 1789640861.06
+    },
+    "eta0.0031622777_tau10000_s9108401": {
+      "pid": 2318526,
+      "create_time": 1789640861.06
+    },
+    "eta0.01_tau5.6234133_s9108401": {
+      "pid": 2318529,
+      "create_time": 1789640861.06
+    },
+    "eta0.0017782794_tau1000_s9108401": {
+      "pid": 2318533,
+      "create_time": 1789640861.06
+    },
+    "eta0.056234133_tau1_s9108401": {
+      "pid": 2354117,
+      "create_time": 1789641751.63
+    },
+    "eta0.0056234133_tau10_s9108401": {
+      "pid": 2354980,
+      "create_time": 1789641771.27
+    },
+    "eta0.0056234133_tau100_s9108401": {
+      "pid": 2365351,
+      "create_time": 1789642021.0
+    },
+    "eta0.0056234133_tau1000_s9108401": {
+      "pid": 2384116,
+      "create_time": 1789642491.26
+    },
+    "eta0.031622777_tau1.7782794_s9108401": {
+      "pid": 2664526,
+      "create_time": 1789649322.62
+    },
+    "eta0.031622777_tau3.1622777_s9108401": {
+      "pid": 2700105,
+      "create_time": 1789650193.01
+    }
+  },
+  "resume": {
+    "eta0.0056234133_tau10000_s9108401": {
+      "resume_s": 200.0,
+      "checkpoint_sha256": "28f4911c1b7e2ad6a74dc90368c3861eb2f654f713a8418041c6c2148a825e01"
+    },
+    "eta0.0031622777_tau1000_s9108401": {
+      "resume_s": 380.0,
+      "checkpoint_sha256": "a6b7f25445446a1964a86d27120f35d97a582d35f995336b53a4b4bb3a5120f3"
+    }
+  },
+  "rule": "One retry of each failed job; exact saved engine and RNG state. No new parameter points or seeds.",
+  "recovery_producer": "/home/honglab/leijiaxin/HFOsp/scripts/resume_topic4_fig5_boundary_refinement.py",
+  "producer_sha256": "5c66e724339f0cfc0b49863ba784da711e16a84fe6d005259b898a26ae9f15f9"
+}

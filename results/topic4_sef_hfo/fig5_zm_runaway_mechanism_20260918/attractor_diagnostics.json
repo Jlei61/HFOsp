@@ -1,0 +1,258 @@
+[
+  {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2190000_dt0.05/trajectory.npz",
+    "tail_start_ms": 6000,
+    "tail_length_ms": 6000,
+    "events": [
+      [
+        6032,
+        6124
+      ],
+      [
+        6296,
+        6388
+      ],
+      [
+        6561,
+        6652
+      ],
+      [
+        6825,
+        6916
+      ],
+      [
+        7089,
+        7181
+      ],
+      [
+        7353,
+        7445
+      ],
+      [
+        7617,
+        7709
+      ],
+      [
+        7881,
+        7973
+      ],
+      [
+        8146,
+        8237
+      ],
+      [
+        8410,
+        8501
+      ],
+      [
+        8674,
+        8766
+      ],
+      [
+        8938,
+        9030
+      ],
+      [
+        9202,
+        9294
+      ],
+      [
+        9467,
+        9558
+      ],
+      [
+        9731,
+        9822
+      ],
+      [
+        9995,
+        10086
+      ],
+      [
+        10259,
+        10351
+      ],
+      [
+        10523,
+        10615
+      ],
+      [
+        10787,
+        10879
+      ],
+      [
+        11052,
+        11143
+      ],
+      [
+        11316,
+        11407
+      ],
+      [
+        11580,
+        11671
+      ],
+      [
+        11844,
+        11936
+      ]
+    ],
+    "duration_ms": [
+      92,
+      92,
+      91,
+      91,
+      92,
+      92,
+      92,
+      92,
+      91,
+      91,
+      92,
+      92,
+      92,
+      91,
+      91,
+      91,
+      92,
+      92,
+      92,
+      91,
+      91,
+      91,
+      92
+    ],
+    "interval_ms": [
+      264,
+      265,
+      264,
+      264,
+      264,
+      264,
+      264,
+      265,
+      264,
+      264,
+      264,
+      264,
+      265,
+      264,
+      264,
+      264,
+      264,
+      264,
+      265,
+      264,
+      264,
+      264
+    ],
+    "interval_cv": 0.0014599589425737386,
+    "block_mean_hz": [
+      32.665582032779874,
+      32.666543744183244,
+      31.606245163533348,
+      25.628871482372798,
+      32.60251423522342,
+      32.66618305401573
+    ],
+    "recurrences": [
+      {
+        "lag_ms": 1321,
+        "global_autocorrelation": 1.0024097312035514,
+        "field_recurrence_error": 0.015016626988414614
+      },
+      {
+        "lag_ms": 1057,
+        "global_autocorrelation": 1.0017690625607665,
+        "field_recurrence_error": 0.034140077550586005
+      },
+      {
+        "lag_ms": 793,
+        "global_autocorrelation": 1.0011239349769951,
+        "field_recurrence_error": 0.05301020095918734
+      },
+      {
+        "lag_ms": 528,
+        "global_autocorrelation": 1.0006577648391362,
+        "field_recurrence_error": 0.038289316813132954
+      },
+      {
+        "lag_ms": 264,
+        "global_autocorrelation": 1.0003416733773651,
+        "field_recurrence_error": 0.019209928410879155
+      }
+    ],
+    "interpretation": "Finite-time event and field-recurrence diagnostics; no Floquet or chaos classification inferred"
+  },
+  {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2196000_dt0.05/trajectory.npz",
+    "tail_start_ms": 6000,
+    "tail_length_ms": 6000,
+    "events": [
+      [
+        6165,
+        7206
+      ],
+      [
+        7396,
+        8597
+      ],
+      [
+        8775,
+        11039
+      ],
+      [
+        11235,
+        11463
+      ]
+    ],
+    "duration_ms": [
+      1041,
+      1201,
+      2264,
+      228
+    ],
+    "interval_ms": [
+      1231,
+      1379,
+      2460
+    ],
+    "interval_cv": 0.3241505594502783,
+    "block_mean_hz": [
+      58.53580291118458,
+      62.26509719673374,
+      62.864374184517466,
+      76.73305617263898,
+      73.8153391204064,
+      51.02197208496122
+    ],
+    "recurrences": [
+      {
+        "lag_ms": 110,
+        "global_autocorrelation": 0.26410974400193926,
+        "field_recurrence_error": 1.2055470686722487
+      },
+      {
+        "lag_ms": 1380,
+        "global_autocorrelation": 0.23436765256044229,
+        "field_recurrence_error": 1.3548172886664962
+      },
+      {
+        "lag_ms": 1270,
+        "global_autocorrelation": 0.10907472524158277,
+        "field_recurrence_error": 1.3820198326979887
+      },
+      {
+        "lag_ms": 824,
+        "global_autocorrelation": 0.10060440369241014,
+        "field_recurrence_error": 1.4143171000732455
+      },
+      {
+        "lag_ms": 937,
+        "global_autocorrelation": 0.08848041990100369,
+        "field_recurrence_error": 1.4045605478641332
+      }
+    ],
+    "interpretation": "Finite-time event and field-recurrence diagnostics; no Floquet or chaos classification inferred"
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "status": "NATIVE_COMPLETE_RECORD_NOT_SAVED_MODEL_NOT_STARTED",
+  "cause": "The native horizon observer raises its normal completion exception. Post-return recording code was skipped; the wrapper incorrectly reported observation completion without checking the file. Native100ms result exists; model aborted at file loading before initialization or a physical step.",
+  "repair": "Parallel v2 folder; same100ms replay, save in finally, require exactcount/spike lengths and record existence, compare final complete native engine with the retained first run. No physics, input or acceptance changes."
+}

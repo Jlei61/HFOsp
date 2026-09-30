@@ -1,0 +1,13 @@
+{
+  "J_EE_core": 0.942,
+  "dt_ms": 0.1,
+  "epsilon": 1e-06,
+  "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/finite_lyapunov/periodic_control/state.npz",
+  "initial_history_interpolation": "Cubic on saved physical-time history; endpoint fixed to current rate",
+  "norm": "RMS over all nine local states and every delayed rate. Local scaling [1000,1000,1,1,1,1,.1,.1,1], delayed rate scaling 1000.",
+  "block_ms": 359,
+  "block_steps": 3590,
+  "requested_duration_ms": 20000,
+  "scope": "Finite-time largest Lyapunov estimate. Compare perturbation amplitudes, integration steps and periodic control before an attractor claim.",
+  "phase_projection": "Weighted full-flow orthogonal projection after every block; centered history derivative and exact current RHS"
+}

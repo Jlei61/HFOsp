@@ -1,0 +1,15 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/multiple_three_burst/iteration00/node01.npz",
+  "steps": 2636,
+  "dt_ms": 0.05,
+  "modes": [
+    "nominal_graph",
+    "nominal_graph",
+    "nominal_sync_steps",
+    "tangent_graph",
+    "tangent_graph",
+    "tangent_sync_steps"
+  ],
+  "question": "Does the nominal discrepancy depend on first use,10ms CUDA graphs, per-step synchronization or the presence of a passive tangent?",
+  "scope": "Diagnosis only; failed source and derivative checks are retained, no acceptance criterion is amended. Every mode starts from identical complete physical bytes."
+}

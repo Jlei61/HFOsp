@@ -1,0 +1,16 @@
+{
+  "status": "REGISTERED_BEFORE_RECONSTRUCTION",
+  "created_epoch": 1790525946.3208866,
+  "question": "Supply the exact original expected externalrates to all3479groups at0.1ms during10-20s, removing1msclockandfloat32globalinput approximations from the coupling diagnostic.",
+  "method": "Restore original nativeglobalRNG,xi,andcompleteSpatialOUstate at10s. Advance exactoriginalOU andconsumeoriginalPoisson externaldraws inoriginalorder; no neuronspikes,currentorconnectivitysimulation. Recordmembergroupmeansfloat64.",
+  "checks": "Intermediate16.7s andfinal20s nativeglobalRNG/xi andSpatialOUstate/cached/rng/clocks exactly; selected16groups every0.1ms matchalreadyvalidated16.7-20sobserver, originalsparseglobal/inputmeans throughout10-20s.",
+  "downstream": "Numericalpopulationparticles useexpectedexternalrate, notrealizednativePoissoncounts. This is exogenous input matching, notneuralteacherforcing ornewnative seed.",
+  "interval_s": [
+    10,
+    20
+  ],
+  "sampling_ms": 0.1,
+  "initial": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+  "initial_sha256": "4866822869ffc7e779aba7b3bf40dd4e9a08b7b3403d3b4c47fb0dea4d9bde50",
+  "producer_sha256": "e1a2c5d03a26ac7c78cf2f42c26ee2d8d15f312b4298dea1aabf7cc080a80469"
+}

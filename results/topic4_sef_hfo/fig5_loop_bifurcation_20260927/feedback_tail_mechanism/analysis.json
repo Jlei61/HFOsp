@@ -1,0 +1,96 @@
+{
+  "status": "COMPLETE_EXISTING_NATIVE_RECORDS",
+  "rows": [
+    {
+      "name": "G30_response0_s9108402",
+      "seed": 9108402,
+      "tau_G_s": 0.0,
+      "onset_s": 9.87,
+      "minimum_sampled_R_after_entry_Hz": 73.98303995891125,
+      "maximum_G_raw_with_q_zero_after_entry": 0.0,
+      "first_R_below5_for100ms_s": null,
+      "first_core_net_positive_1s_budget_endpoint_s": null,
+      "G_block_threshold": 2.669402995841955
+    },
+    {
+      "name": "G30_response0.5_s9108402",
+      "seed": 9108402,
+      "tau_G_s": 0.5,
+      "onset_s": 9.87,
+      "minimum_sampled_R_after_entry_Hz": 3.7e-322,
+      "maximum_G_raw_with_q_zero_after_entry": 12.225955576963694,
+      "first_R_below5_for100ms_s": 17.416,
+      "first_core_net_positive_1s_budget_endpoint_s": 18.12,
+      "G_block_threshold": 2.669402995841955,
+      "G_raw_at_R5": 10.565153690626513,
+      "K_at_R5": 11.272248427443913,
+      "first_G_below_recovery_block_after_R5_s": 18.104,
+      "G_exponential_prediction_error": 1.9584334154387761e-13,
+      "between_sample_R_upper_bound_Hz": 5.180075160647245,
+      "q_zero_interval_s": [
+        17.416,
+        18.104
+      ],
+      "K_at_G_unblocking": 9.823169340174656
+    },
+    {
+      "name": "G30_response0_s9108403",
+      "seed": 9108403,
+      "tau_G_s": 0.0,
+      "onset_s": 10.29,
+      "minimum_sampled_R_after_entry_Hz": 85.01823373107464,
+      "maximum_G_raw_with_q_zero_after_entry": 0.0,
+      "first_R_below5_for100ms_s": null,
+      "first_core_net_positive_1s_budget_endpoint_s": null,
+      "G_block_threshold": 2.669402995841955
+    },
+    {
+      "name": "G30_response0.5_s9108403",
+      "seed": 9108403,
+      "tau_G_s": 0.5,
+      "onset_s": 10.29,
+      "minimum_sampled_R_after_entry_Hz": 3.7e-322,
+      "maximum_G_raw_with_q_zero_after_entry": 10.969465712123316,
+      "first_R_below5_for100ms_s": 14.236,
+      "first_core_net_positive_1s_budget_endpoint_s": 14.62,
+      "G_block_threshold": 2.669402995841955,
+      "G_raw_at_R5": 5.45603576697312,
+      "K_at_R5": 4.8165848179217265,
+      "first_G_below_recovery_block_after_R5_s": 14.594,
+      "G_exponential_prediction_error": 1.1857181902996672e-13,
+      "between_sample_R_upper_bound_Hz": 5.215113217280134,
+      "q_zero_interval_s": [
+        14.236,
+        14.594
+      ],
+      "K_at_G_unblocking": 4.48377413637354
+    },
+    {
+      "name": "G30_response0.5_s9108405",
+      "seed": 9108405,
+      "tau_G_s": 0.5,
+      "onset_s": 9.94,
+      "minimum_sampled_R_after_entry_Hz": 3.7e-322,
+      "maximum_G_raw_with_q_zero_after_entry": 12.484265068366877,
+      "first_R_below5_for100ms_s": 16.868,
+      "first_core_net_positive_1s_budget_endpoint_s": 17.58,
+      "G_block_threshold": 2.669402995841955,
+      "G_raw_at_R5": 10.44574850016614,
+      "K_at_R5": 11.093778275626784,
+      "first_G_below_recovery_block_after_R5_s": 17.551,
+      "G_exponential_prediction_error": 2.4069635173873394e-13,
+      "between_sample_R_upper_bound_Hz": 5.006190753600697,
+      "q_zero_interval_s": [
+        16.868,
+        17.551
+      ],
+      "K_at_G_unblocking": 9.677314503384354
+    }
+  ],
+  "producer_sha256": "173c97bab581a2c43b7273e0237b58bccd33996e95dbd1c4873adb02b46da2df",
+  "question": "Does delayedGpersistaftertheinstantaneoushigh-rategatecloses, bridging into the presetlow-rateK-retention regime before Z recovery becomes possible?",
+  "statistical_unit": "Two previously paired120s seeds plus the selected240s source; reused data, not additional simulations. One first-entry episode per trajectory for this diagnostic.",
+  "interpretation": "InstantGequals30qandvanishesbelow200Hz. DelayedGcanremainpositiveafterqcloses. PairednativecontrolsestablishtheconsequenceofchangingtauG; this trajectory-levelmediatingsequencealone does not prove Gcarryover is the unique mechanism or identify a bifurcation.",
+  "timing": "R/G/K at1ms samples; R<=5 first100ms is a diagnostic marker, not a new physicalrule. CoreZpositive uses20msintegratedbudgetendpoints sustained1s. q-off continuous bound uses positive spikeincrements and15msdecay.",
+  "formal_bifurcation_allowed": false
+}

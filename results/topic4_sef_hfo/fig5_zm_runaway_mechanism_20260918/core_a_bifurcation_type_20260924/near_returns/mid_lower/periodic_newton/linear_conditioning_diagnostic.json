@@ -1,0 +1,71 @@
+{
+  "status": "SOLVER_ONLY_NOT_FLOQUET",
+  "rows": [
+    {
+      "step": "iteration00",
+      "k": 6,
+      "near_zero_linear_value": [
+        0.3124233995847482,
+        0.0
+      ],
+      "Arnoldi_residual_estimate": 0.08341671712028684,
+      "corresponding_return_value": [
+        0.6875766004152518,
+        0.0
+      ]
+    },
+    {
+      "step": "iteration01",
+      "k": 6,
+      "near_zero_linear_value": [
+        0.3049857582064547,
+        0.0
+      ],
+      "Arnoldi_residual_estimate": 0.07425803386499871,
+      "corresponding_return_value": [
+        0.6950142417935453,
+        0.0
+      ]
+    },
+    {
+      "step": "iteration02",
+      "k": 6,
+      "near_zero_linear_value": [
+        0.2506250582400505,
+        0.0
+      ],
+      "Arnoldi_residual_estimate": 0.06374788280194983,
+      "corresponding_return_value": [
+        0.7493749417599496,
+        0.0
+      ]
+    },
+    {
+      "step": "iteration03",
+      "k": 7,
+      "near_zero_linear_value": [
+        0.2613896171861124,
+        0.0
+      ],
+      "Arnoldi_residual_estimate": 0.06782599605143072,
+      "corresponding_return_value": [
+        0.7386103828138876,
+        0.0
+      ]
+    },
+    {
+      "step": "iteration04",
+      "k": 8,
+      "near_zero_linear_value": [
+        0.24828815352623135,
+        0.0
+      ],
+      "Arnoldi_residual_estimate": 0.05143313952929061,
+      "corresponding_return_value": [
+        0.7517118464737687,
+        0.0
+      ]
+    }
+  ],
+  "interpretation": "Eigenvalues of the residual-seeded projected I-DP used by the inexact Newton solve. No periodic orbit yet, no converged Floquet spectrum or bifurcation assertion."
+}

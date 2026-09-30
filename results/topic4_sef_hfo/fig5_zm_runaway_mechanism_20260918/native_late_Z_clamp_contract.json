@@ -1,0 +1,19 @@
+{
+  "status": "DEFINED_BEFORE_RUNS",
+  "created_local": "2026-09-19T14:43:02.043636",
+  "question": "At the original pre-entry and first-high-entry clocks, is the current spatial Z field sufficient for broad persistent recruitment by12.5s, or is continuing depletion still required?",
+  "clamp_times_ms": [
+    9420,
+    9870
+  ],
+  "stop_ms": 12500,
+  "source": "Original Fig.5 full SNN checkpoints, same absolute clock and preserved future input state; existing dynamic9s-to12.5s bitwise replay is shared reference",
+  "intervention": "Freeze onlyZ updates at each original clock; M and all fast states remain dynamic",
+  "readouts": [
+    "200Hz200ms entry and75percent E-space+200Hz200ms broad entry, absolute clock",
+    "Last1s spatial occupancy and global rate on common11.5-to12.5s window",
+    "Complete self-terminating events on each full continuation"
+  ],
+  "interpretation": "One original history, two clamp times, not independent replicates. Survival/nonentry is finite-horizon evidence. No bifurcation type inferred.",
+  "comparison": "Each clamp versus original dynamic reference from the identical full checkpoint. Do not interpret between-clamp differences as Z-only state transplants."
+}

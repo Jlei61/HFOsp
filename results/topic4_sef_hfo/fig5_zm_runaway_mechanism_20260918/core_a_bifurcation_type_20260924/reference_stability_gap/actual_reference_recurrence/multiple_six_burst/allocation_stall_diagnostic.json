@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-09-24T21:55:59.583469+08:00",
+  "pid": 2393733,
+  "stat": "2393733 (python) R 2393732 2393732 2393732 0 -1 12584960 5546980 207 59 0 44793 48671 0 3 20 0 7 0 89901159 55277596672 7049368 18446744073709551615 4321280 6627138 140727042043040 0 0 0 0 16781316 514 0 0 0 17 28 0 0 0 0 0 7803536 9051136 26841088 140727042046635 140727042047244 140727042047244 140727042052029 0\n",
+  "smaps_rollup": "00400000-7ffd915b5000 ---p 00000000 00:00 0                              [rollup]\nRss:            28336840 kB\nPss:            28121722 kB\nPss_Anon:       27246164 kB\nPss_File:         123942 kB\nPss_Shmem:        751616 kB\nShared_Clean:     272880 kB\nShared_Dirty:          0 kB\nPrivate_Clean:     48880 kB\nPrivate_Dirty:  28015080 kB\nReferenced:     25541144 kB\nAnonymous:      27246164 kB\nLazyFree:              0 kB\nAnonHugePages:  22075392 kB\nShmemPmdMapped:        0 kB\nFilePmdMapped:         0 kB\nShared_Hugetlb:        0 kB\nPrivate_Hugetlb:       0 kB\nSwap:                  0 kB\nSwapPss:               0 kB\nLocked:                0 kB\n",
+  "vmstat_selected": {
+    "allocstall_movable": 10848667,
+    "compact_stall": 21885628,
+    "compact_success": 168822
+  },
+  "reason": "Extended kernel time while allocating/copying multi-GB host Jacobian buffers under NumPy MADV_HUGEPAGE; compact_stall rose with no compact_success. No numerical accept step yet. Restart identical scientific solve with per-process NumPy hugepage advice disabled, not a system-wide setting."
+}

@@ -1,0 +1,29 @@
+{
+  "status": "COMPLETE_SINGLE_REPLICA_IDENTITY",
+  "guards": {
+    "spikes_exact": true,
+    "refs_exact": true,
+    "state_tolerance": true,
+    "global_tolerance": true
+  },
+  "retained": true,
+  "steps": 1000,
+  "spike_mismatch_count": 0,
+  "first_mismatch_step": null,
+  "max_state_error": {
+    "V": 5.506706202140776e-13,
+    "sE": 1.3642420526593924e-12,
+    "IE": 9.094947017729282e-13,
+    "sI": 1.3642420526593924e-12,
+    "II": 9.094947017729282e-13,
+    "M": 1.3812950783176348e-11,
+    "Z": 0.0,
+    "K": 0.0
+  },
+  "global_error": [
+    0.0,
+    0.0
+  ],
+  "interpretation": "Shared external counts only; recurrent spikes and their delayed feedback are free. One-replica equivalence supports an explicit graph-replication interpretation of R>1, without asserting any largeR/native near-boundary correspondence.",
+  "formal_bifurcation_allowed": false
+}

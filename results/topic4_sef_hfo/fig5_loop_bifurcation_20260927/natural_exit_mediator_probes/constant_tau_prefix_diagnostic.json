@@ -1,0 +1,10 @@
+{
+  "status": "READ_ONLY_PREFIX_DIAGNOSTIC",
+  "first_nonzero_K_sample_s": 9.874,
+  "first_positive_K": 3.225941524798208e-06,
+  "prefix_sampled_K_exactly_zero": true,
+  "continuous_R_lower_bound_after_previous_sample_Hz": 13.864331203864596,
+  "through_s": 16.8,
+  "constant_tau_prefix_equivalence_supported": true,
+  "scope": "With nonnegative K spike increments and strictly positive decay, exact zero sample values imply zero K throughout preceding intervals. Once K is positive, this R lower bound tests whether the low-rate decay rule was ever used. No new autonomous simulation or independent seed."
+}

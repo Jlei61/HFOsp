@@ -1,0 +1,15 @@
+{
+  "time": "2026-09-25T02:54:05.760238+08:00",
+  "rationale": "The historical independent phase check in core_a_periodic_validate.py uses combined<1e-6 and block<1e-5; the new check mistakenly copied the tighter root-correction stopping tolerance1e-7/1e-6. Retain both raw outcomes. Use the existing independent-phase criterion for scientific qualification; root correction, neutral1e-3 and derivative gates unchanged. This alignment is recorded before reading any shifted-phase results.",
+  "phase_result_present": true,
+  "historical_source": "scripts/topic4_zm_runaway_mechanism/core_a_periodic_validate.py",
+  "independent_phase_gates": {
+    "combined": 1e-06,
+    "each_block": 1e-05
+  },
+  "root_correction_gates": {
+    "combined": 1e-07,
+    "each_block": 1e-06
+  },
+  "new_script_strict_status": "Retained as an additional numerical diagnostic, not a new scientific acceptance requirement"
+}

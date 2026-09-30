@@ -1,0 +1,48 @@
+{
+  "created_local": "2026-09-20T00:44:12.767321+08:00",
+  "question": "Does the old or history-conditioned, voltage-corrected rate response fail under fresh, nonstationary colored-LIF inputs whose complete periodic input history remains inside the response-table calibration bounds?",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "shape_groups": [
+    "Core A E",
+    "Core B E",
+    "Surround E",
+    "I"
+  ],
+  "amplitudes": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "threshold_mv": 18.0,
+  "reset_mv": 11.0,
+  "baseline_normalized_mean": 1.0,
+  "baseline_sigma_E": 0.7,
+  "baseline_sigma_I": 1.4,
+  "waveform_formula": "For each source channel separately q=(wave-mean(wave))/max(abs(wave-mean(wave))). Mean=18+7*a*q_mu; raw variance E=(7*0.7)^2*(1+a*q_E); raw variance I=(7*1.4)^2*(1+a*q_I). Same source period and relative phase. Positive low-pass filters preserve the convex input bounds.",
+  "variants": [
+    "units_instantaneous",
+    "units_history"
+  ],
+  "prediction": "Existing static spline, response coefficient tables and poles without fitting. Unit correction retained. History variant reads coefficients at mus/vEv/vIv; original at mu/vE/vI. Predict all 12 inputs before MC acquisition.",
+  "dt_ms": 0.1,
+  "replicates": 8192,
+  "burn_cycles": 5,
+  "record_cycles": 20,
+  "phase_bins": 128,
+  "seed": 919820,
+  "device": 0,
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1,
+    "original_gates_unchanged": true
+  },
+  "readouts": [
+    "original waveform L2 and mean bias",
+    "MC split-half precision",
+    "AC waveform error descriptive only"
+  ],
+  "statistical_unit": "Independent Gaussian noise path, with paired common random numbers across conditions; source shapes and amplitudes are paired conditions, not independent biological replicates.",
+  "budget": "One preparation and one 12-condition local LIF batch. No coefficients fitted and no network or continuation launch.",
+  "scope": "Fresh synthesized in-domain waveform diagnostic only. A failure here rules out instantaneous domain extrapolation as the sole local explanation; a pass would not validate the actual high-amplitude native-cycle inputs, autonomous SNN dynamics or onset bifurcation. These are local population assays, not a replacement particle network.",
+  "pre_execution_dt_note": "Use the native/calibration 0.1 ms membrane/reset/refractory clock. Preparation and MC acquisition have not started; this avoids changing the local reference discretization."
+}

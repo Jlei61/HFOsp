@@ -1,0 +1,16 @@
+{
+  "status": "REGISTERED_BEFORE_ONE_VARIANCE_ASSAY",
+  "created_epoch": 1790568848.4707391,
+  "question": "Does replacing Poisson recurrent variance by the conditional independent Bernoulli variance repair the spurious surround recruitment and G activation in the full-source physical dynamics?",
+  "evidence": "Both completed source-identity arms retained core rates but drifted to causalR>200 and spuriously activatedG; individual source tail fieldRMS18.84Hz. Original exact source identity and initial state alone were insufficient.",
+  "design": "Exactly one1s trajectory from the same complete72s high state, same64 replicas, thresholds, fixedpercellnu, randomstreams, heldZ/K and dynamicM/G. Mean arrivals unchanged. Replace only squared-weight rate r by r*(1-dt*r) in recurrent variance, because source probability p=dt*r is0/1 perstep. Reuse completed individual-Poisson arm; no biological parameter adjustment.",
+  "limitations": "Variance belongs to empirical particle probability, not a claim of exact finite-network covariance. Independent Gaussian residuals still omit source/time correlations; external Gaussian input remains unchanged. Finite64 particle error needs separate convergence if relevant. Not an autonomous loop or stable branch.",
+  "validation": "GPU delayed means versus same CPU operators; variance versus W2*(r*(1-dt*r)); nonnegativeand<=Poisson variance, per-cell/group count conservation, eager/captured bitwise. Membrane kernel unchanged from completed paired pilot.",
+  "decision": "Same registered one-second native relevance guards; stop after one trajectory, no automatic root or parameter/horizon extension. Use failure to localize remaining approximation, not relax guards.",
+  "duration_ms": 1000,
+  "replicas": 64,
+  "producer_sha256": "0ef32284c63102d146b1983a6217a0ea07baffa85fc1d2f02acdf48e5640e27d",
+  "base_sha256": "e02b9ee463458fb0bfe053121f37c9e176369c3f197acd5640cd10a590f22fe1",
+  "target_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "formal_bifurcation_allowed": false
+}

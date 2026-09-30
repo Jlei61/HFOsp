@@ -1,0 +1,37 @@
+{
+  "rows": [
+    {
+      "d_mean_Hz": -0.02,
+      "kind": "uniform",
+      "maximum_BVP_error_Hz": 0.3125591527595173,
+      "RMS_BVP_error_Hz": 0.016014869368991377,
+      "actual_mean_change_Hz": -0.020000000000000018,
+      "minimum_combined_rate_Hz": -0.016931397179201634
+    },
+    {
+      "d_mean_Hz": -0.02,
+      "kind": "saved_tangent",
+      "maximum_BVP_error_Hz": 1.3185016957304452,
+      "RMS_BVP_error_Hz": 0.011124660673937239,
+      "actual_mean_change_Hz": -0.02,
+      "minimum_combined_rate_Hz": -0.0008317430830732328
+    },
+    {
+      "d_mean_Hz": 0.02,
+      "kind": "uniform",
+      "maximum_BVP_error_Hz": 0.3011362031044573,
+      "RMS_BVP_error_Hz": 0.016237317133257025,
+      "actual_mean_change_Hz": 0.020000000000000018,
+      "minimum_combined_rate_Hz": -0.0003657688230175161
+    },
+    {
+      "d_mean_Hz": 0.02,
+      "kind": "saved_tangent",
+      "maximum_BVP_error_Hz": 1.3030837207387846,
+      "RMS_BVP_error_Hz": 0.010823774168765406,
+      "actual_mean_change_Hz": 0.020000000000000004,
+      "minimum_combined_rate_Hz": -0.00047384371917849795
+    }
+  ],
+  "scope": "Initialization check only, full frozen DDE action at N3072; no refined root or branch acceptance."
+}

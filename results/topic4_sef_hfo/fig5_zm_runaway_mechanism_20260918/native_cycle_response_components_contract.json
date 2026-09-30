@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-19T19:07:53.951349",
+  "question": "Which terms of the existing response produce the candidate-waveform error?",
+  "variants": [
+    "frozen_response",
+    "remove_slow_mean_mixing",
+    "remove_variance_transient_mean_shift",
+    "remove_variance_mixing",
+    "instantaneous_static_with_existing_variance_filter",
+    "instantaneous_static_with_exact_continuous_synaptic_covariance"
+  ],
+  "acceptance": {
+    "base_reproduction_relative_L2_max": 0.001
+  },
+  "scope": "Open-loop diagnostic on the four already assayed groups. Report all six predefined conditions, never select or deploy a new closure from this test. Measured outputs are reused and therefore not held-out validation of any variant. Exact covariance is the continuous colored-Gaussian second-moment solution; it is not a new autonomous network."
+}

@@ -1,0 +1,130 @@
+{
+  "status": "COMPLETE",
+  "J_EE_core": 0.94,
+  "duration_ms": 3000,
+  "dt_ms": 0.1,
+  "seconds": 15.785816669464111,
+  "dynamics": [
+    {
+      "mean_rate_hz": 13.050339082220251,
+      "minimum_hz": 0.019548513974254906,
+      "maximum_hz": 207.86011783927782,
+      "quiet_fraction": 0.8151111111111111,
+      "self_limited_bursts": 5,
+      "peak_times_ms": [
+        1147,
+        1485,
+        1938,
+        2281,
+        2736
+      ],
+      "burst_windows_ms": [
+        [
+          1120,
+          1205
+        ],
+        [
+          1458,
+          1538
+        ],
+        [
+          1911,
+          1997
+        ],
+        [
+          2254,
+          2333
+        ],
+        [
+          2709,
+          2794
+        ]
+      ],
+      "IEI_CV": 0.16505002991429782,
+      "median_IEI_ms": 398.0,
+      "oscillatory_peaks": 10
+    },
+    {
+      "mean_rate_hz": 13.787904431017216,
+      "minimum_hz": 0.018868197193063728,
+      "maximum_hz": 221.65395432723938,
+      "quiet_fraction": 0.7875555555555556,
+      "self_limited_bursts": 5,
+      "peak_times_ms": [
+        1087,
+        1546,
+        1878,
+        2342,
+        2675
+      ],
+      "burst_windows_ms": [
+        [
+          1056,
+          1136
+        ],
+        [
+          1518,
+          1605
+        ],
+        [
+          1848,
+          1926
+        ],
+        [
+          2314,
+          2401
+        ],
+        [
+          2646,
+          2724
+        ]
+      ],
+      "IEI_CV": 0.18767574392635214,
+      "median_IEI_ms": 396.0,
+      "oscillatory_peaks": 9
+    },
+    {
+      "mean_rate_hz": 5.1532560543164925,
+      "minimum_hz": 0.056885313955296626,
+      "maximum_hz": 34.89264740285808,
+      "quiet_fraction": 0.7506666666666667,
+      "self_limited_bursts": 5,
+      "peak_times_ms": [
+        1163,
+        1533,
+        1954,
+        2329,
+        2752
+      ],
+      "burst_windows_ms": [
+        [
+          1091,
+          1202
+        ],
+        [
+          1485,
+          1578
+        ],
+        [
+          1882,
+          1994
+        ],
+        [
+          2282,
+          2374
+        ],
+        [
+          2679,
+          2792
+        ]
+      ],
+      "IEI_CV": 0.07215424793746228,
+      "median_IEI_ms": 398.0,
+      "oscillatory_peaks": 5
+    }
+  ],
+  "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.9400000/trajectory.npz",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.9400000/contract.json",
+  "observation": "Rates in Hz/cell; fields and readouts are functions of this rate trajectory, not sampled spikes",
+  "native_equivalence": "NOT_VALIDATED"
+}

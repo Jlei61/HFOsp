@@ -1,0 +1,12 @@
+{
+  "status": "REGISTERED_BEFORE_PHASE_COMPONENT_DECOMPOSITION",
+  "created_epoch": 1790560891.958061,
+  "question": "How much of the missing current structure is a repeatable22-step phase component, rather than stationary Gaussian variance?",
+  "selection": "Largest cross-source IE variance spectral bin is454.5Hz in the measured2srecord. The proposed2.2ms phase period is22 original0.1ms steps, consistent with that finite-frequency bin. Fixed before this decomposition; no period search or fit to rate error.",
+  "design": "Read-only59target recurrentcurrent projection and all40000 existing native source trains. Phase means at time-index mod22, phase-residual covariance and exact variance budget. Report phase explainability percell and perregion, including fraction remaining outside this one phase component.",
+  "limitations": "One native highhistory2s window. A spectral peak near a timestep multiple is a model-level observation, not a physiological frequency or a certified periodic orbit. Period locking and timestep sensitivity remain separate questions. This decomposition supplies no newautonomous model.",
+  "period_steps": 22,
+  "dt_ms": 0.1,
+  "producer_sha256": "664ec1e710f921f9208e42ecf5e731330de2461cf373774a1fc321f58cd48d1d",
+  "formal_bifurcation_allowed": false
+}

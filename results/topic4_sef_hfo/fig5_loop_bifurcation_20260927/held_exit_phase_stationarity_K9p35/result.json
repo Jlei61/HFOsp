@@ -1,0 +1,58 @@
+{
+  "status": "COMPLETE_PHASE_ALLTARGET_STATIONARY_RESPONSE",
+  "rows": [
+    {
+      "region": "allE",
+      "observed_source_rate_Hz": 200.44956269190197,
+      "phase_response_rate_Hz": 200.44941324234009,
+      "source_residual_weighted_RMS_Hz": 0.016927877784649686,
+      "group_count_SEM_weighted_RMS_Hz": 0.002301567644948783,
+      "groups_outside6countSEM": 432,
+      "groups": 1885
+    },
+    {
+      "region": "coreA",
+      "observed_source_rate_Hz": 472.3095266315567,
+      "phase_response_rate_Hz": 472.3079317533053,
+      "source_residual_weighted_RMS_Hz": 0.05623988428010442,
+      "group_count_SEM_weighted_RMS_Hz": 0.0019133828666397994,
+      "groups_outside6countSEM": 127,
+      "groups": 172
+    },
+    {
+      "region": "coreB",
+      "observed_source_rate_Hz": 475.0006668157329,
+      "phase_response_rate_Hz": 474.9973062219207,
+      "source_residual_weighted_RMS_Hz": 0.06182934930178356,
+      "group_count_SEM_weighted_RMS_Hz": 0.0014533485040083552,
+      "groups_outside6countSEM": 132,
+      "groups": 171
+    },
+    {
+      "region": "surround",
+      "observed_source_rate_Hz": 186.63539392460615,
+      "phase_response_rate_Hz": 186.63536311629878,
+      "source_residual_weighted_RMS_Hz": 0.011140005804408265,
+      "group_count_SEM_weighted_RMS_Hz": 0.002328068262938485,
+      "groups_outside6countSEM": 173,
+      "groups": 1542
+    },
+    {
+      "region": "I",
+      "observed_source_rate_Hz": 255.20435025708943,
+      "phase_response_rate_Hz": 255.19584707641602,
+      "source_residual_weighted_RMS_Hz": 0.21393864139550636,
+      "group_count_SEM_weighted_RMS_Hz": 0.04583306938859798,
+      "groups_outside6countSEM": 272,
+      "groups": 1594
+    }
+  ],
+  "field_RMS_Hz": 0.006050381333725604,
+  "individual_E_M_residual_RMS_Hz": 0.21271859471625365,
+  "changed_from_fixedstart_target_RMS_Hz": 0.10829379832472862,
+  "root_certified": false,
+  "formal_bifurcation_allowed": false,
+  "root_gate_changed": false,
+  "interpretation": "Phase-aware fixed-input response replaces the biased value estimator for subsequent numerical correction; supplied source/M may still need correction. This does not change native physics or establish stability.",
+  "producer_sha256": "8df440e187f87ea3d29a2fd180606f4edb0596339a515e6a5c40ace665d123e3"
+}

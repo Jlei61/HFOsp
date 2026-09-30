@@ -1,0 +1,75 @@
+{
+  "mode": "homogeneous",
+  "windows": [
+    {
+      "interval_s": [
+        0,
+        5
+      ],
+      "native_rates_Hz": [
+        242.10760624999998,
+        464.6511936339521,
+        472.22595419847175,
+        230.66076165462937
+      ],
+      "density_rates_Hz": [
+        219.2165224512553,
+        474.03735127232784,
+        475.4288058706495,
+        206.2973576548422
+      ],
+      "density_Graw_mean": 2.2844241214850927,
+      "native_Graw_mean": 4.313554088729839,
+      "density_counterfactual_dZ_per_s": [
+        0.011721992677879238,
+        -0.03483387689533417,
+        -0.03307375779645461,
+        0.014030350705818453
+      ],
+      "native_counterfactual_dZ_per_s": [
+        -0.04199999999999982,
+        -0.0348338772209919,
+        -0.033073757753916404,
+        -0.04240772432635605
+      ],
+      "drift_statistics": "Density1msinstantaneousperparticleeligibility versus native20msfullstepbudgets; both averaged over named window.",
+      "weighted_field_RMS_Hz": 124.79008171764445,
+      "weighted_field_MAE_Hz": 54.81709045669934
+    },
+    {
+      "interval_s": [
+        5,
+        10
+      ],
+      "native_rates_Hz": [
+        242.58916874999977,
+        464.54641909814416,
+        470.6796437659014,
+        231.20916611950116
+      ],
+      "density_rates_Hz": [
+        216.64046472954993,
+        475.04497930977607,
+        475.7432540301273,
+        203.55800260270325
+      ],
+      "density_Graw_mean": 1.7365987131999445,
+      "native_Graw_mean": 4.3396842661561,
+      "density_counterfactual_dZ_per_s": [
+        0.026171448588848876,
+        -0.03483387689533417,
+        -0.03307375779645461,
+        0.029210343783659352
+      ],
+      "native_counterfactual_dZ_per_s": [
+        -0.04199999999999982,
+        -0.0348338772209919,
+        -0.033073757753916404,
+        -0.04240772432635605
+      ],
+      "drift_statistics": "Density1msinstantaneousperparticleeligibility versus native20msfullstepbudgets; both averaged over named window.",
+      "weighted_field_RMS_Hz": 145.03132058298195,
+      "weighted_field_MAE_Hz": 64.16674316683944
+    }
+  ]
+}

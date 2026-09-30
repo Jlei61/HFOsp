@@ -1,0 +1,45 @@
+{
+  "updated_local": "2026-09-20T05:38:56.117417+08:00",
+  "status": "BOUNDED_CHECKS_CLOSED_WITH_INCOMPLETE",
+  "checks": {
+    "fine_spectrum": {
+      "status": "INCOMPLETE_CONTROLLED_STOP",
+      "pid": 3875227,
+      "reason": "Controlled stop of this task own obsolete-model single-orbit refinement after more than12hours. Independent family phase consistency and local-response correspondence already fail; completing this one spectrum cannot certify onset or repair those failures. Preserve all completed coarse evidence and progress logs; no final fine spectrum or stable/unstable verdict claimed.",
+      "record": "pending_critical_controlled_stops.json"
+    },
+    "fine_family": {
+      "source": "periodic/native_family_flow_consistency/dt0.000390625.json",
+      "status": "FLOW_CONSISTENCY_FAIL",
+      "gates": {
+        "phase": false,
+        "family": true,
+        "history": true,
+        "components": true
+      },
+      "phase_error": 0.005190681476920569,
+      "family_return_relative": 0.0019922968907236326,
+      "history_relative": 0.002960821923039378,
+      "scope": "Differentiated period-return identity includes constant spatial parameter forcing. Not a homogeneous Floquet eigenvector or a fold certificate."
+    },
+    "relocated_tangent": {
+      "source": "periodic/native_turn_relocated_fine_tangent/result.json",
+      "status": "GEOMETRIC_TURN_REFINEMENT_REQUIRED",
+      "gates": {
+        "target_period": true,
+        "root": true,
+        "derivative": false,
+        "augmented": true
+      },
+      "D": 0.21933565200803865,
+      "T_ms": 264.3623569561784,
+      "dD_dT": 3.8241489653019626e-08,
+      "augmented_target_relative_residual": 1.3080907284124551e-08,
+      "scope": "One geometric turning point on fixed1mm old-v3 conditional family. A physical cycle fold still needs critical multiplier and nondegeneracy evidence."
+    }
+  },
+  "onset_bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false,
+  "launches": 0,
+  "scope": "Completed files only. Collects existing contracts; no tolerance changes, model updates, branch launches, or automatic goal completion."
+}

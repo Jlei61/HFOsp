@@ -1,0 +1,20 @@
+{
+  "epoch": 1790271983.1271346,
+  "prior_supervisor_pid": 2717102,
+  "maximum_total_science_workers": 8,
+  "maximum_new_GPU0_workers": 4,
+  "GPU0_dispatch_free_GiB": 9.3,
+  "GPU0_estimated_startup_GiB": 1.25,
+  "GPU0_reserved_GiB": 8,
+  "host_dispatch_GiB": 88,
+  "host_reserved_GiB": 80,
+  "CPU_dispatch_limit_percent": 65,
+  "gate": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/qa/cuda_device0_route/gate.json",
+  "physics_job_and_horizon_unchanged": true,
+  "new_conditions_added": 0,
+  "handoff": "Complete original engine checkpoint, all8 observation endpoints,24 source files verified; byte copy archived; at mostone uncommitted2s block recomputed. Runtime metadata explicitly records GPU0 execution while preserving immutable planned job.",
+  "selection": "Prioritize existing lowZ smallK high-activity workers with more than4s remaining; use available CPU/GPU slots for the unchanged18-job queue. OtherGPUwork remains running.",
+  "startup_accounting_corrected_epoch": 1790272363.9999766,
+  "reservation_correction": "GPU allocations appear after CPU initialization. Carry each not-yet-resident1.25GiB startup reservation across polls. Initial four workers had already allocated, leaving7.31GiB actual free versus nominal8GiB. Preserve all live workers, record this deviation, and dispatch no further GPU work below the corrected guard.",
+  "existing_GPU_workers_preserved": 4
+}

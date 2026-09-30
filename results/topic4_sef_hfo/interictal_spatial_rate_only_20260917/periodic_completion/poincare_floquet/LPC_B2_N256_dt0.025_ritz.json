@@ -1,0 +1,133 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N256.npz",
+  "J_EE_core": 0.9463101206889282,
+  "T_ms": 296.72680168084366,
+  "dt_ms": 0.024998045634443442,
+  "history_dimension": 1349205,
+  "minimum_occupied_delay_ms": 0.1,
+  "multipliers": [
+    [
+      23.00481956522512,
+      0.0
+    ],
+    [
+      1.2169993474229197,
+      -0.8225914988409359
+    ],
+    [
+      1.2169993474229197,
+      0.8225914988409359
+    ],
+    [
+      1.0000660619583086,
+      0.0
+    ],
+    [
+      0.39298779878557016,
+      0.0
+    ],
+    [
+      -0.0037633669103032162,
+      0.0
+    ]
+  ],
+  "residuals": [
+    4.287529062080905e-10,
+    1.3788223833979189e-11,
+    1.3788223833979189e-11,
+    6.454242069117357e-11,
+    8.745963397173514e-11,
+    2.6509244319875456e-08
+  ],
+  "phase_tangent_relative_defect": 0.0013339528213748213,
+  "phase_overlap": [
+    2.953929716287849e-17,
+    8.917529930550496e-19,
+    8.917529930550496e-19,
+    7.977310825840464e-18,
+    2.596214445507552e-17,
+    3.444704386940347e-17
+  ],
+  "section_time_shift_coefficients": [
+    [
+      -1265.4425188616256,
+      0.0
+    ],
+    [
+      -0.12144558193441476,
+      0.03515655985567255
+    ],
+    [
+      -0.12144558193441476,
+      -0.03515655985567255
+    ],
+    [
+      31.981499367168606,
+      0.0
+    ],
+    [
+      -29.174649895639206,
+      0.0
+    ],
+    [
+      -0.5157684044603075,
+      0.0
+    ]
+  ],
+  "full_state_generalized_eigen_residuals": [
+    4.287529062080905e-10,
+    1.3788223833979189e-11,
+    1.3788223833979189e-11,
+    6.454242069117357e-11,
+    8.745963397173514e-11,
+    2.6509244319875456e-08
+  ],
+  "polynomial_filter_rho": 0.7432470384691092,
+  "transformed_eigenvalues": [
+    [
+      512.1234592161946,
+      0.0
+    ],
+    [
+      -0.10010052312848858,
+      -1.3907979391867296
+    ],
+    [
+      -0.10010052312848858,
+      1.3907979391867296
+    ],
+    [
+      0.25683598945682196,
+      0.0
+    ],
+    [
+      -0.13764760760754144,
+      0.0
+    ],
+    [
+      0.0028112742412570724,
+      -0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.2567529615308908,
+  "smallest_returned_transformed_modulus": 0.0028112742412570724,
+  "method": "Original full-history Poincare operator re-diagonalized in the real orthonormal source subspace; each lifted mode checked by a fresh propagation.",
+  "seconds": 877.5830869674683,
+  "limitation": "Refinement of the existing numerically selected subspace only; no missing-mode or branch-interval completeness proof.",
+  "source_spectrum": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/LPC_B2_N256_dt0.025.json",
+  "subspace_singular_values": [
+    1.9723716124935833,
+    1.342214934983888,
+    0.49752092901448297,
+    0.24392859606362696,
+    0.03395727381668635,
+    0.005287655963377699,
+    5.201081192031639e-16,
+    2.7327109946178533e-17,
+    8.531037309169441e-33,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "subspace_rank": 6
+}

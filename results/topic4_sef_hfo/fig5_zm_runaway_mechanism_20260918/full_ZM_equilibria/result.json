@@ -1,0 +1,107 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "seed": "low",
+      "status": "ROOT_CONVERGED",
+      "residual_per_ms": 5.629177679544739e-16,
+      "iterations": [
+        0.013997453347232909,
+        0.00705498677238162,
+        0.0035267168475900095,
+        0.00010669944066463914,
+        3.7565107553448607e-06,
+        2.3166290596997666e-09,
+        5.629177679544739e-16
+      ],
+      "global_E_hz": 0.12368770774896289,
+      "D": 1.1102230246251565e-16,
+      "region_Z": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "stability": "NOT_ESTABLISHED",
+      "full_state_rhs_max": 2.8145888397723696e-19,
+      "duplicate_of_root_index": null,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/low.npz"
+    },
+    {
+      "seed": "cycle_mean",
+      "status": "NEWTON_UNRESOLVED",
+      "residual_per_ms": 0.3569201193774361,
+      "iterations": [
+        0.35796052971659087,
+        0.3572000140863809,
+        0.3570248139052587,
+        0.3569374826589176,
+        0.35692658740522504,
+        0.35692114054781515,
+        0.3569204597656024,
+        0.3569201193774361
+      ],
+      "global_E_hz": 27.49732618718529,
+      "D": 0.5720081921121262,
+      "region_Z": [
+        1.2541148109045649e-57,
+        4.435794720441428e-73,
+        0.44963026436020886
+      ],
+      "stability": "NOT_ESTABLISHED"
+    },
+    {
+      "seed": "released_high",
+      "status": "ROOT_CONVERGED",
+      "residual_per_ms": 5.773159728050814e-15,
+      "iterations": [
+        0.03835274065721084,
+        0.0035432271559279194,
+        1.698969327734723e-05,
+        2.41401121314766e-10,
+        5.773159728050814e-15
+      ],
+      "global_E_hz": 489.8110851925823,
+      "D": 1.0,
+      "region_Z": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "stability": "NOT_ESTABLISHED",
+      "full_state_rhs_max": 4.996003610813204e-19,
+      "duplicate_of_root_index": null,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/released_high.npz"
+    },
+    {
+      "seed": "high",
+      "status": "ROOT_CONVERGED",
+      "residual_per_ms": 4.773959005888173e-15,
+      "iterations": [
+        0.8999999000000001,
+        0.44845877905276477,
+        0.16394981406620557,
+        0.07339460483025739,
+        0.007355373042175484,
+        8.944037900160406e-05,
+        1.3516179397932149e-08,
+        4.773959005888173e-15
+      ],
+      "global_E_hz": 489.8110851925823,
+      "D": 1.0,
+      "region_Z": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "stability": "NOT_ESTABLISHED",
+      "full_state_rhs_max": 0.0,
+      "duplicate_of_root_index": 1,
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/full_ZM_equilibria/high.npz"
+    }
+  ],
+  "distinct_roots_found": 2,
+  "Z": "dynamic",
+  "M": "dynamic",
+  "model": "Unchanged frozen spatial rate equations",
+  "claim": "Only stationary roots found from the named seeds. No completeness, stability, separatrix or onset bifurcation follows from root convergence alone."
+}

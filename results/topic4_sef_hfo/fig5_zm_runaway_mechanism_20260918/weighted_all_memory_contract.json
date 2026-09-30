@@ -1,0 +1,32 @@
+{
+  "created_local": "2026-09-20T01:06:19.151295+08:00",
+  "question": "Does applying the same causal historical weighting to all existing response channels repair the remaining joint-input error after mean-only weighting improved mean-only response?",
+  "hypothesis": "Existing closure multiplies all accumulated mean memory by the current (or filtered-current) alpha. A moving working point can therefore reweight old input history instantaneously. Test weighting mean increments before the same causal exponential memory filter.",
+  "equations": "Mean memory as registered previously. Additionally p_v_dot=-p_v/tau_v+(1-a_v(t))*v_dot, v_eff=max(v-p_v,0); p_c_dot=-p_c/tau_c+eta(t)*v_dot; add p_cE+p_cI to mu_eff. Keep the original variance proxy clamp and all static parameters.",
+  "variants": [
+    "weighted_all_memory_instantaneous",
+    "weighted_all_memory_history"
+  ],
+  "workpoints": [
+    "mu,vE,vI",
+    "mus,vEv,vIv"
+  ],
+  "datasets": [
+    "in_domain_waveform",
+    "factorial_waveform"
+  ],
+  "prediction": "No new coefficient, pole, time constant or selected optimum. Both variants are diagnostics on already acquired targets; no held-out acceptance claim.",
+  "checks": [
+    "Constant alpha identity to original input mixture under fixed weights",
+    "Small perturbation first-order identity with original response, including amplitude halving",
+    "Rates within zero and refractory bounds without post-hoc clipping"
+  ],
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1
+  },
+  "scope": "Final two fixed variants of this historical-weighting diagnostic, on already observed data. No new noise, fitting, network or bifurcation analysis. A pass remains a candidate requiring new waveforms; existing small-signal failures are unchanged. If neither variant passes all selected conditions, park this fixed-coefficient memory rearrangement route; do not tune a mixture of variants based on these targets.",
+  "budget": "Exactly two full-channel variants on both existing12-condition datasets; no target-selected combination or further weighting variant in this batch.",
+  "output_directory": "weighted_all_memory",
+  "trigger": "Weighted mean-only memory improved surround mean-only error to0.1486 but full-input error remains0.1754. Complete the same time-dependent-kernel idea for variance readout and variance-to-mean memory, without adjusting any coefficient."
+}

@@ -1,0 +1,517 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/entry_spatial_probes/extended_analysis_summary.json",
+  "rows": [
+    {
+      "name": "entry_z0.65_k0.0002_high",
+      "family": "Common t20 pattern",
+      "history": "high",
+      "mean_Z": 0.65,
+      "tail_mean_Hz": [
+        237.7693656249999,
+        408.369098143235,
+        408.32697201018016,
+        229.14525279054482
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            237.6499468750002,
+            408.4756852343029,
+            408.4356658184917,
+            229.0143532501643
+          ],
+          "peak_Hz_allE_A_B_other": [
+            246.11562500000002,
+            413.262599469496,
+            414.8854961832061,
+            237.76756401838477
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "entry_z0.7_k0.0002_high",
+      "family": "Common t20 pattern",
+      "history": "high",
+      "mean_Z": 0.7,
+      "tail_mean_Hz": [
+        218.58640312499963,
+        389.60888594164487,
+        391.43307888040516,
+        209.89275771503623
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.02,
+          "observed_duration_lower_bound_s": 0.02,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": {
+          "start_s": 2.43,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 27.57,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            218.5911974066014,
+            389.67773374549705,
+            390.80060839814445,
+            209.91241062265905
+          ],
+          "peak_Hz_allE_A_B_other": [
+            289.571875,
+            450.39787798408486,
+            459.0330788804072,
+            283.6474064346684
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.74_k0.0002_high",
+      "family": "Common t20 pattern",
+      "history": "high",
+      "mean_Z": 0.74,
+      "tail_mean_Hz": [
+        172.85783750000002,
+        247.3976127320957,
+        220.09236641221378,
+        169.7938411030858
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": {
+          "start_s": 2.43,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 27.57,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            173.03504601922367,
+            193.326704438858,
+            276.1735799044027,
+            169.871329732876
+          ],
+          "peak_Hz_allE_A_B_other": [
+            235.25,
+            439.1246684350133,
+            453.05343511450377,
+            234.7898883782009
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.78_k0.0002_high",
+      "family": "Common t20 pattern",
+      "history": "high",
+      "mean_Z": 0.78,
+      "tail_mean_Hz": [
+        30.556240624999987,
+        42.47785145888588,
+        43.41755725190838,
+        29.92925804333553
+      ],
+      "brief_events": 44,
+      "joint_quiet_fraction": 0.491,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.85_k0.0002_high",
+      "family": "Common t20 pattern",
+      "history": "high",
+      "mean_Z": 0.85,
+      "tail_mean_Hz": [
+        22.08272187500002,
+        32.502254641909765,
+        33.05648854961831,
+        21.54162836506895
+      ],
+      "brief_events": 49,
+      "joint_quiet_fraction": 0.46,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.74_k0.0002_Z10_high",
+      "family": "Entry t10 pattern",
+      "history": "high",
+      "mean_Z": 0.74,
+      "tail_mean_Hz": [
+        203.27417500000004,
+        409.9287798408488,
+        424.0940203562337,
+        192.460584372948
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.07,
+          "observed_duration_lower_bound_s": 0.07,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": {
+          "start_s": 2.41,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 27.59,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            203.02264067596937,
+            409.3644335442338,
+            423.9166844202688,
+            192.21487868628756
+          ],
+          "peak_Hz_allE_A_B_other": [
+            219.103125,
+            450.7957559681698,
+            453.8167938931298,
+            208.97898883782008
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.78_k0.0002_Z10_high",
+      "family": "Entry t10 pattern",
+      "history": "high",
+      "mean_Z": 0.78,
+      "tail_mean_Hz": [
+        125.79775312500007,
+        211.0367374005303,
+        351.1871501272264,
+        117.87174326986198
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": {
+          "start_s": 2.96,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 27.04,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            124.8570451183431,
+            231.72915064429503,
+            346.066754370116,
+            116.50338789449364
+          ],
+          "peak_Hz_allE_A_B_other": [
+            229.13125,
+            457.0291777188329,
+            430.91603053435114,
+            220.7977675640184
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.65_k0.0002_interictal",
+      "family": "Common t20 pattern",
+      "history": "interictal",
+      "mean_Z": 0.65,
+      "tail_mean_Hz": [
+        237.77211875,
+        408.2014588859407,
+        408.69770992366614,
+        229.14272816808943
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            238.03598437499988,
+            407.97210433244777,
+            408.077099236643,
+            229.44162617640578
+          ],
+          "peak_Hz_allE_A_B_other": [
+            349.809375,
+            449.6021220159151,
+            451.6539440203562,
+            346.0866710439921
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "entry_z0.7_k0.0002_interictal",
+      "family": "Common t20 pattern",
+      "history": "interictal",
+      "mean_Z": 0.7,
+      "tail_mean_Hz": [
+        218.60284999999993,
+        389.5653846153845,
+        391.348346055978,
+        209.91329940906073
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            218.51291562500003,
+            389.43019451812586,
+            390.4304071246788,
+            209.84585138980188
+          ],
+          "peak_Hz_allE_A_B_other": [
+            275.653125,
+            439.920424403183,
+            425.69974554707375,
+            269.12344057780695
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "entry_z0.74_k0.0002_interictal",
+      "family": "Common t20 pattern",
+      "history": "interictal",
+      "mean_Z": 0.74,
+      "tail_mean_Hz": [
+        174.80488125000022,
+        287.1038461538462,
+        154.7297709923666,
+        172.543082731451
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            173.0286729166668,
+            280.9591511936334,
+            157.463486005089,
+            170.7586353687898
+          ],
+          "peak_Hz_allE_A_B_other": [
+            237.071875,
+            425.86206896551727,
+            412.59541984732823,
+            238.6736703873933
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "entry_z0.78_k0.0002_interictal",
+      "family": "Common t20 pattern",
+      "history": "interictal",
+      "mean_Z": 0.78,
+      "tail_mean_Hz": [
+        28.834912499999966,
+        42.73488063660468,
+        40.75496183206105,
+        28.183246881155604
+      ],
+      "brief_events": 40,
+      "joint_quiet_fraction": 0.481,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.12,
+          "observed_duration_lower_bound_s": 0.12,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.85_k0.0002_interictal",
+      "family": "Common t20 pattern",
+      "history": "interictal",
+      "mean_Z": 0.85,
+      "tail_mean_Hz": [
+        22.00739687499998,
+        33.33461538461533,
+        31.87671755725188,
+        21.472334208798397
+      ],
+      "brief_events": 45,
+      "joint_quiet_fraction": 0.462,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.12,
+          "observed_duration_lower_bound_s": 0.12,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "entry_z0.74_k0.0002_Z10_interictal",
+      "family": "Entry t10 pattern",
+      "history": "interictal",
+      "mean_Z": 0.74,
+      "tail_mean_Hz": [
+        203.33504375000004,
+        409.55901856763916,
+        423.96170483460537,
+        192.53709783322384
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            203.03037812500017,
+            409.2716180371348,
+            422.95937234944836,
+            192.2500076603199
+          ],
+          "peak_Hz_allE_A_B_other": [
+            264.715625,
+            440.18567639257293,
+            447.20101781170484,
+            257.0354563361786
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "entry_z0.78_k0.0002_Z10_interictal",
+      "family": "Entry t10 pattern",
+      "history": "interictal",
+      "mean_Z": 0.78,
+      "tail_mean_Hz": [
+        124.67004062499996,
+        204.29151193633976,
+        350.7036895674301,
+        116.86646093237
+      ],
+      "brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.13,
+          "observed_duration_lower_bound_s": 0.13,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": {
+          "start_s": 0.21,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 29.79,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            124.5313297247399,
+            208.65826479432073,
+            347.30108212961505,
+            116.70044546890614
+          ],
+          "peak_Hz_allE_A_B_other": [
+            238.525,
+            439.920424403183,
+            415.52162849872775,
+            236.99606040709128
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      }
+    }
+  ],
+  "producer_sha256": "4f1500912143b3496cb8d7f06f2ddf385ae82fc36eb274fb05e37166a6029216",
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS",
+  "formal_bifurcation": false,
+  "interpretation": "Same mean-Z coordinates need a specified spatial field family. t10 is60ms after the operational entry marker, not an exact bifurcation state.",
+  "agent_visual_notes": "InspectedrenderedPNG: labels/legend/axesvisible, alignedsemanticcolors, observedZ.78contrastclear. Conditionalguide lines explicitlydistinguishedfromformalbranches. Humanreviewpending."
+}

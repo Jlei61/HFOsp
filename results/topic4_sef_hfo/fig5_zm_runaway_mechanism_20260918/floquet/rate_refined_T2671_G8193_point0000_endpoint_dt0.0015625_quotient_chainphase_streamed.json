@@ -1,0 +1,35 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+  "N": 8193,
+  "D": 0.14497187728110808,
+  "T_ms": 267.1,
+  "dt_ms": 0.0015625,
+  "multipliers": [
+    [
+      0.9328952081612201,
+      0.0
+    ]
+  ],
+  "eigen_residuals": [
+    3.2207222463190525e-12
+  ],
+  "phase_index": null,
+  "phase_defect": 0.002833188415222612,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 0.9328952081612201,
+  "phase_projection": 0.9971668807787895,
+  "phase_quotient": true,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "reusable blocks with cached exact local gradients",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "STABLE",
+  "calls": 11,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/rate_refined_T2671_G8193_point0000_endpoint_dt0.003125_quotient_chainphase_streamed.npz"
+}

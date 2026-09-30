@@ -1,0 +1,30 @@
+{
+  "status": "FROZEN_BEFORE_FRESH_NONLINEAR_RESPONSE",
+  "created_epoch": 1790536322.7962363,
+  "question": "Does the single measured-Jacobian Newton proposal actually reduce the original direct density-cell source/local residuals under fresh independent count paths?",
+  "design": {
+    "targets": 40000,
+    "streams": 2,
+    "replicas": 256,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "seeds": [
+      928901,
+      928902
+    ],
+    "devices": [
+      0,
+      1
+    ]
+  },
+  "change": "Only the proposed source/individualM equilibrium coordinates. HeldZ/K, graph, externalmean, synaptic filters and native cell update unchanged; no neural response function.",
+  "physical_projection": {
+    "negative_proposed_M_count": 10,
+    "maximum_projection": 5.659107775288225e-05,
+    "explanation": "Tiny negative rate/M predictions from sampling were projected to0 before direct evaluation. Source constraint is remeasured, not assumed exact."
+  },
+  "criterion": "Compare actual source-group weightedRMS/max residual with the starting point, alongside independent MonteCarlo SEM. A reduced residual supports this step; it is not exact-root, dynamical stability, or native bifurcation certification. No automatic next Newton step.",
+  "producer_sha256": "4cb41f3a47114eee43756d7ddc5f500ae2fd6cfd8b3dcdd822feecd67d975e4f",
+  "proposal_sha256": "58d717c7df3933be8e2c76eb1056e0259c9765655a69a6946fec1ed321f60a86",
+  "formal_bifurcation_allowed": false
+}

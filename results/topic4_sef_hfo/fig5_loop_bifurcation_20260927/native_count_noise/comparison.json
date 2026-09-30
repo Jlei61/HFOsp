@@ -1,0 +1,775 @@
+{
+  "status": "COMPLETE",
+  "completed": [
+    928701,
+    928702
+  ],
+  "rows": [
+    {
+      "name": "Native original 8405",
+      "first_causal_R_le5_for100ms_s": 16.868,
+      "first_joint_allE_A_B_le5_for100ms_s": 16.835,
+      "first_Graw_below_allcell_resource_block_after_Rlow_s": 17.551,
+      "final_Z_allE_A_B_other": [
+        0.49720775994953326,
+        0.4778585556813315,
+        0.4738897485142639,
+        0.49828843155184277
+      ],
+      "final_K_allE_A_B_other": [
+        5.929764123850076,
+        6.423626991348137,
+        6.820753644862849,
+        5.894547762536564
+      ],
+      "windows": [
+        {
+          "window_s": [
+            10,
+            12
+          ],
+          "mean_rate_allE_A_B_other": [
+            230.368609375,
+            421.05769230769346,
+            437.04643765903404,
+            220.3151510177282
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6459311918118885,
+            0.5587569944411355,
+            0.5306207032668286,
+            0.6510645926265294
+          ],
+          "mean_K_allE_A_B_other": [
+            1.352602272142299,
+            2.3543098144273458,
+            2.4134107547356254,
+            1.3004327726609708
+          ],
+          "mean_Graw": 2.0976822964892876,
+          "mean_field_weighted_RMS_Hz": 0.0
+        },
+        {
+          "window_s": [
+            12,
+            14
+          ],
+          "mean_rate_allE_A_B_other": [
+            198.168140625,
+            335.5477453580904,
+            379.3880407124689,
+            190.09121799080802
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4511735133419295,
+            0.3745445160354805,
+            0.3556842714823824,
+            0.45553440658128197
+          ],
+          "mean_K_allE_A_B_other": [
+            3.7900162127149293,
+            5.452856522464283,
+            5.518110319190315,
+            3.704262320356404
+          ],
+          "mean_Graw": 4.585025000484965,
+          "mean_field_weighted_RMS_Hz": 0.0
+        },
+        {
+          "window_s": [
+            14,
+            16
+          ],
+          "mean_rate_allE_A_B_other": [
+            236.912765625,
+            265.6412466843506,
+            273.26081424936405,
+            235.26369008535784
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.3024294404971122,
+            0.251063692961129,
+            0.23842134353422564,
+            0.30535262296116206
+          ],
+          "mean_K_allE_A_B_other": [
+            6.06758723918613,
+            7.0348466801967495,
+            7.557564883383642,
+            6.005196036071842
+          ],
+          "mean_Graw": 6.257213009640738,
+          "mean_field_weighted_RMS_Hz": 0.0
+        },
+        {
+          "window_s": [
+            16,
+            18
+          ],
+          "mean_rate_allE_A_B_other": [
+            104.964390625,
+            142.8309018567638,
+            111.28307888040737,
+            103.86400196979653
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.2119658819028572,
+            0.17732331594385883,
+            0.1690690502407888,
+            0.21393034035392314
+          ],
+          "mean_K_allE_A_B_other": [
+            9.330557338433248,
+            10.250727386105819,
+            10.791022380031668,
+            9.27009332862886
+          ],
+          "mean_Graw": 5.863624428416544,
+          "mean_field_weighted_RMS_Hz": 0.0
+        },
+        {
+          "window_s": [
+            18,
+            20
+          ],
+          "mean_rate_allE_A_B_other": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.3805473102323498,
+            0.3567086037566925,
+            0.351818933473471,
+            0.38187872483560403
+          ],
+          "mean_K_allE_A_B_other": [
+            7.30560286181504,
+            7.914053029946765,
+            8.403322005208533,
+            7.262215512061972
+          ],
+          "mean_Graw": 0.26671224893767687,
+          "mean_field_weighted_RMS_Hz": 0.0
+        }
+      ],
+      "diagnostic_definitions": "CausalRreadoutat1ms; jointallE/coreA/coreB means10ms bins for100ms. Theseare reporteddiagnostics,not a new controller. Absencebefore20s is censored.",
+      "first_recovery_or_exit_is_not_sufficient_restoration": true
+    },
+    {
+      "name": "Native count 928701",
+      "first_causal_R_le5_for100ms_s": 13.748,
+      "first_joint_allE_A_B_le5_for100ms_s": 13.735,
+      "first_Graw_below_allcell_resource_block_after_Rlow_s": 14.083,
+      "final_Z_allE_A_B_other": [
+        0.41923240972454423,
+        0.4176498545758585,
+        0.3938843374089719,
+        0.41992567405225756
+      ],
+      "final_K_allE_A_B_other": [
+        5.670418702430717,
+        6.270909166165501,
+        7.2514313421313,
+        5.614757318830564
+      ],
+      "windows": [
+        {
+          "window_s": [
+            10,
+            12
+          ],
+          "mean_rate_allE_A_B_other": [
+            226.59115625,
+            424.9960212201605,
+            438.24745547073906,
+            216.21823703217345
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6470454841298867,
+            0.5587569944411355,
+            0.5306207032668286,
+            0.6522352214569939
+          ],
+          "mean_K_allE_A_B_other": [
+            1.3078102888893064,
+            2.2606685606077312,
+            2.316099347679528,
+            1.2582052220119329
+          ],
+          "mean_Graw": 2.010230655016355,
+          "mean_field_weighted_RMS_Hz": 11.097541539141034
+        },
+        {
+          "window_s": [
+            12,
+            14
+          ],
+          "mean_rate_allE_A_B_other": [
+            192.53946875,
+            337.45954907161854,
+            384.2181933842235,
+            184.00600787918592
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.45731927064347744,
+            0.3745445160354805,
+            0.3556842714823824,
+            0.4619908817503406
+          ],
+          "mean_K_allE_A_B_other": [
+            3.7645364863620716,
+            5.513596212584448,
+            5.567885656064626,
+            3.674706431176324
+          ],
+          "mean_Graw": 4.5011890365248055,
+          "mean_field_weighted_RMS_Hz": 30.902698127456098
+        },
+        {
+          "window_s": [
+            14,
+            16
+          ],
+          "mean_rate_allE_A_B_other": [
+            0.00015625,
+            0.0,
+            0.0,
+            0.00016414970453053183
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4666042293703668,
+            0.4114248533512943,
+            0.3984613973585883,
+            0.46972850761986273
+          ],
+          "mean_K_allE_A_B_other": [
+            3.5960856979240736,
+            4.900640648436077,
+            4.948720175946224,
+            3.5288892063806925
+          ],
+          "mean_Graw": 0.7738093868713212,
+          "mean_field_weighted_RMS_Hz": 238.09014761931303
+        },
+        {
+          "window_s": [
+            16,
+            18
+          ],
+          "mean_rate_allE_A_B_other": [
+            82.433828125,
+            63.941644562334176,
+            51.92239185750636,
+            83.67890676296798
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6178806349014786,
+            0.5949974314715324,
+            0.5810152189002534,
+            0.619398368071641
+          ],
+          "mean_K_allE_A_B_other": [
+            2.0661555367769786,
+            2.5011458162324365,
+            2.8391494607000514,
+            2.0354412920326284
+          ],
+          "mean_Graw": 0.4676814744489828,
+          "mean_field_weighted_RMS_Hz": 99.0196806608749
+        },
+        {
+          "window_s": [
+            18,
+            20
+          ],
+          "mean_rate_allE_A_B_other": [
+            211.113046875,
+            231.55702917771896,
+            196.99936386768485,
+            210.97117531188425
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.5036101080097364,
+            0.5008936396422226,
+            0.4809054522070479,
+            0.5042632293692247
+          ],
+          "mean_K_allE_A_B_other": [
+            2.968145658762246,
+            3.241874571818779,
+            3.7275330261832753,
+            2.941774349791872
+          ],
+          "mean_Graw": 3.588897468943867,
+          "mean_field_weighted_RMS_Hz": 219.88615790369627
+        }
+      ],
+      "diagnostic_definitions": "CausalRreadoutat1ms; jointallE/coreA/coreB means10ms bins for100ms. Theseare reporteddiagnostics,not a new controller. Absencebefore20s is censored.",
+      "first_recovery_or_exit_is_not_sufficient_restoration": true,
+      "paired_input_gate": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_count_noise/runs/count928701/paired_input_audit.json"
+    },
+    {
+      "name": "Native count 928702",
+      "first_causal_R_le5_for100ms_s": 13.744,
+      "first_joint_allE_A_B_le5_for100ms_s": 13.735,
+      "first_Graw_below_allcell_resource_block_after_Rlow_s": 14.138,
+      "final_Z_allE_A_B_other": [
+        0.40964164108976997,
+        0.39964658021772137,
+        0.3862037493433602,
+        0.41049385575852254
+      ],
+      "final_K_allE_A_B_other": [
+        4.461594470431443,
+        4.4742804001545995,
+        5.6195557668061165,
+        4.431400026243599
+      ],
+      "windows": [
+        {
+          "window_s": [
+            10,
+            12
+          ],
+          "mean_rate_allE_A_B_other": [
+            228.883359375,
+            422.26458885941634,
+            437.63358778626065,
+            218.70978332239002
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6463422935441733,
+            0.5587569944411355,
+            0.5306207032668286,
+            0.6514964788850031
+          ],
+          "mean_K_allE_A_B_other": [
+            1.325618914776676,
+            2.307351176953065,
+            2.3645249854942354,
+            1.2745090560352124
+          ],
+          "mean_Graw": 2.053956826831344,
+          "mean_field_weighted_RMS_Hz": 4.670210635860353
+        },
+        {
+          "window_s": [
+            12,
+            14
+          ],
+          "mean_rate_allE_A_B_other": [
+            193.4965625,
+            340.05835543766625,
+            384.7461832061062,
+            184.93353578463535
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.45437340941490306,
+            0.3745445160354805,
+            0.3556842714823824,
+            0.4588960833486865
+          ],
+          "mean_K_allE_A_B_other": [
+            3.891530793471648,
+            5.629485904958744,
+            5.686673843259106,
+            3.8021873728808977
+          ],
+          "mean_Graw": 4.587486161932253,
+          "mean_field_weighted_RMS_Hz": 28.791684203504417
+        },
+        {
+          "window_s": [
+            14,
+            16
+          ],
+          "mean_rate_allE_A_B_other": [
+            0.000125,
+            0.0,
+            0.0,
+            0.00013131976362442546
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4561184202710038,
+            0.4028820386047552,
+            0.3898309856374314,
+            0.4591467247817831
+          ],
+          "mean_K_allE_A_B_other": [
+            4.119079347890994,
+            5.504421565525783,
+            5.557334965992089,
+            4.047673670020866
+          ],
+          "mean_Graw": 0.8633074812183267,
+          "mean_field_weighted_RMS_Hz": 238.09017950873212
+        },
+        {
+          "window_s": [
+            16,
+            18
+          ],
+          "mean_rate_allE_A_B_other": [
+            86.938171875,
+            59.433687002652526,
+            49.360687022900755,
+            88.58867367038738
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6105567097586103,
+            0.5894911653950512,
+            0.5756815005805916,
+            0.611978093043707
+          ],
+          "mean_K_allE_A_B_other": [
+            2.308473867997397,
+            2.770827281634175,
+            3.1113548959691717,
+            2.2763110655723153
+          ],
+          "mean_Graw": 0.4758677409726092,
+          "mean_field_weighted_RMS_Hz": 110.65310142372753
+        },
+        {
+          "window_s": [
+            18,
+            20
+          ],
+          "mean_rate_allE_A_B_other": [
+            212.313078125,
+            190.011273209549,
+            217.87468193384234,
+            212.72161851608712
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.49707958550490206,
+            0.490736412771412,
+            0.4758109873903292,
+            0.49778542497828027
+          ],
+          "mean_K_allE_A_B_other": [
+            2.863983074035858,
+            3.029919556524106,
+            3.74610351832296,
+            2.8371129894329106
+          ],
+          "mean_Graw": 3.6097389657234302,
+          "mean_field_weighted_RMS_Hz": 221.69921576812752
+        }
+      ],
+      "diagnostic_definitions": "CausalRreadoutat1ms; jointallE/coreA/coreB means10ms bins for100ms. Theseare reporteddiagnostics,not a new controller. Absencebefore20s is censored.",
+      "first_recovery_or_exit_is_not_sufficient_restoration": true,
+      "paired_input_gate": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_count_noise/runs/count928702/paired_input_audit.json"
+    },
+    {
+      "name": "Density 927671",
+      "first_causal_R_le5_for100ms_s": 13.75,
+      "first_joint_allE_A_B_le5_for100ms_s": 13.735,
+      "first_Graw_below_allcell_resource_block_after_Rlow_s": 14.162,
+      "final_Z_allE_A_B_other": [
+        0.4366752587296069,
+        0.45446211384209145,
+        0.43797281289676976,
+        0.4362014843917801
+      ],
+      "final_K_allE_A_B_other": [
+        2.32655652509151,
+        2.3129404561905393,
+        2.576938257569272,
+        2.32043264046327
+      ],
+      "windows": [
+        {
+          "window_s": [
+            10,
+            12
+          ],
+          "mean_rate_allE_A_B_other": [
+            229.60879667663573,
+            421.17943137900016,
+            438.089906182907,
+            219.48698411466884
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6444919794066164,
+            0.5576372443813853,
+            0.5295572352401322,
+            0.6496077764888182
+          ],
+          "mean_K_allE_A_B_other": [
+            1.3498397617890998,
+            2.3633876153241813,
+            2.4309311503196254,
+            1.2968537830316982
+          ],
+          "mean_Graw": 2.0897468136244766,
+          "mean_field_weighted_RMS_Hz": 5.3565212164217355
+        },
+        {
+          "window_s": [
+            12,
+            14
+          ],
+          "mean_rate_allE_A_B_other": [
+            193.72828597259522,
+            338.2841586408942,
+            386.46779518030405,
+            185.17646777728518
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4518918728734099,
+            0.37383379474007555,
+            0.355009269548509,
+            0.4563240960226512
+          ],
+          "mean_K_allE_A_B_other": [
+            3.9528850654637155,
+            5.675627741987415,
+            5.741359405666366,
+            3.8640902916784743
+          ],
+          "mean_Graw": 4.625363762426669,
+          "mean_field_weighted_RMS_Hz": 27.535610483668304
+        },
+        {
+          "window_s": [
+            14,
+            16
+          ],
+          "mean_rate_allE_A_B_other": [
+            1.51214599609375e-05,
+            0.0,
+            0.0,
+            1.5885972381812227e-05
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4523973554040891,
+            0.4000860577830041,
+            0.3874218311055386,
+            0.4553689076202725
+          ],
+          "mean_K_allE_A_B_other": [
+            4.307030624198385,
+            5.696744437993355,
+            5.76473240628589,
+            4.2350149375167625
+          ],
+          "mean_Graw": 0.9064259721168357,
+          "mean_field_weighted_RMS_Hz": 238.09029250818807
+        },
+        {
+          "window_s": [
+            16,
+            18
+          ],
+          "mean_rate_allE_A_B_other": [
+            79.61228575134277,
+            47.10855903929047,
+            47.06415742286892,
+            81.25675846332805
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6103950724757333,
+            0.5890827742211077,
+            0.5759929164658485,
+            0.611810357029501
+          ],
+          "mean_K_allE_A_B_other": [
+            2.3994107436690446,
+            2.8881965275678,
+            3.212602247401542,
+            2.3663275853304526
+          ],
+          "mean_Graw": 0.42911019896446534,
+          "mean_field_weighted_RMS_Hz": 111.30845115245981
+        },
+        {
+          "window_s": [
+            18,
+            20
+          ],
+          "mean_rate_allE_A_B_other": [
+            168.47955923461913,
+            118.6096071602496,
+            123.28444277542535,
+            170.88025868967506
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.5140365982019385,
+            0.5195714317455257,
+            0.509940503399771,
+            0.5140052871718211
+          ],
+          "mean_K_allE_A_B_other": [
+            2.7128077533859116,
+            2.55388041403179,
+            3.15184309504945,
+            2.705412790658571
+          ],
+          "mean_Graw": 3.3151352102436893,
+          "mean_field_weighted_RMS_Hz": 203.182701417119
+        }
+      ],
+      "diagnostic_definitions": "CausalRreadoutat1ms; jointallE/coreA/coreB means10ms bins for100ms. Theseare reporteddiagnostics,not a new controller. Absencebefore20s is censored.",
+      "first_recovery_or_exit_is_not_sufficient_restoration": true
+    },
+    {
+      "name": "Density 927672",
+      "first_causal_R_le5_for100ms_s": 13.764,
+      "first_joint_allE_A_B_le5_for100ms_s": 13.745,
+      "first_Graw_below_allcell_resource_block_after_Rlow_s": 14.185,
+      "final_Z_allE_A_B_other": [
+        0.4444292548960075,
+        0.4760498962999971,
+        0.44793235789273533,
+        0.44355612940112776
+      ],
+      "final_K_allE_A_B_other": [
+        2.6365720836006874,
+        2.4389055589465944,
+        2.9704418331005495,
+        2.6328497899855297
+      ],
+      "windows": [
+        {
+          "window_s": [
+            10,
+            12
+          ],
+          "mean_rate_allE_A_B_other": [
+            229.18410703277587,
+            421.30040888697863,
+            438.1295259199063,
+            219.03680595453042
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6444814778130836,
+            0.5576372443813853,
+            0.5295572352401322,
+            0.6495967439545743
+          ],
+          "mean_K_allE_A_B_other": [
+            1.3456646565601218,
+            2.359551726798123,
+            2.427452867536092,
+            1.2926522998698162
+          ],
+          "mean_Graw": 2.0869856150687505,
+          "mean_field_weighted_RMS_Hz": 6.533048924300991
+        },
+        {
+          "window_s": [
+            12,
+            14
+          ],
+          "mean_rate_allE_A_B_other": [
+            195.88924972534178,
+            341.20037307536876,
+            389.4883660469344,
+            187.29655463556182
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4518720052840961,
+            0.37383379474007555,
+            0.355009269548509,
+            0.45630322396559275
+          ],
+          "mean_K_allE_A_B_other": [
+            3.9678859717156842,
+            5.6924858811319,
+            5.758782080154386,
+            3.8789827322891437
+          ],
+          "mean_Graw": 4.650858607630186,
+          "mean_field_weighted_RMS_Hz": 27.605965030931742
+        },
+        {
+          "window_s": [
+            14,
+            16
+          ],
+          "mean_rate_allE_A_B_other": [
+            1.3641357421875e-05,
+            0.0,
+            0.0,
+            1.4331038657255422e-05
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.4490219837362536,
+            0.3967230153694272,
+            0.3841040875204194,
+            0.45199174370257805
+          ],
+          "mean_K_allE_A_B_other": [
+            4.40724496447345,
+            5.812415953890091,
+            5.88470207455322,
+            4.33433688126456
+          ],
+          "mean_Graw": 0.9476646408089536,
+          "mean_field_weighted_RMS_Hz": 238.0902942628865
+        },
+        {
+          "window_s": [
+            16,
+            18
+          ],
+          "mean_rate_allE_A_B_other": [
+            78.74463341522217,
+            45.24691618658819,
+            47.13091839118161,
+            80.38959923266437
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.6081983853943612,
+            0.5867479991580439,
+            0.5737335375954444,
+            0.6096187058668571
+          ],
+          "mean_K_allE_A_B_other": [
+            2.4516370387012976,
+            2.952667962585183,
+            3.275450549116001,
+            2.4179766731138255
+          ],
+          "mean_Graw": 0.4286781039573935,
+          "mean_field_weighted_RMS_Hz": 110.97822009081803
+        },
+        {
+          "window_s": [
+            18,
+            20
+          ],
+          "mean_rate_allE_A_B_other": [
+            180.05595559692384,
+            115.83540615415697,
+            122.52780003826719,
+            183.13013237134754
+          ],
+          "mean_Z_allE_A_B_other": [
+            0.5215543395715315,
+            0.5377820455881532,
+            0.5204031200658427,
+            0.5211823490329547
+          ],
+          "mean_K_allE_A_B_other": [
+            2.6007395279507888,
+            2.3792731953183557,
+            3.0419230887221005,
+            2.5948372080571147
+          ],
+          "mean_Graw": 3.1969196075289648,
+          "mean_field_weighted_RMS_Hz": 223.1644429972602
+        }
+      ],
+      "diagnostic_definitions": "CausalRreadoutat1ms; jointallE/coreA/coreB means10ms bins for100ms. Theseare reporteddiagnostics,not a new controller. Absencebefore20s is censored.",
+      "first_recovery_or_exit_is_not_sufficient_restoration": true
+    }
+  ],
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false,
+  "statistical_unit": "Three countrealizations conditionalon one nativeinitialstate andone identicalOU meantrajectory. No preciseensemble distributionestimated.",
+  "producer_sha256": "f9779954fae7a91b253821a3c63e29253bf1db619619bf7baaef238225317a13"
+}

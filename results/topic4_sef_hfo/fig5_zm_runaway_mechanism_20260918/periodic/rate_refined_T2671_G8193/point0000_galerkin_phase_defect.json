@@ -1,0 +1,31 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+  "rows": [
+    {
+      "N": 8193,
+      "M": 32768,
+      "D": 0.14497187728110808,
+      "T_ms": 267.1,
+      "retained_residual_max_hz": 4.829470157119431e-12,
+      "phase_JVP_relative": 0.004118938718854732,
+      "phase_JVP_max_hz_per_cycle_phase": 15327.012535057196,
+      "unprojected_rms_hz": 0.0058874459106899755,
+      "unprojected_max_hz": 4.632412106386652,
+      "unprojected_relative_rate_L2": 3.948522855123144e-05
+    },
+    {
+      "N": 8193,
+      "M": 65536,
+      "D": 0.14497187728110808,
+      "T_ms": 267.1,
+      "retained_residual_max_hz": 0.05417793165635176,
+      "phase_JVP_relative": 0.0021480153403860567,
+      "phase_JVP_max_hz_per_cycle_phase": 7350.838187092448,
+      "unprojected_rms_hz": 0.0058857457673139385,
+      "unprojected_max_hz": 5.360821599308563,
+      "unprojected_relative_rate_L2": 3.9473826250288206e-05
+    }
+  ],
+  "claim": "Closure/quadrature diagnostics, not a stability classification"
+}

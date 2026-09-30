@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "delayed_operator_checks": [
+    {
+      "step": 0,
+      "max_error": 0.0
+    },
+    {
+      "step": 1,
+      "max_error": 0.0
+    },
+    {
+      "step": 51,
+      "max_error": 0.0
+    },
+    {
+      "step": 4999,
+      "max_error": 1.3877787807814457e-17
+    },
+    {
+      "step": 17821,
+      "max_error": 5.551115123125783e-17
+    },
+    {
+      "step": 29999,
+      "max_error": 3.979039320256561e-13
+    }
+  ],
+  "native_discrete_means_match_old_reconstruction": 2.205524651799351e-11,
+  "measured_mean_inversion_max_error": 2.9558577807620168e-12,
+  "source_replay": "PASS_SIX_NATIVE_CHUNKS_AND_ORIGINAL_CELL_FIELDS",
+  "private_variance": "Only old stationary Poisson split sensitivity; not exact conditional nonstationary covariance.",
+  "no_autonomous_validation": true
+}

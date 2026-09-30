@@ -1,0 +1,2867 @@
+{
+  "status": "LOCAL_VALIDATION_COMPLETE",
+  "linear_response_verdict": "FAIL",
+  "n_counted": 146,
+  "n_failed": 69,
+  "by_channel": {
+    "mean": {
+      "n": 58,
+      "failed": 1
+    },
+    "variance_E": {
+      "n": 56,
+      "failed": 44
+    },
+    "variance_I": {
+      "n": 32,
+      "failed": 24
+    }
+  },
+  "response_rows": [
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.018516845479671536,
+      "new_error": 0.05188995568265643,
+      "predicted": [
+        2.863933508030792,
+        -0.8681714883562002
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.03749549189814654,
+      "new_error": 0.04453520947489663,
+      "predicted": [
+        1.6603999307753046,
+        -0.8138487787368136
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.1638870302863098,
+      "new_error": 0.14407938840498807,
+      "predicted": [
+        0.7014059664079257,
+        -0.11300471879632677
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.24218921973955942,
+      "new_error": 0.25813912143325957,
+      "predicted": [
+        0.42229614507842317,
+        -0.509612475284835
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.0659056935744809,
+      "new_error": 0.292855018561213,
+      "predicted": [
+        0.17743740218662307,
+        -0.18052632824712772
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.1477325105751044,
+      "new_error": 0.1556753641645946,
+      "predicted": [
+        -0.07235324238661142,
+        -0.08708023180277896
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.02168409469960348,
+      "new_error": 0.039707989223153536,
+      "predicted": [
+        1.6886819178303338,
+        -0.4034397233127929
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.019405367537633098,
+      "new_error": 0.03328928761975845,
+      "predicted": [
+        1.0790061152522348,
+        -0.54634731015266
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.07382562210251693,
+      "new_error": 0.04657856679925355,
+      "predicted": [
+        0.3475721535323898,
+        -0.06804298198762478
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.15109758291106667,
+      "new_error": 0.12832828323123094,
+      "predicted": [
+        0.2084829299492707,
+        -0.23189614590965396
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.025444670910723624,
+      "new_error": 0.040079826344938674,
+      "predicted": [
+        0.09289849692869405,
+        -0.05564910310906159
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.2753228474111604,
+      "new_error": 0.2760292323076397,
+      "predicted": [
+        0.004507813498331983,
+        -0.04942472287435992
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.031177859935315414,
+      "new_error": 0.06420253038584528,
+      "predicted": [
+        2.8914379338501917,
+        -0.44401229840548956
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.02254057063360508,
+      "new_error": 0.03903075237384974,
+      "predicted": [
+        2.2747005957131337,
+        -0.4359262745304499
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.027015528009200852,
+      "new_error": 0.0607650505921157,
+      "predicted": [
+        0.06144977597540795,
+        0.011336160876260217
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.12688548079318243,
+      "new_error": 0.1947962037141529,
+      "predicted": [
+        0.08361743395997356,
+        -0.013186489941535163
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.04011791453364943,
+      "new_error": 0.07769983673019874,
+      "predicted": [
+        0.022809838581305107,
+        -0.007942155013334104
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.12290971850314898,
+      "new_error": 0.09017608326862063,
+      "predicted": [
+        0.0021611752095087302,
+        -0.011271914045522564
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.013177181308132398,
+      "new_error": 0.008504604740439892,
+      "predicted": [
+        7.810851427181262,
+        0.021099398662707047
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.05488669761532962,
+      "new_error": 0.009542112487299205,
+      "predicted": [
+        7.633521517602123,
+        0.3674606014950013
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.09590629994049894,
+      "new_error": 0.2274810993056366,
+      "predicted": [
+        -0.06308549927936688,
+        0.0036740142032309947
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.2673126822730498,
+      "new_error": 0.36682480152805286,
+      "predicted": [
+        -0.046233525344129854,
+        0.015110584030543127
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.04836542007449685,
+      "new_error": 1.8864194179253557,
+      "predicted": [
+        0.01026640166711939,
+        0.003087497589234118
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.05702991817847569,
+      "new_error": 1.0272955702180433,
+      "predicted": [
+        0.005495736152226763,
+        -0.005083873327737617
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.03237109659157069,
+      "new_error": 0.0063305243674035856,
+      "predicted": [
+        3.900453703930903,
+        0.036388181162548744
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.07949596273904272,
+      "new_error": 0.018991736957041063,
+      "predicted": [
+        3.8180685820331304,
+        0.3034816333860276
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.05679627174455405,
+      "new_error": 0.07246705223991223,
+      "predicted": [
+        -0.04495799432471364,
+        0.017229051521636184
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.08772350766328758,
+      "new_error": 0.0485724389912138,
+      "predicted": [
+        -0.017269290998707533,
+        0.046528945848110424
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.1637319858200116,
+      "new_error": 0.9290865141637585,
+      "predicted": [
+        0.0013773055906468015,
+        0.0025079471089810095
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.2693757500450493,
+      "new_error": 0.3895024776778967,
+      "predicted": [
+        -0.0007289087338695763,
+        0.0009066557036916118
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.0188731222239802,
+      "new_error": 0.0047809550093954115,
+      "predicted": [
+        7.622154453062703,
+        0.0702474889836627
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.07151065311585544,
+      "new_error": 0.011904734636476367,
+      "predicted": [
+        7.555702262421207,
+        0.511129305280638
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.04111135419308969,
+      "new_error": 0.030939032662486002,
+      "predicted": [
+        -0.07498087552299994,
+        0.009357568952377618
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.14947206717715183,
+      "new_error": 0.08447050288167599,
+      "predicted": [
+        -0.06066721490708356,
+        0.027861828419423744
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 6.0,
+      "counted": true,
+      "old_error": 0.06367733031855845,
+      "new_error": 0.7689010068462433,
+      "predicted": [
+        -0.02174750705532481,
+        0.007832701634700762
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.0628892634458383,
+      "new_error": 0.3268949469883751,
+      "predicted": [
+        -0.003569529835201286,
+        0.010156759020695277
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.07393614368736355,
+      "new_error": 0.011214479638098317,
+      "predicted": [
+        3.8256875219378563,
+        0.2447498442434535
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.10596805540129686,
+      "new_error": 0.10078666436558728,
+      "predicted": [
+        -0.0077305956793104645,
+        0.04632922105732034
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.3121039424275452,
+      "new_error": 0.18964434852022488,
+      "predicted": [
+        -0.0005773526337388803,
+        0.00021694208149099047
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.050507531645791755,
+      "new_error": 0.01024702837470913,
+      "predicted": [
+        7.716360339185267,
+        0.3516038991706736
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.2358649671222494,
+      "new_error": 0.34148467641285835,
+      "predicted": [
+        -0.04154083480308147,
+        0.017418552054987862
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "v2_assayed",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 25.0,
+      "counted": true,
+      "old_error": 0.10560206464974202,
+      "new_error": 0.8838802186061224,
+      "predicted": [
+        0.004191053993336649,
+        -0.0028393709403724907
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.025433718690771056,
+      "new_error": 0.019106931358462746,
+      "predicted": [
+        4.039293723322605,
+        -0.4472146092940961
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.03538638601958803,
+      "new_error": 0.005506622021388452,
+      "predicted": [
+        3.6392776726357847,
+        -0.24362477847884123
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.2684856644061613,
+      "new_error": 0.9849409725479322,
+      "predicted": [
+        0.11052848424307415,
+        -0.0035991649007533714
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 1.3488194640886233,
+      "new_error": 0.35551068512249034,
+      "predicted": [
+        0.15163331279359663,
+        -0.14146049434769561
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 1.986894052738105,
+      "new_error": 2.03023931624399,
+      "predicted": [
+        0.04893067771991404,
+        -0.06177197745494495
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 2.0981579049606864,
+      "new_error": 2.1994522724065813,
+      "predicted": [
+        -0.004572011845064018,
+        -0.018778932674455115
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.11017738092493883,
+      "new_error": 0.006340440086750612,
+      "predicted": [
+        4.324492708288496,
+        0.48300115531935284
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.5173147640002067,
+      "new_error": 0.04250553466718544,
+      "predicted": [
+        4.698692102034523,
+        2.290669268076953
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.11335917580819904,
+      "new_error": 0.02619703671528177,
+      "predicted": [
+        -0.11817598491694088,
+        0.020816951047456837
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.4685981916089479,
+      "new_error": 0.22587460775281035,
+      "predicted": [
+        -0.11528842653208914,
+        0.14293765242275205
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 4.270560638395608,
+      "new_error": 3.7345261829776724,
+      "predicted": [
+        -0.007180150261738983,
+        0.003910894470618754
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 17.46079911415765,
+      "new_error": 16.73946176961358,
+      "predicted": [
+        0.0035024899901822705,
+        0.007884613142267901
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.037437136377182566,
+      "new_error": 0.01936250780840447,
+      "predicted": [
+        3.940591513352648,
+        -0.7998569437266727
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.023537710796496785,
+      "new_error": 0.02009721062468616,
+      "predicted": [
+        3.258948705931547,
+        -0.4410069127777554
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.18491544945266114,
+      "new_error": 0.44633596650355956,
+      "predicted": [
+        0.23022679820624672,
+        -0.04148168020383047
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.5405212426553805,
+      "new_error": 0.695739381171837,
+      "predicted": [
+        0.10645655063410604,
+        -0.13973364896042603
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.22126369115509864,
+      "new_error": 0.14173951358416356,
+      "predicted": [
+        0.02888413998509831,
+        -0.05900595464970488
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.21448259413032233,
+      "new_error": 0.13010486291629228,
+      "predicted": [
+        -0.014741331714223985,
+        -0.009413859721668881
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.026815009797501357,
+      "new_error": 0.05270475756093462,
+      "predicted": [
+        1.2209899250042309,
+        -0.5434785448712478
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.02261500598411261,
+      "new_error": 0.05112386625888104,
+      "predicted": [
+        0.8498633348034071,
+        -0.23533203061982946
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.10059851343466819,
+      "new_error": 0.1863021550082979,
+      "predicted": [
+        0.06840878158222341,
+        -0.012658331317248708
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.06258649252181922,
+      "new_error": 0.4625208651961804,
+      "predicted": [
+        0.041958807918649504,
+        -0.030844778068941467
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.07798127739006028,
+      "new_error": 0.22841639202935077,
+      "predicted": [
+        -0.0010460908920871955,
+        -0.018741871238195113
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.12419516964298491,
+      "new_error": 0.14474751355060478,
+      "predicted": [
+        -0.0038918812954830107,
+        0.0019556434866791865
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.013138489874448026,
+      "new_error": 0.025968666034702034,
+      "predicted": [
+        2.965362402509614,
+        -0.6799477217787513
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.05001781402334504,
+      "new_error": 0.014667108917159596,
+      "predicted": [
+        2.247313211557023,
+        -0.25446087215536345
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.16017886158007807,
+      "new_error": 0.06596434966078725,
+      "predicted": [
+        0.054311066271841166,
+        0.009981440353494079
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.3718736940943917,
+      "new_error": 0.7192710550905206,
+      "predicted": [
+        0.03145043303306663,
+        -0.05155260045334567
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.36308066506273473,
+      "new_error": 0.30938791071773875,
+      "predicted": [
+        0.015406120209339244,
+        -0.036627435454119485
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.9206461556712778,
+      "new_error": 1.0685366366969797,
+      "predicted": [
+        -0.005445898455422097,
+        -0.004875545944762127
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.030794089017247516,
+      "new_error": 0.025362143891493584,
+      "predicted": [
+        3.9806461424087463,
+        -1.02027873627683
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.035429595044063636,
+      "new_error": 0.02681338136612516,
+      "predicted": [
+        3.0853391383378956,
+        -0.6212302593052825
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.22596318567005452,
+      "new_error": 0.20407012250335976,
+      "predicted": [
+        0.37738808156916004,
+        -0.0613640748386365
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.5083608662259469,
+      "new_error": 0.11207466441600891,
+      "predicted": [
+        0.15458326926339822,
+        -0.31104304644676445
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.7957127874057943,
+      "new_error": 0.2215499759163496,
+      "predicted": [
+        -0.006541427891486572,
+        -0.09489038334551747
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 1.143798327096868,
+      "new_error": 0.7896539581107267,
+      "predicted": [
+        -0.04369681120197431,
+        0.008880452872942044
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.06312051279822756,
+      "new_error": 0.02486211609627112,
+      "predicted": [
+        0.32479015631284236,
+        -0.24038171236608957
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.0012514897044989392,
+      "new_error": 0.036885897590609874,
+      "predicted": [
+        0.16931940881671745,
+        -0.10411348165304558
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.023638825975595027,
+      "new_error": 0.2609365637353626,
+      "predicted": [
+        0.055941424179690745,
+        -0.0705031667788031
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.06477841982246549,
+      "new_error": 0.4746532238687459,
+      "predicted": [
+        -0.04169678068205704,
+        -0.021712087510895504
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.2614059290333657,
+      "new_error": 0.2348906015066754,
+      "predicted": [
+        0.0014085304042082884,
+        -0.02360173545529938
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.4709079862457917,
+      "new_error": 0.4624539079250581,
+      "predicted": [
+        -0.002859732366921213,
+        -0.001991649541328582
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.10273989887359627,
+      "new_error": 0.01688403584322949,
+      "predicted": [
+        4.481582874559207,
+        0.5060661151324918
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.4907059542163507,
+      "new_error": 0.06269748860439234,
+      "predicted": [
+        5.205970685675833,
+        1.8175636065221576
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.0874447392786751,
+      "new_error": 0.10661114608238963,
+      "predicted": [
+        -0.11361757664224227,
+        0.03347746016979642
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.8478544560388352,
+      "new_error": 0.06431822224574027,
+      "predicted": [
+        -0.028908492222823934,
+        0.15168650718115262
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 2.315681096511226,
+      "new_error": 2.452126579885903,
+      "predicted": [
+        0.0004927723283293833,
+        -0.0026249375560653543
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 5.798926796053609,
+      "new_error": 5.921206348366296,
+      "predicted": [
+        0.0036885626742855543,
+        0.004551154402931574
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.11303661549096918,
+      "new_error": 0.004625779641993849,
+      "predicted": [
+        7.951013708450266,
+        0.9027304942955723
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.5436084271882989,
+      "new_error": 0.044672003792877384,
+      "predicted": [
+        8.88307178037789,
+        4.025964291187438
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.04734518745477095,
+      "new_error": 0.08697456827571445,
+      "predicted": [
+        -0.38403290580771315,
+        0.07949106620841932
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 1.1705399861758305,
+      "new_error": 0.27367844065780306,
+      "predicted": [
+        -0.33483319177057724,
+        0.5447304864324378
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.5539486813440182,
+      "new_error": 0.5230025809984271,
+      "predicted": [
+        0.032089812019101625,
+        -0.04155592022833153
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 3.4379288554357847,
+      "new_error": 3.4202727391564793,
+      "predicted": [
+        0.01905924956464805,
+        0.0005874809380551428
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.04123437916795218,
+      "new_error": 0.03765296057783481,
+      "predicted": [
+        2.262991427130916,
+        -0.36936986988762044
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.07988297860738304,
+      "new_error": 0.027521257401227215,
+      "predicted": [
+        2.104003554046122,
+        -0.011561262614600835
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.1470672918125804,
+      "new_error": 0.1732860291848559,
+      "predicted": [
+        0.08201430211036267,
+        0.012262791484364117
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.16860145745968497,
+      "new_error": 0.7497440547619898,
+      "predicted": [
+        0.07574733935994965,
+        -0.09125084594599815
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.02458539158175924,
+      "new_error": 0.002462670282001635,
+      "predicted": [
+        0.009630947827254125,
+        -0.015789968581382485
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.07448211461595286,
+      "new_error": 0.08167251085111027,
+      "predicted": [
+        7.523146198381119e-05,
+        -0.0028230457420161687
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.03166335564150071,
+      "new_error": 0.07128742959216969,
+      "predicted": [
+        1.713188369568509,
+        -0.3167635346784922
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.10787844195467317,
+      "new_error": 0.09623802760216235,
+      "predicted": [
+        1.668532566812568,
+        0.13668530465688752
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.260139760977252,
+      "new_error": 0.3643983143612607,
+      "predicted": [
+        0.09168874356295527,
+        -0.008952150355007257
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.6997970399973428,
+      "new_error": 0.7180115794371548,
+      "predicted": [
+        0.08268442600551386,
+        -0.04862360509200291
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.002162812155380693,
+      "new_error": 1.9618212390964878,
+      "predicted": [
+        0.08494422408370639,
+        -0.0556319439611376
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.04471611264424463,
+      "new_error": 0.7579824979080552,
+      "predicted": [
+        0.006925625782972245,
+        -0.035636250605238264
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.14489826580894,
+      "new_error": 0.012199062236998036,
+      "predicted": [
+        5.267479910911961,
+        0.7852097439254203
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.869064496104765,
+      "new_error": 0.32157860342979,
+      "predicted": [
+        6.509924676220041,
+        2.6671716644035195
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.044072822456756706,
+      "new_error": 0.25293449909704735,
+      "predicted": [
+        -0.20336013473497033,
+        -0.006309526856781084
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 1.735703451665011,
+      "new_error": 0.7193053491483393,
+      "predicted": [
+        0.005795755594580412,
+        0.3074280768106542
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 1.1310391944186768,
+      "new_error": 1.1288734617947627,
+      "predicted": [
+        -0.025540303896192083,
+        0.024091793461246017
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "E",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 13.214736986680315,
+      "new_error": 13.322492057082176,
+      "predicted": [
+        0.003982549609577872,
+        0.020338370868876812
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.07964415966584427,
+      "new_error": 0.011127522265643085,
+      "predicted": [
+        11.963511916615412,
+        1.0117391551083954
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.3504189275649092,
+      "new_error": 0.018815990930191276,
+      "predicted": [
+        13.243379394147206,
+        3.6073195094042942
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.11128131931312775,
+      "new_error": 0.1545251196456372,
+      "predicted": [
+        -0.15727795855638524,
+        0.04350155666825923
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 1.295616025792272,
+      "new_error": 0.6383347189801493,
+      "predicted": [
+        -0.05717113522934825,
+        0.3183689425386281
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.37904675894810336,
+      "new_error": 0.861127458667122,
+      "predicted": [
+        -0.03467322799341223,
+        0.034347582214049974
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 1.8936914615631077,
+      "new_error": 1.7263094985617347,
+      "predicted": [
+        0.0009322741407320867,
+        0.01750342516690633
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.01006040029343432,
+      "new_error": 0.054353696239349436,
+      "predicted": [
+        2.586923557114928,
+        -0.313200102196636
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.10617587549596418,
+      "new_error": 0.05654639483025802,
+      "predicted": [
+        2.3249803295987266,
+        -0.046063447707590854
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.05436836622843512,
+      "new_error": 0.11037509461176122,
+      "predicted": [
+        0.16872443528635112,
+        -0.02134620989753331
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.33528376161004947,
+      "new_error": 0.2549269925314638,
+      "predicted": [
+        0.08659293565257768,
+        -0.1172882921682846
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.04661154292482501,
+      "new_error": 0.2546845280272026,
+      "predicted": [
+        0.028681546437692638,
+        -0.038805616834599634
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.023074086958915406,
+      "new_error": 0.09706220697444379,
+      "predicted": [
+        -0.0026488144156801056,
+        -0.011558887555032652
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.03193285772264259,
+      "new_error": 0.06853355490583725,
+      "predicted": [
+        2.1842855048149397,
+        -0.5861969771945577
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.04163505421324219,
+      "new_error": 0.051596852800644674,
+      "predicted": [
+        1.5042647439679073,
+        -0.38909087650928187
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.3004141747875421,
+      "new_error": 1.0526898114945258,
+      "predicted": [
+        0.14599291130618144,
+        0.07746822967551704
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.3972006958848454,
+      "new_error": 1.9880574493383103,
+      "predicted": [
+        0.2537111900094571,
+        -0.08836018768430746
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.4069910567795761,
+      "new_error": 0.17158903072370443,
+      "predicted": [
+        -0.0021784664170840648,
+        -0.024377309277965938
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.3376349414878453,
+      "new_error": 0.3403050579800879,
+      "predicted": [
+        -0.008527723946494191,
+        0.0021010351782104015
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.016548709098112954,
+      "new_error": 0.041158538493682714,
+      "predicted": [
+        7.271425675675458,
+        -0.8307277023218654
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.05865356417381018,
+      "new_error": 0.08630107226416828,
+      "predicted": [
+        5.629316395700225,
+        -0.016399487530266554
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.4635807236199438,
+      "new_error": 5.901589274503315,
+      "predicted": [
+        0.056709102433639344,
+        -0.16204584537679448
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.7985433846822364,
+      "new_error": 20.95244435170826,
+      "predicted": [
+        -0.5801928605889336,
+        -0.08183871995622957
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 12.790433606174073,
+      "new_error": 11.569383277241892,
+      "predicted": [
+        0.05115680597337334,
+        -0.062483377776786676
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 27.005568359101265,
+      "new_error": 26.979445231561353,
+      "predicted": [
+        0.003112386949653144,
+        -0.023146948794005844
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.36968000794249073,
+      "new_error": 0.40254001595194266,
+      "predicted": [
+        0.0005726894685406009,
+        -0.00023578790934316603
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.6062336504318334,
+      "new_error": 0.6137001816710719,
+      "predicted": [
+        0.00032895652441530994,
+        -0.0001580612028369086
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.4612844277703552,
+      "new_error": 0.6322592300630164,
+      "predicted": [
+        0.0006498229459053562,
+        -0.0001291280794623418
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.12203081821237227,
+      "new_error": 0.48537681021449786,
+      "predicted": [
+        0.0004133612208038179,
+        -0.0003294575003746498
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 58010011.082496054,
+      "new_error": 63395011.77285539,
+      "predicted": [
+        4.43153790474862e-05,
+        -6.151137495685742e-05
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 177343892.3565844,
+      "new_error": 177391947.95416397,
+      "predicted": [
+        2.81983776505236e-07,
+        -2.075125025667062e-05
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.03834221444446019,
+      "new_error": 0.009002303046548811,
+      "predicted": [
+        9.485393482451732,
+        0.27795428821361684
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.1788258851056003,
+      "new_error": 0.01446592687797409,
+      "predicted": [
+        9.656278631133583,
+        1.602698147284858
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.0759816093743697,
+      "new_error": 0.2884661729482075,
+      "predicted": [
+        -0.025769469702163556,
+        0.02993182115860182
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.2823308726713496,
+      "new_error": 0.6986514075233083,
+      "predicted": [
+        0.00435325758568906,
+        0.028941033141378924
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.45158778578439107,
+      "new_error": 0.49901595276736194,
+      "predicted": [
+        -0.002778489735778783,
+        0.0031249237331438854
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.31748036946640984,
+      "new_error": 0.280555585457627,
+      "predicted": [
+        -0.0004080255399672655,
+        0.0025966631284148113
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.006459959466425188,
+      "new_error": 0.04025507271069166,
+      "predicted": [
+        5.130912176649879,
+        -0.4042030424906164
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.09521929784399903,
+      "new_error": 0.07347232738287574,
+      "predicted": [
+        4.458067772003615,
+        0.04231614945668712
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.10319940851632797,
+      "new_error": 1.653155898582024,
+      "predicted": [
+        0.09239967390581404,
+        -0.16429355189144096
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.18861270616667147,
+      "new_error": 2.786064875674399,
+      "predicted": [
+        -0.19992739162075376,
+        -0.07198429805295177
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.07012750189429927,
+      "new_error": 0.2550687336075093,
+      "predicted": [
+        0.010401552845926594,
+        -0.028310606010675168
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.026788858979649742,
+      "new_error": 0.3200243045283267,
+      "predicted": [
+        -0.008057581190197808,
+        0.0016143616569908564
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.031787392372546734,
+      "new_error": 0.017456379396370104,
+      "predicted": [
+        6.816148904214391,
+        -0.9562705613174536
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.0260379642281616,
+      "new_error": 0.00599213963411964,
+      "predicted": [
+        5.6351774157029375,
+        -0.812695205690839
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.04562316256321646,
+      "new_error": 0.17849792129326872,
+      "predicted": [
+        0.43640615238084435,
+        -0.09659689045290101
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.14192290549524683,
+      "new_error": 0.2400704736553167,
+      "predicted": [
+        0.1809305560799237,
+        -0.389878975098069
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.2509059434732315,
+      "new_error": 0.4312806045282161,
+      "predicted": [
+        0.01943180809069957,
+        -0.05861632191985493
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.3926775301203923,
+      "new_error": 0.25484452823798576,
+      "predicted": [
+        -0.017606248142489653,
+        -0.008187265793404303
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 644545.0755069696,
+      "new_error": 579107.7076136699,
+      "predicted": [
+        -5.384517837198106e-07,
+        2.1315584351951047e-07
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 433433.528329803,
+      "new_error": 345714.00447699096,
+      "predicted": [
+        -3.2231617207936696e-07,
+        1.250218305241961e-07
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 849990.6777569785,
+      "new_error": 871879.7833002512,
+      "predicted": [
+        8.552888468886382e-07,
+        -1.6927889684067672e-07
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 540876.1812426199,
+      "new_error": 696849.4982802458,
+      "predicted": [
+        5.463582141708718e-07,
+        -4.325412408793479e-07
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 156011.16987683493,
+      "new_error": 162520.51932660156,
+      "predicted": [
+        -1.0766734465897795e-07,
+        1.217401416800273e-07
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 32786.85732663703,
+      "new_error": 51394.63181495035,
+      "predicted": [
+        -9.052245960495543e-09,
+        5.059115557550547e-08
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.04270325793446275,
+      "new_error": 0.01624671019939093,
+      "predicted": [
+        9.106607475837842,
+        0.19611215509660382
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.12999848186857163,
+      "new_error": 0.012928761774251287,
+      "predicted": [
+        9.079911488108833,
+        0.9755412613127407
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.12919759110036227,
+      "new_error": 0.19982047518613513,
+      "predicted": [
+        -0.03545831027349897,
+        0.03436788923158436
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.17147816437580987,
+      "new_error": 0.8951510037161378,
+      "predicted": [
+        -0.007647506293168264,
+        0.08721837329721448
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.6750516630596364,
+      "new_error": 4.003056163527093,
+      "predicted": [
+        -0.030564159487563393,
+        0.02821035364823396
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 1.4867486809265151,
+      "new_error": 3.197020631209818,
+      "predicted": [
+        -0.0028098016604859266,
+        0.016455429163655312
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.011697734854419472,
+      "new_error": 0.029083119289183265,
+      "predicted": [
+        7.548841489414585,
+        -0.48422059958220004
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.05731352351696043,
+      "new_error": 0.045804663118672984,
+      "predicted": [
+        6.833433604978962,
+        0.3409462709922062
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": false,
+      "old_error": 0.4050232200252468,
+      "new_error": 7.757800108465741,
+      "predicted": [
+        0.06226114720689404,
+        0.04880294915315729
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": false,
+      "old_error": 0.4323787007821964,
+      "new_error": 5.321526888940811,
+      "predicted": [
+        0.07299688961553194,
+        -0.03284359093987652
+      ],
+      "old_failed": null,
+      "new_failed": null
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.24121727726657344,
+      "new_error": 0.344872915806102,
+      "predicted": [
+        0.0047615871480689125,
+        -0.004633907742439596
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.08136127601747906,
+      "new_error": 0.2792367339652093,
+      "predicted": [
+        -0.0016011573774705255,
+        -0.0021664163513819344
+      ],
+      "old_failed": false,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.08890324437032276,
+      "new_error": 0.006787715953584611,
+      "predicted": [
+        11.555601480586157,
+        1.072413761892645
+      ],
+      "old_failed": false,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "mean",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.39852710279576653,
+      "new_error": 0.004312610663756072,
+      "predicted": [
+        12.59101018830839,
+        4.375638900207651
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.16483678618319506,
+      "new_error": 0.01320885857672234,
+      "predicted": [
+        -0.2527937484641793,
+        0.02805002622785471
+      ],
+      "old_failed": true,
+      "new_failed": false
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_E",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.862412061026615,
+      "new_error": 0.9269046354777849,
+      "predicted": [
+        -0.3564665522587035,
+        0.3814620066479833
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 15.0,
+      "counted": true,
+      "old_error": 0.2789434155243333,
+      "new_error": 0.2577600226433293,
+      "predicted": [
+        -0.03334205649585955,
+        0.030343203425808752
+      ],
+      "old_failed": true,
+      "new_failed": true
+    },
+    {
+      "kind": "random",
+      "pop": "I",
+      "channel": "variance_I",
+      "frequency_hz": 60.0,
+      "counted": true,
+      "old_error": 0.7611498778433842,
+      "new_error": 0.6910438680242843,
+      "predicted": [
+        0.00170377108400378,
+        0.01799687407804899
+      ],
+      "old_failed": true,
+      "new_failed": true
+    }
+  ],
+  "waveform_verdict": "FAIL",
+  "waveform_rows": [
+    {
+      "label": "Core A E",
+      "group": 279,
+      "waveform_error": 0.1515123689766756,
+      "relative_mean_error": 0.008773476625946429,
+      "predicted_mean_hz": 73.363452436057,
+      "MC_mean_hz": 72.7253978578386,
+      "passed": false
+    },
+    {
+      "label": "Core B E",
+      "group": 141,
+      "waveform_error": 0.12879218069495418,
+      "relative_mean_error": 0.04355918992314955,
+      "predicted_mean_hz": 51.82038777818328,
+      "MC_mean_hz": 54.18044402979782,
+      "passed": true
+    },
+    {
+      "label": "Surround E",
+      "group": 39,
+      "waveform_error": 0.23072033514875961,
+      "relative_mean_error": 0.020605295591678317,
+      "predicted_mean_hz": 65.70621322493466,
+      "MC_mean_hz": 64.37965147617876,
+      "passed": false
+    },
+    {
+      "label": "I",
+      "group": 594,
+      "waveform_error": 0.035174557256153545,
+      "relative_mean_error": 0.015420765709180329,
+      "predicted_mean_hz": 88.43399522742678,
+      "MC_mean_hz": 89.81907412573524,
+      "passed": true
+    }
+  ],
+  "implementation_checks": [
+    {
+      "pop": "E",
+      "knot_interpolation_max_error": 1.4210854715202004e-13,
+      "instantaneous_mean_factor_min": -0.26776397000273144,
+      "negative_instantaneous_mean_grid_points": 34
+    },
+    {
+      "pop": "I",
+      "knot_interpolation_max_error": 2.842170943040401e-14,
+      "instantaneous_mean_factor_min": -0.3044225358605184,
+      "negative_instantaneous_mean_grid_points": 98
+    }
+  ],
+  "network_promoted": false,
+  "scope": "One candidate, original independent response tests and previously observed waveform diagnostics. No fit to either target. No autonomous network or bifurcation evidence."
+}

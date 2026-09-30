@@ -1,0 +1,7 @@
+{
+  "epoch": 1790536301.9296079,
+  "phase": "Before any validation counts or contract",
+  "issue": "Reference per_ms source array was float32; roundtrip toHz thenback introduced3.81e-8mV input reconstruction discrepancy and triggered1e-9 check.",
+  "fix": "Promote reference saved per_ms source tofloat64 beforeunitconversion. Originalinputs reconstructionmax1.36e-12, G difference1.78e-15. Proposedsource remains the stored double precision Newton point; no tolerance or physical change.",
+  "new_counts_generated_before_fix": 0
+}

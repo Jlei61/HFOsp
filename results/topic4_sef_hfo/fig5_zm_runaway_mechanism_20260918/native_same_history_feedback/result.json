@@ -1,0 +1,340 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "condition": "held",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/runs/native_t9000_Zheld",
+      "start_s": 9.0,
+      "end_s": 12.5,
+      "global_Z_initial": 0.7835339789603897,
+      "global_Z_final": 0.7835339789603897,
+      "M_feedback_final_mv": 0.021321109112653974,
+      "high_entry_s": null,
+      "high_confirmation_s": null,
+      "broad_entry_s": null,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 29,
+          "duration_ms": 90,
+          "peak_hz": 65.8625,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.29
+        },
+        {
+          "start_bin": 31,
+          "end_bin": 41,
+          "duration_ms": 100,
+          "peak_hz": 128.959375,
+          "qualifies": true,
+          "start_s": 9.31,
+          "end_s": 9.41
+        },
+        {
+          "start_bin": 48,
+          "end_bin": 57,
+          "duration_ms": 90,
+          "peak_hz": 80.8625,
+          "qualifies": true,
+          "start_s": 9.48,
+          "end_s": 9.57
+        },
+        {
+          "start_bin": 60,
+          "end_bin": 69,
+          "duration_ms": 90,
+          "peak_hz": 159.60625,
+          "qualifies": true,
+          "start_s": 9.6,
+          "end_s": 9.69
+        },
+        {
+          "start_bin": 77,
+          "end_bin": 282,
+          "duration_ms": 2050,
+          "peak_hz": 161.59062500000002,
+          "qualifies": true,
+          "start_s": 9.77,
+          "end_s": 11.82
+        },
+        {
+          "start_bin": 288,
+          "end_bin": 294,
+          "duration_ms": 60,
+          "peak_hz": 54.259375,
+          "qualifies": true,
+          "start_s": 11.879999999999999,
+          "end_s": 11.94
+        },
+        {
+          "start_bin": 305,
+          "end_bin": 315,
+          "duration_ms": 100,
+          "peak_hz": 89.803125,
+          "qualifies": true,
+          "start_s": 12.05,
+          "end_s": 12.15
+        }
+      ],
+      "windows": [
+        {
+          "absolute_window_ms": [
+            9000,
+            9420
+          ],
+          "lo_bin": 0,
+          "hi_bin": 42,
+          "n_bins": 42,
+          "quiet_fraction": 0.2857142857142857,
+          "longest_quiet_ms": 90,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 2,
+          "event_durations_ms": [
+            90,
+            100
+          ],
+          "event_peaks_hz": [
+            65.8625,
+            128.959375
+          ],
+          "inter_onset_ms": [
+            110
+          ],
+          "activity_duty": 0.7142857142857143,
+          "mean_rate_hz": 34.7890625,
+          "max_rate_hz": 128.959375,
+          "trailing_activity_ms": 110,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.12207886904761904
+        },
+        {
+          "absolute_window_ms": [
+            9420,
+            10070
+          ],
+          "lo_bin": 42,
+          "hi_bin": 107,
+          "n_bins": 65,
+          "quiet_fraction": 0.26153846153846155,
+          "longest_quiet_ms": 80,
+          "quiet_runs_ge20ms": 3,
+          "n_events": 2,
+          "event_durations_ms": [
+            90,
+            90
+          ],
+          "event_peaks_hz": [
+            80.8625,
+            159.60625
+          ],
+          "inter_onset_ms": [
+            120
+          ],
+          "activity_duty": 0.7384615384615385,
+          "mean_rate_hz": 42.93139423076923,
+          "max_rate_hz": 159.60625,
+          "trailing_activity_ms": 300,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.1447548076923077
+        },
+        {
+          "absolute_window_ms": [
+            10070,
+            12500
+          ],
+          "lo_bin": 107,
+          "hi_bin": 350,
+          "n_bins": 243,
+          "quiet_fraction": 0.09053497942386832,
+          "longest_quiet_ms": 110,
+          "quiet_runs_ge20ms": 3,
+          "n_events": 2,
+          "event_durations_ms": [
+            60,
+            100
+          ],
+          "event_peaks_hz": [
+            54.259375,
+            89.803125
+          ],
+          "inter_onset_ms": [
+            170
+          ],
+          "activity_duty": 0.9094650205761317,
+          "mean_rate_hz": 49.34942129629629,
+          "max_rate_hz": 161.59062500000002,
+          "trailing_activity_ms": 310,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.16901067386831273
+        }
+      ]
+    },
+    {
+      "condition": "dynamic",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/runs/native_t9000_Zdynamic",
+      "start_s": 9.0,
+      "end_s": 12.5,
+      "global_Z_initial": 0.7835339789603897,
+      "global_Z_final": 0.459827298595804,
+      "M_feedback_final_mv": 0.19949337284081398,
+      "high_entry_s": 9.87,
+      "high_confirmation_s": 10.07,
+      "broad_entry_s": 10.39,
+      "complete_events": [
+        {
+          "start_bin": 20,
+          "end_bin": 30,
+          "duration_ms": 100,
+          "peak_hz": 65.790625,
+          "qualifies": true,
+          "start_s": 9.2,
+          "end_s": 9.3
+        },
+        {
+          "start_bin": 32,
+          "end_bin": 40,
+          "duration_ms": 80,
+          "peak_hz": 150.08125,
+          "qualifies": true,
+          "start_s": 9.32,
+          "end_s": 9.4
+        }
+      ],
+      "windows": [
+        {
+          "absolute_window_ms": [
+            9000,
+            9420
+          ],
+          "lo_bin": 0,
+          "hi_bin": 42,
+          "n_bins": 42,
+          "quiet_fraction": 0.30952380952380953,
+          "longest_quiet_ms": 90,
+          "quiet_runs_ge20ms": 3,
+          "n_events": 2,
+          "event_durations_ms": [
+            100,
+            80
+          ],
+          "event_peaks_hz": [
+            65.790625,
+            150.08125
+          ],
+          "inter_onset_ms": [
+            120
+          ],
+          "activity_duty": 0.6904761904761905,
+          "mean_rate_hz": 35.612723214285715,
+          "max_rate_hz": 150.08125,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.12490104166666668
+        },
+        {
+          "absolute_window_ms": [
+            9420,
+            10070
+          ],
+          "lo_bin": 42,
+          "hi_bin": 107,
+          "n_bins": 65,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 151.57403846153846,
+          "max_rate_hz": 269.809375,
+          "trailing_activity_ms": 650,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.2420625,
+            "20Hz_duty90": 0.135,
+            "50Hz_duty80": 0.217,
+            "50Hz_duty90": 0.11740625,
+            "100Hz_duty80": 0.19671875,
+            "100Hz_duty90": 0.1020625
+          },
+          "high_confirmed_inside": true,
+          "mean_instantaneous_fraction_50Hz": 0.4232831730769231
+        },
+        {
+          "absolute_window_ms": [
+            10070,
+            12500
+          ],
+          "lo_bin": 107,
+          "hi_bin": 350,
+          "n_bins": 243,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 393.4860339506172,
+          "max_rate_hz": 464.88750000000005,
+          "trailing_activity_ms": 2430,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.8168125,
+            "20Hz_duty90": 0.723,
+            "50Hz_duty80": 0.8071875,
+            "50Hz_duty90": 0.7109375,
+            "100Hz_duty80": 0.79725,
+            "100Hz_duty90": 0.69534375
+          },
+          "high_confirmed_inside": true,
+          "mean_instantaneous_fraction_50Hz": 0.9047717335390946
+        }
+      ]
+    }
+  ],
+  "dynamic_replay_qa": "PASS",
+  "same_complete_initial_state": true,
+  "same_global_OU_innovations": true,
+  "final_input_state_difference_keys": [],
+  "statistical_unit": "One paired native history, seed9108401, starting at its actual9s checkpoint",
+  "time_window": "Original clock9.0--12.5s; shorter than original4s classification window",
+  "asymptotic_category": "NOT_ASSIGNED; operational entries, events and occupation only",
+  "Z": "Held vs dynamic; only state-update intervention",
+  "M": "dynamic in both arms",
+  "onset_type": "NOT_INFERRED_FROM_THIS_FEEDBACK_INTERVENTION"
+}

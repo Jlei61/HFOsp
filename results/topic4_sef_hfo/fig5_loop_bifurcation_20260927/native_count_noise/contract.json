@@ -1,0 +1,21 @@
+{
+  "status": "REGISTERED_BEFORE_NEW_NATIVE_TRAJECTORIES",
+  "created_epoch": 1790527335.6305375,
+  "question": "Can finite external-count noise alone move the first autonomous exit around the 13.7s dip, with identical native10s fullstate and external OU mean path?",
+  "motivation": "Coupled density927671 matches native10-12s mean rate/Z/K/G closely, but exits13.750s versus original16.868s and reactivates. Two new nativecount realizations distinguish strong conditional native variability from a systematic candidate-coupling discrepancy; they do not estimate an ensemble distribution precisely.",
+  "design": "Exactlytwo originalnative10-20s continuations. Same graph/cells/fulljointinitialstate/pendingdelays, same0.1ms globalandspatialOU path. Only Poissonexternalcounts replaced, seeds928701/928702. Allnetwork,G/R,Z/M/K states autonomous.",
+  "method": "Originalrng still consumes anddiscards originalPoissondraw; separatecountgenerator supplies newdraw with identicallambda. OriginalnormalincrementsandspatialOU remainpaired. No simulator source edits.",
+  "checks": "RNG wrapper deterministic unitcheck; exact100 sparse originalinputrecords and completefinalglobalrng,xi,spatialOU field/cache/RNG/clocks; owncounterstate retainedat checkpoints. Verify countdrawcount100000 and matchedsumexpectedintensity.",
+  "readouts": "Absolute10-20s traces, first100ms causalR<=5, first100ms joint10msallE/coreA/coreB<=5, G resource-blockrelease, 2s meanfields andZ/K endpoints; samecollector asdensity, no phasealignment.",
+  "decisions": "Nativeexit near13.7s supports countnoise sensitivity, but doesnot certify density or bifurcation. Bothnativecontinuations nearoriginal16.9s strengthens coupled-approximation concern. No automatic seed/grid/horizon expansion or refit.",
+  "statistical_unit": "Same nativecondition with two new externalcountstreams; original8405 third countstream. Not three independentOU trajectories, autonomouscoldstarts,or patientreplicates.",
+  "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+  "source_sha256": "4866822869ffc7e779aba7b3bf40dd4e9a08b7b3403d3b4c47fb0dea4d9bde50",
+  "seeds": [
+    928701,
+    928702
+  ],
+  "producer_sha256": "fc0490e9fbc90d187e013af93d76b9e0a8bafff198812bec245ed9e160c9a957",
+  "native_engine_unchanged": true,
+  "formal_bifurcation_allowed": false
+}

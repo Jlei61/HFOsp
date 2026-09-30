@@ -1,0 +1,80 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "DA0348158",
+  "coordinates": {
+    "D_A": 0.34815764125480564,
+    "Z_A": 0.6518423587451944,
+    "native_interpolation_time_ms": 9951.291472238374
+  },
+  "window_ms": [
+    65000.0,
+    70000.0
+  ],
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_rate_hz": 54.98868325515336,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.6236,
+      "range_10ms_hz": [
+        10.063224196459679,
+        95.65043414891501
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core A",
+      "mean_rate_hz": 391.52709112859003,
+      "quiet_fraction": 0.0,
+      "duty_above50": 1.0,
+      "range_10ms_hz": [
+        107.66522099390927,
+        430.4417089973284
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core B",
+      "mean_rate_hz": 146.69788201122094,
+      "quiet_fraction": 0.2626,
+      "duty_above50": 0.6514,
+      "range_10ms_hz": [
+        3.0438695245886987e-05,
+        466.3745156518685
+      ],
+      "complete_local_episodes": 13,
+      "episode_durations_ms": [
+        44,
+        22,
+        45,
+        44,
+        49,
+        50,
+        28,
+        257,
+        35,
+        41,
+        46,
+        47,
+        40
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_rate_hz": 44.2915923241343,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.383,
+      "range_10ms_hz": [
+        7.888445056543757,
+        78.56613023498804
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    }
+  ],
+  "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+  "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+  "model_promoted": false
+}

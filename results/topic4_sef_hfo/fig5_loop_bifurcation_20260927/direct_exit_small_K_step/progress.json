@@ -1,0 +1,77 @@
+{
+  "status": "BOUNDED_DIRECT_PARAMETER_STEP_COMPLETE",
+  "reason": "Fresh nonlinear residual at recorded sampling precision",
+  "rows": [
+    {
+      "status": "RESIDUAL_REQUIRES_CORRECTION",
+      "iteration": 0,
+      "K_mean": 9.00625,
+      "Graw": 4.465192763461977,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.029031701812665442,
+          "combined_SEM_RMS_Hz": 0.008587841503586092,
+          "maximum_residual_Hz": 0.4433939895415122,
+          "outside_6SEM": 12
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.14123656997595732,
+          "combined_SEM_RMS_Hz": 0.17458768358967708,
+          "maximum_residual_Hz": 0.9858389292750189,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.0900944066339856,
+      "E_target_combined_SEM_RMS_Hz": 0.036932869573208384,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.83794400024414,
+        469.06718724096487,
+        474.18337818563134,
+        232.31875947387454,
+        309.46633392333985
+      ],
+      "near_equilibrium": false,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    },
+    {
+      "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+      "iteration": 1,
+      "K_mean": 9.00625,
+      "Graw": 4.464677770181993,
+      "rows": [
+        {
+          "population": "E",
+          "residual_RMS_Hz": 0.0064748300122305135,
+          "combined_SEM_RMS_Hz": 0.006791627829481261,
+          "maximum_residual_Hz": 0.059807786774911165,
+          "outside_6SEM": 0
+        },
+        {
+          "population": "I",
+          "residual_RMS_Hz": 0.14558137197540078,
+          "combined_SEM_RMS_Hz": 0.14249293343335342,
+          "maximum_residual_Hz": 1.0451297988236092,
+          "outside_6SEM": 0
+        }
+      ],
+      "E_target_residual_RMS_Hz": 0.030578743808434096,
+      "E_target_combined_SEM_RMS_Hz": 0.029321463779073284,
+      "regional_Hz_allE_A_B_surround_I": [
+        243.83318534851074,
+        469.06732129165283,
+        474.18359685611483,
+        232.31375127280143,
+        309.4592686767578
+      ],
+      "near_equilibrium": true,
+      "formal_bifurcation_allowed": false,
+      "stability_established": false
+    }
+  ],
+  "candidate_near_equilibrium": true,
+  "formal_bifurcation_allowed": false,
+  "stability_established": false
+}

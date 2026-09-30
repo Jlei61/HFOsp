@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "radius": 0.1,
+      "relative_error_to_exact_full_space_solution": 1.6855057044005858e-14,
+      "norm": 0.10000000000000087
+    },
+    {
+      "radius": 1.0,
+      "relative_error_to_exact_full_space_solution": 1.6703000894280777e-14,
+      "norm": 1.000000000000009
+    },
+    {
+      "radius": 10.0,
+      "relative_error_to_exact_full_space_solution": 2.4705144151771726e-15,
+      "norm": 10.000000000000057
+    }
+  ],
+  "meaning": "Right preconditioning changes the numerical basis but the hookstep bounds the original physical-coordinate norm; verified against independent diagonal constrained least squares."
+}

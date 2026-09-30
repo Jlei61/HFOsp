@@ -1,0 +1,13 @@
+{
+  "status": "REGISTERED_BEFORE_ALLCELL_PHASE_UPDATES",
+  "created_epoch": 1790561887.3960295,
+  "question": "Does the coherent mean survive self-generated source feedback at the actualK9.35 highhistoryfield, without continually supplyingnativewaveforms?",
+  "design": "Exactly3 numericalmapupdates of40000targets x64 replicas. Generation0 native sourcephaseprobabilities and residualspectra initialize only. Originalweights/delayresidues/filter/threshold/ref/M/ZK/externalPoisson retained. Subsequent updates use only their own outputphaseprobabilities and residualsourcePSDs; no damping, frequencysearch, fittedgain or nativeforcing.",
+  "period": "22 original0.1ms steps is a candidate; updateindex is notphysicaltime. Phaseconditionalresiduals are approximated as independent stationaryGaussian source processes.",
+  "stop": "Stop early if phase-specific causalR crosses200 invalidatingG0, fieldRMS frommatchednative exceeds10Hz, or eithercore mean drifts morethan10Hz fromgeneration0. Retention permits furthercorrespondenceanalysis only, notroot/stability/Floquet/bifurcationacceptance.",
+  "validation": "Local59targetsourceprojectioncheck complete; phasekernel zero-wavebitwiseQA; count/exposureconservation and residualParseval eachbatch. Originalgraph identity and delayresidueweights exact. New Fourier/Poisson/burn/phase streams eachgeneration.",
+  "replicas": 64,
+  "generations": 3,
+  "producer_sha256": "d172445ebccf11febcc91f53dbf8d1f19bef09bb876e65c007667e11a767f9f2",
+  "formal_bifurcation_allowed": false
+}

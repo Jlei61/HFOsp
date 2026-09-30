@@ -1,0 +1,34 @@
+{
+  "status": "NEAR_EQUILIBRIUM_AT_RECORDED_PRECISION",
+  "iteration": 2,
+  "K_mean": 9.0125,
+  "Graw": 4.436447575533768,
+  "rows": [
+    {
+      "population": "E",
+      "residual_RMS_Hz": 0.007233143612201313,
+      "combined_SEM_RMS_Hz": 0.00681305220543601,
+      "maximum_residual_Hz": 0.07301899096229647,
+      "outside_6SEM": 0
+    },
+    {
+      "population": "I",
+      "residual_RMS_Hz": 0.14300983769292872,
+      "combined_SEM_RMS_Hz": 0.1425995305019824,
+      "maximum_residual_Hz": 1.142470777616154,
+      "outside_6SEM": 0
+    }
+  ],
+  "E_target_residual_RMS_Hz": 0.030785681975617384,
+  "E_target_combined_SEM_RMS_Hz": 0.029402091488659642,
+  "regional_Hz_allE_A_B_surround_I": [
+    243.55173165893555,
+    468.98024015148377,
+    474.14792064249366,
+    232.02114400481676,
+    309.10969482421876
+  ],
+  "near_equilibrium": true,
+  "formal_bifurcation_allowed": false,
+  "stability_established": false
+}

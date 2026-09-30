@@ -1,0 +1,137 @@
+{
+  "label": "LPC_B8",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B8_N256.npz",
+  "N": 256,
+  "check_N": 1024,
+  "J_EE_core": 0.9476334668030755,
+  "T_ms": 303.2727650228376,
+  "checks": [
+    {
+      "kind": "fold_tangent",
+      "epsilon": 9.358093433916749e-07,
+      "relative_residual_by_state": [
+        1.6118529073143054e-08,
+        1.7447342448855672e-09,
+        4.833326023387161e-11,
+        1.034387786034329e-11,
+        2.4177846976693245e-11,
+        2.7426162830835573e-12,
+        1.5689165409524667e-11,
+        3.5887721135253876e-12,
+        2.2357292310856907e-12
+      ],
+      "maximum_relative_residual": 1.6118529073143054e-08,
+      "maximum_rate_rhs_tangent_defect_Hz_per_ms": 1.650906669703467e-05,
+      "tangent_RMS_by_state": [
+        0.036684218529551706,
+        0.023182207741583985,
+        34.16417020511137,
+        32.871101753346636,
+        53.391451502915466,
+        31.144144509689216,
+        8.008750121999602,
+        30.504737877329454,
+        0.0005123145262730869
+      ]
+    },
+    {
+      "kind": "fold_tangent",
+      "epsilon": 4.6790467169583746e-07,
+      "relative_residual_by_state": [
+        7.85041735527054e-09,
+        8.436311799188381e-10,
+        9.289610012632535e-11,
+        2.0112174443440153e-11,
+        4.7016396845254157e-11,
+        5.422838497229931e-12,
+        3.147494259003839e-11,
+        7.1359959446985384e-12,
+        4.516256618136696e-12
+      ],
+      "maximum_relative_residual": 7.85041735527054e-09,
+      "maximum_rate_rhs_tangent_defect_Hz_per_ms": 8.209870422382082e-06,
+      "tangent_RMS_by_state": [
+        0.036684218529550464,
+        0.02318220774158344,
+        34.164170205098024,
+        32.87110175332816,
+        53.391451502913405,
+        31.144144509695106,
+        8.008750122001452,
+        30.50473787733321,
+        0.0005123145262768173
+      ]
+    },
+    {
+      "kind": "fold_tangent",
+      "epsilon": 2.3395233584791873e-07,
+      "relative_residual_by_state": [
+        7.50049828408402e-09,
+        8.056456416182014e-10,
+        1.8522868174144088e-10,
+        3.974272614362993e-11,
+        9.13421905534411e-11,
+        1.096077226055204e-11,
+        6.24290858104368e-11,
+        1.4308525232799206e-11,
+        9.501099133074498e-12
+      ],
+      "maximum_relative_residual": 7.50049828408402e-09,
+      "maximum_rate_rhs_tangent_defect_Hz_per_ms": 6.803827848345101e-06,
+      "tangent_RMS_by_state": [
+        0.03668421852954811,
+        0.023182207741592614,
+        34.1641702051164,
+        32.87110175335572,
+        53.39145150290101,
+        31.14414450968287,
+        8.00875012200463,
+        30.504737877346678,
+        0.0005123145262701656
+      ]
+    }
+  ],
+  "negative_control": {
+    "kind": "permuted_group_negative_control",
+    "epsilon": 2.3395233584791873e-07,
+    "relative_residual_by_state": [
+      0.9258188186322688,
+      0.5662811746879386,
+      1.759439568430292e-10,
+      3.675054960997798e-11,
+      9.911170806032165e-11,
+      1.1684775619861226e-11,
+      5.786622820377812e-11,
+      1.5319539618045848e-11,
+      7.211403407058431e-12
+    ],
+    "maximum_relative_residual": 0.9258188186322688,
+    "maximum_rate_rhs_tangent_defect_Hz_per_ms": 2752.1678321476315,
+    "tangent_RMS_by_state": [
+      0.04250572032533841,
+      0.028460067210600896,
+      41.90660033483793,
+      40.68987547818724,
+      50.451394040503985,
+      29.734343726958507,
+      9.82036160497374,
+      29.063216631157896,
+      0.0005943470195397701
+    ]
+  },
+  "status": "INDEPENDENT_VARIATIONAL_BVP_CHECK_ONLY",
+  "interpretation": "Centered derivative of y_dot(theta;s)-F(y(theta;s), delayed y(theta;s),J(s)) with r_s=r+s*dr, T_s=T+s*dT, J_s=J+s*dJ. All linear filters and physical delays reconstructed separately on CPU; no GPU BVP Jacobian is used.",
+  "state_order": [
+    "fast_rate",
+    "slow_rate",
+    "AMPA_rise",
+    "AMPA_current",
+    "GABA_rise",
+    "GABA_current",
+    "E_variance",
+    "I_variance",
+    "M"
+  ],
+  "scope": "Independent tangent-equation diagnostic with epsilon refinement and a non-null control. Does not automatically promote a fold, establish adjacent stability, or replace the recorded monodromy evidence.",
+  "epsilon_scale": 0.125
+}

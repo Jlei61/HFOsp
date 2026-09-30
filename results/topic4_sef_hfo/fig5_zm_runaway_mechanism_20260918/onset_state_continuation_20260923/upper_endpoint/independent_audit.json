@@ -1,0 +1,178 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "upper_endpoint",
+  "D": 0.25634442534475455,
+  "observed_ms": 20000.0,
+  "spatial_reconstruction_errors_hz": [
+    1.52587890625e-05,
+    1.52587890625e-05,
+    1.52587890625e-05
+  ],
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        5000
+      ],
+      "mean_rates_global_A_B_surround": [
+        197.13235182085904,
+        417.60814242202105,
+        411.86332952613014,
+        186.13375383695802
+      ],
+      "smoothed_global_range_hz": [
+        66.63273737479491,
+        219.01435932535256
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.5046562499999999,
+      "group_rate_relative_variation": 0.23823968690133165,
+      "M_mean_global_A_B_surround": [
+        0.0832188441573424,
+        0.18367032449303497,
+        0.1770160611024882,
+        0.07831191609785472
+      ]
+    },
+    {
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "mean_rates_global_A_B_surround": [
+        197.68573994709436,
+        417.5964187975314,
+        411.5163584370007,
+        186.7243637820818
+      ],
+      "smoothed_global_range_hz": [
+        192.75795051977678,
+        203.0551300113586
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.50715625,
+      "group_rate_relative_variation": 0.23222985928404752,
+      "M_mean_global_A_B_surround": [
+        0.09876241324871786,
+        0.20863428004627663,
+        0.20556555638357135,
+        0.09328668580061038
+      ]
+    },
+    {
+      "window_ms": [
+        10000,
+        15000
+      ],
+      "mean_rates_global_A_B_surround": [
+        197.8644838556805,
+        417.6132408183689,
+        411.51629551164797,
+        186.9117298599012
+      ],
+      "smoothed_global_range_hz": [
+        192.20038373362294,
+        203.49670022874471
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.5118749999999999,
+      "group_rate_relative_variation": 0.23184120015020168,
+      "M_mean_global_A_B_surround": [
+        0.09890901787706757,
+        0.2088027205230968,
+        0.20575454045435454,
+        0.0934316563360021
+      ]
+    },
+    {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_rates_global_A_B_surround": [
+        197.81253194354287,
+        417.6044237734446,
+        411.513098642458,
+        186.8574521055548
+      ],
+      "smoothed_global_range_hz": [
+        192.4044411662106,
+        203.43821390171072
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.5142499999999999,
+      "group_rate_relative_variation": 0.2311445148960172,
+      "M_mean_global_A_B_surround": [
+        0.09890060782138425,
+        0.20880198001376152,
+        0.20575357368378608,
+        0.093422864361079
+      ]
+    }
+  ],
+  "original_high_onset_elapsed_ms": 158.0,
+  "complete_events_all": {
+    "n": 0
+  },
+  "recurrence": {
+    "status": "RATE_RECURRENCE_ONLY",
+    "best_local_minima": [
+      {
+        "lag_ms": 33,
+        "relative_MSE": 0.21023463783946206
+      },
+      {
+        "lag_ms": 406,
+        "relative_MSE": 0.33702219895094065
+      },
+      {
+        "lag_ms": 372,
+        "relative_MSE": 0.4441718489449087
+      },
+      {
+        "lag_ms": 439,
+        "relative_MSE": 0.5202654570301055
+      },
+      {
+        "lag_ms": 810,
+        "relative_MSE": 0.5603127927377187
+      },
+      {
+        "lag_ms": 777,
+        "relative_MSE": 0.6284284488552003
+      },
+      {
+        "lag_ms": 67,
+        "relative_MSE": 0.6305591839668808
+      },
+      {
+        "lag_ms": 1215,
+        "relative_MSE": 0.6867674972209358
+      }
+    ],
+    "direct_formula_errors": [
+      4.440892098500626e-16,
+      2.7200464103316335e-15,
+      0.0
+    ],
+    "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied."
+  },
+  "scope": "Longer finite-time state/recurrence readout; no certified attractor, periodic stability, separatrix or bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,31 @@
+{
+  "candidate": {
+    "index1": 18,
+    "index2": 27,
+    "burst_count": 9,
+    "time1_ms": 6896.1447629627055,
+    "time2_ms": 9265.1784997284,
+    "period_ms": 2369.033736765694,
+    "history_relative_rms": 0.00023958402350867373,
+    "M_relative_rms": 0.0008978104258977853,
+    "score": 0.0006570631876659076
+  },
+  "segments": 6,
+  "dt_ms": 0.05,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/from_interictal_history/checkpoint5000.npz",
+  "times_ms": [
+    6896.150000000001,
+    7291.0,
+    7685.85,
+    8080.700000000001,
+    8475.5,
+    8870.35,
+    9265.2
+  ],
+  "question": "Does the actual returningD_A=.270 state admit its observed nine-burst full-spatial periodic candidate, rather than the unstable one-burst root?",
+  "selection": "Nine-burst recurrence score.000657 is far below one/three/six-burst recurrence scores. The eighteen-burst near-return is also strong; it is not declared a distinct period before checking the shorter nine-burst candidate.",
+  "equations": "Same original3479-group drift, frozen originalCoreAfield atnative9116.474ms andnative9s outsideA, allE M dynamic. No parameter, response or futureinput changes.",
+  "numerical": "Six complete-state nodes shorten each derivative cache toabout395ms; K is a shooting partition, not physical model reduction. All nodes are nearest actual.05ms states; subsequent matching removes segment timing offsets.",
+  "acceptance": "Every replayed1ms all-group rate bitwise matches the original auditedrecord; report full endpoint closure. Recurrence is not a cycle or bifurcation certificate.",
+  "model_promoted": false
+}

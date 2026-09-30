@@ -1,0 +1,11 @@
+{
+  "created_local": "2026-09-20T14:30:50.694943+08:00",
+  "question": "Does applying the measured population response bias alter early closed-loop surround recruitment?",
+  "original_local_status": "FAIL: group531 laterwindow L2 .157/.162; original.15gate preserved. No accepted repair or original gate-conditioned network was launched.",
+  "design_revision": "A distinct causal sensitivity experiment, not the gated model-validation run. The local failure does not prevent measuring the effect of a fixed response perturbation. Outcome cannot promote this candidate, even if native correspondence improves.",
+  "intervention": "Use exactly the two alreadylocked ell offsets, no furtherfit. Compare one0-3s PhysicalDelayCountEngine trajectory with existing unmodified trajectory, original seed1/graph/forcing/ZM/initialstate/dt0.05.",
+  "hypotheses": "Recruitment restored: these response differences can strongly affect feedback, though local/model correctness remain unresolved. Recruitment stillweak: the simple populationwide localbias cannot explain the deficit alone. Earlypersistent runaway: correction distorts the regime and cannot be accepted.",
+  "budget": "One3s network sensitivity, no extension, newseed, nextfit or branch. Independent numerical and original earlywindow readouts required.",
+  "model_promoted": false,
+  "acceptance_gates_changed": false
+}

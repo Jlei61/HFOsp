@@ -1,0 +1,82 @@
+{
+  "created_local": "2026-09-20T03:27:42.706136+08:00",
+  "question": "At the original E/I mode workpoints, does a Gaussian distribution of the proposed membrane voltage within each pre-step voltage bin reproduce threshold flux and its AMPA-variance gain when supplied the actual LIF moments?",
+  "selection": "The E and I AMPA-variance DC pair: E passed after moment-preserving transport, I failed well beyond reference SEM. Diagnostic selection after seeing errors, not a blind model validation.",
+  "cases": [
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "E",
+        "mu": 38.105642595043854,
+        "theta": 18.0,
+        "ve": 98.8064369216561,
+        "vi": 228.10459732455527
+      },
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 2.470160923041403,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.045081533571105926,
+          0.0
+        ],
+        "sem": 0.0008979103945998653,
+        "dc_measured": -0.045081533571105926,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 50.20716303345119
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 309,
+      "id": 56
+    },
+    {
+      "kind": "v2_assayed",
+      "workpoint": {
+        "pop": "I",
+        "mu": 40.52129073125151,
+        "theta": 18.0,
+        "ve": 169.41685684011793,
+        "vi": 435.4321850498046
+      },
+      "channel": 1,
+      "frequency_hz": 0.0,
+      "absolute_amplitude": 4.235421421002949,
+      "dt_ms": 0.05,
+      "burn_ms": 1000.0,
+      "duration_ms": 4000,
+      "reference_index": null,
+      "reference": {
+        "measured": [
+          -0.055091897393411124,
+          0.0
+        ],
+        "sem": 0.0007027025007281339,
+        "dc_measured": -0.055091897393411124,
+        "counted": true,
+        "tol": 0.15,
+        "dc_snr": 78.40003036324106
+      },
+      "source": "local_response_additional_mode_groups/result.json",
+      "state": "SN7",
+      "group": 587,
+      "id": 62
+    }
+  ],
+  "replicates": 8192,
+  "duration_ms": 4000.0,
+  "burn_ms": 1000.0,
+  "dt_ms": 0.05,
+  "voltage_nodes": 128,
+  "seed": 920033,
+  "variance_relative_amplitude": 0.025,
+  "outputs": "Per independent path, per pre-step V bin: eligible-step count, four raw moments of proposed V minus threshold, actual spike count. Both paired sides use identical innovations. All recording steps included.",
+  "checks": "Reference-lif kernel per-path spike counts must be exactly identical. Refractory denominator remains all steps. Bootstrap resamples32blocks of256independent noise paths, paired across input sides; time steps are not independent replicates.",
+  "budget": "Two workpoints times paired +/-; one observer and one exact-count reference replay per workpoint. No parameter fit, network or bifurcation launch.",
+  "interpretation": "Actual-state Gaussian flux is a diagnostic reconstruction, not an autonomous response. Failure implicates the Gaussian flux assumption; passing only excludes a large instantaneous flux error and does not validate moment evolution or reset-conditioned distributions."
+}

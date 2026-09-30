@@ -1,0 +1,31 @@
+{
+  "stage": "NATIVE_CORRESPONDENCE_AT_DENSITY_EXIT_BRACKET",
+  "question": "Does the original native network retain a high state or become quiet near the density held-state transition between K9.35 and9.5, with the same actual exit-field family?",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "Z": 0.21,
+      "K": 9.35,
+      "duration_s": 30.0,
+      "cut": "exit",
+      "history_label": "high",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "reason": "Native correspondence at completed density held-state bracket, without changing network physics."
+    },
+    {
+      "name": "exit_z0.21_k9.5_fields16p7_high",
+      "Z": 0.21,
+      "K": 9.5,
+      "duration_s": 30.0,
+      "cut": "exit",
+      "history_label": "high",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "reason": "Native correspondence at completed density held-state bracket, without changing network physics."
+    }
+  ],
+  "max_workers": 2
+}

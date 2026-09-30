@@ -1,0 +1,1865 @@
+{
+  "status": "EVIDENCE_INVENTORY_INCOMPLETE",
+  "counts": {
+    "INDEPENDENT_MODE_CHECKED": 41,
+    "MODE_CHECK_PRESENT_REVIEW_PENDING": 5,
+    "BVP_LOCATED_MODE_CHECK_PENDING": 2
+  },
+  "rows": [
+    {
+      "label": "LPC1",
+      "internal_label": "LPC_resonance_upper",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.021388034132485377,
+          "phase_index": 719,
+          "group": 337
+        },
+        "slow": {
+          "minimum_Hz": 0.03178790964637343,
+          "phase_index": 873,
+          "group": 208
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9458472114142701,
+      "T_ms": 165.81578803670592,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+      "temporal_meshes": [
+        128,
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 1.1102230246251565e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_resonance_upper_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 6.110170202390517e-07
+    },
+    {
+      "label": "LPC2",
+      "internal_label": "LPC_resonance_lower",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.021735836821346693,
+          "phase_index": 709,
+          "group": 337
+        },
+        "slow": {
+          "minimum_Hz": 0.03208333653121585,
+          "phase_index": 862,
+          "group": 208
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.945751951597284,
+      "T_ms": 165.61244373063624,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_lower_N512.npz",
+      "temporal_meshes": [
+        64,
+        128,
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 0.0,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_resonance_lower_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 5.77595427095702e-07
+    },
+    {
+      "label": "LPC3",
+      "internal_label": "LPC_A1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.0022467814574666806,
+          "phase_index": 307,
+          "group": 319
+        },
+        "slow": {
+          "minimum_Hz": 0.019386421859694213,
+          "phase_index": 363,
+          "group": 277
+        },
+        "positive": true,
+        "N": 128,
+        "check_N": 512
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9614345887728242,
+      "T_ms": 164.6106857336651,
+      "N": 128,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A1_N128.npz",
+      "temporal_meshes": [
+        64,
+        128
+      ],
+      "latest_mesh_J_difference": 5.88418203051333e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.2092687889515389e-06
+    },
+    {
+      "label": "LPC4",
+      "internal_label": "LPC_B1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.0009528703276855989,
+          "phase_index": 199,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.009315117778864387,
+          "phase_index": 235,
+          "group": 17
+        },
+        "positive": true,
+        "N": 128,
+        "check_N": 512
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.971261892416582,
+      "T_ms": 255.6910340229652,
+      "N": 128,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B1_N128.npz",
+      "temporal_meshes": [
+        64,
+        128
+      ],
+      "latest_mesh_J_difference": 1.2798295756510925e-10,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.0035879810091691e-05
+    },
+    {
+      "label": "LPC5",
+      "internal_label": "LPC_burst_low",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -7.216449660063518e-13,
+          "phase_index": 7359,
+          "group": 570
+        },
+        "slow": {
+          "minimum_Hz": 3.278737424467062e-05,
+          "phase_index": 6418,
+          "group": 360
+        },
+        "positive": true,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9568975728050448,
+      "T_ms": 296.7319254727045,
+      "N": 4096,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N4096.npz",
+      "temporal_meshes": [
+        256,
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "latest_mesh_J_difference": 7.771561172376096e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_low_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 5.4184532410165646e-06
+    },
+    {
+      "label": "LPC6",
+      "internal_label": "LPC_burst_high",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.348561324730161e-11,
+          "phase_index": 2580,
+          "group": 15
+        },
+        "slow": {
+          "minimum_Hz": 6.764722048090187e-05,
+          "phase_index": 3539,
+          "group": 399
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.6265015185605372,
+      "T_ms": 239.69812295484667,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_high_N2048.npz",
+      "temporal_meshes": [
+        256,
+        512,
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 8.881784197001252e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 2.7440847137345073e-05
+    },
+    {
+      "label": "LPC7",
+      "internal_label": "LPC_Bleading_low",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -6.938893903907228e-13,
+          "phase_index": 3956,
+          "group": 763
+        },
+        "slow": {
+          "minimum_Hz": 4.917462195129724e-05,
+          "phase_index": 6795,
+          "group": 378
+        },
+        "positive": true,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9488485317657749,
+      "T_ms": 317.84042426489776,
+      "N": 4096,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N4096.npz",
+      "temporal_meshes": [
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "latest_mesh_J_difference": 1.942890293094024e-14,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_Bleading_low_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 8.429486588610794e-06
+    },
+    {
+      "label": "LPC8",
+      "internal_label": "LPC_double_high",
+      "status": "MODE_CHECK_PRESENT_REVIEW_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -8.00441386261255e-05,
+          "phase_index": 7936,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 3.195823425821324e-05,
+          "phase_index": 1628,
+          "group": 379
+        },
+        "positive": false,
+        "N": 3072,
+        "check_N": 12288
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.9449471475293998,
+      "T_ms": 760.6705290765454,
+      "N": 3072,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_high_N3072.npz",
+      "temporal_meshes": [
+        1024,
+        1536,
+        3072
+      ],
+      "latest_mesh_J_difference": 1.8451684624665177e-11,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_high_validation.json",
+      "independent_validation_status": "VALIDATION_INCOMPLETE",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 9.20420885317415e-06
+    },
+    {
+      "label": "LPC9",
+      "internal_label": "LPC_A2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.000127198954780975,
+          "phase_index": 737,
+          "group": 355
+        },
+        "slow": {
+          "minimum_Hz": 0.012551136607416373,
+          "phase_index": 870,
+          "group": 277
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.939333107388464,
+      "T_ms": 136.67317551384602,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A2_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 7.41295913542217e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.4647108182860343e-05
+    },
+    {
+      "label": "LPC10",
+      "internal_label": "LPC_A3",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.00012115347278055313,
+          "phase_index": 739,
+          "group": 355
+        },
+        "slow": {
+          "minimum_Hz": 0.012406108946344285,
+          "phase_index": 873,
+          "group": 277
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9394710284040595,
+      "T_ms": 135.84855186173525,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A3_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 6.661338147750939e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A3_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.1211792296062032e-05
+    },
+    {
+      "label": "LPC11",
+      "internal_label": "LPC_A4",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.00011192414239467527,
+          "phase_index": 739,
+          "group": 355
+        },
+        "slow": {
+          "minimum_Hz": 0.01215131434628329,
+          "phase_index": 450,
+          "group": 341
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9382319284104846,
+      "T_ms": 134.71776774727965,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A4_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 6.661338147750939e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A4_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 5.0952686864535446e-05
+    },
+    {
+      "label": "LPC12",
+      "internal_label": "LPC_A5",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 8.566309700345012e-05,
+          "phase_index": 634,
+          "group": 265
+        },
+        "slow": {
+          "minimum_Hz": 0.008496970275935356,
+          "phase_index": 726,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9406839080905371,
+      "T_ms": 133.80024380913872,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A5_N256.npz",
+      "temporal_meshes": [
+        128,
+        192,
+        256
+      ],
+      "latest_mesh_J_difference": 7.66053886991358e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A5_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 3.3573579382018645e-05
+    },
+    {
+      "label": "LPC13",
+      "internal_label": "LPC_B2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.412716249890938e-05,
+          "phase_index": 352,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005694712758268147,
+          "phase_index": 435,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9463101206889282,
+      "T_ms": 296.72680168084366,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 1.396660564978447e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 4.0836977613644294e-05
+    },
+    {
+      "label": "LPC14",
+      "internal_label": "LPC_B3",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.8532108285619135e-05,
+          "phase_index": 347,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005730780334277244,
+          "phase_index": 428,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476814192142715,
+      "T_ms": 303.38590573874313,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B3_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 2.5268676040468563e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B3_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.0003823241954873944
+    },
+    {
+      "label": "LPC15",
+      "internal_label": "LPC_B4",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.841214136275555e-05,
+          "phase_index": 356,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005729957779680529,
+          "phase_index": 438,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476505250084494,
+      "T_ms": 303.3061029830933,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B4_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 5.965228311310966e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B4_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.03391274385458576
+    },
+    {
+      "label": "LPC16",
+      "internal_label": "LPC_B5",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.8642073235559326e-05,
+          "phase_index": 359,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005732043824450767,
+          "phase_index": 441,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476981541529192,
+      "T_ms": 303.39002709922977,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B5_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 5.525579993559404e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B5_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.10254647393472095
+    },
+    {
+      "label": "LPC17",
+      "internal_label": "LPC_B6",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.844635106997968e-05,
+          "phase_index": 357,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005730009057716492,
+          "phase_index": 438,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476486217000467,
+      "T_ms": 303.2568068538829,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B6_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 1.20570220474292e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B6_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.023431971207981097
+    },
+    {
+      "label": "LPC18",
+      "internal_label": "LPC_B7",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.8697811879186165e-05,
+          "phase_index": 355,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.00573261822133087,
+          "phase_index": 436,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9477081392136185,
+      "T_ms": 303.30366400377056,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B7_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 1.9506618542664e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B7_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.05926569559090511
+    },
+    {
+      "label": "LPC19",
+      "internal_label": "LPC_B8",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.833584669509624e-05,
+          "phase_index": 403,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005728950612101755,
+          "phase_index": 484,
+          "group": 17
+        },
+        "positive": true,
+        "N": 256,
+        "check_N": 1024
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476334668030755,
+      "T_ms": 303.2727650228376,
+      "N": 256,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B8_N256.npz",
+      "temporal_meshes": [
+        128,
+        256
+      ],
+      "latest_mesh_J_difference": 1.247890679678676e-13,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B8_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.05445149361153372
+    },
+    {
+      "label": "LPC20",
+      "internal_label": "LPC_double_low",
+      "status": "BVP_LOCATED_MODE_CHECK_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -8.185053964282713e-06,
+          "phase_index": 10368,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 4.513898987923426e-05,
+          "phase_index": 9787,
+          "group": 16
+        },
+        "positive": false,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.9381101414695568,
+      "T_ms": 852.7423753110708,
+      "N": 4096,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_low_N4096.npz",
+      "temporal_meshes": [
+        1024,
+        1536,
+        3072,
+        4096
+      ],
+      "latest_mesh_J_difference": 5.540012892879531e-14,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_low_validation.json",
+      "independent_validation_status": "VALIDATION_INCOMPLETE",
+      "independent_validation_matches_current_root": false,
+      "positive_base_profile_checked": false,
+      "matched_mode_check_count": 0,
+      "finest_mode_relative_defect": null
+    },
+    {
+      "label": "LPC21",
+      "internal_label": "LPC_double_secondary1",
+      "status": "MODE_CHECK_PRESENT_REVIEW_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.4267044601428444e-05,
+          "phase_index": 10172,
+          "group": 915
+        },
+        "slow": {
+          "minimum_Hz": 3.276229232034695e-05,
+          "phase_index": 3248,
+          "group": 379
+        },
+        "positive": false,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.9391433309540169,
+      "T_ms": 875.8164824803579,
+      "N": 4096,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N4096.npz",
+      "temporal_meshes": [
+        1024,
+        2048,
+        4096
+      ],
+      "latest_mesh_J_difference": 1.1119771770040643e-11,
+      "independent_validation_source": null,
+      "independent_validation_status": null,
+      "independent_validation_matches_current_root": false,
+      "positive_base_profile_checked": false,
+      "matched_mode_check_count": 2,
+      "finest_mode_relative_defect": 0.0005406762266918268
+    },
+    {
+      "label": "LPC22",
+      "internal_label": "LPC_double_secondary2",
+      "status": "MODE_CHECK_PRESENT_REVIEW_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -0.021943007444109718,
+          "phase_index": 1196,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 4.009308207197741e-05,
+          "phase_index": 4846,
+          "group": 16
+        },
+        "positive": false,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 1.3656175856802122e-08,
+      "independent_validation_source": null,
+      "independent_validation_status": null,
+      "independent_validation_matches_current_root": false,
+      "positive_base_profile_checked": false,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.004117501527748624
+    },
+    {
+      "label": "LPC23",
+      "internal_label": "LPC_double_secondary3",
+      "status": "MODE_CHECK_PRESENT_REVIEW_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -0.01757712940037503,
+          "phase_index": 1348,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 4.955285910560183e-05,
+          "phase_index": 2044,
+          "group": 10
+        },
+        "positive": false,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 8.487745728480434e-09,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_secondary3_validation.json",
+      "independent_validation_status": "VALIDATION_INCOMPLETE",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 4,
+      "finest_mode_relative_defect": 0.0004215611328178582
+    },
+    {
+      "label": "LPC24",
+      "internal_label": "LPC_double_secondary4",
+      "status": "MODE_CHECK_PRESENT_REVIEW_PENDING",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -5.170040531836872e-06,
+          "phase_index": 2936,
+          "group": 554
+        },
+        "slow": {
+          "minimum_Hz": 5.1660105943190124e-05,
+          "phase_index": 3247,
+          "group": 237
+        },
+        "positive": false,
+        "N": 4096,
+        "check_N": 16384
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.940343489690564,
+      "T_ms": 856.8099149281564,
+      "N": 4096,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N4096.npz",
+      "temporal_meshes": [
+        1024,
+        2048,
+        4096
+      ],
+      "latest_mesh_J_difference": 2.2737367544323206e-12,
+      "independent_validation_source": null,
+      "independent_validation_status": null,
+      "independent_validation_matches_current_root": false,
+      "positive_base_profile_checked": false,
+      "matched_mode_check_count": 2,
+      "finest_mode_relative_defect": 0.0009404992737164433
+    },
+    {
+      "label": "LPC25",
+      "internal_label": "LPC_A_low_extension",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -2.0816681711721685e-14,
+          "phase_index": 1851,
+          "group": 375
+        },
+        "slow": {
+          "minimum_Hz": 0.0018238682539128241,
+          "phase_index": 186,
+          "group": 417
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.7057755003569962,
+      "T_ms": 115.45814851312022,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_low_extension_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 3.930189507173054e-14,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_low_extension_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 5,
+      "finest_mode_relative_defect": 0.0004953200420459612
+    },
+    {
+      "label": "LPC26",
+      "internal_label": "LPC_A_return_exchange",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -7.806255641895632e-14,
+          "phase_index": 1584,
+          "group": 815
+        },
+        "slow": {
+          "minimum_Hz": 0.0011860001633802806,
+          "phase_index": 185,
+          "group": 457
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9459767886094599,
+      "T_ms": 122.72015595663247,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_exchange_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 4.6629367034256575e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_return_exchange_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.0008983441613393831
+    },
+    {
+      "label": "LPC27",
+      "internal_label": "LPC_A_return_recruitment",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -6.661338147750939e-13,
+          "phase_index": 7496,
+          "group": 797
+        },
+        "slow": {
+          "minimum_Hz": 3.2654247076991504e-06,
+          "phase_index": 2904,
+          "group": 518
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9438163372922354,
+      "T_ms": 118.53333633229546,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N2048.npz",
+      "temporal_meshes": [
+        256,
+        512,
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 0.0,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_return_recruitment_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 9.168294491672025e-05
+    },
+    {
+      "label": "LPC28",
+      "internal_label": "LPC_A_large_return1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.019902031752784e-07,
+          "phase_index": 1224,
+          "group": 375
+        },
+        "slow": {
+          "minimum_Hz": 5.8809572671287426e-08,
+          "phase_index": 1892,
+          "group": 518
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.0761836153250073,
+      "T_ms": 110.67709588969598,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return1_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 2.220446049250313e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_large_return1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 4,
+      "finest_mode_relative_defect": 1.1468852899213006e-05
+    },
+    {
+      "label": "LPC29",
+      "internal_label": "LPC_A_large_return2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -5.241934490640698e-09,
+          "phase_index": 1648,
+          "group": 415
+        },
+        "slow": {
+          "minimum_Hz": 1.2768234404005412e-07,
+          "phase_index": 2465,
+          "group": 517
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.0717683543624708,
+      "T_ms": 101.20897953462885,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return2_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 2.220446049250313e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_large_return2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.28700156452934e-05
+    },
+    {
+      "label": "LPC30",
+      "internal_label": "LPC_A_large_return3",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -3.679858934929614e-09,
+          "phase_index": 1684,
+          "group": 415
+        },
+        "slow": {
+          "minimum_Hz": 4.3022971970993835e-09,
+          "phase_index": 2727,
+          "group": 16
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.0866976587440011,
+      "T_ms": 101.41226624841781,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return3_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 0.0,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_large_return3_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.0878122229488166e-05
+    },
+    {
+      "label": "LPC31",
+      "internal_label": "LPC_single_upper1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -5.514866911120013e-07,
+          "phase_index": 624,
+          "group": 106
+        },
+        "slow": {
+          "minimum_Hz": 2.962650116290423e-06,
+          "phase_index": 2334,
+          "group": 380
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.569234886663887,
+      "T_ms": 137.40287021828732,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper1_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 9.08295660906333e-12,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_single_upper1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 6,
+      "finest_mode_relative_defect": 0.01095461571754197
+    },
+    {
+      "label": "LPC32",
+      "internal_label": "LPC_single_upper2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.595139992316419e-07,
+          "phase_index": 544,
+          "group": 107
+        },
+        "slow": {
+          "minimum_Hz": 5.455251488427972e-06,
+          "phase_index": 2328,
+          "group": 380
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.5757028697657414,
+      "T_ms": 141.79218622554177,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper2_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 2.3085977574055505e-12,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_single_upper2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.37345596051813207
+    },
+    {
+      "label": "LPC33",
+      "internal_label": "LPC_single_upper3",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -2.289032935637661e-07,
+          "phase_index": 620,
+          "group": 108
+        },
+        "slow": {
+          "minimum_Hz": 1.0154720052256153e-06,
+          "phase_index": 2339,
+          "group": 380
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.5585735213787404,
+      "T_ms": 131.0465094577135,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper3_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 2.0797807920303057e-11,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_single_upper3_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.0012477200293166907
+    },
+    {
+      "label": "LPC34",
+      "internal_label": "LPC_single_upper4",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.3658124930788097e-07,
+          "phase_index": 472,
+          "group": 106
+        },
+        "slow": {
+          "minimum_Hz": 8.674743494377752e-06,
+          "phase_index": 2352,
+          "group": 380
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.580897229627566,
+      "T_ms": 145.66741011786976,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_single_upper4_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 1.1820988632393892e-11,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_single_upper4_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 2.5359608531217077
+    },
+    {
+      "label": "LPC35",
+      "internal_label": "LPC_A_global_turn1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "TEMPORAL_REFINEMENT_REQUIRED",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -3.7727871662288776e-08,
+          "phase_index": 1536,
+          "group": 415
+        },
+        "slow": {
+          "minimum_Hz": 8.773188100964516e-07,
+          "phase_index": 1694,
+          "group": 518
+        },
+        "positive": false,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 1.0387480258884794,
+      "T_ms": 122.57781285229113,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_global_turn1_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 2.220446049250313e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_global_turn1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 4.604088113595204e-05
+    },
+    {
+      "label": "LPC40",
+      "internal_label": "LPC_B_burst_turn1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.841649605960227e-05,
+          "phase_index": 958,
+          "group": 18
+        },
+        "slow": {
+          "minimum_Hz": 0.005730018145572048,
+          "phase_index": 1120,
+          "group": 17
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9476496937693254,
+      "T_ms": 303.4221561823126,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn1_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 1.1102230246251565e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_burst_turn1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.08413393369134811
+    },
+    {
+      "label": "LPC41",
+      "internal_label": "LPC_B_burst_turn2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 4.927865186439909e-06,
+          "phase_index": 518,
+          "group": 375
+        },
+        "slow": {
+          "minimum_Hz": 0.0042286071859458235,
+          "phase_index": 549,
+          "group": 277
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9475846096212432,
+      "T_ms": 303.4683135402992,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_burst_turn2_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 6.328271240363392e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_burst_turn2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.019421039212823
+    },
+    {
+      "label": "LPC56",
+      "internal_label": "LPC_A_connection1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -5.641646004528322e-13,
+          "phase_index": 1671,
+          "group": 435
+        },
+        "slow": {
+          "minimum_Hz": 1.2696337968746402e-06,
+          "phase_index": 1035,
+          "group": 16
+        },
+        "positive": true,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.068621108088585,
+      "T_ms": 121.1754355865831,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection1_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 4.440892098500626e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_connection1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.00031659545901216457
+    },
+    {
+      "label": "LPC57",
+      "internal_label": "LPC_A_connection2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -3.3306690738754696e-13,
+          "phase_index": 66,
+          "group": 594
+        },
+        "slow": {
+          "minimum_Hz": 1.3248441792229173e-06,
+          "phase_index": 745,
+          "group": 16
+        },
+        "positive": true,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.0669734719268986,
+      "T_ms": 122.7072774188867,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_connection2_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 0.0,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_connection2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.0008700341741659982
+    },
+    {
+      "label": "LPC58",
+      "internal_label": "LPC_B_connection1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 0.00011496936824255594,
+          "phase_index": 1916,
+          "group": 375
+        },
+        "slow": {
+          "minimum_Hz": 0.0093509177503222,
+          "phase_index": 1975,
+          "group": 277
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9837713307806173,
+      "T_ms": 377.3847429639683,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection1_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 1.8318679906315083e-14,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_connection1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 785.4503135062735
+    },
+    {
+      "label": "LPC59",
+      "internal_label": "LPC_B_connection2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": 2.735691019691792e-07,
+          "phase_index": 1949,
+          "group": 375
+        },
+        "slow": {
+          "minimum_Hz": 0.004528360207470617,
+          "phase_index": 2014,
+          "group": 277
+        },
+        "positive": true,
+        "N": 512,
+        "check_N": 2048
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9688715736052305,
+      "T_ms": 323.29572632231583,
+      "N": 512,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_connection2_N512.npz",
+      "temporal_meshes": [
+        256,
+        512
+      ],
+      "latest_mesh_J_difference": 1.6330270469211428e-12,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_connection2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 89.4824957725829
+    },
+    {
+      "label": "LPC60",
+      "internal_label": "LPC_A_next1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -4.996003610813204e-13,
+          "phase_index": 990,
+          "group": 775
+        },
+        "slow": {
+          "minimum_Hz": 1.6999721870825206e-07,
+          "phase_index": 3902,
+          "group": 16
+        },
+        "positive": true,
+        "N": 1024,
+        "check_N": 4096
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.1041306472658425,
+      "T_ms": 119.5271138929016,
+      "N": 1024,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_next1_N1024.npz",
+      "temporal_meshes": [
+        512,
+        1024
+      ],
+      "latest_mesh_J_difference": 1.5543122344752192e-15,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_next1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 7.826097348547562e-05
+    },
+    {
+      "label": "LPC61",
+      "internal_label": "LPC_A_stage4_turn1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -7.91033905045424e-13,
+          "phase_index": 2574,
+          "group": 755
+        },
+        "slow": {
+          "minimum_Hz": 1.848746585894927e-15,
+          "phase_index": 2465,
+          "group": 15
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.2115992495880454,
+      "T_ms": 106.98543512379396,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn1_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 4.440892098500626e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 7.703420106568737e-06
+    },
+    {
+      "label": "LPC62",
+      "internal_label": "LPC_A_stage4_turn2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -8.881784197001252e-13,
+          "phase_index": 1183,
+          "group": 776
+        },
+        "slow": {
+          "minimum_Hz": 7.185041782091222e-15,
+          "phase_index": 5377,
+          "group": 16
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.198713442456352,
+      "T_ms": 106.26514784898256,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 6.661338147750939e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 3.946284561885857e-06
+    },
+    {
+      "label": "LPC63",
+      "internal_label": "LPC_A_stage4_turn3",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -7.771561172376096e-13,
+          "phase_index": 5942,
+          "group": 594
+        },
+        "slow": {
+          "minimum_Hz": 4.462044345932159e-58,
+          "phase_index": 3010,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 1.3068816112324584,
+      "T_ms": 79.34223478072948,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn3_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 8.881784197001252e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn3_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 1.7567903126898075e-05
+    },
+    {
+      "label": "LPC64",
+      "internal_label": "LPC_B_stage3_turn1",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.196959198423997e-13,
+          "phase_index": 126,
+          "group": 775
+        },
+        "slow": {
+          "minimum_Hz": 0.00030306494731004933,
+          "phase_index": 145,
+          "group": 277
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9826980071091734,
+      "T_ms": 332.26635768703164,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_stage3_turn1_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 2.220446049250313e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_stage3_turn1_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 0.12199621781013335
+    },
+    {
+      "label": "LPC65",
+      "internal_label": "LPC_B_stage3_turn2",
+      "status": "INDEPENDENT_MODE_CHECKED",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.9971004017182992e-13,
+          "phase_index": 7793,
+          "group": 795
+        },
+        "slow": {
+          "minimum_Hz": 7.80692238675862e-05,
+          "phase_index": 4453,
+          "group": 151
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": true,
+      "J_EE_core": 0.9500667321547613,
+      "T_ms": 328.47982704571154,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_stage3_turn2_N2048.npz",
+      "temporal_meshes": [
+        1024,
+        2048
+      ],
+      "latest_mesh_J_difference": 2.220446049250313e-16,
+      "independent_validation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_stage3_turn2_validation.json",
+      "independent_validation_status": "VALIDATED_CYCLE_FOLD",
+      "independent_validation_matches_current_root": true,
+      "positive_base_profile_checked": true,
+      "matched_mode_check_count": 3,
+      "finest_mode_relative_defect": 33.56153607121241
+    },
+    {
+      "label": "LPC66",
+      "internal_label": "LPC_B_stage4_turn1",
+      "status": "BVP_LOCATED_MODE_CHECK_PENDING",
+      "constituent_filter_status": "PASS",
+      "constituent_filter_check": {
+        "fast": {
+          "minimum_Hz": -1.457167719820518e-13,
+          "phase_index": 4315,
+          "group": 574
+        },
+        "slow": {
+          "minimum_Hz": 3.9359379147606635e-05,
+          "phase_index": 4627,
+          "group": 151
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "profile_evidence_source": "Current root: independent CPU Fourier reconstruction at fourfold temporal sampling",
+      "complete_local_validation": false,
+      "J_EE_core": 0.953245575140753,
+      "T_ms": 323.26972475438885,
+      "N": 2048,
+      "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_stage4_turn1_N2048.npz",
+      "temporal_meshes": [
+        2048
+      ],
+      "latest_mesh_J_difference": null,
+      "independent_validation_source": null,
+      "independent_validation_status": null,
+      "independent_validation_matches_current_root": false,
+      "positive_base_profile_checked": false,
+      "matched_mode_check_count": 0,
+      "finest_mode_relative_defect": null
+    }
+  ],
+  "physical_profile_counts": {
+    "PASS": 34,
+    "TEMPORAL_REFINEMENT_REQUIRED": 14
+  },
+  "complete_local_validation_count": 33,
+  "inventory_criteria": {
+    "direct_check_finest_relative_defect": 0.001,
+    "direct_check_minimum_halving_reduction": 3,
+    "direct_check_minimum_steps": 3,
+    "note": "Existing point-specific validated modes are retained. Legacy checks previously accepted at 0.01 are listed for finer follow-up when they do not meet this tighter direct-mode threshold; their original evidence is not erased."
+  },
+  "scope": "LPC markers with a located BVP null tangent are not all independently checked to the same standard. This inventory records presence and acceptance of full-state mode evidence; it neither rejects an untested fold nor certifies all intervening crossings.",
+  "all_modes_independently_checked": false,
+  "profiles_refreshed_from_current_roots": true
+}

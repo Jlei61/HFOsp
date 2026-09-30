@@ -1,0 +1,81 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.68276556491745,
+        "difference_rms": 1.3904941238667531e-08,
+        "relative_rms": 8.334913767480215e-10
+      },
+      "GABA": {
+        "reference_rms": 10.800823785580054,
+        "difference_rms": 1.9102124763791682e-08,
+        "relative_rms": 1.7685803548887183e-09
+      },
+      "M": {
+        "reference_rms": 0.016005901628211548,
+        "difference_rms": 1.698848617216064e-11,
+        "relative_rms": 1.0613888905962796e-09
+      },
+      "covariance": {
+        "reference_rms": 37.710963452111805,
+        "difference_rms": 8.796991762499633e-09,
+        "relative_rms": 2.33274118643792e-10
+      },
+      "input_memory": {
+        "reference_rms": 0.09812494868714629,
+        "difference_rms": 2.8682458676690427e-10,
+        "relative_rms": 2.9230546421113836e-09
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.005497682832351715,
+        "difference_rms": 1.2013103921285854e-11,
+        "relative_rms": 2.1851213115812052e-09
+      }
+    },
+    "combined_relative_rms": 1.7475006497574915e-09
+  },
+  "verified": [
+    {
+      "real": -0.6240958638126164,
+      "imag": 0.0,
+      "relative_residual": 1.9771258023257236e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.7838796167275479,
+      "imag": 0.0,
+      "relative_residual": 7.947874491807815e-07,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.7666523354444765,
+      "imag": 0.0,
+      "relative_residual": 1.1169223292683684e-07,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.6381318384237236,
+      "imag": 0.0,
+      "relative_residual": 3.1209988316157677e-09,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 663.9925887584686,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 6.511706304771732e-05,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 1.4598486980256082e-05,
+      "pass_gate": true
+    }
+  ],
+  "prior_physical_neutral_gate_failed": false,
+  "model_promoted": false
+}

@@ -1,0 +1,37 @@
+{
+  "rows": [
+    {
+      "condition": "reference",
+      "coordinates": {
+        "D_A": 0.2557216996140609,
+        "D_global": 0.2164660210396102,
+        "Z_A": 0.7442783003859391
+      },
+      "native_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_native_clamp_20260924/fields.npz",
+      "rate_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/block01.npz"
+    },
+    {
+      "condition": "coreA_depleted",
+      "coordinates": {
+        "D_A": 0.40052149864164854,
+        "D_global": 0.2198778663041978,
+        "Z_A": 0.5994785013583515
+      },
+      "native_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_native_clamp_20260924/fields.npz",
+      "rate_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/block01.npz"
+    }
+  ],
+  "native_window_ms": [
+    11500,
+    12500
+  ],
+  "rate_elapsed_window_ms": [
+    9000,
+    10000
+  ],
+  "definition": "Both rows average1000ms; matching intervention and original spatial geometry, different within-model histories and external input conditions. EntireZheld,allMdynamic. Native original noisy9s state; rate its own settled state and constantmeaninput. Not a branch or complete model validation.",
+  "model_promoted": false,
+  "human_visual_acceptance": "PENDING",
+  "agent_png_visual_review": "PASS: shared scales, original geometry, no overall title or bifurcation symbols; stronger CoreB rate activity visible and retained",
+  "agent_same_pdf_visual_review": "PASS: /tmp/hfosp_core_a_native_rate_pdf_review.png inspected"
+}

@@ -1,0 +1,10 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/equilibrium_branch/point000.npz",
+  "target_slow_field": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/first_long_M_intervention_from2800/replayed_initial.npz",
+  "question": "At the actual spatial M just before the first prolonged activity, is there a fast-system equilibrium connected to an already verified root? This can nominate a relevant fast fold/Hopf for a slow-passage explanation, distinct from full-dynamic-M periodic bifurcations.",
+  "model": "The same3479-group spatial graph, response, physical private variance, constant external mean and synaptic/delay equations. This diagnostic alone holds all M and Z. Its target is exactly the existing2.8s held-M intervention field, not a scalar M substitution. Main trajectories and periodic branches keep M dynamic.",
+  "numerical": "Start at a verified full-dynamic-M equilibrium, hold M at its exact equilibrium value .5*E*r, and interpolate prescribed M and CoreA Z to the actual target. Predictor and logit Newton solve the unchanged fast stationary equations. The homotopy coordinate is numerical, not a physical bifurcation axis.",
+  "acceptance": "Original fast-system rate residual<1e-11/ms at every accepted point. Existing independently checked frozen-M Jacobian is reused. Root at the target still needs original-engine, stability and actual-path checks; numerical stalls do not prove nonexistence or a fold.",
+  "budget": "At most40homotopy trials,12Newton steps each; step below.002 stops. No automatic physical branch or stability scan from auxiliary turns.",
+  "model_promoted": false
+}

@@ -1,0 +1,78 @@
+{
+  "status": "PASS_EXISTING_WORKERS_RETAINED_SAME16_JOBS",
+  "supervisor": 3238772,
+  "retained": [
+    3121843,
+    3209719,
+    3218015,
+    3218016
+  ],
+  "active": [
+    {
+      "condition": "rotated",
+      "name": "z0.75_k2_high",
+      "pid": 3121843,
+      "time_s": 39.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_high",
+      "pid": 3209719,
+      "time_s": 15.0,
+      "state": "RUNNING",
+      "backend": "cuda_ordered:0"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_high",
+      "pid": 3218015,
+      "time_s": null,
+      "state": "BUILDING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3218016,
+      "time_s": null,
+      "state": "BUILDING",
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "isotropic",
+      "name": "z0.25_k0.02_interictal",
+      "pid": 3238782,
+      "time_s": null,
+      "state": null,
+      "backend": "locality_cpu"
+    },
+    {
+      "condition": "rotated",
+      "name": "z0.95_k0.02_high",
+      "pid": 3238783,
+      "time_s": null,
+      "state": null,
+      "backend": "locality_cpu"
+    }
+  ],
+  "completed": [
+    [
+      "isotropic",
+      "z0.75_k2_high"
+    ],
+    [
+      "rotated",
+      "z0.75_k2_interictal"
+    ],
+    [
+      "isotropic",
+      "z0.75_k2_interictal"
+    ]
+  ],
+  "pending_count": 7,
+  "available_memory_GiB": 142.7595558166504,
+  "CPU_busy_percent_at_dispatch": 47.5,
+  "physics_and_job_changes": false
+}

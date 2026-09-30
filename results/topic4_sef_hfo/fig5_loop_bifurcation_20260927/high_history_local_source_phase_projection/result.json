@@ -1,0 +1,42 @@
+{
+  "status": "COMPLETE_LOCAL_SOURCE_PHASE_RESPONSE",
+  "rows": [
+    {
+      "region": "selected_all",
+      "targets": 59,
+      "response_mean_Hz": 258.1057997881356,
+      "native_rate_RMS_error_Hz": 0.40983813297760396,
+      "MCSEM_RMS_Hz": 0.019364809588083096
+    },
+    {
+      "region": "selected_coreA",
+      "targets": 3,
+      "response_mean_Hz": 475.3385416666667,
+      "native_rate_RMS_error_Hz": 0.4800444592972803,
+      "MCSEM_RMS_Hz": 0.018787336408447184
+    },
+    {
+      "region": "selected_coreB",
+      "targets": 5,
+      "response_mean_Hz": 467.6068359375,
+      "native_rate_RMS_error_Hz": 0.25842102367275427,
+      "MCSEM_RMS_Hz": 0.01183691204822559
+    },
+    {
+      "region": "largest20_errors",
+      "targets": 20,
+      "response_mean_Hz": 454.864453125,
+      "native_rate_RMS_error_Hz": 0.310514628337573,
+      "MCSEM_RMS_Hz": 0.016181775340094712
+    }
+  ],
+  "causal_R_phase_range_Hz": [
+    197.10672241445272,
+    197.3019998015258
+  ],
+  "permits_bounded_allcell_phase_test": true,
+  "formal_bifurcation_allowed": false,
+  "autonomous_closure": false,
+  "elapsed_s": 3.2539236545562744,
+  "producer_sha256": "54847f332bd4c4d509adcb8c7da1c7fc89e457288652f1ae67135fd9c1dcbfa9"
+}

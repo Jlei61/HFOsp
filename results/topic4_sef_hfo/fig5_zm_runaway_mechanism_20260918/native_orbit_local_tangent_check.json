@@ -1,0 +1,56 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+  "samples": 257,
+  "rows": [
+    {
+      "direction": "phase",
+      "epsilon": 0.001,
+      "rhs_relative_L2": 1.176665590452613e-10,
+      "rate_relative_L2": 0.0027868639755623498
+    },
+    {
+      "direction": "phase",
+      "epsilon": 0.0001,
+      "rhs_relative_L2": 9.891109349180274e-12,
+      "rate_relative_L2": 0.00027655632842279955
+    },
+    {
+      "direction": "phase",
+      "epsilon": 1e-05,
+      "rhs_relative_L2": 9.912130456685602e-11,
+      "rate_relative_L2": 1.3489262673802213e-08
+    },
+    {
+      "direction": "phase",
+      "epsilon": 1e-06,
+      "rhs_relative_L2": 9.911380976577793e-10,
+      "rate_relative_L2": 1.0825830788991604e-08
+    },
+    {
+      "direction": "random_scaled",
+      "epsilon": 0.001,
+      "rhs_relative_L2": 1.6263688318518808e-08,
+      "rate_relative_L2": 0.04623909230001237
+    },
+    {
+      "direction": "random_scaled",
+      "epsilon": 0.0001,
+      "rhs_relative_L2": 2.082409987107324e-09,
+      "rate_relative_L2": 0.005711349618827072
+    },
+    {
+      "direction": "random_scaled",
+      "epsilon": 1e-05,
+      "rhs_relative_L2": 3.1905346227136833e-10,
+      "rate_relative_L2": 0.0008460087490723132
+    },
+    {
+      "direction": "random_scaled",
+      "epsilon": 1e-06,
+      "rhs_relative_L2": 5.898255131583969e-11,
+      "rate_relative_L2": 3.9379499452754196e-07
+    }
+  ],
+  "scope": "Local analytic derivative vs central finite differences; no Floquet acceptance"
+}

@@ -1,0 +1,56 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 13.010663565197692,
+        "difference_rms": 1.1717208707892554e-08,
+        "relative_rms": 9.005850200626962e-10
+      },
+      "GABA": {
+        "reference_rms": 0.6896175457983875,
+        "difference_rms": 8.790088233173461e-09,
+        "relative_rms": 1.2746323359561502e-08
+      },
+      "M": {
+        "reference_rms": 0.021798400211269307,
+        "difference_rms": 4.81949722186224e-09,
+        "relative_rms": 2.2109407915956433e-07
+      },
+      "covariance": {
+        "reference_rms": 36.867723019285854,
+        "difference_rms": 5.980160368419525e-09,
+        "relative_rms": 1.622058505021112e-10
+      },
+      "input_memory": {
+        "reference_rms": 0.10289786536773933,
+        "difference_rms": 1.416247252723885e-09,
+        "relative_rms": 1.3763621311894665e-08
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0002787415809445829,
+        "difference_rms": 6.3142888587879195e-12,
+        "relative_rms": 2.2652841522210043e-08
+      }
+    },
+    "combined_relative_rms": 9.105720405635689e-08
+  },
+  "verified": [
+    {
+      "real": -0.3022577545174551,
+      "imag": 0.15765981344966065,
+      "relative_residual": 6.144289113782338e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    },
+    {
+      "real": -37.68741926348024,
+      "imag": 0.0,
+      "relative_residual": 2.3613161519101985e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 293.5770230293274,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "model_promoted": false
+}

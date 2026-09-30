@@ -1,0 +1,34 @@
+{
+  "status": "STOPPED_AFTER_ACCEPTED_MESH_REFINEMENT",
+  "family": "rate",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G8193_restart80/point0000.npz",
+      "D": 0.1449654651543334,
+      "T_ms": 266.5499999999999,
+      "N": 8193,
+      "mean_hz": 28.35863600350521,
+      "min_hz": 0.013675423649500527,
+      "max_hz": 174.8961842694487,
+      "residual": 5.995204332975845e-12,
+      "iterations": [
+        0.00036689146099000425,
+        2.731759263241429e-08,
+        6.161737786669619e-12
+      ],
+      "minimum_group_rate_hz": -0.04460635805507821,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 32768,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.001,
+      "period_step_ms": 0.0,
+      "D_step": 8.714665100661989e-11,
+      "predictor": "constant"
+    }
+  ],
+  "reason": "Use converged finer grid at the newer near-critical N4097 point; reload verified off-physical predictor derivative."
+}

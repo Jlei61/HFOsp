@@ -1,0 +1,87 @@
+{
+  "label": "native_Z9000_held",
+  "duration_ms": 3500.0,
+  "n_events": 7,
+  "quiet_fraction": 0.26142857142857145,
+  "high_onset_ms": null,
+  "mean_allE_hz": 37.78589953456286,
+  "expansion_first_ms": {
+    "0.25": 10063.0,
+    "0.5": null,
+    "0.75": null
+  },
+  "status": "COMPLETE",
+  "complete_events": [
+    {
+      "start_ms": 10048.0,
+      "duration_ms": 117.0,
+      "peak_hz": 122.40921200013179,
+      "n_cells": 216,
+      "area_fraction": 0.5384374999999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 202,
+      "direction_axis_mm": -8.65508492745564,
+      "extent_mm": 11.111249999131957
+    },
+    {
+      "start_ms": 10328.0,
+      "duration_ms": 122.0,
+      "peak_hz": 139.475893767253,
+      "n_cells": 240,
+      "area_fraction": 0.59815625,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 226,
+      "direction_axis_mm": -5.903485477489684,
+      "extent_mm": 8.571350859436077
+    },
+    {
+      "start_ms": 10587.0,
+      "duration_ms": 905.0,
+      "peak_hz": 118.30807408925993,
+      "n_cells": 226,
+      "area_fraction": 0.5665937499999999,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 212,
+      "direction_axis_mm": -13.770701612610837,
+      "extent_mm": 14.836878780214374
+    },
+    {
+      "start_ms": 11608.0,
+      "duration_ms": 104.0,
+      "peak_hz": 103.46122536848857,
+      "n_cells": 214,
+      "area_fraction": 0.5369687499999998,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 200,
+      "direction_axis_mm": -15.752069669835443,
+      "extent_mm": 16.66247128874352
+    },
+    {
+      "start_ms": 11895.0,
+      "duration_ms": 119.0,
+      "peak_hz": 138.68222473759184,
+      "n_cells": 237,
+      "area_fraction": 0.5906249999999998,
+      "coreA": true,
+      "coreB": true,
+      "surround_cells": 223,
+      "direction_axis_mm": -6.669528285341778,
+      "extent_mm": 9.134696978143555
+    }
+  ],
+  "initial_D": 0.21646602103961077,
+  "M_dynamic": true,
+  "Z_dynamic": false,
+  "tail_global_hz": 30.03457580749296,
+  "tail_quiet_fraction": 0.424,
+  "tail_persistent_fraction": 0.0,
+  "conditional_drift_private_Q": true,
+  "count_sampling": false,
+  "autonomous_constant_input": false,
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

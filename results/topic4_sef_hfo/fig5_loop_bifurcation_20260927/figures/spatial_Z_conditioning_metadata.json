@@ -1,0 +1,56 @@
+{
+  "rows": [
+    {
+      "time_s": 10.0,
+      "allEmeanZ": 0.7357038486818693,
+      "core_values_natural_template_difference": [
+        [
+          0.6765858733875222,
+          0.6425162915703067
+        ],
+        [
+          0.7207796454988935,
+          0.7175661976649904
+        ],
+        [
+          -0.04419377211137119,
+          -0.07504990609468383
+        ]
+      ],
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl"
+    },
+    {
+      "time_s": 16.7,
+      "allEmeanZ": 0.21340404828071916,
+      "core_values_natural_template_difference": [
+        [
+          0.1771587063949351,
+          0.1682378535075776
+        ],
+        [
+          0.2002879780700721,
+          0.1977511871169237
+        ],
+        [
+          -0.023129271675136984,
+          -0.02951333360934603
+        ]
+      ],
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl"
+    }
+  ],
+  "display_grid": 40,
+  "display_operation": "Per-bin mean over original E neurons; no spatial smoothing.",
+  "physical_core_radius_mm": 1.5,
+  "regional_observer_radius_mm": 1.75,
+  "observer_neurons": [
+    754,
+    786
+  ],
+  "interpretation": "Equal globalZ does not specify coreZ; no transition effect inferred from this picture alone.",
+  "exit_checkpoint_lineage": "All168observationarrays and continued20s fullphysicalenginebitwise.",
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS",
+  "agent_visual_review_epoch": 1790515150.631555,
+  "visual_checks": "Correct1.75mmobserver counts754/786; physical1.5mmcircles separated; labels clear; common Z scale and signed difference scale; no transition inferred from appearance."
+}

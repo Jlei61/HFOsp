@@ -1,0 +1,135 @@
+{
+  "label": "H5_highorder",
+  "J_EE_core": 1.0251093618180307,
+  "frequency_hz": 9.158984290103763,
+  "gain_derivative_order": 4,
+  "gain_derivative_step": 0.0001,
+  "core_B_rate_Hz": 6.853512811051695,
+  "rates_hz": [
+    1.5716000712004083,
+    6.853512811051697,
+    0.2848386428887275
+  ],
+  "lambda_per_ms": [
+    -4.929902772999414e-15,
+    0.05754759552026862
+  ],
+  "equilibrium_residual": 1.1449174941446927e-16,
+  "characteristic_residual": 1.1769882472516227e-15,
+  "E_rate_mode_energy_by_region": [
+    0.0026939917148051055,
+    0.018618643720978243,
+    0.9786873645642169
+  ],
+  "transversality": {
+    "coordinate": "Core-B neuron-weighted E equilibrium rate, Hz",
+    "real_exponent_derivative_per_ms_per_Hz": 0.027174477625138204,
+    "J_derivative_per_Hz": 0.006250877110369757,
+    "real_exponent_derivative_per_ms_per_J": 4.347306329228212,
+    "coordinate_step_Hz": 0.0001,
+    "real_exponents": [
+      -2.7174495197866304e-06,
+      2.717446005241011e-06
+    ]
+  },
+  "source_mode": 11,
+  "source_branch_indices": [
+    254,
+    255
+  ],
+  "solver_evaluations": [
+    {
+      "core_B_rate_Hz": 6.374273823788309,
+      "J_EE_core": 1.0220036115219298,
+      "lambda_per_ms": [
+        -0.013092543127719602,
+        0.05920053791199877
+      ],
+      "equilibrium_residual_Hz": 9.020562075079397e-14,
+      "characteristic_residual": 9.738823117399896e-16
+    },
+    {
+      "core_B_rate_Hz": 6.866282004205476,
+      "J_EE_core": 1.0251890955469838,
+      "lambda_per_ms": [
+        0.00034696905656960325,
+        0.05745743015793424
+      ],
+      "equilibrium_residual_Hz": 1.5959455978986625e-13,
+      "characteristic_residual": 1.4735855564889021e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853579786160432,
+      "J_EE_core": 1.0251097804688725,
+      "lambda_per_ms": [
+        1.8200124767667045e-06,
+        0.05754712704411102
+      ],
+      "equilibrium_residual_Hz": 1.5265566588595902e-13,
+      "characteristic_residual": 1.378867232618759e-15
+    },
+    {
+      "core_B_rate_Hz": 6.85351281514465,
+      "J_EE_core": 1.0251093618436156,
+      "lambda_per_ms": [
+        1.112239093438162e-10,
+        0.05754759549177326
+      ],
+      "equilibrium_residual_Hz": 1.1796119636642288e-13,
+      "characteristic_residual": 1.3049984208605776e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811051695,
+      "J_EE_core": 1.0251093618180307,
+      "lambda_per_ms": [
+        -4.929902772999414e-15,
+        0.05754759552026862
+      ],
+      "equilibrium_residual_Hz": 1.1449174941446927e-13,
+      "characteristic_residual": 1.175785988452953e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811102038,
+      "J_EE_core": 1.0251093618183453,
+      "lambda_per_ms": [
+        1.3634894973326662e-12,
+        0.0575475955201905
+      ],
+      "equilibrium_residual_Hz": 1.1102230246251565e-13,
+      "characteristic_residual": 1.5813041565084097e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811051695,
+      "J_EE_core": 1.0251093618180307,
+      "lambda_per_ms": [
+        -4.929902772999414e-15,
+        0.05754759552026862
+      ],
+      "equilibrium_residual_Hz": 1.1449174941446927e-13,
+      "characteristic_residual": 1.1806958072017102e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853412811051696,
+      "J_EE_core": 1.0251087367251202,
+      "lambda_per_ms": [
+        -2.7174495197866304e-06,
+        0.05754829491079853
+      ],
+      "equilibrium_residual_Hz": 1.3183898417423734e-13,
+      "characteristic_residual": 1.091472303767513e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853612811051695,
+      "J_EE_core": 1.0251099869005422,
+      "lambda_per_ms": [
+        2.717446005241011e-06,
+        0.05754689602453114
+      ],
+      "equilibrium_residual_Hz": 1.700029006457271e-13,
+      "characteristic_residual": 1.2822363187722583e-15
+    }
+  ],
+  "status": "REFINED_HOPF_CANDIDATE",
+  "criticality": "NOT_COMPUTED",
+  "scope": "A new imaginary-axis crossing on an already unstable equilibrium branch; not the first resting instability. Derivative and independent full-state checks pending."
+}

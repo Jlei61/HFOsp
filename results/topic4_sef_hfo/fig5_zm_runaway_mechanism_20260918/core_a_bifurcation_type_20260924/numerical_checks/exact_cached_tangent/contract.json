@@ -1,0 +1,8 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/below_high_A/periodic_fast_hookstep_bounds/right_precondition_source.npz",
+  "seed_period_ms": 32.79834680891999,
+  "dt_ms": 0.05,
+  "comparison": "Same original full-state Poincare derivative versus float64 local-Jacobian caching along exactly the same nominal flow. Entire delayed history, all M, private variance and transient response retained. No reduced rank or altered network.",
+  "gates": "Nominal terminal state bitwise identical; three independent full-state derivative products relative error<1e-9, phase and return-time derivative included. Timing reported, not presumed.",
+  "model_promoted": false
+}

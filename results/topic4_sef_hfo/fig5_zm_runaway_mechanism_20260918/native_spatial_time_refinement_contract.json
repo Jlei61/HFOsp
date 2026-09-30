@@ -1,0 +1,20 @@
+{
+  "created_local": "2026-09-19T18:18:04.455785",
+  "question": "Does the new0.5mm held-Z persistent state at D=.219 survive halving the integration step?",
+  "reason": "Primary lifted-Z spatial comparison changed from coarse SELF_LIMITED to fine PERSISTENT; exclude an integration-step explanation before relocating a boundary.",
+  "grid": 40,
+  "D": 0.219,
+  "dt_ms": [
+    0.05,
+    0.025
+  ],
+  "duration_ms": 12000,
+  "new_trajectories": 1,
+  "reference": "runs/native_g40_liftedZ_D0.2190000_dt0.05",
+  "initial": "Bitwise same full fast/M state as0.05ms arm; exact same Fourier history sampled0.025ms, every shared physical time checked exactly.",
+  "Z": "Bitwise same held spatial field as0.05ms arm",
+  "M": "dynamic",
+  "readout": "Canonical final4s plusfour1s subwindows; actual1600cells and common400cells",
+  "acceptance": "Same finitewindow category and no original highentry; report quantitative differences without imposing trajectory phase agreement.",
+  "scope": "Qualitative time-step check, not full distribution or spatial convergence, bifurcation type or asymptotic proof."
+}

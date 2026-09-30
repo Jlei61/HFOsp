@@ -1,0 +1,34 @@
+{
+  "created_local": "2026-09-20T00:26:05.870782+08:00",
+  "question": "Do the already selected candidate-cycle local input waveforms substantially exceed the frequency range used to calibrate their rate response?",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "original_fit_frequencies_hz": [
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    40.0
+  ],
+  "later_capacity_fit_frequencies_hz": [
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "cutoffs_hz": [
+    40,
+    80,
+    200,
+    1000
+  ],
+  "channels": [
+    "filtered_mean_current",
+    "raw_variance_E_intensity",
+    "raw_variance_I_intensity"
+  ],
+  "observable": "DC-removed one-sided Parseval power per input channel; strict frequency greater than cutoff; no mixing of channel units",
+  "statistical_unit": "One deterministic local input waveform at each of four previously selected populations; no replicate or whole-network inference",
+  "scope": "Read-only diagnosis of spectral coverage on the old 1 mm conditional periodic candidate. Raw variance intensities are NOT the variance after synaptic filtering. Input power outside the fit range is not response-weighted output error, does not prove a cause of closure mismatch, does not repair the model and does not classify onset. No fitting or new simulations. Analytic two-frequency and Nyquist checks required."
+}

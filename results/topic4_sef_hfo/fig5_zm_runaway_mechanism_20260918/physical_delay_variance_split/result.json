@@ -1,0 +1,427 @@
+{
+  "status": "PHYSICAL_DELAY_UNIT_ERROR_CONFIRMED",
+  "created_local": "2026-09-20T12:57:50.843202+08:00",
+  "physical_delay_spacing_ms": 0.1,
+  "legacy_mistake": "Covariance used abs(delay_index_difference)*integrator_dt instead of actualphysicaldelaydifference. Transport still uses0.1msdelaybins.",
+  "consequence": "Atdt.05/.025 old sharedvariance is too large and remainingprivatevariance too small. Reducing dt changes the modeled variance split as well as numericalaccuracy.",
+  "corrected": "Evaluate normalized filter autocovariance at actual s.delays differences. No integration timestep argument in physical_split.",
+  "checks": [
+    {
+      "synapse": "ampa",
+      "quadrature": [
+        {
+          "lag_ms": 0.0,
+          "error": 0.0
+        },
+        {
+          "lag_ms": 0.1,
+          "error": 0.0
+        },
+        {
+          "lag_ms": 1.0,
+          "error": 1.1102230246251565e-16
+        },
+        {
+          "lag_ms": 3.0,
+          "error": 2.220446049250313e-16
+        },
+        {
+          "lag_ms": 35.7,
+          "error": 1.98544522836408e-18
+        }
+      ],
+      "actual_pair_quadrature_relative_max": 1.9033279762675674e-15,
+      "agrees_with_legacy_at_native_step_relative_error": 2.2556840461230945e-16,
+      "legacy_dt05_corrected_max_operator_difference": 0.030737876566731034,
+      "legacy_dt05_dt025_max_difference": 0.011857832270709585
+    },
+    {
+      "synapse": "gaba",
+      "quadrature": [
+        {
+          "lag_ms": 0.0,
+          "error": 0.0
+        },
+        {
+          "lag_ms": 0.1,
+          "error": 1.1102230246251565e-16
+        },
+        {
+          "lag_ms": 1.0,
+          "error": 0.0
+        },
+        {
+          "lag_ms": 3.0,
+          "error": 0.0
+        },
+        {
+          "lag_ms": 35.7,
+          "error": 2.7755575615628914e-17
+        }
+      ],
+      "actual_pair_quadrature_relative_max": 9.788617031458195e-16,
+      "agrees_with_legacy_at_native_step_relative_error": 1.1422047578448112e-16,
+      "legacy_dt05_corrected_max_operator_difference": 0.035853646484731605,
+      "legacy_dt05_dt025_max_difference": 0.012148321851109391
+    }
+  ],
+  "closure_checks": [
+    {
+      "synapse": "ampa",
+      "pairwise_reconstruction_relative_error": 8.969347212986513e-16,
+      "removed_fraction_range": [
+        0.0008403361344537816,
+        1.0
+      ],
+      "roundoff_cleanup": 0.0,
+      "delay_min_ms": 0.1,
+      "delay_max_ms": 35.800000000000004,
+      "delay_spacing_ms": 0.09999999999999432,
+      "integration_step_used": false
+    },
+    {
+      "synapse": "gaba",
+      "pairwise_reconstruction_relative_error": 7.899585674510125e-16,
+      "removed_fraction_range": [
+        0.0026041666666666665,
+        1.0
+      ],
+      "roundoff_cleanup": 0.0,
+      "delay_min_ms": 0.1,
+      "delay_max_ms": 35.800000000000004,
+      "delay_spacing_ms": 0.09999999999999432,
+      "integration_step_used": false
+    }
+  ],
+  "rows": [
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.029418636836686156,
+      "mean_private_variance_increase_fraction": 0.08719787301348836,
+      "largest_total_recurrent_variance_deficit": 0.0416114298692702
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.028378977242643818,
+      "mean_private_variance_increase_fraction": 0.08032495329381259,
+      "largest_total_recurrent_variance_deficit": 0.050040436449100896
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.031268944484132574,
+      "mean_private_variance_increase_fraction": 0.08933114443881082,
+      "largest_total_recurrent_variance_deficit": 0.054885439563888264
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.03977549025556534,
+      "mean_private_variance_increase_fraction": 0.12187695070546609,
+      "largest_total_recurrent_variance_deficit": 0.0570296886738807
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.03838204885888806,
+      "mean_private_variance_increase_fraction": 0.11220342318840797,
+      "largest_total_recurrent_variance_deficit": 0.069614321767212
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.042582536886690704,
+      "mean_private_variance_increase_fraction": 0.1272589405809634,
+      "largest_total_recurrent_variance_deficit": 0.07521749342994674
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.030351939539031605,
+      "mean_private_variance_increase_fraction": 0.08829508924549882,
+      "largest_total_recurrent_variance_deficit": 0.04248822471626802
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.03037373051755357,
+      "mean_private_variance_increase_fraction": 0.0913422921476247,
+      "largest_total_recurrent_variance_deficit": 0.048379291248823175
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.03127775979743731,
+      "mean_private_variance_increase_fraction": 0.08783903309124641,
+      "largest_total_recurrent_variance_deficit": 0.054369368908882804
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.04107246980932547,
+      "mean_private_variance_increase_fraction": 0.12341440055531214,
+      "largest_total_recurrent_variance_deficit": 0.05876455396540398
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.04106936094358031,
+      "mean_private_variance_increase_fraction": 0.12770062288864878,
+      "largest_total_recurrent_variance_deficit": 0.06726251608278189
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.04259718545256779,
+      "mean_private_variance_increase_fraction": 0.12501173435755306,
+      "largest_total_recurrent_variance_deficit": 0.07455010085943949
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.029609073172046658,
+      "mean_private_variance_increase_fraction": 0.08143355998374006,
+      "largest_total_recurrent_variance_deficit": 0.042655944881432824
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.029568950073715888,
+      "mean_private_variance_increase_fraction": 0.08312795441316832,
+      "largest_total_recurrent_variance_deficit": 0.046299647035426585
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.03078411515711324,
+      "mean_private_variance_increase_fraction": 0.09504632107569372,
+      "largest_total_recurrent_variance_deficit": 0.058205483132423436
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.04007273891197498,
+      "mean_private_variance_increase_fraction": 0.11354754468055535,
+      "largest_total_recurrent_variance_deficit": 0.05900715986218894
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.03998741133748905,
+      "mean_private_variance_increase_fraction": 0.1158685044075927,
+      "largest_total_recurrent_variance_deficit": 0.06435068351935115
+    },
+    {
+      "synapse": "ampa",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.041926579162021214,
+      "mean_private_variance_increase_fraction": 0.1418546684865357,
+      "largest_total_recurrent_variance_deficit": 0.07951307239663338
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.005582356833603053,
+      "mean_private_variance_increase_fraction": 0.02962371657513101,
+      "largest_total_recurrent_variance_deficit": 0.007823352211862792
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.005525210642393701,
+      "mean_private_variance_increase_fraction": 0.026148456251649584,
+      "largest_total_recurrent_variance_deficit": 0.00905741223731966
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.006001694694342772,
+      "mean_private_variance_increase_fraction": 0.027653566396690053,
+      "largest_total_recurrent_variance_deficit": 0.008690160108481726
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.007309469934295996,
+      "mean_private_variance_increase_fraction": 0.03916497900771472,
+      "largest_total_recurrent_variance_deficit": 0.010315113156061786
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.007240098484843913,
+      "mean_private_variance_increase_fraction": 0.0345707295037865,
+      "largest_total_recurrent_variance_deficit": 0.012024835213338919
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9000,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.007881861932611152,
+      "mean_private_variance_increase_fraction": 0.036717474010011575,
+      "largest_total_recurrent_variance_deficit": 0.011454518975959387
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.0055703090913730045,
+      "mean_private_variance_increase_fraction": 0.027842875722003422,
+      "largest_total_recurrent_variance_deficit": 0.007598433173042628
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.005711583240998511,
+      "mean_private_variance_increase_fraction": 0.02798109194110907,
+      "largest_total_recurrent_variance_deficit": 0.008625773630357854
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.006034382845072805,
+      "mean_private_variance_increase_fraction": 0.02721427514267099,
+      "largest_total_recurrent_variance_deficit": 0.008672561667129515
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.0072945357472356245,
+      "mean_private_variance_increase_fraction": 0.036781123053084605,
+      "largest_total_recurrent_variance_deficit": 0.010015312657461663
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.007485733080781242,
+      "mean_private_variance_increase_fraction": 0.036997961186570755,
+      "largest_total_recurrent_variance_deficit": 0.011446364609612934
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9420,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.007924710993995334,
+      "mean_private_variance_increase_fraction": 0.036121567519418966,
+      "largest_total_recurrent_variance_deficit": 0.01144967552452947
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.005413293350860295,
+      "mean_private_variance_increase_fraction": 0.024286656138541286,
+      "largest_total_recurrent_variance_deficit": 0.007321056643823192
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.005550588510494596,
+      "mean_private_variance_increase_fraction": 0.02490193848418332,
+      "largest_total_recurrent_variance_deficit": 0.008134692126313134
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.05,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.00574481807854797,
+      "mean_private_variance_increase_fraction": 0.026906224912365006,
+      "largest_total_recurrent_variance_deficit": 0.00885845562128648
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Core A",
+      "mean_total_recurrent_variance_deficit": 0.007088870074538164,
+      "mean_private_variance_increase_fraction": 0.03204409781684599,
+      "largest_total_recurrent_variance_deficit": 0.009648721040575025
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Core B",
+      "mean_total_recurrent_variance_deficit": 0.007273795504352643,
+      "mean_private_variance_increase_fraction": 0.032885487048906134,
+      "largest_total_recurrent_variance_deficit": 0.010788236539696692
+    },
+    {
+      "synapse": "gaba",
+      "probe_field_ms": 9870,
+      "legacy_dt_ms": 0.025,
+      "region": "Surround E",
+      "mean_total_recurrent_variance_deficit": 0.0075442480989708315,
+      "mean_private_variance_increase_fraction": 0.03573814825350038,
+      "largest_total_recurrent_variance_deficit": 0.011722672958675052
+    }
+  ],
+  "scope": "Exact unit andstationaryPoisson identity audit. Rates are imposedmeans fromcompletedoldmodel; not trajectories orproofthatthisaccountsfornativeDerror. Renewal and cross-population covariance approximation remains.",
+  "running_baseline_changed": false,
+  "new_network_runs": 0,
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

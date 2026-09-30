@@ -1,0 +1,12 @@
+{
+  "status": "REGISTERED_BEFORE_REPLICA_PHASE_DECOMPOSITION",
+  "created_epoch": 1790563194.9359934,
+  "question": "How much sourcephase structure is lost by averaging localnumericalreplicas, as opposed to being absent withinindividualreplicas?",
+  "design": "One80prespecifiedrastercell x512replica localresponse. Same source-defined22step phasewave and independent-source residual as the completedphasepilot. Inputphase0, pairedfixedexternalmean,3-4sburn and2srecord. Save phaseprobability separately for everyreplica before pooling. Compare phasevariance withinreplicas versus varianceofmeanprofile and existingnative5x2s/10sraster.",
+  "initialization": "resetV/ref and source-meanM; paired80target control changes only this initialization",
+  "identity": "Exact lawtotalvariance over the finite replica byphase array; use equalphase andequalreplica weights for decomposition, save exposure-weightedprofile separately. Phase-averaging differences are not a rate or time-series stability test.",
+  "unit": "Oneconditionaldevelopment sourcefield;80fixedstratifiedrastercells,512 numericalcopies. Neither80 independentnetworks nor a freshautonomousseed.",
+  "decision": "Ifsingle replicas retain native-like phasevar butmeanprofile losesit, the closure loses conditional/quenchedphase structure in its averaging, ratherthan demonstrating absenceofrhythm in individualresponses. Ifsingle replicas also lackit, omittedinputtemporalstructure remains a competingexplanation.",
+  "producer_sha256": "b75c3d1a30527ac858de32578dab3198f835995782074f5354d7258ec3dda8a6",
+  "formal_bifurcation_allowed": false
+}

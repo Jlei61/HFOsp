@@ -1,0 +1,11 @@
+{
+  "status": "REGISTERED_BEFORE_SOURCE_PHASE_OPERATOR",
+  "created_epoch": 1790561524.8743541,
+  "question": "Can measured coherent target currents be represented by source phase probabilities passed through the original spatial graph and delays, with a source-defined residual spectrum?",
+  "design": "Exactly one22-step candidate from the measured454.5Hz peak. Build and retain originalgraph operators grouped by delay modulo22. Source conditionalphase probabilities and residual PSD come from the existing72-74s developmentrecord only. No parameter/period fitting, native replay, or free model run in this preparation.",
+  "next_gate": "Compare this source-level projection to the completed59target current decomposition. Then test the local response with independent source residual spectra before any bounded allcell self-generated update.",
+  "limits": "A fixedperiod is a candidate representation, not spontaneous frequency selection or a physical time simulation. Source residual cross correlations are omitted. A local fit or convergence of a statistical map cannot certify physical stability or bifurcation.",
+  "producer_sha256": "75bee89ad5d12db0127512bb826660bcc5827786db09d236d3c9c5b907fd0ce5",
+  "period_steps": 22,
+  "formal_bifurcation_allowed": false
+}

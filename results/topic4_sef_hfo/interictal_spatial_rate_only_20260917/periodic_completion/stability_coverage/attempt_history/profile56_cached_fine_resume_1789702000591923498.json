@@ -1,0 +1,13 @@
+{
+  "previous_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 258261,
+    "rows": [],
+    "index": 56,
+    "next_stage": "FLOQUET",
+    "free_mib": 8750.0,
+    "required_free_gib": 10.0
+  },
+  "coarse_monodromy": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleDown_0050_N256_positive_leading_dt0.1.json",
+  "reason": "Positive N1024 orbit and coarse leading multiplier are saved. Release idle FFT workspace and resume finer-step check with cache clearing; 7GiB gate for this short-period leading-mode job."
+}

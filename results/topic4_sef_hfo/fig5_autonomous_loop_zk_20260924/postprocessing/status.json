@@ -1,0 +1,37 @@
+{
+  "stage": "COMPLETE_ANALYSIS_CANDIDATES",
+  "watcher_pid": 2679166,
+  "updated_epoch": 1790293085.0545146,
+  "simulation_results": {
+    "primary": {
+      "completed": 18,
+      "total": 18
+    },
+    "native_rotated": {
+      "completed": 1,
+      "total": 1
+    },
+    "conditional_rotated": {
+      "completed": 8,
+      "total": 8
+    },
+    "native_isotropic": {
+      "completed": 1,
+      "total": 1
+    },
+    "conditional_isotropic": {
+      "completed": 8,
+      "total": 8
+    }
+  },
+  "failed_analysis": [],
+  "actions_this_pass": [
+    "spatial_conditional_isotropic_z0.75_k8_high",
+    "structure_conditional_summary",
+    "structure_conditional_map"
+  ],
+  "dispatches_simulations": false,
+  "formal_bifurcation": "NOT_ESTABLISHED_STATIC_RATE_GATE_FAILED",
+  "human_review": "PENDING",
+  "scope": "Native count/field/contact review and conditional/drift plots. Scientific interpretation and final figure review remain agent tasks."
+}

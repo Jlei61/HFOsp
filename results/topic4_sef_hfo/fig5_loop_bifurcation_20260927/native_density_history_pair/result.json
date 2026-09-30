@@ -1,0 +1,93 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "kind": "Native",
+      "history": "Original evolving history",
+      "window_s": [
+        5,
+        10
+      ],
+      "rate_Hz": [
+        98.44386875000001,
+        392.4824933687005,
+        132.21475826971835,
+        90.29386736703869
+      ],
+      "mean_Graw": 2.690311256581956e-05,
+      "mean_causal_R_Hz": 98.76987202373749,
+      "min_causal_R_Hz": 98.35602274816091,
+      "max_causal_R_Hz": 99.31204042549854,
+      "sampled_R_above200_fraction": 0.0
+    },
+    {
+      "kind": "Density",
+      "history": "Original evolving history",
+      "window_s": [
+        5,
+        10
+      ],
+      "rate_Hz": [
+        108.76953227754377,
+        393.50803017283215,
+        137.07234415197183,
+        100.99084424253576
+      ],
+      "mean_Graw": 2.7112951143240832e-05,
+      "mean_causal_R_Hz": 109.12502354696518,
+      "min_causal_R_Hz": 106.33711312179086,
+      "max_causal_R_Hz": 109.64529892763356,
+      "sampled_R_above200_fraction": 0.0
+    },
+    {
+      "kind": "Native",
+      "history": "Held K9 history",
+      "window_s": [
+        5,
+        10
+      ],
+      "rate_Hz": [
+        196.9063125,
+        474.07161803713575,
+        474.1954198473267,
+        182.89016414970436
+      ],
+      "mean_Graw": 2.6878804695846753e-05,
+      "mean_causal_R_Hz": 197.56695677954414,
+      "min_causal_R_Hz": 197.1262599558863,
+      "max_causal_R_Hz": 198.0518182696708,
+      "sampled_R_above200_fraction": 0.0
+    },
+    {
+      "kind": "Density",
+      "history": "Held K9 history",
+      "window_s": [
+        5,
+        10
+      ],
+      "rate_Hz": [
+        200.45668596122832,
+        472.30902910376136,
+        474.9950946092718,
+        186.6430334357253
+      ],
+      "mean_Graw": 0.11277510992503258,
+      "mean_causal_R_Hz": 201.12534985817226,
+      "min_causal_R_Hz": 200.6479136026873,
+      "max_causal_R_Hz": 201.60962201905662,
+      "sampled_R_above200_fraction": 1.0
+    }
+  ],
+  "source_comparisons": [
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/history_comparison/result.json",
+    "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_K9p35_held_history/comparison/result.json"
+  ],
+  "scope": "Finite conditional history selection, identical Z/K and future input; native30s anddensity10s complete. Figure uses common5-10sfield/summary. Distinct finite states are not certified attractors, bistability, an autonomous loop, or a bifurcation.",
+  "field_geometry": "20x20 display;1.5mm substrate circles, original1.75mmnearestcore rate grouping unchanged.",
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false,
+  "agent_visual_review": "PASS_RENDERED_PNG_AND_SVG_XML",
+  "human_visual_review": "PENDING",
+  "SVG_XML": "PASS",
+  "producer_sha256": "9e5ea3e0b17b5abdf8d7149e9512d72910390c94d30cf7a72742caa8f1ff0b42"
+}

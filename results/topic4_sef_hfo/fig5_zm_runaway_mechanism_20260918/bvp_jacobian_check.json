@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_physical_fine_G4097_M16384/point0000.npz",
+  "iterate": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/current_iterate.npz",
+  "N": 4097,
+  "M": 16384,
+  "rows": [
+    {
+      "h": 0.01,
+      "relative_error": 1.0821738927108863e-05,
+      "max_error": 2.5308952054596545e-05
+    },
+    {
+      "h": 0.001,
+      "relative_error": 1.174277647765999e-07,
+      "max_error": 7.380802115319884e-09
+    },
+    {
+      "h": 0.0001,
+      "relative_error": 8.977353370974823e-07,
+      "max_error": 5.264867710200183e-08
+    }
+  ],
+  "direction": "actual recent Newton branch displacement"
+}

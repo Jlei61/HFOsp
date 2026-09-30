@@ -1,0 +1,62 @@
+{
+  "created_local": "2026-09-20T05:53:42.525973+08:00",
+  "status": "LOCKED_BEFORE_CONDITIONED_FIT_AND_NEW_TARGETS",
+  "model": "Continuous refractory renewal flux r=rho*(1-integral of r over tref),rho=exp(ell)/0.1ms.6exact current-covariance states,36linear input-history states,39-to64tanh-to64tanh-to1 residual log-intensity readout, separate E/I. No particle or voltage grid in network state.",
+  "numerical_bridge": "Implicit Euler: p=sigmoid(ell+log(dt/0.1)); flux=p times own available fraction/dt. At0.1ms this agrees with native decrement-before-membrane refractory bookkeeping. It is an approximate conditional LIF response, not an exact derivation.",
+  "training_sources": "Original static and dynamic calibration plus224existing TRAIN profiles and256additional TRAIN profiles. Observed availability used only as local conditional-flux calibration labels. No native spatial future firing, onset time, Z/M or propagation targets.",
+  "validation_sources": "Original24waveforms and32workpoints; previous64validationprofiles are reused diagnostics and no longer novel.64additional unseen profiles are independent validation. Predictions and weights locked before scoring.",
+  "new_data": {
+    "validation_generator_seed": 920072,
+    "validation_noise_seed": 920074,
+    "validation_profiles": 64,
+    "replicates": 8192,
+    "scope": "Same preregistered broad stimulus generator. Allnewprofiles validationonly, no new training data. Parent64 and legacy64 are reused diagnostics with unchanged58/64gates; original24 requireallpass."
+  },
+  "training": {
+    "seed": 920065,
+    "steps_per_pop": 12000,
+    "threads": 2,
+    "optimizer": "AdamW,weight_decay1e-6,clipnorm10",
+    "learning_rate": [
+      [
+        0,
+        0.001
+      ],
+      [
+        4000,
+        0.0003
+      ],
+      [
+        8000,
+        0.0001
+      ]
+    ],
+    "sample": "2048 equally spaced record steps/profile; all profiles equally represented; no validation checkpoint selection",
+    "batch": {
+      "flux": 512,
+      "static": 128,
+      "linear": 64
+    },
+    "loss": "10*mean((available*softplus(ell)-fired*ell-empirical_entropy)/max(profile_mean_fired,.001)) + static squared asinh(rate/.1)/.1 difference + original normalized complex gain error. Static/linear evaluated on same readout, covariance and refractory dynamics.",
+    "boundary": "Fixed schedule and architecture; no automatic extra training or architecture enlargement after validation.",
+    "source": "Exact parent480profile arrays, unchanged; whitening statistics computed only from these training features."
+  },
+  "acceptance": {
+    "original_waveforms": "24/24 waveformL2<=.15,meanerror<=.10",
+    "fresh_waveforms": "At least58/64 with same thresholds",
+    "numerical": "Per-profile0.1to0.05ms prediction difference<=.02",
+    "linear": "Original finite-amplitude and per-row DC/AC gates unchanged; analytic gains only preliminary diagnostics",
+    "spatial": "Original interictal,propagation,Z/M-path gates remain required; local pass does not promote model or certify bifurcation."
+  },
+  "invariant": "Spatial graph,geometry,thresholds,mean/variance synapses,delays,external-input definition and Z/M laws remain fixed.",
+  "question": "Does fixed invertible feature conditioning address the documented approximately1e10covariance condition without adding physical memory or changing the rate function class?",
+  "parent": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/refractory_rate_response",
+  "only_change": "Readout sees A*(features-training_mean), A=U diag(1/sqrt(max(eigenvalue,largest*1e-7))) U^T. All39directions retained. Same64/64tanh architecture, loss,schedule,seed,480trainingprofiles and originalcalibration; no onset/validationtarget fitting.",
+  "conditioning": {
+    "training_only": true,
+    "eigenvalue_floor_relative": 1e-07,
+    "drop_dimensions": false,
+    "proof": "Map arbitrary parent network first layer through inverse transform; outputs and full linear-response derivatives must match before fit."
+  },
+  "stop": "One fixed conditioning and original12000steps/pop. No more optimization, transform tuning or model change after scoring. Local pass still requires native autonomous dynamics and propagation before bifurcation."
+}

@@ -1,0 +1,517 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "label": "9420_low",
+      "status": "ROOT_FAIL",
+      "D": 0.22884476056519176,
+      "global_rate_hz": 0.1015877488155426,
+      "regional_rates_hz": [
+        0.9068258656729665,
+        0.9065428650409866,
+        0.06088373497891434
+      ],
+      "residual_per_ms": 0.003833930074577812,
+      "trace": [
+        {
+          "iteration": 0,
+          "rate_residual_per_ms": 0.0037541972051918435,
+          "logit_residual": 0.7334970251014479
+        },
+        {
+          "iteration": 1,
+          "rate_residual_per_ms": 0.0037999861296948347,
+          "logit_residual": 0.7327237391045518
+        },
+        {
+          "iteration": 2,
+          "rate_residual_per_ms": 0.0038308538554505615,
+          "logit_residual": 0.7325821086697122
+        },
+        {
+          "iteration": 3,
+          "rate_residual_per_ms": 0.003834766264103546,
+          "logit_residual": 0.7325812582975129
+        },
+        {
+          "iteration": 4,
+          "rate_residual_per_ms": 0.003833788668381565,
+          "logit_residual": 0.7325811868005818
+        },
+        {
+          "iteration": 5,
+          "rate_residual_per_ms": 0.0038339108609920357,
+          "logit_residual": 0.7325811844231538
+        },
+        {
+          "iteration": 6,
+          "rate_residual_per_ms": 0.00383394141149097,
+          "logit_residual": 0.7325811844126111
+        },
+        {
+          "iteration": 7,
+          "rate_residual_per_ms": 0.0038339261364811437,
+          "logit_residual": 0.7325811844024255
+        },
+        {
+          "iteration": 8,
+          "rate_residual_per_ms": 0.003833929955241379,
+          "logit_residual": 0.7325811844006491
+        },
+        {
+          "iteration": 9,
+          "rate_residual_per_ms": 0.00383393019391416,
+          "logit_residual": 0.7325811844006473
+        },
+        {
+          "iteration": 10,
+          "rate_residual_per_ms": 0.003833930074577812,
+          "logit_residual": 0.7325811844006438
+        }
+      ],
+      "coordinate_Jacobian_relative_errors": [
+        8.597849238478112e-10,
+        2.1607737582149947e-10
+      ],
+      "stability": "NOT_COMPUTED",
+      "model_promoted": false
+    },
+    {
+      "label": "9420_tail_mean",
+      "status": "ROOT_FAIL",
+      "D": 0.22884476056519176,
+      "global_rate_hz": 89.08365252831555,
+      "regional_rates_hz": [
+        296.2957690461144,
+        273.6547798303417,
+        79.19163539391594
+      ],
+      "residual_per_ms": 0.2675717589732627,
+      "trace": [
+        {
+          "iteration": 0,
+          "rate_residual_per_ms": 0.24966026634689686,
+          "logit_residual": 14.384610571584982
+        },
+        {
+          "iteration": 1,
+          "rate_residual_per_ms": 0.2631436317647574,
+          "logit_residual": 14.350634031607719
+        },
+        {
+          "iteration": 2,
+          "rate_residual_per_ms": 0.26766695660588835,
+          "logit_residual": 14.346118570732
+        },
+        {
+          "iteration": 3,
+          "rate_residual_per_ms": 0.2675876377314962,
+          "logit_residual": 14.344979991763282
+        },
+        {
+          "iteration": 4,
+          "rate_residual_per_ms": 0.2675838631700384,
+          "logit_residual": 14.344393195619695
+        },
+        {
+          "iteration": 5,
+          "rate_residual_per_ms": 0.2673017821534667,
+          "logit_residual": 14.344326991964817
+        },
+        {
+          "iteration": 6,
+          "rate_residual_per_ms": 0.26746973662463547,
+          "logit_residual": 14.344005529352588
+        },
+        {
+          "iteration": 7,
+          "rate_residual_per_ms": 0.26755712857823516,
+          "logit_residual": 14.343944578135227
+        },
+        {
+          "iteration": 8,
+          "rate_residual_per_ms": 0.26765655995319526,
+          "logit_residual": 14.34393010798389
+        },
+        {
+          "iteration": 9,
+          "rate_residual_per_ms": 0.2675482098564493,
+          "logit_residual": 14.343904379882092
+        },
+        {
+          "iteration": 10,
+          "rate_residual_per_ms": 0.26760027524596336,
+          "logit_residual": 14.343898706022529
+        },
+        {
+          "iteration": 11,
+          "rate_residual_per_ms": 0.26754626776233986,
+          "logit_residual": 14.343893982580964
+        },
+        {
+          "iteration": 12,
+          "rate_residual_per_ms": 0.26757259867600497,
+          "logit_residual": 14.343891361308716
+        },
+        {
+          "iteration": 13,
+          "rate_residual_per_ms": 0.2675458172601159,
+          "logit_residual": 14.343891327900781
+        },
+        {
+          "iteration": 14,
+          "rate_residual_per_ms": 0.26755901996194614,
+          "logit_residual": 14.343890047223363
+        },
+        {
+          "iteration": 15,
+          "rate_residual_per_ms": 0.26757233234622063,
+          "logit_residual": 14.34388942698703
+        },
+        {
+          "iteration": 16,
+          "rate_residual_per_ms": 0.26756562248572613,
+          "logit_residual": 14.343889414385629
+        },
+        {
+          "iteration": 17,
+          "rate_residual_per_ms": 0.26757230747636707,
+          "logit_residual": 14.343889267394454
+        },
+        {
+          "iteration": 18,
+          "rate_residual_per_ms": 0.2675655964443899,
+          "logit_residual": 14.343889254053112
+        },
+        {
+          "iteration": 19,
+          "rate_residual_per_ms": 0.2675689394809005,
+          "logit_residual": 14.343889181288382
+        },
+        {
+          "iteration": 20,
+          "rate_residual_per_ms": 0.2675706142579137,
+          "logit_residual": 14.343889164733266
+        },
+        {
+          "iteration": 21,
+          "rate_residual_per_ms": 0.2675714524540366,
+          "logit_residual": 14.343889161376584
+        },
+        {
+          "iteration": 22,
+          "rate_residual_per_ms": 0.2675722910535989,
+          "logit_residual": 14.343889160459751
+        },
+        {
+          "iteration": 23,
+          "rate_residual_per_ms": 0.26757208130384746,
+          "logit_residual": 14.343889160073065
+        },
+        {
+          "iteration": 24,
+          "rate_residual_per_ms": 0.2675718715791836,
+          "logit_residual": 14.343889159838357
+        },
+        {
+          "iteration": 25,
+          "rate_residual_per_ms": 0.2675717667293547,
+          "logit_residual": 14.343889159797394
+        },
+        {
+          "iteration": 26,
+          "rate_residual_per_ms": 0.2675717405184585,
+          "logit_residual": 14.343889159796714
+        },
+        {
+          "iteration": 27,
+          "rate_residual_per_ms": 0.26757175362371244,
+          "logit_residual": 14.343889159795847
+        },
+        {
+          "iteration": 28,
+          "rate_residual_per_ms": 0.2675717667290645,
+          "logit_residual": 14.343889159795571
+        },
+        {
+          "iteration": 29,
+          "rate_residual_per_ms": 0.2675717536236156,
+          "logit_residual": 14.343889159795248
+        },
+        {
+          "iteration": 30,
+          "rate_residual_per_ms": 0.2675717568999536,
+          "logit_residual": 14.343889159795172
+        },
+        {
+          "iteration": 31,
+          "rate_residual_per_ms": 0.2675717601762976,
+          "logit_residual": 14.34388915979515
+        },
+        {
+          "iteration": 32,
+          "rate_residual_per_ms": 0.26757175935721,
+          "logit_residual": 14.343889159795145
+        },
+        {
+          "iteration": 33,
+          "rate_residual_per_ms": 0.26757175976675357,
+          "logit_residual": 14.343889159795141
+        },
+        {
+          "iteration": 34,
+          "rate_residual_per_ms": 0.26757175894766627,
+          "logit_residual": 14.34388915979514
+        },
+        {
+          "iteration": 35,
+          "rate_residual_per_ms": 0.2675717589732627,
+          "logit_residual": 14.343889159795136
+        }
+      ],
+      "coordinate_Jacobian_relative_errors": [
+        1.2342602859143082e-05,
+        3.085850501766141e-06
+      ],
+      "stability": "NOT_COMPUTED",
+      "model_promoted": false
+    },
+    {
+      "label": "9870_low",
+      "status": "ROOT_FAIL",
+      "D": 0.25634442534475455,
+      "global_rate_hz": 0.09823426684676427,
+      "regional_rates_hz": [
+        0.8375053317857767,
+        0.8670683181463159,
+        0.06009526660758296
+      ],
+      "residual_per_ms": 0.004594289383434988,
+      "trace": [
+        {
+          "iteration": 0,
+          "rate_residual_per_ms": 0.00468405999849484,
+          "logit_residual": 0.8928287381973377
+        },
+        {
+          "iteration": 1,
+          "rate_residual_per_ms": 0.004533297142770202,
+          "logit_residual": 0.8926323481475062
+        },
+        {
+          "iteration": 2,
+          "rate_residual_per_ms": 0.004594701095666108,
+          "logit_residual": 0.8923049272940418
+        },
+        {
+          "iteration": 3,
+          "rate_residual_per_ms": 0.004594085671174995,
+          "logit_residual": 0.8923049192324335
+        },
+        {
+          "iteration": 4,
+          "rate_residual_per_ms": 0.004594393437878106,
+          "logit_residual": 0.8923049173482784
+        },
+        {
+          "iteration": 5,
+          "rate_residual_per_ms": 0.00459423956813842,
+          "logit_residual": 0.8923049168112112
+        },
+        {
+          "iteration": 6,
+          "rate_residual_per_ms": 0.0045943165064115665,
+          "logit_residual": 0.8923049167100103
+        },
+        {
+          "iteration": 7,
+          "rate_residual_per_ms": 0.004594278038125751,
+          "logit_residual": 0.8923049166681718
+        },
+        {
+          "iteration": 8,
+          "rate_residual_per_ms": 0.004594297272481382,
+          "logit_residual": 0.8923049166659816
+        },
+        {
+          "iteration": 9,
+          "rate_residual_per_ms": 0.004594287655356749,
+          "logit_residual": 0.8923049166612973
+        },
+        {
+          "iteration": 10,
+          "rate_residual_per_ms": 0.004594290059638618,
+          "logit_residual": 0.892304916661125
+        },
+        {
+          "iteration": 11,
+          "rate_residual_per_ms": 0.004594288857498491,
+          "logit_residual": 0.8923049166611214
+        },
+        {
+          "iteration": 12,
+          "rate_residual_per_ms": 0.004594289458568778,
+          "logit_residual": 0.8923049166610983
+        },
+        {
+          "iteration": 13,
+          "rate_residual_per_ms": 0.004594289383434988,
+          "logit_residual": 0.8923049166610966
+        }
+      ],
+      "coordinate_Jacobian_relative_errors": [
+        8.217456611994755e-10,
+        2.0666859591862516e-10
+      ],
+      "stability": "NOT_COMPUTED",
+      "model_promoted": false
+    },
+    {
+      "label": "9870_tail_mean",
+      "status": "ROOT_FAIL",
+      "D": 0.25634442534475455,
+      "global_rate_hz": 197.8363227927697,
+      "regional_rates_hz": [
+        417.62192775948836,
+        411.5300621641855,
+        186.88157475301796
+      ],
+      "residual_per_ms": 0.6123338558533495,
+      "trace": [
+        {
+          "iteration": 0,
+          "rate_residual_per_ms": 0.22921232954501886,
+          "logit_residual": 14.736897976404531
+        },
+        {
+          "iteration": 1,
+          "rate_residual_per_ms": 0.5297967851344965,
+          "logit_residual": 14.486477826838684
+        },
+        {
+          "iteration": 2,
+          "rate_residual_per_ms": 0.5009383398625331,
+          "logit_residual": 14.371597409612054
+        },
+        {
+          "iteration": 3,
+          "rate_residual_per_ms": 0.48778795518029455,
+          "logit_residual": 14.356063860808888
+        },
+        {
+          "iteration": 4,
+          "rate_residual_per_ms": 0.5002851066694727,
+          "logit_residual": 14.34085292013163
+        },
+        {
+          "iteration": 5,
+          "rate_residual_per_ms": 0.5073725874973437,
+          "logit_residual": 14.314892719081021
+        },
+        {
+          "iteration": 6,
+          "rate_residual_per_ms": 0.5099649278960124,
+          "logit_residual": 14.31409731781553
+        },
+        {
+          "iteration": 7,
+          "rate_residual_per_ms": 0.5276014231379902,
+          "logit_residual": 14.29329535760644
+        },
+        {
+          "iteration": 8,
+          "rate_residual_per_ms": 0.567058664356454,
+          "logit_residual": 14.25976370861737
+        },
+        {
+          "iteration": 9,
+          "rate_residual_per_ms": 0.617562724334212,
+          "logit_residual": 14.230050259272803
+        },
+        {
+          "iteration": 10,
+          "rate_residual_per_ms": 0.6132128869334084,
+          "logit_residual": 14.19208139452606
+        },
+        {
+          "iteration": 11,
+          "rate_residual_per_ms": 0.6119007749040276,
+          "logit_residual": 14.191937999010806
+        },
+        {
+          "iteration": 12,
+          "rate_residual_per_ms": 0.6124599032521731,
+          "logit_residual": 14.191895657274634
+        },
+        {
+          "iteration": 13,
+          "rate_residual_per_ms": 0.6123108769041781,
+          "logit_residual": 14.191891901503286
+        },
+        {
+          "iteration": 14,
+          "rate_residual_per_ms": 0.6123474566124975,
+          "logit_residual": 14.191891846219356
+        },
+        {
+          "iteration": 15,
+          "rate_residual_per_ms": 0.6123290852162766,
+          "logit_residual": 14.191891809525451
+        },
+        {
+          "iteration": 16,
+          "rate_residual_per_ms": 0.6123336677958412,
+          "logit_residual": 14.191891803481887
+        },
+        {
+          "iteration": 17,
+          "rate_residual_per_ms": 0.6123339543665677,
+          "logit_residual": 14.191891803477546
+        },
+        {
+          "iteration": 18,
+          "rate_residual_per_ms": 0.6123338110762023,
+          "logit_residual": 14.191891803475654
+        },
+        {
+          "iteration": 19,
+          "rate_residual_per_ms": 0.6123338827201344,
+          "logit_residual": 14.191891803475555
+        },
+        {
+          "iteration": 20,
+          "rate_residual_per_ms": 0.6123338468978556,
+          "logit_residual": 14.191891803475443
+        },
+        {
+          "iteration": 21,
+          "rate_residual_per_ms": 0.6123338648089169,
+          "logit_residual": 14.191891803475428
+        },
+        {
+          "iteration": 22,
+          "rate_residual_per_ms": 0.6123338468978166,
+          "logit_residual": 14.191891803475398
+        },
+        {
+          "iteration": 23,
+          "rate_residual_per_ms": 0.6123338513755819,
+          "logit_residual": 14.191891803475366
+        },
+        {
+          "iteration": 24,
+          "rate_residual_per_ms": 0.6123338558533495,
+          "logit_residual": 14.191891803475272
+        }
+      ],
+      "coordinate_Jacobian_relative_errors": [
+        4.176769411786339e-06,
+        1.0445418831094535e-06
+      ],
+      "stability": "NOT_COMPUTED",
+      "model_promoted": false
+    }
+  ],
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

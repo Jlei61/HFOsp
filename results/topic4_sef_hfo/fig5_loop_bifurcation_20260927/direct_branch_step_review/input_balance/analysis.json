@@ -1,0 +1,53 @@
+{
+  "status": "COMPLETE_EXACT_LOCAL_INPUT_DECOMPOSITION",
+  "rows": [
+    {
+      "region": "CoreA",
+      "delta_drift_at_threshold_mV_equiv": {
+        "excitation_from_CoreA": -0.2472498606643915,
+        "excitation_from_CoreB": 0.0,
+        "excitation_from_surround": -1.0987771762257152,
+        "local_inhibition": 0.32387969820935114,
+        "M": 8.524020446430481e-05,
+        "global_G": 0.3377209695009983,
+        "K": -0.6572335295674904
+      },
+      "total_mean": -1.3415746585428003,
+      "old_mean_margin_mV_equiv": 652.9552079656719,
+      "new_mean_margin_mV_equiv": 651.6136333071291
+    },
+    {
+      "region": "CoreB",
+      "delta_drift_at_threshold_mV_equiv": {
+        "excitation_from_CoreA": 0.0,
+        "excitation_from_CoreB": -0.10074088446018727,
+        "excitation_from_surround": -0.2935841744407091,
+        "local_inhibition": 0.07304182936716926,
+        "M": 3.557699543958921e-05,
+        "global_G": 0.3209504958642474,
+        "K": -0.6658552571044974
+      },
+      "total_mean": -0.6661524137785627,
+      "old_mean_margin_mV_equiv": 690.4632219073746,
+      "new_mean_margin_mV_equiv": 689.7970694935962
+    },
+    {
+      "region": "surround",
+      "delta_drift_at_threshold_mV_equiv": {
+        "excitation_from_CoreA": -0.007615558656261686,
+        "excitation_from_CoreB": -0.003686234550948136,
+        "excitation_from_surround": -1.74506167797263,
+        "local_inhibition": 0.3682086627821807,
+        "M": 0.0002859892043702374,
+        "global_G": 0.4174569605231948,
+        "K": -0.5965108045492216
+      },
+      "total_mean": -1.566922663219313,
+      "old_mean_margin_mV_equiv": 110.81306551174802,
+      "new_mean_margin_mV_equiv": 109.24614284852872
+    }
+  ],
+  "reconstruction_max_error": 3.654354596704934e-12,
+  "scope": "Differences in supplied stationarymean input balance at grouptargetthresholds between two independentlychecked nearselfconsistent candidates. Not native current measurements, causal ablations or a termination prediction.",
+  "producer_sha256": "22e99343de2bf04bbfa540c641b425a051f6edf93140290d9f25578b117b0bec"
+}

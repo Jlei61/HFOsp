@@ -1,0 +1,54 @@
+{
+  "status": "DENSITY_LINEAR_CASE_COMPLETE",
+  "case_id": 31,
+  "kind": "v2_assayed",
+  "workpoint": {
+    "pop": "I",
+    "mu": 41.525583143123654,
+    "theta": 18.0,
+    "ve": 175.61827689514723,
+    "vi": 452.58407618203887
+  },
+  "channel": "variance_E",
+  "frequency_hz": 6.0,
+  "dt_ms": 0.1,
+  "absolute_amplitude": 8.780913844757363,
+  "predicted": [
+    -0.04129403453273994,
+    0.010760297552419187
+  ],
+  "measured": [
+    -0.05259014571842913,
+    0.010455059688206945
+  ],
+  "dc_measured": -0.054929399239419696,
+  "normalized_error": 0.2057228839574958,
+  "counted": true,
+  "tolerance": 0.1,
+  "passed": false,
+  "sign_ok": true,
+  "numerical_pass": true,
+  "numerical": [
+    [
+      4.4064751847372463e-13,
+      4.410179946326809e-13,
+      3.747853541526993e-21,
+      1.098612215121449e-16,
+      0.0
+    ],
+    [
+      4.39648317751562e-13,
+      4.3992026346558343e-13,
+      3.742974145419396e-21,
+      1.098612215121449e-16,
+      0.0
+    ]
+  ],
+  "mean_rates_hz": [
+    258.4209692161497,
+    258.42118776070413
+  ],
+  "elapsed_seconds": 169.21223120496143,
+  "scope": "Already observed validation targets, independent of this candidate calculation but not newly blind. Physical constants fixed. Population-density benchmark is not yet a compact accepted spatial rate field.",
+  "model_promoted": false
+}

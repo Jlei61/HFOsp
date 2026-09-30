@@ -1,0 +1,23 @@
+{
+  "status": "PASS_SAME_EQUATION_LINEARISATION",
+  "rows": [
+    {
+      "scale": 1.0,
+      "joint_local_source_JVP_relative_error": 2.1142695281307536e-10
+    },
+    {
+      "scale": 0.1,
+      "joint_local_source_JVP_relative_error": 2.278824115969705e-09
+    }
+  ],
+  "source_constraint_max_error_Hz": 3.075898910576136e-13,
+  "targets_below_zero": 5,
+  "minimum_target_rate_Hz": -1.6788850616401516e-05,
+  "targets_above_cap": 0,
+  "minimum_proposed_E_M": -1.728693741141085e-06,
+  "gmres_info": 0,
+  "clarification": "The earlier local_adaptation_corrected_rate was at the old source input. This file also includes the proposed source-current and G changes. No proposed M/rate has been accepted without fresh nonlinear evaluation.",
+  "independent_response_validation": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "8cb7807fe51bffeacb7db2fc059040e7c4f9aeeb76c85d8ae6a97e75215f61c1"
+}

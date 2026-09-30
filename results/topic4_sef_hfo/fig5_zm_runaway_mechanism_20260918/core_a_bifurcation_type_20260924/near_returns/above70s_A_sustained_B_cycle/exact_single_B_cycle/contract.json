@@ -1,0 +1,45 @@
+{
+  "question": "Does the observed A-continuous/B-intermittent state admit a full periodic skeleton in the stronger local-resource field?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/checkpoint25000.npz",
+  "source_total_elapsed_ms": 45000,
+  "candidate": {
+    "time1_ms": 45007.0,
+    "time2_ms": 45179.0,
+    "period_ms": 172.0,
+    "score": 0.3180265522271142,
+    "rate_history_squared_error_over_variance": 0.27722904134410664,
+    "M_squared_error_over_variance": 0.04079751088300753,
+    "regional_rates_A_B_S_1": [
+      389.7788529939928,
+      4.055943567894988e-05,
+      12.470176078865414
+    ],
+    "regional_rates_A_B_S_2": [
+      403.3042586956478,
+      4.097363123914307e-05,
+      16.17596096803026
+    ],
+    "Core_B_50Hz_20ms_segments_relative_ms": [
+      [
+        63,
+        103
+      ]
+    ],
+    "B_max_hz": 443.64720994401233,
+    "B_quiet_fraction": 0.7093023255813954
+  },
+  "times_ms": [
+    45007.0,
+    45050.0,
+    45093.0,
+    45136.0,
+    45179.0
+  ],
+  "number_segments": 4,
+  "dt_ms": 0.05,
+  "selection": "Lowest original recurrence score among candidate intervals with exactly one B>50Hz20ms burst, peak>200Hz and>10percent quiet. This only nominates an elementary skeleton; fundamental-period and closure checks remain necessary.",
+  "single_B_cycle_selector": true,
+  "equations": "Unchanged full3479-group spatial conditional rate drift, physical delays, all Z held and all M dynamic; only native Core-A Z pattern differs from native9s.",
+  "validation": "Every replayed1ms3479-group float32 rate must equal its source record bitwise. Save exact full-state quarter-period nodes, not interpolated states. This is a seed, not a closed orbit.",
+  "model_promoted": false
+}

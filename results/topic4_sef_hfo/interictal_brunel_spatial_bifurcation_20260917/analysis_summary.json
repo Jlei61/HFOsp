@@ -1,0 +1,220 @@
+{
+  "status": "SPATIAL_LINEAR_ONSET_ANALYSIS_COMPLETE_NONLINEAR_REPLACEMENT_NOT_VALIDATED",
+  "reference": {
+    "title": "A Spatially Structured Spiking Network Model of Beta Traveling Waves and Their Attenuation in Motor Cortex",
+    "doi": "10.64898/2026.03.18.712701",
+    "local_file": "/home/honglab/leijiaxin/HFOsp/docs/paper/brunel2026/paper.md",
+    "method": "Spatial stationary self-consistency and mean/variance susceptibility, Eqs 13-30 and 36; local causal response calibration replaces extrapolation of authors Table 2"
+  },
+  "actual_network": {
+    "topology": 6101,
+    "neurons": 40000,
+    "spatial_extent_mm": [
+      20,
+      20
+    ],
+    "threshold_bin_mv": 0.5,
+    "parameter": "Within-core EE multiplier applied to both A and B; mean weights multiply J, squared weights multiply J squared",
+    "Z": "fixed interictal baseline 1",
+    "M": "original dynamic feedback",
+    "forcing": "Original private Poisson mean and variance; shared and spatial OU fluctuations held at zero"
+  },
+  "critical_points": [
+    {
+      "grid": 20,
+      "space_cells": 400,
+      "rate_groups": 935,
+      "kind": "oscillatory crossing",
+      "core": "A",
+      "J_EE_core": 0.9540023599593805,
+      "frequency_hz": 6.1001280479622295,
+      "equilibrium_residual": 7.28583859910259e-17,
+      "characteristic_residual": 7.48834991901658e-12,
+      "regional_energy": [
+        0.8584523851308256,
+        6.433055049704398e-08,
+        0.023248924136620927
+      ],
+      "inhibitory_energy": 0.1182986264020031
+    },
+    {
+      "grid": 20,
+      "space_cells": 400,
+      "rate_groups": 935,
+      "kind": "oscillatory crossing",
+      "core": "B",
+      "J_EE_core": 0.9605570403962195,
+      "frequency_hz": 5.521130590417726,
+      "equilibrium_residual": 1.734723475976807e-15,
+      "characteristic_residual": 1.0201766830254884e-11,
+      "regional_energy": [
+        9.113211867340792e-08,
+        0.8492334638376439,
+        0.03321779134100845
+      ],
+      "inhibitory_energy": 0.11754865368922916
+    },
+    {
+      "grid": 20,
+      "space_cells": 400,
+      "kind": "stationary fold",
+      "J_EE_core": 1.0173027588818748,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/g20/fold/result.json"
+    },
+    {
+      "grid": 40,
+      "space_cells": 1600,
+      "rate_groups": 3479,
+      "kind": "oscillatory crossing",
+      "core": "A",
+      "J_EE_core": 0.950600848947085,
+      "frequency_hz": 6.125940800872267,
+      "equilibrium_residual": 4.163336342344337e-17,
+      "characteristic_residual": 1.9652954669348423e-11,
+      "regional_energy": [
+        0.8493130640165242,
+        6.205305252935917e-08,
+        0.028459151267104174
+      ],
+      "inhibitory_energy": 0.12222772266331922
+    },
+    {
+      "grid": 40,
+      "space_cells": 1600,
+      "rate_groups": 3479,
+      "kind": "oscillatory crossing",
+      "core": "B",
+      "J_EE_core": 0.9561308086654551,
+      "frequency_hz": 5.553986142565489,
+      "equilibrium_residual": 1.6653345369377348e-16,
+      "characteristic_residual": 5.324626825399373e-12,
+      "regional_energy": [
+        8.395385858722404e-08,
+        0.8403009513462507,
+        0.039273839511669836
+      ],
+      "inhibitory_energy": 0.12042512518822078
+    },
+    {
+      "grid": 40,
+      "space_cells": 1600,
+      "kind": "stationary fold",
+      "J_EE_core": 1.000633065443246,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/g40/fold/result.json"
+    }
+  ],
+  "nyquist": {
+    "status": "COMPLETE",
+    "rows": [
+      {
+        "J_EE_core": 0.9,
+        "unstable_root_count_candidate": 0,
+        "maximum_phase_increment": 0.1539263754710416,
+        "high_frequency_row_sum_bound": 0.002416142624037572,
+        "frequency_refinements": 2,
+        "meaning": "Full determinant count, numerically refined; high-frequency tail checked by loop norm"
+      },
+      {
+        "J_EE_core": 0.957,
+        "unstable_root_count_candidate": 2,
+        "maximum_phase_increment": 0.4962743843469033,
+        "high_frequency_row_sum_bound": 0.002725130121120731,
+        "frequency_refinements": 2,
+        "meaning": "Full determinant count, numerically refined; high-frequency tail checked by loop norm"
+      },
+      {
+        "J_EE_core": 0.98,
+        "unstable_root_count_candidate": 4,
+        "maximum_phase_increment": 0.16984324003435347,
+        "high_frequency_row_sum_bound": 0.0028919124950138437,
+        "frequency_refinements": 2,
+        "meaning": "Full determinant count, numerically refined; high-frequency tail checked by loop norm"
+      }
+    ]
+  },
+  "local_mean_response": [
+    {
+      "population": "E",
+      "zero_time_ms": 4.6671671065788,
+      "pole_time_ms": 1.9867444837226067,
+      "fit_mean_shape_error": 0.009120002013215426,
+      "heldout_mean_shape_error": 0.025994009642258984,
+      "static_gain_ratio_range": [
+        1.0593995812365946,
+        1.0755138282403458
+      ]
+    },
+    {
+      "population": "I",
+      "zero_time_ms": 2.8287060351151894,
+      "pole_time_ms": 0.8272599855537631,
+      "fit_mean_shape_error": 0.006637931472122427,
+      "heldout_mean_shape_error": 0.011999533673098759,
+      "static_gain_ratio_range": [
+        1.0749120617446137,
+        1.103134892886203
+      ]
+    }
+  ],
+  "local_variance_response": [
+    {
+      "population": "E",
+      "input_variance": "E",
+      "zero_time_ms": 0.0010000000011754166,
+      "pole_time_ms": 1.2439946694578996,
+      "fit_error": 0.018318766984483197,
+      "heldout_error": 0.03874611445857965,
+      "dc_ratio_range": [
+        1.0667126519316599,
+        1.097253472988243
+      ]
+    },
+    {
+      "population": "E",
+      "input_variance": "I",
+      "zero_time_ms": 0.36186434849948973,
+      "pole_time_ms": 6.913287636231321,
+      "fit_error": 0.039621269412320005,
+      "heldout_error": 0.09905913664789899,
+      "dc_ratio_range": [
+        0.7582497638370023,
+        0.8411914529153088
+      ]
+    },
+    {
+      "population": "I",
+      "input_variance": "E",
+      "zero_time_ms": 0.0010000000000000696,
+      "pole_time_ms": 1.136274460547371,
+      "fit_error": 0.00953419882405817,
+      "heldout_error": 0.012142483082903749,
+      "dc_ratio_range": [
+        1.0929669104385256,
+        1.1219424252507941
+      ]
+    },
+    {
+      "population": "I",
+      "input_variance": "I",
+      "zero_time_ms": 0.9535355597237982,
+      "pole_time_ms": 6.200495594719855,
+      "fit_error": 0.06557045383134555,
+      "heldout_error": 0.12514550671132416,
+      "dc_ratio_range": [
+        0.650974867947527,
+        0.7257371920063549
+      ]
+    }
+  ],
+  "native_check_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/native_private_only/summary.json",
+  "limits": [
+    "The stationary transfer is a colored-noise diffusion approximation; local response spectral calibration preserves its DC gains. Static gain discrepancies, especially inhibitory variance gain, remain.",
+    "Oscillatory crossings are numerically established in this approximation. Supercritical/subcritical Hopf classification and nonlinear periodic branches have not been calculated.",
+    "Spatial mode amplitudes are infinitesimal eigenvectors, not finite-amplitude event propagation snapshots or SEEG rank validation.",
+    "Native checks are single-seed 5-second runs with 0.5-second burn-in and new frozen-Z, zero-OU conditions. They are not full original-condition interictal distribution recovery.",
+    "Native events occur below and above the crossings; no equivalence of Hopf frequency and burst repetition frequency is asserted.",
+    "A second localized mode crossing on an unstable branch is not a codimension-two double-Hopf point.",
+    "Nyquist count is numerically refined over the sampled frequency contour, with a small loop norm at the endpoint; no analytic bound for every unsampled tail frequency is claimed."
+  ],
+  "human_visual_acceptance": false
+}

@@ -1,0 +1,44 @@
+{
+  "question": "Does Core A regain a qualified quiet interval on the other side of the certified equilibrium SN or at the stronger depletion endpoint, after observation comparable to the64.83s counterexample?",
+  "trigger": "The D_A=.34315764 trajectory returned to qualified Core-A quiet at64.83s. Its preceding60s absence of quiet was censoring, not permanent activity.",
+  "coordinates": {
+    "above_SN": {
+      "D_A": 0.3631576412548057,
+      "Z_A": 0.6368423587451943,
+      "D_global": 0.21899748041452027,
+      "native_time_ms": 10067.69345650688
+    },
+    "strong_depletion": {
+      "D_A": 0.40052149864164854,
+      "D_global": 0.2198778663041978,
+      "Z_A": 0.5994785013583515
+    }
+  },
+  "conditions": {
+    "above_SN": {
+      "label": "above_SN",
+      "field": "above_SN",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/final_state.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 50000,
+      "previous_elapsed_ms": 0,
+      "prior_same_field_elapsed_ms": 20000
+    },
+    "strong_depletion": {
+      "label": "strong_depletion",
+      "field": "strong_depletion",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/depleted_coarse/final_state.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 40000,
+      "previous_elapsed_ms": 0,
+      "prior_same_field_elapsed_ms": 30000
+    }
+  },
+  "equations": "Identical full3479-group spatial rate flow, original physical delays, locked response and constant mean input. Each original full terminal state is resumed exactly; all Z fixed, all M dynamic, no future innovations or new coefficients.",
+  "budget": "One50s extension above the equilibrium SN and one40s stronger-depletion extension; each actual history reaches70s. These are continuations, not independent replicates.",
+  "primary": "All qualified Core-A quiet intervals,10ms smoothing and<5Hz for>=20ms. Report each uninterrupted activity interval with both boundaries and right-censoring. Original global recruitment stays separate.",
+  "acceptance": "Independent fullgroup-to-region/space reconstruction and Z identity, original source chronology and complete-state source. A return refutes permanence of that episode; no return provides a lower bound on duration only. No bifurcation type from threshold crossings.",
+  "model_promoted": false
+}

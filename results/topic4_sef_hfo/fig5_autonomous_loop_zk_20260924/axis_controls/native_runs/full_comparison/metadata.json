@@ -1,0 +1,210 @@
+{
+  "status": "COMPLETE_CANDIDATE",
+  "rows": [
+    {
+      "condition": "current",
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+      "result_sha256": "b80272f20be127c34390db9e35e903358278238bf849dc0bb9380a7482635abe",
+      "entries": [
+        {
+          "onset_s": 9.94,
+          "confirmation_s": 10.14
+        },
+        {
+          "onset_s": 59.74,
+          "confirmation_s": 59.94
+        },
+        {
+          "onset_s": 66.58,
+          "confirmation_s": 66.78
+        },
+        {
+          "onset_s": 112.09,
+          "confirmation_s": 112.29
+        }
+      ],
+      "exits": [
+        {
+          "start_s": 16.7,
+          "confirmation_s": 18.7,
+          "mechanism": "AUTONOMOUS",
+          "all_and_core_means_Hz": [
+            [
+              32.428687499999995,
+              26.26127320954907,
+              45.609414758269715,
+              32.241234405778066
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "quiet_fraction": [
+            [
+              0.87,
+              0.92,
+              0.87,
+              0.87
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "start_s": 63.56,
+          "confirmation_s": 65.56,
+          "mechanism": "AUTONOMOUS",
+          "all_and_core_means_Hz": [
+            [
+              12.751312500000001,
+              22.140583554376658,
+              49.262086513994916,
+              11.576756401838479
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "quiet_fraction": [
+            [
+              0.85,
+              0.91,
+              0.86,
+              0.85
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "start_s": 70.31,
+          "confirmation_s": 72.31,
+          "mechanism": "AUTONOMOUS",
+          "all_and_core_means_Hz": [
+            [
+              47.589625000000034,
+              45.52917771883289,
+              49.41984732824428,
+              47.59340118187788
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "quiet_fraction": [
+            [
+              0.67,
+              0.88,
+              0.87,
+              0.67
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "initial_brief": 36,
+      "brief_recurrence_after_Z": 2,
+      "own_initial_comparison": "ESTIMABLE"
+    },
+    {
+      "condition": "rotated",
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/rotated/runs/rotated_s9108405",
+      "result_sha256": "f8d9213f0c64c32163f829f1e6dfe07c4ae54f3de40536106c22c3da0139ae27",
+      "entries": [
+        {
+          "onset_s": 89.64,
+          "confirmation_s": 89.84
+        }
+      ],
+      "exits": [
+        {
+          "start_s": 90.34,
+          "confirmation_s": 92.34,
+          "mechanism": "AUTONOMOUS",
+          "all_and_core_means_Hz": [
+            [
+              43.347281250000016,
+              47.29973474801061,
+              46.82061068702289,
+              43.15981615233093
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "quiet_fraction": [
+            [
+              0.82,
+              0.87,
+              0.87,
+              0.82
+            ],
+            [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      ],
+      "initial_brief": 0,
+      "brief_recurrence_after_Z": 0,
+      "own_initial_comparison": "NOT_ESTIMABLE_OWN_INITIAL_EVENTS"
+    },
+    {
+      "condition": "isotropic",
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/isotropic/runs/isotropic_s9108405",
+      "result_sha256": "915ec230f1d9b6720eaad13a6aea6c50020ba1f40f41f13ec1d60b93f3b37c16",
+      "entries": [],
+      "exits": [],
+      "initial_brief": 26,
+      "brief_recurrence_after_Z": 0,
+      "own_initial_comparison": "ESTIMABLE"
+    }
+  ],
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/full_comparison/figures/axis_native_120s.png",
+      "sha256": "1edce91d8c850d8f03edc93434fe05efd0cd5215a3f35ae30f8f2208be06da7b"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/full_comparison/figures/axis_native_120s.pdf",
+      "sha256": "8310aed24080431f8443025103c6628d8100f21ea3aa184662d6fdb489272edf"
+    }
+  ],
+  "analysis": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/native_runs/analysis.json",
+  "analysis_sha256": "4538c8f0dcbf9138a89326ac194e9715d3e0805e7d710ae7a201a8ff9aea1148",
+  "producer_sha256": "46789ca6e3e2794ba5ddd385601f47ca281f42b35f63d4f41c2fb9756bd5732a",
+  "paired_future_input_records_exact": true,
+  "raster": "Original fixed80 cells, all0.1ms spike indicators over0\u2013120s; no resampling or jitter.",
+  "role": "Diagnostic common-window comparison, not a replacement for the accepted main Figure5 layout.",
+  "interpretation": "No new detector or phase alignment. Use native analysis for entry/exit/return and per-event spatial views for propagation. Repeated bouts are not a certified periodic orbit.",
+  "agent_visual_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "human_review": "PENDING"
+}

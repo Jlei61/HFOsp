@@ -1,0 +1,81 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.271144512525485,
+        "difference_rms": 1.162088707290434e-11,
+        "relative_rms": 7.142021917363349e-13
+      },
+      "GABA": {
+        "reference_rms": 9.651920509589873,
+        "difference_rms": 1.8382590107080312e-11,
+        "relative_rms": 1.904552579853501e-12
+      },
+      "M": {
+        "reference_rms": 0.016226135940064945,
+        "difference_rms": 4.034387620385896e-14,
+        "relative_rms": 2.4863514242009664e-12
+      },
+      "covariance": {
+        "reference_rms": 37.60681036464067,
+        "difference_rms": 8.507177345708389e-12,
+        "relative_rms": 2.2621374328802835e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.09814437286738442,
+        "difference_rms": 7.620029872849623e-13,
+        "relative_rms": 7.764102668571771e-12
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.005128272942067886,
+        "difference_rms": 9.423010970400443e-15,
+        "relative_rms": 1.8374628411647645e-12
+      }
+    },
+    "combined_relative_rms": 3.5125508609169574e-12
+  },
+  "verified": [
+    {
+      "real": -1.7689291883671379,
+      "imag": 0.0,
+      "relative_residual": 1.5479835248428485e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": -0.27307213474033243,
+      "imag": 0.308767351648987,
+      "relative_residual": 3.164698959405374e-10,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    },
+    {
+      "real": 0.7668279660338531,
+      "imag": 0.0,
+      "relative_residual": 2.0843174744839164e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    },
+    {
+      "real": 0.6163532394833757,
+      "imag": 0.0,
+      "relative_residual": 4.576151540633421e-08,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 735.7020981311798,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "neutral": [
+    {
+      "order": 2,
+      "relative_error": 6.670526017327402e-05,
+      "pass_gate": true
+    },
+    {
+      "order": 4,
+      "relative_error": 2.006323916549552e-05,
+      "pass_gate": true
+    }
+  ],
+  "prior_physical_neutral_gate_failed": false,
+  "model_promoted": false
+}

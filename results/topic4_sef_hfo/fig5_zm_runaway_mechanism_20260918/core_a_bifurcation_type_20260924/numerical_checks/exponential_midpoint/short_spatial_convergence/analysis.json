@@ -1,0 +1,440 @@
+{
+  "status": "SHORT_WINDOW_ORDER_AND_COMMON_LIMIT_PASS",
+  "rows": [
+    {
+      "time_ms": 20,
+      "methods": {
+        "old_endpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 0.005386448125555139,
+                "GABA": 0.002553564330614941,
+                "M": 0.00032766253591786894,
+                "covariance": 0.003563004227437258,
+                "input_memory": 0.010704181250362573,
+                "history": 0.00489871330541855
+              },
+              "combined_relative_rms": 0.005581424017091034
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.0027369252893798823,
+                "GABA": 0.0012808378719000927,
+                "M": 0.00016691243226243973,
+                "covariance": 0.0018070644005856844,
+                "input_memory": 0.005378140293451569,
+                "history": 0.0025133386481623796
+              },
+              "combined_relative_rms": 0.0028185667568832035
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.0013783260596267387,
+                "GABA": 0.0006409012958660371,
+                "M": 8.430920885540417e-05,
+                "covariance": 0.0009093087416423091,
+                "input_memory": 0.002685839994011258,
+                "history": 0.0012725956451515926
+              },
+              "combined_relative_rms": 0.0014129003136281457
+            }
+          ],
+          "ratios": [
+            1.9802348138324823,
+            1.9948801268544472
+          ]
+        },
+        "exponential_midpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 0.0001699482458338287,
+                "GABA": 9.296998685589141e-05,
+                "M": 1.1230321201050672e-05,
+                "covariance": 0.00012043757867542553,
+                "input_memory": 0.0003534254059618587,
+                "history": 0.0001667109143008912
+              },
+              "combined_relative_rms": 0.00018477878743504889
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 4.249492451057246e-05,
+                "GABA": 2.321216052809339e-05,
+                "M": 2.808297384350019e-06,
+                "covariance": 3.009116478730396e-05,
+                "input_memory": 8.823102999226991e-05,
+                "history": 4.1660801451731855e-05
+              },
+              "combined_relative_rms": 4.6148898089218254e-05
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 1.0626810282603551e-05,
+                "GABA": 5.803933109032675e-06,
+                "M": 7.023711724911271e-07,
+                "covariance": 7.523282823790927e-06,
+                "input_memory": 2.2056302313490465e-05,
+                "history": 1.0416946706784738e-05
+              },
+              "combined_relative_rms": 1.1537627546881454e-05
+            }
+          ],
+          "ratios": [
+            4.003969652272557,
+            3.999860274714103
+          ]
+        }
+      },
+      "cross_method_differences": [
+        {
+          "block_relative_rms": {
+            "AMPA": 0.010672346687188293,
+            "GABA": 0.005012040976747963,
+            "M": 0.0006493448785330229,
+            "covariance": 0.007066722283451481,
+            "input_memory": 0.020937130179680366,
+            "history": 0.009728208428936272
+          },
+          "combined_relative_rms": 0.01097255068010287
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.005446966768186963,
+            "GABA": 0.0025367601269231576,
+            "M": 0.00033255554040092356,
+            "covariance": 0.0035980908962559024,
+            "input_memory": 0.010622958540019298,
+            "history": 0.005013220614688983
+          },
+          "combined_relative_rms": 0.005584816906502886
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.002750065709182235,
+            "GABA": 0.0012754507711075045,
+            "M": 0.00016834293500792136,
+            "covariance": 0.0018145031989555205,
+            "input_memory": 0.0053373421215083825,
+            "history": 0.0025442541798441887
+          },
+          "combined_relative_rms": 0.002812793615216251
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.0013817133561402361,
+            "GABA": 0.0006394278986036684,
+            "M": 8.470201984271753e-05,
+            "covariance": 0.0009110472721405958,
+            "input_memory": 0.0026737489963633543,
+            "history": 0.0012816634456132843
+          },
+          "combined_relative_rms": 0.0014110738395317138
+        }
+      ],
+      "cross_method_ratios": [
+        1.9647109052629064,
+        1.9855053980110513,
+        1.9933709607639802
+      ],
+      "order_and_common_limit_gate": true
+    },
+    {
+      "time_ms": 60,
+      "methods": {
+        "old_endpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 0.026666703011375636,
+                "GABA": 0.02047410291722249,
+                "M": 0.0010899608774332945,
+                "covariance": 0.021886961306037074,
+                "input_memory": 0.02268215605284813,
+                "history": 0.04129999815961457
+              },
+              "combined_relative_rms": 0.02526756511445108
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.01145795070877365,
+                "GABA": 0.008688385609623228,
+                "M": 0.0005374701975178973,
+                "covariance": 0.009639453159161055,
+                "input_memory": 0.010467822554481924,
+                "history": 0.020301000434466088
+              },
+              "combined_relative_rms": 0.011702467959362157
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.005358782079949438,
+                "GABA": 0.004037956705580942,
+                "M": 0.0002648862108938533,
+                "covariance": 0.004497806287470806,
+                "input_memory": 0.005142044950043322,
+                "history": 0.009981711901717994
+              },
+              "combined_relative_rms": 0.005647968139045398
+            }
+          ],
+          "ratios": [
+            2.159165502712326,
+            2.071978394931256
+          ]
+        },
+        "exponential_midpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 0.0007502121751554888,
+                "GABA": 0.0004963502741279789,
+                "M": 3.496187139942426e-05,
+                "covariance": 0.0005719415090439132,
+                "input_memory": 0.0007439888771827842,
+                "history": 0.0014527164884602145
+              },
+              "combined_relative_rms": 0.0007959717300061086
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.00018645472840998303,
+                "GABA": 0.00012329404355349328,
+                "M": 8.706242820172167e-06,
+                "covariance": 0.0001419939170836415,
+                "input_memory": 0.00018512863991721636,
+                "history": 0.00036166997950355103
+              },
+              "combined_relative_rms": 0.00019802468089723414
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 4.656846950241169e-05,
+                "GABA": 3.07846695921269e-05,
+                "M": 2.1747435170970834e-06,
+                "covariance": 3.5451148630965164e-05,
+                "input_memory": 4.623841108303111e-05,
+                "history": 9.03662824272636e-05
+              },
+              "combined_relative_rms": 4.946697103711518e-05
+            }
+          ],
+          "ratios": [
+            4.019558200521389,
+            4.003169726091694
+          ]
+        }
+      },
+      "cross_method_differences": [
+        {
+          "block_relative_rms": {
+            "AMPA": 0.047384080139167395,
+            "GABA": 0.03622316972077883,
+            "M": 0.0020924676060252315,
+            "covariance": 0.03942842409221845,
+            "input_memory": 0.04196866701423267,
+            "history": 0.07478382921064125
+          },
+          "combined_relative_rms": 0.04558935958585692
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.021710349167720612,
+            "GABA": 0.016418593630265068,
+            "M": 0.0010502006236417427,
+            "covariance": 0.018242315019644094,
+            "input_memory": 0.020404688875425507,
+            "history": 0.03828287294874584
+          },
+          "combined_relative_rms": 0.022198814329143373
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.010473758969224407,
+            "GABA": 0.007875097697764951,
+            "M": 0.0005235072247716865,
+            "covariance": 0.008762203865677443,
+            "input_memory": 0.010171988725386886,
+            "history": 0.019386121256065307
+          },
+          "combined_relative_rms": 0.011015580776617405
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.005164483566471358,
+            "GABA": 0.0038695390552514865,
+            "M": 0.0002610816278434308,
+            "covariance": 0.004300803006398558,
+            "input_memory": 0.005080601071469384,
+            "history": 0.009749872074352487
+          },
+          "combined_relative_rms": 0.005493675239739602
+        }
+      ],
+      "cross_method_ratios": [
+        2.053684440524629,
+        2.015219603878212,
+        2.005138690568017
+      ],
+      "order_and_common_limit_gate": true
+    },
+    {
+      "time_ms": 120,
+      "methods": {
+        "old_endpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 0.00017619214896062043,
+                "GABA": 0.013252485951936503,
+                "M": 0.00110697590148804,
+                "covariance": 0.0002618725902262626,
+                "input_memory": 0.012063346344796161,
+                "history": 0.07453890451916724
+              },
+              "combined_relative_rms": 0.031301027705257146
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 0.00010946774717209198,
+                "GABA": 0.006633168592514517,
+                "M": 0.0005877586631794446,
+                "covariance": 0.00012756451946989992,
+                "input_memory": 0.00929549300597781,
+                "history": 0.033513208376317466
+              },
+              "combined_relative_rms": 0.01445633637092411
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 8.390284856987376e-05,
+                "GABA": 0.003522027543152129,
+                "M": 0.0003138139011146126,
+                "covariance": 7.041744416065639e-05,
+                "input_memory": 0.006105645885436455,
+                "history": 0.01587853495189622
+              },
+              "combined_relative_rms": 0.007093681923381213
+            }
+          ],
+          "ratios": [
+            2.1652116346858534,
+            2.0379171954799853
+          ]
+        },
+        "exponential_midpoint": {
+          "differences": [
+            {
+              "block_relative_rms": {
+                "AMPA": 3.0161499060850884e-05,
+                "GABA": 0.0005751059083770811,
+                "M": 5.461130916987054e-05,
+                "covariance": 1.5939120452043794e-05,
+                "input_memory": 0.001480515640202922,
+                "history": 0.0013514066138898015
+              },
+              "combined_relative_rms": 0.000851774556389622
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 7.990114279906068e-06,
+                "GABA": 0.0001466584633997957,
+                "M": 1.3796228158665094e-05,
+                "covariance": 4.183313789314498e-06,
+                "input_memory": 0.0003765082701357293,
+                "history": 0.000338928039699498
+              },
+              "combined_relative_rms": 0.00021541087732277462
+            },
+            {
+              "block_relative_rms": {
+                "AMPA": 2.0263510924982174e-06,
+                "GABA": 3.684594700317587e-05,
+                "M": 3.4582166919929143e-06,
+                "covariance": 1.0585519656581756e-06,
+                "input_memory": 9.452403710281945e-05,
+                "history": 8.48406594129639e-05
+              },
+              "combined_relative_rms": 5.401780691603066e-05
+            }
+          ],
+          "ratios": [
+            3.9541854477167897,
+            3.9877753211570677
+          ]
+        }
+      },
+      "cross_method_differences": [
+        {
+          "block_relative_rms": {
+            "AMPA": 0.0004364922278688059,
+            "GABA": 0.02622771847001069,
+            "M": 0.002241333402120598,
+            "covariance": 0.0005149304109110114,
+            "input_memory": 0.032716461604028385,
+            "history": 0.13542128028492967
+          },
+          "combined_relative_rms": 0.057883017780479766
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.0003102810634101654,
+            "GABA": 0.0137102684221777,
+            "M": 0.001212616664272393,
+            "covariance": 0.0002740186923599548,
+            "input_memory": 0.02225699999459633,
+            "history": 0.06396100064093456
+          },
+          "combined_relative_rms": 0.02821346283754678
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.00021527191827119048,
+            "GABA": 0.007288249746617745,
+            "M": 0.000644794895561636,
+            "covariance": 0.00015506249107144688,
+            "input_memory": 0.013366685631360994,
+            "history": 0.031063194051838095
+          },
+          "combined_relative_rms": 0.014125597572439967
+        },
+        {
+          "block_relative_rms": {
+            "AMPA": 0.000134464423824767,
+            "GABA": 0.003814591946910133,
+            "M": 0.0003354445965121475,
+            "covariance": 8.688303147493032e-05,
+            "input_memory": 0.007362719284952711,
+            "history": 0.015313688986041836
+          },
+          "combined_relative_rms": 0.0071111177013114145
+        }
+      ],
+      "cross_method_ratios": [
+        2.0516098329996,
+        1.9973287992143587,
+        1.9864103177247312
+      ],
+      "order_and_common_limit_gate": true
+    }
+  ],
+  "gates": {
+    "last_midpoint_difference_ratio_interval": [
+      3.2,
+      4.8
+    ],
+    "last_cross_method_difference_ratio_interval": [
+      1.6,
+      2.4
+    ],
+    "times_ms": [
+      20,
+      60,
+      120
+    ],
+    "scope": "Short-window accuracy diagnostic only, not long-time attractor/critical-parameter convergence."
+  },
+  "interpretation": "All comparisons share exactly the same bin-integrated initial history. Passing authorizes further numerical controls only; neither a phase-independent periodic orbit nor an onset bifurcation is established.",
+  "model_promoted": false
+}

@@ -1,0 +1,28 @@
+{
+  "status": "COMPLETE_STATIC_K_SENSITIVITY",
+  "gmres_info": 0,
+  "gmres_iterations": 68,
+  "K_parameter_JVP_relative_error": 1.1361627919193476e-10,
+  "maximum_linear_constraint_residual_Hz_per_K": 2.658645030351181e-06,
+  "regional_Hz_per_K_allE_A_B_surround_I": [
+    -41.073254804236235,
+    -11.036751495056363,
+    -3.886801257609967,
+    -42.776343313191255,
+    -51.11779198083251
+  ],
+  "current_R_Hz": 201.11847030611287,
+  "dR_Hz_per_K": -41.21031777663695,
+  "dGraw_per_K": -4.121031777663695,
+  "linear_deltaK_to_R200": 0.027140540681463866,
+  "previous_held9p2_to9p35_finite_slope_allE_A_B_surround_Hz_per_K": [
+    -70.13704049040561,
+    -10.57296244557127,
+    -1.5128025267616372,
+    -73.38227902898136
+  ],
+  "maximum_measured_matrix_action_SEM_Hz_per_K": 14.098166643080345,
+  "scope": "Local conditional static susceptibility before independentrootvalidation. ReachingR200 changes the stationaryGderivative formula, not automatically stability or equilibriumexistence. Finite0.15Khistorydifference is not an independentinfinitesimal derivative check. Eightblock actionSEM is not total tangent/closure uncertainty.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "939a430d83191795d15ee1e5b28274997cd612bdb135ebfb0b4f9003864518e8"
+}

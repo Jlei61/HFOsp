@@ -1,0 +1,12 @@
+{
+  "status": "REGISTERED_NOT_RUN",
+  "question": "Does the unresolved neutral/shifted-phase defect converge when the time step is halved again? Higher-order phase differentiation atdt.05 did not solve it.",
+  "source": "near_returns/mid_lower/fine_coreB_direct_newton/latest_state.npz",
+  "source_dt_ms": 0.025,
+  "target_dt_ms": 0.0125,
+  "source_period_ms": 261.41655957985563,
+  "physical_changes": "None: same entire model, allMdynamic and allZheld, sameCore-A native field. Only numerical time step changes.",
+  "planned_checks": "Bounded full-state root correction with original variational equations and original FD/root gates, then unchanged independent phase closure and1e-3 neutral-mode gate. No derivative cache atthismesh due memory size.",
+  "priority": "Method qualification only. Run after the actualD_A=.300 step control or when numerical capacity is available, unless a directly relevant closed orbit becomes available first. No classification from registration.",
+  "model_promoted": false
+}

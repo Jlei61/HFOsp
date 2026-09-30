@@ -1,0 +1,71 @@
+{
+  "name": "low_arclength_v2_0",
+  "status": "LINE_SEARCH_STOP",
+  "J_coarse": 1.2012835770138564,
+  "J_fine": 1.1861673069588918,
+  "rates_coarse_hz": [
+    101.2316191773936,
+    118.73342342161614,
+    5.72771717815789
+  ],
+  "rates_fine_hz": [
+    103.62463417772221,
+    123.86710810233325,
+    6.814301773635854
+  ],
+  "residual": 0.005805931902851948,
+  "trace": [
+    {
+      "iteration": 0,
+      "J": 1.2012835770138564,
+      "residual": 0.24918074495819223
+    },
+    {
+      "iteration": 1,
+      "J": 1.1991277661657316,
+      "residual": 0.6685531526847681
+    },
+    {
+      "iteration": 2,
+      "J": 1.2161306719301093,
+      "residual": 1.1052885842325675
+    },
+    {
+      "iteration": 3,
+      "J": 1.1913045296027849,
+      "residual": 0.9234435987731149
+    },
+    {
+      "iteration": 4,
+      "J": 1.1850253302351283,
+      "residual": 0.3815293256786503
+    },
+    {
+      "iteration": 5,
+      "J": 1.1863156612738108,
+      "residual": 0.22391536389690359
+    },
+    {
+      "iteration": 6,
+      "J": 1.1862926709977213,
+      "residual": 0.2178973557411772
+    },
+    {
+      "iteration": 7,
+      "J": 1.1861632968294926,
+      "residual": 0.21734744842304088
+    },
+    {
+      "iteration": 8,
+      "J": 1.1861682554917328,
+      "residual": 0.21734696034455503
+    },
+    {
+      "iteration": 9,
+      "J": 1.1861673069588918,
+      "residual": 0.2173469517084783
+    }
+  ],
+  "seed_projection": "Average each original-neuron coarse-group rate onto its fine group; no re-fitting of network parameters",
+  "projected_newton": true
+}

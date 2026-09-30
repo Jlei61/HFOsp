@@ -1,0 +1,31 @@
+{
+  "timestamp": 1789876806.7830646,
+  "previous_waiting_worker": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 499445,
+    "device": 0,
+    "requested_indices": [
+      42,
+      44,
+      45
+    ],
+    "completed": [],
+    "timestamp": 1789876795.0072212,
+    "dependencies": [
+      488306
+    ]
+  },
+  "previous_cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_positive_stability.py --device 0 --require-dimension --min-free-gib 4 --indices 42 44 45 --worker-label Aleading_before_LPC6_stability_worker --after-pids 488306 ",
+  "profile_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 520184,
+    "timestamp": 1789876795.1957622,
+    "completed": 0,
+    "index": 45,
+    "N": 0,
+    "stage": "PROFILE",
+    "free_mib": 3755.0,
+    "required_free_gib": 6.0
+  },
+  "reason": "Separate the already requested physical correction of survey sites 45,44,42 from their full-spectrum computation. Reload only the verified sleeping survey coordinator to add the correction-worker dependency and prevent duplicate Newton solves. Preserve all site outputs and all spectrum acceptance criteria."
+}

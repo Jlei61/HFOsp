@@ -1,0 +1,233 @@
+{
+  "families": [
+    {
+      "family": "A",
+      "points": 289,
+      "points_with_matching_monodromy": 1,
+      "matching_indices": [
+        3
+      ],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HA_a0.10000_N32.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0175_N64.npz"
+      ]
+    },
+    {
+      "family": "B",
+      "points": 166,
+      "points_with_matching_monodromy": 0,
+      "matching_indices": [],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a0.10000_N32.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0156_N64.npz"
+      ]
+    },
+    {
+      "family": "single",
+      "points": 114,
+      "points_with_matching_monodromy": 3,
+      "matching_indices": [
+        46,
+        80,
+        87
+      ],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0045_N256.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0066_N256.npz"
+      ]
+    },
+    {
+      "family": "double",
+      "points": 256,
+      "points_with_matching_monodromy": 1,
+      "matching_indices": [
+        126
+      ],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0044_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0059_N1536.npz"
+      ]
+    },
+    {
+      "family": "Bleading",
+      "points": 91,
+      "points_with_matching_monodromy": 1,
+      "matching_indices": [
+        0
+      ],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0089_N512.npz"
+      ]
+    },
+    {
+      "family": "PDchild",
+      "points": 8,
+      "points_with_matching_monodromy": 1,
+      "matching_indices": [
+        7
+      ],
+      "endpoint_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a2.00000_N3072.npz",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a120.00000_N4096.npz"
+      ]
+    }
+  ],
+  "monodromy_files": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/HA_a0.80000_N32_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HA_a0.80000_N32.npz",
+      "J": 0.93852977932717,
+      "T": 153.34539470099944,
+      "phase_defect": 5.0433710638797465e-05,
+      "requested_multipliers": 2
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/smallA_J0.942000000_N64_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/smallA_J0.942000000_N64.npz",
+      "J": 0.942,
+      "T": 158.3799421253318,
+      "phase_defect": 2.8255135757494025e-05,
+      "requested_multipliers": 2
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PD_double_low_eval_J0.93900217448_N1024_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93900217448_N1024.npz",
+      "J": 0.9390021744838646,
+      "T": 818.6951824993582,
+      "phase_defect": 0.0005126358246029731,
+      "requested_multipliers": 3
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/branch_J1.300000000_N256_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch_J1.300000000_N256.npz",
+      "J": 1.3,
+      "T": 249.33161896733841,
+      "phase_defect": 0.0002682030153855228,
+      "requested_multipliers": 2
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/highUnstable_J1.626267229_N512_dt0.05.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/highUnstable_J1.626267229_N512.npz",
+      "J": 1.6262672287319453,
+      "T": 234.52957358252124,
+      "phase_defect": 9.49279214041854,
+      "requested_multipliers": 1
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/refined_J0.942000000_N1536_dt0.05.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/refined_J0.942000000_N1536.npz",
+      "J": 0.942,
+      "T": 784.9764942973611,
+      "phase_defect": 0.0005391330955614758,
+      "requested_multipliers": 2
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/nearBurstFold_J0.938252184_N1024_dt0.05.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/nearBurstFold_J0.938252184_N1024.npz",
+      "J": 0.9382521844539521,
+      "T": 841.1365891531576,
+      "phase_defect": 0.0017644603618153388,
+      "requested_multipliers": 1
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/branch095_J0.950000000_N512_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512.npz",
+      "J": 0.95,
+      "T": 312.7455307353431,
+      "phase_defect": 0.0007633637974735326,
+      "requested_multipliers": 4
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0033_N256_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256.npz",
+      "J": 1.6251725691286658,
+      "T": 241.1009511826622,
+      "phase_defect": 0.0003058367928712741,
+      "requested_multipliers": 4
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleUp_0040_N256_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0040_N256.npz",
+      "J": 1.6262672287319453,
+      "T": 234.53240872920594,
+      "phase_defect": 68.62704860019048,
+      "requested_multipliers": 3
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/refined_J0.942000000_N1024_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/refined_J0.942000000_N1024.npz",
+      "J": 0.942,
+      "T": 784.9764860112269,
+      "phase_defect": 0.0019552117487009074,
+      "requested_multipliers": 2
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/nearBurstFold_J0.938252184_N1024_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/nearBurstFold_J0.938252184_N1024.npz",
+      "J": 0.9382521844539521,
+      "T": 841.1365891531576,
+      "phase_defect": 0.01065586135902924,
+      "requested_multipliers": 3
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDchild_a120.00000_N4096_dt0.05.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a120.00000_N4096.npz",
+      "J": 0.9387399135600878,
+      "T": 1650.126885475753,
+      "phase_defect": 0.000990290684142152,
+      "requested_multipliers": 1
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PD_double_low_eval_J0.93872542224_N1536_dt0.05.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872542224_N1536.npz",
+      "J": 0.9387254222350181,
+      "T": 825.3667270537677,
+      "phase_defect": 0.0006071670433544481,
+      "requested_multipliers": 3
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDchild_a120.00000_N4096_dt0.1.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDchild_a120.00000_N4096.npz",
+      "J": 0.9387399135600878,
+      "T": 1650.126885475753,
+      "phase_defect": 0.003882541855251231,
+      "requested_multipliers": 1
+    }
+  ],
+  "spectral_files": 10,
+  "single_mesh_critical_points": [
+    {
+      "label": "LPC_resonance_upper",
+      "meshes": [
+        128
+      ]
+    },
+    {
+      "label": "LPC_double_secondary1",
+      "meshes": [
+        1024
+      ]
+    },
+    {
+      "label": "LPC_double_secondary2",
+      "meshes": [
+        1024
+      ]
+    },
+    {
+      "label": "LPC_double_secondary3",
+      "meshes": [
+        1024
+      ]
+    },
+    {
+      "label": "LPC_double_secondary4",
+      "meshes": [
+        1024
+      ]
+    }
+  ],
+  "counting_rule": "Monodromy match by J within 1e-8 and period within .01ms; a match is evidence of computation, not an automatic stability certificate.",
+  "complete": false
+}

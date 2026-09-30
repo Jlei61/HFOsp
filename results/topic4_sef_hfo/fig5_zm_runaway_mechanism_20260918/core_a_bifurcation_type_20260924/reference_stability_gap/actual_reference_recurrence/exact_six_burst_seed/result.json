@@ -1,0 +1,66 @@
+{
+  "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+  "period_ms": 1576.5,
+  "times_ms": [
+    6397.6,
+    6791.700000000001,
+    7185.85,
+    7580.0,
+    7974.1
+  ],
+  "six_node_times_ms": [
+    6397.6,
+    6660.35,
+    6923.1,
+    7185.85,
+    7448.6,
+    7711.35,
+    7974.1
+  ],
+  "full_state_errors": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.06242402130782,
+        "difference_rms": 0.045234823585992755,
+        "relative_rms": 0.002816189108567045
+      },
+      "GABA": {
+        "reference_rms": 8.846516578778315,
+        "difference_rms": 0.06315722827712193,
+        "relative_rms": 0.0071392200212033975
+      },
+      "M": {
+        "reference_rms": 0.02047458511669445,
+        "difference_rms": 0.0001377283388469958,
+        "relative_rms": 0.006726795100463143
+      },
+      "covariance": {
+        "reference_rms": 37.61222330579377,
+        "difference_rms": 0.024982687080938402,
+        "relative_rms": 0.0006642172380458583
+      },
+      "input_memory": {
+        "reference_rms": 0.08890713159978268,
+        "difference_rms": 0.001322217676270876,
+        "relative_rms": 0.014871896691289813
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0048100710931506556,
+        "difference_rms": 3.020799435067596e-05,
+        "relative_rms": 0.0062801554832923176
+      }
+    },
+    "combined_relative_rms": 0.007801751988709744
+  },
+  "all_original_1ms_group_rates_bitwise": true,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "mean_global_A_B_surround_hz": [
+    34.64397651469049,
+    102.99622335477322,
+    91.67952928611139,
+    31.480235917324762
+  ],
+  "seconds": 231.32381772994995,
+  "model_promoted": false
+}

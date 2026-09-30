@@ -1,0 +1,180 @@
+{
+  "status": "COMPLETE",
+  "J_EE_core": 0.96,
+  "duration_ms": 3000,
+  "dt_ms": 0.1,
+  "seconds": 15.757944583892822,
+  "dynamics": [
+    {
+      "mean_rate_hz": 8.764835072182258,
+      "minimum_hz": 0.028255183976985586,
+      "maximum_hz": 97.3605046349869,
+      "quiet_fraction": 0.716,
+      "self_limited_bursts": 8,
+      "peak_times_ms": [
+        877,
+        1158,
+        1428,
+        1696,
+        1965,
+        2231,
+        2509,
+        2779
+      ],
+      "burst_windows_ms": [
+        [
+          833,
+          922
+        ],
+        [
+          1115,
+          1202
+        ],
+        [
+          1391,
+          1465
+        ],
+        [
+          1659,
+          1734
+        ],
+        [
+          1928,
+          2002
+        ],
+        [
+          2194,
+          2268
+        ],
+        [
+          2465,
+          2555
+        ],
+        [
+          2741,
+          2817
+        ]
+      ],
+      "IEI_CV": 0.02045974555895501,
+      "median_IEI_ms": 270.0,
+      "oscillatory_peaks": 8
+    },
+    {
+      "mean_rate_hz": 8.487302776259023,
+      "minimum_hz": 0.02398901533841422,
+      "maximum_hz": 71.20819762375488,
+      "quiet_fraction": 0.7351111111111112,
+      "self_limited_bursts": 8,
+      "peak_times_ms": [
+        886,
+        1158,
+        1429,
+        1700,
+        1971,
+        2243,
+        2515,
+        2787
+      ],
+      "burst_windows_ms": [
+        [
+          852,
+          926
+        ],
+        [
+          1124,
+          1199
+        ],
+        [
+          1395,
+          1470
+        ],
+        [
+          1666,
+          1740
+        ],
+        [
+          1937,
+          2011
+        ],
+        [
+          2209,
+          2283
+        ],
+        [
+          2481,
+          2556
+        ],
+        [
+          2753,
+          2828
+        ]
+      ],
+      "IEI_CV": 0.0019682574364933937,
+      "median_IEI_ms": 272.0,
+      "oscillatory_peaks": 8
+    },
+    {
+      "mean_rate_hz": 5.166324422227198,
+      "minimum_hz": 0.054171731984204094,
+      "maximum_hz": 20.445311660942252,
+      "quiet_fraction": 0.6106666666666667,
+      "self_limited_bursts": 9,
+      "peak_times_ms": [
+        891,
+        1165,
+        1439,
+        1708,
+        1978,
+        2248,
+        2521,
+        2608,
+        2793
+      ],
+      "burst_windows_ms": [
+        [
+          862,
+          925
+        ],
+        [
+          1142,
+          1267
+        ],
+        [
+          1416,
+          1538
+        ],
+        [
+          1685,
+          1809
+        ],
+        [
+          1955,
+          2081
+        ],
+        [
+          2222,
+          2286
+        ],
+        [
+          2494,
+          2561
+        ],
+        [
+          2576,
+          2630
+        ],
+        [
+          2769,
+          2900
+        ]
+      ],
+      "IEI_CV": 0.2863127925741114,
+      "median_IEI_ms": 270.0,
+      "oscillatory_peaks": 14
+    }
+  ],
+  "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.9600000/trajectory.npz",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J0.9600000/contract.json",
+  "observation": "Rates in Hz/cell; fields and readouts are functions of this rate trajectory, not sampled spikes",
+  "native_equivalence": "NOT_VALIDATED"
+}

@@ -1,0 +1,130 @@
+{
+  "index": 70,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64.npz",
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64_accuracy_N128.npz",
+  "memberships": [
+    {
+      "family": "B",
+      "index": 113
+    }
+  ],
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64_accuracy_N128.npz",
+    "N": 128,
+    "check_N": 512,
+    "J_EE_core": 0.9465596459862857,
+    "T_ms": 299.72780069086076,
+    "maximum_group_defect_Hz": 3.168837108078609e-05,
+    "regional_defect_Hz": [
+      3.6485775695098233e-16,
+      5.0201657429935986e-08,
+      1.2449765636937146e-07
+    ],
+    "minimum_rate_Hz": 0.004831654355438536,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 4.4351356265799884e-05,
+        "phase_index": 175,
+        "group": 18
+      },
+      "slow": {
+        "minimum_Hz": 0.0056953446125437,
+        "phase_index": 216,
+        "group": 17
+      },
+      "positive": true,
+      "N": 128,
+      "check_N": 512
+    }
+  },
+  "J_EE_core": 0.9465596459862857,
+  "T_ms": 299.72780069086076,
+  "relative_waveform_refinement_change": 0.0005695349082940833,
+  "relative_period_change": 1.943836545059696e-06,
+  "status": "UNSTABLE",
+  "attempts": [
+    {
+      "nev": 2,
+      "requested_steps_ms": [
+        0.1,
+        0.05
+      ],
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_070_k2_arcB_0104_N64_accuracy_N128_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_070_k2_arcB_0104_N64_accuracy_N128_dt0.05.json"
+      ],
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            -1232.5726896823699,
+            0.0
+          ],
+          [
+            1.3269428456459167,
+            -0.6961676592028964
+          ]
+        ],
+        "per_mode_margin": [
+          1.8252160950264624,
+          0.18325139184218345
+        ],
+        "reliable_mode_mask": [
+          true,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true
+        ],
+        "paired_absolute_changes": [
+          0.3042026825044104,
+          7.61025031271585e-05
+        ],
+        "reliable_outside_count": 2,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": false,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 1232.5726896823699,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        -1232.5726896823699,
+        0.0
+      ],
+      [
+        1.3269428456459167,
+        -0.6961676592028964
+      ]
+    ],
+    "per_mode_margin": [
+      1.8252160950264624,
+      0.18325139184218345
+    ],
+    "reliable_mode_mask": [
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true
+    ],
+    "paired_absolute_changes": [
+      0.3042026825044104,
+      7.61025031271585e-05
+    ],
+    "reliable_outside_count": 2,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": false,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1232.5726896823699,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

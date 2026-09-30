@@ -1,0 +1,120 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/independent_comparison.json",
+  "trajectory_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_external_filter_pair/recorded_drive_expected",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/recorded_drive_expected",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_count_consistency/recorded_drive_binomial_seed1",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_resolution/recorded_drive_binomial_seed1"
+  ],
+  "labels": [
+    "native",
+    "expected_g20",
+    "expected_g40",
+    "binomial_g20",
+    "binomial_g40"
+  ],
+  "snapshots": [
+    {
+      "label": "native",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_g20",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_g20",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_g40",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "expected_g40",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "binomial_g20",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "binomial_g20",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "binomial_g40",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "binomial_g40",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    }
+  ],
+  "Z_and_M": "Both dynamic in every trajectory; native slow variables are exact checkpoint observations shown as unconnected dots, no interpolation.",
+  "scope": "Same native physical graph,thresholdmembers,delays,Z/M,lockedresponse andsame1mm externaldrive lifted to0.5mm. Common20x20count-weightedreadout; samephysicalclock, no phase/onset alignment. LocalresponsevalidationFAIL; no modelpromotion or bifurcationclassification.",
+  "conventions": "All curves are time courses; no branch stability encoding. No overall title, no narrative gray annotations, same0-500Hz spatial scale.",
+  "agent_PNG_PDF_check": "PASS; current PNG and same-state PDF rendered and inspected",
+  "human_visual_acceptance": "PENDING",
+  "runs": "Two meshresolutions timesexpected oractual-count flux.",
+  "artifact_sha256": {
+    "png": "70e1825aa1f470ad042cbec4316966a75d9ad4fe7e24b57f2c554806482f52f2",
+    "pdf": "526844be314ae4df58aec790b8c7cae04c0924085547fdbdaaa590ed715b8fb8",
+    "svg": "4d71e43edc0106dc48afcf9b8d0538287bfc5635a31d4d990183f1cfc555d124"
+  }
+}

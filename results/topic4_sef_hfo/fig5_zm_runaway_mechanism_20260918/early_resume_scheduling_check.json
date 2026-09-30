@@ -1,0 +1,41 @@
+{
+  "at": "2026-09-19T23:58:38.366626+08:00",
+  "action": "RESUME_EXISTING_FLOQUET_EARLY",
+  "reason": "Check whether pausing an active CUDA process interferes with the other CUDA process during phase preparation. This is a scheduling diagnostic, not a scientific run.",
+  "before": {
+    "247078": {
+      "state": "R",
+      "user_seconds": 1120.92,
+      "system_seconds": 7467.45,
+      "major_faults": 20196767
+    },
+    "3875227": {
+      "state": "T",
+      "user_seconds": 18312.94,
+      "system_seconds": 3262.99,
+      "major_faults": 24430905
+    }
+  },
+  "memory_pressure": "some avg10=87.80 avg60=84.57 avg300=83.50 total=5858794997\nfull avg10=87.80 avg60=84.56 avg300=83.48 total=5857788265\n",
+  "scientific_settings_changed": false,
+  "after": {
+    "247078": {
+      "state": "R",
+      "user_seconds": 1121.01,
+      "system_seconds": 7552.64,
+      "major_faults": 20196767,
+      "user_increase": 0.08999999999991815,
+      "system_increase": 85.19000000000051
+    },
+    "3875227": {
+      "state": "R",
+      "user_seconds": 18332.05,
+      "system_seconds": 3306.5,
+      "major_faults": 24476896,
+      "user_increase": 19.110000000000582,
+      "system_increase": 43.51000000000022
+    }
+  },
+  "after_local": "2026-09-20T00:00:03.615162+08:00",
+  "after_memory_pressure": "some avg10=77.69 avg60=78.16 avg300=80.94 total=5921045463\nfull avg10=77.69 avg60=78.14 avg300=80.92 total=5920033998\n"
+}

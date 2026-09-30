@@ -1,0 +1,389 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "label": "LPC_B_stage3_turn1",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_stage3_turn1_N2048.npz",
+  "N": 2048,
+  "J_EE_core": 0.9826980071091734,
+  "T_ms": 332.26635768703164,
+  "dT": -78.0162400614374,
+  "dJ": -9.03345652546577e-12,
+  "checks": [
+    {
+      "dt_ms": 0.09998987592146603,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.697904315743468,
+          "fold_relative_defect": 1.7924741843124289e-06,
+          "phase_relative_defect": 1.0088021243627802e-05,
+          "permuted_group_control_defect": 0.22356395370754556
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.697904315743468,
+          "end_ms": 41.4957985074084,
+          "fold_relative_defect": 6.330353534257289e-06,
+          "phase_relative_defect": 3.261105332108789e-05
+        },
+        {
+          "segment": 2,
+          "start_ms": 41.4957985074084,
+          "end_ms": 62.29369269907334,
+          "fold_relative_defect": 1.1296059725020146e-05,
+          "phase_relative_defect": 1.567194033050832e-05
+        },
+        {
+          "segment": 3,
+          "start_ms": 62.29369269907334,
+          "end_ms": 82.9915970148168,
+          "fold_relative_defect": 1.4539352902173398e-05,
+          "phase_relative_defect": 3.515285687774526e-05
+        },
+        {
+          "segment": 4,
+          "start_ms": 82.9915970148168,
+          "end_ms": 103.78949120648174,
+          "fold_relative_defect": 3.06852889620281e-05,
+          "phase_relative_defect": 4.823213096371507e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 103.78949120648174,
+          "end_ms": 124.58738539814668,
+          "fold_relative_defect": 4.739544808745058e-05,
+          "phase_relative_defect": 6.0269688931001516e-05
+        },
+        {
+          "segment": 6,
+          "start_ms": 124.58738539814668,
+          "end_ms": 145.28528971389014,
+          "fold_relative_defect": 3.722158878355983e-06,
+          "phase_relative_defect": 9.065233538897023e-06
+        },
+        {
+          "segment": 7,
+          "start_ms": 145.28528971389014,
+          "end_ms": 166.08318390555507,
+          "fold_relative_defect": 6.562191152758058e-06,
+          "phase_relative_defect": 1.5038818436494382e-05
+        },
+        {
+          "segment": 8,
+          "start_ms": 166.08318390555507,
+          "end_ms": 186.88107809722,
+          "fold_relative_defect": 1.535142636459129e-05,
+          "phase_relative_defect": 2.543885038005434e-05,
+          "permuted_group_control_defect": 0.6769725014112653
+        },
+        {
+          "segment": 9,
+          "start_ms": 186.88107809722,
+          "end_ms": 207.57898241296348,
+          "fold_relative_defect": 2.454379750118522e-05,
+          "phase_relative_defect": 2.983533413395947e-05
+        },
+        {
+          "segment": 10,
+          "start_ms": 207.57898241296348,
+          "end_ms": 228.37687660462842,
+          "fold_relative_defect": 6.833316652334515e-05,
+          "phase_relative_defect": 3.2780894424332275e-05
+        },
+        {
+          "segment": 11,
+          "start_ms": 228.37687660462842,
+          "end_ms": 249.17477079629336,
+          "fold_relative_defect": 6.162508082603068e-05,
+          "phase_relative_defect": 8.045099427430329e-05
+        },
+        {
+          "segment": 12,
+          "start_ms": 249.17477079629336,
+          "end_ms": 269.8726751120368,
+          "fold_relative_defect": 5.5075441091944014e-05,
+          "phase_relative_defect": 6.218276488723029e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 269.8726751120368,
+          "end_ms": 290.67056930370177,
+          "fold_relative_defect": 6.48896212373257e-05,
+          "phase_relative_defect": 0.00011375704627647796
+        },
+        {
+          "segment": 14,
+          "start_ms": 290.67056930370177,
+          "end_ms": 311.4684634953667,
+          "fold_relative_defect": 2.854148690201018e-06,
+          "phase_relative_defect": 4.8767247815608335e-06
+        },
+        {
+          "segment": 15,
+          "start_ms": 311.4684634953667,
+          "end_ms": 332.26635768703164,
+          "fold_relative_defect": 2.297041759024628e-06,
+          "phase_relative_defect": 3.881370641651909e-06
+        }
+      ],
+      "maximum_fold_relative_defect": 6.833316652334515e-05,
+      "maximum_phase_relative_defect": 0.00011375704627647796,
+      "minimum_negative_control_defect": 0.22356395370754556,
+      "phase_reconstruction_relative_error": 1.7007054959771863e-15,
+      "generalized_boundary_relative_error": 6.004622254273546e-15
+    },
+    {
+      "dt_ms": 0.04999493796073302,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.7478992537042,
+          "fold_relative_defect": 4.476925132814802e-07,
+          "phase_relative_defect": 2.501568266485871e-06,
+          "permuted_group_control_defect": 0.22324894574623871
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.7478992537042,
+          "end_ms": 41.4957985074084,
+          "fold_relative_defect": 1.5813824229524504e-06,
+          "phase_relative_defect": 8.147283243562616e-06
+        },
+        {
+          "segment": 2,
+          "start_ms": 41.4957985074084,
+          "end_ms": 62.29369269907334,
+          "fold_relative_defect": 2.792880953608076e-06,
+          "phase_relative_defect": 3.874216278222035e-06
+        },
+        {
+          "segment": 3,
+          "start_ms": 62.29369269907334,
+          "end_ms": 83.04159195277754,
+          "fold_relative_defect": 3.6748405998547362e-06,
+          "phase_relative_defect": 8.90885418651807e-06
+        },
+        {
+          "segment": 4,
+          "start_ms": 83.04159195277754,
+          "end_ms": 103.78949120648174,
+          "fold_relative_defect": 7.63009243119236e-06,
+          "phase_relative_defect": 1.1685487786223674e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 103.78949120648174,
+          "end_ms": 124.58738539814668,
+          "fold_relative_defect": 1.1270829003409807e-05,
+          "phase_relative_defect": 1.4400171138217697e-05
+        },
+        {
+          "segment": 6,
+          "start_ms": 124.58738539814668,
+          "end_ms": 145.33528465185088,
+          "fold_relative_defect": 9.148868713758427e-07,
+          "phase_relative_defect": 2.2151508083998227e-06
+        },
+        {
+          "segment": 7,
+          "start_ms": 145.33528465185088,
+          "end_ms": 166.13317884351582,
+          "fold_relative_defect": 1.6545053635924183e-06,
+          "phase_relative_defect": 3.672676296329181e-06
+        },
+        {
+          "segment": 8,
+          "start_ms": 166.13317884351582,
+          "end_ms": 186.88107809722,
+          "fold_relative_defect": 3.858646317095814e-06,
+          "phase_relative_defect": 6.396746010947862e-06,
+          "permuted_group_control_defect": 0.6758464439633274
+        },
+        {
+          "segment": 9,
+          "start_ms": 186.88107809722,
+          "end_ms": 207.62897735092423,
+          "fold_relative_defect": 5.943330615827368e-06,
+          "phase_relative_defect": 7.322749333262389e-06
+        },
+        {
+          "segment": 10,
+          "start_ms": 207.62897735092423,
+          "end_ms": 228.42687154258917,
+          "fold_relative_defect": 1.7007876830319037e-05,
+          "phase_relative_defect": 8.051531267684552e-06
+        },
+        {
+          "segment": 11,
+          "start_ms": 228.42687154258917,
+          "end_ms": 249.17477079629336,
+          "fold_relative_defect": 1.5254421573512886e-05,
+          "phase_relative_defect": 1.9552679713095357e-05
+        },
+        {
+          "segment": 12,
+          "start_ms": 249.17477079629336,
+          "end_ms": 269.9226700499976,
+          "fold_relative_defect": 1.3990682715138529e-05,
+          "phase_relative_defect": 1.5123178769042896e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 269.9226700499976,
+          "end_ms": 290.7205642416625,
+          "fold_relative_defect": 1.5109819956571329e-05,
+          "phase_relative_defect": 2.6940684771181358e-05
+        },
+        {
+          "segment": 14,
+          "start_ms": 290.7205642416625,
+          "end_ms": 311.4684634953667,
+          "fold_relative_defect": 7.104919628902928e-07,
+          "phase_relative_defect": 1.2157165612931474e-06
+        },
+        {
+          "segment": 15,
+          "start_ms": 311.4684634953667,
+          "end_ms": 332.26635768703164,
+          "fold_relative_defect": 5.728609138172064e-07,
+          "phase_relative_defect": 9.668002270258164e-07
+        }
+      ],
+      "maximum_fold_relative_defect": 1.7007876830319037e-05,
+      "maximum_phase_relative_defect": 2.6940684771181358e-05,
+      "minimum_negative_control_defect": 0.22324894574623871,
+      "phase_reconstruction_relative_error": 2.0827792319761435e-15,
+      "generalized_boundary_relative_error": 6.0047396925875205e-15
+    },
+    {
+      "dt_ms": 0.024999349762021793,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.749460302478088,
+          "fold_relative_defect": 1.1123497957962928e-07,
+          "phase_relative_defect": 6.169137502835886e-07,
+          "permuted_group_control_defect": 0.22323823742497473
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.749460302478088,
+          "end_ms": 41.523919954718195,
+          "fold_relative_defect": 3.943076886429825e-07,
+          "phase_relative_defect": 2.0337619878218754e-06
+        },
+        {
+          "segment": 2,
+          "start_ms": 41.523919954718195,
+          "end_ms": 62.29837960695831,
+          "fold_relative_defect": 6.925820246188513e-07,
+          "phase_relative_defect": 9.510632270008412e-07
+        },
+        {
+          "segment": 3,
+          "start_ms": 62.29837960695831,
+          "end_ms": 83.04783990943639,
+          "fold_relative_defect": 9.172330734825786e-07,
+          "phase_relative_defect": 2.2147196694545812e-06
+        },
+        {
+          "segment": 4,
+          "start_ms": 83.04783990943639,
+          "end_ms": 103.8222995616765,
+          "fold_relative_defect": 1.8982779099823578e-06,
+          "phase_relative_defect": 2.8840303418698974e-06
+        },
+        {
+          "segment": 5,
+          "start_ms": 103.8222995616765,
+          "end_ms": 124.59675921391661,
+          "fold_relative_defect": 2.7508370851154363e-06,
+          "phase_relative_defect": 3.503065963561358e-06
+        },
+        {
+          "segment": 6,
+          "start_ms": 124.59675921391661,
+          "end_ms": 145.3462195163947,
+          "fold_relative_defect": 2.2575537504299757e-07,
+          "phase_relative_defect": 5.436715565872857e-07
+        },
+        {
+          "segment": 7,
+          "start_ms": 145.3462195163947,
+          "end_ms": 166.1206791686348,
+          "fold_relative_defect": 4.112890295994339e-07,
+          "phase_relative_defect": 9.191085148726919e-07
+        },
+        {
+          "segment": 8,
+          "start_ms": 166.1206791686348,
+          "end_ms": 186.89513882087493,
+          "fold_relative_defect": 9.547853494306386e-07,
+          "phase_relative_defect": 1.5941496917968732e-06,
+          "permuted_group_control_defect": 0.6767679483833775
+        },
+        {
+          "segment": 9,
+          "start_ms": 186.89513882087493,
+          "end_ms": 207.644599123353,
+          "fold_relative_defect": 1.4482813098241826e-06,
+          "phase_relative_defect": 1.7978606389805003e-06
+        },
+        {
+          "segment": 10,
+          "start_ms": 207.644599123353,
+          "end_ms": 228.41905877559313,
+          "fold_relative_defect": 4.19832786424335e-06,
+          "phase_relative_defect": 1.974903361026238e-06
+        },
+        {
+          "segment": 11,
+          "start_ms": 228.41905877559313,
+          "end_ms": 249.19351842783323,
+          "fold_relative_defect": 3.7899658665065517e-06,
+          "phase_relative_defect": 4.821960380445183e-06
+        },
+        {
+          "segment": 12,
+          "start_ms": 249.19351842783323,
+          "end_ms": 269.9429787303113,
+          "fold_relative_defect": 3.491219355192235e-06,
+          "phase_relative_defect": 3.6987741758067977e-06
+        },
+        {
+          "segment": 13,
+          "start_ms": 269.9429787303113,
+          "end_ms": 290.71743838255145,
+          "fold_relative_defect": 3.696018597259241e-06,
+          "phase_relative_defect": 6.561751966873383e-06
+        },
+        {
+          "segment": 14,
+          "start_ms": 290.71743838255145,
+          "end_ms": 311.4918980347916,
+          "fold_relative_defect": 1.756722241986017e-07,
+          "phase_relative_defect": 2.9886533327278404e-07
+        },
+        {
+          "segment": 15,
+          "start_ms": 311.4918980347916,
+          "end_ms": 332.26635768703164,
+          "fold_relative_defect": 1.424051303075657e-07,
+          "phase_relative_defect": 2.3997082331563435e-07
+        }
+      ],
+      "maximum_fold_relative_defect": 4.19832786424335e-06,
+      "maximum_phase_relative_defect": 6.561751966873383e-06,
+      "minimum_negative_control_defect": 0.22323823742497473,
+      "phase_reconstruction_relative_error": 2.6313796643451443e-15,
+      "generalized_boundary_relative_error": 6.004971996512634e-15
+    }
+  ],
+  "equation": "w(t)=dY(t/T)/ds - (t/T)*T_prime*y_dot(t); w_dot=A(t)w+A_delay(t)w_delayed; w(T)-w(0)+T_prime*f(0)=0",
+  "scope": "Independent physical-time variational matching of the periodic BVP tangent on all sections. All nine states and the full delayed rate history are retained. This diagnostic does not classify full Floquet stability or automatically promote a fold."
+}

@@ -1,0 +1,443 @@
+{
+  "attempts": [
+    {
+      "from_index": 0,
+      "ds": 0.0125,
+      "halving": 0,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 0,
+      "ds": 0.00625,
+      "halving": 1,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 0,
+      "ds": 0.003125,
+      "halving": 2,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 0,
+      "ds": 0.0015625,
+      "halving": 3,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 0,
+      "ds": 0.00078125,
+      "halving": 4,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.08855657529088616,
+          "arc_error": 0.0,
+          "K": 9.002555285482776,
+          "gmres_info": 0,
+          "gmres_iterations": 50
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.00012836495973111983,
+          "arc_error": 3.969175198323661e-11,
+          "K": 9.002514057162166,
+          "gmres_info": 0,
+          "gmres_iterations": 58
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 6.525613382990514e-10,
+          "arc_error": 2.055669970639557e-15,
+          "K": 9.00251407435121
+        }
+      ]
+    },
+    {
+      "from_index": 1,
+      "ds": 0.0009375,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.20861287776247073,
+          "arc_error": 0.0,
+          "K": 9.005489212533499,
+          "gmres_info": 0,
+          "gmres_iterations": 49
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.00011385542972308649,
+          "arc_error": 1.2870982370117931e-10,
+          "K": 9.005484397644452,
+          "gmres_info": 0,
+          "gmres_iterations": 57
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 3.0281332996651145e-10,
+          "arc_error": -3.8253550162373855e-16,
+          "K": 9.005484409709434
+        }
+      ]
+    },
+    {
+      "from_index": 2,
+      "ds": 0.001125,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.3887987697328288,
+          "arc_error": 0.0,
+          "K": 9.009051050559378,
+          "gmres_info": 0,
+          "gmres_iterations": 47
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0001331983639774048,
+          "arc_error": -1.1689495049178433e-10,
+          "K": 9.009066658963826,
+          "gmres_info": 0,
+          "gmres_iterations": 52
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 9.312550730555813e-10,
+          "arc_error": -1.8572375223308685e-16,
+          "K": 9.009066692262138
+        }
+      ]
+    },
+    {
+      "from_index": 3,
+      "ds": 0.0013499999999999999,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.4492432825670689,
+          "arc_error": 0.0,
+          "K": 9.013394675448515,
+          "gmres_info": 0,
+          "gmres_iterations": 44
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0006473138774101697,
+          "arc_error": 3.939193535685375e-10,
+          "K": 9.013456054436178,
+          "gmres_info": 0,
+          "gmres_iterations": 59
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 2.0795351551861074e-08,
+          "arc_error": 2.3720080693865234e-16,
+          "K": 9.01345615440919
+        }
+      ]
+    },
+    {
+      "from_index": 4,
+      "ds": 0.0016199999999999997,
+      "halving": 0,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 4,
+      "ds": 0.0008099999999999998,
+      "halving": 1,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.16202463141612444,
+          "arc_error": 0.0,
+          "K": 9.01609504597403,
+          "gmres_info": 0,
+          "gmres_iterations": 38
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0007647107969910305,
+          "arc_error": 1.8530087698074096e-11,
+          "K": 9.016050613290759,
+          "gmres_info": 0,
+          "gmres_iterations": 60
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 3.770529721780491e-08,
+          "arc_error": -3.2249472434652373e-16,
+          "K": 9.01605050654836
+        }
+      ]
+    },
+    {
+      "from_index": 5,
+      "ds": 0.0009719999999999998,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.1512809501892292,
+          "arc_error": 0.0,
+          "K": 9.01905881427959,
+          "gmres_info": 0,
+          "gmres_iterations": 45
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0019564605275301794,
+          "arc_error": 6.711225152538023e-11,
+          "K": 9.018933332695712,
+          "gmres_info": 0,
+          "gmres_iterations": 60
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 1.7327222989749202e-07,
+          "arc_error": -1.3115917607833034e-14,
+          "K": 9.018932942715573
+        }
+      ]
+    },
+    {
+      "from_index": 6,
+      "ds": 0.0011663999999999997,
+      "halving": 0,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 6,
+      "ds": 0.0005831999999999999,
+      "halving": 1,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.07941591568635259,
+          "arc_error": 0.0,
+          "K": 9.020563964841703,
+          "gmres_info": 0,
+          "gmres_iterations": 50
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0003964171035875097,
+          "arc_error": -3.178417859304258e-11,
+          "K": 9.0204802795414,
+          "gmres_info": 0,
+          "gmres_iterations": 61
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 6.1996796585361835e-09,
+          "arc_error": -2.5147323629222016e-15,
+          "K": 9.020480144925225
+        }
+      ]
+    },
+    {
+      "from_index": 7,
+      "ds": 0.0006998399999999999,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.24015016255224397,
+          "arc_error": 0.0,
+          "K": 9.022219688222517,
+          "gmres_info": 0,
+          "gmres_iterations": 46
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.00029949844587706664,
+          "arc_error": -1.67892091249931e-10,
+          "K": 9.02214326526446,
+          "gmres_info": 0,
+          "gmres_iterations": 59
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 2.8088920078772617e-09,
+          "arc_error": -2.1863174520081914e-15,
+          "K": 9.022143176101636
+        }
+      ]
+    },
+    {
+      "from_index": 8,
+      "ds": 0.0008398079999999998,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.5394834158465798,
+          "arc_error": 0.0,
+          "K": 9.024088886554937,
+          "gmres_info": 0,
+          "gmres_iterations": 41
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0001512252486013388,
+          "arc_error": -4.527522753561898e-10,
+          "K": 9.024092226286465,
+          "gmres_info": 0,
+          "gmres_iterations": 57
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 3.3367197893596767e-09,
+          "arc_error": -1.837459612815719e-15,
+          "K": 9.024091971176897
+        }
+      ]
+    },
+    {
+      "from_index": 9,
+      "ds": 0.0010077695999999997,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.8168180144645445,
+          "arc_error": 0.0,
+          "K": 9.026480069530352,
+          "gmres_info": 0,
+          "gmres_iterations": 39
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0011378344159096443,
+          "arc_error": 2.19401140654926e-09,
+          "K": 9.02674871608951,
+          "gmres_info": 0,
+          "gmres_iterations": 54
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 1.1445844272373051e-09,
+          "arc_error": 3.420749302058098e-16,
+          "K": 9.026749209757018
+        }
+      ]
+    },
+    {
+      "from_index": 10,
+      "ds": 0.0012093235199999997,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.567136725748707,
+          "arc_error": 0.0,
+          "K": 9.030262128125072,
+          "gmres_info": 0,
+          "gmres_iterations": 40
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0012292111268852324,
+          "arc_error": -7.22110045467825e-10,
+          "K": 9.030504217681354,
+          "gmres_info": 0,
+          "gmres_iterations": 53
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 3.8986036621224684e-09,
+          "arc_error": 2.8164927850372145e-16,
+          "K": 9.030504883028177
+        }
+      ]
+    },
+    {
+      "from_index": 11,
+      "ds": 0.0014511882239999995,
+      "halving": 0,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.48364405901885066,
+          "arc_error": 0.0,
+          "K": 9.035208889010232,
+          "gmres_info": 0,
+          "gmres_iterations": 41
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0011842276324766643,
+          "arc_error": -3.596026004422613e-10,
+          "K": 9.035386946820351,
+          "gmres_info": 0,
+          "gmres_iterations": 53
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 1.9483678559417683e-08,
+          "arc_error": 1.1867485265840848e-15,
+          "K": 9.035387520325656
+        }
+      ]
+    },
+    {
+      "from_index": 12,
+      "ds": 0.0017414258687999994,
+      "halving": 0,
+      "reason": "Predictor left physical rate domain",
+      "history": []
+    },
+    {
+      "from_index": 12,
+      "ds": 0.0008707129343999997,
+      "halving": 1,
+      "reason": "Converged",
+      "history": [
+        {
+          "iteration": 0,
+          "maximum_residual_Hz": 0.20155137192957168,
+          "arc_error": 0.0,
+          "K": 9.038412947893816,
+          "gmres_info": 0,
+          "gmres_iterations": 42
+        },
+        {
+          "iteration": 1,
+          "maximum_residual_Hz": 0.0002183310815993822,
+          "arc_error": -5.193108257379955e-11,
+          "K": 9.038453066859434,
+          "gmres_info": 0,
+          "gmres_iterations": 50
+        },
+        {
+          "iteration": 2,
+          "maximum_residual_Hz": 6.898058513282734e-10,
+          "arc_error": 1.0031391320533437e-15,
+          "K": 9.038453144352353
+        }
+      ]
+    }
+  ]
+}

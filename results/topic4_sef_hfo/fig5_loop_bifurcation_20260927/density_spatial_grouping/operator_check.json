@@ -1,0 +1,32 @@
+{
+  "status": "PASS_OPERATOR_REFINEMENT_ALGEBRA",
+  "fine_groups": 3479,
+  "coarse_groups": 935,
+  "all_fine_groups_nested_in_one_coarse_group": true,
+  "original_positions_and_graph_identity": true,
+  "threshold_average_error": 7.105427357601002e-15,
+  "delayed_first_and_squared_weight_action_errors": {
+    "mean_ampa": {
+      "max_absolute_error": 2.5579538487363607e-13,
+      "relative_to_max": 4.711737363194246e-15
+    },
+    "variance_ampa": {
+      "max_absolute_error": 8.526512829121202e-14,
+      "relative_to_max": 4.953101728447135e-15
+    },
+    "mean_gaba": {
+      "max_absolute_error": 1.9895196601282805e-13,
+      "relative_to_max": 4.896277390569739e-15
+    },
+    "variance_gaba": {
+      "max_absolute_error": 1.5631940186722204e-13,
+      "relative_to_max": 4.0503732140427376e-15
+    }
+  },
+  "original_1mm_external_forcing_held_identical": true,
+  "homogeneous_Bernoulli_numerical_variance_factors": [
+    2.957170009613037e-07,
+    3.092803955078125e-07
+  ],
+  "variance_note": "Only a homogeneous-independent-sampling size diagnostic; unequal group rates and recurrent feedback prevent exact numerical-noise matching. Fine2048 andcoarse8192 have similar total particles, not paired physical noises."
+}

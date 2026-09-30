@@ -1,0 +1,13 @@
+{
+  "created_local": "2026-09-23T14:58:35.041714+08:00",
+  "question": "With the correct full native Z supplied and fast/M correspondence improved, does the rate model's own GABA-current resource target still predict the wrong Z spatial path?",
+  "design": "Replay the completed prescribed-native-Z corrected rate trajectory exactly. Integrate a separate shadowZ using precisely the unchanged Gaussian GABA threshold target/tauZ, at every0.05ms step. ShadowZ starts1 and has no feedback into the actual network.",
+  "shadow_equation": "dZshadow/dt=(P(rawGABA<threshold)-Zshadow)/5000ms. Uses actual rate-engine postfilter GABA mean and raw-current variance state; not normalized diffusion, not Z-scaled variance.",
+  "controls": "Free-shadow100ms must equal true freeZ bitwise. Prescribed replay must match all stored1ms sampled/expected rates and10ms M/Z, plus full saved checkpoints. Independent CPUone-step Gaussian/slowupdate must match GPU.",
+  "unchanged": "Same graph, input, physicalprivateQ, response, countseed1, M law and prescribednativeZ. No response/slowparameter fit.",
+  "readouts": "Native/free/conditional-shadow full spatial Z and cell-weighted global/coreA/coreB/surround paths. Exact exponentially weighted10ms target reconstructed from Z endpoints. GABA mean/rawvariance/target recorded at10ms for interpretation only.",
+  "interpretation": "Wrongshadowpath shows target-input mismatch persists even conditional on nativeZ, but does not alone distinguish incorrect current statistics from the Gaussian target shape. Near-correctshadow with wrong freeZ implicates closed-loop amplification; neither alone certifies a bifurcation.",
+  "budget": "One12.5s exact replay with nonfeedback observer, implementation checks and independent readout. No new seed, parameter scan or fitting.",
+  "model_promoted": false,
+  "additional_readonly_comparison": "At the same g40 groups, recompute native measured GABA mean/variance, empirical below-threshold fraction and Gaussian below-threshold target from existing5/10ms raw field records. Filter Gaussian-minus-empirical differences with tauZ using left and linear sampling quadratures; this isolates sampled Gaussian shape error, not exact unobserved temporal error. No new native simulation."
+}

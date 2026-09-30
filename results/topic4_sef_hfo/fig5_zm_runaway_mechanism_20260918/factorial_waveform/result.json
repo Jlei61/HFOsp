@@ -1,0 +1,328 @@
+{
+  "status": "FACTORIAL_WAVEFORM_ASSAY_COMPLETE",
+  "rows": [
+    {
+      "source_label": "Core A E",
+      "source_group": 279,
+      "pop": "E",
+      "condition": "full",
+      "theta_mv": 17.955848651430077,
+      "MC_mean_hz": 72.7304540109673,
+      "MC_mean_SEM_hz": 0.017745672866479132,
+      "MC_split_half_relative_difference": 0.003585327964083345,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.3290532839277783,
+          "relative_mean_error": 0.21483336350352908,
+          "AC_waveform_L2_descriptive": 0.3543824733431609,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.13145491963724787,
+          "relative_mean_error": 0.05069667701997709,
+          "AC_waveform_L2_descriptive": 0.14621972892849705,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Core A E",
+      "source_group": 279,
+      "pop": "E",
+      "condition": "mean_only",
+      "theta_mv": 17.955848651430077,
+      "MC_mean_hz": 77.67957368807095,
+      "MC_mean_SEM_hz": 0.02064153166842811,
+      "MC_split_half_relative_difference": 0.003612201332882456,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.32126842634203034,
+          "relative_mean_error": 0.20410587915267311,
+          "AC_waveform_L2_descriptive": 0.35153945832372924,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.1173612420282224,
+          "relative_mean_error": 0.053984657138039474,
+          "AC_waveform_L2_descriptive": 0.13178511380353353,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Core A E",
+      "source_group": 279,
+      "pop": "E",
+      "condition": "variances_only",
+      "theta_mv": 17.955848651430077,
+      "MC_mean_hz": 180.7710728641627,
+      "MC_mean_SEM_hz": 0.0267172886181121,
+      "MC_split_half_relative_difference": 0.007629736267312536,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.0044160504292843,
+          "relative_mean_error": 0.0007622627082225851,
+          "AC_waveform_L2_descriptive": 0.11086430606362309,
+          "passed": true
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.0038951554174630997,
+          "relative_mean_error": 0.0009429111337645265,
+          "AC_waveform_L2_descriptive": 0.096327176525866,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Core B E",
+      "source_group": 141,
+      "pop": "E",
+      "condition": "full",
+      "theta_mv": 17.931614720234382,
+      "MC_mean_hz": 54.206186544585606,
+      "MC_mean_SEM_hz": 0.005413872152568551,
+      "MC_split_half_relative_difference": 0.004091638201974725,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.3624475636414497,
+          "relative_mean_error": 0.20933728469761886,
+          "AC_waveform_L2_descriptive": 0.38135800639137274,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.11173460942762163,
+          "relative_mean_error": 0.012373310550103265,
+          "AC_waveform_L2_descriptive": 0.12027142578969978,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Core B E",
+      "source_group": 141,
+      "pop": "E",
+      "condition": "mean_only",
+      "theta_mv": 17.931614720234382,
+      "MC_mean_hz": 57.38618363815179,
+      "MC_mean_SEM_hz": 0.014449810200720092,
+      "MC_split_half_relative_difference": 0.002877228841583526,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.3337080065094417,
+          "relative_mean_error": 0.19784851009039353,
+          "AC_waveform_L2_descriptive": 0.3533350575855353,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.05473409631941377,
+          "relative_mean_error": 0.008448990614394285,
+          "AC_waveform_L2_descriptive": 0.059515032755797476,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Core B E",
+      "source_group": 141,
+      "pop": "E",
+      "condition": "variances_only",
+      "theta_mv": 17.931614720234382,
+      "MC_mean_hz": 7.432452749394775,
+      "MC_mean_SEM_hz": 0.01951145059217389,
+      "MC_split_half_relative_difference": 0.016625967944978837,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.12643875465805846,
+          "relative_mean_error": 0.07830030806537393,
+          "AC_waveform_L2_descriptive": 0.1378847955240215,
+          "passed": true
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.08281921782281979,
+          "relative_mean_error": 0.04793178310740285,
+          "AC_waveform_L2_descriptive": 0.09088093457157215,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "Surround E",
+      "source_group": 39,
+      "pop": "E",
+      "condition": "full",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 64.41225096575756,
+      "MC_mean_SEM_hz": 0.013653220884700426,
+      "MC_split_half_relative_difference": 0.0031814950321852804,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.3835788208065879,
+          "relative_mean_error": 0.2325776068757598,
+          "AC_waveform_L2_descriptive": 0.4082049318421366,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.20832566768144847,
+          "relative_mean_error": 0.06673317200785327,
+          "AC_waveform_L2_descriptive": 0.22707398625378358,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "source_label": "Surround E",
+      "source_group": 39,
+      "pop": "E",
+      "condition": "mean_only",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 68.14260686426672,
+      "MC_mean_SEM_hz": 0.01603947054525434,
+      "MC_split_half_relative_difference": 0.003263720623702449,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.3690595831127162,
+          "relative_mean_error": 0.23160576749815442,
+          "AC_waveform_L2_descriptive": 0.3955072344154574,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.18803540073807995,
+          "relative_mean_error": 0.07979557711430967,
+          "AC_waveform_L2_descriptive": 0.2060575451792068,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "source_label": "Surround E",
+      "source_group": 39,
+      "pop": "E",
+      "condition": "variances_only",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 148.85550303025644,
+      "MC_mean_SEM_hz": 0.028919267091215877,
+      "MC_split_half_relative_difference": 0.007917317574594646,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.0065534188970638955,
+          "relative_mean_error": 0.0003611455614705489,
+          "AC_waveform_L2_descriptive": 0.13463686726467522,
+          "passed": true
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.005740289531183273,
+          "relative_mean_error": 0.0009040425466558521,
+          "AC_waveform_L2_descriptive": 0.11664137979556895,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "I",
+      "source_group": 594,
+      "pop": "I",
+      "condition": "full",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 89.85250476377357,
+      "MC_mean_SEM_hz": 0.008764992386461381,
+      "MC_split_half_relative_difference": 0.0015944907808148117,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.1817996280545862,
+          "relative_mean_error": 0.07672041567903778,
+          "AC_waveform_L2_descriptive": 0.19125459577894757,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.04178904941391947,
+          "relative_mean_error": 0.003731525084353107,
+          "AC_waveform_L2_descriptive": 0.04439989039348889,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "I",
+      "source_group": 594,
+      "pop": "I",
+      "condition": "mean_only",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 98.28392869913517,
+      "MC_mean_SEM_hz": 0.02556373461137128,
+      "MC_split_half_relative_difference": 0.0015235392134608885,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.22214487919473813,
+          "relative_mean_error": 0.09389792868651722,
+          "AC_waveform_L2_descriptive": 0.23626627021412783,
+          "passed": false
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.03380622879506887,
+          "relative_mean_error": 0.006978312108185305,
+          "AC_waveform_L2_descriptive": 0.03629940774268722,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "source_label": "I",
+      "source_group": 594,
+      "pop": "I",
+      "condition": "variances_only",
+      "theta_mv": 18.0,
+      "MC_mean_hz": 20.010453261825504,
+      "MC_mean_SEM_hz": 0.04090377910663421,
+      "MC_split_half_relative_difference": 0.011960077692109675,
+      "rows": [
+        {
+          "variant": "units_instantaneous",
+          "waveform_L2": 0.07305062624000483,
+          "relative_mean_error": 0.04211760560314275,
+          "AC_waveform_L2_descriptive": 0.08429535409191063,
+          "passed": true
+        },
+        {
+          "variant": "units_history",
+          "waveform_L2": 0.03999451719594834,
+          "relative_mean_error": 0.0035404599344738942,
+          "AC_waveform_L2_descriptive": 0.04886387472882029,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "scope": "Local strong-input diagnostic, not an autonomous reduced network or native SNN validation. Full-input condition repeats a previously seen waveform with new noise; eight channel-clamped waveforms have new targets. A conditional failure identifies an input context, not by itself the unique correct closure or onset bifurcation.",
+  "replicates": 8192,
+  "dt_ms": 0.1,
+  "steps": 52873,
+  "burn_steps": 13218,
+  "all_cases_pass": {
+    "units_instantaneous": false,
+    "units_history": false
+  },
+  "statistical_unit": "Independent noise path; common random numbers pair the 12 input conditions. Three conditions per source population are paired counterfactual assays, not independent biological replicates.",
+  "model_promoted": false
+}

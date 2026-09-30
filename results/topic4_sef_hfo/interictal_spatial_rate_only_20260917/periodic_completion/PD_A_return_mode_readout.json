@@ -1,0 +1,62 @@
+{
+  "label": "PD_A_return",
+  "J_EE_core": 1.0758067726710216,
+  "T_ms": 105.39979415446477,
+  "normalization": "Largest absolute E-group rate mode component = 1 Hz; all derivatives per this unit.",
+  "E_mode_energy_A_B_surround": [
+    0.23040546392687214,
+    1.103887636167927e-06,
+    0.7695934321854916
+  ],
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mode_RMS_relative_to_network": [
+    3.127056319874278,
+    0.006703878748646698,
+    0.8991677378621147
+  ],
+  "core_peak_derivatives": {
+    "A": [
+      {
+        "peak_ms": 21.928563097168833,
+        "peak_rate_Hz": 114.42028880912636,
+        "delta_peak_height_Hz_per_unit": 0.22553191142491386,
+        "delta_peak_time_ms_per_unit": -0.004786808510783709
+      }
+    ],
+    "B": [
+      {
+        "peak_ms": 44.11173498916604,
+        "peak_rate_Hz": 63.9049520423862,
+        "delta_peak_height_Hz_per_unit": 0.000536382973161768,
+        "delta_peak_time_ms_per_unit": -5.7966594455401306e-05
+      }
+    ]
+  },
+  "maximum_regional_mode_Hz": [
+    0.2494157035094367,
+    0.0006056758777640884,
+    0.011235215076161804
+  ],
+  "maximum_contact_mode_Hz": [
+    0.009852537294872564,
+    0.00040761212019860575,
+    0.0008143069938430519,
+    0.000259669741990203,
+    4.1367355551323435e-05,
+    0.00034520813900468174,
+    0.0005763233266551678,
+    8.395971499051622e-06,
+    0.0013856944446905522,
+    0.0026981510207827047,
+    0.0026214683569227106,
+    0.0014022551518345235,
+    0.0006044386454836562,
+    0.0008737965113787958,
+    0.00045539767309441854
+  ],
+  "meaning": "The mode changes sign after one parent period, so adjacent parent-length windows receive opposite first-order changes. This does not establish child stability, a propagation-template switch, or irregular dynamics."
+}

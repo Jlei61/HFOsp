@@ -1,0 +1,72 @@
+{
+  "window_ms": [
+    9400,
+    9700
+  ],
+  "number_of_5ms_steps": 60,
+  "negative_D_increments": 0,
+  "delta_D_range": [
+    3.3954859776974544e-05,
+    0.000760836443945534
+  ],
+  "rows": [
+    {
+      "field": "native9420",
+      "D": 0.22884476056519176,
+      "first_upcrossing": {
+        "sample_bracket_ms": [
+          9420.0,
+          9425.0
+        ],
+        "interpolation_weight": 2.9685623552605177e-13,
+        "interpolated_time_ms": 9420.000000000002
+      },
+      "regional_Z": [
+        0.7711552394348083,
+        0.72487861685313,
+        0.7163253334996627,
+        0.773715609739851
+      ],
+      "selected_vs_first_weighted_rms": 1.7210068420299196e-16
+    },
+    {
+      "field": "native_mid9420_mid",
+      "D": 0.23571967676008299,
+      "first_upcrossing": {
+        "sample_bracket_ms": [
+          9630.0,
+          9635.0
+        ],
+        "interpolation_weight": 0.8718127007155958,
+        "interpolated_time_ms": 9634.359063503578
+      },
+      "regional_Z": [
+        0.7642803232399166,
+        0.6944983784624671,
+        0.7066482095581142,
+        0.7674948481156918
+      ],
+      "selected_vs_first_weighted_rms": 6.821042119537662e-16
+    },
+    {
+      "field": "native_mid9420_9870",
+      "D": 0.24259459295497288,
+      "first_upcrossing": {
+        "sample_bracket_ms": [
+          9680.0,
+          9685.0
+        ],
+        "interpolation_weight": 0.3314012514627576,
+        "interpolated_time_ms": 9681.657006257316
+      },
+      "regional_Z": [
+        0.7574054070450269,
+        0.6879596576660896,
+        0.6999951010083384,
+        0.7606058862169428
+      ],
+      "selected_vs_first_weighted_rms": 2.9521235230027993e-16
+    }
+  ],
+  "scope": "Continuation must retain actual spatial path and account for piecewise linear sample knots; displayed D is not automatically a smooth global parameter."
+}

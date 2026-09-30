@@ -1,0 +1,13 @@
+{
+  "status": "WITHDRAWN_BEFORE_NUMERICS",
+  "pid": 471319,
+  "previous_record": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 471319,
+    "dependencies": [
+      461794,
+      468094
+    ]
+  },
+  "reason": "The original coordinator had already begun the fine root before a dependency change was attempted. Preserve that live solve and withdraw the extra queue."
+}

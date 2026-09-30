@@ -1,0 +1,30 @@
+{
+  "created_local": "2026-09-19T21:06:31.770190+08:00",
+  "question": "Under original native currents, can Gaussian threshold averaging alone account for the large resource-clock discrepancy?",
+  "start_ms": 3000,
+  "threshold_mV": 95.19851312666987,
+  "tau_Z_ms": 5000,
+  "windows_ms": [
+    [
+      3000,
+      8000
+    ],
+    [
+      8000,
+      9420
+    ],
+    [
+      9420,
+      9870
+    ],
+    [
+      9870,
+      10400
+    ],
+    [
+      10400,
+      12500
+    ]
+  ],
+  "scope": "Descriptive algebraic audit using existing original per-cell currents at5/10ms. No new simulation or fit. Exact native threshold target, Gaussian using measured group moments, and original stationary mean-to-variance surrogate. Propagate only target difference through same linear Z equation with equal initialZ at3s; compare left-hold and linear sample interpolation. Not a full0.1ms current reconstruction, autonomous response test, actual rate variance-state validation, native bifurcation or proof excluding localized effects."
+}

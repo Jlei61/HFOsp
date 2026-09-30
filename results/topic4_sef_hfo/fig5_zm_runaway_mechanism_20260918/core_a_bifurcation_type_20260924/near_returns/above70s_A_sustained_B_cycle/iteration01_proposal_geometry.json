@@ -1,0 +1,118 @@
+{
+  "status": "PROPOSAL_GEOMETRY_ONLY",
+  "rows": [
+    {
+      "alpha": 1.0,
+      "method": "rational",
+      "raw_step_relative": 11.814298380823084,
+      "admissible": false,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false,
+        "phase_error": 1.369182545119014e-13,
+        "min_syn_M": 0.0,
+        "min_covariance": 9.851089070438807e-07,
+        "min_history": 7.390723869055539e-26,
+        "max_refractory_occupancy_E_I": [
+          31.818255740130304,
+          46.793906525620606
+        ]
+      }
+    },
+    {
+      "alpha": 1.0,
+      "method": "phase_bound",
+      "raw_step_relative": 11.814298380823084,
+      "admissible": false,
+      "diagnostic": {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 327.4796841800734,
+        "projected_step_norm": 161.76521245869543,
+        "phase_error": -5.1465776085275823e-14
+      }
+    },
+    {
+      "alpha": 0.1,
+      "method": "rational",
+      "raw_step_relative": 1.1814298380823123,
+      "admissible": false,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false,
+        "phase_error": 1.0286910212542864e-14,
+        "min_syn_M": 0.0,
+        "min_covariance": 5.870963691939415e-06,
+        "min_history": 7.390723869050783e-25,
+        "max_refractory_occupancy_E_I": [
+          3.44165059597066,
+          5.093079247910462
+        ]
+      }
+    },
+    {
+      "alpha": 0.1,
+      "method": "phase_bound",
+      "raw_step_relative": 1.1814298380823123,
+      "admissible": false,
+      "diagnostic": {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 32.747968418007446,
+        "projected_step_norm": 19.324588698975575,
+        "phase_error": -3.4728296627317286e-14
+      }
+    },
+    {
+      "alpha": 0.01,
+      "method": "rational",
+      "raw_step_relative": 0.11814298380823042,
+      "admissible": true,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false
+      },
+      "actual_step_relative": 0.09789842497322333,
+      "retraction_distortion": 0.4771864424956251
+    },
+    {
+      "alpha": 0.01,
+      "method": "phase_bound",
+      "raw_step_relative": 0.11814298380823042,
+      "admissible": true,
+      "diagnostic": {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 3.2747968418007223,
+        "projected_step_norm": 3.122143190270052,
+        "phase_error": -8.68879621029844e-16
+      },
+      "actual_step_relative": 0.11263578481168494,
+      "retraction_distortion": 0.18870039383138823
+    },
+    {
+      "alpha": 0.001,
+      "method": "rational",
+      "raw_step_relative": 0.0118142983808231,
+      "admissible": true,
+      "diagnostic": {
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": false
+      },
+      "actual_step_relative": 0.011230755678674133,
+      "retraction_distortion": 0.10758778184954038
+    },
+    {
+      "alpha": 0.001,
+      "method": "phase_bound",
+      "raw_step_relative": 0.0118142983808231,
+      "admissible": true,
+      "diagnostic": {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.32747968418007384,
+        "projected_step_norm": 0.32683412528582023,
+        "phase_error": 4.3767073298894875e-15
+      },
+      "actual_step_relative": 0.01179100891962125,
+      "retraction_distortion": 0.055441923170940065
+    }
+  ],
+  "physical_flow_changed": false
+}

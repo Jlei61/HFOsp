@@ -1,0 +1,31 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR2_saddle_matched_endpoint_further_TR2_a0.038000Hz_N64x64_N128.npz",
+  "J_EE_core": 0.945762867639569,
+  "torus_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/tori/endpoint_further_TR2_a0.038000Hz_N64x64.npz",
+  "independent_CPU_full_RHS": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/TR2_saddle_matched_endpoint_further_TR2_a0.038000Hz_N64x64_N128.npz",
+    "J": 0.945762867639569,
+    "T_ms": 165.6361411504112,
+    "N": 128,
+    "check_N": 512,
+    "stored_collocation_error_Hz": 7.103692634125025e-13,
+    "original_mesh_CPU_collocation_error_Hz": 7.095019016745141e-13,
+    "oversampled_residual_at_original_nodes_Hz": 7.095019016745141e-13,
+    "between_nodes_integrated_error_Hz": 7.095019016745141e-13,
+    "between_nodes_regional_error_A_B_surround_Hz": [
+      2.083943701593864e-15,
+      1.853331710681727e-13,
+      1.8434929622279023e-15
+    ],
+    "full_RHS_rate_error_Hz_per_ms": 1.1500810069911549e-12,
+    "full_RHS_linear_state_max_abs": 3.1988300897012323e-15,
+    "transfer_48_vs_96_quadrature_max_Hz": 1.734723475976807e-14,
+    "minimum_interpolated_group_rate_Hz": 0.030621171014999934,
+    "refractory_rate_bound_excess_Hz": 0.0
+  },
+  "minimum_fast_slow_filter_Hz": [
+    0.021695166685514935,
+    0.03204853301472649
+  ],
+  "model": "Unchanged 400-cell / 935-population rate DDE"
+}

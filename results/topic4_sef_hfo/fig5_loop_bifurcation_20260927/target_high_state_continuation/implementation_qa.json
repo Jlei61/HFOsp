@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "checks": {
+    "all_saved_states_bitwise": true,
+    "original_constant_input_step_bitwise": {
+      "state": true,
+      "ref": true,
+      "rng": true,
+      "spikes": true
+    },
+    "captured_continuation_bitwise": {
+      "state": true,
+      "ref": true,
+      "rng": true,
+      "history": true,
+      "clock": true,
+      "global_state": true,
+      "output": true,
+      "global_output": true,
+      "accumulator": true,
+      "rate": true
+    },
+    "ramp_schedule": [
+      {
+        "offset_steps": 0,
+        "max_K_error": 0.0,
+        "Z_bitwise": true
+      },
+      {
+        "offset_steps": 10000,
+        "max_K_error": 0.0,
+        "Z_bitwise": true
+      },
+      {
+        "offset_steps": 20000,
+        "max_K_error": 0.0,
+        "Z_bitwise": true
+      },
+      {
+        "offset_steps": 30000,
+        "max_K_error": 0.0,
+        "Z_bitwise": true
+      }
+    ]
+  },
+  "producer_sha256": "3282d13e39be5030712f9d20250dac24e7c616a67e98573aee5f32b5b4a09a64"
+}

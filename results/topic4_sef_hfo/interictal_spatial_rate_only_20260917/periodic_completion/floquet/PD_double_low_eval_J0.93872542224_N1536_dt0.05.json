@@ -1,0 +1,50 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872542224_N1536.npz",
+  "J_EE_core": 0.9387254222350181,
+  "T_ms": 825.3667270537677,
+  "dt_ms": 0.049997984435047715,
+  "history_dimension": 679745,
+  "multipliers": [
+    [
+      -1.0008539335044164,
+      0.0
+    ],
+    [
+      1.0004043800526368,
+      0.0
+    ],
+    [
+      0.43818718639746035,
+      0.00012359898440162913
+    ]
+  ],
+  "residuals": [
+    1.9718290465516777e-13,
+    9.238145438475132e-14,
+    3.3849291383364694e-08
+  ],
+  "phase_multiplier_error": 0.0004043800526367658,
+  "phase_tangent_relative_defect": 0.0006071670433544481,
+  "raw_multipliers_above_1p001": 0,
+  "requested_multipliers": 3,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 966.7557756900787,
+  "phase_eigenvector_overlaps": [
+    0.9581314682043196,
+    0.9999999984540303,
+    0.9989272811779759
+  ],
+  "identified_neutral_index": 1,
+  "nontrivial_multipliers": [
+    [
+      -1.0008539335044164,
+      0.0
+    ],
+    [
+      0.43818718639746035,
+      0.00012359898440162913
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 1.0008539335044164,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

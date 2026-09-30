@@ -1,0 +1,30 @@
+{
+  "created_local": "2026-09-23T15:39:59.799235+08:00",
+  "question": "In the onset-relevant spatial Z neighborhood, do self-limited and spatially sustained activities persist under the same autonomous equations, and can their states seed bidirectional continuation?",
+  "user_priority": "Only the actual interictal/self-limited to sustained recruitment transition. UnrelatedD0.02static roots and broad response refits suspended.",
+  "equations": "Unchanged g40 graph, locked transient-corrected conditioned39 response, physical-delay private-Q conditional drift, original constant mean input, no future count innovations. M dynamic. Z entire field held.",
+  "scope": "This is the explicitly declared deterministic conditional drift, not exact stochastic ensemble dynamics. Earlier local and autonomousZ correspondence failures remain; no native-onset attribution from existence alone.",
+  "path": "Actual native spatial Z family; D is only its E-cell-weighted display coordinate. Lower endpoint is actual interpolatedD.20 field; upper is native9870ms fieldD.256344. No uniformZ substitution.",
+  "conditions": [
+    {
+      "label": "lower_endpoint",
+      "field": "D020",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_native_Z_path_20260923/recorded_drive_binomial_seed1/checkpoint9000.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 20000
+    },
+    {
+      "label": "upper_endpoint",
+      "field": "native9870",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_autonomous_Z_probe_20260923/9870/final_state.npz",
+      "previous_elapsed_ms": 5000,
+      "duration_ms": 15000
+    }
+  ],
+  "initialization": "Lower starts from the original prescribed-Z rate9s full fast/M/history. Upper resumes its already-computed5s deterministic trajectory without resetting any fast/M/delay state. Thus both endpoints reach20s elapsed under fixedZ; old high5s is not rerun.",
+  "observations": "Save1ms fullgroup/20x20E rates,10ms M and exact5s fullstate checkpoints. Original quiet<5Hz20ms, high200Hz200ms and spatialpersistent50Hz/duty90 definitions unchanged. Compare final consecutive5s windows and spatial recurrence before calling an attractor.",
+  "numerical": "dt.05ms. Check exact10ms restored replay and equality of expected/emitted flux. Static or periodic certification requires its own residual/stability/time-step checks.",
+  "budget": "Two endpoint continuations,35seconds of new simulated time. After independent endpoint readout, register only neighboring forward/backward continuations that directly resolve the onset transition. No automatic unrelated branch search.",
+  "outcomes": "If both endpoints lack autonomous self-limited activity, do not invent an interictal limit cycle; inspect excitability/noise-dependent or basin dynamics in this neighborhood. If distinct persistent regimes occur, use them to locate the transition and test coexistence.",
+  "model_promoted": false
+}

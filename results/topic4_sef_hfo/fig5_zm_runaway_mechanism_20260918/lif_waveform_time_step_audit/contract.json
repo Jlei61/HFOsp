@@ -1,0 +1,81 @@
+{
+  "created_local": "2026-09-20T04:39:20.153204+08:00",
+  "question": "Do supra-stationary transient LIF population-rate peaks persist under smaller LIF time steps, and are the four original strong response targets numerically stable?",
+  "trigger": "The rejected bounded-output rate fit has38/288targetprofiles above reciprocal refractory rate; its cap alone forces19waveformfailures (16train,3validation). This does not explain all waveform errors.",
+  "selection": "Six TRAINING profiles: largest output-cap lower-bound defect in eachE/I by100/200/400ms stratum; ties smallestid. Four original full source waveforms retained as controls. No newheldout-targetselection.",
+  "cases": [
+    {
+      "label": "train083",
+      "kind": "fresh_training",
+      "index": 83,
+      "pop": "E"
+    },
+    {
+      "label": "train050",
+      "kind": "fresh_training",
+      "index": 50,
+      "pop": "E"
+    },
+    {
+      "label": "train026",
+      "kind": "fresh_training",
+      "index": 26,
+      "pop": "E"
+    },
+    {
+      "label": "train204",
+      "kind": "fresh_training",
+      "index": 204,
+      "pop": "I"
+    },
+    {
+      "label": "train171",
+      "kind": "fresh_training",
+      "index": 171,
+      "pop": "I"
+    },
+    {
+      "label": "train118",
+      "kind": "fresh_training",
+      "index": 118,
+      "pop": "I"
+    },
+    {
+      "label": "original00",
+      "kind": "original_full",
+      "index": 0,
+      "pop": "E"
+    },
+    {
+      "label": "original03",
+      "kind": "original_full",
+      "index": 3,
+      "pop": "E"
+    },
+    {
+      "label": "original06",
+      "kind": "original_full",
+      "index": 6,
+      "pop": "E"
+    },
+    {
+      "label": "original09",
+      "kind": "original_full",
+      "index": 9,
+      "pop": "I"
+    }
+  ],
+  "time_steps_ms": [
+    0.1,
+    0.05,
+    0.025
+  ],
+  "reuse_original_dt01": true,
+  "additional_runs": 20,
+  "physical_invariants": "Same input-wave samples, LIF membrane/reset/threshold/refractory constants, synaptic rise/decay and Gaussian driving law. Exact innovation covariance recomputed for eachdt. Burn/record durations and128phase bins retained.",
+  "noise": "Same per-profile seed and replicate count as its parent. Acrossdt this is not pathwise identical SDE noise; differences are population-response comparisons, not a paired trajectory effect.",
+  "readouts": "Rate peaks, the mathematical lower bound on waveform error for r<=1/t_ref, phase-binL2andmean changes across both step halvings; retain exact exposure for each discrete clock.",
+  "interpretation": "Persistent supra-cap peaks reject an instantaneous stationary-rate cap. Large timestep differences flag a numerical-source issue, not a new bifurcation. Agreement alone does not validate a replacement response or model.",
+  "convergence_reference": "Report last-step relativeL2change<=0.02 as numerical diagnostic; no alteration to original local/model acceptance gates.",
+  "stop": "Exactly two additionaldtlevels for10fixedcases. No fitting, spatial network, bifurcation scan or automatic further refinement."
+}

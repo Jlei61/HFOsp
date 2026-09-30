@@ -1,0 +1,33 @@
+{
+  "definition": "sum_j |phi_v| tau_m area^2 Q_ij / sum_j |phi_mu| tau_m area A_ij (Z-scaled), per group, at equilibria",
+  "rows": [
+    {
+      "label": "lower D=0.002",
+      "D": 0.002,
+      "global_hz": 0.12490696254704341,
+      "ratio_median": 0.129081134519193,
+      "ratio_p90": 0.13073373396963806
+    },
+    {
+      "label": "lower D~0.03 fold",
+      "D": 0.02828195980220597,
+      "global_hz": 0.8815108907140995,
+      "ratio_median": 0.10446554563821525,
+      "ratio_p90": 0.13072782749711787
+    },
+    {
+      "label": "upper D=0.999",
+      "D": 0.999,
+      "global_hz": 489.7853544731517,
+      "ratio_median": 0.0,
+      "ratio_p90": 0.002035805605862483
+    },
+    {
+      "label": "upper D~0.5",
+      "D": 0.4060799152889656,
+      "global_hz": 435.550803597143,
+      "ratio_median": 0.002256417353991914,
+      "ratio_p90": 0.004944253213525752
+    }
+  ]
+}

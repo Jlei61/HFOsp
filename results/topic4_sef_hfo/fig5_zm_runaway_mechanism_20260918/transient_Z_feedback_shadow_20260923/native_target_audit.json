@@ -1,0 +1,34 @@
+{
+  "status": "COMPLETE",
+  "grid": 40,
+  "groups": 3479,
+  "samples": 1411,
+  "regions": [
+    "global_E",
+    "coreA",
+    "coreB",
+    "surround"
+  ],
+  "maximum_Gaussian_minus_empirical_Z_error_by_region": [
+    1.2475472260131681e-05,
+    3.7942654526057495e-05,
+    6.207286338144602e-05,
+    1.1973899582629066e-05
+  ],
+  "maximum_quadrature_difference_by_region": [
+    1.1073226734437114e-06,
+    1.130210152600064e-05,
+    9.621502358614364e-06,
+    1.1644699012824944e-06
+  ],
+  "sampled_empirical_Z_reconstruction_error_by_region": [
+    0.00022996784872242326,
+    0.0027269618027617737,
+    0.0016133375959491714,
+    0.00022228856843764522
+  ],
+  "maximum_E_count_weighted_absolute_spatial_Z_error": 0.00024264776270186566,
+  "maximum_individual_E_group_Z_error": 0.003388825666721572,
+  "scope": "Both target methods use the same observed native currents. Shape substitution error is estimated on5/10ms samples; this is not the rate model current-statistics validation or exact unsampled native trajectory.",
+  "model_promoted": false
+}

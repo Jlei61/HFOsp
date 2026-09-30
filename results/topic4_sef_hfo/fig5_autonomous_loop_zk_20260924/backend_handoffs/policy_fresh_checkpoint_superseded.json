@@ -1,0 +1,14 @@
+{
+  "epoch": 1790268685.066179,
+  "prior_supervisor_pid": 2640170,
+  "max_total_workers": 8,
+  "max_locality_workers": 8,
+  "threads_each": 8,
+  "dispatch_available_GiB": 88,
+  "reserved_GiB": 80,
+  "dispatch_CPU_busy_max_percent": 65,
+  "scientific_conditions_unchanged": 18,
+  "horizon_each_s": 30,
+  "handoff_rule": "Only a newly committed complete checkpoint with identical job/identity and all8 observation endpoints. Pause, verify, back up exact complete state; terminate only that old worker and resume same job through the bitwise-validated locality wrapper.",
+  "reason": "Serial branches require about900wallseconds per simulated second; verified locality backend reduces that bottleneck. Existing workers remain active until their next complete checkpoint."
+}

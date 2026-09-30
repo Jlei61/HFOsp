@@ -1,0 +1,80 @@
+{
+  "status": "LOCKED_BEFORE_FRESH_TARGETS",
+  "created_epoch": 1790486045.937355,
+  "source_sha256": "3ec138def4057347b0c829d4daf198fd972e79a6e98e864f6c963f6504076bdb",
+  "question": "Does broader sampling with deliberate low-effective-mean coverage repair the documented recovery-relevant static response errors without relaxing acceptance?",
+  "changes": "4096 fresh training conditions (half broad, half subthreshold effective mean) plus original1024 training conditions; 4-96-96-96-1 tanh residual; fixed20000-step train-only schedule.",
+  "development_information": "All previous failures are known development evidence. Previous validation is diagnostic only; this version has a fresh independent test design and noise seed.",
+  "domain": {
+    "normalized_mean": [
+      -10,
+      30
+    ],
+    "noise_sigma_EI": [
+      0,
+      12
+    ],
+    "total_g": [
+      0,
+      32
+    ],
+    "low_mean_stratum": [
+      -10,
+      1
+    ]
+  },
+  "train": {
+    "fresh_points": 4096,
+    "reused_training_points": 1024,
+    "design_seeds": [
+      927271,
+      927272
+    ],
+    "noise_seed": 927274,
+    "replicates": 512,
+    "burn_ms": 500,
+    "record_ms": 2000
+  },
+  "validation": {
+    "points": 512,
+    "strata": [
+      "broad256",
+      "low_mean256"
+    ],
+    "design_seeds": [
+      927281,
+      927282
+    ],
+    "noise_seed": 927284,
+    "replicates": 1024,
+    "burn_ms": 500,
+    "record_ms": 2000
+  },
+  "fit": {
+    "seed": 927273,
+    "optimizer": "AdamW",
+    "weight_decay": 1e-06,
+    "gradient_clip": 10.0,
+    "steps": 20000,
+    "batch": 512,
+    "lr_schedule": [
+      [
+        0,
+        0.001
+      ],
+      [
+        8000,
+        0.0003
+      ],
+      [
+        16000,
+        0.0001
+      ]
+    ],
+    "loss": "Mean squared asinh(rate/2Hz) error; final fixed-step weights only."
+  },
+  "gate": "Same original gate, applied separately to both fresh strata and overall: >=90% within max(2Hz,10%MC,3SEM), all within max(10Hz,25%MC,5SEM). No test-target refit, threshold relaxation or checkpoint selection.",
+  "stationary_boundary": "Exact g=0 parent; static pass does not certify derivatives, transient response, spatial correspondence or bifurcations.",
+  "physical_mapping": "Constant total g changes tau_m to20/(1+g); effective current mean and both colored-current channel amplitudes incorporate division by1+g. Native filter times and absolute refractory steps unchanged.",
+  "future": "After independent static pass, assess local gain/derivative and dynamics, then same native spatial slices; inspect actual domain coverage and hidden spatial/history differences."
+}

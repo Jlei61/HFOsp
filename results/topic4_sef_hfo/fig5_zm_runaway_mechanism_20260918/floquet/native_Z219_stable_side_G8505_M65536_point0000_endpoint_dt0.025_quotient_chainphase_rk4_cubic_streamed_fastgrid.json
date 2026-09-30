@@ -1,0 +1,81 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z219_stable_side_G8505_M65536/point0000.npz",
+  "N": 8505,
+  "D": 0.219,
+  "T_ms": 264.17351154071343,
+  "dt_ms": 0.024460510327843837,
+  "multipliers": [
+    [
+      0.7685660881703894,
+      0.0
+    ]
+  ],
+  "eigen_residuals": [
+    3.632535910621835e-08
+  ],
+  "phase_index": null,
+  "phase_defect": 0.00022826942774232807,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 0.7685660881703894,
+  "phase_projection": 1.0000967418501658,
+  "phase_quotient": true,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "RK4 with cubic delayed history",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "STABLE",
+  "calls": 32,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": null,
+  "eigenvector_refined_orbit_check": null,
+  "time_grid": {
+    "requested_maximum_dt_ms": 0.025,
+    "steps": 10800,
+    "fft_friendly": true
+  },
+  "gain_cache": "GPU float64",
+  "phase_component_diagnostics": {
+    "state_component_relative_defects": [
+      0.0002556348607153105,
+      0.00019453141165894476,
+      0.00018201043302665143,
+      0.00015299188822118107,
+      0.00027253874812359504,
+      0.00018263979727812453,
+      0.00024147863280630274,
+      0.00016731107746939308,
+      0.00022941664058122362,
+      0.00018504501153860837,
+      0.0023373311245205018,
+      0.0,
+      0.0001913270041347628,
+      0.0001624936106533148
+    ],
+    "state_component_phase_norms": [
+      710.8650837784759,
+      385.86926490390357,
+      225.32846031004874,
+      569.0313950678235,
+      1403.1248519853075,
+      1249.8397752623298,
+      3174.543894398944,
+      1011.8307772090252,
+      339.3657595923954,
+      1336.2597320542761,
+      0.0027186735995920978,
+      0.0,
+      298.445404887578,
+      718.712616830896
+    ],
+    "state_relative_defect": 0.0002282715953135955,
+    "history_relative_defect": 0.00019179266669438122,
+    "propagated_phase_norm_ratio": 1.0000967632220708
+  },
+  "requested_eigenpairs": 1,
+  "arnoldi_basis_size": 12
+}

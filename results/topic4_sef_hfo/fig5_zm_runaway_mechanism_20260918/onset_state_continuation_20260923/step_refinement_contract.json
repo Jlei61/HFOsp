@@ -1,0 +1,39 @@
+{
+  "created_local": "2026-09-23T16:46:16.009577+08:00",
+  "question": "Do the same onset-neighbor self-limited/persistent behaviors survive halving the integration step with the complete physical state matched?",
+  "conditions": [
+    {
+      "label": "native9420_from_lower_dt0025",
+      "field": "native9420",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/checkpoint5000.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.025,
+      "previous_elapsed_ms": 0,
+      "duration_ms": 5000,
+      "comparison_condition": "native9420_from_lower",
+      "comparison_window_ms": [
+        5000,
+        10000
+      ]
+    },
+    {
+      "label": "native_mid9420_9870_from_lower_dt0025",
+      "field": "native_mid9420_9870",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native_mid9420_9870_from_lower/checkpoint5000.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.025,
+      "previous_elapsed_ms": 0,
+      "duration_ms": 5000,
+      "comparison_condition": "native_mid9420_9870_from_lower",
+      "comparison_window_ms": [
+        5000,
+        10000
+      ]
+    }
+  ],
+  "changed": "Onlydt .05to.025ms. Preserve synapses, localcovariance/memory, M, Z andphysicaltime. Fill interleaved delay/refractoryhistory nodes bylinearinterpolation; every oldphysical-lag node remains bitwiseidentical. No countinnovations; constantinput andphysicalprivateQ unchanged.",
+  "comparison": "Each fine5s continues the exact coarse5s checkpoint and compares the coarse5-10s window. Irregular trajectories need not match phase/eventbyevent. Originalquiet,event,spatialparticipation andconditionalstate categories are unchanged.",
+  "numerical_gate": "Verifyexactrestored10msfineflow, fixedZ,dynamicM, samephysicaltime, retainedoldhistorynodes, and originalcoarsehistoryreconstruction. Different long-term category invalidates a timestep-independent transition claim.",
+  "budget": "2 fine5s continuations only; no thresholds/physicalparameter/modelpromotion changes.",
+  "scope": "Numericalstateconsistency; notcriticalpointrefinement,Floquet,orfullSNNvalidation."
+}

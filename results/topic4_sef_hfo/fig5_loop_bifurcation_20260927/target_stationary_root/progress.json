@@ -1,0 +1,91 @@
+{
+  "status": "NUMERICAL_ROOT",
+  "reason": "Residual converged",
+  "maximum_residual_Hz": 3.42222743199283e-08,
+  "regional": [
+    {
+      "region": "allE",
+      "rate_Hz": 246.29315506023494
+    },
+    {
+      "region": "coreA",
+      "rate_Hz": 467.32952270955013
+    },
+    {
+      "region": "coreB",
+      "rate_Hz": 468.34822791091347
+    },
+    {
+      "region": "surround",
+      "rate_Hz": 235.09168728386538
+    },
+    {
+      "region": "I",
+      "rate_Hz": 312.35442843
+    }
+  ],
+  "G": 4.711504443999564,
+  "causal_R_Hz": 247.11504443999564,
+  "history": [
+    {
+      "iteration": 0,
+      "max_residual_Hz": 15.242005380209866,
+      "mean_E_Hz": 244.11083467073982,
+      "G": 4.492544156650846,
+      "gmres_info": 0,
+      "gmres_iterations": 34,
+      "gmres_last_residual": 0.0036822206829324974,
+      "accepted_alpha": 1.0
+    },
+    {
+      "iteration": 1,
+      "max_residual_Hz": 38.09094180682279,
+      "mean_E_Hz": 246.38580526127473,
+      "G": 4.72080038181559,
+      "gmres_info": 0,
+      "gmres_iterations": 11,
+      "gmres_last_residual": 0.03333662131071447,
+      "accepted_alpha": 1.0
+    },
+    {
+      "iteration": 2,
+      "max_residual_Hz": 1.251088771419162,
+      "mean_E_Hz": 246.28778533202632,
+      "G": 4.710965679277348,
+      "gmres_info": 0,
+      "gmres_iterations": 33,
+      "gmres_last_residual": 0.0009407386574442097,
+      "accepted_alpha": 1.0
+    },
+    {
+      "iteration": 3,
+      "max_residual_Hz": 0.2701375981353634,
+      "mean_E_Hz": 246.29536069361984,
+      "G": 4.711725743362919,
+      "gmres_info": 0,
+      "gmres_iterations": 43,
+      "gmres_last_residual": 5.888112627275423e-05,
+      "accepted_alpha": 1.0
+    },
+    {
+      "iteration": 4,
+      "max_residual_Hz": 0.00035533273111398866,
+      "mean_E_Hz": 246.29316748967256,
+      "G": 4.711505691087911,
+      "gmres_info": 0,
+      "gmres_iterations": 57,
+      "gmres_last_residual": 1.0448295851937105e-06,
+      "accepted_alpha": 1.0
+    },
+    {
+      "iteration": 5,
+      "max_residual_Hz": 3.42222743199283e-08,
+      "mean_E_Hz": 246.29315506026649,
+      "G": 4.711504443999564
+    }
+  ],
+  "elapsed_s": 38.22987627983093,
+  "root_is_static_surrogate_only": true,
+  "stability_established": false,
+  "formal_bifurcation_allowed": false
+}

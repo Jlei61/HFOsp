@@ -1,0 +1,48 @@
+[
+  {
+    "dt_ms": 0.05,
+    "partition": {
+      "status": "PASS",
+      "relative_error": 7.295851234051646e-14,
+      "fixed_time_relative_error": 7.188176788695351e-14,
+      "comparison": "Full composed implicit Poincare derivative and fixed-time derivative versus original unsegmented uncached CubicSectionDerivative"
+    },
+    "tests": [
+      {
+        "epsilon": 2e-05,
+        "relative_error": 6.595392284288812e-07
+      },
+      {
+        "epsilon": 1e-05,
+        "relative_error": 1.64915199910319e-07
+      },
+      {
+        "epsilon": 5e-06,
+        "relative_error": 4.121853817502186e-08
+      }
+    ]
+  },
+  {
+    "dt_ms": 0.025,
+    "partition": {
+      "status": "PASS",
+      "relative_error": 1.4707967712355265e-13,
+      "fixed_time_relative_error": 1.452185460981605e-13,
+      "comparison": "Full composed implicit Poincare derivative and fixed-time derivative versus original unsegmented uncached CubicSectionDerivative"
+    },
+    "tests": [
+      {
+        "epsilon": 2e-05,
+        "relative_error": 0.00018435194814903774
+      },
+      {
+        "epsilon": 1e-05,
+        "relative_error": 4.628560517617648e-05
+      },
+      {
+        "epsilon": 5e-06,
+        "relative_error": 1.1589848499732923e-05
+      }
+    ]
+  }
+]

@@ -1,0 +1,621 @@
+{
+  "status": "COMPLETE_PAIRED_INPUT_DIAGNOSTIC",
+  "summaries": {
+    "coarse_input": {
+      "onset_ms": 10495.0,
+      "D9870": 0.20570483541302387,
+      "event_count": 39,
+      "median_duration_ms": 90.0,
+      "median_area": 0.5704999999999999,
+      "quiet_fraction": 0.5908551068883611
+    },
+    "fine_input": {
+      "onset_ms": 10745.0,
+      "D9870": 0.23669993251748378,
+      "event_count": 42,
+      "median_duration_ms": 92.0,
+      "median_area": 0.5898281249999999,
+      "quiet_fraction": 0.49453681710213776
+    },
+    "native9108401": {
+      "onset_ms": 9868.5,
+      "D9870": 0.2563444253447549,
+      "event_count": 40,
+      "median_duration_ms": 100.0,
+      "median_area": 0.745828125,
+      "quiet_fraction": 0.5176959619952494
+    },
+    "native9108402": {
+      "onset_ms": 9869.5,
+      "D9870": 0.2564642696760423,
+      "event_count": 42,
+      "median_duration_ms": 97.5,
+      "median_area": 0.6763437499999999,
+      "quiet_fraction": 0.49216152019002374
+    }
+  },
+  "contacts": {
+    "coarse_input": {
+      "N": 23,
+      "direction_counts": {
+        "0.2": {
+          "A_to_B": 4,
+          "B_to_A": 12,
+          "weak_or_complex": 7,
+          "not_estimable": 0
+        },
+        "0.3": {
+          "A_to_B": 4,
+          "B_to_A": 9,
+          "weak_or_complex": 10,
+          "not_estimable": 0
+        },
+        "0.4": {
+          "A_to_B": 2,
+          "B_to_A": 9,
+          "weak_or_complex": 12,
+          "not_estimable": 0
+        }
+      },
+      "comparisons": [
+        {
+          "reference": "native9108401",
+          "overall": {
+            "left_N": 23,
+            "right_N": 14,
+            "rank": 0.05705885652182886,
+            "within_shaft_order": 0.07699421332239281,
+            "participation": 0.0535361377752682
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 5,
+                "rank": 0.41707437764255945,
+                "within_shaft_order": 0.5354545454545454,
+                "participation": 0.24204545454545456
+              },
+              "B_to_A": {
+                "left_N": 12,
+                "right_N": 7,
+                "rank": 0.10798370700968103,
+                "within_shaft_order": 0.07316017316017318,
+                "participation": 0.11160714285714288
+              },
+              "weak_or_complex": {
+                "left_N": 7,
+                "right_N": 2,
+                "rank": 0.34372869194297767,
+                "within_shaft_order": 0.24642857142857144,
+                "participation": 0.24025974025974023
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 3,
+                "rank": 0.3717610398860399,
+                "within_shaft_order": 0.5462962962962963,
+                "participation": 0.2708333333333333
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 7,
+                "rank": 0.11284740992533196,
+                "within_shaft_order": 0.08608465608465608,
+                "participation": 0.06204906204906205
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 4,
+                "rank": 0.12033109724871086,
+                "within_shaft_order": 0.15207792207792206,
+                "participation": 0.1806818181818182
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 2,
+                "right_N": 2,
+                "rank": 0.0723905723905724,
+                "within_shaft_order": 0.08333333333333333,
+                "participation": 0.21022727272727273
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 6,
+                "rank": 0.0704610985455141,
+                "within_shaft_order": 0.058855218855218855,
+                "participation": 0.06313131313131314
+              },
+              "weak_or_complex": {
+                "left_N": 12,
+                "right_N": 6,
+                "rank": 0.1106606167606389,
+                "within_shaft_order": 0.09428981372163191,
+                "participation": 0.04450757575757576
+              },
+              "not_estimable": null
+            }
+          }
+        },
+        {
+          "reference": "native9108402",
+          "overall": {
+            "left_N": 23,
+            "right_N": 17,
+            "rank": 0.062379132824125834,
+            "within_shaft_order": 0.08410820653293337,
+            "participation": 0.05931760055800976
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 3,
+                "rank": 0.10752410468319559,
+                "within_shaft_order": 0.5909090909090909,
+                "participation": 0.17234848484848483
+              },
+              "B_to_A": {
+                "left_N": 12,
+                "right_N": 11,
+                "rank": 0.03605119778009387,
+                "within_shaft_order": 0.09733766233766235,
+                "participation": 0.05346074380165287
+              },
+              "weak_or_complex": {
+                "left_N": 7,
+                "right_N": 3,
+                "rank": 0.19542967854656165,
+                "within_shaft_order": 0.18221288515406162,
+                "participation": 0.1536796536796537
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 1,
+                "rank": 0.06105371900826446,
+                "within_shaft_order": 0.12727272727272726,
+                "participation": 0.18181818181818182
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 10,
+                "rank": 0.042838018763343436,
+                "within_shaft_order": 0.11174062049062046,
+                "participation": 0.07967171717171716
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 6,
+                "rank": 0.1702277199862427,
+                "within_shaft_order": 0.11591970121381884,
+                "participation": 0.0928030303030303
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 2,
+                "right_N": 1,
+                "rank": 0.16666666666666666,
+                "within_shaft_order": 0.09722222222222222,
+                "participation": 0.2159090909090909
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 7,
+                "rank": 0.04716643535637043,
+                "within_shaft_order": 0.11715488215488215,
+                "participation": 0.07178932178932179
+              },
+              "weak_or_complex": {
+                "left_N": 12,
+                "right_N": 9,
+                "rank": 0.0873709169923136,
+                "within_shaft_order": 0.1342654486036839,
+                "participation": 0.11584595959595961
+              },
+              "not_estimable": null
+            }
+          }
+        },
+        {
+          "reference": "R8192_num927611",
+          "overall": {
+            "left_N": 23,
+            "right_N": 20,
+            "rank": 0.031659991984409636,
+            "within_shaft_order": 0.07819727271862026,
+            "participation": 0.033522727272727294
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 6,
+                "rank": 0.068237444373808,
+                "within_shaft_order": 0.543939393939394,
+                "participation": 0.06818181818181818
+              },
+              "B_to_A": {
+                "left_N": 12,
+                "right_N": 11,
+                "rank": 0.04555361785881267,
+                "within_shaft_order": 0.07143972189426734,
+                "participation": 0.07618801652892562
+              },
+              "weak_or_complex": {
+                "left_N": 7,
+                "right_N": 3,
+                "rank": 0.18732575144912805,
+                "within_shaft_order": 0.30987012987012985,
+                "participation": 0.12987012987012989
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 6,
+                "rank": 0.068237444373808,
+                "within_shaft_order": 0.543939393939394,
+                "participation": 0.06818181818181818
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 11,
+                "rank": 0.0396482077326233,
+                "within_shaft_order": 0.05903952949407494,
+                "participation": 0.02662993572084481
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 3,
+                "rank": 0.1360509676560813,
+                "within_shaft_order": 0.28428571428571425,
+                "participation": 0.16704545454545455
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 2,
+                "right_N": 5,
+                "rank": 0.07340930674264008,
+                "within_shaft_order": 0.09166666666666666,
+                "participation": 0.11136363636363639
+              },
+              "B_to_A": {
+                "left_N": 9,
+                "right_N": 10,
+                "rank": 0.042843539637370795,
+                "within_shaft_order": 0.04939273689273689,
+                "participation": 0.023737373737373734
+              },
+              "weak_or_complex": {
+                "left_N": 12,
+                "right_N": 5,
+                "rank": 0.1489821890676008,
+                "within_shaft_order": 0.20463875770693954,
+                "participation": 0.10549242424242428
+              },
+              "not_estimable": null
+            }
+          }
+        }
+      ]
+    },
+    "fine_input": {
+      "N": 19,
+      "direction_counts": {
+        "0.2": {
+          "A_to_B": 8,
+          "B_to_A": 6,
+          "weak_or_complex": 5,
+          "not_estimable": 0
+        },
+        "0.3": {
+          "A_to_B": 6,
+          "B_to_A": 5,
+          "weak_or_complex": 8,
+          "not_estimable": 0
+        },
+        "0.4": {
+          "A_to_B": 4,
+          "B_to_A": 5,
+          "weak_or_complex": 10,
+          "not_estimable": 0
+        }
+      },
+      "comparisons": [
+        {
+          "reference": "native9108401",
+          "overall": {
+            "left_N": 19,
+            "right_N": 14,
+            "rank": 0.08062790447390002,
+            "within_shaft_order": 0.08224150181369433,
+            "participation": 0.07591421736158577
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 8,
+                "right_N": 5,
+                "rank": 0.08904090227953863,
+                "within_shaft_order": 0.13106060606060607,
+                "participation": 0.11931818181818182
+              },
+              "B_to_A": {
+                "left_N": 6,
+                "right_N": 7,
+                "rank": 0.06512446788420817,
+                "within_shaft_order": 0.07025974025974027,
+                "participation": 0.04437229437229437
+              },
+              "weak_or_complex": {
+                "left_N": 5,
+                "right_N": 2,
+                "rank": 0.13730871401325945,
+                "within_shaft_order": 0.32696540880503144,
+                "participation": 0.2340909090909091
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 6,
+                "right_N": 3,
+                "rank": 0.09091767491767491,
+                "within_shaft_order": 0.14537037037037037,
+                "participation": 0.1477272727272727
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 7,
+                "rank": 0.08074117441000561,
+                "within_shaft_order": 0.08874458874458871,
+                "participation": 0.04675324675324676
+              },
+              "weak_or_complex": {
+                "left_N": 8,
+                "right_N": 4,
+                "rank": 0.09823103709061501,
+                "within_shaft_order": 0.16517316017316017,
+                "participation": 0.203125
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 2,
+                "rank": 0.021163419913419922,
+                "within_shaft_order": 0.03888888888888889,
+                "participation": 0.17897727272727273
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 6,
+                "rank": 0.051017164653528305,
+                "within_shaft_order": 0.05272727272727273,
+                "participation": 0.049999999999999996
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 6,
+                "rank": 0.09101226725415035,
+                "within_shaft_order": 0.14502705627705625,
+                "participation": 0.11212121212121215
+              },
+              "not_estimable": null
+            }
+          }
+        },
+        {
+          "reference": "native9108402",
+          "overall": {
+            "left_N": 19,
+            "right_N": 17,
+            "rank": 0.13206094480543823,
+            "within_shaft_order": 0.14460304311662323,
+            "participation": 0.0969954967632986
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 8,
+                "right_N": 3,
+                "rank": 0.35925170158124703,
+                "within_shaft_order": 0.16742424242424245,
+                "participation": 0.07859848484848485
+              },
+              "B_to_A": {
+                "left_N": 6,
+                "right_N": 11,
+                "rank": 0.058495300094326,
+                "within_shaft_order": 0.10922996195723468,
+                "participation": 0.09882920110192836
+              },
+              "weak_or_complex": {
+                "left_N": 5,
+                "right_N": 3,
+                "rank": 0.2041108828040647,
+                "within_shaft_order": 0.301062091503268,
+                "participation": 0.16893939393939394
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 6,
+                "right_N": 1,
+                "rank": 0.3623776223776224,
+                "within_shaft_order": 0.027272727272727264,
+                "participation": 0.2765151515151515
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 10,
+                "rank": 0.09127066881531164,
+                "within_shaft_order": 0.11232744107744107,
+                "participation": 0.08068181818181817
+              },
+              "weak_or_complex": {
+                "left_N": 8,
+                "right_N": 6,
+                "rank": 0.12450689206776869,
+                "within_shaft_order": 0.22450980392156863,
+                "participation": 0.09895833333333331
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 1,
+                "rank": 0.15257575757575756,
+                "within_shaft_order": 0.05,
+                "participation": 0.2471590909090909
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 7,
+                "rank": 0.07132376552019404,
+                "within_shaft_order": 0.09638528138528138,
+                "participation": 0.0564935064935065
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 9,
+                "rank": 0.18769911570912653,
+                "within_shaft_order": 0.24090608465608462,
+                "participation": 0.08813131313131313
+              },
+              "not_estimable": null
+            }
+          }
+        },
+        {
+          "reference": "R8192_num927611",
+          "overall": {
+            "left_N": 19,
+            "right_N": 20,
+            "rank": 0.1527465162111377,
+            "within_shaft_order": 0.1135496792821589,
+            "participation": 0.04087918660287081
+          },
+          "within_direction": {
+            "0.2": {
+              "A_to_B": {
+                "left_N": 8,
+                "right_N": 6,
+                "rank": 0.3316204628704629,
+                "within_shaft_order": 0.3787878787878788,
+                "participation": 0.14772727272727273
+              },
+              "B_to_A": {
+                "left_N": 6,
+                "right_N": 11,
+                "rank": 0.03455115591479226,
+                "within_shaft_order": 0.06515545060999606,
+                "participation": 0.026859504132231406
+              },
+              "weak_or_complex": {
+                "left_N": 5,
+                "right_N": 3,
+                "rank": 0.41708263327581513,
+                "within_shaft_order": 0.21648989898989898,
+                "participation": 0.11136363636363635
+              },
+              "not_estimable": null
+            },
+            "0.3": {
+              "A_to_B": {
+                "left_N": 6,
+                "right_N": 6,
+                "rank": 0.26272403522403526,
+                "within_shaft_order": 0.38636363636363635,
+                "participation": 0.1268939393939394
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 11,
+                "rank": 0.06319498683135044,
+                "within_shaft_order": 0.0681857536402991,
+                "participation": 0.02975206611570249
+              },
+              "weak_or_complex": {
+                "left_N": 8,
+                "right_N": 3,
+                "rank": 0.301923772926208,
+                "within_shaft_order": 0.2723232323232323,
+                "participation": 0.16051136363636365
+              },
+              "not_estimable": null
+            },
+            "0.4": {
+              "A_to_B": {
+                "left_N": 4,
+                "right_N": 5,
+                "rank": 0.07531898656898657,
+                "within_shaft_order": 0.08407407407407406,
+                "participation": 0.1426136363636364
+              },
+              "B_to_A": {
+                "left_N": 5,
+                "right_N": 10,
+                "rank": 0.05559007460793174,
+                "within_shaft_order": 0.06216810966810965,
+                "participation": 0.031818181818181815
+              },
+              "weak_or_complex": {
+                "left_N": 10,
+                "right_N": 5,
+                "rank": 0.281973778686441,
+                "within_shaft_order": 0.2203805916305916,
+                "participation": 0.045454545454545456
+              },
+              "not_estimable": null
+            }
+          }
+        }
+      ]
+    }
+  },
+  "final_numerical_stream_and_clock_bitwise": {
+    "rng": true,
+    "clock": true,
+    "particle_count": true,
+    "seed": true
+  },
+  "original_A4_before": {
+    "self_limited_events": true,
+    "two_core_participation": true,
+    "surround_recruitment": true,
+    "propagation": true,
+    "entry": true,
+    "D_track": false
+  },
+  "original_A4_after": {
+    "self_limited_events": true,
+    "two_core_participation": true,
+    "surround_recruitment": true,
+    "propagation": true,
+    "entry": true,
+    "D_track": true
+  },
+  "comparison": "Only externalfinegroupdrive changes; nativegraph,densitykernel,initialstates,dt andfullnumericalrandomstreamfixed. Original1msinputholding remains.",
+  "acceptance": "UnchangedoriginalA4checks arediagnostic. No numericalconvergence, actualG/Kspatialcorrespondence or formalbifurcation followsfrom thispair.",
+  "producer_sha256": "15e9146b4ed36b60f50ba9c1491c4ed5b401b7d860d7f2887d3307db23d2207e",
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false,
+  "human_review": "PENDING"
+}

@@ -1,0 +1,543 @@
+{
+  "status": "MANUFACTURED_SCALAR_CHECK_COMPLETE",
+  "rows": [
+    {
+      "case": "smooth_E",
+      "method": "old_endpoint",
+      "parameters": {
+        "tau": 2.0,
+        "mean": 0.25,
+        "amplitude": 0.08,
+        "omega": 0.7
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 0.000573060892724796,
+          "bin_flux_max_error_per_ms": 0.0013702581245397805,
+          "final_occupancy_error": 0.0004778970987173725,
+          "flux_min": 0.17020651044466642,
+          "occupancy_range": [
+            0.3531372095657285,
+            0.6467943124759672
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 0.00028732476331011145,
+          "bin_flux_max_error_per_ms": 0.0006926041985396147,
+          "final_occupancy_error": 0.00023808621461196555,
+          "flux_min": 0.17010478148993402,
+          "occupancy_range": [
+            0.35294482011558026,
+            0.6470187354212827
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 0.00014386256335564368,
+          "bin_flux_max_error_per_ms": 0.0003481561463416494,
+          "final_occupancy_error": 0.00011882494659909426,
+          "flux_min": 0.17005157669383777,
+          "occupancy_range": [
+            0.3528486624221408,
+            0.6471341075651983
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 7.198153560578909e-05,
+          "bin_flux_max_error_per_ms": 0.00017453968228442474,
+          "final_occupancy_error": 5.9357607112509037e-05,
+          "flux_min": 0.17002576991955543,
+          "occupancy_range": [
+            0.3527993636650207,
+            0.6471922879279048
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        }
+      ],
+      "error_ratios": [
+        1.9944709468229431,
+        1.9972170424894615,
+        1.998603699475308
+      ]
+    },
+    {
+      "case": "smooth_E",
+      "method": "exponential_midpoint",
+      "parameters": {
+        "tau": 2.0,
+        "mean": 0.25,
+        "amplitude": 0.08,
+        "omega": 0.7
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 5.900759093336223e-06,
+          "bin_flux_max_error_per_ms": 1.1242915368858686e-05,
+          "final_occupancy_error": 1.3709447976850697e-07,
+          "flux_min": 0.16999893621656278,
+          "occupancy_range": [
+            0.3527410976971351,
+            0.6472627084819516
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 1.475196114427759e-06,
+          "bin_flux_max_error_per_ms": 2.8108597746601127e-06,
+          "final_occupancy_error": 3.449338092931242e-08,
+          "flux_min": 0.16999989355133618,
+          "occupancy_range": [
+            0.3527491361820293,
+            0.6472521967442528
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 3.6879942495985117e-07,
+          "bin_flux_max_error_per_ms": 7.027147619353968e-07,
+          "final_occupancy_error": 8.637081494455856e-09,
+          "flux_min": 0.16999988384038633,
+          "occupancy_range": [
+            0.3527502687065202,
+            0.647249683463331
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 9.219988091954269e-08,
+          "bin_flux_max_error_per_ms": 1.7567967897091918e-07,
+          "final_occupancy_error": 2.160128964590058e-09,
+          "flux_min": 0.17000000726216882,
+          "occupancy_range": [
+            0.3527500829437221,
+            0.6472499766327549
+          ],
+          "initial_integral_error": 5.551115123125783e-17
+        }
+      ],
+      "error_ratios": [
+        3.999982806099769,
+        3.9999957011547784,
+        3.9999989293010074
+      ]
+    },
+    {
+      "case": "smooth_I",
+      "method": "old_endpoint",
+      "parameters": {
+        "tau": 1.0,
+        "mean": 0.45,
+        "amplitude": 0.15,
+        "omega": 1.3
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 0.002112232174229131,
+          "bin_flux_max_error_per_ms": 0.004697658569733809,
+          "final_occupancy_error": 0.0022530224708732227,
+          "flux_min": 0.3006175904050457,
+          "occupancy_range": [
+            0.3109163664873329,
+            0.5889118349820404
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 0.0010597740634069193,
+          "bin_flux_max_error_per_ms": 0.00239370765906044,
+          "final_occupancy_error": 0.0011317861147752128,
+          "flux_min": 0.3003096395268333,
+          "occupancy_range": [
+            0.3106344565427759,
+            0.5892756804995315
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 0.0005308050475816973,
+          "bin_flux_max_error_per_ms": 0.0012078728509319903,
+          "final_occupancy_error": 0.0005672472242624349,
+          "flux_min": 0.30015494239807566,
+          "occupancy_range": [
+            0.3104900568383907,
+            0.5894650415799719
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 0.0002656325256565332,
+          "bin_flux_max_error_per_ms": 0.000606664769493559,
+          "final_occupancy_error": 0.00028396672282821056,
+          "flux_min": 0.3000775032469937,
+          "occupancy_range": [
+            0.31041632622684145,
+            0.589561262135818
+          ],
+          "initial_integral_error": 0.0
+        }
+      ],
+      "error_ratios": [
+        1.9930966865133606,
+        1.9965410431478747,
+        1.9982682703097745
+      ]
+    },
+    {
+      "case": "smooth_I",
+      "method": "exponential_midpoint",
+      "parameters": {
+        "tau": 1.0,
+        "mean": 0.45,
+        "amplitude": 0.15,
+        "omega": 1.3
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 3.5444872880074707e-05,
+          "bin_flux_max_error_per_ms": 6.365803117436286e-05,
+          "final_occupancy_error": 1.4418018508599584e-05,
+          "flux_min": 0.29998801516001344,
+          "occupancy_range": [
+            0.3103133249369844,
+            0.5896948296588902
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 8.861110408890467e-06,
+          "bin_flux_max_error_per_ms": 1.591425107572153e-05,
+          "final_occupancy_error": 3.6032376857231263e-06,
+          "flux_min": 0.29999889498935217,
+          "occupancy_range": [
+            0.3103325498610705,
+            0.5896691731309737
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 2.2152708628825683e-06,
+          "bin_flux_max_error_per_ms": 3.978549396710385e-06,
+          "final_occupancy_error": 9.007302095298542e-07,
+          "flux_min": 0.29999970148604094,
+          "occupancy_range": [
+            0.3103393371983108,
+            0.5896610885051791
+          ],
+          "initial_integral_error": 0.0
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 5.538172943699209e-07,
+          "bin_flux_max_error_per_ms": 9.94646445429126e-07,
+          "final_occupancy_error": 2.2517760089879602e-07,
+          "flux_min": 0.29999987992266164,
+          "occupancy_range": [
+            0.3103410339573232,
+            0.5896590673119969
+          ],
+          "initial_integral_error": 0.0
+        }
+      ],
+      "error_ratios": [
+        4.000048667096214,
+        4.000012168877696,
+        4.000003043247117
+      ]
+    },
+    {
+      "case": "near_saturation_E",
+      "method": "old_endpoint",
+      "parameters": {
+        "tau": 2.0,
+        "mean": 0.499,
+        "amplitude": 0.0001,
+        "omega": 0.7
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 1.7306683805842442e-08,
+          "bin_flux_max_error_per_ms": 1.3662656206392398e-07,
+          "final_occupancy_error": 9.9367236661152e-10,
+          "flux_min": 0.4989000049201415,
+          "occupancy_range": [
+            0.9978159454963512,
+            0.998184056531473
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 1.0399190310063541e-08,
+          "bin_flux_max_error_per_ms": 1.2688802986104974e-07,
+          "final_occupancy_error": 4.778705209318446e-10,
+          "flux_min": 0.49890000135051377,
+          "occupancy_range": [
+            0.9978159424380234,
+            0.9981840590242937
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 6.052392006120835e-09,
+          "bin_flux_max_error_per_ms": 1.1087191442715749e-07,
+          "final_occupancy_error": 2.341887794798936e-10,
+          "flux_min": 0.49889999999551154,
+          "occupancy_range": [
+            0.9978159399659225,
+            0.998184060037199
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 3.420698919559751e-09,
+          "bin_flux_max_error_per_ms": 8.847180238413799e-08,
+          "final_occupancy_error": 1.1590695070395896e-10,
+          "flux_min": 0.49890000003603047,
+          "occupancy_range": [
+            0.9978159384430448,
+            0.9981840616852451
+          ],
+          "initial_integral_error": 0.0
+        }
+      ],
+      "error_ratios": [
+        1.6642337806910175,
+        1.718195103613043,
+        1.7693436775487352
+      ]
+    },
+    {
+      "case": "near_saturation_E",
+      "method": "exponential_midpoint",
+      "parameters": {
+        "tau": 2.0,
+        "mean": 0.499,
+        "amplitude": 0.0001,
+        "omega": 0.7
+      },
+      "results": [
+        {
+          "dt_ms": 0.05,
+          "bin_flux_rms_error_per_ms": 5.137090850752499e-06,
+          "bin_flux_max_error_per_ms": 4.18652123194696e-05,
+          "final_occupancy_error": 2.045256676574958e-06,
+          "flux_min": 0.49888127571355445,
+          "occupancy_range": [
+            0.9978159268633182,
+            0.9981840613853475
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.025,
+          "bin_flux_rms_error_per_ms": 2.554463250387792e-06,
+          "bin_flux_max_error_per_ms": 3.3147803936761644e-05,
+          "final_occupancy_error": 8.411729707225035e-07,
+          "flux_min": 0.4988904467943,
+          "occupancy_range": [
+            0.9978159372212716,
+            0.9981840629474793
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.0125,
+          "bin_flux_rms_error_per_ms": 1.0091838578588774e-06,
+          "bin_flux_max_error_per_ms": 2.032264528178951e-05,
+          "final_occupancy_error": 2.828803650212208e-07,
+          "flux_min": 0.4988968452166575,
+          "occupancy_range": [
+            0.9978159364196207,
+            0.9981840626673617
+          ],
+          "initial_integral_error": 2.220446049250313e-16
+        },
+        {
+          "dt_ms": 0.00625,
+          "bin_flux_rms_error_per_ms": 3.1626532055245853e-07,
+          "bin_flux_max_error_per_ms": 9.048498026797969e-06,
+          "final_occupancy_error": 7.918085653813023e-08,
+          "flux_min": 0.49890003141568373,
+          "occupancy_range": [
+            0.997815937394916,
+            0.9981840622478595
+          ],
+          "initial_integral_error": 0.0
+        }
+      ],
+      "error_ratios": [
+        2.0110255451796535,
+        2.5312169140392693,
+        3.1909406194015046
+      ]
+    }
+  ],
+  "equilibria": [
+    {
+      "hazard": 0.01,
+      "tau": 1.0,
+      "dt": 0.1,
+      "error": 1.734723475976807e-18
+    },
+    {
+      "hazard": 0.01,
+      "tau": 1.0,
+      "dt": 0.05,
+      "error": 0.0
+    },
+    {
+      "hazard": 0.01,
+      "tau": 1.0,
+      "dt": 0.0125,
+      "error": 1.734723475976807e-18
+    },
+    {
+      "hazard": 0.01,
+      "tau": 2.0,
+      "dt": 0.1,
+      "error": 0.0
+    },
+    {
+      "hazard": 0.01,
+      "tau": 2.0,
+      "dt": 0.05,
+      "error": 1.734723475976807e-18
+    },
+    {
+      "hazard": 0.01,
+      "tau": 2.0,
+      "dt": 0.0125,
+      "error": 0.0
+    },
+    {
+      "hazard": 1.0,
+      "tau": 1.0,
+      "dt": 0.1,
+      "error": 0.0
+    },
+    {
+      "hazard": 1.0,
+      "tau": 1.0,
+      "dt": 0.05,
+      "error": 0.0
+    },
+    {
+      "hazard": 1.0,
+      "tau": 1.0,
+      "dt": 0.0125,
+      "error": 0.0
+    },
+    {
+      "hazard": 1.0,
+      "tau": 2.0,
+      "dt": 0.1,
+      "error": 5.551115123125783e-17
+    },
+    {
+      "hazard": 1.0,
+      "tau": 2.0,
+      "dt": 0.05,
+      "error": 5.551115123125783e-17
+    },
+    {
+      "hazard": 1.0,
+      "tau": 2.0,
+      "dt": 0.0125,
+      "error": 5.551115123125783e-17
+    },
+    {
+      "hazard": 100.0,
+      "tau": 1.0,
+      "dt": 0.1,
+      "error": 1.1102230246251565e-16
+    },
+    {
+      "hazard": 100.0,
+      "tau": 1.0,
+      "dt": 0.05,
+      "error": 2.220446049250313e-16
+    },
+    {
+      "hazard": 100.0,
+      "tau": 1.0,
+      "dt": 0.0125,
+      "error": 5.551115123125783e-16
+    },
+    {
+      "hazard": 100.0,
+      "tau": 2.0,
+      "dt": 0.1,
+      "error": 2.220446049250313e-16
+    },
+    {
+      "hazard": 100.0,
+      "tau": 2.0,
+      "dt": 0.05,
+      "error": 4.996003610813204e-16
+    },
+    {
+      "hazard": 100.0,
+      "tau": 2.0,
+      "dt": 0.0125,
+      "error": 1.27675647831893e-15
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 1.0,
+      "dt": 0.1,
+      "error": 5.551115123125783e-16
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 1.0,
+      "dt": 0.05,
+      "error": 1.1102230246251565e-15
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 1.0,
+      "dt": 0.0125,
+      "error": 4.440892098500626e-15
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 2.0,
+      "dt": 0.1,
+      "error": 1.6653345369377348e-16
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 2.0,
+      "dt": 0.05,
+      "error": 3.3306690738754696e-16
+    },
+    {
+      "hazard": 100000.0,
+      "tau": 2.0,
+      "dt": 0.0125,
+      "error": 1.3322676295501878e-15
+    }
+  ],
+  "scope": "Exact scalar manufactured hazards and analytic bin-integrated rates; validates only this numerical renewal formula, not full spatial midpoint integration or bifurcation. Stiff cases must be interpreted separately.",
+  "model_promoted": false
+}

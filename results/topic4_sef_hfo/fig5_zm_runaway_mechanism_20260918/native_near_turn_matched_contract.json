@@ -1,0 +1,27 @@
+{
+  "status": "DEFINED_BEFORE_RUNS",
+  "created_local": "2026-09-19T14:12:15.363043",
+  "question": "Does the original short-period attractor remain reachable from the matched reference history immediately below the native cycle-turn candidate and disappear above it?",
+  "model": "Frozen v3 20x20 spatial rate field, native checkpoint spatial Z path",
+  "D": [
+    0.21932,
+    0.21934
+  ],
+  "candidate_D_approx": 0.21933565,
+  "Z": "held",
+  "M": "dynamic",
+  "duration_ms": 30000,
+  "dt_ms": 0.05,
+  "initial": "initial_states/seed_N1024_dt0.05.npz, same complete history as existing matched parameter series",
+  "primary_readouts": [
+    "Original event/quiet/persistent readouts on final4s",
+    "Spatial-field recurrence and temporal variation; compare short-cycle period near264ms",
+    "Finite-time event intervals and longest complete event"
+  ],
+  "followup": "If the two sides differ, repeat with a halved step and correct-spacing history before claiming a resolved trajectory boundary. If high-side remains cycle-like, keep finite-time survival and test branch connection, not an onset label.",
+  "limits": [
+    "No bifurcation certification or asymptotic inference from finite trajectories.",
+    "This uses a conditional spatial Z slice, not the autonomous Z evolution or a new SNN run.",
+    "The parameter values are selected around the currently observed cycle turn, not a new fitted threshold."
+  ]
+}

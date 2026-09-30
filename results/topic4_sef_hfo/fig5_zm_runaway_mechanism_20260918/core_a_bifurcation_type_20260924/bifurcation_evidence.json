@@ -1,0 +1,3129 @@
+{
+  "equilibrium_bifurcation_type": "GENERIC_SADDLE_NODE_CERTIFIED",
+  "D_A": 0.3531576412548057,
+  "Z_A": 0.6468423587451944,
+  "whole_network_M_dynamic": true,
+  "all_Z_held_during_each_condition": true,
+  "equilibrium_stability": "UNSTABLE_ON_BOTH_SHEETS",
+  "critical_mode": "Activity-band recruitment edge, not Core A resting-state disappearance",
+  "actual_attractor_onset_bifurcation_type": "NOT_ESTABLISHED",
+  "global_onset_attribution": "NOT_ESTABLISHED",
+  "strong_endpoint_controls": [
+    {
+      "label": "depleted_coarse",
+      "status": "AUDIT_PASS",
+      "dt_ms": 0.05,
+      "new_exposure_ms": 20000,
+      "prior_coarse_exposure_ms": 10000,
+      "final5s": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 54.100326924105595,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.5586,
+          "range_10ms_hz": [
+            20.345986916850745,
+            98.47002063657953
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 423.9596510591738,
+          "quiet_fraction": 0.0,
+          "duty_above50": 1.0,
+          "range_10ms_hz": [
+            363.63546179370894,
+            435.8373557902766
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 122.03511066703419,
+          "quiet_fraction": 0.3878,
+          "duty_above50": 0.5266,
+          "range_10ms_hz": [
+            1.9703583065126502e-05,
+            454.0645959461009
+          ],
+          "complete_local_episodes": 26,
+          "episode_durations_ms": [
+            48,
+            568,
+            43,
+            49,
+            48,
+            51,
+            186,
+            38,
+            5,
+            322,
+            44,
+            38,
+            21,
+            293,
+            47,
+            47,
+            22,
+            1,
+            331,
+            44,
+            48,
+            282,
+            44,
+            49,
+            279,
+            20
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 43.19190044939176,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.3518,
+          "range_10ms_hz": [
+            11.69473498573599,
+            81.7378335820479
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        }
+      ],
+      "finite_time_growth_per_s": 10.73257562333815,
+      "all_1s_growth_positive": true
+    },
+    {
+      "label": "depleted_fine",
+      "status": "AUDIT_PASS",
+      "dt_ms": 0.025,
+      "new_exposure_ms": 10000,
+      "prior_coarse_exposure_ms": 10000,
+      "final5s": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 53.80159900603845,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.5606,
+          "range_10ms_hz": [
+            20.35128150145909,
+            90.51515233253664
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 423.1232613363225,
+          "quiet_fraction": 0.0,
+          "duty_above50": 1.0,
+          "range_10ms_hz": [
+            362.1262448031289,
+            435.8747372047986
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 117.50025289351619,
+          "quiet_fraction": 0.3834,
+          "duty_above50": 0.5356,
+          "range_10ms_hz": [
+            2.290449826329596e-05,
+            452.8243410474479
+          ],
+          "complete_local_episodes": 22,
+          "episode_durations_ms": [
+            42,
+            37,
+            15,
+            450,
+            33,
+            46,
+            396,
+            41,
+            38,
+            50,
+            47,
+            49,
+            40,
+            42,
+            507,
+            39,
+            47,
+            233,
+            47,
+            50,
+            49,
+            49
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 43.01579219866512,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.3796,
+          "range_10ms_hz": [
+            11.696541609691142,
+            73.52872049746853
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        }
+      ],
+      "finite_time_growth_per_s": 9.204577003970027,
+      "all_1s_growth_positive": true
+    }
+  ],
+  "fold_crossing_actual_trajectory_test": "COMPLETE_BOTH_AUDIT_PASS_NO_LATE_CORE_A_TERMINATION_ON_EITHER_SIDE",
+  "model_promoted": false,
+  "fold_crossing_conditions": [
+    {
+      "status": "AUDIT_PASS",
+      "label": "below",
+      "coordinates": {
+        "D_A": 0.3431576412548057,
+        "Z_A": 0.6568423587451944,
+        "D_global": 0.21852623041452024,
+        "native_time_ms": 9913.085481004982
+      },
+      "window_ms": [
+        15000.0,
+        20000.0
+      ],
+      "rows": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 54.864266810751054,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.634,
+          "range_10ms_hz": [
+            12.164170613371523,
+            80.86894617553534
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 392.7278944049189,
+          "quiet_fraction": 0.0,
+          "duty_above50": 1.0,
+          "range_10ms_hz": [
+            166.8065353245994,
+            428.9784859088113
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 137.70104148133743,
+          "quiet_fraction": 0.3062,
+          "duty_above50": 0.6102,
+          "range_10ms_hz": [
+            2.4914332146613015e-05,
+            457.9645891320627
+          ],
+          "complete_local_episodes": 19,
+          "episode_durations_ms": [
+            19,
+            369,
+            45,
+            17,
+            417,
+            43,
+            320,
+            44,
+            45,
+            40,
+            45,
+            329,
+            47,
+            44,
+            335,
+            49,
+            16,
+            44,
+            14
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 44.363318678870435,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.4124,
+          "range_10ms_hz": [
+            8.12830067198964,
+            66.30360679374712
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        }
+      ],
+      "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+      "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+      "model_promoted": false
+    },
+    {
+      "status": "AUDIT_PASS",
+      "label": "above",
+      "coordinates": {
+        "D_A": 0.3631576412548057,
+        "Z_A": 0.6368423587451943,
+        "D_global": 0.21899748041452027,
+        "native_time_ms": 10067.69345650688
+      },
+      "window_ms": [
+        15000.0,
+        20000.0
+      ],
+      "rows": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 54.813669650140966,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.6108,
+          "range_10ms_hz": [
+            18.49442793451189,
+            88.20420012368372
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 410.9987984759284,
+          "quiet_fraction": 0.0,
+          "duty_above50": 1.0,
+          "range_10ms_hz": [
+            275.25184725013344,
+            432.3217247231888
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 118.73637232232322,
+          "quiet_fraction": 0.3622,
+          "duty_above50": 0.5518,
+          "range_10ms_hz": [
+            2.1721324886241917e-05,
+            460.5304049038098
+          ],
+          "complete_local_episodes": 21,
+          "episode_durations_ms": [
+            340,
+            48,
+            571,
+            48,
+            49,
+            44,
+            47,
+            49,
+            349,
+            42,
+            515,
+            43,
+            353,
+            39,
+            38,
+            31,
+            48,
+            22,
+            48,
+            24,
+            39
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 44.347260213667596,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.3882,
+          "range_10ms_hz": [
+            10.65775938190872,
+            81.95741839940817
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        }
+      ],
+      "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+      "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+      "model_promoted": false
+    }
+  ],
+  "relevance_of_certified_equilibrium_SN": "Not established: both fields from identical actual quiet history maintain late Core A activity. This does not prove asymptotic permanence; the known SN is not supported as a unique finite-window termination threshold.",
+  "ongoing_invariant_set_analysis": "Original interictal six-burst full-state near-return is now in four-segment correction. The high-A/three-B candidate continues a bounded eight-step refinement; one-B eight-step batch ended without a root. See active_classification_status.json and individual jobs.json. No root or critical type is implied by solver progress.",
+  "actual_periodic_structure": {
+    "status": "COARSE_NUMERICAL_PERIODIC_ROOT_NOT_YET_PHYSICAL_CERTIFICATE",
+    "D_A": 0.3281215991278547,
+    "period_ms": 261.59215038240956,
+    "full_state_closure": 6.66446587061136e-08,
+    "maximum_block_relative": 1.1096283007488374e-07,
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/mid1/root_state.npz",
+    "independent_phase": {
+      "status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+      "dt_ms": 0.05,
+      "rows": [
+        {
+          "phase": 0.0,
+          "actual_shift_ms": 0.0,
+          "period_ms": 261.592150293819,
+          "fraction": 0.8430058763791356,
+          "section_residual": 9.872373280799524e-18,
+          "section_speed": 1.6984403128512031,
+          "initial_phase": 0.0,
+          "blocks": {
+            "AMPA": {
+              "reference_rms": 13.014751250281945,
+              "difference_rms": 1.6746379674996034e-08,
+              "relative_rms": 1.2867229924685075e-09
+            },
+            "GABA": {
+              "reference_rms": 0.6936314182668356,
+              "difference_rms": 6.440045578555134e-08,
+              "relative_rms": 9.284535574594878e-08
+            },
+            "M": {
+              "reference_rms": 0.02246454089890394,
+              "difference_rms": 7.050067670870434e-10,
+              "relative_rms": 3.1383092592888963e-08
+            },
+            "covariance": {
+              "reference_rms": 36.86916521884281,
+              "difference_rms": 1.8637387011171886e-08,
+              "relative_rms": 5.055006507618685e-10
+            },
+            "input_memory": {
+              "reference_rms": 0.10297312031983458,
+              "difference_rms": 1.1406504338747049e-08,
+              "relative_rms": 1.1077166840548717e-07
+            },
+            "delay_refractory_history": {
+              "reference_rms": 0.00028670489687537864,
+              "difference_rms": 1.897678716816067e-11,
+              "relative_rms": 6.618926769293817e-08
+            }
+          },
+          "combined_relative_rms": 6.615442974625802e-08
+        },
+        {
+          "phase": 0.25,
+          "actual_shift_ms": 65.4,
+          "period_ms": 261.5921296531591,
+          "fraction": 0.8425930631813515,
+          "section_residual": 1.1780873043587863e-16,
+          "section_speed": 3.066945457013228,
+          "initial_phase": 0.0,
+          "blocks": {
+            "AMPA": {
+              "reference_rms": 680.7029058281887,
+              "difference_rms": 0.0016625794222157853,
+              "relative_rms": 2.4424450196712178e-06
+            },
+            "GABA": {
+              "reference_rms": 801.500914520962,
+              "difference_rms": 0.0039419928182466805,
+              "relative_rms": 4.9182636561340865e-06
+            },
+            "M": {
+              "reference_rms": 0.024981286893463836,
+              "difference_rms": 4.965096730322995e-09,
+              "relative_rms": 1.9875264038627548e-07
+            },
+            "covariance": {
+              "reference_rms": 610.094484153785,
+              "difference_rms": 0.003685076297988169,
+              "relative_rms": 6.040173110398555e-06
+            },
+            "input_memory": {
+              "reference_rms": 0.5005471295469738,
+              "difference_rms": 3.6498798683478847e-06,
+              "relative_rms": 7.291780639420013e-06
+            },
+            "delay_refractory_history": {
+              "reference_rms": 0.3012811856812168,
+              "difference_rms": 1.7636645823471926e-05,
+              "relative_rms": 5.85388224080249e-05
+            }
+          },
+          "combined_relative_rms": 2.4312691619442672e-05
+        },
+        {
+          "phase": 0.5,
+          "actual_shift_ms": 130.8,
+          "period_ms": 261.59215299608894,
+          "fraction": 0.8430599217785272,
+          "section_residual": -2.5281392376700433e-16,
+          "section_speed": 6.193895159734177,
+          "initial_phase": 0.0,
+          "blocks": {
+            "AMPA": {
+              "reference_rms": 83.27339699571164,
+              "difference_rms": 0.0014684220786584886,
+              "relative_rms": 1.763374777102114e-05
+            },
+            "GABA": {
+              "reference_rms": 203.97071991403155,
+              "difference_rms": 0.0013697011845582403,
+              "relative_rms": 6.715185322361633e-06
+            },
+            "M": {
+              "reference_rms": 0.025602015212005582,
+              "difference_rms": 1.1330462392911816e-08,
+              "relative_rms": 4.4256134913936814e-07
+            },
+            "covariance": {
+              "reference_rms": 71.2316768700913,
+              "difference_rms": 0.0014836123867696266,
+              "relative_rms": 2.082798625498264e-05
+            },
+            "input_memory": {
+              "reference_rms": 0.4910560683386029,
+              "difference_rms": 9.541704230785043e-06,
+              "relative_rms": 1.943098730674e-05
+            },
+            "delay_refractory_history": {
+              "reference_rms": 0.11239130044979533,
+              "difference_rms": 9.025119644881085e-06,
+              "relative_rms": 8.0300873900045e-05
+            }
+          },
+          "combined_relative_rms": 3.5627323931632335e-05
+        }
+      ],
+      "scope": "Same numerical root at multiple phases; refinement begins with physical-lag-preserving history interpolation. An uncorrected refined residual alone is not absence of an orbit. No Floquet or bifurcation certificate.",
+      "model_promoted": false
+    },
+    "fine_quiet_phase_solver": "FAILED_SECTION_WINDOW_AFTER_LARGE_RESIDUAL",
+    "current": "GPU0 D_A.334 cubic Newton; GPU1 half-step Core B descending phase, small convex fast relaxation and dynamic-M numerical preconditioning. Actual onset type NOT_ESTABLISHED.",
+    "stability": "NUMERICAL_ROOT_UNSTABLE_PHYSICAL_FLOQUET_NOT_YET_CERTIFIED",
+    "model_promoted": false,
+    "active_phase_root": {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/mid1_active_coarse",
+      "period_ms": 261.59212044610115,
+      "closure": 6.599820409748624e-08
+    },
+    "numerical_section_eigenmode": {
+      "status": "ONE_REAL_SECTION_MAP_EIGENPAIR_VERIFIED",
+      "dt_ms": 0.05,
+      "period_ms": 261.59212044561986,
+      "rows": [
+        {
+          "iteration": 1,
+          "real_multiplier": 0.030256194198519847,
+          "eigen_residual": 25.243346606567837,
+          "relative_eigen_residual": 25.243346606567837,
+          "phase_leakage": 1.8800618080884824e-12,
+          "norm_gain": 25.243364738809152
+        },
+        {
+          "iteration": 2,
+          "real_multiplier": -31.94400676672324,
+          "eigen_residual": 0.43531285207341625,
+          "relative_eigen_residual": 0.01362737164602942,
+          "phase_leakage": 2.388901578056285e-12,
+          "norm_gain": 31.9469727140393
+        },
+        {
+          "iteration": 3,
+          "real_multiplier": -32.14750388494783,
+          "eigen_residual": 0.006687743872020593,
+          "relative_eigen_residual": 0.00020803306832017966,
+          "phase_leakage": 3.0884669821713436e-12,
+          "norm_gain": 32.14750458058364
+        },
+        {
+          "iteration": 4,
+          "real_multiplier": -32.14797128526088,
+          "eigen_residual": 5.773594422024786e-05,
+          "relative_eigen_residual": 1.795943629162021e-06,
+          "phase_leakage": 3.082867294791235e-12,
+          "norm_gain": 32.147971285312686
+        },
+        {
+          "iteration": 5,
+          "real_multiplier": -32.147915602000786,
+          "eigen_residual": 8.010565935462622e-07,
+          "relative_eigen_residual": 2.4917839260981727e-08,
+          "phase_leakage": 3.080632970954176e-12,
+          "norm_gain": 32.147915602000865
+        },
+        {
+          "iteration": 6,
+          "real_multiplier": -32.14791490668924,
+          "eigen_residual": 1.2442352430120587e-08,
+          "relative_eigen_residual": 3.870345080306164e-10,
+          "phase_leakage": 3.135172677038887e-12,
+          "norm_gain": 32.14791490668927
+        }
+      ],
+      "numerical_root_unstable": true,
+      "physical_Floquet_status": "PENDING_INDEPENDENT_PHASE_AND_MESH",
+      "seconds": 229.67157745361328,
+      "model_promoted": false
+    },
+    "fine_active_relaxed_solver": "FAILED_NO_SECTION_RETURN_NOT_A_BIFURCATION",
+    "fine_newton_first_attempt": "DERIVATIVE_GATE_FAILED; smaller-epsilon check running because period perturbations cross the interpolation time bracket",
+    "cubic_coarse_root": {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/active_cubic_dt005",
+      "period_ms": 261.59215979661917,
+      "closure": 3.85657538027827e-08,
+      "derivative_gate": "PASS",
+      "independent_phase": {
+        "status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+        "dt_ms": 0.05,
+        "rows": [
+          {
+            "phase": 0.0,
+            "actual_shift_ms": 0.0,
+            "period_ms": 261.592159796443,
+            "fraction": 0.8431959288600547,
+            "section_residual": 3.648353948553172e-17,
+            "section_speed": 3.0813669122649436,
+            "initial_phase": 0.0,
+            "interpolation": "cubic_four_actual_steps",
+            "blocks": {
+              "AMPA": {
+                "reference_rms": 680.7030677932739,
+                "difference_rms": 1.1236362051861258e-05,
+                "relative_rms": 1.650699487558896e-08
+              },
+              "GABA": {
+                "reference_rms": 801.5011971853703,
+                "difference_rms": 1.6662785199746633e-05,
+                "relative_rms": 2.0789470132123686e-08
+              },
+              "M": {
+                "reference_rms": 0.024981284935370326,
+                "difference_rms": 1.6128062676540733e-09,
+                "relative_rms": 6.456058092394377e-08
+              },
+              "covariance": {
+                "reference_rms": 610.0947931996596,
+                "difference_rms": 1.21282787130602e-05,
+                "relative_rms": 1.9879334897210143e-08
+              },
+              "input_memory": {
+                "reference_rms": 0.5005471396517271,
+                "difference_rms": 2.564960023318331e-08,
+                "relative_rms": 5.124312617395017e-08
+              },
+              "delay_refractory_history": {
+                "reference_rms": 0.3012811837877223,
+                "difference_rms": 9.669082234303706e-09,
+                "relative_rms": 3.209321641910562e-08
+              }
+            },
+            "combined_relative_rms": 3.856546821875895e-08
+          },
+          {
+            "phase": 0.25,
+            "actual_shift_ms": 65.4,
+            "period_ms": 261.5921516783644,
+            "fraction": 0.8430335672886454,
+            "section_residual": -6.848769598319965e-17,
+            "section_speed": 6.210198615022512,
+            "initial_phase": 0.0,
+            "interpolation": "cubic_four_actual_steps",
+            "blocks": {
+              "AMPA": {
+                "reference_rms": 83.27344906242256,
+                "difference_rms": 0.00012355432946801833,
+                "relative_rms": 1.4837181701865242e-06
+              },
+              "GABA": {
+                "reference_rms": 203.97078419463273,
+                "difference_rms": 0.00015180630036634162,
+                "relative_rms": 7.442551195051798e-07
+              },
+              "M": {
+                "reference_rms": 0.02560201423265856,
+                "difference_rms": 1.9479286483501253e-09,
+                "relative_rms": 7.60849763869477e-08
+              },
+              "covariance": {
+                "reference_rms": 71.23171169373725,
+                "difference_rms": 0.00010292515546753757,
+                "relative_rms": 1.4449344683736813e-06
+              },
+              "input_memory": {
+                "reference_rms": 0.4910560988526205,
+                "difference_rms": 5.485832012731466e-07,
+                "relative_rms": 1.117149756524644e-06
+              },
+              "delay_refractory_history": {
+                "reference_rms": 0.11239131997689157,
+                "difference_rms": 2.9953993348052904e-06,
+                "relative_rms": 2.6651518421717667e-05
+              }
+            },
+            "combined_relative_rms": 1.0927033888439539e-05
+          },
+          {
+            "phase": 0.5,
+            "actual_shift_ms": 130.8,
+            "period_ms": 261.592168747475,
+            "fraction": 0.8433749494999387,
+            "section_residual": -1.610121397857862e-16,
+            "section_speed": 0.49922595962491745,
+            "initial_phase": 0.0,
+            "interpolation": "cubic_four_actual_steps",
+            "blocks": {
+              "AMPA": {
+                "reference_rms": 12.752355588378075,
+                "difference_rms": 1.2734502312408582e-08,
+                "relative_rms": 9.986000017137413e-10
+              },
+              "GABA": {
+                "reference_rms": 8.078301135251994,
+                "difference_rms": 3.5405735193761006e-06,
+                "relative_rms": 4.382819432078099e-07
+              },
+              "M": {
+                "reference_rms": 0.023981505052845138,
+                "difference_rms": 1.7625528811050966e-09,
+                "relative_rms": 7.349634133559058e-08
+              },
+              "covariance": {
+                "reference_rms": 36.75361404671823,
+                "difference_rms": 1.9485975701492704e-08,
+                "relative_rms": 5.301784928340299e-10
+              },
+              "input_memory": {
+                "reference_rms": 0.22863214454565295,
+                "difference_rms": 5.821527779740049e-08,
+                "relative_rms": 2.5462420392849066e-07
+              },
+              "delay_refractory_history": {
+                "reference_rms": 4.827594396029647e-05,
+                "difference_rms": 1.805235263364114e-11,
+                "relative_rms": 3.7394095594459875e-07
+              }
+            },
+            "combined_relative_rms": 2.5889488728758474e-07
+          }
+        ],
+        "scope": "Same numerical root at multiple phases; refinement begins with physical-lag-preserving history interpolation. An uncorrected refined residual alone is not absence of an orbit. No Floquet or bifurcation certificate.",
+        "model_promoted": false
+      }
+    },
+    "actual_orbit_profile": {
+      "status": "ACTUAL_CLOSED_ROOT_PROFILE_RECORDED",
+      "period_ms": 261.59212044610115,
+      "dt_ms": 0.05,
+      "rows": [
+        {
+          "region": "Global E",
+          "mean_hz": 36.25650853736043,
+          "min_hz": 0.011606927328862062,
+          "max_hz": 176.26329732903594,
+          "time_fraction_below5": 0.5742403974775463
+        },
+        {
+          "region": "Core A",
+          "mean_hz": 120.45982306641504,
+          "min_hz": 1.9552575062285146e-05,
+          "max_hz": 479.1512023254334,
+          "time_fraction_below5": 0.6220141410280909
+        },
+        {
+          "region": "Core B",
+          "mean_hz": 93.77182082808325,
+          "min_hz": 2.619275184816561e-05,
+          "max_hz": 477.4326231684687,
+          "time_fraction_below5": 0.5343015478692911
+        },
+        {
+          "region": "Surround",
+          "mean_hz": 32.68801429522602,
+          "min_hz": 0.012181772111574366,
+          "max_hz": 163.5812495460576,
+          "time_fraction_below5": 0.5851328110070705
+        }
+      ],
+      "partial_period_returns": [
+        {
+          "divisor": 8,
+          "elapsed_ms": 33,
+          "full_state_coordinate_relative": 0.978683882434484
+        },
+        {
+          "divisor": 7,
+          "elapsed_ms": 37,
+          "full_state_coordinate_relative": 0.9788512330837528
+        },
+        {
+          "divisor": 6,
+          "elapsed_ms": 44,
+          "full_state_coordinate_relative": 0.9829370730530093
+        },
+        {
+          "divisor": 5,
+          "elapsed_ms": 52,
+          "full_state_coordinate_relative": 0.9896784961542207
+        },
+        {
+          "divisor": 4,
+          "elapsed_ms": 65,
+          "full_state_coordinate_relative": 1.0113149375186414
+        },
+        {
+          "divisor": 3,
+          "elapsed_ms": 87,
+          "full_state_coordinate_relative": 1.0166814941579403
+        },
+        {
+          "divisor": 2,
+          "elapsed_ms": 131,
+          "full_state_coordinate_relative": 1.0031563396500338
+        }
+      ],
+      "fundamental_scope": "Excludes tested subperiods only; full phase/mesh checks and Floquet certificate remain separate.",
+      "model_promoted": false
+    },
+    "spatial_unstable_mode": {
+      "multiplier": -32.14791490668924,
+      "squared_cell_weighted_physical_component_fraction": {
+        "instantaneous_E_rate": {
+          "Core A": 0.00012261410245984134,
+          "Core B": 0.013712557594564682,
+          "Surround": 0.9861648283029752
+        },
+        "delayed_E_rate_history": {
+          "Core A": 0.0023425976153572553,
+          "Core B": 0.013416172716096996,
+          "Surround": 0.9842412296685457
+        },
+        "M": {
+          "Core A": 0.034867985657238164,
+          "Core B": 0.014947912894820304,
+          "Surround": 0.9501841014479416
+        }
+      },
+      "scope": "One unstable numerical return-map direction at active phase; not a critical mode, not a bifurcation. Regional fractions depend on observable and phase."
+    },
+    "fine_derivative_gate": {
+      "status": "PASS",
+      "epsilon": 1e-05,
+      "relative_error": 0.0006531472390114043,
+      "earlier_failure_explained_by": "Perturbed return crossed the fractional-time interpolation bracket"
+    },
+    "fine_positive_update": {
+      "ordinary_newton": "No tested linear step admissible",
+      "positive_coordinates": "Actual unchanged residual reduced by factor.24130, full closure.01895; NOT_AN_ORBIT",
+      "current": "fine_positive_cubic_newton on GPU1"
+    },
+    "neighbor_D0326": "RETURN_BUDGET_NOT_AN_ORBIT; best closure.00011347, no branch endpoint claim",
+    "neighbor_D0330": "Corrector running on GPU0; no accepted orbit yet",
+    "accepted_neighbor": {
+      "D_A": 0.33,
+      "Z_A": 0.67,
+      "period_ms": 261.6065664289337,
+      "closure": 7.749537685907686e-09,
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_D0330_positive_cubic",
+      "stability": "NOT_COMPUTED"
+    },
+    "neighbor_D0334": "Full-state secant predicted; cubic positive Newton running, not yet accepted",
+    "fine_positive_newton": "Stopped after a preserved accepted update with factor.89775 improvement; no orbit. All linear and positive proposal failures retained.",
+    "fine_coreB_auto_orientation": "First return failed; the coarse actual orbit has descending B rate at this phase. Explicit descending orientation returns successfully; do not infer cycle disappearance from an off-orbit initial-step phase estimate."
+  },
+  "actual_onset_bifurcation_type": "NOT_ESTABLISHED",
+  "updated_local": "2026-09-25T07:58:23.893577+08:00",
+  "short_burst_cycle_continuation": [
+    {
+      "D_A": 0.3281215991278547,
+      "Z_A": 0.6718784008721452,
+      "period_ms": 261.59215979661917,
+      "combined_closure": 3.85657538027827e-08,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/relaxed_return_corrector/active_cubic_dt005",
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "physical_phase_mesh_status": "PENDING"
+    },
+    {
+      "D_A": 0.33,
+      "Z_A": 0.6699999999999999,
+      "period_ms": 261.6065664289337,
+      "combined_closure": 7.749537685907686e-09,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_D0330_positive_cubic",
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "physical_phase_mesh_status": "PENDING"
+    },
+    {
+      "D_A": 0.334,
+      "Z_A": 0.6659999999999999,
+      "period_ms": 261.6396191785999,
+      "combined_closure": 1.7546303291342145e-08,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_D0334_positive_cubic",
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "physical_phase_mesh_status": "PENDING"
+    },
+    {
+      "D_A": 0.3431576412548057,
+      "Z_A": 0.6568423587451944,
+      "period_ms": 261.748259457055,
+      "combined_closure": 6.993823967780114e-10,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_below_SN_positive_cubic",
+      "status": "NUMERICAL_PERIODIC_ROOT",
+      "physical_phase_mesh_status": "PENDING"
+    }
+  ],
+  "same_field_short_cycle_and_actual_sustained_A": {
+    "D_A": 0.3431576412548057,
+    "cycle_profile": [
+      {
+        "region": "Global E",
+        "mean_hz": 36.458144644377484,
+        "min_hz": 0.011606030096242066,
+        "max_hz": 176.52143934753383,
+        "time_fraction_below5": 0.5744843391902216
+      },
+      {
+        "region": "Core A",
+        "mean_hz": 124.00751139305233,
+        "min_hz": 2.1199818849167503e-05,
+        "max_hz": 479.59701045512793,
+        "time_fraction_below5": 0.6109625668449198
+      },
+      {
+        "region": "Core B",
+        "mean_hz": 93.79229341721222,
+        "min_hz": 2.616648271719853e-05,
+        "max_hz": 477.436252271575,
+        "time_fraction_below5": 0.5338044308632544
+      },
+      {
+        "region": "Surround",
+        "mean_hz": 32.81149778082057,
+        "min_hz": 0.012179198888884381,
+        "max_hz": 163.83451733229845,
+        "time_fraction_below5": 0.5855614973262032
+      }
+    ],
+    "interpretation": "The numerically closed self-limited cycle persists at the same field where the observed20s trajectory has sustained Core A. Its disappearance cannot explain the finite-window difference across these computed fields. This does not exclude a stability/basin/global bifurcation or assert complete branch coverage.",
+    "physical_periodic_certification": "PENDING_PHASE_AND_MESH",
+    "actual_permanence": "FINITE20S_NOT_ASYMPTOTIC"
+  },
+  "active_search": "Sustained-A full-state periodic structures; all M dynamic. Fast34ms near-return and tonic-A/burst-B numerical seeds are not periodic or bifurcation evidence until closed, independently checked and continued.",
+  "short_cycle_fine_refinement": {
+    "path": "near_returns/mid_lower/fine_coreB_direct_newton",
+    "status": "NUMERICAL_PERIODIC_ROOT",
+    "dt_ms": 0.025,
+    "period_ms": 261.4165595805867,
+    "combined_relative_rms": 1.2235043444501726e-09,
+    "independent_validation_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "phase_errors": [
+      {
+        "phase": 0.0,
+        "period_ms": 261.41655957985563,
+        "combined_relative_rms": 1.222146040749416e-09
+      },
+      {
+        "phase": 0.25,
+        "period_ms": 261.4165580464712,
+        "combined_relative_rms": 3.864198756345684e-06
+      },
+      {
+        "phase": 0.5,
+        "period_ms": 261.41655883163884,
+        "combined_relative_rms": 3.9184964844931166e-08
+      }
+    ],
+    "physical_Floquet": "NOT_ACCEPTED_PHASE_CLOSURE_GATE"
+  },
+  "long_recurrence_seed": {
+    "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+    "times_ms": [
+      8010.0,
+      8250.25,
+      8490.5,
+      8730.75,
+      8971.0
+    ],
+    "period_ms": 961.0,
+    "full_state_errors": {
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 273.1652419003641,
+          "difference_rms": 14.74780831106611,
+          "relative_rms": 0.05398859755534093
+        },
+        "GABA": {
+          "reference_rms": 301.37355953707055,
+          "difference_rms": 30.713123201055904,
+          "relative_rms": 0.10191047697825006
+        },
+        "M": {
+          "reference_rms": 0.05303792874614367,
+          "difference_rms": 0.0017538323641528542,
+          "relative_rms": 0.03306751235605846
+        },
+        "covariance": {
+          "reference_rms": 214.0238967813753,
+          "difference_rms": 23.80741012220528,
+          "relative_rms": 0.11123715846798393
+        },
+        "input_memory": {
+          "reference_rms": 0.3874942902125917,
+          "difference_rms": 0.07562226321290662,
+          "relative_rms": 0.1951571032734904
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.12249937045083685,
+          "difference_rms": 0.025071469576000004,
+          "relative_rms": 0.20466610957859604
+        }
+      },
+      "combined_relative_rms": 0.1333805277826778
+    },
+    "actual_state_structure": [
+      {
+        "region": "Global E",
+        "mean_hz": 52.35471842128345,
+        "min_hz": 16.54581461676516,
+        "max_hz": 87.22395234997246,
+        "fraction_below5": 0.0
+      },
+      {
+        "region": "Core A",
+        "mean_hz": 391.15371757175865,
+        "min_hz": 134.3921901712464,
+        "max_hz": 427.49905597879024,
+        "fraction_below5": 0.0
+      },
+      {
+        "region": "Core B",
+        "mean_hz": 135.46935872867252,
+        "min_hz": 2.455563520596731e-05,
+        "max_hz": 419.9144071725792,
+        "fraction_below5": 0.3433922996878252
+      },
+      {
+        "region": "Surround",
+        "mean_hz": 41.82344617436729,
+        "min_hz": 9.675793633549878,
+        "max_hz": 70.39029560057465,
+        "fraction_below5": 0.0
+      }
+    ],
+    "original_1ms_group_rates_bitwise": true,
+    "all_Z_held": true,
+    "all_M_dynamic": true,
+    "seconds": 179.35685086250305,
+    "model_promoted": false
+  },
+  "actual_sustained_A_60s": {
+    "status": "AUDIT_PASS",
+    "total_same_field_ms": 60000,
+    "D_A": 0.3431576412548057,
+    "all_Z_held": true,
+    "all_M_dynamic": true,
+    "quiet_intervals_ms": [
+      [
+        0,
+        40
+      ],
+      [
+        149,
+        308
+      ],
+      [
+        407,
+        467
+      ]
+    ],
+    "quiet_after_original20s": false,
+    "windows": [
+      {
+        "window_ms": [
+          0,
+          5000
+        ],
+        "mean_Core_A_hz": 370.69535950847916,
+        "min_Core_A_10ms_hz": 2.3022222281774334e-05,
+        "quiet_fraction": 0.0518
+      },
+      {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_Core_A_hz": 395.55415217344853,
+        "min_Core_A_10ms_hz": 137.76700167589672,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          10000,
+          15000
+        ],
+        "mean_Core_A_hz": 395.5731997064257,
+        "min_Core_A_10ms_hz": 171.66875576711925,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          15000,
+          20000
+        ],
+        "mean_Core_A_hz": 392.7278944049189,
+        "min_Core_A_10ms_hz": 166.80653532459903,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          20000,
+          25000
+        ],
+        "mean_Core_A_hz": 397.4147994514416,
+        "min_Core_A_10ms_hz": 178.71616477222886,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          25000,
+          30000
+        ],
+        "mean_Core_A_hz": 393.3291856589385,
+        "min_Core_A_10ms_hz": 121.4373669281802,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          30000,
+          35000
+        ],
+        "mean_Core_A_hz": 395.3769521770238,
+        "min_Core_A_10ms_hz": 157.51206183466533,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          35000,
+          40000
+        ],
+        "mean_Core_A_hz": 397.87118772243895,
+        "min_Core_A_10ms_hz": 174.2499068357053,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          40000,
+          45000
+        ],
+        "mean_Core_A_hz": 395.01880175560626,
+        "min_Core_A_10ms_hz": 124.63746883204658,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          45000,
+          50000
+        ],
+        "mean_Core_A_hz": 396.79378631339466,
+        "min_Core_A_10ms_hz": 203.95398745619,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          50000,
+          55000
+        ],
+        "mean_Core_A_hz": 393.8421352875812,
+        "min_Core_A_10ms_hz": 156.8848390905045,
+        "quiet_fraction": 0.0
+      },
+      {
+        "window_ms": [
+          55000,
+          60000
+        ],
+        "mean_Core_A_hz": 394.49363530650015,
+        "min_Core_A_10ms_hz": 110.6805355232976,
+        "quiet_fraction": 0.0
+      }
+    ],
+    "sources": [
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block00.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block01.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block02.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block03.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block00.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block01.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block02.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block03.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block04.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block05.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block06.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block07.npz"
+    ],
+    "scope": "Same-history finite continuation. An observed return is conclusive for nonpermanence of that episode; absence of return is right censoring, not an asymptotic bifurcation certificate.",
+    "model_promoted": false
+  },
+  "multiple_shooting_derivative_checks": {
+    "all_four_cache_checks": [
+      {
+        "status": "PASS",
+        "relative_error": 6.300379747123929e-14
+      },
+      {
+        "status": "PASS",
+        "relative_error": 1.3609101234022503e-13
+      },
+      {
+        "status": "PASS",
+        "relative_error": 4.0167570838844145e-14
+      },
+      {
+        "status": "PASS",
+        "relative_error": 5.586995285010691e-14
+      }
+    ],
+    "full_bordered_fd": [
+      {
+        "epsilon": 0.0001,
+        "relative_error": 0.03286694428120162
+      },
+      {
+        "epsilon": 1e-05,
+        "relative_error": 0.003304578123525783
+      },
+      {
+        "epsilon": 1e-06,
+        "relative_error": 0.00033042452401463096
+      }
+    ],
+    "scientific_scope": "Implementation checks only; no periodic root or bifurcation type yet."
+  },
+  "mid2_twenty_second_history_control": {
+    "status": "BOTH_COMPLETE_AUDIT_PASS",
+    "rows": [
+      {
+        "label": "mid2_from_lower",
+        "status": "FULL20S_LOCAL_RETURN_READOUT",
+        "source_audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.3356396201913302,
+        "Z_A": 0.6643603798086698,
+        "quiet_intervals_ms": [
+          [
+            0,
+            41
+          ],
+          [
+            147,
+            308
+          ],
+          [
+            406,
+            468
+          ],
+          [
+            4670,
+            4833
+          ],
+          [
+            8623,
+            8706
+          ],
+          [
+            8759,
+            8900
+          ],
+          [
+            8956,
+            9127
+          ],
+          [
+            9243,
+            9396
+          ],
+          [
+            9496,
+            9555
+          ],
+          [
+            9889,
+            10009
+          ],
+          [
+            10065,
+            10243
+          ],
+          [
+            10346,
+            10405
+          ],
+          [
+            11860,
+            12011
+          ]
+        ],
+        "all_M_dynamic": true,
+        "all_Z_held": true,
+        "scope": "Actual same-field return-to-quiet evidence. No named invariant-set bifurcation."
+      },
+      {
+        "label": "mid2_from_upper",
+        "status": "FULL20S_LOCAL_RETURN_READOUT",
+        "source_audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.3356396201913302,
+        "Z_A": 0.6643603798086698,
+        "quiet_intervals_ms": [
+          [
+            3240,
+            3393
+          ],
+          [
+            3476,
+            3641
+          ],
+          [
+            3744,
+            3804
+          ],
+          [
+            11430,
+            11467
+          ],
+          [
+            11509,
+            11572
+          ],
+          [
+            11623,
+            11753
+          ],
+          [
+            11809,
+            11871
+          ],
+          [
+            14566,
+            14731
+          ]
+        ],
+        "all_M_dynamic": true,
+        "all_Z_held": true,
+        "scope": "Actual same-field return-to-quiet evidence. No named invariant-set bifurcation."
+      }
+    ],
+    "interpretation": "Both20s histories contain qualifying A quiet intervals and long active intervals at the identical fullZfield; last5s alone would miss the observed returns. No certified bistability or invariant bifurcation."
+  },
+  "short_cycle_spectrum_D0334": {
+    "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+    "closure": {
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.015478645098463,
+          "difference_rms": 3.936252658679643e-10,
+          "relative_rms": 3.024285749308196e-11
+        },
+        "GABA": {
+          "reference_rms": 0.6935455300013968,
+          "difference_rms": 8.667422540060173e-10,
+          "relative_rms": 1.2497265377865988e-09
+        },
+        "M": {
+          "reference_rms": 0.022528735197197745,
+          "difference_rms": 9.666072415375116e-10,
+          "relative_rms": 4.290552634564872e-08
+        },
+        "covariance": {
+          "reference_rms": 36.86943754072063,
+          "difference_rms": 3.8081599732645584e-10,
+          "relative_rms": 1.0328771544341075e-11
+        },
+        "input_memory": {
+          "reference_rms": 0.10290947026287499,
+          "difference_rms": 1.8058082668416445e-10,
+          "relative_rms": 1.7547542147761858e-09
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0002877281694646943,
+          "difference_rms": 3.764499995062849e-13,
+          "relative_rms": 1.3083529506570513e-09
+        }
+      },
+      "combined_relative_rms": 1.754631005144255e-08
+    },
+    "verified": [
+      {
+        "real": 0.3759426396638876,
+        "imag": 0.0,
+        "relative_residual": 8.069773426081931e-06,
+        "status": "FAILED_FULL_RESIDUAL"
+      },
+      {
+        "real": -0.31034405624516714,
+        "imag": 0.17073404493731953,
+        "relative_residual": 4.433184741316651e-09,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": -33.057464006826095,
+        "imag": 0.0,
+        "relative_residual": 1.6971536769645623e-14,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      }
+    ],
+    "seconds": 292.52204728126526,
+    "completeness": "NOT_ESTABLISHED",
+    "physical_Floquet": "PENDING_PHASE_AND_MESH",
+    "model_promoted": false
+  },
+  "distinct_stationary_search": {
+    "status": "BOUNDED_DISTINCT_ROOT_SEARCH_COMPLETE",
+    "rows": [
+      {
+        "label": "actual_B_quiet",
+        "status": "NO_DISTINCT_ROOT_ESTABLISHED",
+        "original_rate_residual_per_ms": 0.9675371136888908,
+        "distance_from_known": 7.190335881435144,
+        "CoreA_hz": 425.9409294496124,
+        "CoreB_hz": 3.46607000373409e-05,
+        "regional_rates_hz": [
+          425.9409294496124,
+          3.46607000373409e-05,
+          33.803091012564074
+        ],
+        "relevant_asymmetric_candidate": false,
+        "dynamical_stability": "NOT_COMPUTED",
+        "bifurcation_type": "NOT_ESTABLISHED"
+      },
+      {
+        "label": "mean_lowB",
+        "status": "NO_DISTINCT_ROOT_ESTABLISHED",
+        "original_rate_residual_per_ms": 0.32212563982687337,
+        "distance_from_known": 4.977141121724107,
+        "CoreA_hz": 423.1781295562535,
+        "CoreB_hz": 0.09968849333720317,
+        "regional_rates_hz": [
+          423.1781295562535,
+          0.09968849333720317,
+          43.553022857718815
+        ],
+        "relevant_asymmetric_candidate": false,
+        "dynamical_stability": "NOT_COMPUTED",
+        "bifurcation_type": "NOT_ESTABLISHED"
+      }
+    ],
+    "seconds": 170.09784746170044,
+    "interpretation": "Only distinct original equilibria count; no failed solve proves nonexistence and no root alone certifies onset.",
+    "model_promoted": false
+  },
+  "late_return_counterexample": {
+    "status": "AUDIT_PASS",
+    "D_A": 0.3431576412548057,
+    "Z_A": 0.6568423587451944,
+    "observed_ms": 70000,
+    "exact_original_terminal_state_resumed": true,
+    "nominal_flow_unaltered_by_passive_tangent": true,
+    "all_Z_held": true,
+    "all_M_dynamic": true,
+    "quiet_intervals_ms": [
+      [
+        0,
+        40
+      ],
+      [
+        149,
+        308
+      ],
+      [
+        407,
+        467
+      ],
+      [
+        64830,
+        64919
+      ],
+      [
+        64973,
+        65105
+      ],
+      [
+        65161,
+        65330
+      ]
+    ],
+    "first_quiet_after60s_ms": [
+      64830,
+      64919
+    ],
+    "ended_activity": {
+      "start_ms": 467,
+      "end_ms": 64830,
+      "duration_ms": 64363
+    },
+    "sources": [
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/joined60s_regional.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block00.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block01.npz"
+    ],
+    "conclusion": "The activity episode previously right-censored at60s ends at64.830s. D_A=.34315764 cannot serve as a demonstrated asymptotic sustained-side endpoint or certified onset bracket againstD_A=.33564.",
+    "distinction": "Long irregular activity and its later termination are directly observed. This does not identify a crisis, chaos in the infinite-time limit, a unique transition parameter, or the native-SNN onset mechanism.",
+    "model_promoted": false
+  },
+  "candidate_bracket_status": "WITHDRAWN_AS_ASYMPTOTIC_BRACKET: D_A=.34315764 returns to quiet at64.83s",
+  "actual_sustained_growth_coarse": {
+    "status": "COMPLETE",
+    "dt_ms": 0.05,
+    "alignment_discard_ms": 2000,
+    "duration_ms": 10000,
+    "renormalization_ms": 100,
+    "finite_time_growth_per_s": 8.02731544922908,
+    "one_second_blocks_per_s": [
+      9.888694892456742,
+      8.546052429067045,
+      11.48240464201876,
+      9.675345019513074,
+      6.879030261095127,
+      2.4942864561250895,
+      9.094831266172633,
+      9.608434374564286,
+      6.25500121263984,
+      8.729190361703832
+    ],
+    "log_growth": [
+      2.335824012809402,
+      1.7802776780053593,
+      -0.4084998584597617,
+      0.45305778930821294,
+      1.3706282295992311,
+      1.0089077716553394,
+      1.1565318423764113,
+      2.979824765770106,
+      -0.7095959906531777,
+      -0.07826134795438,
+      1.1837835423888312,
+      0.2717942640976715,
+      1.7852879332994849,
+      2.3058674036113005,
+      0.26761074290858056,
+      -0.6263227632993202,
+      0.7763644223196178,
+      0.8926861209229879,
+      0.28587086900829556,
+      1.4031098938095947,
+      1.4177365803144644,
+      0.5073716504233943,
+      0.019002158331940425,
+      0.7206666255576895,
+      1.2733178399921539,
+      0.07718179620109095,
+      1.6523755668223248,
+      1.6584576417222154,
+      2.7122099970296203,
+      1.4440847856238659,
+      0.4477025208410522,
+      1.5926759555763055,
+      1.5825467194020446,
+      1.2306396871672467,
+      0.35177361136203833,
+      -0.03897986005651387,
+      0.7428636823621007,
+      1.9968082188471932,
+      0.5857770026973211,
+      1.1835374813142865,
+      1.8934934047308243,
+      -0.9554973038199917,
+      -1.4945718576315044,
+      0.33841992082759886,
+      1.7147445226515587,
+      0.48775983896843744,
+      0.5893674501965449,
+      3.2029095681766933,
+      0.6744163561843781,
+      0.4279883608105879,
+      1.386627590396104,
+      -0.5568089484309525,
+      -4.303833012792439,
+      5.359637430348613,
+      -1.209283950381031,
+      0.4468033172355811,
+      -0.03889413215901158,
+      0.16928398980659212,
+      0.24352912068432608,
+      0.9972250514173073,
+      1.1084888602679377,
+      0.8033358316949374,
+      1.0971839823805092,
+      1.6757736469391096,
+      -0.15766428600215687,
+      0.96230092903913,
+      0.1494445372613145,
+      0.3996352036992002,
+      2.3776648320842755,
+      0.6786677288083751,
+      1.4846739005880314,
+      0.8947326350794826,
+      1.3893287694848557,
+      -0.15730318813613697,
+      0.5878152302132233,
+      3.9111518384053983,
+      -1.0320792875107052,
+      4.261784733089597,
+      -2.637681357748041,
+      0.906011101098583,
+      0.02876834641612184,
+      0.6068885042303561,
+      0.48612250835684834,
+      1.8801688621619184,
+      -0.11160336423491274,
+      0.5263629373625097,
+      1.926531670147654,
+      0.0804642643286336,
+      0.7898140356996832,
+      0.04148344817102731,
+      0.7236403984462734,
+      0.029898749946144776,
+      1.1499076745164423,
+      1.7686957628551645,
+      0.5537112987275652,
+      0.8595516247521813,
+      3.3706367702466995,
+      -0.12701299748876158,
+      0.3627118804239301,
+      0.03744919927819357
+    ],
+    "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+    "model_promoted": false
+  },
+  "deflated_stationary_homotopy": {
+    "status": "NO_DISTINCT_ORIGINAL_ROOT_ESTABLISHED",
+    "accepted_points": 72,
+    "trials": 81,
+    "seconds": 944.9073557853699,
+    "auxiliary_endpoint": 0.2057076472276081,
+    "model_promoted": false
+  },
+  "actual_transition_two_mesh_readout": {
+    "status": "RETURN_OBSERVED_AT_BOTH_STEPS_TIMING_DIFFERS",
+    "rows": [
+      {
+        "label": "coarse",
+        "dt_ms": 0.05,
+        "same_original60s_state": true,
+        "duration_ms": 10000,
+        "quiet_intervals_ms": [
+          [
+            64830,
+            64919
+          ],
+          [
+            64973,
+            65105
+          ],
+          [
+            65161,
+            65330
+          ]
+        ],
+        "finite_time_growth": {
+          "status": "COMPLETE",
+          "dt_ms": 0.05,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 10000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": 8.02731544922908,
+          "one_second_blocks_per_s": [
+            9.888694892456742,
+            8.546052429067045,
+            11.48240464201876,
+            9.675345019513074,
+            6.879030261095127,
+            2.4942864561250895,
+            9.094831266172633,
+            9.608434374564286,
+            6.25500121263984,
+            8.729190361703832
+          ],
+          "log_growth": [
+            2.335824012809402,
+            1.7802776780053593,
+            -0.4084998584597617,
+            0.45305778930821294,
+            1.3706282295992311,
+            1.0089077716553394,
+            1.1565318423764113,
+            2.979824765770106,
+            -0.7095959906531777,
+            -0.07826134795438,
+            1.1837835423888312,
+            0.2717942640976715,
+            1.7852879332994849,
+            2.3058674036113005,
+            0.26761074290858056,
+            -0.6263227632993202,
+            0.7763644223196178,
+            0.8926861209229879,
+            0.28587086900829556,
+            1.4031098938095947,
+            1.4177365803144644,
+            0.5073716504233943,
+            0.019002158331940425,
+            0.7206666255576895,
+            1.2733178399921539,
+            0.07718179620109095,
+            1.6523755668223248,
+            1.6584576417222154,
+            2.7122099970296203,
+            1.4440847856238659,
+            0.4477025208410522,
+            1.5926759555763055,
+            1.5825467194020446,
+            1.2306396871672467,
+            0.35177361136203833,
+            -0.03897986005651387,
+            0.7428636823621007,
+            1.9968082188471932,
+            0.5857770026973211,
+            1.1835374813142865,
+            1.8934934047308243,
+            -0.9554973038199917,
+            -1.4945718576315044,
+            0.33841992082759886,
+            1.7147445226515587,
+            0.48775983896843744,
+            0.5893674501965449,
+            3.2029095681766933,
+            0.6744163561843781,
+            0.4279883608105879,
+            1.386627590396104,
+            -0.5568089484309525,
+            -4.303833012792439,
+            5.359637430348613,
+            -1.209283950381031,
+            0.4468033172355811,
+            -0.03889413215901158,
+            0.16928398980659212,
+            0.24352912068432608,
+            0.9972250514173073,
+            1.1084888602679377,
+            0.8033358316949374,
+            1.0971839823805092,
+            1.6757736469391096,
+            -0.15766428600215687,
+            0.96230092903913,
+            0.1494445372613145,
+            0.3996352036992002,
+            2.3776648320842755,
+            0.6786677288083751,
+            1.4846739005880314,
+            0.8947326350794826,
+            1.3893287694848557,
+            -0.15730318813613697,
+            0.5878152302132233,
+            3.9111518384053983,
+            -1.0320792875107052,
+            4.261784733089597,
+            -2.637681357748041,
+            0.906011101098583,
+            0.02876834641612184,
+            0.6068885042303561,
+            0.48612250835684834,
+            1.8801688621619184,
+            -0.11160336423491274,
+            0.5263629373625097,
+            1.926531670147654,
+            0.0804642643286336,
+            0.7898140356996832,
+            0.04148344817102731,
+            0.7236403984462734,
+            0.029898749946144776,
+            1.1499076745164423,
+            1.7686957628551645,
+            0.5537112987275652,
+            0.8595516247521813,
+            3.3706367702466995,
+            -0.12701299748876158,
+            0.3627118804239301,
+            0.03744919927819357
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        }
+      },
+      {
+        "label": "fine",
+        "dt_ms": 0.025,
+        "same_original60s_state": true,
+        "duration_ms": 5000,
+        "quiet_intervals_ms": [
+          [
+            64521,
+            64682
+          ]
+        ],
+        "finite_time_growth": {
+          "status": "COMPLETE",
+          "dt_ms": 0.025,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 5000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": 9.692245282863514,
+          "one_second_blocks_per_s": [
+            17.53561337394297,
+            7.033938393941215,
+            4.932229662969389,
+            8.910119977379889,
+            15.234386208241265
+          ],
+          "log_growth": [
+            1.8031710929975708,
+            2.7185749337449217,
+            -0.6395826856326535,
+            0.3137957833253652,
+            0.1516987209251667,
+            1.3699507366445887,
+            1.6403550080532932,
+            2.8209237652323984,
+            5.146898012626903,
+            2.2098280060254134,
+            0.811521283739613,
+            3.150510348642316,
+            -1.451553743117289,
+            -0.02629999655469519,
+            1.0464916061904572,
+            0.1190382824559545,
+            0.4006927265340073,
+            2.178121889412206,
+            0.04860824430108375,
+            0.7568077523375604,
+            1.4655592608108394,
+            1.5194966489398731,
+            -0.20118561093952034,
+            -0.7713478079882949,
+            1.3158243980393767,
+            -0.13198183868652674,
+            0.8531752142127607,
+            1.319532967284975,
+            -1.0763904585572228,
+            0.6395468898531295,
+            0.6299379643051953,
+            1.1272402779936521,
+            1.0312580938785727,
+            1.4456227630446237,
+            -0.2513556249962792,
+            1.7621787953961938,
+            1.4172847245818794,
+            1.0705768538411118,
+            1.5503106364506503,
+            -0.8729345071157119,
+            1.873524701501504,
+            0.166295410740416,
+            1.9637779997635667,
+            0.016096721310218765,
+            0.723666058458247,
+            -3.9506212301378634,
+            4.313405565411504,
+            3.141212352045908,
+            2.8659852951505753,
+            4.12104333399719
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        }
+      }
+    ],
+    "local_pretermination_test": {
+      "status": "LOCAL_RETURN_MESH_CHECK_NOT_PASSED",
+      "rows": [
+        {
+          "dt_ms": 0.05,
+          "qualified_Core_A_quiet_ms": [
+            [
+              64830,
+              64919
+            ],
+            [
+              64973,
+              65105
+            ],
+            [
+              65161,
+              65330
+            ]
+          ],
+          "minimum_Core_A_10ms_hz": 2.182093364111358e-05,
+          "original_coarse_bitwise": true,
+          "all_Z_held": true,
+          "all_M_dynamic": true,
+          "seconds": 54.37335658073425
+        },
+        {
+          "dt_ms": 0.025,
+          "qualified_Core_A_quiet_ms": [],
+          "minimum_Core_A_10ms_hz": 85.07832141384498,
+          "original_coarse_bitwise": false,
+          "all_Z_held": true,
+          "all_M_dynamic": true,
+          "seconds": 117.198322057724
+        },
+        {
+          "dt_ms": 0.0125,
+          "qualified_Core_A_quiet_ms": [],
+          "minimum_Core_A_10ms_hz": 91.1109036733611,
+          "original_coarse_bitwise": false,
+          "all_Z_held": true,
+          "all_M_dynamic": true,
+          "seconds": 233.7082061767578
+        }
+      ],
+      "first_quiet_timing_ms": [
+        64830,
+        null,
+        null
+      ],
+      "scope": "Observed late-return numerical robustness only. Finite-time and local history control, not a proof of chaos, crisis or a parameter bifurcation.",
+      "model_promoted": false
+    },
+    "interpretation": "Both full-state continuations from the60s state exhibit a qualified Core-A quiet return. The same late coarse episode is not locally reproduced after step halving from64.65s. Thus the finite observation does not establish a permanent sustained attractor at either step, but pointwise return timing and a critical parameter are not mesh-certified.",
+    "model_promoted": false
+  },
+  "late_return_local_mesh_control": {
+    "status": "LOCAL_RETURN_MESH_CHECK_NOT_PASSED",
+    "rows": [
+      {
+        "dt_ms": 0.05,
+        "qualified_Core_A_quiet_ms": [
+          [
+            64830,
+            64919
+          ],
+          [
+            64973,
+            65105
+          ],
+          [
+            65161,
+            65330
+          ]
+        ],
+        "minimum_Core_A_10ms_hz": 2.182093364111358e-05,
+        "original_coarse_bitwise": true,
+        "all_Z_held": true,
+        "all_M_dynamic": true,
+        "seconds": 54.37335658073425
+      },
+      {
+        "dt_ms": 0.025,
+        "qualified_Core_A_quiet_ms": [],
+        "minimum_Core_A_10ms_hz": 85.07832141384498,
+        "original_coarse_bitwise": false,
+        "all_Z_held": true,
+        "all_M_dynamic": true,
+        "seconds": 117.198322057724
+      },
+      {
+        "dt_ms": 0.0125,
+        "qualified_Core_A_quiet_ms": [],
+        "minimum_Core_A_10ms_hz": 91.1109036733611,
+        "original_coarse_bitwise": false,
+        "all_Z_held": true,
+        "all_M_dynamic": true,
+        "seconds": 233.7082061767578
+      }
+    ],
+    "first_quiet_timing_ms": [
+      64830,
+      null,
+      null
+    ],
+    "scope": "Observed late-return numerical robustness only. Finite-time and local history control, not a proof of chaos, crisis or a parameter bifurcation.",
+    "model_promoted": false
+  },
+  "above_SN_70s": {
+    "status": "AUDIT_PASS",
+    "label": "above_SN",
+    "coordinates": {
+      "D_A": 0.3631576412548057,
+      "Z_A": 0.6368423587451943,
+      "D_global": 0.21899748041452027,
+      "native_time_ms": 10067.69345650688
+    },
+    "observed_ms": 70000,
+    "all_Z_held": true,
+    "all_M_dynamic": true,
+    "quiet_intervals_ms": [
+      [
+        0,
+        39
+      ]
+    ],
+    "activities": [
+      {
+        "start_ms": 39,
+        "end_ms": 70000,
+        "duration_ms": 69961,
+        "left_censored": false,
+        "right_censored": true
+      }
+    ],
+    "sources": [
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block00.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block01.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block02.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/block03.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block00.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block01.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block02.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block03.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block04.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block05.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block06.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block07.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block08.npz",
+      "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/block09.npz"
+    ],
+    "scope": "Finite actual history; censored activity duration cannot establish asymptotic persistence or a bifurcation.",
+    "model_promoted": false
+  },
+  "returning_coarse_growth": {
+    "status": "COMPLETE",
+    "dt_ms": 0.05,
+    "alignment_discard_ms": 2000,
+    "duration_ms": 10000,
+    "renormalization_ms": 100,
+    "finite_time_growth_per_s": 8.63540644094208,
+    "one_second_blocks_per_s": [
+      2.618422052717512,
+      8.462753721532945,
+      12.391965525267379,
+      9.421683217014285,
+      8.80756820013896,
+      5.880438960575305,
+      4.08121101060644,
+      12.852722577286832,
+      6.764949783126605,
+      8.882712253520822
+    ],
+    "log_growth": [
+      4.725636410955201,
+      1.3579890866706723,
+      0.7804855657608565,
+      1.8087584880017569,
+      -4.520722263951581,
+      3.6078489817871984,
+      -4.852328159564175,
+      3.952196606541708,
+      0.4352186958770778,
+      -4.676661359361203,
+      4.808896530105481,
+      1.0642065970097858,
+      1.1620535725366978,
+      -2.2207282402015123,
+      1.3652364336305483,
+      -0.46062119011157554,
+      0.226223741943458,
+      0.9365297755065818,
+      1.1446101213529778,
+      0.4363463797605032,
+      1.640933874195693,
+      1.2104473587570745,
+      0.5093330519025554,
+      1.0031997396628523,
+      3.438238788401493,
+      0.2719619877239065,
+      1.5004480697467246,
+      0.0337000080468234,
+      1.5930071306716558,
+      1.1906955161586008,
+      1.345125093839541,
+      1.4605081773647957,
+      1.4663124727732517,
+      0.8059503684460736,
+      0.2937541628103546,
+      1.0721583819531544,
+      -0.17828942089423191,
+      0.5959950713946129,
+      1.1294777118226393,
+      1.4306911975040932,
+      2.1636153463287275,
+      3.76240013130867,
+      0.9545747541198129,
+      1.418760132900156,
+      -0.9698696944889351,
+      0.8998548855902966,
+      0.7637107301252513,
+      -0.8507428406554279,
+      0.20401404470055912,
+      0.46125071020985,
+      0.4652151432285976,
+      1.1105912247910361,
+      1.109452217201718,
+      0.0636992472665336,
+      1.3930964517947966,
+      0.08764363620760762,
+      1.209124777111757,
+      -1.5010691089167127,
+      0.6941959695631276,
+      1.248489402326844,
+      -4.906245193077273,
+      4.850699403904173,
+      -0.2866933447464677,
+      0.183152187874824,
+      -1.0637593565606778,
+      0.2412303825448213,
+      4.082265429585804,
+      0.06439824734778443,
+      0.2767002268610564,
+      0.6394630268723946,
+      1.9410322113724228,
+      2.1678260146211232,
+      2.005501115753812,
+      -1.0274564633430885,
+      2.0053078148725287,
+      1.3489425015166217,
+      2.024094182019262,
+      1.299748364578313,
+      0.7933035276104111,
+      0.29442330828542745,
+      1.0534388133098969,
+      -0.046146654113940824,
+      0.5010477599957894,
+      1.9367355597038196,
+      -0.08852185642239062,
+      0.9688491211728643,
+      1.1506081044253875,
+      -0.3127423752884849,
+      0.878940493939422,
+      0.7227408164042419,
+      1.3646771136706937,
+      -0.009166626057641136,
+      0.22064788065608937,
+      1.4272880138561752,
+      1.7122565155924692,
+      0.14471628967794348,
+      1.0903124527348815,
+      1.2350637349480964,
+      0.2685466240954107,
+      1.428370254346702
+    ],
+    "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+    "model_promoted": false
+  },
+  "fine_D0343158_periodic_root": {
+    "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/fine_D0343158_coreB",
+    "status": "NUMERICAL_PERIODIC_ROOT",
+    "period_ms": 261.6271791003456,
+    "combined_relative_rms": 5.790087525029594e-08,
+    "physical_acceptance": "INDEPENDENT_PHASE_AND_FLOQUET_PENDING"
+  },
+  "multiple_shooting_current": {
+    "status": "STOPPED_AFTER_ACCEPTED_STEP_TO_PRIORITIZE_REFINED_TRANSITION_BRANCH",
+    "period_ms": 959.9496383712112,
+    "max_combined_relative_rms": 0.1381834134308022,
+    "physical_Floquet": "NOT_ESTABLISHED",
+    "scientific_type": "NOT_A_PERIODIC_ROOT",
+    "reason": "The actualD_A=.34316 state has a late quiet return at both tested full-continuation steps; an unrelated assumed long-period sustained attractor is not established. One additional accepted multiple-shooting step lowers coordinate residual by11% but maximum physical matching error remains.138. Preserve the complete proposal and prioritize the known short branch across the relevantD neighborhood atdt.025. This is neither a branch endpoint nor a bifurcation.",
+    "model_promoted": false
+  },
+  "latest_actual_state_seed": {
+    "path": "near_returns/above70s_A_sustained_B_cycle/exact_seed/result.json",
+    "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+    "period_ms": 537,
+    "full_state_error": 0.08910448330570085,
+    "scope": "Actual high-A/B-intermittent initial guess. No orbit or bifurcation label."
+  },
+  "fine_D0343158_phase": {
+    "path": "near_returns/mid_lower/fine_D0343158_coreB/independent_dt0p025/result.json",
+    "status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "quarter_phase_combined": 1.2316838494992806e-06,
+    "original_gate": 1e-06
+  },
+  "actual_growth_same_window_contrast": {
+    "path": "actual_growth_same_window_contrast.json",
+    "status": "MATCHED_WINDOW_READOUT_PASS",
+    "observation_unit": "Same complete-state source and2--5s window atdt.05/.025 per local resource field; not independent replicates.",
+    "conclusion": "Finite-time positive growth on both returning and strong-depletion actual states. Quiet returns atlowerD andlate-returnD, not atstrongerfield withinmatched5s. No crisis or asymptotic-stability classification."
+  },
+  "fine_D0353158_root": {
+    "path": "near_returns/mid_lower/fine_D0353158_coreB/result.json",
+    "status": "NUMERICAL_PERIODIC_ROOT",
+    "period_ms": 261.90462602413277,
+    "full_state_closure": 1.487908093442387e-08,
+    "scope": "Short-burst numerical periodic branch exists at the certified equilibrium SN coordinate. Its phase,mesh,and Floquet remain separate; no attracting-cycle or onset linkage implied."
+  },
+  "fold_parameter_direction": {
+    "path": "fold_certificate/parameter_direction.json",
+    "status": "LOCAL_FOLD_ORIENTATION_VERIFIED",
+    "direction": "Unstable high-equilibrium pair is created asCore-AZdepletes;D_A>D_c side only locally."
+  },
+  "short_cycle_above_finite_time_transition": {
+    "source": "near_returns/mid_lower/fine_D0363158_projected_finish",
+    "D_A": 0.3631576412548057,
+    "numerical_root": "NUMERICAL_PERIODIC_ROOT",
+    "period_ms": 262.58274114676965,
+    "closure_relative_rms": 3.7152146854e-09,
+    "Core_A_mean_hz": 130.9739,
+    "Core_A_instantaneous_below5_fraction": 0.5772,
+    "independent_phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+    "quarter_phase_relative_rms": 3.3116810348e-06,
+    "interpretation": "Self-terminating short numerical periodic root persists at the field where actual A activity is69.961s right-censored; not the actual sustained-state attractor. No stability or complete branch certificate."
+  },
+  "actual_sustained_skeleton_jobs": [
+    "near_returns/above70s_A_sustained_B_cycle/multiple_three_B_refine"
+  ],
+  "entry_vs_permanence": "Primary entry into prolonged Core-A activity is distinct from eventual disappearance of all quiet returns. Later finite returns do not negate prior onset-like episodes.",
+  "priority_entry_interval": {
+    "D_A": [
+      0.2557216996140609,
+      0.3
+    ],
+    "Z_A": [
+      0.7442783003859391,
+      0.7
+    ],
+    "status": "FINITE_TIME_STATE_CONTRAST_NOT_CRITICAL_BRACKET",
+    "source": "reference_stability_gap/decision_record.md"
+  },
+  "D0300_actual_prefix": {
+    "source": "reference_stability_gap/actual_D0300/from_interictal_history/prefix10s_audit.json",
+    "status": "SUPERSEDED_BY_COMPLETE20S_AUDIT_PASS",
+    "complete_long_activity_ms": [
+      3290,
+      2428,
+      806,
+      449,
+      550,
+      4545
+    ],
+    "all_M_dynamic": true,
+    "only_A_Z_changed": true
+  },
+  "short_cycle_reference_bridge": {
+    "source": "active_classification_status.json",
+    "D_A": [
+      0.255721699614062,
+      0.27,
+      0.3,
+      0.334
+    ],
+    "verified_numerical_multipliers": [
+      -32.87766136278292,
+      -37.68741926348024,
+      -30.885897135263352,
+      -33.057464
+    ],
+    "meaning": "D0255722 uses native9015.710ms A field, same mean but different spatial pattern from exact9s reference. Its large negative numerical multiplier is not yet the exact9s spectrum. D0270/D0300 numerical roots and actual trajectories use matching full fields; their known negative eigenpairs do not establish a critical crossing."
+  },
+  "latest_actual_reference_seed": {
+    "path": "reference_stability_gap/actual_reference_recurrence/exact_six_burst_seed/result.json",
+    "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+    "period_ms": 1576.5,
+    "complete_state_error": 0.007801751988709744,
+    "original_group_rates": "BITWISE_PASS"
+  },
+  "D0300_actual_complete": {
+    "status": "AUDIT_PASS",
+    "source": "reference_stability_gap/actual_D0300/from_interictal_history/whole_record_audit.json",
+    "longest_complete_activity_ms": 4545,
+    "initial_complete_events_about_ms": 100,
+    "whole_M_dynamic": true,
+    "only_A_Z_changed": true
+  },
+  "D0348158_actual_complete": {
+    "status": "AUDIT_PASS",
+    "quiet_intervals_ms": [
+      [
+        10546,
+        10571
+      ],
+      [
+        10618,
+        10783
+      ]
+    ],
+    "last_activity_right_censored_ms": 59217,
+    "scope": "Later persistence question, not first entry into prolonged activity."
+  },
+  "neutral_derivative_refinement": {
+    "source": "near_returns/mid_lower/coarse_D0334_positive_cubic/neutral_derivative_refinement_no_thp/result.json",
+    "orders": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "neutral_errors": [
+      0.009778411846275457,
+      0.011234841041991829,
+      0.011235306904606522,
+      0.01123541775237394
+    ],
+    "status": "ORIGINAL_NEUTRAL_GATE_STILL_FAILED",
+    "physical_Floquet": "NOT_PROMOTED"
+  },
+  "parameter_path_audit": {
+    "path": "reference_stability_gap/parameter_path_audit.json",
+    "first_crossing_field_jump_count": 3,
+    "future_continuation_parameter": "native path time;D_A remains display coordinate"
+  },
+  "D0270_actual_complete": {
+    "status": "AUDIT_PASS",
+    "observed_ms": 20000,
+    "longest_complete_activity_ms": 94
+  },
+  "latest_entry_investigation": {
+    "updated_local": "2026-09-25T02:25:04.917470+08:00",
+    "onset_type": "NOT_ESTABLISHED",
+    "fixed_model": "3479-group spatial rate drift; frozen conditionalZ; allE M dynamic; CoreA native spatialpath only, outsideA native9s.",
+    "actual_entry_evidence": {
+      "DA0270": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.27,
+        "Z_A": 0.73,
+        "native_interpolation_time_ms": 9116.474189515997,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 94,
+        "complete_A_activities_ge_1000ms": []
+      },
+      "DA0300": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.3,
+        "Z_A": 0.7,
+        "native_interpolation_time_ms": 9594.906685976377,
+        "complete_A_activity_count": 34,
+        "longest_complete_A_activity_ms": 4545,
+        "complete_A_activities_ge_1000ms": [
+          3290,
+          2428,
+          4545
+        ]
+      },
+      "DA0300_dt025": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 10000,
+        "D_A": 0.3,
+        "Z_A": 0.7,
+        "native_interpolation_time_ms": 9594.906685976377,
+        "complete_A_activity_count": 21,
+        "longest_complete_A_activity_ms": 2867,
+        "complete_A_activities_ge_1000ms": [
+          2867,
+          1919
+        ]
+      },
+      "native9420": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.27512138314687007,
+        "Z_A": 0.7248786168531299,
+        "native_interpolation_time_ms": 9420.0,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 96,
+        "complete_A_activities_ge_1000ms": []
+      },
+      "native_midpoint": {
+        "status": "COMPLETE",
+        "audit": "AUDIT_PASS",
+        "observed_ms": 20000,
+        "D_A": 0.28764862467548047,
+        "Z_A": 0.7123513753245195,
+        "native_interpolation_time_ms": 9507.453342988189,
+        "complete_A_activity_count": 76,
+        "longest_complete_A_activity_ms": 104,
+        "complete_A_activities_ge_1000ms": []
+      }
+    },
+    "parameter_path": "NativeTimeFamily continuous per-group native-time interpolation; D_A is display only. Prior first-upcrossing meanD lookup has3field jumps and cannot define one continuous branch.",
+    "source_correction": "D0255722 shortcycle spectrum belongs to native9015.710msAfield, not exactnative9000 reference. Original reference sixburstseed usesexact9sfield.",
+    "periodic_work": {
+      "high_A_three_B": "multiple_three_B_refine COMPLETE ITERATION_LIMIT_NOT_A_PERIODIC_ROOT; acceptediteration07T534.739122693926ms maxmatching.0005176222; no furtherbatch, prioritizeearlierentry.",
+      "reference_six_burst": "K12 stopped intentionally after first accepted complete iterate T1576.5360852ms, maxmatching.00942961713; preserved restart nodes and scheduling_stop.json. Original KeyboardInterrupt worker status retained. Not a root or bifurcation.",
+      "DA0270_nine_burst": "Fixedgridretryall6cachechecksPASS; fullborderedFD3.5364e-5PASS. Iteration00Krylov17relative7.34694e-5reachedlineartolerance; actualnonlineartrialpending. Originalshape-copyfailureandsolverfloorstopretained.",
+      "midpoint_three_burst": "FixedgridK6RUNNING, all6cachechecksPASS andFDpassed; iteration00Krylov15relative.00471719. Originalequalpartition6iterationbatchcompletenotroot."
+    },
+    "known_SN": "Generic high-equilibrium surround-dominated saddle-node remainscertified and unlinked to onset.",
+    "model_promoted": false,
+    "replay_precision_note": "Newmidpoint exactreplayFAILretained(max10ms outputdelta3.375e-14Hz). Fiveindependent graph/manual/synchronizedreplaysstartfromidenticalbits and differabout1.6--2.8e-15 inphysicalblocknorm. Causeunattributed. SeparatepredeclaredFP64componentbound<=1e-14+1e-12*abs(reference),combined<1e-12/blocks<1e-11implementationcheckPASS; latest3repeatswerealsoexact. Thisonlyamendsthefinite-runreplaygate; nochange toperiodicclosure,derivative,phase,mesh,stabilityorclassificationgates. Allfailuresandarrayspreserved.",
+    "entry_neighborhood": {
+      "native_path_time_ms": [
+        9507.453342988189,
+        9594.906685976377
+      ],
+      "Z_A": [
+        0.7123513753245195,
+        0.7
+      ],
+      "scope": "Same complete initial history,20s each; finite-window short-to-prolonged local activity contrast, not a bifurcation or permanence bracket.",
+      "mesh_status": "NOT_VALIDATED: finer same-field run already has a complete1.679slongactivity at the former coarse short endpoint. Retain coarse finite-window observations; withdraw any mesh-independent boundary interpretation."
+    },
+    "preentry_growth": {
+      "DA0270": {
+        "tangent_result.json": {
+          "status": "COMPLETE",
+          "dt_ms": 0.05,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 10000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": -1.1555437528830668,
+          "one_second_blocks_per_s": [
+            1.0851771280130347,
+            9.006652472113911,
+            0.38549787893695964,
+            -4.174510742498409,
+            -6.03248044735197,
+            8.021643550567253,
+            2.7485440317215124,
+            -0.2681852628178145,
+            -5.49256523897568,
+            -4.43229379264638
+          ],
+          "log_growth": [
+            10.068823330540786,
+            -2.0083594130768443,
+            -5.59150715605731,
+            7.99832460863659,
+            -9.917569696103723,
+            9.402487468677295,
+            0.20109704041750576,
+            -8.533715879190284,
+            9.107617597312677,
+            -9.642020773143658,
+            3.148922650142272,
+            6.035223179882287,
+            -7.652373428109384,
+            7.627872822330511,
+            -0.5817909081923527,
+            -7.69610056965254,
+            8.890146707844309,
+            -10.248113557633516,
+            7.267657998417706,
+            2.2152075770846196,
+            -7.356606314921642,
+            7.878709083702823,
+            -0.7874697397399696,
+            -7.290475079776749,
+            8.318516714538793,
+            -9.515259982909315,
+            8.022929005240695,
+            0.5361804558886589,
+            -8.602629021634247,
+            9.181602758547912,
+            -1.0676867241409311,
+            -6.418047879546655,
+            7.493733527033816,
+            -10.117333701947164,
+            9.582850402829854,
+            0.9499276853891296,
+            -8.91415683623509,
+            8.650678226546432,
+            -2.2412520099212436,
+            -2.093223432506557,
+            3.911327571550726,
+            -9.819289291981507,
+            9.875314817814845,
+            0.32562961835926796,
+            -8.51873337124049,
+            8.292733202189128,
+            -10.100530734591983,
+            8.074277117555441,
+            1.9885390058857262,
+            -10.061748382893123,
+            9.97411342710362,
+            -0.5454966836191082,
+            -6.4815560901005425,
+            7.408982548599026,
+            -3.110926431422516,
+            1.9481996122453111,
+            0.7187940654615702,
+            -8.969722322367703,
+            9.20076656958981,
+            -2.121511144922213,
+            -2.1311330665004387,
+            4.303223888990451,
+            -9.161259253457922,
+            8.72976794341339,
+            -0.5724651104519728,
+            -7.798419288493008,
+            8.768051558816085,
+            0.5239197906556246,
+            -2.301381241987269,
+            2.3882388107365724,
+            -10.355825619890066,
+            9.94356639773697,
+            -0.567662040538224,
+            -7.638554388883838,
+            8.25473132928769,
+            -10.529637420326011,
+            8.960574151967606,
+            1.2862514634593951,
+            -8.353659972800353,
+            8.732030837169017,
+            -9.039765908329793,
+            1.0135161488523998,
+            8.045007075165126,
+            -8.527543308415504,
+            7.674558233758585,
+            0.3166505511854826,
+            -8.408727273165287,
+            8.862187300623933,
+            -9.788522655771613,
+            4.360074597120991,
+            5.378234405864327,
+            -1.4051499390927493,
+            0.5828472546607535,
+            0.07487617736873903,
+            -8.538406056546348,
+            9.180334148414591,
+            -8.9032300223966,
+            5.67270066481588,
+            2.7964912751914435,
+            -9.270991700926416
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        },
+        "local_state_audit.json": {
+          "status": "AUDIT_PASS",
+          "label": "DA0270",
+          "coordinates": {
+            "D_A": 0.27,
+            "Z_A": 0.73,
+            "native_interpolation_time_ms": 9116.474189515997
+          },
+          "window_ms": [
+            5000.0,
+            10000.0
+          ],
+          "rows": [
+            {
+              "region": "Global E",
+              "mean_rate_hz": 34.64578527548828,
+              "quiet_fraction": 0.5516,
+              "duty_above50": 0.252,
+              "range_10ms_hz": [
+                0.009368502480332464,
+                178.68426024233145
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                121,
+                122,
+                93,
+                127,
+                119,
+                93,
+                154,
+                113,
+                117,
+                121,
+                123,
+                93,
+                127,
+                119,
+                93,
+                155,
+                114,
+                117,
+                121
+              ]
+            },
+            {
+              "region": "Core A",
+              "mean_rate_hz": 108.7789601253035,
+              "quiet_fraction": 0.652,
+              "duty_above50": 0.2974,
+              "range_10ms_hz": [
+                1.5340948546387993e-05,
+                473.92511714459715
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                93,
+                88,
+                93,
+                93,
+                89,
+                93,
+                92,
+                91,
+                92,
+                93,
+                88,
+                93,
+                93,
+                89,
+                93,
+                92,
+                91,
+                92,
+                92
+              ]
+            },
+            {
+              "region": "Core B",
+              "mean_rate_hz": 90.22315117955475,
+              "quiet_fraction": 0.6184,
+              "duty_above50": 0.3184,
+              "range_10ms_hz": [
+                1.5208488074579502e-05,
+                474.79691567845674
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                94,
+                137,
+                82,
+                93,
+                137,
+                81,
+                90,
+                91,
+                104,
+                95,
+                138,
+                81,
+                93,
+                137,
+                80,
+                90,
+                90,
+                101,
+                94
+              ]
+            },
+            {
+              "region": "Surround",
+              "mean_rate_hz": 31.376572424622985,
+              "quiet_fraction": 0.5634,
+              "duty_above50": 0.24,
+              "range_10ms_hz": [
+                0.009840867977002076,
+                165.8636938893517
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                118,
+                117,
+                91,
+                125,
+                113,
+                90,
+                152,
+                111,
+                114,
+                119,
+                117,
+                91,
+                124,
+                114,
+                91,
+                152,
+                111,
+                114,
+                119
+              ]
+            }
+          ],
+          "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+          "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+          "model_promoted": false
+        }
+      },
+      "native_midpoint": {
+        "tangent_result.json": {
+          "status": "COMPLETE",
+          "dt_ms": 0.05,
+          "alignment_discard_ms": 2000,
+          "duration_ms": 10000,
+          "renormalization_ms": 100,
+          "finite_time_growth_per_s": 1.2899451350992859,
+          "one_second_blocks_per_s": [
+            7.713329772077533,
+            3.0587958911792574,
+            5.204380228485142,
+            -9.076803409285795,
+            -2.2861139496817646,
+            14.750007426016753,
+            5.3952918589632235,
+            -1.1220441316091065,
+            -7.569213846503299,
+            5.024056904409118
+          ],
+          "log_growth": [
+            9.171131900949351,
+            -0.7222626111319594,
+            -7.124657232552517,
+            8.615258771954744,
+            -4.275492543230576,
+            3.0218052954905734,
+            1.3517110199706575,
+            -8.535695835481604,
+            9.12554430347678,
+            -2.9140132973679167,
+            -5.491464376292137,
+            8.456814590827975,
+            -9.717567845936097,
+            8.714272126684023,
+            0.6051147969477839,
+            -8.981288945028846,
+            9.310787570876734,
+            -9.196757560468198,
+            1.6137403824202325,
+            7.745145151147787,
+            2.241727100499819,
+            0.9654504527713719,
+            -0.1364985332097795,
+            -6.617584640800172,
+            7.103741317579978,
+            -2.4503047970332092,
+            -2.390620992403048,
+            7.8434061955781536,
+            -9.629135377120848,
+            8.274199502622878,
+            0.3946930227186208,
+            -7.5780106225930846,
+            7.814600347928329,
+            -10.484870788690339,
+            4.298578584810081,
+            4.765664802171511,
+            -6.395514137751118,
+            6.047074812460342,
+            -0.29835069010472715,
+            -7.640668740235407,
+            8.608753985928148,
+            -9.467651574350665,
+            6.955635045921823,
+            0.704110940853927,
+            -8.893290544449012,
+            8.448276505348524,
+            1.4610993070854326,
+            -7.267492052873926,
+            7.761712174107201,
+            -10.597267737253217,
+            9.267761776707273,
+            3.5165955675195493,
+            3.3432095144300065,
+            -1.0494581265675997,
+            -9.149226393756773,
+            6.457469065417189,
+            3.4379932913476825,
+            -9.239750180244512,
+            8.050746588095786,
+            0.11466632306814906,
+            -5.933111607110408,
+            9.006690133946025,
+            -1.8134323922229834,
+            -1.7560994853655445,
+            3.214709374735639,
+            -9.68264499894202,
+            9.960326923562633,
+            -0.5674169716329237,
+            -5.89279244554112,
+            8.859063327533926,
+            -9.633046223224001,
+            7.366896238145302,
+            1.761230334778758,
+            -9.197050862253407,
+            9.6375608183988,
+            -1.247311130972057,
+            -6.988069883934864,
+            8.351424516375339,
+            -10.527184044746171,
+            9.353506105823197,
+            0.9239165327941649,
+            -8.511575592718941,
+            8.813244911251635,
+            -1.6573180606500517,
+            -5.800927096132187,
+            7.3213156822291605,
+            -10.410713555285488,
+            9.8786890327839,
+            0.2345891119120274,
+            -8.360434812687517,
+            8.840046391330464,
+            -2.1779894583837573,
+            -2.2697745650719585,
+            4.077668634503782,
+            -10.080624809749581,
+            10.021212045746987,
+            -0.16172440359470724,
+            -7.842928886658807,
+            8.481720054067422,
+            -3.8635480977807233
+          ],
+          "scope": "Finite-time full delayed-state directional growth. Not an asymptotic Lyapunov or bifurcation certificate.",
+          "model_promoted": false
+        },
+        "local_state_audit.json": {
+          "status": "AUDIT_PASS",
+          "label": "native_midpoint",
+          "coordinates": {
+            "D_A": 0.28764862467548047,
+            "Z_A": 0.7123513753245195,
+            "native_interpolation_time_ms": 9507.453342988189
+          },
+          "window_ms": [
+            5000.0,
+            10000.0
+          ],
+          "rows": [
+            {
+              "region": "Global E",
+              "mean_rate_hz": 35.08597143174994,
+              "quiet_fraction": 0.5362,
+              "duty_above50": 0.262,
+              "range_10ms_hz": [
+                0.011736618624339227,
+                178.88838237190572
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                128,
+                204,
+                110,
+                131,
+                128,
+                120,
+                129,
+                97,
+                127,
+                121,
+                95,
+                127,
+                120,
+                95,
+                126,
+                120,
+                94,
+                127,
+                120
+              ]
+            },
+            {
+              "region": "Core A",
+              "mean_rate_hz": 113.90231168772709,
+              "quiet_fraction": 0.6328,
+              "duty_above50": 0.3142,
+              "range_10ms_hz": [
+                1.7657785555329367e-05,
+                474.91729204496534
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                100,
+                93,
+                96,
+                90,
+                104,
+                100,
+                91,
+                100,
+                100,
+                92,
+                99,
+                100,
+                92,
+                99,
+                99,
+                92,
+                98,
+                99,
+                92
+              ]
+            },
+            {
+              "region": "Core B",
+              "mean_rate_hz": 90.61005923655144,
+              "quiet_fraction": 0.6006,
+              "duty_above50": 0.334,
+              "range_10ms_hz": [
+                1.8350887121939993e-05,
+                474.74123378297475
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                92,
+                92,
+                103,
+                136,
+                93,
+                99,
+                137,
+                90,
+                90,
+                134,
+                83,
+                94,
+                134,
+                82,
+                94,
+                134,
+                81,
+                94,
+                135
+              ]
+            },
+            {
+              "region": "Surround",
+              "mean_rate_hz": 31.702207361901586,
+              "quiet_fraction": 0.5456,
+              "duty_above50": 0.2444,
+              "range_10ms_hz": [
+                0.012327865618217377,
+                165.78898412314499
+              ],
+              "complete_local_episodes": 19,
+              "episode_durations_ms": [
+                125,
+                205,
+                108,
+                129,
+                125,
+                118,
+                127,
+                94,
+                125,
+                117,
+                92,
+                125,
+                117,
+                92,
+                124,
+                116,
+                93,
+                124,
+                116
+              ]
+            }
+          ],
+          "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+          "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+          "model_promoted": false
+        }
+      }
+    },
+    "midpoint_recurrence": "Late10--20s3burstT790.276ms candidate. Initial source replay failure retained. Independent5s replay passes original storedprecision and endpoint combined1.4467e-11; newsource acceptance rechecked6nodesx3shortreplays. This source is only a recurrence seed; no root/type.",
+    "numerical_discrepancy": "One-step compute-sanitizer memcheck/racecheck report0errors; limited coverage. Six full131.8ms graph/manual-synchronized nominal+tangent trajectories from exactpacked node1 matchbitwise. CPU coordinate alignment/copy roundtrips matchexactly. None explains rare prior nominal drift; no physical model/kernel/tolerance changes.",
+    "prolonged_entry_growth": {
+      "status": "BOTH_FINITE_GROWTH_RUNS_COMPLETE",
+      "rows": [
+        {
+          "label": "coarse",
+          "dt_ms": 0.05,
+          "common_2to5s_growth_per_s": 8.826087567041453,
+          "full_post_alignment_growth_per_s": 5.974600889028986,
+          "one_second_blocks_per_s": [
+            11.472031012348866,
+            3.183916144909826,
+            8.263819743458669,
+            14.063395790804606,
+            4.151047166861088,
+            -2.3161845524623796,
+            0.07175264279031346,
+            5.1176877357712796,
+            9.667271739518915,
+            8.77801684548941
+          ],
+          "duration_ms": 10000
+        },
+        {
+          "label": "fine",
+          "dt_ms": 0.025,
+          "common_2to5s_growth_per_s": 6.546396556153304,
+          "full_post_alignment_growth_per_s": 6.546396556153304,
+          "one_second_blocks_per_s": [
+            12.256701802446734,
+            11.86830573064901,
+            10.472918317422259,
+            7.79282292999611,
+            1.3734484210415436
+          ],
+          "duration_ms": 5000
+        }
+      ],
+      "same_initial_state": true,
+      "independent_replicates": false,
+      "observation": "Growth is positive in both discretizations over the common2--5s window; detailed waveforms and growth values differ.",
+      "inference_limit": "Finite directional growth is not an asymptotic Lyapunov certificate, does not rule out eventual stable dynamics, and does not identify a bifurcation. The short-event midpoint already has positive finite growth over10s, so its mere sign cannot explain onset of long activities.",
+      "bifurcation_type": "NOT_ESTABLISHED",
+      "model_promoted": false
+    },
+    "M_diagnostic": {
+      "status": "EARLY_AND_LATE_PAIRED_INTERVENTIONS_COMPLETE",
+      "comparison": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/M_intervention_comparison.json",
+      "early": {
+        "start_ms": 2800,
+        "normal_long_duration_ms": 3290,
+        "held_M_long_duration_ms": 4823,
+        "normal_return_ms": 6143,
+        "held_return_ms": 7676,
+        "held_M_A": 0.06128392929944654,
+        "normal_original_replay_bitwise": true,
+        "source_replay_bitwise": true
+      },
+      "late": {
+        "start_ms": 5000,
+        "normal_return_ms": 6143,
+        "held_return_ms": 6134,
+        "held_M_A": 0.15588242138778013,
+        "normal_original_replay_bitwise": true
+      },
+      "implication": "A complete long activity and return occurs in the fixed fast spatial network even with both entireZ andeveryMheld frombeforeentry. M evolution changes duration but isnotnecessaryforthisone localactivitytermination. No general M irrelevance, no CoreA-M-only attribution and no bifurcationtype fromtheseinterventions."
+    },
+    "entry_stationary_screen": "Two full dynamic-M stationary root guesses (shortfieldlast5smean, firstlong1smean) bothROOT_FAIL, residuals.25865/.36352perms. No nonexistence/type conclusion.",
+    "new_spectrum_driver": "core_a_multiple_spectrum.py written/compiled,NOTRUN. Requiresclosedmultiple-shootingroot andindependentwholeflowresidual; thenper-nodecached/originalQA andautonomousneutralgate; onlythenboundedfull-stateArnoldi. No tolerance orphysicalmodelchange.",
+    "same_field_history_control": {
+      "status": "RUNNING",
+      "destination": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_entry_carried_history",
+      "session": 95310,
+      "check": "PASS_10MS_BITWISE",
+      "condition": "Only nativeCoreAZ .712351 to.700; complete20snearbyshort-history carried unchanged,allMdynamic,allZheld,one10s continuation. Finitehistorycontrolnotbasincertificate."
+    },
+    "new_figure": {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/first_long_M_intervention_from2800/figures/fig_M_clamp_spatial_return.png",
+      "PDF": "samebasename.pdf",
+      "meaning": "EarlyMclamp pairedactivitybars andsame-time50ms spatialEfields; no bifurcationdiagram orcriticalsymbol. AllZheld botharms.",
+      "agent_visual": "PNG_and_PDF_PASS",
+      "human_visual": "PENDING"
+    },
+    "carried_history_control": {
+      "status": "COMPLETE_AUDIT_PASS",
+      "path": "reference_stability_gap/actual_entry_carried_history/from_nearby_short_history",
+      "duration_ms": 10000,
+      "changed": "OnlyA Z toexactDA0300, fromnearbyshortfield20sfullstate; allMdynamic",
+      "complete_long_activity_ms": [
+        522,
+        553,
+        276
+      ],
+      "final_activity_observed_ms": 1060,
+      "final_activity_right_censored": true,
+      "interpretation": "SameDA0300canaccess>1slocalactivityfromnearbyshort-historyseedtoo; time/durationdependsontheinitialhistory. Notcoexistenceorbasinproof."
+    },
+    "M_controls_latest": "Both independent audits PASS. Early allM clampfrom2.8s: firstcompleteAactivity normal2853--6143ms=3290ms, held2853--7676ms=4823ms. HoldingMdoesnotpreventeventtermination, changesitsduration; doesnotexcludeparameterbifurcationornativeMrole. Late5sclampreturns6134msversus6143normal.",
+    "spatial_control_figure": {
+      "path": "reference_stability_gap/first_long_M_intervention_from2800/figures/fig_M_clamp_spatial_return.png",
+      "agent_visual": "PNG_AND_PDF_CHECKED",
+      "human_visual": "PENDING",
+      "bifurcation_figure": false
+    },
+    "preentry_fine_control": {
+      "status": "RUNNING",
+      "path": "reference_stability_gap/preentry_fine_growth",
+      "source": "Samefull10scheckpointascompletedcoarse",
+      "duration_ms": 10000,
+      "dt_ms": 0.025,
+      "implementation": "PASS: exactnominal/passiveflowandcenteredFD, finestFDhistory1.878e-6",
+      "amendment": "Initial5splanreplacedBEFOREANYFINEGROWTHRUNby10stomatchcoarse2--10sinterval. Coarse2--5sgrowth-2.05285/s,2--10s+1.28995/s. Bothwindowsandallblocksretained."
+    },
+    "native9420_recurrence": {
+      "status": "PASSIVE_SCREEN_COMPLETE_NOT_A_CYCLE",
+      "path": "reference_stability_gap/actual_native9420/late_recurrence",
+      "discard_ms": 10000,
+      "best_burst_count": 9,
+      "period_ms": 2369.269582896908,
+      "all_group_history_M_distance": 0.00026829924366056417,
+      "exact_full_state_replay": "NOT_RUN",
+      "interpretation": "Actualnative9420stillshort-eventstateprovidesaneighboringnine-burstseed; neitherperiodicitynorstabilitycertified."
+    },
+    "mesh_counterexample": {
+      "status": "INDEPENDENT_MATCHED_5S_PREFIX_READOUT_PASS",
+      "path": "reference_stability_gap/preentry_fine_growth/prefix5s_comparison.json",
+      "Z_A": 0.7123513753245195,
+      "coarse_max_complete_ms": 100,
+      "fine_complete_long_ms": [
+        309,
+        1679
+      ],
+      "fine_observed_prefix_ms": 5000,
+      "interpretation": "Samecompletecoarse10scheckpoint; coarseinitialhistoryretained/finehistorylinearlyregriddedbyphysicallag underexistingdeclaredinitializer. Coarse5smaxcomplete100ms; fine5scomplete309msand1679ms. The coarse short/long fieldcontrast is not a mesh-validated bifurcation bracket. This can reflect discretization or sensitivity to refined initialhistory/basin access; alone doesnot identifywhich. No type or nativeclaim."
+    },
+    "relative_period_readout": {
+      "status": "PASS",
+      "path": "numerical_checks/relative_rate_recorder/result.json",
+      "proof": "New relative1msbins andexactT perstepfluxquadrature matchmanualoriginalsteppingbitwise; alloriginalphysicalandreadoutbuffersalsobitwiseunchanged. Originalabsoluteclockbinsarecyclicallymisorderedfromfractional-ms shootingphases(max difference641Hz). Newperiodicprofilesmustuserelativerecorder. Originalcomplete-stateclosures/derivativesandactualentryrunsfromaligned10mscheckpointsunaffected."
+    },
+    "new_numerical_driver": {
+      "path": "scripts/topic4_zm_runaway_mechanism/core_a_whole_cycle_newton.py",
+      "status": "COMPILED_NOT_RUN",
+      "method": "Single startingstate+period shooting; allintermediatenodesfromoriginalflow andsegmentedcachedfullvariationalproduct. No modelreduction. Allactualcache/wholeFD/nonlinear/physicalgatesrequiredonfirstuse.",
+      "priority": "Do not automatically expandcoarsebranches before resolving the new mesh sensitivity."
+    }
+  },
+  "current_entry_checkpoint": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/classification_checkpoint_20260925_0704.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "negative_multiplier_crossing_bracket": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/negative_multiplier_crossing_bracket.json",
+  "latest_checkpoint": "classification_checkpoint_20260925_1009.json",
+  "numerical_flip_onset_link": "NOT_SUPPORTED_BY_PAIRED_4S_FLOW",
+  "matched_small_Z_step": "COARSE_CONTRAST_NOT_MESH_QUALIFIED",
+  "active_priority": "NUMERICAL_CONVERGENCE_OF_SAME_PHYSICAL_EQUATIONS",
+  "latest_numerical_control": {
+    "time": "2026-09-25T08:53:21.373577+08:00",
+    "previous_checkpoint": "classification_checkpoint_20260925_0837.json",
+    "target_entry_type": "NOT_ESTABLISHED",
+    "numerical_method": "exponential_midpoint_v1",
+    "frozen_model_unchanged": true,
+    "all_Z_held": true,
+    "all_E_M_dynamic": true,
+    "outside_A_Z": "native9s",
+    "new_short_side": {
+      "label": "native4000_fine",
+      "Z_A": 0.8365893776571304,
+      "maximum_complete_A_ms": 53,
+      "duration_ms": 5000,
+      "source_audit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/independent_audit.json"
+    },
+    "first_numerical_cycle": {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root",
+      "Z_A": 1.0,
+      "dt_ms": 0.025,
+      "period_ms": 232.3550271307739,
+      "whole_closure": 3.0725661612719554e-08,
+      "independent_phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+      "phase_errors": [
+        {
+          "phase": 0.0,
+          "combined": 3.1071840337437925e-08,
+          "max_block": 7.370104550288311e-08
+        },
+        {
+          "phase": 0.25,
+          "combined": 1.1467678500802996e-06,
+          "max_block": 2.807961176163234e-06
+        },
+        {
+          "phase": 0.5,
+          "combined": 5.44764761520969e-06,
+          "max_block": 1.3317552144670139e-05
+        }
+      ],
+      "physical_periodic_branch": "NOT_YET_QUALIFIED"
+    },
+    "active": [
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root_tight",
+        "purpose": "Tighten only numerical root closure to1e-11, originalphasegateunchanged. Distinguish amplified rootresidualfrom true meshphase defect."
+      },
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root",
+        "purpose": "Correct actualshorttrajectoryoneburstseedatZA.836589."
+      },
+      {
+        "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine",
+        "purpose": "5s actualmidfieldflowbetween native4000short andnative8000long, same originalcompletehistory."
+      }
+    ],
+    "figure": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/figures/fig_local_resource_recovery.png",
+    "figure_scope": "Finite5s controls, agentcheckedPNGandPDF; humanpending, notbifurcationplot.",
+    "model_promoted": false
+  },
+  "latest_numerical_method": "exponential_midpoint_v1"
+}

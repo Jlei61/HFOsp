@@ -1,0 +1,20 @@
+{
+  "question": "Do the actual short-event field and the first seconds-long local-activity field have a stationary spatial counterpart that could nominate a relevant equilibrium mechanism, instead of the already excluded later surround fold?",
+  "equations": "Same3479-group physical private-Q static equations, original graph, locked local response and nativeA spatialfields. EveryM obeys its stationary dynamic-law constraint M=.5*E*r; M is not clamped to an observed value. Locked transient correction and its first derivative vanish at stationary input.",
+  "cases": [
+    [
+      "short_midpoint",
+      "actual_native_entry_midpoint",
+      null
+    ],
+    [
+      "first_long_D0300",
+      "actual_D0300",
+      "first_long"
+    ]
+  ],
+  "seed_selection": "Short field: actual last5s mean of every group. Long field: mean of every group in the1s window ending200ms before the first complete >=1s Core-A activity ends, selected from the unchanged5Hz/20ms audit.",
+  "numerical": "Existing logit full-space Newton/Armijo/LSMR method, atmost70iterations percase and residual-stagnation stop. Numerical seed floor only. Original physical residual<1e-11/ms required.",
+  "scope": "A trajectory mean is not a root. Failure is not nonexistence. A root remains a stationary candidate pending original-engine, temporal stability and actual-onset correspondence. No continuation or bifurcation label automatically follows.",
+  "model_promoted": false
+}

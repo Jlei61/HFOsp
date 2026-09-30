@@ -1,0 +1,74 @@
+{
+  "reason": "Repeated Newton stagnation with relative linear residuals about 1e-3. Preserve converged checkpoints and tighten only the linear solver; equations unchanged.",
+  "stopped_pid": 3694565,
+  "original_command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/rate_periodic_continue.py results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBsecond_0078_N128.npz results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBsecond_0079_N128.npz --N 256 --steps 120 --ds .4 --label arcBtoBurst --device 1 --low-memory --krylov-restart 100 --linear-normalize ",
+  "original_continuation": {
+    "rows": [
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0000_N256.npz",
+        "ds": 0.4
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0001_N256.npz",
+        "ds": 0.2
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0002_N256.npz",
+        "ds": 0.2
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0003_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0004_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0005_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0006_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0007_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0008_N256.npz",
+        "ds": 0.1
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0009_N256.npz",
+        "ds": 0.12
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0010_N256.npz",
+        "ds": 0.036
+      },
+      {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0011_N256.npz",
+        "ds": 0.009
+      }
+    ],
+    "method": "pseudo-arclength",
+    "N": 256
+  },
+  "retained_orbits": [
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0000_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0001_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0002_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0003_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0004_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0005_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0006_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0007_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0008_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0009_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0010_N256.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurst_0011_N256.json"
+  ],
+  "time_unix": 1789681761.6529493
+}

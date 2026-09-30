@@ -1,0 +1,153 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "category": "SELF_LIMITED",
+      "tail_ms": 3000,
+      "tail_mean_hz": 28.03631793736195,
+      "tail_global_cv": 1.7280644181127451,
+      "longest_quiet_ms": 169,
+      "quiet_fraction": 0.6456666666666667,
+      "occupation_50Hz": 0.09043490625,
+      "self_limited_events": [
+        [
+          187,
+          282
+        ],
+        [
+          450,
+          545
+        ],
+        [
+          714,
+          809
+        ],
+        [
+          978,
+          1073
+        ],
+        [
+          1242,
+          1337
+        ],
+        [
+          1505,
+          1600
+        ],
+        [
+          1769,
+          1864
+        ],
+        [
+          2033,
+          2128
+        ],
+        [
+          2297,
+          2392
+        ],
+        [
+          2560,
+          2655
+        ],
+        [
+          2824,
+          2919
+        ]
+      ],
+      "fraction_global_above_200": 0.0,
+      "group_rate_temporal_relative_std": 2.480406851784577,
+      "label": "endpoint_D0.1449000_dt0.05_rate",
+      "status": "COMPLETE",
+      "D_initial": 0.14490000000000036,
+      "D_final": 0.14490000000000036,
+      "seconds": 954.1427927017212,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 12000
+    },
+    {
+      "category": "SELF_LIMITED",
+      "tail_ms": 3000,
+      "tail_mean_hz": 30.192450183646244,
+      "tail_global_cv": 1.7183314236827294,
+      "longest_quiet_ms": 177,
+      "quiet_fraction": 0.6483333333333333,
+      "occupation_50Hz": 0.09762362500000002,
+      "self_limited_events": [
+        [
+          4,
+          93
+        ],
+        [
+          270,
+          359
+        ],
+        [
+          536,
+          626
+        ],
+        [
+          802,
+          892
+        ],
+        [
+          1068,
+          1158
+        ],
+        [
+          1334,
+          1424
+        ],
+        [
+          1601,
+          1690
+        ],
+        [
+          1867,
+          1956
+        ],
+        [
+          2133,
+          2223
+        ],
+        [
+          2399,
+          2489
+        ],
+        [
+          2665,
+          2755
+        ]
+      ],
+      "fraction_global_above_200": 0.0,
+      "group_rate_temporal_relative_std": 2.347139685760547,
+      "label": "endpoint_D0.1449600_dt0.05_rate",
+      "status": "COMPLETE",
+      "D_initial": 0.1449600000000003,
+      "D_final": 0.1449600000000003,
+      "seconds": 800.4334709644318,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 12000
+    },
+    {
+      "category": "SUSTAINED_PARTIAL",
+      "tail_ms": 3000,
+      "tail_mean_hz": 85.93240961068379,
+      "tail_global_cv": 0.15631234790698206,
+      "longest_quiet_ms": 0,
+      "quiet_fraction": 0.0,
+      "occupation_50Hz": 0.2687388854166667,
+      "self_limited_events": [],
+      "fraction_global_above_200": 0.0,
+      "group_rate_temporal_relative_std": 0.6950034029676653,
+      "label": "endpoint_D0.1452000_dt0.05_rate",
+      "status": "COMPLETE",
+      "D_initial": 0.14520000000000033,
+      "D_final": 0.14520000000000033,
+      "seconds": 808.1643726825714,
+      "Z_actual_final_max_difference": 0.0,
+      "duration_ms": 12000
+    }
+  ],
+  "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/rate_seed_N1024_dt0.05.npz"
+}

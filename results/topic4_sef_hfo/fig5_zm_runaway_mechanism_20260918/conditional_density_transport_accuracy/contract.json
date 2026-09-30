@@ -1,0 +1,22 @@
+{
+  "created_local": "2026-09-20T03:08:32.280831+08:00",
+  "question": "Does voltage remapping broaden identical zero-noise cells, separately from conditional-current Gaussian closure?",
+  "populations": [
+    "E",
+    "I"
+  ],
+  "mean_input_mv": 40.0,
+  "threshold_mv": 18.0,
+  "dt_ms": 0.05,
+  "duration_ms": 100.0,
+  "burn_ms": 0.0,
+  "grids": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "selection": "Two population types under identical deterministic input; no tuning against original weak-response errors.",
+  "readout": "One-step voltage variance created by remapping, full finite-time rate discrepancy, first-spike distribution mean/spread, mass accounting.",
+  "scope": "Numerical diagnosis. First-spike spread is not physiological variability and does not by itself establish which term dominates the noisy gain error."
+}

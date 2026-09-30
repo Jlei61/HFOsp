@@ -1,0 +1,79 @@
+{
+  "status": "UNSTABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/trace_center_spectrum/physical_child.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD4_child_trace_center_20260920_a0.03590_N1024.npz",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_trace_center_20260920_k6_dt0.05.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_trace_center_20260920_k6_dt0.025.json"
+  ],
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        -0.0019939434598397567,
+        15.63767166088517
+      ],
+      [
+        -0.0019939434598397567,
+        -15.63767166088517
+      ],
+      [
+        0.834469417092585,
+        2.0026510425420074
+      ],
+      [
+        0.834469417092585,
+        -2.0026510425420074
+      ],
+      [
+        0.5509842497356452,
+        0.0
+      ],
+      [
+        0.5048211148593994,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.7229386628827964,
+      0.7229386628827964,
+      0.05211368262302025,
+      0.05211368262302025,
+      0.05211368262302025,
+      0.05211368262302025
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.12048977714713273,
+      0.12048977714713273,
+      3.917864528618258e-05,
+      3.917864528618258e-05,
+      4.4160242129720473e-10,
+      6.39309805794408e-05
+    ],
+    "reliable_outside_count": 4,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": false,
+    "maximum_returned_modulus": 15.63767178800801,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "selected_amplitude_Hz": 0.03589661039700412,
+  "amplitude_selection_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/trace_center_spectrum/amplitude_selection.json",
+  "scope": "One intermediate physical doubled cycle between amplitudes .02 and .04. Tests the spectral sign-change interval; does not certify the entire interval or locate a new bifurcation."
+}

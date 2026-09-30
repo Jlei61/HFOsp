@@ -1,0 +1,50 @@
+{
+  "status": "AUTHORIZED_BOUNDED_REQUIREMENTS_FULFILLED",
+  "checked_utc": "2026-09-24T23:49:02.291412+00:00",
+  "requirements": [
+    {
+      "requirement": "Native interictal propagation, entry, autonomous termination, Z recovery and propagation return",
+      "status": "DELIVERED_SUPPORTED_IN_REUSED_NATIVE_SOURCE",
+      "evidence": "recovery_mechanism/scientific_review.md",
+      "limit": "Four returns within one source trajectory; no all-seed or clinical-equivalence claim."
+    },
+    {
+      "requirement": "Figure 5 A and actual state-space return candidates",
+      "status": "DELIVERED_AGENT_REVIEWED_HUMAN_PENDING",
+      "evidence": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5/candidates/autonomous_loop_20260924/publication_qa.json",
+      "limit": "Original approved figure not overwritten; projections do not certify a limit cycle."
+    },
+    {
+      "requirement": "Bounded spatial Z/K conditional experiment",
+      "status": "COMPLETE_18_OF_18",
+      "evidence": "primary_completion_audit.json",
+      "limit": "Finite-window responses and drift, not full bifurcation boundary."
+    },
+    {
+      "requirement": "Conductance-aware rate gate before relevant formal branches",
+      "status": "COMPLETE_NEGATIVE_GATE_WITH_CONTRACT_FALLBACK",
+      "evidence": "conductance_response/static_calibration_v1/gate_review.json",
+      "limit": "Static independent validation failed; transient/spatial certification and formal continuation not performed."
+    },
+    {
+      "requirement": "Current, rotated and isotropic structural comparison",
+      "status": "COMPLETE_16_NEW_CONDITIONALS_AND_2_NATIVE_120S",
+      "evidence": "axis_controls/conditional_runs/comparison.json",
+      "limit": "Composite graph intervention, not isolated axis-angle causality."
+    },
+    {
+      "requirement": "Scientific review, figures, provenance and reproducibility",
+      "status": "DELIVERED_AUDIT_PASS",
+      "evidence": "completion_audit.json",
+      "limit": "185-file code/configuration snapshot retains original paths to large source states and observations."
+    }
+  ],
+  "required_work_remaining": [],
+  "human_candidate_review": "PENDING",
+  "future_scientific_extensions": [
+    "low-rate closure repair and independent correspondence validation",
+    "targeted coverage near actual entry/exit",
+    "further outgoing-strength-matched geometry controls if isolating orientation"
+  ],
+  "future_extensions_are_launched": false
+}

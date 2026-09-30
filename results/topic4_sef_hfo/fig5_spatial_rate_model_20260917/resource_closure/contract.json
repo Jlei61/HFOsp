@@ -1,0 +1,19 @@
+{
+  "training_seed": 9108401,
+  "validation_seed": 9108402,
+  "window_ms": [
+    500,
+    8000
+  ],
+  "observable": "Within1mm cell fraction of original E neurons with I_G below the fixed native threshold",
+  "unchanged": [
+    "I_th",
+    "tau_Z=5000ms",
+    "eta_M=.0005",
+    "tau_M=1000ms",
+    "native graph and threshold field"
+  ],
+  "candidates": "Measured mean/variance with positive lognormal moment closure; calibrate two global dispersion parameters",
+  "prohibited_targets": "Entry time, D threshold, future native Z or rate as simulator input",
+  "sampling_unit": "Whole input realization; cells and times are calibration observations, not independent biological replicates"
+}

@@ -1,0 +1,33 @@
+{
+  "status": "FINER_TIME_MESH_REQUIRED",
+  "pid": 469560,
+  "check": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547375832_N3072.npz",
+    "N": 3072,
+    "check_N": 12288,
+    "J_EE_core": 0.9387254737583224,
+    "T_ms": 825.3653905745635,
+    "maximum_group_defect_Hz": 0.0006769531180061961,
+    "regional_defect_Hz": [
+      1.573438385293066e-06,
+      2.0494077290103035e-06,
+      3.1227128391242257e-06
+    ],
+    "minimum_rate_Hz": 4.949461858879308e-06,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -0.00030831885573826044,
+        "phase_index": 7832,
+        "group": 915
+      },
+      "slow": {
+        "minimum_Hz": 7.3493190670099636e-06,
+        "phase_index": 1818,
+        "group": 237
+      },
+      "positive": false,
+      "N": 3072,
+      "check_N": 12288
+    }
+  }
+}

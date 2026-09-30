@@ -1,0 +1,121 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/independent_comparison.json",
+  "labels": [
+    "dynamic_reference",
+    "own_Z9000_held",
+    "native_Z9000_held",
+    "native_Z9420_held",
+    "native_Z9870_held"
+  ],
+  "trajectories": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/dynamic_reference/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/own_Z9000_held/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/native_Z9000_held/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/native_Z9420_held/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/fine_rate_frozen_Z_fields/native_Z9870_held/trajectory.npz"
+  ],
+  "snapshots": [
+    {
+      "label": "dynamic_reference",
+      "center_ms": 10000.0,
+      "window_ms": [
+        9975.0,
+        10025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "dynamic_reference",
+      "center_ms": 12000.0,
+      "window_ms": [
+        11975.0,
+        12025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "own_Z9000_held",
+      "center_ms": 10000.0,
+      "window_ms": [
+        9975.0,
+        10025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "own_Z9000_held",
+      "center_ms": 12000.0,
+      "window_ms": [
+        11975.0,
+        12025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9000_held",
+      "center_ms": 10000.0,
+      "window_ms": [
+        9975.0,
+        10025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9000_held",
+      "center_ms": 12000.0,
+      "window_ms": [
+        11975.0,
+        12025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9420_held",
+      "center_ms": 10000.0,
+      "window_ms": [
+        9975.0,
+        10025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9420_held",
+      "center_ms": 12000.0,
+      "window_ms": [
+        11975.0,
+        12025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9870_held",
+      "center_ms": 10000.0,
+      "window_ms": [
+        9975.0,
+        10025.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native_Z9870_held",
+      "center_ms": 12000.0,
+      "window_ms": [
+        11975.0,
+        12025.0
+      ],
+      "samples": 50
+    }
+  ],
+  "initial_history": "Same own-rate full9s state; M dynamic in every condition; shared external clock and innovation keys.",
+  "column_semantics": "First dynamicZ; other columns freeze entireZfields. Times in column identities label field sources; plotted times label shared continuation clock.",
+  "scope": "Finite-time spatial conditional comparison. Not a bifurcation figure, no stability convention or critical point claim.",
+  "agent_PNG_PDF_check": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "agent_checked_local": "2026-09-20T12:28:03.570495+08:00",
+  "visual_check": "Both PNG and rasterized same-state PDF inspected: all five columns, physical core circles, common color scale and two fixed 50ms windows readable; no clipping, supertitle or bifurcation symbol.",
+  "artifact_sha256": {
+    "png": "ac433a12dbf60fd5ed82078675b4cb31042da94bbfc22d66013a430dfb0c7c33",
+    "pdf": "57ff989e07cbe25204f690c5f16f95e602dd0bd50c6c6ef9bfcc255c7a6146c6",
+    "svg": "21cc3065c7a5226bda0bbca8f4ec9fb171108995db3aa10c35b88e611e30a84b"
+  }
+}

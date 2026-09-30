@@ -1,0 +1,114 @@
+{
+  "kind": "tables",
+  "structure": "V3: mean a+(1-a)/(1+iw tau_s); variance c: a_c+(1-a_c)/(1+iw tau_vc) (a_c in [-1,1]) plus fast transient eta_c iw tau_c/(1+iw tau_c) as mean shift; workpoint tables (alpha,a_E,a_I,eta_E,eta_I)",
+  "fit_band_hz": [
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    40.0
+  ],
+  "poles": {
+    "E": {
+      "tau_s": 13.42552007788631,
+      "tau_vE": 3.865262308026596,
+      "tau_cE": 10.96476080633985,
+      "tau_vI": 7.315065567592629,
+      "tau_cI": 16.105263678654783
+    },
+    "I": {
+      "tau_s": 8.17918824203836,
+      "tau_vE": 2.402861237937535,
+      "tau_cE": 5.695309078439988,
+      "tau_vI": 4.340208375629938,
+      "tau_cI": 8.64555570741439
+    }
+  },
+  "summary": {
+    "E": {
+      "points": 576,
+      "used": 523,
+      "mean_channel_rms_norm": {
+        "median": 0.04715657028125317,
+        "p90": 0.14286766678961152,
+        "max": 0.5300479154968905
+      },
+      "varE_channel_rms_rel": {
+        "n": 393,
+        "median": 0.04438873458407323,
+        "p90": 0.1368732761832142
+      },
+      "varI_channel_rms_rel": {
+        "n": 238,
+        "median": 0.07704934262721078,
+        "p90": 0.23240297672015184
+      },
+      "ranges": {
+        "alpha": [
+          0.11677607263826684,
+          1.0
+        ],
+        "a_E": [
+          -1.0,
+          1.0
+        ],
+        "a_I": [
+          -1.0,
+          1.0
+        ],
+        "eta_E": [
+          -0.36321337160378436,
+          0.6077897129298506
+        ],
+        "eta_I": [
+          -0.06796967421369027,
+          0.13657926857132793
+        ]
+      }
+    },
+    "I": {
+      "points": 450,
+      "used": 395,
+      "mean_channel_rms_norm": {
+        "median": 0.03334380496006477,
+        "p90": 0.07806059437497906,
+        "max": 0.39841983596455777
+      },
+      "varE_channel_rms_rel": {
+        "n": 290,
+        "median": 0.030150555890063133,
+        "p90": 0.09100699337083631
+      },
+      "varI_channel_rms_rel": {
+        "n": 211,
+        "median": 0.04745729577765751,
+        "p90": 0.1569196563385188
+      },
+      "ranges": {
+        "alpha": [
+          0.19627540265225082,
+          1.0
+        ],
+        "a_E": [
+          -1.0,
+          1.0
+        ],
+        "a_I": [
+          -1.0,
+          1.0
+        ],
+        "eta_E": [
+          -0.2739191806908859,
+          0.40242304330258044
+        ],
+        "eta_I": [
+          -0.1317191998155831,
+          0.08416470881712323
+        ]
+      }
+    }
+  },
+  "source_assay": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/rows.json",
+  "table_smoothing_sigma_gridpoints": 0.6,
+  "note": "alpha clipped to [0,1], a_E,a_I to [-1,1]; eta unclipped; 80 Hz not fitted; mean-channel high-frequency lead of mean-driven neurons is outside the closure"
+}

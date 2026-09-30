@@ -1,0 +1,52 @@
+{
+  "status": "COMPLETE_STATIC_INPUT_BOOKKEEPING",
+  "rows": [
+    {
+      "region": "CoreA",
+      "components_mV_equiv": {
+        "EE_CoreA": 721.6203142217103,
+        "EE_CoreB": 0.0,
+        "EE_surround": 717.197165944372,
+        "external_E": 12.886576764177617,
+        "local_I": -280.3679728922712,
+        "M": -0.23457539789686438,
+        "G": -27.477897537965518,
+        "K": -473.20814128862133,
+        "leak": -17.460261847833205
+      },
+      "net": 652.9552079656719
+    },
+    {
+      "region": "CoreB",
+      "components_mV_equiv": {
+        "EE_CoreA": 0.0,
+        "EE_CoreB": 761.5352543126072,
+        "EE_surround": 716.5643053978966,
+        "external_E": 12.926535062254036,
+        "local_I": -277.3039643121742,
+        "M": -0.2371096581093205,
+        "G": -26.11340614456855,
+        "K": -479.415785115267,
+        "leak": -17.492607635263923
+      },
+      "net": 690.4632219073749
+    },
+    {
+      "region": "surround",
+      "components_mV_equiv": {
+        "EE_CoreA": 19.7989299295738,
+        "EE_CoreB": 22.290357321878005,
+        "EE_surround": 688.4268391903091,
+        "external_E": 12.93810933359833,
+        "local_I": -151.07165957725138,
+        "M": -0.11629655881760291,
+        "G": -33.96543485207825,
+        "K": -429.48777927546405,
+        "leak": -18.0
+      },
+      "net": 110.81306551174804
+    }
+  ],
+  "reconstruction_max_error": 3.183231456205249e-12,
+  "scope": "Supplied stationary means at the checked K9 candidate, threshold reference; not a causal lesion, native instantaneous current or proof of an isolatedcore fixedpoint."
+}

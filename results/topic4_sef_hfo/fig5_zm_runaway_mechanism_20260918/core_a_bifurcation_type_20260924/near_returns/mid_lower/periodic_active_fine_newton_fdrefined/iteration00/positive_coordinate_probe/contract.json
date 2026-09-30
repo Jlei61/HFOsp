@@ -1,0 +1,13 @@
+{
+  "question": "Do positivity-preserving Newton coordinates improve the actual unchanged return residual when linear proposals hit physical bounds?",
+  "numerical_only": "Negative increments of positive coordinates use x/(1-d/x), positive increments are linear. The first derivative at zero step equals the ordinary Newton direction. The exact same phase plane is restored multiplicatively in its participating current-rate coordinates. Every candidate passes original full-state physical constraints, then the actual unmodified flow is evaluated.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/periodic_active_fine_newton_fdrefined/iteration00/newton_direction.npz",
+  "trials": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625
+  ],
+  "model_promoted": false
+}

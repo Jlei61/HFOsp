@@ -1,0 +1,23 @@
+{
+  "status": "REGISTERED_BEFORE_BRANCH_CORRESPONDENCE",
+  "created_epoch": 1790528725.9202962,
+  "question": "At the relevant actual-exitfield family, does the distribution candidate preserve the existing native K9 high-versus-quiet separation and K12 suppression, before any branchcontinuation?",
+  "design": "Exactlyfour10s conditionalruns, Zmean.21,Kmean9or12, originalhigh12s/recovery30s states, originalactual16.7s Z/K fields. Same original50-60s exactexternalmeaninput.3479g40groups,2048particles/group,onepairednumericalseed928711.",
+  "physics": "OnlyZandK fixedperparticle aftereach originallocalupdate, matching nativeConditionalSlow semantics. Jointfast/Mstate andpendingpulses restored fromthe actualhistory. Allrecursive spikes,R/GandM dynamic;nofutureneuralinputprovided. Groupmeanthresholds andGaussianarrivalapproximation unchanged.",
+  "validation": "CPU/GPUlocalstep andclampidentity atinitial/pending/afterpendingtimes;captured100steps/fullstateexact. Exactsource/cutexternalmeanroute requiredbeforelaunch. Groupempiricalinitialmeanerrorreported, nohiddenprojectioncorrection.",
+  "comparison": "Compare first10s nativeprefix atsamebranch-relativeclock, especially5-10s means/core/surround/400cells,G,shorteventsandquiet; also report native20-30s tails separately, not matchedhorizon. No phasealignment.",
+  "decision": "This is a correspondence screen, notstabilityorcontinuation. Requiredqualitativepattern:K9high sustainedglobalactivity,K9recoveryquiet,K12bothquiet. Report allnumericandspatialresiduals; matchingtheseclasses isnecessarybutnotsufficientforacceptance. NoautomaticdenserKgrid,seedcountincrease,parameterfit orhorizonextension.",
+  "limitation": "Onefixednumericalstream perpoint doesnotestablish resolution/noiseconvergence. Conditionalclampsarenotautonomousloops. Natural10-20s countnoiseexperimentremainsseparate andcannotcertifytheseclamps.",
+  "names": [
+    "exit_z0.21_k9_fields16p7_high",
+    "exit_z0.21_k9_fields16p7_recovery",
+    "exit_z0.21_k12_fields16p7_high",
+    "exit_z0.21_k12_fields16p7_recovery"
+  ],
+  "numerical_seed": 928711,
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "carried_source_sha256": "0520150892ebd97afdd778e5ccf7141bba8e92a13a1b0fcf2ceed1a3c2fc81b3",
+  "producer_sha256": "8d05056443cc536b98773c2324707047e2aa41ebabb3ad7feb2d044aa23dc1fe",
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false
+}

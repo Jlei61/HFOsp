@@ -1,0 +1,31 @@
+{
+  "question": "Where along the continuous CoreA spatial-resource path after Fig.5 state3 do separated short events first give way to prolonged local activity from the same complete history?",
+  "coordinates": {
+    "from_interictal_history": {
+      "D_A": 0.28764862467548047,
+      "Z_A": 0.7123513753245195,
+      "native_interpolation_time_ms": 9507.453342988189
+    }
+  },
+  "conditions": {
+    "from_interictal_history": {
+      "label": "from_interictal_history",
+      "field": "from_interictal_history",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/final_state.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 20000,
+      "previous_elapsed_ms": 0
+    }
+  },
+  "source_endpoints": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native9420/from_interictal_history/whole_record_audit.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0300/from_interictal_history/whole_record_audit.json"
+  ],
+  "selection": "One midpoint in native path time between the independently audited20s short-event and prolonged-event records. D_A is only the plotted coordinate; interpolate original per-group fields continuously, no first-upcrossing lookup.",
+  "physical_scope": "Same3479-group full drift, original response/graph/delays/privatevariance. Only withinCoreA Z differs. OutsideA native9s; everyZ held percondition and everyE M dynamic. Same original reference full fast/M/delay state and original constant external mean. No futureSNN spikes.",
+  "readout": "Whole20s original10ms-smoothed A rate; quietbelow5Hz for20ms; complete and censored activities plus1/10/50Hz controls and independent all-group spatial reconstruction.",
+  "budget": "One20s deterministic point; actual root continuation and stability remain the primary type test. No finite-window permanence or unique bifurcation value inferred.",
+  "acceptance": "Full initial identity exceptA Z and exact10ms replay before launch; whole-record independent audit after. No change to periodic root, phase, mesh or Floquet gates.",
+  "model_promoted": false
+}

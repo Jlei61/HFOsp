@@ -1,0 +1,18 @@
+{
+  "pid": 530562,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/check_rate_live_Bleading_observer.py",
+    "--after-pid",
+    "530061",
+    "--control-source",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcBleadingConnection_20260920_prefix28_CPU_checks.json",
+    "--continuation-pid",
+    "508751",
+    "--last-index",
+    "79"
+  ],
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/live_CPU_observer/worker.log",
+  "scope": "CPU checks and frozen observer only; no accepted-prefix mutation or automatic figure replacement."
+}

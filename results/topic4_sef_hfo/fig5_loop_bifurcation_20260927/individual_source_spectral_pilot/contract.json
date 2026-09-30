@@ -1,0 +1,32 @@
+{
+  "status": "REGISTERED_BEFORE_SELF_GENERATED_SPECTRA",
+  "created_epoch": 1790553383.4126596,
+  "question": "Can a diagonal-source Gaussian spectral approximation preserve the relevant asymmetric native state when its source means and spectra are updated from its own outputs?",
+  "scope": "One held spatial Z/K point, meanZ0.21/K9.35, initialized from the completed asymmetric native42-44s source trains. Exactly three parallel-Jacobi generations, no relaxation, root solver or parameter sweep.",
+  "retained": "Original40000 individual source/target identities, original synaptic weights and filters, actual individual thresholds, local dynamic native M. External independent Poisson shot noise has fixed per-cell expected rates averaged over native42-44s. This removes the native time-varying external modulation and is a distinct conditional protocol.",
+  "initialization": "Native source means and demeaned2s autospectra initialize generation0 only. Generations1-3 read solely the preceding candidate output means and spectra for recurrent neural drive. Native recordings are retained only as development references.",
+  "protocol": {
+    "generations": 3,
+    "replicas": 16,
+    "dt_ms": 0.1,
+    "record_steps": 20000,
+    "burn_steps": 30000,
+    "additional_burn_uniform_steps": [
+      0,
+      10000
+    ],
+    "seed": 929531,
+    "source_PSD": "Mean |rFFT(x-mean(x))|^2, DC0; Nyquist has single real component.",
+    "recurrent_input": "Independent E/I Gaussian Fourier coefficients after original squared-weight spectral projection. Two-second periodic recurrent signal; fresh external Poisson throughout each local assay.",
+    "M": "Native Euler decay and post-spike increment, initial M=source mean Hz at tauM1000ms, full dynamic burn and record.",
+    "G": "Stationary Graw=30clip((meanEHz*dt/[15*(1-exp(-dt/15))]-200)/300,0,1), held during each local assay. Not physical-time feedback.",
+    "streams": "Same Gaussian/external seeds across iterations as numerical common random numbers; independent target replicas, not native seeds."
+  },
+  "approximation": "Distinct-source cross spectra, E/I cross spectra and shared-input correlations omitted. Fixed axonal delays drop from individual-source autospectral power; original delays remain in the native system and would be required for temporal stability. Finite periodic spectrum may phase-lock local outputs.",
+  "evidence": "Compare spatial field, cores, feedback activation segment and counterfactual Z drift; report input-output changes, PSD residuals and first/second1s stationarity. This pilot has no prespecified numerical tolerance for certification and cannot pass the native correspondence gate.",
+  "stop": "Stop after three complete generations or on implementation/finite-value failure. Spectral iteration convergence is not physical dynamic stability. Failure redirects analysis, not noise-gain fitting or acceptance relaxation.",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_temporal_inputs_v2/source_spikes_0p1ms.npz",
+  "producer_sha256": "471020a295bcdcf58e22bb3a51dd93781fbc841d9d95d0171df954e8e23c52a8"
+}

@@ -1,0 +1,95 @@
+{
+  "time": "2026-09-25T06:44:51.712114+08:00",
+  "numerical_mode": -1.4222121150929221,
+  "independent_phase": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+  "phase_errors": [
+    [
+      0.0,
+      7.053000537962932e-12
+    ],
+    [
+      0.25,
+      1.5501526488128357e-06
+    ],
+    [
+      0.5,
+      3.0287384585485745e-05
+    ]
+  ],
+  "left_mode_first_failure": "Initial closure assertion failed before any adjoint construction. Magnitude was not persisted; cannot assign cause retrospectively. Failure retained.",
+  "left_mode_retry_closure": {
+    "return_meta": {
+      "period_ms": 791.4775732403626,
+      "fraction": 0.5514648072530542,
+      "section_residual": 2.2272714622469087e-18,
+      "section_speed": 1.0701037118879293,
+      "initial_phase": 0.0,
+      "interpolation": "cubic_four_actual_steps"
+    },
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.900758094007948,
+        "difference_rms": 8.011797788719262e-12,
+        "relative_rms": 5.038626297785407e-13
+      },
+      "GABA": {
+        "reference_rms": 8.23042374762567,
+        "difference_rms": 9.589206015323416e-12,
+        "relative_rms": 1.165092625770299e-12
+      },
+      "M": {
+        "reference_rms": 0.021092989858940696,
+        "difference_rms": 3.408497636883167e-13,
+        "relative_rms": 1.6159385936642857e-11
+      },
+      "covariance": {
+        "reference_rms": 37.56208210407482,
+        "difference_rms": 4.491083345427805e-12,
+        "relative_rms": 1.1956428115417495e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.08868808975881101,
+        "difference_rms": 4.762232267192753e-13,
+        "relative_rms": 5.369641267664843e-12
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004709493985330944,
+        "difference_rms": 6.394094953978731e-15,
+        "relative_rms": 1.3577031787056009e-12
+      }
+    },
+    "combined_relative_rms": 6.993184457120699e-12
+  },
+  "first_nonlinear_test": [
+    {
+      "amplitude": 0.001,
+      "sign": -1,
+      "nonlinear_derivative_relative_error": 0.02074025011232918,
+      "along_right_vector_ratio": -1.4318677846695305,
+      "period_ms": 791.4777140973952
+    },
+    {
+      "amplitude": 0.001,
+      "sign": 1,
+      "nonlinear_derivative_relative_error": 0.02603107334775676,
+      "along_right_vector_ratio": -1.401414149086454,
+      "period_ms": 791.4774048567991
+    },
+    {
+      "amplitude": 0.0005,
+      "sign": -1,
+      "nonlinear_derivative_relative_error": 0.011011851475233153,
+      "along_right_vector_ratio": -1.428899942770613,
+      "period_ms": 791.4776467003828
+    },
+    {
+      "amplitude": 0.0005,
+      "sign": 1,
+      "nonlinear_derivative_relative_error": 0.012671365168240793,
+      "along_right_vector_ratio": -1.4119843564339074,
+      "period_ms": 791.4774932067605
+    }
+  ],
+  "interpretation": "Both signed nonlinear returns reverse and amplify the perturbation; first half amplitudes have1.10/1.27% errors, so the declared1% gate correctly stops multi-return continuation. New test uses amplitude.00025 and.000125, unchanged1% gate, then atmost16returns/sign. No full-model type or onset claim.",
+  "target_entry_type": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "native_t8000_inputs_observe",
+  "eta_m": 0.0005,
+  "tau_M_s": 1.0,
+  "seed": 9108401,
+  "eta_index": -1,
+  "tau_index": 0,
+  "tau_z_ms": 5000.0,
+  "threshold": 95.19851312666987,
+  "horizon_s": 10.37,
+  "device": null,
+  "z_source_ms": 8000,
+  "history_ms": 8000,
+  "future": "W1",
+  "m_source_ms": null,
+  "freeze_z": false,
+  "freeze_m": false,
+  "anchor_ms": 8000,
+  "start_step": 80000,
+  "duration_ms": 2370,
+  "kind": "continuation",
+  "state_construction": "Complete native checkpoint, input observation only"
+}

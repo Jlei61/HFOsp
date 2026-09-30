@@ -1,0 +1,88 @@
+{
+  "status": "COMPLEMENT_SPECTRUM_COMPLETE",
+  "pid": 547431,
+  "timestamp": 1789929609.4147387,
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        -62.481840835915015,
+        0.0
+      ],
+      [
+        -3.8746825940969254,
+        0.0
+      ],
+      [
+        0.8349237329870749,
+        1.9999163707267327
+      ],
+      [
+        0.8349237329870749,
+        -1.9999163707267327
+      ],
+      [
+        0.5512632022960537,
+        0.0
+      ],
+      [
+        0.5511550589225409,
+        0.0
+      ],
+      [
+        0.5509842574794946,
+        0.0
+      ],
+      [
+        0.5105643967935046,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.36278707421878664,
+      0.022890128303334475,
+      0.022890128303334475,
+      0.022890128303334475,
+      0.022890128303334475,
+      0.022890128303334475,
+      0.022890128303334475,
+      0.022890128303334475
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.060464512369797774,
+      0.003282788290142058,
+      1.2719259629638067e-05,
+      1.2719259629638067e-05,
+      5.478051345875201e-11,
+      2.8167691512592796e-09,
+      1.2790546399799041e-11,
+      1.569336116402642e-05
+    ],
+    "reliable_outside_count": 4,
+    "numerical_unstable_dimension": 4,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 62.481840835915015,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "final_engine_difference_keys": [],
+  "original_chunk_comparisons": [
+    {
+      "chunk": "0000080000_0000085000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    },
+    {
+      "chunk": "0000085000_0000090000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    },
+    {
+      "chunk": "0000090000_0000095000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    },
+    {
+      "chunk": "0000095000_0000100000.npz",
+      "common_keys": 16,
+      "bitwise": true
+    }
+  ],
+  "samples": 23700,
+  "groups": 935,
+  "selected_groups": [
+    279,
+    141,
+    39,
+    594,
+    293,
+    130
+  ],
+  "scope": "Observer replay identity; downstream count/readout and moment reconstruction checks pending."
+}

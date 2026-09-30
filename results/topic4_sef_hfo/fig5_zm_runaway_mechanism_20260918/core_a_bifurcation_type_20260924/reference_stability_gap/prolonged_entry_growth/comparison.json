@@ -1,0 +1,44 @@
+{
+  "status": "BOTH_FINITE_GROWTH_RUNS_COMPLETE",
+  "rows": [
+    {
+      "label": "coarse",
+      "dt_ms": 0.05,
+      "common_2to5s_growth_per_s": 8.826087567041453,
+      "full_post_alignment_growth_per_s": 5.974600889028986,
+      "one_second_blocks_per_s": [
+        11.472031012348866,
+        3.183916144909826,
+        8.263819743458669,
+        14.063395790804606,
+        4.151047166861088,
+        -2.3161845524623796,
+        0.07175264279031346,
+        5.1176877357712796,
+        9.667271739518915,
+        8.77801684548941
+      ],
+      "duration_ms": 10000
+    },
+    {
+      "label": "fine",
+      "dt_ms": 0.025,
+      "common_2to5s_growth_per_s": 6.546396556153304,
+      "full_post_alignment_growth_per_s": 6.546396556153304,
+      "one_second_blocks_per_s": [
+        12.256701802446734,
+        11.86830573064901,
+        10.472918317422259,
+        7.79282292999611,
+        1.3734484210415436
+      ],
+      "duration_ms": 5000
+    }
+  ],
+  "same_initial_state": true,
+  "independent_replicates": false,
+  "observation": "Growth is positive in both discretizations over the common2--5s window; detailed waveforms and growth values differ.",
+  "inference_limit": "Finite directional growth is not an asymptotic Lyapunov certificate, does not rule out eventual stable dynamics, and does not identify a bifurcation. The short-event midpoint already has positive finite growth over10s, so its mere sign cannot explain onset of long activities.",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

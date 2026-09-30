@@ -1,0 +1,120 @@
+{
+  "status": "COMPLETE_TWO_NATIVE_CONSTANT_BACKGROUND_CONTROLS",
+  "rows": [
+    {
+      "name": "asymmetric_history_constant_background",
+      "windows": [
+        {
+          "relative_s": [
+            0,
+            5
+          ],
+          "rate_Hz_allE_A_B_surround": [
+            98.48857500000004,
+            392.602917771884,
+            132.51374045801347,
+            90.33013788575185
+          ],
+          "causal_R_mean_and_range": [
+            98.81434419901231,
+            98.52424052629013,
+            99.1204971877241
+          ],
+          "mean_Graw": 5.188937427122788e-27,
+          "mean_counterfactual_Zdot_per_s": [
+            0.08060195450000004,
+            -0.0348338772209919,
+            -0.015243533835341274,
+            0.08593265610699963
+          ]
+        },
+        {
+          "relative_s": [
+            5,
+            10
+          ],
+          "rate_Hz_allE_A_B_surround": [
+            98.49589375000009,
+            392.62068965517227,
+            132.6246819338404,
+            90.3345239658569
+          ],
+          "causal_R_mean_and_range": [
+            98.8234084993369,
+            98.53704011321922,
+            99.1311170556422
+          ],
+          "mean_Graw": 2.3557739473343596e-31,
+          "mean_counterfactual_Zdot_per_s": [
+            0.08059335075,
+            -0.0348338772209919,
+            -0.015361579636867989,
+            0.08592666346090638
+          ]
+        }
+      ],
+      "complete10s": true,
+      "brief_events": 0
+    },
+    {
+      "name": "high_history_constant_background",
+      "windows": [
+        {
+          "relative_s": [
+            0,
+            5
+          ],
+          "rate_Hz_allE_A_B_surround": [
+            196.5181499999999,
+            472.3981432360744,
+            474.1292620865113,
+            182.52550886408395
+          ],
+          "causal_R_mean_and_range": [
+            197.1773251527506,
+            196.94680272499767,
+            197.4601860340975
+          ],
+          "mean_Graw": 5.184249047071319e-27,
+          "mean_counterfactual_Zdot_per_s": [
+            0.040240407750000005,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.04399060292249528
+          ]
+        },
+        {
+          "relative_s": [
+            5,
+            10
+          ],
+          "rate_Hz_allE_A_B_surround": [
+            196.50336874999977,
+            472.3554376657831,
+            474.1435114503794,
+            182.51066973079435
+          ],
+          "causal_R_mean_and_range": [
+            197.16413396594328,
+            196.89443604974153,
+            197.48198289630193
+          ],
+          "mean_Graw": 2.3536454260839944e-31,
+          "mean_counterfactual_Zdot_per_s": [
+            0.040243542999999986,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.043993896684806515
+          ]
+        }
+      ],
+      "complete10s": true,
+      "brief_events": 0
+    }
+  ],
+  "paired_recorded_inputs_exact": true,
+  "final_external_RNG_and_xi_exact": true,
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false,
+  "producer_sha256": "cae675044990a3994516b39a09cac9375f202aeb791621e818afbe32b15f29b3"
+}

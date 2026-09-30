@@ -1,0 +1,118 @@
+{
+  "family": "native",
+  "held": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2196000_dt0.05/trajectory.npz",
+  "released": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2196000_dt0.05_dynamicZ/trajectory.npz",
+  "contracts": {
+    "held": {
+      "Z_source": "endpoint_D0.2196000_dt0.05",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+      "history": "canonical ring with checkpoint tick accounted for",
+      "Z_applied_inside_state": true,
+      "M": "dynamic",
+      "Z": "held",
+      "D_initial": 0.2195999999999999,
+      "duration_ms": 12000,
+      "dt_ms": 0.05,
+      "model": "frozen v3, same physical graph",
+      "rate_history_scheme": "instantaneous rate at the labelled endpoint"
+    },
+    "released": {
+      "Z_source": "endpoint_D0.2196000_dt0.05_dynamicZ",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+      "history": "canonical ring with checkpoint tick accounted for",
+      "Z_applied_inside_state": true,
+      "M": "dynamic",
+      "Z": "dynamic",
+      "D_initial": 0.2195999999999999,
+      "duration_ms": 12000,
+      "dt_ms": 0.05,
+      "model": "frozen v3, same physical graph",
+      "rate_history_scheme": "instantaneous rate at the labelled endpoint"
+    }
+  },
+  "readouts": {
+    "held": {
+      "first_200Hz_for_200ms_start_ms": null,
+      "first_broad_75percent_and_200Hz_for_200ms_start_ms": null,
+      "D_at_200Hz_entry": null,
+      "Z_A_B_surround_at_200Hz_entry": null,
+      "tail4s_mean_hz": 66.10868539063102,
+      "tail4s_mean_occupation": 0.22135179687499998,
+      "D_initial": 0.21960000000000002,
+      "D_final": 0.21960000000000013
+    },
+    "released": {
+      "first_200Hz_for_200ms_start_ms": 340,
+      "first_broad_75percent_and_200Hz_for_200ms_start_ms": 750,
+      "D_at_200Hz_entry": 0.24286201079542286,
+      "Z_A_B_surround_at_200Hz_entry": [
+        0.70545852073684,
+        0.6856888976083004,
+        0.7602609473536035
+      ],
+      "tail4s_mean_hz": 486.05026087586043,
+      "tail4s_mean_occupation": 1.0,
+      "D_initial": 0.21960000000000002,
+      "D_final": 0.9232538448123557
+    }
+  },
+  "interpretation": "Paired slow-feedback intervention; operational high-rate entry is not a located bifurcation.",
+  "spatial_panels": [
+    {
+      "panel": "A",
+      "condition": "Z held",
+      "window_ms": [
+        237,
+        287
+      ],
+      "global_window_mean_hz": 139.24889843514174
+    },
+    {
+      "panel": "B",
+      "condition": "Z held",
+      "window_ms": [
+        340,
+        390
+      ],
+      "global_window_mean_hz": 78.01502114302372
+    },
+    {
+      "panel": "C",
+      "condition": "Z held",
+      "window_ms": [
+        540,
+        590
+      ],
+      "global_window_mean_hz": 79.31265955367184
+    },
+    {
+      "panel": "D",
+      "condition": "Z dynamic",
+      "window_ms": [
+        237,
+        287
+      ],
+      "global_window_mean_hz": 149.54364719215076
+    },
+    {
+      "panel": "E",
+      "condition": "Z dynamic",
+      "window_ms": [
+        340,
+        390
+      ],
+      "global_window_mean_hz": 220.18151010407234
+    },
+    {
+      "panel": "F",
+      "condition": "Z dynamic",
+      "window_ms": [
+        540,
+        590
+      ],
+      "global_window_mean_hz": 254.63102782152887
+    }
+  ],
+  "agent_png_pdf_visual_review": "PASS",
+  "human_visual_acceptance": "PENDING"
+}

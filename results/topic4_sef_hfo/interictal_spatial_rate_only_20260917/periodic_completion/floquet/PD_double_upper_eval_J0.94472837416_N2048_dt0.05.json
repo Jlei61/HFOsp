@@ -1,0 +1,82 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_upper_eval_J0.94472837416_N2048.npz",
+  "J_EE_core": 0.944728374157131,
+  "T_ms": 761.9648707070426,
+  "dt_ms": 0.04999769492828363,
+  "history_dimension": 679745,
+  "multipliers": [
+    [
+      1.0005146724539273,
+      0.0
+    ],
+    [
+      -1.000165301224821,
+      0.0
+    ],
+    [
+      0.455304327531406,
+      0.0
+    ],
+    [
+      0.19880723357339045,
+      0.0
+    ]
+  ],
+  "residuals": [
+    1.9996074886711475e-13,
+    1.9871653732596206e-14,
+    5.493390811680184e-13,
+    1.2103836467470176e-14
+  ],
+  "phase_multiplier_error": 0.000514672453927334,
+  "phase_tangent_relative_defect": 0.00048690689116951053,
+  "raw_multipliers_above_1p001": 0,
+  "requested_multipliers": 4,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 1160.6325540542603,
+  "polynomial_filter_rho": 0.4667484251196672,
+  "transformed_eigenvalues": [
+    [
+      1.4671562089801198,
+      0.0
+    ],
+    [
+      0.5340409621182208,
+      0.0
+    ],
+    [
+      -0.053268647051687906,
+      0.0
+    ],
+    [
+      -0.0052105471565402125,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.5332515748803328,
+  "smallest_returned_transformed_modulus": 0.0052105471565402125,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.9999999989504198,
+    0.8182731161385178,
+    0.9875711490526268,
+    0.9162627192580493
+  ],
+  "identified_neutral_index": 0,
+  "nontrivial_multipliers": [
+    [
+      -1.000165301224821,
+      0.0
+    ],
+    [
+      0.455304327531406,
+      0.0
+    ],
+    [
+      0.19880723357339045,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 1.000165301224821,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

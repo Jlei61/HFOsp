@@ -1,0 +1,22 @@
+{
+  "pid": 559640,
+  "timestamp": 1789904664.7947605,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/check_rate_Bleading_return_witness.py",
+    "--device",
+    "0",
+    "--after-pids",
+    "558944",
+    "--min-free-gib",
+    "8",
+    "--source-index",
+    "56",
+    "--physical-evidence",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/live_CPU_observer/through_0056_CPU_checks.json"
+  ],
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/return_witness56/worker.log",
+  "physical_prefix": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/accepted_prefix_0057.json",
+  "selection": "Last physically checked return sample in prefix57, to test stability beyond the earlier return witness. Does not certify the interval."
+}

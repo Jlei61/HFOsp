@@ -1,0 +1,10 @@
+{
+  "status": "REGISTERED_BEFORE_PAIRED_INITIAL_HISTORY_TEST",
+  "created_epoch": 1790562248.075792,
+  "question": "Does the observed reduction in output phase coherence reflect loss of native fast-state history during local response initialization?",
+  "trigger": "First40000-target phase-map response matchesnative rates and spatialfield but reduces sourcephasevariance. Random phase and resetinitialization could erase phase-conditioned history, so rate agreement alone is insufficient.",
+  "design": "Two paired59target x512replica localresponses with identicalsource-phasewave, independent-sourceGaussianresidual, Poissonstreams and3-4sburn. Both start inputphase0; change only initialV/ref/M from reset/ratemean toactual72s nativejointV/ref/M. Record2s, align everyoutputspike toactualinputphase. No nativewaveform beyond initialsource statistics, no newnative run or autonomousclosureclaim.",
+  "decision": "A retainedhistory effect would require preserving phase-conditioned faststates beforestationarybranchanalysis. Absenceofeffect would rule out this particular finite-burninitialization explanation, not prove allsourcecorrelations captured.",
+  "producer_sha256": "bacc7aa39f7334c91c15f1a96fcff0452ad3de7d6ac5e7f0ca1dfad526e30f36",
+  "formal_bifurcation_allowed": false
+}

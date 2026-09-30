@@ -1,0 +1,37 @@
+{
+  "created_local": "2026-09-20T01:20:35.164544+08:00",
+  "question": "Does the strong-mean local mismatch coincide with suppressed membrane voltage and delayed recovery, rather than only instantaneous refractory occupancy?",
+  "source": "factorial_waveform",
+  "selected_indices": [
+    6,
+    7
+  ],
+  "selected_group": 39,
+  "conditions": [
+    "full",
+    "mean_only"
+  ],
+  "selection": "Previously identified surround E group, with original and constant-variance inputs; no new subgroup or waveform search.",
+  "observables": [
+    "voltage_mv",
+    "voltage_squared_mv2",
+    "refractory_fraction",
+    "input_current_mv",
+    "refractory_current_mv",
+    "below_reset_fraction"
+  ],
+  "recording": "Post-update, post-reset voltage and refractory flag; current is the pre-update input current. All paths, including reset-clamped refractory paths, contribute. Voltage variance includes variation inside each phase bin.",
+  "statistical_unit": "Independent noise path; repeated cycles combined within each path. Two conditions use common random numbers.",
+  "inherited_simulation": {
+    "dt_ms": 0.1,
+    "replicates": 8192,
+    "burn_cycles": 5,
+    "record_cycles": 20,
+    "phase_bins": 128,
+    "seed": 919821,
+    "device": 0
+  },
+  "acceptance": "All spike counts bitwise equal to the existing factorial assay; finite moments, valid probabilities and variance; phase exposure independently reconstructed.",
+  "budget": "Two recording-only local LIF replays, count parity and moment audit. No fitting, spatial network launch, response equation change or critical-point promotion.",
+  "scope": "Diagnostic of local imposed-input response. A membrane-state association does not establish a unique closure, causal sufficiency, or the native onset bifurcation."
+}

@@ -1,0 +1,40 @@
+{
+  "status": "BOUNDED_DISTINCT_ROOT_SEARCH_COMPLETE",
+  "rows": [
+    {
+      "label": "actual_B_quiet",
+      "status": "NO_DISTINCT_ROOT_ESTABLISHED",
+      "original_rate_residual_per_ms": 0.9675371136888908,
+      "distance_from_known": 7.190335881435144,
+      "CoreA_hz": 425.9409294496124,
+      "CoreB_hz": 3.46607000373409e-05,
+      "regional_rates_hz": [
+        425.9409294496124,
+        3.46607000373409e-05,
+        33.803091012564074
+      ],
+      "relevant_asymmetric_candidate": false,
+      "dynamical_stability": "NOT_COMPUTED",
+      "bifurcation_type": "NOT_ESTABLISHED"
+    },
+    {
+      "label": "mean_lowB",
+      "status": "NO_DISTINCT_ROOT_ESTABLISHED",
+      "original_rate_residual_per_ms": 0.32212563982687337,
+      "distance_from_known": 4.977141121724107,
+      "CoreA_hz": 423.1781295562535,
+      "CoreB_hz": 0.09968849333720317,
+      "regional_rates_hz": [
+        423.1781295562535,
+        0.09968849333720317,
+        43.553022857718815
+      ],
+      "relevant_asymmetric_candidate": false,
+      "dynamical_stability": "NOT_COMPUTED",
+      "bifurcation_type": "NOT_ESTABLISHED"
+    }
+  ],
+  "seconds": 170.09784746170044,
+  "interpretation": "Only distinct original equilibria count; no failed solve proves nonexistence and no root alone certifies onset.",
+  "model_promoted": false
+}

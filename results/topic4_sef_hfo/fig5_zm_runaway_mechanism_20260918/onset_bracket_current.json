@@ -1,0 +1,196 @@
+{
+  "status": "FINITE_TIME_MATCHED_HISTORY_BRACKET",
+  "shared_initial": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449700_dt0.05/trajectory.npz",
+  "duration_ms": 12000,
+  "dt_ms": 0.05,
+  "Z": "held spatial field",
+  "M": "dynamic",
+  "rows": [
+    {
+      "D": 0.14497000000000038,
+      "category": "SELF_LIMITED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.6725,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 15,
+        "n_events": 14,
+        "event_durations_ms": [
+          90,
+          80,
+          90,
+          90,
+          90,
+          90,
+          90,
+          90,
+          80,
+          90,
+          90,
+          80,
+          90,
+          90
+        ],
+        "event_peaks_hz": [
+          167.8683875996855,
+          174.99976570226622,
+          175.80153599194483,
+          169.83798544863797,
+          173.90704408375223,
+          176.2222074072116,
+          171.58033366885132,
+          172.57348816028505,
+          176.35582835831488,
+          173.09248567682616,
+          171.04939029254336,
+          176.1433113013312,
+          174.37797255618653,
+          169.26117892885605
+        ],
+        "inter_onset_ms": [
+          270,
+          260,
+          270,
+          270,
+          260,
+          270,
+          270,
+          270,
+          260,
+          270,
+          270,
+          260,
+          270
+        ],
+        "activity_duty": 0.3275,
+        "mean_rate_hz": 28.087063159910123,
+        "max_rate_hz": 176.35582835831488,
+        "trailing_activity_ms": 50,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.09711390624999999
+      },
+      "returns": [
+        {
+          "lag_ms": 267,
+          "relative_field_error": 0.010474041683462202
+        },
+        {
+          "lag_ms": 534,
+          "relative_field_error": 0.020903211281980746
+        }
+      ],
+      "global_mean_Z": 0.8550299999999996,
+      "Z_A_B_surround": [
+        0.7370552672790044,
+        0.7336007726849696,
+        0.8610837203263697
+      ]
+    },
+    {
+      "D": 0.1449750000000004,
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.28,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 6,
+        "n_events": 5,
+        "event_durations_ms": [
+          80,
+          80,
+          90,
+          90,
+          80
+        ],
+        "event_peaks_hz": [
+          189.91338802720304,
+          189.24664983982245,
+          186.0905956489338,
+          188.0508382733206,
+          193.89490183444923
+        ],
+        "inter_onset_ms": [
+          270,
+          260,
+          270,
+          270
+        ],
+        "activity_duty": 0.72,
+        "mean_rate_hz": 65.00646054957161,
+        "max_rate_hz": 197.47737050660365,
+        "trailing_activity_ms": 2430,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.21223390625
+      },
+      "returns": [
+        {
+          "lag_ms": 268,
+          "relative_field_error": 0.6192702453707652
+        },
+        {
+          "lag_ms": 536,
+          "relative_field_error": 0.6635493547540684
+        },
+        {
+          "lag_ms": 392,
+          "relative_field_error": 0.8087813118332046
+        }
+      ],
+      "global_mean_Z": 0.8550249999999996,
+      "Z_A_B_surround": [
+        0.7370440035645771,
+        0.733597286532353,
+        0.8610788363131272
+      ]
+    }
+  ],
+  "high_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_finer_restart_D0.1449750_dt0.05/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D144975_D0.1449750_dt0.05/trajectory.npz"
+  ],
+  "high_segment_lengths_ms": [
+    8000,
+    4000
+  ],
+  "low_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_tail_D14497_D0.1449700_dt0.05/trajectory.npz",
+  "claim": "Finite-time consequence of changing only spatial Z from a shared complete fast/M/delay state; not a certified bifurcation point.",
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "bracket_D": [
+    0.14497,
+    0.144975
+  ],
+  "longer_record_source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/actual_rate_long_tail_bracket.json",
+  "time_step_refinement": {
+    "status": "COMPLETE",
+    "D": 0.1449750000000004,
+    "dt_ms": 0.025,
+    "category": "UNRESOLVED",
+    "tail_mean_hz": 68.40602228165808,
+    "best_field_return": {
+      "lag_ms": 270,
+      "relative_field_error": 0.7811623124536198,
+      "relative_global_error": 0.42109292791199066
+    },
+    "claim": "Loss of regular short cycle reproduced; exact finite-window persistence category differs and is not used as a monotone bifurcation label."
+  }
+}

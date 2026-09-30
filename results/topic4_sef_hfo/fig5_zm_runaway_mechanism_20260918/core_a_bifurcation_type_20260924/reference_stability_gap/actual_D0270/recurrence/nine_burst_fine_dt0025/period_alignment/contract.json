@@ -1,0 +1,11 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/nine_burst_fine_dt0025/iteration00/node00.npz",
+  "dt_ms": 0.025,
+  "period_guess_ms": 2369.0337184833256,
+  "search_halfwidth_ms": 50.0,
+  "question": "Does a period shift account for the large refined-mesh return error before full Newton correction?",
+  "method": "One existing full-state cubic Poincare return around the old period, with the identical refined starting state. The return uses actual original integration and the original four-step crossing interpolant. A corrected period guess alone is not a periodic root.",
+  "decision": "Compare original full six-block return residual against the saved initial fixed-T residual. If at least tenfold smaller, use the same starting state with this aligned period for a new declared fine corrector. Otherwise resume the paused original corrector. Do not infer orbit disappearance or a bifurcation from this test.",
+  "model": "Unchanged complete spatial field, all conditional Z held and every E M dynamic, constant original mean input, locked physical private variance and response.",
+  "model_promoted": false
+}

@@ -1,0 +1,52 @@
+{
+  "status": "COMPLETE_ONE_EVENT_SPATIAL_CANDIDATE",
+  "original_reference_start_s": 0.57,
+  "event_absolute_start_s": 26.47,
+  "event_duration_s": 0.12,
+  "both_core_Z_reference_s": 25.48,
+  "metrics": {
+    "start_s": 9.67,
+    "end_s": 9.790000000000001,
+    "peak_5ms_Hz": [
+      113.0875,
+      402.38726790450926,
+      419.8473282442748,
+      109.83585029546947
+    ],
+    "core_to_other_peak_ratio": 3.8224980925157253,
+    "core_peak_over100": true,
+    "order": {
+      "25": {
+        "onset_ms_A_B_other": [
+          35.0,
+          5.0,
+          20.0
+        ],
+        "core_precedes_other": true
+      },
+      "50": {
+        "onset_ms_A_B_other": [
+          35.0,
+          5.0,
+          35.0
+        ],
+        "core_precedes_other": true
+      },
+      "100": {
+        "onset_ms_A_B_other": [
+          40.0,
+          10.0,
+          55.0
+        ],
+        "core_precedes_other": true
+      }
+    }
+  },
+  "scope": "One complete brief after recovery; population-threshold order is descriptive, not causal source localization. Sustained return and propagation fidelity require the registered continuation and visual review.",
+  "producer_sha256": "8e48d0f8076ce2e5f3494f1312d1305c2c7c0803b3b0fc54752895024ef479bd",
+  "agent_visual_review": "PASS",
+  "human_visual_review": "PENDING",
+  "counts_as_independent_seed": false,
+  "counts_as_autonomous_loop": false,
+  "agent_visual_observation": "PNG opened: B then A recruitment and outward movement are visible in both rows. Candidate event has broader spatial recruitment and longer local activity; one event is not sustained native-return acceptance."
+}

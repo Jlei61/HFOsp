@@ -1,0 +1,15 @@
+{
+  "status": "REGISTERED_BEFORE_REPAIRED_CORRECTION",
+  "created_epoch": 1790546348.9137874,
+  "question": "At the same K9.35 coordinates, does the phase-repaired value residual support one bounded current-point measured-DC correction?",
+  "values": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_phase_stationarity_K9p35",
+  "values_sha256": "e8105d6e7d9e43be15cab134fea4e1638975f0387bc13245926460f3f22c1650",
+  "DC": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_dc_K9p35",
+  "DC_sha256": "520092cc9ace6f84f0911d156cd40de8336c8f3b14a22f55ea0ce6ee22242dc5",
+  "derivative_scope": "DC is measured at these same inputs, not transported fromK9. Selected observerprotocol51/51estimable comparisons passed; this does not promote alltarget amplitude failures or weak components. Preserve every batch and eight-block error.",
+  "solver": "Existing implicitM/globalG exact moment construction and one bounded GMRES solve. A resulting proposal still needs current-point chain-rule QA and fresh nonlinear phase-aware response counts before acceptance.",
+  "stopping": "No automatic continuation, new native job, eigenvalue interpretation or root promotion.",
+  "producer_sha256": "4c3c690904b40d55d4f04df168ddbccc72c334d2262ac4f9af7259bb2e222f26",
+  "collector_sha256": "d40c9efa3dcab7f7a70588e8024dff8e692956c37dad7aced306f3147a85a687",
+  "formal_bifurcation_allowed": false
+}

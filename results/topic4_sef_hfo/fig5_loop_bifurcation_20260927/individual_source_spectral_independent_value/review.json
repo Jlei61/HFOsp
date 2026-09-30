@@ -1,0 +1,97 @@
+{
+  "status": "COMPLETE_INDEPENDENT_REVIEW",
+  "rows": [
+    {
+      "region": "allE",
+      "native_development_rate_Hz": 98.481484375,
+      "independent_output_rate_Hz": 98.4943212890625,
+      "projected_recurrent_IE_II_mean_residual_RMS_mV": [
+        0.019692743275915022,
+        0.049576585168222706
+      ],
+      "projected_recurrent_IE_II_variance_residual_RMS_mV2": [
+        0.0014322532510773556,
+        0.041396221052103055
+      ],
+      "projected_variance_output_MCSEM_RMS_mV2": [
+        0.0006744277720694225,
+        0.006584067880446413
+      ]
+    },
+    {
+      "region": "coreA",
+      "native_development_rate_Hz": 392.64522546419096,
+      "independent_output_rate_Hz": 392.73646800397876,
+      "projected_recurrent_IE_II_mean_residual_RMS_mV": [
+        0.025212577413151832,
+        0.07118150103043855
+      ],
+      "projected_recurrent_IE_II_variance_residual_RMS_mV2": [
+        0.001870982270833861,
+        0.08621645681844226
+      ],
+      "projected_variance_output_MCSEM_RMS_mV2": [
+        0.0009991296222055044,
+        0.009228880278542052
+      ]
+    },
+    {
+      "region": "coreB",
+      "native_development_rate_Hz": 132.47582697201017,
+      "independent_output_rate_Hz": 132.51016817748092,
+      "projected_recurrent_IE_II_mean_residual_RMS_mV": [
+        0.02886698435862214,
+        0.07358862044021182
+      ],
+      "projected_recurrent_IE_II_variance_residual_RMS_mV2": [
+        0.0016947040517203223,
+        0.07494641749932837
+      ],
+      "projected_variance_output_MCSEM_RMS_mV2": [
+        0.0010628307223663352,
+        0.012905335098105474
+      ]
+    },
+    {
+      "region": "surroundE",
+      "native_development_rate_Hz": 90.3226198292843,
+      "independent_output_rate_Hz": 90.33296100418582,
+      "projected_recurrent_IE_II_mean_residual_RMS_mV": [
+        0.01923987072785964,
+        0.04813461359674953
+      ],
+      "projected_recurrent_IE_II_variance_residual_RMS_mV2": [
+        0.0014121964000921713,
+        0.03835807794595028
+      ],
+      "projected_variance_output_MCSEM_RMS_mV2": [
+        0.000651144993920103,
+        0.006255849688643265
+      ]
+    },
+    {
+      "region": "I",
+      "native_development_rate_Hz": 129.05975,
+      "independent_output_rate_Hz": 129.0803505859375,
+      "projected_recurrent_IE_II_mean_residual_RMS_mV": [
+        0.016304413121577554,
+        0.034997856171042105
+      ],
+      "projected_recurrent_IE_II_variance_residual_RMS_mV2": [
+        0.0008585381716142534,
+        0.02016428968596923
+      ],
+      "projected_variance_output_MCSEM_RMS_mV2": [
+        0.0004226590528514968,
+        0.0032260422880638967
+      ]
+    }
+  ],
+  "actual_native_development_field_RMS_Hz": 0.061764825512121264,
+  "counterpart": "The base collect uses candidate X12 as generation0, so its native_reference labels do not denote a native trajectory. This review explicitly uses originalnative42-44s for the development field comparison.",
+  "uncertainty": "Projection SEM uses independent target/replica output estimators conditional on the fixed supplied X12. It excludes numerical uncertainty of X12, source crosscorrelations omitted by the approximation, finite-window bias and native variability.",
+  "judgement": "Do not accept a certified root at the fresh-output sampling precision: E/I rates and filteredsourcevariances have residuals beyond that SEM, with6SEM outliers and zeroSEM nonzero residuals. This does not by itself establish structural closure failure: X12 was estimated from16 common-stream replicas and remains a noisy approximate candidate. Native same-background controls are required separately.",
+  "formal_bifurcation_allowed": false,
+  "root_certified": false,
+  "producer_sha256": "285f555c64e599b33ff11d2ad84aa1b23dc0a14ba32f497cbcf5db6f6f079c5e"
+}

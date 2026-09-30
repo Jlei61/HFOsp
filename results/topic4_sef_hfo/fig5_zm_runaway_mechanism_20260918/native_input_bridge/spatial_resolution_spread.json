@@ -1,0 +1,155 @@
+{
+  "status": "READ_ONLY_DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": 0,
+      "g20_native_within_variance_mv2": 614.5816319765564,
+      "g40_native_within_variance_mv2": 191.86378411140112,
+      "retained_fraction": 0.3121860044764889,
+      "matched_size_shuffle_mean_mv2": 514.0882601945186,
+      "matched_size_shuffle_range_mv2": [
+        494.7872633854404,
+        528.444044965148
+      ],
+      "shuffle_retained_fraction": 0.836484908507856
+    },
+    {
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": 1,
+      "g20_native_within_variance_mv2": 797.9785388684901,
+      "g40_native_within_variance_mv2": 256.33964517437954,
+      "retained_fraction": 0.3212362647469963,
+      "matched_size_shuffle_mean_mv2": 673.9317443833867,
+      "matched_size_shuffle_range_mv2": [
+        664.9045665736539,
+        685.1903639185335
+      ],
+      "shuffle_retained_fraction": 0.844548708464017
+    },
+    {
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": 2,
+      "g20_native_within_variance_mv2": 662.8896148018706,
+      "g40_native_within_variance_mv2": 204.4476489143401,
+      "retained_fraction": 0.3084188443281721,
+      "matched_size_shuffle_mean_mv2": 637.2402193740706,
+      "matched_size_shuffle_range_mv2": [
+        635.0333594076345,
+        638.3931228100951
+      ],
+      "shuffle_retained_fraction": 0.9613066868826022
+    },
+    {
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": 0,
+      "g20_native_within_variance_mv2": 755.9547743263016,
+      "g40_native_within_variance_mv2": 253.86813655219595,
+      "retained_fraction": 0.3358245032296282,
+      "matched_size_shuffle_mean_mv2": 640.0848627423526,
+      "matched_size_shuffle_range_mv2": [
+        625.5472053950123,
+        664.507747170103
+      ],
+      "shuffle_retained_fraction": 0.846723751844532
+    },
+    {
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": 1,
+      "g20_native_within_variance_mv2": 1241.1330508923643,
+      "g40_native_within_variance_mv2": 394.5958168408033,
+      "retained_fraction": 0.3179319224132274,
+      "matched_size_shuffle_mean_mv2": 1045.975209122617,
+      "matched_size_shuffle_range_mv2": [
+        1019.9547734707145,
+        1084.2889066446742
+      ],
+      "shuffle_retained_fraction": 0.8427583234292
+    },
+    {
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": 2,
+      "g20_native_within_variance_mv2": 987.8515261963345,
+      "g40_native_within_variance_mv2": 326.7646211334296,
+      "retained_fraction": 0.33078313133919834,
+      "matched_size_shuffle_mean_mv2": 949.9092482587109,
+      "matched_size_shuffle_range_mv2": [
+        945.7522184129423,
+        952.6822774925504
+      ],
+      "shuffle_retained_fraction": 0.961591112701199
+    },
+    {
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": 0,
+      "g20_native_within_variance_mv2": 60.36146542421184,
+      "g40_native_within_variance_mv2": 32.20954887260204,
+      "retained_fraction": 0.5336111150754523,
+      "matched_size_shuffle_mean_mv2": 51.75367384278911,
+      "matched_size_shuffle_range_mv2": [
+        50.713730391643296,
+        53.588671493935216
+      ],
+      "shuffle_retained_fraction": 0.8573959144144632
+    },
+    {
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": 1,
+      "g20_native_within_variance_mv2": 114.6016743758162,
+      "g40_native_within_variance_mv2": 52.15131598423337,
+      "retained_fraction": 0.45506591651717254,
+      "matched_size_shuffle_mean_mv2": 97.37744383707818,
+      "matched_size_shuffle_range_mv2": [
+        95.20226849537592,
+        98.49318342947531
+      ],
+      "shuffle_retained_fraction": 0.84970350012292
+    },
+    {
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": 2,
+      "g20_native_within_variance_mv2": 984.670179921205,
+      "g40_native_within_variance_mv2": 323.07618637219167,
+      "retained_fraction": 0.32810599219938275,
+      "matched_size_shuffle_mean_mv2": 947.562025505461,
+      "matched_size_shuffle_range_mv2": [
+        944.5836227331046,
+        951.9451921279436
+      ],
+      "shuffle_retained_fraction": 0.9623141279461581
+    }
+  ],
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/fields",
+  "sampling_ms": 5,
+  "shuffle_seed": 920115,
+  "shuffles": 10,
+  "control": "Finegroup labels shuffled within each parentcoarsegroup; exactgroupN and originalcoarsegroup membership preserved. Removes spatialsubdivision while retaining smallerNs.",
+  "scope": "One existing native history; shuffles are descriptive partitioncontrols, not independentnetworkexperiments. ActualeffectiveinhibitionincludesZ/M. No finenetwork simulation, privatevarianceclosure validation or bifurcation."
+}

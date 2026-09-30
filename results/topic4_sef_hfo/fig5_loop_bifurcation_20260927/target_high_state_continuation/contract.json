@@ -1,0 +1,33 @@
+{
+  "status": "REGISTERED_BEFORE_CONTINUATION",
+  "created_epoch": 1790541154.902691,
+  "question": "Does the established K9 high state continue toward K10.5 when K changes gradually, or do the cores collapse after a spatial recruitment transition?",
+  "why": "K9.01875 tiny unresolved quiet-group residuals do not locate whole-network termination. Previous K10.5 conditional trajectories begin from a large clamp of a different history and cannot prove absence of a carried high state.",
+  "design": "First carry the exact final40000x128 density state at K9 into5s K9 control. External expected input becomes the SAME stationary mean used by DirectDC, with ongoing local Gaussian streams. If the last2s preserve allE>200Hz and bothcores>300Hz, carry that complete final state into two fixed ramps K9to10.5 lasting2s or10s, each followed by5s heldK10.5. No reset of cells, RNG, delay ring, M, R or G; Z stays at the actual16.7s field mean.21. Same paired numerical RNG future for the ramps.",
+  "intervention": "K is explicitly prescribed. Constant expected external input differs from the earlier time-varying native drive; the control exposes that substitution. Gaussian local sampling and the original cell/recurrent equations remain unchanged. These are reduced-density diagnostic trajectories, not native seeds, equilibrium continuation or autonomous recovery.",
+  "readouts": "Rates allE/coreA/coreB/surround, G/R, counterfactual Zdrift, 400-bin spatialfield, actual imposedK. Compare terminal3s and the two ramp trajectories; record transition brackets only if eachcore sustainedbelow5Hz for1s. Report censoring and speed dependence. No Hopf/fold name and no stability claim.",
+  "stop": "Exactly one control and at most two ramps. If control loses the high-state class, stop before ramps and report baseline mismatch. No automatic horizon, parameter or frequency extension.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/target_density_exit/individual",
+  "source_state_sha256": "b8667027c27f2908125428d642c9f20ddc71097c0cec5120c07e00c3396a6293",
+  "jobs": {
+    "control_K9": {
+      "duration_s": 5.0,
+      "ramp_s": 0.0,
+      "delta_K": 0.0
+    },
+    "ramp2s_K10p5": {
+      "duration_s": 7.0,
+      "ramp_s": 2.0,
+      "delta_K": 1.5
+    },
+    "ramp10s_K10p5": {
+      "duration_s": 15.0,
+      "ramp_s": 10.0,
+      "delta_K": 1.5
+    }
+  },
+  "producer_sha256": "3282d13e39be5030712f9d20250dac24e7c616a67e98573aee5f32b5b4a09a64",
+  "base_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "physical_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "formal_bifurcation_allowed": false
+}

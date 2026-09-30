@@ -1,0 +1,282 @@
+{
+  "created_local": "2026-09-24T09:34:28.957317+08:00",
+  "coordinates": {
+    "D_A": 0.3281215991278547,
+    "Z_A": 0.6718784008721452,
+    "D_global": 0.21817194367190396,
+    "native_time_ms": 9799.919439549412
+  },
+  "conditions": [
+    {
+      "label": "mid1_from_lower",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    },
+    {
+      "label": "mid1_from_upper",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    }
+  ],
+  "source_evidence": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference",
+      "D_A": 0.2557216996140609,
+      "local_readout": {
+        "status": "AUDIT_PASS",
+        "label": "reference",
+        "coordinates": {
+          "D_A": 0.2557216996140609,
+          "D_global": 0.2164660210396102,
+          "Z_A": 0.7442783003859391
+        },
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "rows": [
+          {
+            "region": "Global E",
+            "mean_rate_hz": 34.38887126733126,
+            "quiet_fraction": 0.5488,
+            "duty_above50": 0.2512,
+            "range_10ms_hz": [
+              0.00926160193122346,
+              178.08508541868278
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              93,
+              155,
+              114,
+              117,
+              122,
+              119,
+              93,
+              157,
+              114,
+              117,
+              120,
+              122,
+              93,
+              126,
+              117,
+              92,
+              154,
+              114,
+              117
+            ]
+          },
+          {
+            "region": "Core A",
+            "mean_rate_hz": 103.03514866111585,
+            "quiet_fraction": 0.6636,
+            "duty_above50": 0.2892,
+            "range_10ms_hz": [
+              1.5061846892042494e-05,
+              473.035976015288
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              89,
+              90,
+              88,
+              89,
+              89,
+              86,
+              89,
+              89,
+              88,
+              89,
+              89,
+              87,
+              89,
+              89,
+              87,
+              89,
+              89,
+              88,
+              89
+            ]
+          },
+          {
+            "region": "Core B",
+            "mean_rate_hz": 91.04546808255446,
+            "quiet_fraction": 0.6274,
+            "duty_above50": 0.312,
+            "range_10ms_hz": [
+              1.5191951001837135e-05,
+              474.98053362120766
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              81,
+              90,
+              90,
+              99,
+              92,
+              139,
+              80,
+              92,
+              90,
+              101,
+              95,
+              138,
+              79,
+              94,
+              137,
+              81,
+              89,
+              91,
+              105
+            ]
+          },
+          {
+            "region": "Surround",
+            "mean_rate_hz": 31.227631009561115,
+            "quiet_fraction": 0.5598,
+            "duty_above50": 0.2406,
+            "range_10ms_hz": [
+              0.009728566866110351,
+              165.57520154331894
+            ],
+            "complete_local_episodes": 19,
+            "episode_durations_ms": [
+              90,
+              153,
+              111,
+              115,
+              120,
+              113,
+              90,
+              155,
+              111,
+              115,
+              118,
+              116,
+              90,
+              125,
+              111,
+              90,
+              152,
+              111,
+              115
+            ]
+          }
+        ],
+        "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+        "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+        "model_promoted": false
+      }
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/coreA_depleted",
+      "D_A": 0.40052149864164854,
+      "local_readout": {
+        "status": "AUDIT_PASS",
+        "label": "coreA_depleted",
+        "coordinates": {
+          "D_A": 0.40052149864164854,
+          "D_global": 0.2198778663041978,
+          "Z_A": 0.5994785013583515
+        },
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "rows": [
+          {
+            "region": "Global E",
+            "mean_rate_hz": 54.55282374757598,
+            "quiet_fraction": 0.0,
+            "duty_above50": 0.5758,
+            "range_10ms_hz": [
+              21.075729886675063,
+              98.55175539705523
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          },
+          {
+            "region": "Core A",
+            "mean_rate_hz": 423.18456638611525,
+            "quiet_fraction": 0.0,
+            "duty_above50": 1.0,
+            "range_10ms_hz": [
+              353.67283987431523,
+              435.8835474636576
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          },
+          {
+            "region": "Core B",
+            "mean_rate_hz": 125.20257718279322,
+            "quiet_fraction": 0.359,
+            "duty_above50": 0.5552,
+            "range_10ms_hz": [
+              2.6409678654951525e-05,
+              450.71221269990946
+            ],
+            "complete_local_episodes": 22,
+            "episode_durations_ms": [
+              39,
+              50,
+              46,
+              343,
+              143,
+              113,
+              46,
+              48,
+              47,
+              49,
+              314,
+              126,
+              39,
+              28,
+              47,
+              46,
+              168,
+              44,
+              33,
+              44,
+              346,
+              43
+            ]
+          },
+          {
+            "region": "Surround",
+            "mean_rate_hz": 43.60472656604153,
+            "quiet_fraction": 0.0,
+            "duty_above50": 0.3366,
+            "range_10ms_hz": [
+              12.299313054468893,
+              84.07161158430873
+            ],
+            "complete_local_episodes": 0,
+            "episode_durations_ms": []
+          }
+        ],
+        "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+        "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+        "model_promoted": false
+      }
+    }
+  ],
+  "interpolation": {
+    "native_interval_ms": [
+      9795.0,
+      9800.0
+    ],
+    "fraction": 0.9838879098825062,
+    "number_upcrossings": 1
+  },
+  "budget": "Two10s full-state continuations. Audit before selecting another field or longer history. No physical parameter refit.",
+  "initial_M": "Carried separately from each full source history; dynamic in both, not fixed or reset.",
+  "numerical_dt_ms": 0.05,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

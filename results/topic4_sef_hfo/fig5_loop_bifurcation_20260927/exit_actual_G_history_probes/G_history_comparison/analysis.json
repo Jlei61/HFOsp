@@ -1,0 +1,425 @@
+{
+  "status": "COMPLETE_ACTUAL_FIELD_G_HISTORY_COMPARISON",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "initial_Graw": 4.51130203132469,
+      "complete_30s": true,
+      "recorded_future_input_samples_bitwise": 300,
+      "finite_window_state": "sustained_high",
+      "tail_brief_events": 0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            242.50047500000028,
+            464.55862068965456,
+            470.9960135708231,
+            231.1075224337934
+          ],
+          "peak_Hz_allE_A_B_other": [
+            262.49375000000003,
+            469.36339522546416,
+            479.89821882951657,
+            252.32764281024296
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      },
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            239.9295625000001,
+            464.75994694960224,
+            475.37531806615874,
+            228.28864084044662
+          ],
+          "mean_Graw": 4.411235018826133,
+          "minimum_causal_R_Hz": 233.00684745454782,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.041999999999999836,
+            -0.03483387722099197,
+            -0.033073757753916404,
+            -0.04240772432635589
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 0.0
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            242.65211718749967,
+            464.62400530503976,
+            471.4386132315508,
+            231.2537918581747
+          ],
+          "mean_Graw": 4.289133856205766,
+          "minimum_causal_R_Hz": 236.3777606037623,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04199999999999982,
+            -0.03483387722099193,
+            -0.033073757753916404,
+            -0.04240772432635603
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 0.0
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            242.58916874999977,
+            464.54641909814416,
+            470.6796437659014,
+            231.20916611950116
+          ],
+          "mean_Graw": 4.3396842661561,
+          "minimum_causal_R_Hz": 242.30680561013727,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04199999999999982,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            -0.04240772432635605
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 0.0
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            242.57829687500035,
+            464.53289124668424,
+            470.7650127226439,
+            231.1958765594224
+          ],
+          "mean_Graw": 4.338578300009933,
+          "minimum_causal_R_Hz": 242.31428223599676,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04200000000000024,
+            -0.03483387722099196,
+            -0.03307375775391635,
+            -0.04240772432635607
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 0.0
+        }
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_zero",
+      "initial_Graw": 0.0,
+      "complete_30s": true,
+      "recorded_future_input_samples_bitwise": 300,
+      "finite_window_state": "sustained_high",
+      "tail_brief_events": 0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            244.67867291666684,
+            444.89986737400596,
+            470.2525021204405,
+            233.90166010067855
+          ],
+          "peak_Hz_allE_A_B_other": [
+            312.5625,
+            479.17771883289123,
+            480.27989821882954,
+            304.3007222586999
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      },
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            281.79215625000006,
+            462.1657824933686,
+            469.8295165394413,
+            272.47504924491136
+          ],
+          "mean_Graw": 5.161412063047836,
+          "minimum_causal_R_Hz": 239.34301216417728,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.178,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.034289521249999864,
+            -0.03483387722099197,
+            -0.033073757753916404,
+            -0.03430741835130659
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 106.7775448163922
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            240.74753906249967,
+            440.86007957559707,
+            470.9220737913474,
+            229.85449770190414
+          ],
+          "mean_Graw": 4.379057355751623,
+          "minimum_causal_R_Hz": 226.9380625167063,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04199999999999982,
+            -0.03483387722099193,
+            -0.033073757753916404,
+            -0.04240772432635603
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 67.84686562928378
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            243.8526687499999,
+            444.89575596816934,
+            470.15750636132213,
+            233.03644780039411
+          ],
+          "mean_Graw": 4.467824119254361,
+          "minimum_causal_R_Hz": 244.0920042747058,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04199999999999982,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            -0.04240772432635605
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 76.72827446319633
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            243.82370312500052,
+            444.8104774535824,
+            470.1427480916014,
+            233.00850952068308
+          ],
+          "mean_Graw": 4.463066239478941,
+          "minimum_causal_R_Hz": 243.8886892837934,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.04200000000000024,
+            -0.03483387722099196,
+            -0.03307375775391635,
+            -0.04240772432635607
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 76.71463626196343
+        }
+      ]
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+      "initial_Graw": 11.495040572672318,
+      "complete_30s": true,
+      "recorded_future_input_samples_bitwise": 300,
+      "finite_window_state": "sustained_high",
+      "tail_brief_events": 0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            205.89664374999978,
+            470.4032714412024,
+            467.44312977099315,
+            192.60007332020155
+          ],
+          "peak_Hz_allE_A_B_other": [
+            255.4125,
+            476.2599469496021,
+            477.6081424936387,
+            244.99343401181875
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      },
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            1
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            138.45621874999998,
+            437.98408488063666,
+            420.6921119592887,
+            123.75886408404456
+          ],
+          "mean_Graw": 5.275223715051372,
+          "minimum_causal_R_Hz": 107.1568480072617,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 0.237,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            -0.01729389124999988,
+            -0.03483387722099197,
+            -0.033073757753916404,
+            -0.016452521437321014
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 176.3063827487366
+        },
+        {
+          "interval_s": [
+            1,
+            5
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            198.99614062499992,
+            471.2775198938991,
+            462.435114503816,
+            185.45828135259381
+          ],
+          "mean_Graw": 1.0111574164502493,
+          "minimum_causal_R_Hz": 122.75070895943593,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 1.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            0.04679585671875002,
+            -0.03483387722099193,
+            -0.033073757753916404,
+            0.05087748299472115
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 250.38911108051943
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            209.83029374999984,
+            471.5700265251994,
+            470.22544529261904,
+            196.63192383453705
+          ],
+          "mean_Graw": 1.053246931808002,
+          "minimum_causal_R_Hz": 210.07575506623382,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 1.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            0.04437649,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.048335797669704715
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 267.1299444277997
+        },
+        {
+          "interval_s": [
+            20,
+            30
+          ],
+          "rates_Hz_allE_A_B_surround": [
+            209.64679999999976,
+            471.5594164456232,
+            470.08715012722473,
+            196.4429842416284
+          ],
+          "mean_Graw": 1.0354020968537505,
+          "minimum_causal_R_Hz": 209.49097208105206,
+          "sampled_causal_R_at_or_below5_fraction": 0.0,
+          "sampled_G_below_recovery_block_fraction": 1.0,
+          "mean_counterfactual_dZ_per_s_allE_A_B_surround": [
+            0.04448716437499997,
+            -0.03483387722099196,
+            -0.03307375775391635,
+            0.04845206753181897
+          ],
+          "spatial_field_RMS_from_baseline_Hz": 267.21278155524857
+        }
+      ]
+    }
+  ],
+  "initial_state_qa": {
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "exit_z0.21_k9_actualfield_G_zero",
+        "entire_declared_initial_engine_bitwise": true,
+        "held_fields_match_baseline_bitwise": true,
+        "initial_R_Hz": 257.7565702377779,
+        "initial_G_raw": 0.0
+      },
+      {
+        "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+        "entire_declared_initial_engine_bitwise": true,
+        "held_fields_match_baseline_bitwise": true,
+        "initial_R_Hz": 257.7565702377779,
+        "initial_G_raw": 11.495040572672318
+      }
+    ],
+    "baseline_reused": "exit_z0.21_k9_fields16p7_high",
+    "simulator_physics_unchanged": true,
+    "counts_as_autonomous_loop": false
+  },
+  "statistical_unit": "One shared endogenous history and future noise, two initial-G interventions plus reused unchanged baseline; no independent seed replication.",
+  "scope": "Z andK remain held. CounterfactualZdrift is not observed recovery. Finite conditional persistence or suppression does not establish attractors, a basin boundary, an autonomous exit, or a bifurcation.",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "0e2d80c7ced06aea2f76010d661605d18b94204e9faaf37459664ee3035427c2"
+}

@@ -1,0 +1,66 @@
+{
+  "status": "FROZEN_BEFORE_TARGETS",
+  "created_epoch": 1790513468.3920612,
+  "source_sha256": "dbfe12c42c304dea106669e4ef3b12ca48edb8b13f7e916926e650a767cd4801",
+  "question": "Can physically motivated history time compression plus conductance-dependent history weights repair dynamic gain while the same stationary function fits rates and DC derivatives?",
+  "cause": "Staticv3 passes rate tests but original histories fail atg>0; known diagnostic compression improves46to68of81. One DC derivative fails despite accurate mean rate.",
+  "candidate": "Same static4-96-96-96-1 residual fine-tuned with DC derivative labels. Preserve parent nonlinear39-feature hazard; history taus become[1,4,16,64]/(1+g)ms. Add g/(1+g)*36 history weights from4-64-64-36tanh. Added history is zero at equilibrium andg0. Native current covariance filters and absolute2ms refractory unchanged.",
+  "training": {
+    "sobol_workpoints": 256,
+    "design_seed": 927451,
+    "structured_known_workpoints": 9,
+    "frequencies_Hz": [
+      0,
+      10,
+      30,
+      80,
+      150
+    ],
+    "replicates": 8192,
+    "record_ms": 2000,
+    "burn_ms": 500,
+    "noise_seed": 927453,
+    "reused_static_points": 7168,
+    "steps": 18000,
+    "batch_static": 256,
+    "batch_linear": 192,
+    "seed": 927454,
+    "learning_rates": [
+      [
+        0,
+        0.0003
+      ],
+      [
+        6000,
+        0.0001
+      ],
+      [
+        12000,
+        3e-05
+      ]
+    ],
+    "loss": "mean((asinh(r/2)-asinh(target/2))/.05)^2 + mean(abs((H-target)/tolerance))^2 +1e-5*mean(newhistoryweights^2). Gain normalization same10%DC/15%highfrequency and2SEM; nonidentifiable gains excluded and reported."
+  },
+  "validation": {
+    "workpoints": 64,
+    "design_seed": 927461,
+    "frequencies_Hz": [
+      0,
+      7,
+      25,
+      60
+    ],
+    "half_amplitude_every_eighth_point": true,
+    "replicates": 16384,
+    "record_ms": 4000,
+    "burn_ms": 500,
+    "noise_seed": 927463,
+    "static_points": 512,
+    "static_design_seed": 927471,
+    "static_noise_seed": 927473
+  },
+  "gate": "Every estimable primary complex gain must be withinmax(10%absDC,2SEM,1e-7) at<=25Hz or15%absDC at60Hz. DC SNR>=10 determines estimability, never pass an unmeasured derivative. Half-amplitude sensitivity must passcombined2SEM/10%DC. Static criteria unchanged:>=90%withinmax(2Hz,10%,3SEM),ALLwithinmax(10Hz,25%,5SEM),separate broad/lowmean. No fitting or checkpoint selection with fresh validation targets.",
+  "interpretation": "Passing constantg gain is only a local gate. Nonestimable points remain uncertified; time-varyingg, nonlinear waveform and native spatial correspondence still required. No bifurcation permission from this local result.",
+  "bounded": "One frozen architecture/training schedule. Diagnose any failure before further changes; no automatic capacity sweep.",
+  "static_source_sha256": "a951a19ae1faf937c44b687bdd13ea9e6724bf508da00634cf5970f2e696bb63"
+}

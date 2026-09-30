@@ -1,0 +1,58 @@
+{
+  "status": "SELECTED_SAME_J_PROFILES_CHECKED",
+  "selected_indices": [
+    41
+  ],
+  "rows": [
+    {
+      "status": "SAME_J_PHYSICAL_PROFILE_CHECKED",
+      "index": 41,
+      "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256.npz",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256_accuracy_N512_accuracy_N2048.npz",
+      "resolution": {
+        "status": "RESOLUTION_CHECKED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256_accuracy_N512.npz",
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256_accuracy_N512_accuracy_N2048.npz",
+        "N": 2048,
+        "check_N": 8192,
+        "J_EE_core": 1.6251725691286658,
+        "T_ms": 241.1008347908637,
+        "maximum_group_defect_Hz": 1.7283396935852124e-10,
+        "regional_defect_Hz": [
+          5.389422330166034e-13,
+          3.1131444609081996e-13,
+          6.946940667963988e-13
+        ],
+        "minimum_rate_Hz": 4.954926778234526e-05,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 32,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.3652273755937472e-11,
+            "phase_index": 2476,
+            "group": 14
+          },
+          "slow": {
+            "minimum_Hz": 6.758142113993688e-05,
+            "phase_index": 3538,
+            "group": 399
+          },
+          "positive": true,
+          "N": 2048,
+          "check_N": 8192
+        }
+      },
+      "relative_waveform_change": 0.0002866514873502271,
+      "relative_period_change": 4.827513035987607e-07,
+      "memberships": [
+        {
+          "family": "single",
+          "index": 150
+        }
+      ],
+      "scope": "Physical periodic profile only. The queued original Floquet survey must compute stability on this corrected profile."
+    }
+  ],
+  "scope": "Existing frozen survey points; unchanged spatial model and parameter values. No new critical point or stability claim."
+}

@@ -1,0 +1,119 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_diagnostic/independent_comparison.json",
+  "trajectory_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_diagnostic/mean_drive_expected",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_diagnostic/recorded_drive_expected",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_diagnostic/recorded_drive_poisson_seed1",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_spatial_diagnostic/recorded_drive_poisson_seed2"
+  ],
+  "labels": [
+    "native",
+    "mean_drive_expected",
+    "recorded_drive_expected",
+    "recorded_drive_poisson_seed1",
+    "recorded_drive_poisson_seed2"
+  ],
+  "snapshots": [
+    {
+      "label": "native",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "native",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "mean_drive_expected",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "mean_drive_expected",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_expected",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_expected",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_poisson_seed1",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_poisson_seed1",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_poisson_seed2",
+      "time_ms": 4025.0,
+      "window_ms": [
+        4000.0,
+        4050.0
+      ],
+      "samples": 50
+    },
+    {
+      "label": "recorded_drive_poisson_seed2",
+      "time_ms": 9870.0,
+      "window_ms": [
+        9845.0,
+        9895.0
+      ],
+      "samples": 50
+    }
+  ],
+  "Z_and_M": "Both dynamic in every trajectory; native slow variables are exact checkpoint observations shown as unconnected dots, no interpolation.",
+  "scope": "Common physical time comparison, no phase or onset alignment. Four diagnostic rate runs, local validation FAIL, no accepted replacement or bifurcation.",
+  "conventions": "All curves are time courses; no branch stability encoding. No overall title, no narrative gray annotations, same0-500Hz spatial scale.",
+  "agent_PNG_PDF_check": "PASS: same-state PNG and rasterized PDF inspected, labels/scales/fields clear",
+  "human_visual_acceptance": "PENDING",
+  "visual_checked_local": "2026-09-20T07:02:07.904142+08:00",
+  "artifact_sha256": {
+    "png": "57f862ce5c991fde930a9f63962f4a2b57f3b19730e2d267a63def4a22167ea7",
+    "pdf": "6cae9abafec5063e47652e1a9c7735530664c08e5aa6c1dcb17b8fb962f27cd9"
+  }
+}

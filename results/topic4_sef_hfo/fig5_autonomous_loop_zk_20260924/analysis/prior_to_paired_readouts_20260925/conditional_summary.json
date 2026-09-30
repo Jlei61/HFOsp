@@ -1,0 +1,399 @@
+{
+  "completed": 3,
+  "total": 18,
+  "rows": [
+    {
+      "name": "z0.75_k0.02_high",
+      "job": {
+        "name": "z0.75_k0.02_high",
+        "seed": 9108405,
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "mode": "native",
+        "gamma": 0.0,
+        "global_gain": 30.0,
+        "global_resource": "native_z",
+        "phi_jump": 0.0,
+        "horizon_s": 42.0,
+        "checkpoint_s": 2.0,
+        "device": 0,
+        "qa": false,
+        "stop_after_second_entry": false,
+        "stage": "conditional",
+        "C_R": 0.0,
+        "feedback_form": "conductance",
+        "global_reversal_mV": -17.662847938268442,
+        "sahp_gain": 16.0,
+        "sahp_tau_s": 0.5,
+        "k100": 8.0,
+        "K500": 40.0,
+        "G500": 30.0,
+        "rate_start_Hz": 200.0,
+        "rate_full_Hz": 500.0,
+        "added_K_increment_when_gate1": 0.16,
+        "local_inhibition_multiplier": 1.0,
+        "mechanism": "G_raw=G500*s; tau_G*ds/dt=q-s (tau_G=0: s=q). K increment remains0.16*q; K tau0.5s except5s at causal R_G<=5Hz.",
+        "global_tau_s": 0.5,
+        "off_tau_s": 5.0,
+        "on_tau_s": 0.5,
+        "retention_below_Hz": 5.0,
+        "full_state_snapshots": true,
+        "conditional_clamp": true,
+        "target_Z": 0.75,
+        "target_K": 0.02,
+        "backend": "cpu",
+        "branch_start_s": 12.0,
+        "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+        "common_exogenous_input": true,
+        "diagnostic_only": true
+      },
+      "duration_s": 30.0,
+      "finite_window_state": "mixed_or_transient",
+      "full_horizon": true,
+      "tail_mean_Hz": [
+        127.21860312500014,
+        179.46061007957562,
+        275.4419847328238,
+        122.10061063690088
+      ],
+      "tail_high_fraction": 0.0,
+      "tail_joint_quiet_fraction": 0.0,
+      "tail_brief_events": 0,
+      "tail_brief_span_s": 0.0,
+      "events": [
+        {
+          "start_s": 3.24,
+          "end_s": 3.33,
+          "duration_s": 0.09,
+          "quiet_gap_s": 3.23,
+          "peak_s": 3.265,
+          "peak_Hz": 42.8375,
+          "onset_interval_s": null,
+          "interevent_gap_s": null
+        },
+        {
+          "start_s": 3.75,
+          "end_s": 3.85,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.42,
+          "peak_s": 3.825,
+          "peak_Hz": 445.67430025445293,
+          "onset_interval_s": 0.5099999999999998,
+          "interevent_gap_s": 0.41999999999999993
+        },
+        {
+          "start_s": 4.37,
+          "end_s": 4.88,
+          "duration_s": 0.51,
+          "quiet_gap_s": 0.52,
+          "peak_s": 4.3950000000000005,
+          "peak_Hz": 436.7684478371501,
+          "onset_interval_s": 0.6200000000000001,
+          "interevent_gap_s": 0.52
+        },
+        {
+          "start_s": 5.26,
+          "end_s": 5.45,
+          "duration_s": 0.19,
+          "quiet_gap_s": 0.38,
+          "peak_s": 5.335,
+          "peak_Hz": 445.54707379134857,
+          "onset_interval_s": 0.8899999999999997,
+          "interevent_gap_s": 0.3799999999999999
+        },
+        {
+          "start_s": 5.66,
+          "end_s": 15.59,
+          "duration_s": 9.93,
+          "quiet_gap_s": 0.21,
+          "peak_s": 5.6850000000000005,
+          "peak_Hz": 450.92838196286476,
+          "onset_interval_s": 0.40000000000000036,
+          "interevent_gap_s": 0.20999999999999996
+        },
+        {
+          "start_s": 15.91,
+          "end_s": 16.03,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.32,
+          "peak_s": 15.985000000000001,
+          "peak_Hz": 446.2864721485411,
+          "onset_interval_s": 10.25,
+          "interevent_gap_s": 0.3200000000000003
+        },
+        {
+          "start_s": 16.16,
+          "end_s": 16.25,
+          "duration_s": 0.09,
+          "quiet_gap_s": 0.13,
+          "peak_s": 16.185,
+          "peak_Hz": 28.265625,
+          "onset_interval_s": 0.25,
+          "interevent_gap_s": 0.129999999999999
+        },
+        {
+          "start_s": 16.28,
+          "end_s": 16.36,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.03,
+          "peak_s": 16.305,
+          "peak_Hz": 51.262499999999996,
+          "onset_interval_s": 0.120000000000001,
+          "interevent_gap_s": 0.030000000000001137
+        },
+        {
+          "start_s": 16.62,
+          "end_s": 16.7,
+          "duration_s": 0.08,
+          "quiet_gap_s": 0.26,
+          "peak_s": 16.645,
+          "peak_Hz": 56.55,
+          "onset_interval_s": 0.33999999999999986,
+          "interevent_gap_s": 0.26000000000000156
+        },
+        {
+          "start_s": 17.150000000000002,
+          "end_s": 17.25,
+          "duration_s": 0.1,
+          "quiet_gap_s": 0.45,
+          "peak_s": 17.225,
+          "peak_Hz": 446.43765903307883,
+          "onset_interval_s": 0.5300000000000011,
+          "interevent_gap_s": 0.45000000000000284
+        },
+        {
+          "start_s": 17.44,
+          "end_s": 17.580000000000002,
+          "duration_s": 0.14,
+          "quiet_gap_s": 0.19,
+          "peak_s": 17.545,
+          "peak_Hz": 446.41909814323606,
+          "onset_interval_s": 0.28999999999999915,
+          "interevent_gap_s": 0.19000000000000128
+        }
+      ],
+      "counterfactual_drift_mean_allE_A_B_other": [
+        [
+          -0.08496515500249498,
+          -0.039996000266651066
+        ],
+        [
+          -0.14480610023407023,
+          -0.04332708375793104
+        ],
+        [
+          -0.14384722200458558,
+          -0.046005685707034394
+        ],
+        [
+          -0.08196445318475855,
+          -0.039758467446277736
+        ]
+      ],
+      "drift_definition": "Native dZ/dt and discrete native dK/dt at the held spatial fields; G and M dynamic.",
+      "independent_unit": "one conditional trajectory; paired initial histories, one shared future noise stream",
+      "certified_bifurcation": false,
+      "counts_as_autonomous_loop": false,
+      "interpretation": "Finite30s conditional response, not demonstrated attractor convergence or original full-model bistability."
+    },
+    {
+      "name": "z0.75_k2_high",
+      "job": {
+        "name": "z0.75_k2_high",
+        "seed": 9108405,
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "mode": "native",
+        "gamma": 0.0,
+        "global_gain": 30.0,
+        "global_resource": "native_z",
+        "phi_jump": 0.0,
+        "horizon_s": 42.0,
+        "checkpoint_s": 2.0,
+        "device": 0,
+        "qa": false,
+        "stop_after_second_entry": false,
+        "stage": "conditional",
+        "C_R": 0.0,
+        "feedback_form": "conductance",
+        "global_reversal_mV": -17.662847938268442,
+        "sahp_gain": 16.0,
+        "sahp_tau_s": 0.5,
+        "k100": 8.0,
+        "K500": 40.0,
+        "G500": 30.0,
+        "rate_start_Hz": 200.0,
+        "rate_full_Hz": 500.0,
+        "added_K_increment_when_gate1": 0.16,
+        "local_inhibition_multiplier": 1.0,
+        "mechanism": "G_raw=G500*s; tau_G*ds/dt=q-s (tau_G=0: s=q). K increment remains0.16*q; K tau0.5s except5s at causal R_G<=5Hz.",
+        "global_tau_s": 0.5,
+        "off_tau_s": 5.0,
+        "on_tau_s": 0.5,
+        "retention_below_Hz": 5.0,
+        "full_state_snapshots": true,
+        "conditional_clamp": true,
+        "target_Z": 0.75,
+        "target_K": 2.0,
+        "backend": "cpu",
+        "branch_start_s": 12.0,
+        "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+        "common_exogenous_input": true,
+        "diagnostic_only": true
+      },
+      "duration_s": 30.0,
+      "finite_window_state": "quiet",
+      "full_horizon": true,
+      "tail_mean_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_high_fraction": 0.0,
+      "tail_joint_quiet_fraction": 1.0,
+      "tail_brief_events": 0,
+      "tail_brief_span_s": 0.0,
+      "events": [],
+      "counterfactual_drift_mean_allE_A_B_other": [
+        [
+          0.05000000000000044,
+          -0.39999600002449387
+        ],
+        [
+          0.05287677274675778,
+          -0.43330983299220055
+        ],
+        [
+          0.05349798325918692,
+          -0.4600982632891322
+        ],
+        [
+          0.049838525886645606,
+          -0.3976204580355331
+        ]
+      ],
+      "drift_definition": "Native dZ/dt and discrete native dK/dt at the held spatial fields; G and M dynamic.",
+      "independent_unit": "one conditional trajectory; paired initial histories, one shared future noise stream",
+      "certified_bifurcation": false,
+      "counts_as_autonomous_loop": false,
+      "interpretation": "Finite30s conditional response, not demonstrated attractor convergence or original full-model bistability."
+    },
+    {
+      "name": "z0.75_k2_interictal",
+      "job": {
+        "name": "z0.75_k2_interictal",
+        "seed": 9108405,
+        "eta_m": 0.0005,
+        "tau_M_s": 1.0,
+        "tau_Z_s": 5.0,
+        "threshold": 95.19851312666987,
+        "mode": "native",
+        "gamma": 0.0,
+        "global_gain": 30.0,
+        "global_resource": "native_z",
+        "phi_jump": 0.0,
+        "horizon_s": 80.0,
+        "checkpoint_s": 2.0,
+        "device": 0,
+        "qa": false,
+        "stop_after_second_entry": false,
+        "stage": "conditional",
+        "C_R": 0.0,
+        "feedback_form": "conductance",
+        "global_reversal_mV": -17.662847938268442,
+        "sahp_gain": 16.0,
+        "sahp_tau_s": 0.5,
+        "k100": 8.0,
+        "K500": 40.0,
+        "G500": 30.0,
+        "rate_start_Hz": 200.0,
+        "rate_full_Hz": 500.0,
+        "added_K_increment_when_gate1": 0.16,
+        "local_inhibition_multiplier": 1.0,
+        "mechanism": "G_raw=G500*s; tau_G*ds/dt=q-s (tau_G=0: s=q). K increment remains0.16*q; K tau0.5s except5s at causal R_G<=5Hz.",
+        "global_tau_s": 0.5,
+        "off_tau_s": 5.0,
+        "on_tau_s": 0.5,
+        "retention_below_Hz": 5.0,
+        "full_state_snapshots": true,
+        "conditional_clamp": true,
+        "target_Z": 0.75,
+        "target_K": 2.0,
+        "backend": "cpu",
+        "branch_start_s": 50.0,
+        "source_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t50s.pkl",
+        "common_exogenous_input": true,
+        "diagnostic_only": true
+      },
+      "duration_s": 30.0,
+      "finite_window_state": "quiet",
+      "full_horizon": true,
+      "tail_mean_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tail_high_fraction": 0.0,
+      "tail_joint_quiet_fraction": 1.0,
+      "tail_brief_events": 0,
+      "tail_brief_span_s": 0.0,
+      "events": [],
+      "counterfactual_drift_mean_allE_A_B_other": [
+        [
+          0.05000000000000044,
+          -0.39999600002449387
+        ],
+        [
+          0.05287677274675778,
+          -0.43330983299220055
+        ],
+        [
+          0.05349798325918692,
+          -0.4600982632891322
+        ],
+        [
+          0.049838525886645606,
+          -0.3976204580355331
+        ]
+      ],
+      "drift_definition": "Native dZ/dt and discrete native dK/dt at the held spatial fields; G and M dynamic.",
+      "independent_unit": "one conditional trajectory; paired initial histories, one shared future noise stream",
+      "certified_bifurcation": false,
+      "counts_as_autonomous_loop": false,
+      "interpretation": "Finite30s conditional response, not demonstrated attractor convergence or original full-model bistability."
+    }
+  ],
+  "paired_input_checks": [
+    {
+      "high": "z0.75_k2_high",
+      "interictal": "z0.75_k2_interictal",
+      "identical_future_input_records": true
+    }
+  ],
+  "common_future_input_checks": [
+    {
+      "reference": "z0.75_k0.02_high",
+      "name": "z0.75_k0.02_high",
+      "identical_future_input_records": true
+    },
+    {
+      "reference": "z0.75_k0.02_high",
+      "name": "z0.75_k2_high",
+      "identical_future_input_records": true
+    },
+    {
+      "reference": "z0.75_k0.02_high",
+      "name": "z0.75_k2_interictal",
+      "identical_future_input_records": true
+    }
+  ],
+  "stage": "RUNNING_PARTIAL",
+  "bifurcation_status": "NOT_ESTABLISHED",
+  "human_review": "PENDING"
+}

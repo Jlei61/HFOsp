@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "renewal_running_occupancy_rate_maxerror_hz": 3.865352482534945e-12,
+  "raw_LIF_replicate_count_checks": true,
+  "all64scores_independently_reproduced": true,
+  "local_scientific_status": "FAIL",
+  "failed_rows": [
+    {
+      "group": 531,
+      "reference_dt_ms": 0.1,
+      "window": "later",
+      "L2": 0.15691712644395703,
+      "count_error": 0.0792585796802896,
+      "passed": false
+    },
+    {
+      "group": 531,
+      "reference_dt_ms": 0.05,
+      "window": "later",
+      "L2": 0.16213004197408257,
+      "count_error": 0.0698900133462963,
+      "passed": false
+    }
+  ],
+  "model_promoted": false
+}

@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "time_local": "2026-09-25T01:47:23.314098+08:00",
+  "fix": "Copy per-segment hostcoefficients to its own length slice self.t.cache, retaining the full largest allocation for subsequent segments. Shortercopyexact; unusedtailunchanged. Actualfullsegmentcached/originalchecksrepeatintheseparateretry.",
+  "shape_mismatch_failure_retained": true
+}

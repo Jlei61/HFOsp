@@ -1,0 +1,229 @@
+{
+  "status": "COMPLETE_CANDIDATE",
+  "history": "high",
+  "coordinate": {
+    "Z": 0.95,
+    "K": 0.02
+  },
+  "rows": [
+    {
+      "condition": "current",
+      "reference_s": 34.31,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.95_k0.02_high/figures/conditional_tail_first_brief_inputs.npz",
+      "source_npz_sha256": "cbe1546d9065e1b2c713a3917ea50e9559f6d231e83d4363b4d70fc356931bda",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.95_k0.02_high/review.json",
+      "review_sha256": "0dc8e7b4a52d8653f0dc182d17ea963f368533f449ce52fa840c21c3ac8f5bfb",
+      "selection": "first_complete_brief",
+      "tail_brief_count": 5,
+      "core_recruitment": {
+        "n": 5,
+        "core_over100": 4,
+        "median_peak_5ms_Hz": [
+          35.60625,
+          284.8806366047745,
+          366.66666666666663,
+          35.35784635587656
+        ],
+        "median_core_to_other_peak_ratio": 11.366442770879978,
+        "core_recruitment_order": {
+          "A_first": 3,
+          "B_first": 1,
+          "same_5ms_bin": 0,
+          "both_reach100Hz_for10ms": 4
+        }
+      },
+      "frame_absolute_times_s": [
+        34.31,
+        34.335,
+        34.36,
+        34.385000000000005,
+        34.41,
+        34.435
+      ],
+      "feedback_tail": {
+        "window_s": [
+          32.0,
+          42.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 4.131305017524082e-26,
+          "maximum": 1.9257731144044973e-17,
+          "mean": 9.82272667772564e-19
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 3.9247397666478776e-26,
+          "maximum": 1.829484458684272e-17,
+          "mean": 9.331590343839354e-19
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 0.011925230772089917,
+          "maximum": 44.85818713524192,
+          "mean": 1.130603080775821
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "condition": "rotated",
+      "reference_s": 41.739999999999995,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/spatial_review/z0.95_k0.02_high/figures/conditional_tail_fixed_window_inputs.npz",
+      "source_npz_sha256": "c3ce220b069da116af1f80098b5e5fe3b89d1703bc910f21f87f5c14bba963af",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/spatial_review/z0.95_k0.02_high/review.json",
+      "review_sha256": "f9d850ce5c3b67a612461a54b0a8c6f6866d362ad8752dd23ca7b7669fdc87da",
+      "selection": "fixed_final300ms_no_brief_events",
+      "tail_brief_count": 0,
+      "core_recruitment": null,
+      "frame_absolute_times_s": [
+        41.74,
+        41.765,
+        41.79,
+        41.815,
+        41.84,
+        41.865
+      ],
+      "feedback_tail": {
+        "window_s": [
+          32.0,
+          42.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 4.131305017524082e-26,
+          "maximum": 1.9257731144044973e-17,
+          "mean": 9.82272667772564e-19
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 3.9247397666478776e-26,
+          "maximum": 1.829484458684272e-17,
+          "mean": 9.331590343839354e-19
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 11.530164011159046,
+          "maximum": 57.64660298767401,
+          "mean": 31.93525059121233
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "condition": "isotropic",
+      "reference_s": 34.31,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.95_k0.02_high/figures/conditional_tail_first_brief_inputs.npz",
+      "source_npz_sha256": "d5c0f444bbc00b69afc2db8cd106fbab4a3883a478239f997257a514c0098aca",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.95_k0.02_high/review.json",
+      "review_sha256": "a7fe42d66a03c3bdb5afb434906bbc1bcd3dc4ab2738eff66685baff403827b6",
+      "selection": "first_complete_brief",
+      "tail_brief_count": 3,
+      "core_recruitment": {
+        "n": 3,
+        "core_over100": 3,
+        "median_peak_5ms_Hz": [
+          109.83125,
+          346.41909814323606,
+          351.6539440203562,
+          110.34799737360473
+        ],
+        "median_core_to_other_peak_ratio": 3.1549141091439847,
+        "core_recruitment_order": {
+          "A_first": 2,
+          "B_first": 1,
+          "same_5ms_bin": 0,
+          "both_reach100Hz_for10ms": 3
+        }
+      },
+      "frame_absolute_times_s": [
+        34.31,
+        34.335,
+        34.36,
+        34.385000000000005,
+        34.41,
+        34.435
+      ],
+      "feedback_tail": {
+        "window_s": [
+          32.0,
+          42.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 4.131305017524082e-26,
+          "maximum": 1.9257731144044973e-17,
+          "mean": 9.82272667772564e-19
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 3.9247397666478776e-26,
+          "maximum": 1.829484458684272e-17,
+          "mean": 9.331590343839354e-19
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 0.00432775113666661,
+          "maximum": 98.27974512588978,
+          "mean": 1.9381928460913918
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    }
+  ],
+  "paired_future_input_records_exact": true,
+  "geometry_exact": true,
+  "role": "Visual diagnostic companion, not the main Figure5 layout or a new state criterion.",
+  "limits": "One selected illustration per completed trajectory; all final10s events remain in the native reviews. Each row uses its own first complete brief, or the existing fixed final300ms fallback when absent. Rows may have different absolute event times; no temporal warping or event identity is inferred. Graph controls also change outdegree and low-threshold source strength.",
+  "producer_sha256": "1467e659fbdf3cf30a6586f9068511febb7e4a0a4062a8b068760e3d2b428619",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/high/figures/axis_highZ_lowK_propagation.png",
+      "sha256": "c8879a32247e8bf311fefb1bc0b706325b969b4db4608a27e0d2b69f1068e00d"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/high/figures/axis_highZ_lowK_propagation.pdf",
+      "sha256": "ed875c06c2dd6d3c82eb631c27f1608e3027dfe7ea637de318421fad5a6a550f"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/high/figures/axis_highZ_lowK_propagation.svg",
+      "sha256": "0c4eac9602b0eeb6ae1786cd1008ef572786740dd1c7215cf0280c2564d95d4e"
+    }
+  ],
+  "agent_visual_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "human_review": "PENDING",
+  "agent_visual_observation": "Sharednative5ms spatialscale andcorecircles; firstbriefforcurrent/isotropic andexplicitfixedwindowreferenceforrotated. Labels andlegendreadable,nooverlap/clipping. Nativecurrentlocalizedversusisotropicbroaderfield; rotatedcontinuouswave/background withrepeatedcorebursts. Notmatched eventidentity orformalbranch."
+}

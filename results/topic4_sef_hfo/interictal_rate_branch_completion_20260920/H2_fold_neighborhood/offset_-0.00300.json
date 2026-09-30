@@ -1,0 +1,112 @@
+{
+  "offset": -0.003,
+  "coordinate": "core_B_mean_Hz",
+  "coordinate_value": 1.209284251958279,
+  "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_local_-0.00300_N256.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_local_-0.00300_N256.npz",
+  "physical": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_local_-0.00300_N256.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_local_-0.00300_N256.npz",
+    "N": 256,
+    "check_N": 1024,
+    "J_EE_core": 0.9463157070410471,
+    "T_ms": 296.2620332265083,
+    "maximum_group_defect_Hz": 2.449034898488467e-10,
+    "regional_defect_Hz": [
+      4.045627071999956e-16,
+      8.949866506895431e-15,
+      8.184523597683313e-13
+    ],
+    "minimum_rate_Hz": 0.004834126603183586,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 4.424981835455573e-05,
+        "phase_index": 352,
+        "group": 18
+      },
+      "slow": {
+        "minimum_Hz": 0.005696331144804138,
+        "phase_index": 436,
+        "group": 17
+      },
+      "positive": true,
+      "N": 256,
+      "check_N": 1024
+    }
+  },
+  "J_EE_core": 0.9463157070410471,
+  "T_ms": 296.2620332265083,
+  "status": "SPECTRUM_CHECKED",
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/H2_neighborhood_-0.00300_LPC_B2_local_-0.00300_N256_dt0.1.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/H2_neighborhood_-0.00300_LPC_B2_local_-0.00300_N256_dt0.05.json"
+  ],
+  "classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        124.01170067511367,
+        0.0
+      ],
+      [
+        1.201152866663519,
+        -0.8463036865536461
+      ],
+      [
+        1.201152866663519,
+        0.8463036865536461
+      ],
+      [
+        0.7653342482075531,
+        0.0
+      ],
+      [
+        0.047121665899042854,
+        0.0
+      ],
+      [
+        -0.007061205455729209,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.09158447611929432,
+      0.07508693894424946,
+      0.07508693894424946,
+      0.07508693894424946,
+      0.07508693894424946,
+      0.07508693894424946
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.01526407935321572,
+      7.313387204553499e-05,
+      7.313387204553499e-05,
+      6.9232960572263025e-06,
+      1.507016257353e-05,
+      7.735038741124925e-07
+    ],
+    "reliable_outside_count": 3,
+    "numerical_unstable_dimension": 3,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 124.01170067511367,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  }
+}

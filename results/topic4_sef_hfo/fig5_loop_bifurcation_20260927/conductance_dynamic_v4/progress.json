@@ -1,0 +1,40 @@
+{
+  "status": "LOCAL_CONSTANT_G_NOT_QUALIFIED",
+  "estimable": 660,
+  "primary": 768,
+  "passed": 322,
+  "nonestimable": 108,
+  "amplitude_sensitivity_pass": 96,
+  "amplitude_sensitivity_total": 96,
+  "static": {
+    "status": "PASS",
+    "rows": [
+      {
+        "label": "broad",
+        "total": 256,
+        "strict": 256,
+        "within_cap": 256,
+        "passed": true
+      },
+      {
+        "label": "low_mean",
+        "total": 256,
+        "strict": 252,
+        "within_cap": 256,
+        "passed": true
+      },
+      {
+        "label": "zero_g",
+        "total": 64,
+        "strict": 64,
+        "within_cap": 64,
+        "passed": true
+      }
+    ]
+  },
+  "full_domain_derivatives_certified": false,
+  "dynamic_conductance_validated": false,
+  "nonlinear_waveform_validated": false,
+  "native_spatial_validated": false,
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,55 @@
+{
+  "status": "GRID_KNOT_DIAGNOSTIC_SUPERSEDED_BY_OFFGRID_CHECK",
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "partition": {
+        "status": "PASS",
+        "relative_error": 8.240168039147654e-14,
+        "fixed_time_relative_error": 8.118727164564351e-14,
+        "comparison": "Full composed implicit Poincare derivative and fixed-time derivative versus original unsegmented uncached CubicSectionDerivative"
+      },
+      "tests": [
+        {
+          "epsilon": 2e-05,
+          "relative_error": 8.099440081969219e-05
+        },
+        {
+          "epsilon": 1e-05,
+          "relative_error": 8.100208329784e-05
+        },
+        {
+          "epsilon": 5e-06,
+          "relative_error": 8.100389905809427e-05
+        }
+      ]
+    },
+    {
+      "dt_ms": 0.025,
+      "partition": {
+        "status": "PASS",
+        "relative_error": 1.518927723298782e-13,
+        "fixed_time_relative_error": 1.4997974513377917e-13,
+        "comparison": "Full composed implicit Poincare derivative and fixed-time derivative versus original unsegmented uncached CubicSectionDerivative"
+      },
+      "tests": [
+        {
+          "epsilon": 2e-05,
+          "relative_error": 0.0002743366922288674
+        },
+        {
+          "epsilon": 1e-05,
+          "relative_error": 0.0002058734381093876
+        },
+        {
+          "epsilon": 5e-06,
+          "relative_error": 0.00020123673717440912
+        }
+      ]
+    }
+  ],
+  "not_a_periodic_orbit": true,
+  "model_promoted": false,
+  "reassessment": "The declared centereddifference convergence condition was not satisfied by the plateau at an exactinterpolationknot, despite meeting the1e-3 errorbound. Retain this result asdiagnostic. Independent offgridcrossings avoid mixing adjacentcubicpolynomials, display quadraticdifferenceconvergence and match thefullsegmented/uncachedderivative. All subsequentnewmethodcontinuationrequires theoffgridPASS.",
+  "superseding_check": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/numerical_checks/exponential_midpoint/section_variational_check_offgrid/result.json"
+}

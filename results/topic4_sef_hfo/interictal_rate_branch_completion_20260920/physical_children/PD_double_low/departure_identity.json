@@ -1,0 +1,172 @@
+{
+  "status": "CHILD_DEPARTURE_IDENTITY_CHECKED",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "parent_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+  "parent_mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+  "parent_J_EE_core": 0.9387254738385757,
+  "parent_T_ms": 825.3653884974744,
+  "rows": [
+    {
+      "amplitude_Hz": 10.0,
+      "J_EE_core": 0.9387255555312313,
+      "T_ms": 1650.727135368106,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+      "N": 16384,
+      "J_shift": 8.169265552915306e-08,
+      "J_shift_per_amplitude_squared": 8.169265552915306e-10,
+      "period_shift_from_twice_parent_ms": -0.003641626842863843,
+      "weighted_mode_cosine": 0.9999998862526486,
+      "odd_over_amplitude_relative_error": 0.0004771105152484854,
+      "projected_amplitude_Hz": 9.999879507700397,
+      "projected_over_prescribed_amplitude": 0.9999879507700398,
+      "odd_weighted_RMS_Hz": 0.23986748578862646,
+      "even_correction_weighted_RMS_Hz": 0.0036658743496843123,
+      "first_harmonic_weighted_RMS_Hz": 0.020346776296679168,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387255555312313,
+        "T_ms": 1650.727135368106,
+        "maximum_group_defect_Hz": 1.6653345369377348e-11,
+        "regional_defect_Hz": [
+          2.468299842442596e-13,
+          2.6643854571208185e-13,
+          4.0288241092230644e-14
+        ],
+        "minimum_rate_Hz": 5.123606103765388e-06,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.7948141108373953e-12,
+            "phase_index": 54044,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 7.181388356783348e-06,
+            "phase_index": 37604,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      }
+    },
+    {
+      "amplitude_Hz": 20.0,
+      "J_EE_core": 0.9387258019235192,
+      "T_ms": 1650.7161769294646,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a20.00000_N16384.npz",
+      "N": 16384,
+      "J_shift": 3.2808494343505856e-07,
+      "J_shift_per_amplitude_squared": 8.202123585876464e-10,
+      "period_shift_from_twice_parent_ms": -0.014600065484273728,
+      "weighted_mode_cosine": 0.9999981881045599,
+      "odd_over_amplitude_relative_error": 0.0019041462396635546,
+      "projected_amplitude_Hz": 19.999036390773156,
+      "projected_over_prescribed_amplitude": 0.9999518195386579,
+      "odd_weighted_RMS_Hz": 0.479718452586202,
+      "even_correction_weighted_RMS_Hz": 0.014646576178959942,
+      "first_harmonic_weighted_RMS_Hz": 0.04070128079320643,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a20.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387258019235192,
+        "T_ms": 1650.7161769294646,
+        "maximum_group_defect_Hz": 1.7319479184152442e-11,
+        "regional_defect_Hz": [
+          1.5902718701505398e-13,
+          1.618716602305012e-13,
+          4.3054896091764345e-14
+        ],
+        "minimum_rate_Hz": 4.984141369972049e-06,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.4217168498790837e-12,
+            "phase_index": 21268,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 6.987362385034706e-06,
+            "phase_index": 37595,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      }
+    },
+    {
+      "amplitude_Hz": 40.0,
+      "J_EE_core": 0.9387268026049526,
+      "T_ms": 1650.6720668332723,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+      "N": 16384,
+      "J_shift": 1.3287663768180025e-06,
+      "J_shift_per_amplitude_squared": 8.304789855112515e-10,
+      "period_shift_from_twice_parent_ms": -0.05871016167657217,
+      "weighted_mode_cosine": 0.999971528117531,
+      "odd_over_amplitude_relative_error": 0.00754727040075654,
+      "projected_amplitude_Hz": 39.99230598523962,
+      "projected_over_prescribed_amplitude": 0.9998076496309904,
+      "odd_weighted_RMS_Hz": 0.9593241521934315,
+      "even_correction_weighted_RMS_Hz": 0.0582932384637768,
+      "first_harmonic_weighted_RMS_Hz": 0.0814517547004912,
+      "physical_check": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a40.00000_N16384.npz",
+        "N": 16384,
+        "check_N": 65536,
+        "J_EE_core": 0.9387268026049526,
+        "T_ms": 1650.6720668332723,
+        "maximum_group_defect_Hz": 1.5654144647214707e-11,
+        "regional_defect_Hz": [
+          1.7542991488225292e-13,
+          3.344462994645005e-13,
+          4.531213994475701e-14
+        ],
+        "minimum_rate_Hz": 4.723830925475568e-06,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.966598745287672e-12,
+            "phase_index": 54028,
+            "group": 915
+          },
+          "slow": {
+            "minimum_Hz": 6.6249792732487505e-06,
+            "phase_index": 37577,
+            "group": 237
+          },
+          "positive": true,
+          "N": 16384,
+          "check_N": 65536
+        }
+      }
+    }
+  ],
+  "odd_over_amplitude_error_orders": [
+    1.9967488948378984,
+    1.9868106806538428
+  ],
+  "even_correction_orders": [
+    1.9983342134910747,
+    1.9927650963875119
+  ],
+  "coefficient_relative_spread": 0.01647633155408965,
+  "state_contract": {
+    "spatial_cells": 400,
+    "populations": 935,
+    "changed_equations": false,
+    "changed_delays": false
+  },
+  "comparison": "All 935 population rate profiles weighted by original neuron counts; same phase condition; no fitted phase or sign. Odd projection is (r(theta)-r(theta+1/2))/2.",
+  "criterion_scope": "Numerical shape and local scaling diagnostics, not a rigorous enclosure.",
+  "scope": "Physical 2T children approach the accepted antiperiodic critical rate mode. This does not by itself establish child radial Floquet-mode identity, parent-side stability, nonlinear PD criticality, stable attractors, or global connections."
+}

@@ -1,0 +1,547 @@
+{
+  "status": "COMPLETE",
+  "contract": {
+    "J_EE_core": 0.942,
+    "dt_ms": 0.1,
+    "epsilon": 1e-06,
+    "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/finite_lyapunov/periodic_control/state.npz",
+    "initial_history_interpolation": "Cubic on saved physical-time history; endpoint fixed to current rate",
+    "norm": "RMS over all nine local states and every delayed rate. Local scaling [1000,1000,1,1,1,1,.1,.1,1], delayed rate scaling 1000.",
+    "block_ms": 359,
+    "block_steps": 3590,
+    "requested_duration_ms": 20000,
+    "scope": "Finite-time largest Lyapunov estimate. Compare perturbation amplitudes, integration steps and periodic control before an attractor claim.",
+    "phase_projection": "Weighted full-flow orthogonal projection after every block; centered history derivative and exact current RHS"
+  },
+  "rows": [
+    {
+      "time_ms": 359,
+      "log_growth": 2.9952499480111205,
+      "final_reference_rates_hz": [
+        0.5214657298154913,
+        4.180312741119735,
+        0.4725938710753579
+      ]
+    },
+    {
+      "time_ms": 718,
+      "log_growth": -1.7443896578890736,
+      "final_reference_rates_hz": [
+        2.7528130482612436,
+        0.26779579565422074,
+        0.10517560226962473
+      ]
+    },
+    {
+      "time_ms": 1077,
+      "log_growth": -0.5843025775131623,
+      "final_reference_rates_hz": [
+        0.6609159736874086,
+        1.0268938627871056,
+        0.09712063643911507
+      ]
+    },
+    {
+      "time_ms": 1436,
+      "log_growth": -0.8673668138662664,
+      "final_reference_rates_hz": [
+        0.5043133700127749,
+        1.881563986688357,
+        0.08238913033711252
+      ]
+    },
+    {
+      "time_ms": 1795,
+      "log_growth": -1.5638742151049203,
+      "final_reference_rates_hz": [
+        1.2524039420161692,
+        0.03928265830372395,
+        0.06531580777879145
+      ]
+    },
+    {
+      "time_ms": 2154,
+      "log_growth": 0.7473633598173635,
+      "final_reference_rates_hz": [
+        0.03386013983117007,
+        0.5320145744113941,
+        0.06816666936893132
+      ]
+    },
+    {
+      "time_ms": 2513,
+      "log_growth": -1.3132744230895792,
+      "final_reference_rates_hz": [
+        0.06832185702634615,
+        0.4192124409591266,
+        0.10861790316407227
+      ]
+    },
+    {
+      "time_ms": 2872,
+      "log_growth": 4.812055026541131,
+      "final_reference_rates_hz": [
+        2.56786119744029,
+        0.03059001823913117,
+        2.146936119521972
+      ]
+    },
+    {
+      "time_ms": 3231,
+      "log_growth": -0.8482964067995473,
+      "final_reference_rates_hz": [
+        0.4095858839560441,
+        31.806691400440616,
+        5.179674613948708
+      ]
+    },
+    {
+      "time_ms": 3590,
+      "log_growth": 1.4682145730559566,
+      "final_reference_rates_hz": [
+        233.69747482420948,
+        2.2238062952680595,
+        25.589907340193317
+      ]
+    },
+    {
+      "time_ms": 3949,
+      "log_growth": -0.9437068915187068,
+      "final_reference_rates_hz": [
+        31.076295104122163,
+        1.308508400010449,
+        16.623727563259607
+      ]
+    },
+    {
+      "time_ms": 4308,
+      "log_growth": -1.4399087924664826,
+      "final_reference_rates_hz": [
+        0.9537520844470703,
+        98.45586961755512,
+        2.195489434316575
+      ]
+    },
+    {
+      "time_ms": 4667,
+      "log_growth": -2.7511595383429697,
+      "final_reference_rates_hz": [
+        1.3398788512986606,
+        0.37448412308699,
+        0.20343878467072346
+      ]
+    },
+    {
+      "time_ms": 5026,
+      "log_growth": -1.3053419475223587,
+      "final_reference_rates_hz": [
+        0.2494063139022897,
+        1.8797696493962353,
+        0.08764304360946765
+      ]
+    },
+    {
+      "time_ms": 5385,
+      "log_growth": -0.12722078605052325,
+      "final_reference_rates_hz": [
+        1.102056109315471,
+        1.1392336999517885,
+        0.09778260037170285
+      ]
+    },
+    {
+      "time_ms": 5744,
+      "log_growth": -1.7400708670320069,
+      "final_reference_rates_hz": [
+        2.1127388530518636,
+        0.23423947582732982,
+        0.08142528316305185
+      ]
+    },
+    {
+      "time_ms": 6103,
+      "log_growth": -0.2945242710301157,
+      "final_reference_rates_hz": [
+        0.03034486966764928,
+        0.9884177355555192,
+        0.05713857878533385
+      ]
+    },
+    {
+      "time_ms": 6462,
+      "log_growth": -1.5205421595517,
+      "final_reference_rates_hz": [
+        0.31167431328609224,
+        0.08789164122281716,
+        0.061206382072635235
+      ]
+    },
+    {
+      "time_ms": 6821,
+      "log_growth": 3.2037810875670885,
+      "final_reference_rates_hz": [
+        0.5383752645094645,
+        0.0653441087344432,
+        0.47244784886586316
+      ]
+    },
+    {
+      "time_ms": 7180,
+      "log_growth": -0.22432386194069315,
+      "final_reference_rates_hz": [
+        0.08587432044627463,
+        6.668555283688352,
+        1.1119019228402385
+      ]
+    },
+    {
+      "time_ms": 7539,
+      "log_growth": 3.0294167873569133,
+      "final_reference_rates_hz": [
+        40.84785899914085,
+        0.46624078777479294,
+        31.014125644927333
+      ]
+    },
+    {
+      "time_ms": 7898,
+      "log_growth": -1.7016404273676715,
+      "final_reference_rates_hz": [
+        6.5154201251160995,
+        108.83131465248879,
+        25.073033703005898
+      ]
+    },
+    {
+      "time_ms": 8257,
+      "log_growth": 0.2953389085683636,
+      "final_reference_rates_hz": [
+        1.523132061186364,
+        35.37892138438281,
+        11.95976312180758
+      ]
+    },
+    {
+      "time_ms": 8616,
+      "log_growth": -1.8184050267524015,
+      "final_reference_rates_hz": [
+        20.03843220895029,
+        0.6446421707316066,
+        2.8757918366826782
+      ]
+    },
+    {
+      "time_ms": 8975,
+      "log_growth": -3.088195669937537,
+      "final_reference_rates_hz": [
+        0.3121939346564318,
+        3.0210084674115603,
+        0.12110390531106138
+      ]
+    },
+    {
+      "time_ms": 9334,
+      "log_growth": -0.2728592046386395,
+      "final_reference_rates_hz": [
+        2.1183706689815973,
+        0.39418013018408826,
+        0.09081785480323518
+      ]
+    },
+    {
+      "time_ms": 9693,
+      "log_growth": -0.6834712476480904,
+      "final_reference_rates_hz": [
+        1.730539479399863,
+        0.6054819214336752,
+        0.10150716536041927
+      ]
+    },
+    {
+      "time_ms": 10052,
+      "log_growth": -1.0812592144482431,
+      "final_reference_rates_hz": [
+        0.21561225517753077,
+        1.5833482447993443,
+        0.06740225248628397
+      ]
+    },
+    {
+      "time_ms": 10411,
+      "log_growth": -1.2990465017161423,
+      "final_reference_rates_hz": [
+        0.7474167047934196,
+        0.01915156845039505,
+        0.05837831374119604
+      ]
+    },
+    {
+      "time_ms": 10770,
+      "log_growth": 1.1197499763109138,
+      "final_reference_rates_hz": [
+        0.11287512928830801,
+        0.27303713010711844,
+        0.1270352237302356
+      ]
+    },
+    {
+      "time_ms": 11129,
+      "log_growth": -0.4153927954581721,
+      "final_reference_rates_hz": [
+        0.022339285150755478,
+        1.398121499266571,
+        0.26284499509908504
+      ]
+    },
+    {
+      "time_ms": 11488,
+      "log_growth": 4.339239251587551,
+      "final_reference_rates_hz": [
+        8.564114023271825,
+        0.09775158584279511,
+        7.108251926615332
+      ]
+    },
+    {
+      "time_ms": 11847,
+      "log_growth": -1.1410190375057518,
+      "final_reference_rates_hz": [
+        1.3660153591419342,
+        122.03922372438021,
+        19.72906992864124
+      ]
+    },
+    {
+      "time_ms": 12206,
+      "log_growth": 0.5724731635882917,
+      "final_reference_rates_hz": [
+        30.17145133593571,
+        7.416646898869186,
+        22.192904248570684
+      ]
+    },
+    {
+      "time_ms": 12565,
+      "log_growth": -0.42486920840545395,
+      "final_reference_rates_hz": [
+        138.847554573288,
+        1.018488119102464,
+        6.823271090099314
+      ]
+    },
+    {
+      "time_ms": 12924,
+      "log_growth": -3.41552243759683,
+      "final_reference_rates_hz": [
+        0.6045907421740444,
+        6.777760185042838,
+        0.9492954876564995
+      ]
+    },
+    {
+      "time_ms": 13283,
+      "log_growth": -1.8753504877561846,
+      "final_reference_rates_hz": [
+        2.626718509860904,
+        0.27207499231181886,
+        0.11464772142281457
+      ]
+    },
+    {
+      "time_ms": 13642,
+      "log_growth": -0.29882678669093815,
+      "final_reference_rates_hz": [
+        0.49388160183585494,
+        1.185080600201113,
+        0.09326038913658125
+      ]
+    },
+    {
+      "time_ms": 14001,
+      "log_growth": -0.7023724376388081,
+      "final_reference_rates_hz": [
+        0.6150588770539173,
+        1.8385957660106578,
+        0.08742815996235427
+      ]
+    },
+    {
+      "time_ms": 14360,
+      "log_growth": -1.327952562388757,
+      "final_reference_rates_hz": [
+        1.4393302815432556,
+        0.066157859119402,
+        0.06825822730565952
+      ]
+    },
+    {
+      "time_ms": 14719,
+      "log_growth": 0.014818998278101651,
+      "final_reference_rates_hz": [
+        0.023886750570176224,
+        0.6237004029418957,
+        0.062001676312171676
+      ]
+    },
+    {
+      "time_ms": 15078,
+      "log_growth": -1.1480941975167946,
+      "final_reference_rates_hz": [
+        0.1059116281963658,
+        0.2931285172040566,
+        0.08954710161638585
+      ]
+    },
+    {
+      "time_ms": 15437,
+      "log_growth": 3.9354220536646407,
+      "final_reference_rates_hz": [
+        1.7955421229673076,
+        0.02522624788116319,
+        1.5087368082619124
+      ]
+    },
+    {
+      "time_ms": 15796,
+      "log_growth": 0.10950461389987895,
+      "final_reference_rates_hz": [
+        0.2863971814395192,
+        22.240382450822597,
+        3.6310694347491865
+      ]
+    },
+    {
+      "time_ms": 16155,
+      "log_growth": 1.014901778695961,
+      "final_reference_rates_hz": [
+        175.69645228983183,
+        1.5549655085463985,
+        30.048757245420582
+      ]
+    },
+    {
+      "time_ms": 16514,
+      "log_growth": -0.6260847263603695,
+      "final_reference_rates_hz": [
+        21.729659430435117,
+        1.3683009477161332,
+        19.590703855795354
+      ]
+    },
+    {
+      "time_ms": 16873,
+      "log_growth": -1.247397697030486,
+      "final_reference_rates_hz": [
+        1.0776897780629142,
+        123.84219484998857,
+        2.7957747893915443
+      ]
+    },
+    {
+      "time_ms": 17232,
+      "log_growth": -2.158739858921779,
+      "final_reference_rates_hz": [
+        1.1232515216250027,
+        0.4248746013506404,
+        0.3271659259949952
+      ]
+    },
+    {
+      "time_ms": 17591,
+      "log_growth": -1.914742048888014,
+      "final_reference_rates_hz": [
+        0.23619644677014934,
+        2.1392264535069065,
+        0.08971572591648545
+      ]
+    },
+    {
+      "time_ms": 17950,
+      "log_growth": -0.4000260381603539,
+      "final_reference_rates_hz": [
+        1.2916690969464524,
+        0.8943321353173301,
+        0.09683965844846543
+      ]
+    },
+    {
+      "time_ms": 18309,
+      "log_growth": -1.0504340161955756,
+      "final_reference_rates_hz": [
+        2.242283616910236,
+        0.304651309067246,
+        0.08642717489441315
+      ]
+    },
+    {
+      "time_ms": 18668,
+      "log_growth": -0.549517582450912,
+      "final_reference_rates_hz": [
+        0.05260202672968832,
+        1.1149478218924989,
+        0.05838887047981706
+      ]
+    },
+    {
+      "time_ms": 19027,
+      "log_growth": -1.3553224777864832,
+      "final_reference_rates_hz": [
+        0.39424213957196164,
+        0.06145698851505501,
+        0.05858448956844756
+      ]
+    },
+    {
+      "time_ms": 19386,
+      "log_growth": 1.90873379178698,
+      "final_reference_rates_hz": [
+        0.3764512600326453,
+        0.09777618860295699,
+        0.33985562587735196
+      ]
+    },
+    {
+      "time_ms": 19745,
+      "log_growth": 0.3667477817938561,
+      "final_reference_rates_hz": [
+        0.06006245482782083,
+        4.662892554909745,
+        0.7879951874858133
+      ]
+    },
+    {
+      "time_ms": 20104,
+      "log_growth": 2.7768820969993007,
+      "final_reference_rates_hz": [
+        28.56228413849235,
+        0.32601224861928224,
+        25.498674397959867
+      ]
+    }
+  ],
+  "estimates": [
+    {
+      "discard_ms": 0,
+      "duration_ms": 20104,
+      "exponent_per_second": -0.7239828741272923
+    },
+    {
+      "discard_ms": 2000,
+      "duration_ms": 17950,
+      "exponent_per_second": -0.7541856125298128
+    },
+    {
+      "discard_ms": 5000,
+      "duration_ms": 15078,
+      "exponent_per_second": -0.7438793835235167
+    },
+    {
+      "discard_ms": 10000,
+      "duration_ms": 10052,
+      "exponent_per_second": -0.5165377429230331
+    }
+  ],
+  "elapsed_seconds": 1306.2189149856567,
+  "attractor_class": "NOT_ESTABLISHED",
+  "reference_checkpoint": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/finite_lyapunov/J0.9420000_dt0.1_eps1e-06_transverse/state.npz"
+}

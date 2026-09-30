@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "aggregation_reproduced": true,
+  "rows": [
+    {
+      "label": "Core A E",
+      "MC_relative_wave_difference": 0.0,
+      "MC_relative_mean_difference": 0.0,
+      "model_relative_wave_difference": 1.5257764876735946e-07
+    },
+    {
+      "label": "Core B E",
+      "MC_relative_wave_difference": 0.0,
+      "MC_relative_mean_difference": 0.0,
+      "model_relative_wave_difference": 1.8453770912183405e-07
+    },
+    {
+      "label": "Surround E",
+      "MC_relative_wave_difference": 0.0,
+      "MC_relative_mean_difference": 0.0,
+      "model_relative_wave_difference": 2.5313899711042405e-07
+    },
+    {
+      "label": "I",
+      "MC_relative_wave_difference": 0.0,
+      "MC_relative_mean_difference": 0.0,
+      "model_relative_wave_difference": 4.743542825016015e-07
+    }
+  ],
+  "source_samples": [
+    32768,
+    65536
+  ],
+  "scope": "Independent source-sampling/numeric check only; does not relax primary validation gates.",
+  "original_verdict": "FAIL_SELECTED_OPEN_LOOP_GROUPS"
+}

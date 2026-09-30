@@ -1,0 +1,115 @@
+{
+  "updated_epoch": 1789847334.861083,
+  "status": "IN_PROGRESS",
+  "workers": [
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/worker.json",
+      "status": "FINE_CHILD_BRANCH",
+      "pid": 461794,
+      "child_pid": 461798,
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/fine_branch.log",
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u /home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD_physical_children.py --label PD_double_low --device 0",
+      "child_live": true
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_parent_witnesses/worker.json",
+      "status": "WAITING_DEPENDENCIES",
+      "pid": 468094,
+      "rows": [],
+      "dependencies": [
+        461794
+      ],
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD1_parent_witnesses.py --device 0 --after-pid 461794"
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD2_fine_root/worker.json",
+      "status": "ROOT_N4096",
+      "pid": 465844,
+      "child_pid": 471290,
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD2_fine_root/ROOT_N4096_1789847025398179012.log",
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/repair_rate_PD2_fine_mode.py --device 0 --after-pid 465843 --min-free-gib 13",
+      "child_live": true
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/worker_alternating_low.json",
+      "status": "RUNNING",
+      "pid": 469438,
+      "rows": [],
+      "label": "LPC_double_low",
+      "stage": "root_N4096",
+      "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/LPC_double_low_root_N4096_1789845476350670601.log",
+      "child_pid": 469547,
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_primary_burst_folds.py --device 1 --labels LPC_double_low --resolutions 4096 8192 --max-N 8192 --after-pid 468866 --worker-label alternating_low --min-free-gib 7.5",
+      "child_live": true
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_lower_stability_worker.json",
+      "status": "RUNNING",
+      "pid": 470785,
+      "indices": [
+        66,
+        67,
+        70
+      ],
+      "child_pid": 471258,
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u -",
+      "child_live": true
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/worker.json",
+      "status": "WAITING_DEPENDENCIES",
+      "pid": 465634,
+      "label": "arcBleadingConnection_20260920",
+      "dependencies": [
+        458977
+      ],
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/extend_rate_Bleading_connection.py --device 1 --after-pid 458977"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/remaining_turn_refinements/worker_B41_B42.json",
+      "status": "RUNNING",
+      "rows": [],
+      "pid": 458977,
+      "child_pid": 464595,
+      "label": "LPC_B_stage4_turn1",
+      "stage": "N2048",
+      "log": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/remaining_turn_refinements/LPC_B_stage4_turn1_N2048.log",
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/refine_rate_remaining_turns.py B41 B42 --device 1 --after-pid 458835 --cached-host-krylov --min-free-gib 11",
+      "child_live": true
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD2_secondary_refinement_worker.json",
+      "status": "RUNNING",
+      "pid": 675110,
+      "rows": [
+        {
+          "N": 4096,
+          "root": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_upper_child_next_amplitude_N4096.json",
+          "J_mesh_difference": 1.0128294758438017e-08,
+          "continuous_check": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD2_secondary_continuous_N4096.json",
+          "physical_profile_and_mesh_pass": false
+        }
+      ],
+      "stage": "root_N8192",
+      "child_pid": 2942777,
+      "log": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD2_secondary_root_N8192_1789785202101864478.log",
+      "pid_live": true,
+      "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/repair_rate_secondary_PD.py --device 1 --wait-pids 675109",
+      "child_live": true
+    }
+  ],
+  "completed_this_turn": [
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/LPC_Bleading_low_root_spectrum_assessment.json",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/primary_folds/LPC_burst_low_root_spectrum_assessment.json",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_first_fine_child_acceptance.json",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/qa/bounded_defect_equivalence.json"
+  ],
+  "global_branch_completeness": false
+}

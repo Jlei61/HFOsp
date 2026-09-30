@@ -1,0 +1,101 @@
+{
+  "status": "BOUNDED_CHECK_FINISHED",
+  "rows": [
+    {
+      "index": 50,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0050_N2048.npz",
+      "J_EE_core": 1.1992901876417212,
+      "T_ms": 106.81913899920703,
+      "checks": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcAconnectionStage4_0050_N2048_dt0.05.json",
+          "dt_ms": 0.04998555872681658,
+          "multiplier": [
+            797.0882135853332,
+            0.0
+          ],
+          "relative_eigenpair_residual": 2.887261354999012e-14,
+          "phase_tangent_relative_defect": 0.00010524433599369319
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcAconnectionStage4_0050_N2048_dt0.025.json",
+          "dt_ms": 0.02499862836396139,
+          "multiplier": [
+            796.9728177915891,
+            0.0
+          ],
+          "relative_eigenpair_residual": 5.851080137170175e-14,
+          "phase_tangent_relative_defect": 2.5622644395234736e-05
+        }
+      ],
+      "relative_leading_multiplier_change": 0.00014479263428806747,
+      "status": "DOMINANT_INSTABILITY_VERIFIED",
+      "profile_check_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcAconnectionStage4_accuracy.json"
+    },
+    {
+      "index": 52,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0052_N2048.npz",
+      "J_EE_core": 1.1987792961411488,
+      "T_ms": 106.01644111018649,
+      "checks": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcAconnectionStage4_0052_N2048_dt0.05.json",
+          "dt_ms": 0.049984177798296316,
+          "multiplier": [
+            567.170399935154,
+            0.0
+          ],
+          "relative_eigenpair_residual": 2.986250543420054e-14,
+          "phase_tangent_relative_defect": 0.00011484926209279782
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcAconnectionStage4_0052_N2048_dt0.025.json",
+          "dt_ms": 0.024997981869885992,
+          "multiplier": [
+            567.0663922515898,
+            0.0
+          ],
+          "relative_eigenpair_residual": 6.497188459963934e-14,
+          "phase_tangent_relative_defect": 2.7722785887539188e-05
+        }
+      ],
+      "relative_leading_multiplier_change": 0.00018341359139838816,
+      "status": "DOMINANT_INSTABILITY_VERIFIED",
+      "profile_check_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcAconnectionStage4_accuracy.json"
+    },
+    {
+      "index": "fold",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_stage4_turn2_N2048.npz",
+      "J_EE_core": 1.198713442456352,
+      "T_ms": 106.26514784898256,
+      "checks": [
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_A_stage4_turn2_N2048_dt0.05.json",
+          "dt_ms": 0.04998360670224956,
+          "multiplier": [
+            676.267079889011,
+            0.0
+          ],
+          "relative_eigenpair_residual": 6.548003430032862e-15,
+          "phase_tangent_relative_defect": 0.00011437689680181279
+        },
+        {
+          "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/LPC_A_stage4_turn2_N2048_dt0.025.json",
+          "dt_ms": 0.024997682392138922,
+          "multiplier": [
+            676.1594362927713,
+            0.0
+          ],
+          "relative_eigenpair_residual": 1.1950070028430969e-14,
+          "phase_tangent_relative_defect": 2.765092686566207e-05
+        }
+      ],
+      "relative_leading_multiplier_change": 0.00015919854173736532,
+      "status": "DOMINANT_INSTABILITY_VERIFIED",
+      "profile_check_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn2_validation.json"
+    }
+  ],
+  "critical_point_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_stage4_turn2_validation.json",
+  "exact_root_included": true,
+  "scope": "Paired time-step leading Floquet evidence at the listed points, including the exact LPC62 root when requested. Instability is point-specific; neither all unstable multipliers nor intervening crossings are counted."
+}

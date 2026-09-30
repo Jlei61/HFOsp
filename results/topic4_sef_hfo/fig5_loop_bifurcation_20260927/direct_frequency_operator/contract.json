@@ -1,0 +1,18 @@
+{
+  "status": "REGISTERED_BEFORE_DYNAMIC_OPERATOR",
+  "created_epoch": 1790538652.170466,
+  "question": "Do measured local cell responses, original target-wise edge delays, mean synaptic filters and causalR/G/localM form a consistent spatial loop operator?",
+  "convention": "Rate inHz; z=exp(i*2pi*f*.0001). Source r[n] is the current-step spike readout; delays read r[n-d]. Mean synaptic filter uses current arrival in the new current. M andG seen by membrane are pre-update states.",
+  "formulas": {
+    "mean_filter": "(1-ar)*(1-ad)/((1-ar/z)*(1-ad/z))",
+    "global_R_G": ".1*(1-aG)*(.1/15)/((z-aG)*(z-aR))",
+    "local_M": "(.1/1000)/(z-aM)",
+    "implicit_M": "1+etaM*E*chi_mu*H_M/(1+g)",
+    "variance": "Use measured driver-variance frequency response times delayed squared-weight operator; do NOT add the mean synaptic filter twice.",
+    "physical_G": "Use chi_physicalG*Z*H_RG; physical chi already contains instantaneous rescaling of the pre-existing colored currents."
+  },
+  "diagnostics": "At0Hz compare the full operator action to measured DC Jacobian+identity. Test delay compression against uncompressed native delay arrays. Check scalar recurrence phases against exact discrete recurrences. At1/5Hz report eigenvalues of loop operator nearest1 with residuals and replica-block action uncertainty; never label these as dynamical growth exponents.",
+  "limits": "Two frequency samples and a local DC operator cannot count all characteristic roots or certify stability/Hopf. Measured finite-record susceptibilities, failed-amplitude components, source averaging and fixedM response approximation remain. Any next analysis needs frequency coverage and native correspondence.",
+  "producer_sha256": "30dc07a57d03bb4c7aadb878df03e5c2ffb6ce71a1285d79e896715d431040d3",
+  "formal_bifurcation_allowed": false
+}

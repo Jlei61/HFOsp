@@ -1,0 +1,87 @@
+{
+  "status": "SELECTED_POINTS_PASS",
+  "pid": 607415,
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0134_N2048.npz",
+      "J": 1.306854855971254,
+      "T_ms": 79.1841594495323,
+      "N": 2048,
+      "check_N": 4096,
+      "stored_collocation_error_Hz": 9.992007221626409e-13,
+      "original_mesh_CPU_collocation_error_Hz": 2.6645352591003757e-12,
+      "oversampled_residual_at_original_nodes_Hz": 2.7755575615628914e-12,
+      "between_nodes_integrated_error_Hz": 2.7755575615628914e-12,
+      "between_nodes_regional_error_A_B_surround_Hz": [
+        1.581764800343063e-14,
+        1.2880176313846022e-13,
+        1.218371133692259e-14
+      ],
+      "full_RHS_rate_error_Hz_per_ms": 4.197683867168678e-11,
+      "full_RHS_linear_state_max_abs": 8.755218772193984e-13,
+      "transfer_48_vs_96_quadrature_max_Hz": 1.6653345369377348e-13,
+      "minimum_interpolated_group_rate_Hz": 2.073079503422891e-58,
+      "refractory_rate_bound_excess_Hz": 0.0,
+      "index": 134,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -6.661338147750939e-13,
+          "phase_index": 6496,
+          "group": 574
+        },
+        "slow": {
+          "minimum_Hz": 3.162629147161388e-58,
+          "phase_index": 2982,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "status": "POINT_CHECK_PASS"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0159_N2048.npz",
+      "J": 1.2634666122157996,
+      "T_ms": 82.38712557291505,
+      "N": 2048,
+      "check_N": 4096,
+      "stored_collocation_error_Hz": 8.604228440844963e-13,
+      "original_mesh_CPU_collocation_error_Hz": 1.8318679906315083e-12,
+      "oversampled_residual_at_original_nodes_Hz": 1.8041124150158794e-12,
+      "between_nodes_integrated_error_Hz": 1.8041124150158794e-12,
+      "between_nodes_regional_error_A_B_surround_Hz": [
+        6.0196957716414306e-15,
+        6.838950664473223e-14,
+        6.284014434977421e-15
+      ],
+      "full_RHS_rate_error_Hz_per_ms": 3.5596959407913076e-11,
+      "full_RHS_linear_state_max_abs": 6.656897255652439e-13,
+      "transfer_48_vs_96_quadrature_max_Hz": 1.6653345369377348e-13,
+      "minimum_interpolated_group_rate_Hz": 7.383186721139376e-50,
+      "refractory_rate_bound_excess_Hz": 0.0,
+      "index": 159,
+      "filter_state_check": {
+        "fast": {
+          "minimum_Hz": -5.551115123125783e-13,
+          "phase_index": 4316,
+          "group": 835
+        },
+        "slow": {
+          "minimum_Hz": 1.124281446024221e-49,
+          "phase_index": 3265,
+          "group": 59
+        },
+        "positive": true,
+        "N": 2048,
+        "check_N": 8192
+      },
+      "status": "POINT_CHECK_PASS"
+    }
+  ],
+  "selected_orbits": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0134_N2048.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0159_N2048.npz"
+  ],
+  "scope": "Independent CPU physical-delay and nine-state equation checks at selected frozen continuation points. No whole-segment acceptance, critical-point naming, Floquet or global-connection inference."
+}

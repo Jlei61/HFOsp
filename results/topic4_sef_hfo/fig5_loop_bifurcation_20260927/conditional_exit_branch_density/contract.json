@@ -1,0 +1,24 @@
+{
+  "status": "REGISTERED_BEFORE_SOURCE_GATE_AND_SCORING",
+  "created_epoch": 1790530507.4444141,
+  "question": "Does the K9 high-state surrounding-rate deficit persist under native upstream counts and global feedback?",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_exit_branch_inputs",
+  "interval_s": [
+    42.0,
+    44.0
+  ],
+  "selected": "Same 16 geometric targets as preceding diagnostics.",
+  "replicas": 8192,
+  "numerical_seeds": [
+    928731,
+    928732
+  ],
+  "conditions": 4,
+  "design": "Projected versus measured group-current means, each with two numerical streams; full squared-weight Gaussian variance unchanged. Prescribed native upstream counts, external drive, R/G. Hold each copied cell Z/K after each update; V/current/ref/M evolve.",
+  "hypothesis": "If measured-current forcing repairs a projected deficit, group-current projection matters. If both remain deficient, local input statistics/response approximation matters. If both match, free recurrent coupling or unrepresented regions remain the main gap.",
+  "evaluation": "Fixed 20ms count bins and elapsed0-.5/.5-2s windows, selected surround/core/I separately; current means and spread, held fields and numerical stream differences. No fitted acceptance rule.",
+  "bounds": "Exactly four local conditions, no new network parameters or native seeds. Gate on observer_audit PASS; no automatic extension.",
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "producer_sha256": "ac807923d740f80703e4c70e803b454dddb1ec7ee3891f052e33fbb35ea7e7a4",
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 536.6496863092343,
+    "max_combined_relative_rms": 0.06517614632082368,
+    "residual_ratio": 0.7337639852027503,
+    "predicted_gain": 0.45386245185590846,
+    "agreement": 1.0170271017835224,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 1.2997904497702988,
+        "projected_step_norm": 1.2883753598468835,
+        "phase_error": 6.78827111709466e-15
+      },
+      {
+        "projected_negative_coordinates": 9003,
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 1933,
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 8022,
+        "negative_steps_at_exact_zero": 0,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 1.5004067581695186,
+    "step_norm": 1.5004067581692107,
+    "lagrange_multiplier": 1.3612193358723719,
+    "predicted_relative_residual": 0.7396143624315479
+  }
+]

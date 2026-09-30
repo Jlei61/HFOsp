@@ -1,0 +1,19 @@
+{
+  "primary_grid": 20,
+  "space_cells": 400,
+  "rate_groups": 935,
+  "response": "calibrated_full",
+  "topology": 6101,
+  "parameter": "J_EE_core scales both within-A and within-B EE edges",
+  "Z": "fixed 1",
+  "M": "original dynamic",
+  "native_parameter_conditions": [
+    0.88,
+    0.94,
+    0.96,
+    1.0
+  ],
+  "layout": "equilibrium branches, temporal spectrum, spatial eigenmodes; separate native traces",
+  "scientific_status": "Linear spatial mean-field analysis; full nonlinear rate/SNN propagation equivalence and periodic continuation remain unvalidated",
+  "human_visual_acceptance": false
+}

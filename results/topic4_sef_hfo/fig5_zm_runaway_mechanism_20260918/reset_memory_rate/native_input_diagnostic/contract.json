@@ -1,0 +1,7 @@
+{
+  "status": "FIXED_POST_FIT_DIAGNOSTIC",
+  "question": "Did own-reset memory remove the measured preentry local response discrepancy?",
+  "design": "Two existing supplied inputmean contrasts times six fixed groups; locked weights, no native firing in refractory/reset history.1s preparation and all previous50ms windows retained.",
+  "gate": "Broad local validation alreadyFAIL; this diagnostic cannot override it or authorize network/bifurcation promotion. No new fitting or LIF data.",
+  "numerical": "Nativeclock0.1ms; existing general0.05ms waveform gate includes5failures. This additional descriptive assay does not establish step convergence."
+}

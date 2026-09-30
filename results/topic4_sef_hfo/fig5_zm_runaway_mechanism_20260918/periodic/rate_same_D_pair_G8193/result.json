@@ -1,0 +1,38 @@
+{
+  "status": "TWO_DISTINCT_CONVERGED_CYCLES_AT_IDENTICAL_Z",
+  "lower_source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+  "upper_seed": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T26735_G8193/point0000.npz",
+  "upper": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_same_D_pair_G8193/upper_same_D.npz",
+    "D": 0.14497187728110808,
+    "T_ms": 267.3506606391765,
+    "N": 8193,
+    "mean_hz": 28.046633510555186,
+    "min_hz": 0.014263544567066768,
+    "max_hz": 190.23232372978205,
+    "residual": 8.548717289613705e-12,
+    "iterations": [
+      5.316875873766668,
+      0.015109592699569241,
+      0.00013017296912609666,
+      8.548717289613705e-12
+    ],
+    "minimum_group_rate_hz": -0.0385898283742136,
+    "stability": "NOT_ESTABLISHED",
+    "Z": "held",
+    "M": "dynamic",
+    "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation"
+  },
+  "D": 0.14497187728110808,
+  "predictor": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_001.npz",
+    "delta_log_period": 2.326157329838842e-06,
+    "predicted_period_ms": 267.35062189888544,
+    "dD_dlogT": -0.006086530809778255
+  },
+  "period_difference_ms": 0.2506606391764876,
+  "Z": "same held spatial field",
+  "M": "dynamic in both periodic boundary-value problems",
+  "stability": "NOT_INFERRED_FROM_THE_PAIR",
+  "bifurcation_type": "REQUIRES_TURN_AND_STABILITY_ANALYSIS"
+}

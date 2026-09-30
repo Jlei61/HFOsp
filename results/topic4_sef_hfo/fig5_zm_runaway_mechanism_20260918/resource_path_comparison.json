@@ -1,0 +1,108 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "family": "rate endpoint affine slice",
+      "point": "period-turn candidate",
+      "global_Z": 0.8550273569717511,
+      "D": 0.14497264302824886,
+      "core_A_Z": 0.7370493132159224,
+      "core_B_Z": 0.7335989298850012,
+      "surround_Z": 0.8610811386093771,
+      "evidence_scope": "Conditional cycle-fold candidate only; upper transverse refinement and critical certification incomplete"
+    },
+    {
+      "family": "actual rate fine Z slice",
+      "point": "7750 ms field",
+      "global_Z": 0.857138319388032,
+      "D": 0.14286168061196802,
+      "core_A_Z": 0.738269273814219,
+      "core_B_Z": 0.7376248975291507,
+      "surround_Z": 0.8631647412509255,
+      "evidence_scope": "regular self-limited in same-history 8-s held-Z control; not a located bifurcation"
+    },
+    {
+      "family": "actual rate fine Z slice",
+      "point": "7760 ms field",
+      "global_Z": 0.8563709592483938,
+      "D": 0.1436290407516062,
+      "core_A_Z": 0.7367942079466914,
+      "core_B_Z": 0.7375800340381894,
+      "surround_Z": 0.8623962559554424,
+      "evidence_scope": "irregular self-limited in same-history 8-s held-Z control; not a located bifurcation"
+    },
+    {
+      "family": "actual rate fine Z slice",
+      "point": "7770 ms field",
+      "global_Z": 0.8553637153320014,
+      "D": 0.1446362846679986,
+      "core_A_Z": 0.7353220941691563,
+      "core_B_Z": 0.7361063496908765,
+      "surround_Z": 0.8614125555076649,
+      "evidence_scope": "local persistent in same-history 8-s held-Z control; not a located bifurcation"
+    },
+    {
+      "family": "actual rate fine Z slice",
+      "point": "7780 ms field",
+      "global_Z": 0.854295971153304,
+      "D": 0.14570402884669598,
+      "core_A_Z": 0.7338529158808509,
+      "core_B_Z": 0.7346356077351947,
+      "surround_Z": 0.86036514742783,
+      "evidence_scope": "local persistent in same-history 8-s held-Z control; not a located bifurcation"
+    },
+    {
+      "family": "native checkpoint Z slice",
+      "point": "8000 ms field",
+      "global_Z": 0.7985396027290185,
+      "D": 0.20146039727098153,
+      "core_A_Z": 0.7524298884449773,
+      "core_B_Z": 0.7527433147755948,
+      "surround_Z": 0.8008627349319586,
+      "evidence_scope": "Native SNN spatial Z source; not a certified rate/SNN common bifurcation threshold"
+    },
+    {
+      "family": "native checkpoint Z slice",
+      "point": "9000 ms field",
+      "global_Z": 0.7835339789603897,
+      "D": 0.21646602103961032,
+      "core_A_Z": 0.7442783003859391,
+      "core_B_Z": 0.7399002967704519,
+      "surround_Z": 0.7856316433020323,
+      "evidence_scope": "Native SNN spatial Z source; not a certified rate/SNN common bifurcation threshold"
+    },
+    {
+      "family": "native checkpoint Z slice",
+      "point": "9420 ms field",
+      "global_Z": 0.7711552394348083,
+      "D": 0.22884476056519165,
+      "core_A_Z": 0.72487861685313,
+      "core_B_Z": 0.7163253334996625,
+      "surround_Z": 0.7737156097398513,
+      "evidence_scope": "Native SNN spatial Z source; not a certified rate/SNN common bifurcation threshold"
+    },
+    {
+      "family": "native checkpoint Z slice",
+      "point": "9870 ms field",
+      "global_Z": 0.7436555746552451,
+      "D": 0.2563444253447549,
+      "core_A_Z": 0.6625268682481935,
+      "core_B_Z": 0.6741173801287446,
+      "surround_Z": 0.7474582032018224,
+      "evidence_scope": "Native SNN spatial Z source; not a certified rate/SNN common bifurcation threshold"
+    },
+    {
+      "family": "native checkpoint Z slice",
+      "point": "10370 ms field",
+      "global_Z": 0.6912882127142393,
+      "D": 0.30871178728576065,
+      "core_A_Z": 0.5994785013583516,
+      "core_B_Z": 0.6099660197144012,
+      "surround_Z": 0.6956593146860126,
+      "evidence_scope": "Native SNN spatial Z source; not a certified rate/SNN common bifurcation threshold"
+    }
+  ],
+  "weighting": "Original E cell counts, globally and within each region",
+  "warning": "Global Z and core Z are different observables. Do not identify a global native Z~0.77 boundary with the affine rate candidate at global Z~0.855, even though core Z~0.74 there.",
+  "Z_M_contract": "Conditional results hold the full spatial Z field and keep M dynamic"
+}

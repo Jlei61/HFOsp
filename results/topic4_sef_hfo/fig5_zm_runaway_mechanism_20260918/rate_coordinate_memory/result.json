@@ -1,0 +1,149 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "group": 279,
+      "label": "Core A E",
+      "rows": [
+        {
+          "variant": "rate_coordinate_instantaneous",
+          "waveform_L2": 0.23558991034031806,
+          "mean_bias": 0.19720276603979753,
+          "mean_hz": 87.06704747674914,
+          "minimum_raw_rate_Hz": 0.06742697366440308,
+          "maximum_raw_rate_Hz": 446.47215290555755,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": false,
+          "passed": false
+        },
+        {
+          "variant": "rate_coordinate_history",
+          "waveform_L2": 0.1363473666465403,
+          "mean_bias": 0.07894272882133868,
+          "mean_hz": 78.46653921935392,
+          "minimum_raw_rate_Hz": 0.06882542675030263,
+          "maximum_raw_rate_Hz": 446.3916119381225,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "group": 141,
+      "label": "Core B E",
+      "rows": [
+        {
+          "variant": "rate_coordinate_instantaneous",
+          "waveform_L2": 0.26354890491183436,
+          "mean_bias": 0.20002255636128496,
+          "mean_hz": 65.0177549494275,
+          "minimum_raw_rate_Hz": 0.0070766883688177335,
+          "maximum_raw_rate_Hz": 452.89620907938064,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": false,
+          "passed": false
+        },
+        {
+          "variant": "rate_coordinate_history",
+          "waveform_L2": 0.12976421437148578,
+          "mean_bias": 0.04207214889231238,
+          "mean_hz": 56.45993173807107,
+          "minimum_raw_rate_Hz": 0.006431960122301636,
+          "maximum_raw_rate_Hz": 452.7211148844721,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "group": 39,
+      "label": "Surround E",
+      "rows": [
+        {
+          "variant": "rate_coordinate_instantaneous",
+          "waveform_L2": 0.29610373414580005,
+          "mean_bias": 0.22600362690435333,
+          "mean_hz": 78.92968620863337,
+          "minimum_raw_rate_Hz": 0.02073811186859773,
+          "maximum_raw_rate_Hz": 458.0600230127476,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": false,
+          "passed": false
+        },
+        {
+          "variant": "rate_coordinate_history",
+          "waveform_L2": 0.21905211204027153,
+          "mean_bias": 0.11267602058671125,
+          "mean_hz": 71.63369441127398,
+          "minimum_raw_rate_Hz": 0.020910971582257208,
+          "maximum_raw_rate_Hz": 458.2534711738012,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": false,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "group": 594,
+      "label": "I",
+      "rows": [
+        {
+          "variant": "rate_coordinate_instantaneous",
+          "waveform_L2": 0.1530749150468858,
+          "mean_bias": 0.1200183168018362,
+          "mean_hz": 100.59900821900534,
+          "minimum_raw_rate_Hz": 0.0001741465188964638,
+          "maximum_raw_rate_Hz": 910.6685449711201,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": false,
+          "passed": false
+        },
+        {
+          "variant": "rate_coordinate_history",
+          "waveform_L2": 0.07008138738409882,
+          "mean_bias": 0.04182454707992406,
+          "mean_hz": 93.57571622018224,
+          "minimum_raw_rate_Hz": 8.87886886334235e-05,
+          "maximum_raw_rate_Hz": 910.4812515431332,
+          "negative_phase_fraction": 0.0,
+          "physical_bounds_pass": true,
+          "accuracy_pass": true,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "fixed_variance_identity": [
+    {
+      "group": 279,
+      "constant_variance_rate_filter_identity_relative": 6.6543293156534775e-16
+    },
+    {
+      "group": 141,
+      "constant_variance_rate_filter_identity_relative": 6.376946364087217e-16
+    },
+    {
+      "group": 39,
+      "constant_variance_rate_filter_identity_relative": 6.593785322467917e-16
+    },
+    {
+      "group": 594,
+      "constant_variance_rate_filter_identity_relative": 6.761757048356053e-16
+    }
+  ],
+  "all_selected_pass": {
+    "rate_coordinate_instantaneous": false,
+    "rate_coordinate_history": false
+  },
+  "scope": "Two fixed diagnostic constructions on already observed selected waveforms. Same steady and local first-order response; constantvariance nonlinear rate-filter identity independently checked. Positivity forvaryingvariance is not guaranteed and testedwithoutclipping; any physical oraccuracy failure rejects deployment. No network run or model acceptance.",
+  "replacement_promoted": false
+}

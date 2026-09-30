@@ -1,0 +1,61 @@
+{
+  "status": "RESUMED_FROM_VERIFIED_CHECKPOINT",
+  "condition": "rotated",
+  "name": "z0.25_k0.02_interictal",
+  "old_pid": 3218016,
+  "old_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_conditional.py",
+    "worker",
+    "rotated",
+    "z0.25_k0.02_interictal"
+  ],
+  "step": 540000,
+  "time_s": 54.0,
+  "backup": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/rotated/z0.25_k0.02_interictal/1790286690768687332/checkpoint.pkl",
+  "checkpoint_sha256": "501180dc5f44bb502150b05cde7faf74077e2c13ef3bd282f0545d7123c8c3be",
+  "job_sha256": "b4892fa240c52fe078a6cefcf01707876e410614c115b2cf4b375d446a9177bc",
+  "record_path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/rotated/z0.25_k0.02_interictal/1790286690768687332/handoff.json",
+  "new_backend": "cuda_ordered:1",
+  "committed_observation_endpoints": {
+    "actual_current_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "conditional_drift_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "feedback_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "global_response_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "intrinsic_adaptation_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "mechanism_chunks": {
+      "files": 2,
+      "end_step": 540000
+    },
+    "regional_chunks": {
+      "files": 2,
+      "end_step": 540000
+    }
+  },
+  "complete_engine_unmodified": true,
+  "maximum_uncommitted_time_to_recompute_s": 2.0,
+  "persisted_observations_discarded": false,
+  "source_files_verified": 24,
+  "prepared_initial_checkpoint": false,
+  "new_pid": 3290615,
+  "epoch": 1790286692.925586
+}

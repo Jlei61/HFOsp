@@ -1,0 +1,23 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H1_extension_observer_summary.json",
+  "maximum_contact_threshold_ratio": 0.705122651898876,
+  "smoothed_contact_threshold_range_Hz": [
+    35.296281463074564,
+    42.61660558534201
+  ],
+  "maximum_filtered_contact_rate_Hz": 29.369251763210002,
+  "same_temporal_filter_for_regions_and_contacts": true,
+  "bin_origins_ms": [
+    0,
+    0.5,
+    1,
+    1.5
+  ],
+  "bin_origin_summary": "Maximum over the four origins; not a confidence interval",
+  "observer_metrics": {
+    "mean_normalized_rank": null,
+    "within_shaft_order": null,
+    "participation": null
+  },
+  "scope": "Every tested point and bin origin remains below individual contact thresholds. Thus there are no group events and the three event metrics are undefined. This is a frozen-observer result, not absence of spatial activity, instability or a dynamical bifurcation."
+}

@@ -1,0 +1,111 @@
+{
+  "status": "COMPLETE_EXISTING_NATIVE_PHASE_PERSISTENCE_AUDIT",
+  "rows": [
+    {
+      "region": "sampled_E",
+      "targets": 60,
+      "native_fixed_background_2s_phase_variance": [
+        0.003531414659247589,
+        0.003607948632592763,
+        0.003442195992895607,
+        0.003840162092328544,
+        0.003616735342166276
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0033610038789067868,
+      "initial_variable_native_and_three_map_phase_variance": [
+        0.003362690149121204,
+        0.0007957982838053175,
+        0.0005118340129189119,
+        0.00048448081099608113
+      ],
+      "native_fixed_background_mean_rate_Hz": 397.75,
+      "native_fixed_phase_profile_change_from_first_block_RMS": [
+        0.0,
+        0.030878876823564695,
+        0.024137915587429348,
+        0.02927595204821677,
+        0.023548468478133616
+      ]
+    },
+    {
+      "region": "sampled_coreA",
+      "targets": 20,
+      "native_fixed_background_2s_phase_variance": [
+        0.0030620850398566596,
+        0.0032976307356605604,
+        0.003015238167568833,
+        0.0032487517098445497,
+        0.003021576152138353
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0027218012458074385,
+      "initial_variable_native_and_three_map_phase_variance": [
+        0.0025797961343054544,
+        0.0004394659575074198,
+        0.0003097450838432829,
+        0.0002831941503402644
+      ],
+      "native_fixed_background_mean_rate_Hz": 473.3300000000001,
+      "native_fixed_phase_profile_change_from_first_block_RMS": [
+        0.0,
+        0.04370492633161643,
+        0.03508515781339171,
+        0.039325719211809405,
+        0.030077060294704454
+      ]
+    },
+    {
+      "region": "sampled_coreB",
+      "targets": 20,
+      "native_fixed_background_2s_phase_variance": [
+        0.0008319789824291471,
+        0.0005437365264712378,
+        0.0005397366019311712,
+        0.001305630391814023,
+        0.0005391620024982528
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0005529990068003936,
+      "initial_variable_native_and_three_map_phase_variance": [
+        0.0007801162415703552,
+        0.0006052433388336761,
+        0.0004794545230117334,
+        0.0004853186811747606
+      ],
+      "native_fixed_background_mean_rate_Hz": 475.1450000000001,
+      "native_fixed_phase_profile_change_from_first_block_RMS": [
+        0.0,
+        0.026038416756429223,
+        0.02029298385256779,
+        0.02769556474641008,
+        0.014896421954374977
+      ]
+    },
+    {
+      "region": "sampled_I",
+      "targets": 20,
+      "native_fixed_background_2s_phase_variance": [
+        2.058246808301593e-05,
+        2.0013858255457683e-05,
+        3.17518974323032e-05,
+        2.4304970962620893e-05,
+        2.14942874376781e-05
+      ],
+      "native_fixed_background_10s_phase_variance": 1.0526655146548549e-05,
+      "initial_variable_native_and_three_map_phase_variance": [
+        2.9177216404980634e-05,
+        6.862363752590079e-06,
+        3.1641446581691744e-06,
+        2.368939673799537e-06
+      ],
+      "native_fixed_background_mean_rate_Hz": 165.38,
+      "native_fixed_phase_profile_change_from_first_block_RMS": [
+        0.0,
+        0.004758066806136292,
+        0.006158854133945624,
+        0.004967521119324657,
+        0.0053009073552838055
+      ]
+    }
+  ],
+  "scope": "80stratifiedrastercells are not the40000cellnetwork or independentseeds. Nativephase probabilities use onepath; mapoutputs average64 numericalreplicas. Withinpathpersistence can expose finitewindow/phase-drift effects but is not an ensemble equivalence or formalstabilitytest.",
+  "producer_sha256": "00956d140552bbcd746b5e3425afa894006625f6ad36e594fed475b04d6bd1e5"
+}

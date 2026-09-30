@@ -1,0 +1,135 @@
+{
+  "status": "PASS",
+  "grid": 40,
+  "groups": 3479,
+  "rows": [
+    {
+      "native_Z_time_ms": 9000,
+      "D": 0.2164660210396102,
+      "probe_rate_per_ms": 0.0002,
+      "stationary_readout_max_error_per_ms": 1.734723475976807e-18,
+      "covariance_DC_error": 2.6867397195928788e-14,
+      "implicit_flux_error_per_ms": 1.214306433183765e-17,
+      "jacobian_directions": [
+        {
+          "direction": 0,
+          "h": 0.0001,
+          "relative_error": 4.576596127880519e-11
+        },
+        {
+          "direction": 0,
+          "h": 5e-05,
+          "relative_error": 1.0103117799270122e-10
+        },
+        {
+          "direction": 1,
+          "h": 0.0001,
+          "relative_error": 5.633668836766996e-11
+        },
+        {
+          "direction": 1,
+          "h": 5e-05,
+          "relative_error": 1.0710781213612513e-10
+        },
+        {
+          "direction": 2,
+          "h": 0.0001,
+          "relative_error": 5.543702298129129e-11
+        },
+        {
+          "direction": 2,
+          "h": 5e-05,
+          "relative_error": 1.1707818339841613e-10
+        }
+      ]
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "D": 0.22884476056519176,
+      "probe_rate_per_ms": 0.02,
+      "stationary_readout_max_error_per_ms": 5.551115123125783e-17,
+      "covariance_DC_error": 2.6867397195928788e-14,
+      "implicit_flux_error_per_ms": 1.3877787807814457e-16,
+      "jacobian_directions": [
+        {
+          "direction": 0,
+          "h": 0.0001,
+          "relative_error": 2.8909784368619646e-09
+        },
+        {
+          "direction": 0,
+          "h": 5e-05,
+          "relative_error": 7.272808095145332e-10
+        },
+        {
+          "direction": 1,
+          "h": 0.0001,
+          "relative_error": 2.4154328435681156e-09
+        },
+        {
+          "direction": 1,
+          "h": 5e-05,
+          "relative_error": 6.099435482459692e-10
+        },
+        {
+          "direction": 2,
+          "h": 0.0001,
+          "relative_error": 2.609047506432662e-09
+        },
+        {
+          "direction": 2,
+          "h": 5e-05,
+          "relative_error": 6.5600308181468e-10
+        }
+      ]
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "D": 0.25634442534475455,
+      "probe_rate_per_ms": 0.2,
+      "stationary_readout_max_error_per_ms": 1.1102230246251565e-16,
+      "covariance_DC_error": 2.6867397195928788e-14,
+      "implicit_flux_error_per_ms": 9.992007221626409e-16,
+      "jacobian_directions": [
+        {
+          "direction": 0,
+          "h": 0.0001,
+          "relative_error": 1.0537597286206076e-09
+        },
+        {
+          "direction": 0,
+          "h": 5e-05,
+          "relative_error": 2.834874932778117e-10
+        },
+        {
+          "direction": 1,
+          "h": 0.0001,
+          "relative_error": 3.695002778319976e-09
+        },
+        {
+          "direction": 1,
+          "h": 5e-05,
+          "relative_error": 9.270546855557748e-10
+        },
+        {
+          "direction": 2,
+          "h": 0.0001,
+          "relative_error": 3.413229752231015e-09
+        },
+        {
+          "direction": 2,
+          "h": 5e-05,
+          "relative_error": 8.627795792474917e-10
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/audit_current_rate_equilibrium.py": "c899843119f661ecdb22a69726d33f0b6bc553cc90f0f5cf3d91ad495557b911",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/current_rate_equilibrium.py": "1bc082394ad47234c0df407db4e619799bdf4be6ed5e5b7e1812b9ac19b642d9"
+  },
+  "object": "Current conditioned39 deterministic full-diffusion expected-rate static equations; M at its rate-dependent equilibrium, prescribed full Z field and constant original mean external input.",
+  "limits": "Probes are not equilibria. Static Jacobian is not the temporal generator. No stability or bifurcation assignment and no local/native acceptance waiver.",
+  "root_searches": 0,
+  "model_promoted": false
+}

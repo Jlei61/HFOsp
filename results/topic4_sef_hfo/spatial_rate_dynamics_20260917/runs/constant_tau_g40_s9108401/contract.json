@@ -1,0 +1,25 @@
+{
+  "model": "Continuous spatial rate DDE, exponentially integrated at native0.1ms",
+  "grid": 40,
+  "populations": 3479,
+  "continuous_states": 27832,
+  "particle_count": 0,
+  "J_EE_core": 1.0,
+  "seed": 9108401,
+  "duration_ms": 8000,
+  "tau_rate_ms": {
+    "E": 5.0,
+    "I": 5.0
+  },
+  "frozen_z_ms": null,
+  "constant_input": false,
+  "slow_scope": "Original Z/M rules during correspondence; Z clamped to an interictal field for autonomous fast-system analysis when specified",
+  "no_native_future_activity_forcing": true,
+  "transfer_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/spatial_rate_dynamics_20260917/transfer",
+  "continuation_api": [
+    "model.RateSystem.equilibrium_residual",
+    "model.RateSystem.rhs",
+    "model.RateSystem.jvp",
+    "model.RateSystem.characteristic"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "model_id": "SPATIAL_RATE_INTERICTAL",
+  "checkout": "/home/honglab/leijiaxin/HFOsp/.worktrees/main-cherry",
+  "spatial_cells": 400,
+  "populations": 935,
+  "local_states": 8415,
+  "equilibrium_checks": 25,
+  "maximum_rhs_residual": 1.9818397443971398e-10,
+  "tangent": [
+    {
+      "core": "A",
+      "J_EE_core": 0.938026348558721,
+      "relative_error": 6.732592469293119e-10
+    },
+    {
+      "core": "B",
+      "J_EE_core": 0.9457572588319144,
+      "relative_error": 7.744472690729315e-10
+    }
+  ],
+  "external_artifacts_used": false,
+  "scope": "Saved equilibria and two Hopf tangent states only; no new periodic or native-equivalence certification."
+}

@@ -1,0 +1,76 @@
+{
+  "status": "VALIDATED_PD",
+  "label": "PD1",
+  "internal_label": "PD_double_low",
+  "J_EE_core": 0.9387254732490684,
+  "T_ms": 825.3654037556493,
+  "N": 2048,
+  "mesh_J_difference": 5.101405031737727e-08,
+  "lower_mesh_N": 1536,
+  "antiperiodic_relative_residual": 2.5536915953083934e-10,
+  "crossing_border_slope": 34.623247876173075,
+  "monodromy_checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PD_double_low_eval_J0.93872542224_N1536_dt0.05.json",
+      "J_EE_core": 0.9387254222350181,
+      "dt_ms": 0.049997984435047715,
+      "multiplier": [
+        -1.0008539335044164,
+        0.0
+      ],
+      "distance_from_minus_one": 0.0008539335044164265,
+      "phase_multiplier_error": 0.0004043800526367658
+    }
+  ],
+  "E_rate_mode_energy_A_B_surround": [
+    0.05486601051061736,
+    0.0415456413613148,
+    0.9035883481280679
+  ],
+  "criticality": "SUBCRITICAL_PD",
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mean_squared_mode_relative_to_network": [
+    2.328530950052726,
+    1.6914256024962768,
+    0.9492720663197036
+  ],
+  "meaning": "Simple antiperiodic mode and independently checked multiplier -1 on the two-burst cycle; child-branch side and stability require separate calculation",
+  "direct_monodromy_checks": [
+    {
+      "J_EE_core": 0.9387254732490684,
+      "T_ms": 825.3654037556493,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547325_N2048.npz",
+      "mode": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_mode_N2048.npz",
+      "dt_ms": 0.0499979042740277,
+      "recovered_multiplier": -1.0005663665588305,
+      "minus_one_relative_defect": 0.0005666107262709395,
+      "rayleigh_eigen_residual": 1.663238314545904e-05,
+      "phase_relative_defect": 0.0006181421560678438,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 0.9387254732490684,
+      "T_ms": 825.3654037556493,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_eval_J0.93872547325_N2048.npz",
+      "mode": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_mode_N2048.npz",
+      "dt_ms": 0.0999958085480554,
+      "recovered_multiplier": -1.002212149724588,
+      "minus_one_relative_defect": 0.00221320077902944,
+      "rayleigh_eigen_residual": 6.820032488752383e-05,
+      "phase_relative_defect": 0.0023852890919629508,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    }
+  ],
+  "minus_one_defect_coarse_to_fine_ratio": 3.906034030797965,
+  "child_branch_side": "Parent-stable side: J > J_PD",
+  "child_unstable_multiplier": [
+    1.1512718571940206,
+    0.0
+  ],
+  "child_floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/PDchild_a120.00000_N4096_dt0.05.json",
+  "child_mesh_J_shift_difference": 1.9610681412096653e-08
+}

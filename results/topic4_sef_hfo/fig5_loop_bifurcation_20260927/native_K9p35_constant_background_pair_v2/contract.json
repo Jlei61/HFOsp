@@ -1,0 +1,28 @@
+{
+  "status": "REGISTERED_BEFORE_MATCHED_BACKGROUND_CONTROL",
+  "created_epoch": 1790557489.6232278,
+  "question": "Does replacing the native time-varying external expected drive with the same constant per-cell mean used by the spectral model change the two conditional spatial states or the G activation segment?",
+  "design": "Exactly two10s native continuations from complete asymmetric42s and high-history72s states at identical held spatialZ/K. Keep all endogenous states, original network and nativeG/M dynamics. Before every external Poisson draw, replace the actual per-cell nu vector by the fixed source-observer42-44s mean already used in the spectral pilot. Original OU bookkeeping continues but cannot change the overridden rate.",
+  "intervention": "The input callback deliberately MUTATES the rate vector before rng.poisson; it is not a read-only observer. Original source files and neuronal dynamics are untouched. Original input logger runs after this override and records the actual used rate.",
+  "pairing": "The two starting native RNG states and scalar xi are identical; both receive identical fixednu on every0.1ms step. The native loop only draws OU-normal and externalPoisson variates after restoration, so future external count draws are paired. Different original variable-rate runs are not claimed to have matched future Poisson draws after changingnu.",
+  "readout": "Full10s plus last5s rates/core/space/G/causalR/counterfactualZK drift; first/last5s stationarity. Compare native counts with spectral candidate at the SAME fixednu. Separate effect of the background change from residual closure error.",
+  "unit": "One paired initial-noise state with two endogenous histories, not two independent seeds; finite conditional controls, not autonomous exits/recovery or attractor certification.",
+  "stop": "Two10s runs only, no horizon extension, parameter adjustment or formal bifurcation claim.",
+  "fixed_nu_sha256": "b8f3bd06644ecc90a620e84af366d7c51726a5c69ccf1cdbae98c3f0a68c6d8e",
+  "sources": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_exit_K_bracket/runs/exit_z0.21_k9.35_fields16p7_high/checkpoint.pkl",
+      "sha256": "e23265ca72727d4872c60b9687495360c6c834f8828c92e922e1ddf5acfa3580"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/runs/exit_z0.21_k9.35_fields16p7_held_K9_history/checkpoint.pkl",
+      "sha256": "e6f898b416a18b43b881a1ae83a892b630b07be1d59ec156a0e8e1e5a6551f12"
+    }
+  ],
+  "native_engine_sha256": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+  "producer_sha256": "cae675044990a3994516b39a09cac9375f202aeb791621e818afbe32b15f29b3",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false,
+  "metadata_wrapper_sha256": "cd06bab88f96d73c964250e4257dfad12d8424b0ad35b1bbd346810f8fa94f66",
+  "previous_failed_pre_run": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair"
+}

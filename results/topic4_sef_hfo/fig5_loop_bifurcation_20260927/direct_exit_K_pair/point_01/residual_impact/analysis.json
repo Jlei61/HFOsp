@@ -1,0 +1,31 @@
+{
+  "status": "COMPLETE_FROZEN_LINEAR_DIAGNOSTIC",
+  "rows": [
+    {
+      "source": "three_unresolved_groups",
+      "GMRES": {
+        "gmres_info": 0,
+        "iterations": 63,
+        "linear_max_residual_Hz": 1.1569299442071301e-09
+      },
+      "weighted_allE_forcing_Hz": 4.330449368273377e-05,
+      "predicted_allE_shift_Hz": 0.0007543065131568991,
+      "predicted_Graw_shift": 7.568236619265127e-05,
+      "maximum_source_shift_Hz": 0.08988169174545273
+    },
+    {
+      "source": "all_residual_components",
+      "GMRES": {
+        "gmres_info": 0,
+        "iterations": 62,
+        "linear_max_residual_Hz": 7.737927218420815e-08
+      },
+      "weighted_allE_forcing_Hz": -6.673716515846321e-05,
+      "predicted_allE_shift_Hz": -0.001032119672731379,
+      "predicted_Graw_shift": -0.00010355638943031065,
+      "maximum_source_shift_Hz": 0.9879065823607052
+    }
+  ],
+  "interpretation": "OldK9 local linear response only. Small global effect is not a relaxation of the registered allgroup rule, and does not certify the unresolved point. Do not interpret the solver cutoff as a fold or global termination.",
+  "formal_bifurcation_allowed": false
+}

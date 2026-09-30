@@ -1,0 +1,78 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "history": "original12s",
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "rates_Hz": [
+        98.40715625000004,
+        392.36604774535925,
+        132.06730279898247,
+        90.26198621142493
+      ],
+      "mean_Graw": 1.2588030673745421e-18,
+      "counterfactual_mean_dZ_dK_per_s": [
+        [
+          0.08063848299999993,
+          -18.698130124659492
+        ],
+        [
+          -0.03483387722099196,
+          -20.717588978054856
+        ],
+        [
+          -0.014993027474018115,
+          -20.974743334661834
+        ],
+        [
+          0.0859645672691795,
+          -18.589394407045493
+        ]
+      ],
+      "field_RMS_from_carried_density_Hz": 203.41610858096908,
+      "finite_window_state": "mixed_or_transient",
+      "tail_brief_events": 0,
+      "complete_native30s": true
+    },
+    {
+      "history": "heldK9end42s",
+      "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "rates_Hz": [
+        196.62042500000044,
+        473.15981432360684,
+        474.09821882951417,
+        182.6149015101774
+      ],
+      "mean_Graw": 1.2576656963284174e-18,
+      "counterfactual_mean_dZ_dK_per_s": [
+        [
+          0.04026349362499998,
+          -18.698130124659492
+        ],
+        [
+          -0.03483387722099196,
+          -20.717588978054856
+        ],
+        [
+          -0.03307375775391635,
+          -20.974743334661834
+        ],
+        [
+          0.044014855975679765,
+          -18.589394407045493
+        ]
+      ],
+      "field_RMS_from_carried_density_Hz": 18.588655198020405,
+      "finite_window_state": "mixed_or_transient",
+      "tail_brief_events": 0,
+      "complete_native30s": true
+    }
+  ],
+  "recorded300_future_inputs_bitwise": true,
+  "native_history_field_difference_RMS_Hz": 198.40122526595724,
+  "design": "Same heldZ/Kfield and completefutureexternalinput; entire endogenous initialhistory changes. The new condition is an immediate smallK step from heldK9, not a slowramp.",
+  "interpretation": "Finite-history state selection and spatial correspondence only; no equilibrium/stability/basin/fold certification, autonomous release, or independent-seed repetition.",
+  "producer_sha256": "60b5ed2fab71311003ef5408d70e206937cc3e50ecbfe115f297c55b0a6123a9",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

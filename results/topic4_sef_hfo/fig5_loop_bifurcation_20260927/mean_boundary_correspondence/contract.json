@@ -1,0 +1,15 @@
+{
+  "status": "REGISTERED_ONE_EXIT_UPPER_CONDITION",
+  "created_epoch": 1790572519.3111107,
+  "question": "At a nearby largerK, do native and leading-mean dynamics both lose the sustained high state and permit coreZ recovery?",
+  "motivation": "Both10s high/asymmetric histories atK9.35 correspond, and R=1 nativeidentity passes. A second parameter tests disappearance of activity, rather than merely retaining an initializedhighstate. Prior native variable-background K9.5 evidence motivates this fixed-background test but does not replace its matched control.",
+  "design": "One native10s and one64-replica10s at Kmean9.5 from the same complete72s highhistory used at9.35. Only the heldK field scales9.5/9.35; heldZ, fullinitialV/ref/synapse/M/G/pendingpulses, graph, thresholds and fixedpercellnu are unchanged. BothG/M are free. No timedquietwindow or neuralforcing.",
+  "pairing": "Native future countstream paired with completedK9.35 highreference: sameinitialrng and exactnu. Model external/mainrng likewise paired with its10sK9.35 highreference. Native andR64 model share countlaw, not individual realizedcounts.",
+  "guards": "Tail5-10s weightedspatialRMS<=10Hz; eachcoremeanrate error<=10Hz; coreZdrift error<=.01/s and same signs; both satisfy quiet allE/A/B mean<5Hz. First100ms-continuous causalR<=5 entry times must differ<=.25s. Report all guards even if failed. These are finiteconditional correspondence tests, not fold certification.",
+  "stop": "Exactly the native/model pair at9.5 for10s. Analyze after both finish; no automatic K scan or extension. If discrepancy, inspect nativecount sensitivity/replica approximation before formalbranch work.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/runs/exit_z0.21_k9.35_fields16p7_held_K9_history/checkpoint.pkl",
+  "source_sha256": "e6f898b416a18b43b881a1ae83a892b630b07be1d59ec156a0e8e1e5a6551f12",
+  "fields_sha256": "fca3b94c5ec40194680e8f43de53388d07b115c8cdc3049be9d709654d138e76",
+  "producer_sha256": "d1a39fd19cf82e2b92c6f48fba1a24f00cd652cd0d2a4c4c324fd6c3acc49820",
+  "formal_bifurcation_allowed": false
+}

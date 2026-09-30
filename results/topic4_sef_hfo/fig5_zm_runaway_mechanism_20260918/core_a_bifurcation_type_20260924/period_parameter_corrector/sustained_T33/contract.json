@@ -1,0 +1,18 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/periodic_predictors/fast_family_start/state.npz",
+  "target_period_ms": 33.0,
+  "dt_ms": 0.05,
+  "question": "Does a genuine full-state short periodic branch exist near the sustained-A state when D_A may vary as part of periodic continuation?",
+  "equations": "Unchanged3479-group spatial model, native within-Core-A Z family only; all outside-A Z native9s, all M dynamic, every individual orbit has its complete Z field held. No physical parameter other than D_A is changed.",
+  "method": "Bordered Newton-GMRES hookstep solves P(X,D_A)-X=0 and T_return(X,D_A)=target_period. Full actual variational derivative includes return time; parameter derivatives use two finite-difference steps of the actual native-A field. Exact float64 derivative caching has independent whole-state parity checks. Nonnegative bounds constrain numerical proposals only; full original residual and actual-step prediction gate each accepted update.",
+  "parameter_interval": [
+    0.3,
+    0.405
+  ],
+  "D_coordinate_weight": 100.0,
+  "period_residual_scale_ms": 1.0,
+  "maximum_iterations": 6,
+  "Krylov_per_iteration": 80,
+  "interpretation": "A converged periodic root is not a cycle-fold or onset certificate. Need continuation, nontrivial actual activity, independent phase/mesh, critical multiplier/nondegeneracy and correspondence to the observed transition.",
+  "model_promoted": false
+}

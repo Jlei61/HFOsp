@@ -1,0 +1,48 @@
+{
+  "time": "2026-09-25T07:21:16.944018+08:00",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "previous_checkpoint": "classification_checkpoint_20260925_0704.json",
+  "model": "Locked3479-group physical-delay spatial rate; onlynativeCoreA Zvaried,outsideA native9s;allZheld,allE Mdynamic.",
+  "important_counterevidence": "AtZA.701532, uninterrupted4s root and perturbed-return09 trajectories both remain self-terminating; longestcompleteA103/113ms. NumericalP negative-mode crossing not linked to onset in this window. No physical bifurcation type is promoted.",
+  "evidence": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_comparison_review.json",
+  "numerical_flip_campaign": "INTENTIONALLY_STOPPED_ONSET_LINK_NOT_SUPPORTED",
+  "new_test": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step",
+  "new_test_design": "Matched natural4s short-history, heldZA.701532 vs depletedZA.700,10s each, allotherfullstatesidentical andMdynamic.",
+  "fine_root": "native9507_fine/implicit_period_correction_refine bounded6iterations stillrunning; lastmeasuredclosure.0091300598, notroot.",
+  "jobs": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9507_fine/implicit_period_correction_refine",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3343808,
+        "iteration": 1,
+        "last_residual": 0.009130059792083731
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/held_short_field",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3486047,
+        "completed_ms": 5000
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step/depleted_entry_field",
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3486052,
+        "completed_ms": 5000
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/negative_mode_returns_small",
+      "jobs": {
+        "status": "COMPLETE",
+        "pid": 3409471,
+        "sign": 1,
+        "return_index": 13
+      }
+    }
+  ]
+}

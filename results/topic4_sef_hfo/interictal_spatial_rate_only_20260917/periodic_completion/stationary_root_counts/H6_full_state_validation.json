@@ -1,0 +1,87 @@
+{
+  "label": "H6",
+  "status": "VALIDATED_IMAGINARY_PAIR_CROSSING",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stationary_root_counts/H6_highorder_half.npz",
+  "J_EE_core": 1.02928611228195,
+  "frequency_hz": 7.552814827182412,
+  "gain_step_halving_parameter_difference": 2.7977620220553945e-14,
+  "gain_step_halving_frequency_difference_hz": 1.0933476346508542e-11,
+  "full_rhs_checks": [
+    {
+      "epsilon": 0.02,
+      "relative_full_rhs_error": 1.4436158818163699e-05
+    },
+    {
+      "epsilon": 0.01,
+      "relative_full_rhs_error": 3.6090624679058698e-06
+    },
+    {
+      "epsilon": 0.005,
+      "relative_full_rhs_error": 9.022837618434317e-07
+    },
+    {
+      "epsilon": 0.0025,
+      "relative_full_rhs_error": 2.2558975316978701e-07
+    },
+    {
+      "epsilon": 0.00125,
+      "relative_full_rhs_error": 5.641507394190589e-08
+    },
+    {
+      "epsilon": 0.000625,
+      "relative_full_rhs_error": 1.4131394174839208e-08
+    }
+  ],
+  "full_DDE_mode_checks": [
+    {
+      "dt_ms": 0.0999252594431239,
+      "period_ms": 132.40096876213917,
+      "relative_full_DDE_mode_error": 0.29240180936867755
+    },
+    {
+      "dt_ms": 0.04998149066143419,
+      "period_ms": 132.40096876213917,
+      "relative_full_DDE_mode_error": 0.07163724651074871
+    },
+    {
+      "dt_ms": 0.024995463236197692,
+      "period_ms": 132.40096876213917,
+      "relative_full_DDE_mode_error": 0.017699212742558014
+    }
+  ],
+  "time_step_error_reductions": [
+    4.081700841542039,
+    4.047482085940236
+  ],
+  "quarter_period_mode_checks": [
+    {
+      "dt_ms": 0.09969952467028552,
+      "horizon_ms": 33.10024219053479,
+      "relative_full_DDE_mode_error": 1.3725943853957385e-05
+    },
+    {
+      "dt_ms": 0.04992495051362714,
+      "horizon_ms": 33.10024219053479,
+      "relative_full_DDE_mode_error": 3.410951037318403e-06
+    },
+    {
+      "dt_ms": 0.024981314860780975,
+      "horizon_ms": 33.10024219053479,
+      "relative_full_DDE_mode_error": 8.489826303779875e-07
+    }
+  ],
+  "equilibrium_rhs_residual": 1.9829319706715824e-16,
+  "transversality": {
+    "coordinate": "Core-B neuron-weighted E equilibrium rate, Hz",
+    "real_exponent_derivative_per_ms_per_Hz": 0.027647169752754462,
+    "J_derivative_per_Hz": 0.005405586752660341,
+    "real_exponent_derivative_per_ms_per_J": 5.1145548148215365,
+    "coordinate_step_Hz": 0.0001,
+    "real_exponents": [
+      -2.7634937241556626e-06,
+      2.7659402263952303e-06
+    ]
+  },
+  "criticality": "NOT_YET_VALIDATED",
+  "scope": "A complex eigenpair crosses on an already unstable equilibrium branch. This alone does not establish a stable emerging cycle or first resting instability."
+}

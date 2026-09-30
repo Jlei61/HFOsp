@@ -1,0 +1,42 @@
+{
+  "device": 1,
+  "initial_identity_except_A_Z": {
+    "syn": true,
+    "local": true,
+    "history": true,
+    "clock": true,
+    "rate": true,
+    "physical": true,
+    "emitted": true,
+    "accumulator": true,
+    "output": true,
+    "arrivals": true,
+    "parameters": true
+  },
+  "replay_bitwise": true,
+  "max_output_difference": 0.0,
+  "expected_emitted_bitwise": true,
+  "finite": true,
+  "full_terminal_bitwise": {
+    "syn": true,
+    "local": true,
+    "history": true,
+    "clock": true,
+    "rate": true,
+    "physical": true,
+    "emitted": true,
+    "accumulator": true,
+    "output": true,
+    "arrivals": true,
+    "parameters": true
+  },
+  "Z_held": true,
+  "prior_failure": "The first ordinary device1 check failed without saving numerical differences. Its log and subsequent diagnostic files are retained; its cause is not established by a later pass.",
+  "status": "PASS",
+  "only_core_A_Z_changed": true,
+  "full_initial_state_bitwise_except_core_A_Z": true,
+  "constant_mean_external": true,
+  "count_innovations_disabled": true,
+  "private_Q_retained": true,
+  "M_dynamic": true
+}

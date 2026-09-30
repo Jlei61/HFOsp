@@ -1,0 +1,99 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "coarse",
+  "coordinates": {
+    "D_A": 0.3431576412548057,
+    "Z_A": 0.6568423587451944,
+    "D_global": 0.21852623041452024,
+    "native_time_ms": 9913.085481004982
+  },
+  "window_ms": [
+    5000.0,
+    10000.0
+  ],
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_rate_hz": 52.29631700819221,
+      "quiet_fraction": 0.0464,
+      "duty_above50": 0.5522,
+      "range_10ms_hz": [
+        0.012036557451055386,
+        167.88248470591458
+      ],
+      "complete_local_episodes": 1,
+      "episode_durations_ms": [
+        105
+      ]
+    },
+    {
+      "region": "Core A",
+      "mean_rate_hz": 371.7935894353976,
+      "quiet_fraction": 0.0548,
+      "duty_above50": 0.942,
+      "range_10ms_hz": [
+        2.182093345921464e-05,
+        475.1946602859296
+      ],
+      "complete_local_episodes": 1,
+      "episode_durations_ms": [
+        56
+      ]
+    },
+    {
+      "region": "Core B",
+      "mean_rate_hz": 116.49962864807837,
+      "quiet_fraction": 0.41,
+      "duty_above50": 0.475,
+      "range_10ms_hz": [
+        1.861750851658375e-05,
+        474.63316606516736
+      ],
+      "complete_local_episodes": 25,
+      "episode_durations_ms": [
+        97,
+        104,
+        49,
+        48,
+        255,
+        44,
+        105,
+        290,
+        44,
+        37,
+        36,
+        47,
+        57,
+        31,
+        23,
+        42,
+        296,
+        41,
+        352,
+        45,
+        21,
+        50,
+        340,
+        16,
+        47
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_rate_hz": 42.73082960310149,
+      "quiet_fraction": 0.0476,
+      "duty_above50": 0.3922,
+      "range_10ms_hz": [
+        0.012639809432219411,
+        154.1951944849952
+      ],
+      "complete_local_episodes": 1,
+      "episode_durations_ms": [
+        102
+      ]
+    }
+  ],
+  "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+  "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,49 @@
+{
+  "status": "UNRESOLVED",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0039_N64.npz",
+  "checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0039_N64_nearunit_dt0.05.json",
+      "dt_ms": 0.04999890330975088,
+      "mu": [
+        1.0002400551663468,
+        0.004579793174293778
+      ],
+      "modulus": 1.0002505398472403,
+      "eigen_residual": 8.067157950122721e-15,
+      "phase_defect": 1.5143198703800825e-06,
+      "neutral_index": 2
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0039_N64_nearunit_dt0.025.json",
+      "dt_ms": 0.02499945165487544,
+      "mu": [
+        1.0002450943273309,
+        0.004588446274469639
+      ],
+      "modulus": 1.000255618612115,
+      "eigen_residual": 1.5265749084980754e-14,
+      "phase_defect": 3.791897928298117e-07,
+      "neutral_index": 2
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0039_N64_nearunit_dt0.0125.json",
+      "dt_ms": 0.01249972582743772,
+      "mu": [
+        1.000246357292422,
+        0.004590605766207551
+      ],
+      "modulus": 1.000256891472416,
+      "eigen_residual": 1.2128799958550704e-14,
+      "phase_defect": 9.631850040638195e-08,
+      "neutral_index": 2
+    }
+  ],
+  "successive_complex_multiplier_changes": [
+    1.001345525164038e-05,
+    2.501696501903474e-06
+  ],
+  "refinement_ratio": 4.002665888536603,
+  "measured_margin": 1.0006786007613897e-05,
+  "scope": "A conjugate pair outside the unit circle after three time steps establishes instability at this sampled orbit. No new bifurcation or full unstable dimension is inferred."
+}

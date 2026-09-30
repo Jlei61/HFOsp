@@ -1,0 +1,15 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_D0334_positive_cubic",
+  "dt_ms": 0.05,
+  "orders": [
+    2,
+    4,
+    6,
+    8
+  ],
+  "question": "Is the previously failed autonomous neutral-mode test limited by its second-order estimate of the phase velocity?",
+  "unchanged": "Same complete closed numerical root, same fixed-time actual variational flow, all Z held, all M dynamic, same1e-3 neutral residual gate. No physical equation, waveform, period or mesh changes.",
+  "method": "Forward derivative coefficients w_j=(-1)^(j+1)binomial(n,j)/j applied to actual state differences X(j*dt)-X(0), divided bydt. Full-coordinate original monodromy applied independently to each resulting direction.",
+  "scope": "Numerical diagnostic of phase differentiation only. Convergence of this check cannot replace independent shifted-orbit/mesh validation or certify a Floquet crossing.",
+  "model_promoted": false
+}

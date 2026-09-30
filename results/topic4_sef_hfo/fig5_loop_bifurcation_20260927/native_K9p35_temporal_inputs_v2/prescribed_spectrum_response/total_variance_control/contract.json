@@ -1,0 +1,8 @@
+{
+  "status": "REGISTERED_BEFORE_VARIANCE_CONTROL",
+  "question": "Does remaining improvement with a full netcurrent spectrum come only from its different totalvariance (including EIcovariance), or require spectralshape?",
+  "design": "Same six spectralassay targets, same originalthresholds/mean/M/Z/K. Retain earlier independentAMPA/GABA filtershapes but scale both channelvariances by the one analyticallydetermined ratio needed to equal observedNETcurrentvariance, including EIcovariance. This is a prescribedvariance diagnostic, never a fitted autonomousnoise gain.1024replicas,16sphaseawarecounts,seed929501.",
+  "limits": "Comparison isolates spectralshape versus totalvariance only within Gaussian prescribedinput assays; finite2snativewindow andperiodic spectrum remain. Not coupledvalidation.",
+  "producer_sha256": "c6b731bac8d3a14b0dce503e5b398c1a1bb19338644b7c8841532deef092c6e8",
+  "formal_bifurcation_allowed": false
+}

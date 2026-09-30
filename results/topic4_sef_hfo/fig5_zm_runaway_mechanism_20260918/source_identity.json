@@ -1,0 +1,277 @@
+{
+  "created": "2026-09-18T23:33:40.439292+08:00",
+  "model": "v3 same network, frozen existing MC transfer and response closure; no retuning",
+  "common_snapshot_only_change": "absolute project root",
+  "files": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/a4_acceptance.py",
+      "source_sha256": "cf6e217259a2badbfe3b165a046f04490eee96a2802d530fba783749bc4c28b7",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/a4_acceptance.py",
+      "snapshot_sha256": "cf6e217259a2badbfe3b165a046f04490eee96a2802d530fba783749bc4c28b7"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/branch_coverage_v3.py",
+      "source_sha256": "2bc6b0e0764bf3574afccd9e5c336418cfbe6df675a9caa077da1b4320100425",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/branch_coverage_v3.py",
+      "snapshot_sha256": "2bc6b0e0764bf3574afccd9e5c336418cfbe6df675a9caa077da1b4320100425"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/branch_stability_v3.py",
+      "source_sha256": "09ccdb9c05917cd369911b9a074245e8d63916e1f1fafcf98b39b5e1b02be7aa",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/branch_stability_v3.py",
+      "snapshot_sha256": "09ccdb9c05917cd369911b9a074245e8d63916e1f1fafcf98b39b5e1b02be7aa"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/build_dynamic_assay.py",
+      "source_sha256": "7f7a55b75ae8df95444b42a9c937cf5c03e9b20be401afe425c979a3345dc552",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/build_dynamic_assay.py",
+      "snapshot_sha256": "7f7a55b75ae8df95444b42a9c937cf5c03e9b20be401afe425c979a3345dc552"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/build_transfer_table.py",
+      "source_sha256": "c739f5d9c52030d7a5bfce2c8aa726a91fa19831f53c1f8baffcec49f35cda3c",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/build_transfer_table.py",
+      "snapshot_sha256": "c739f5d9c52030d7a5bfce2c8aa726a91fa19831f53c1f8baffcec49f35cda3c"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/common_v3.py",
+      "source_sha256": "74ba9e35d3dc780fc89ecba55fb3d33ecca3f5586ccf15ea4a28650ec980ea60",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/common_v3.py",
+      "snapshot_sha256": "398799de2b2b115cc01056feacb826f2694876caa4032b86c8f2ea1e0442c094"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/compare_native_rate.py",
+      "source_sha256": "a24df0d37eee396eacae83bf9413ce1ae10eba423534ac849a747a4303134def",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/compare_native_rate.py",
+      "snapshot_sha256": "a24df0d37eee396eacae83bf9413ce1ae10eba423534ac849a747a4303134def"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/continue_from_cycle_v3.py",
+      "source_sha256": "ee227dc1025c01dcc37df638325d207cf21b44c4686db8f4fbfe8fe837714a17",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/continue_from_cycle_v3.py",
+      "snapshot_sha256": "ee227dc1025c01dcc37df638325d207cf21b44c4686db8f4fbfe8fe837714a17"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/continue_periodic_v3.py",
+      "source_sha256": "644d72a75a9ee339b3d1ae11b3bb8280f993b6babc436cda2d2a8fbee7642aaa",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/continue_periodic_v3.py",
+      "snapshot_sha256": "644d72a75a9ee339b3d1ae11b3bb8280f993b6babc436cda2d2a8fbee7642aaa"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/cycle_floquet_driver.py",
+      "source_sha256": "6b83f84fe78e92e7a2a7837dfaee8e183b2a80ab53691754ddb50377ebdc29db",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/cycle_floquet_driver.py",
+      "snapshot_sha256": "6b83f84fe78e92e7a2a7837dfaee8e183b2a80ab53691754ddb50377ebdc29db"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/cycle_fold_driver.py",
+      "source_sha256": "eb08424b8ae1f3074969b3f777bb952f7f92ad2d2a49b795838863471e935a8e",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/cycle_fold_driver.py",
+      "snapshot_sha256": "eb08424b8ae1f3074969b3f777bb952f7f92ad2d2a49b795838863471e935a8e"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/cycle_fold_v3.py",
+      "source_sha256": "dd29a4b4570339b20022558ac116a5e7ebff970c3ae34d21328c082d88b70eb2",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/cycle_fold_v3.py",
+      "snapshot_sha256": "dd29a4b4570339b20022558ac116a5e7ebff970c3ae34d21328c082d88b70eb2"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/diagnose_native_closures.py",
+      "source_sha256": "805e64010d498f5c4d8c25d9c81354550e48666164268c096a0208637c65bb4f",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/diagnose_native_closures.py",
+      "snapshot_sha256": "805e64010d498f5c4d8c25d9c81354550e48666164268c096a0208637c65bb4f"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/diagnose_static_closures.py",
+      "source_sha256": "040b3642c4c4abe642a2ee7036e50ceb03bdcb3c3f8467e7a384e308c923e1a6",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/diagnose_static_closures.py",
+      "snapshot_sha256": "040b3642c4c4abe642a2ee7036e50ceb03bdcb3c3f8467e7a384e308c923e1a6"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/dynamics_v3.py",
+      "source_sha256": "e82df7ecfc77dc6a5dadfd81f63ad0c43fad4f300da9ca302cd6fbf4fed39523",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/dynamics_v3.py",
+      "snapshot_sha256": "e82df7ecfc77dc6a5dadfd81f63ad0c43fad4f300da9ca302cd6fbf4fed39523"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/equilibria_v3.py",
+      "source_sha256": "db718eefe2c16c0e67fef16583a3ecd0337db7da02ed5dca9def61553aa6d4ca",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/equilibria_v3.py",
+      "snapshot_sha256": "db718eefe2c16c0e67fef16583a3ecd0337db7da02ed5dca9def61553aa6d4ca"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/extract_native_drive.py",
+      "source_sha256": "a10a3dcbb963b13d556021a7d35c828657f48780665f40242074fe07eb4edffd",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/extract_native_drive.py",
+      "snapshot_sha256": "a10a3dcbb963b13d556021a7d35c828657f48780665f40242074fe07eb4edffd"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/fit_response_closure.py",
+      "source_sha256": "c2a18d2c6954fa13357992484517d2a78052e4624038de04cc5c656a928615c9",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/fit_response_closure.py",
+      "snapshot_sha256": "c2a18d2c6954fa13357992484517d2a78052e4624038de04cc5c656a928615c9"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/fit_response_closure_B.py",
+      "source_sha256": "b027a8424c132a4559e6fba0e31210e86e9e12ba1621bb3d5f7ce62aad3ac37a",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/fit_response_closure_B.py",
+      "snapshot_sha256": "b027a8424c132a4559e6fba0e31210e86e9e12ba1621bb3d5f7ce62aad3ac37a"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/floquet_v3.py",
+      "source_sha256": "c7b56ef2db56d905d254acaa836859723a5d8cf7bc44af147e5fa2dafc4d6ab2",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/floquet_v3.py",
+      "snapshot_sha256": "c7b56ef2db56d905d254acaa836859723a5d8cf7bc44af147e5fa2dafc4d6ab2"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/g40_seed_middle.py",
+      "source_sha256": "0cb7217db17abe4c38647a6484ccc42dfcf0017523c945b2a51ccb181958b3cf",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/g40_seed_middle.py",
+      "snapshot_sha256": "0cb7217db17abe4c38647a6484ccc42dfcf0017523c945b2a51ccb181958b3cf"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/hopf_v3.py",
+      "source_sha256": "778ad2dcb907cb5a9daf84cbaada6c427a22b90aac21cddc12af42f747189c43",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/hopf_v3.py",
+      "snapshot_sha256": "778ad2dcb907cb5a9daf84cbaada6c427a22b90aac21cddc12af42f747189c43"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/lif_mc.py",
+      "source_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/lif_mc.py",
+      "snapshot_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/model_v3.py",
+      "source_sha256": "1a977cd7b911b26f7b908f442c6c2de8e758df6764390c0e3060bb49f84609d4",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/model_v3.py",
+      "snapshot_sha256": "1a977cd7b911b26f7b908f442c6c2de8e758df6764390c0e3060bb49f84609d4"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/native_readouts.py",
+      "source_sha256": "a03c566cd67ea47a31c30a1c59d454e2fdb82975343d678e56ef7b21f606987e",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/native_readouts.py",
+      "snapshot_sha256": "a03c566cd67ea47a31c30a1c59d454e2fdb82975343d678e56ef7b21f606987e"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/periodic_v3.py",
+      "source_sha256": "718ae7b89fbd82f928053263ca39223731d6a07ab63f5dcb25f6cd5f7ef36ea7",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/periodic_v3.py",
+      "snapshot_sha256": "718ae7b89fbd82f928053263ca39223731d6a07ab63f5dcb25f6cd5f7ef36ea7"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/plot_bifurcation_v3.py",
+      "source_sha256": "cae6065868f76a358e29c1edd129aca27568b517ad55fd2f5c998918aaa762ec",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/plot_bifurcation_v3.py",
+      "snapshot_sha256": "cae6065868f76a358e29c1edd129aca27568b517ad55fd2f5c998918aaa762ec"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/post_transition_diagnosis.py",
+      "source_sha256": "9d0a4409b379dfc575b285492eb08a966f7a9f5d928bc19a5e60be61a68b2b91",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/post_transition_diagnosis.py",
+      "snapshot_sha256": "9d0a4409b379dfc575b285492eb08a966f7a9f5d928bc19a5e60be61a68b2b91"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/project_native_states.py",
+      "source_sha256": "121a7e4bb3b391f54e147627922de2a9df2de91ed47adfc7ba2342f69f6a16b3",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/project_native_states.py",
+      "snapshot_sha256": "121a7e4bb3b391f54e147627922de2a9df2de91ed47adfc7ba2342f69f6a16b3"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/refine_low_rate_table.py",
+      "source_sha256": "fc7a962ea1763989011436bab8ffa8904ebeb32de12c510d766fd758196ebdd5",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/refine_low_rate_table.py",
+      "snapshot_sha256": "fc7a962ea1763989011436bab8ffa8904ebeb32de12c510d766fd758196ebdd5"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/refit_variance_v3.py",
+      "source_sha256": "c08d3f193e653bf64fae3186c2461007d8d1431076c33d331e301b03fc24f9cb",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/refit_variance_v3.py",
+      "snapshot_sha256": "c08d3f193e653bf64fae3186c2461007d8d1431076c33d331e301b03fc24f9cb"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/refit_variance_variants.py",
+      "source_sha256": "1f3a798f68e1b78907542261731ad2b0b8b91d0b9ad90affae3b20ee2ece3a4d",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/refit_variance_variants.py",
+      "snapshot_sha256": "1f3a798f68e1b78907542261731ad2b0b8b91d0b9ad90affae3b20ee2ece3a4d"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/response_tables.py",
+      "source_sha256": "25860538f5f49555f8bd1ed01a5a8778bd77bda590712609fc8550da78bd6c64",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/response_tables.py",
+      "snapshot_sha256": "25860538f5f49555f8bd1ed01a5a8778bd77bda590712609fc8550da78bd6c64"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/root_count_v3.py",
+      "source_sha256": "48c6ae7f7de7f019056d73fba330850b2448c87b748e67e13839cf0a2ca18572",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/root_count_v3.py",
+      "snapshot_sha256": "48c6ae7f7de7f019056d73fba330850b2448c87b748e67e13839cf0a2ca18572"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/run_network.py",
+      "source_sha256": "2131deca192613acbeecc1d6d4e217c86ea8f3868a83cb06c594568f1af5e1db",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/run_network.py",
+      "snapshot_sha256": "2131deca192613acbeecc1d6d4e217c86ea8f3868a83cb06c594568f1af5e1db"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/stage_b_entry.py",
+      "source_sha256": "cfbca2f005da44be7e8b03c9f2c64a191703f76ffffe93862ce0d6508895b9fc",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/stage_b_entry.py",
+      "snapshot_sha256": "cfbca2f005da44be7e8b03c9f2c64a191703f76ffffe93862ce0d6508895b9fc"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/stage_b_summary.py",
+      "source_sha256": "c249d85ad6198e0f5dd943cb1f0b585446d4f657377ad58278907aed65484ab5",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/stage_b_summary.py",
+      "snapshot_sha256": "c249d85ad6198e0f5dd943cb1f0b585446d4f657377ad58278907aed65484ab5"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/timescale_comparison.py",
+      "source_sha256": "8a253c2f782ca22cbcb8b9cb7eb3338afcb314384f29dc80370153928e2e9a2e",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/timescale_comparison.py",
+      "snapshot_sha256": "8a253c2f782ca22cbcb8b9cb7eb3338afcb314384f29dc80370153928e2e9a2e"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/transfer_spline.py",
+      "source_sha256": "9d65589f07874df2ef4fbb94ea9e5739999e63da08fa89379de70e086a94ff10",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/transfer_spline.py",
+      "snapshot_sha256": "9d65589f07874df2ef4fbb94ea9e5739999e63da08fa89379de70e086a94ff10"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/validate_dynamic_closure.py",
+      "source_sha256": "7931d5589f7fab342691c1e120ef1c2fd3ab17243f160e9fee584d2b54df6bf2",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/validate_dynamic_closure.py",
+      "snapshot_sha256": "7931d5589f7fab342691c1e120ef1c2fd3ab17243f160e9fee584d2b54df6bf2"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_onset_rate_v3/validate_transfer_table.py",
+      "source_sha256": "562056a0ee68dabd1b2df3f2fabdfe32e588936ba3971cc42069623a02226e4f",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/validate_transfer_table.py",
+      "snapshot_sha256": "562056a0ee68dabd1b2df3f2fabdfe32e588936ba3971cc42069623a02226e4f"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/transfer_table/table_E.npz",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/transfer_table/table_E.npz",
+      "source_sha256": "cfec899a120d678dc5cfc1ad7dc2a2b203484bf542d59370753b412d3a4b72b5",
+      "snapshot_sha256": "cfec899a120d678dc5cfc1ad7dc2a2b203484bf542d59370753b412d3a4b72b5"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/transfer_table/table_I.npz",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/transfer_table/table_I.npz",
+      "source_sha256": "bf3e265954b07f0fa603352fa55f55ccf444518b9d288b3481a21a2c9faedf15",
+      "snapshot_sha256": "bf3e265954b07f0fa603352fa55f55ccf444518b9d288b3481a21a2c9faedf15"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure.json",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/response_closure/closure.json",
+      "source_sha256": "05d41c9732b723d8aa88a6acf55a168b51f3dac497b588c04dcd7075906b50bc",
+      "snapshot_sha256": "05d41c9732b723d8aa88a6acf55a168b51f3dac497b588c04dcd7075906b50bc"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/response_closure/closure.npz",
+      "snapshot": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/response_closure/closure.npz",
+      "source_sha256": "09c8939789cd2a94589625bf1205c688084053ee1f8adb985eb8875b1970292d",
+      "snapshot_sha256": "09c8939789cd2a94589625bf1205c688084053ee1f8adb985eb8875b1970292d"
+    }
+  ]
+}

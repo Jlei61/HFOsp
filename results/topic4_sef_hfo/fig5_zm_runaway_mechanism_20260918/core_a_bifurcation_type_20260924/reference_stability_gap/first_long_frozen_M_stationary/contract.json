@@ -1,0 +1,11 @@
+{
+  "created_local": "2026-09-25T00:31:33.745318+08:00",
+  "question": "Does the first long activity have a stationary fast-network counterpart at its actual5s spatial M, which could nominate a slow-M-controlled fast branch for the matched termination intervention?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0300/from_interictal_history/checkpoint5000.npz",
+  "changed_only": "Explicit fast-subsystem diagnostic: hold every M at its actual5s value. Same held original Z and full3479group physical network. No response fit, scalar M replacement or isolated-core model.",
+  "equation": "r=Phi(mu(r)-m_5s,ve(r),vi(r)); local covariance/filter steady values are eliminated exactly. In the static and temporal gain remove the dynamic-M feedback .5E/(1+1000lambda), because M is prescribed. This is not the full-system stationary law M=.5Er.",
+  "seeds": "Actual instantaneous5s group rates and preceding100ms group mean. Guesses only; original residual<1e-11/ms required.",
+  "verification": "Independent centered logit-Jacobian directional differences at two step sizes, threshold2e-5, and direct original static moment comparison. Original-engine stationary replay and temporal stability required separately if root exists.",
+  "budget": "Two existing70-step Armijo/LSMR solves with stagnation stops; no automatic branch continuation. Failure is not nonexistence.",
+  "model_promoted": false
+}

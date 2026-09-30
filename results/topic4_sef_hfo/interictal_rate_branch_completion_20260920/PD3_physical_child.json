@@ -1,0 +1,67 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD3_child_followup/figure_snapshot.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_3_20260920_a60.00822_N4096.npz",
+  "criticality": "SUPERCRITICAL_PD",
+  "child_stability": "UNSTABLE",
+  "departure": [
+    {
+      "J_shift": -9.241762910505713e-11,
+      "odd_E_RMS_Hz": 0.004776978067660805,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_0_20260920_a0.20000_N4096.npz"
+    },
+    {
+      "J_shift": -5.780409484401616e-10,
+      "odd_E_RMS_Hz": 0.011942442620708161,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_1_20260920_a0.50000_N4096.npz"
+    },
+    {
+      "J_shift": -2.312396052417398e-09,
+      "odd_E_RMS_Hz": 0.023884867051770755,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_2_20260920_a1.00000_N4096.npz"
+    }
+  ],
+  "phase_shift_samples": 1969,
+  "child_stability_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD3_child_followup/physical_mode_result.json",
+  "local_scaling_J_shift_per_odd_E_RMS_squared": -4.052090043370852e-06,
+  "scaling_line_semantics": "Square-root fit to the three small checked children; not additional continuation samples or a criticality verdict. The finite profile shown in B-F may lie farther along that same child branch.",
+  "maximum_regional_half_difference_Hz": [
+    17.859214281394856,
+    0.044989018716414364,
+    0.8207868132094394
+  ],
+  "maximum_contact_half_difference_Hz": [
+    0.7121464201438645,
+    0.0284033560345385,
+    0.05860488511996023,
+    0.01953265463773321,
+    0.0029861152155304348,
+    0.024924010979419948,
+    0.04150220712087731,
+    0.0006115611119741592,
+    0.1004514950098645,
+    0.19805465250759724,
+    0.19273294390671225,
+    0.10346427914561218,
+    0.045015631026174674,
+    0.06499524693211356,
+    0.03388427761294466
+  ],
+  "contact_names": [
+    "SCL9",
+    "ICL11",
+    "SCL8",
+    "ICL10",
+    "SCL7",
+    "ICL9",
+    "ICL8",
+    "SCL6",
+    "ICL7",
+    "ICL6",
+    "ICL5",
+    "ICL4",
+    "ICL3",
+    "ICL2",
+    "ICL1"
+  ],
+  "scope": "Finite nonlinear child differences in physical Hz, not an arbitrarily normalized mode. Criticality and stability follow their separately stated evidence status; physical profile validity does not certify an attractor. Contact-weighted rate is not SEEG voltage."
+}

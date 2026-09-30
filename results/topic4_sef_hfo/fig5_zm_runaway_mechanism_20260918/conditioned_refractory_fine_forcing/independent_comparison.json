@@ -1,0 +1,353 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native",
+      "high_onset_ms": 9868.5,
+      "D_at_native_checkpoints": {
+        "10370": 0.30871178728576065,
+        "12500": 0.5401727014041959,
+        "8000": 0.20146039727098164,
+        "9000": 0.21646602103961032,
+        "9300": 0.22333473704327822,
+        "9420": 0.22884476056519154,
+        "9870": 0.2563444253447549
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 11,
+          "median_duration_ms": 96.0,
+          "iqr_duration_ms": [
+            92.0,
+            105.5
+          ],
+          "median_gap_ms": 256.0,
+          "both_cores": 9,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.72075,
+          "median_surround_cells": 274.0,
+          "forward": 1,
+          "reverse": 9,
+          "undirected": 1,
+          "median_extent_mm": 12.659633743936364
+        },
+        "4000-8000": {
+          "n": 16,
+          "median_duration_ms": 101.5,
+          "iqr_duration_ms": [
+            65.5,
+            118.0
+          ],
+          "median_gap_ms": 253.0,
+          "both_cores": 13,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.752,
+          "median_surround_cells": 287.5,
+          "forward": 8,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 8.628925496258699
+        },
+        "8000-9420": {
+          "n": 5,
+          "median_duration_ms": 162.0,
+          "iqr_duration_ms": [
+            126.0,
+            184.0
+          ],
+          "median_gap_ms": 273.5,
+          "both_cores": 5,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.9162499999999998,
+          "median_surround_cells": 351.0,
+          "forward": 3,
+          "reverse": 1,
+          "undirected": 1,
+          "median_extent_mm": 9.49418726572921
+        },
+        "1000-9420": {
+          "n": 31,
+          "median_duration_ms": 104.0,
+          "iqr_duration_ms": [
+            85.0,
+            125.0
+          ],
+          "median_gap_ms": 266.0,
+          "both_cores": 26,
+          "coreA_only": 1,
+          "coreB_only": 1,
+          "median_area": 0.7592187499999999,
+          "median_surround_cells": 290.0,
+          "forward": 13,
+          "reverse": 17,
+          "undirected": 1,
+          "median_extent_mm": 10.105750851586855
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.552,
+        "4000-8000": 0.55225,
+        "8000-9420": 0.35845070422535213,
+        "1000-9420": 0.5176959619952494
+      },
+      "tail_global_mean_hz": 448.36449990490854,
+      "tail_spatial_persistence": 0.9728124999999999,
+      "total_complete_events": 38,
+      "qa": {
+        "source": "Original seed9108401 SNN, original recorded clock."
+      }
+    },
+    {
+      "label": "recorded_drive_expected",
+      "high_onset_ms": 9120.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.31279563633718144,
+        "12500": 0.5028109591318601,
+        "8000": 0.12899847480597426,
+        "9000": 0.18765335461892074,
+        "9300": 0.21468469174950977,
+        "9420": 0.22554349129011853,
+        "9870": 0.2666151425372927
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 5,
+          "median_duration_ms": 88.0,
+          "iqr_duration_ms": [
+            88.0,
+            89.0
+          ],
+          "median_gap_ms": 196.0,
+          "both_cores": 5,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.31903124999999993,
+          "median_surround_cells": 112.0,
+          "forward": 0,
+          "reverse": 5,
+          "undirected": 0,
+          "median_extent_mm": 18.01103835433862
+        },
+        "4000-8000": {
+          "n": 17,
+          "median_duration_ms": 101.0,
+          "iqr_duration_ms": [
+            97.0,
+            102.0
+          ],
+          "median_gap_ms": 232.0,
+          "both_cores": 17,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.4617812499999999,
+          "median_surround_cells": 169.0,
+          "forward": 0,
+          "reverse": 17,
+          "undirected": 0,
+          "median_extent_mm": 17.15513557942875
+        },
+        "8000-9420": {
+          "n": 0
+        },
+        "1000-9420": {
+          "n": 27,
+          "median_duration_ms": 97.0,
+          "iqr_duration_ms": [
+            92.5,
+            101.5
+          ],
+          "median_gap_ms": 226.5,
+          "both_cores": 27,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.41315624999999995,
+          "median_surround_cells": 149.0,
+          "forward": 0,
+          "reverse": 27,
+          "undirected": 0,
+          "median_extent_mm": 17.336424225839412
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.6472,
+        "4000-8000": 0.55975,
+        "8000-9420": 0.08732394366197183,
+        "1000-9420": 0.49216152019002374
+      },
+      "tail_global_mean_hz": 355.30719412254405,
+      "tail_spatial_persistence": 0.7861874999999999,
+      "total_complete_events": 28,
+      "qa": {
+        "weighted_rate_error_hz": 1.3586658269559848e-06,
+        "D_float32_error": 1.0751542989240193e-09,
+        "Z_physical": true,
+        "M_dynamic_peak_mV": 0.23382678627967834,
+        "expected_emitted_global_mean_difference_hz": 3.2499081441891714e-10,
+        "final_tick": 250000,
+        "Z_and_M_dynamic": true,
+        "conditional_mean_roundoff": {
+          "minimum_hz": 7.277361874002963e-06,
+          "negative_values": 0,
+          "binary64_occupancy_bound_hz": 7.105427357601065e-10,
+          "raw_values_changed": false,
+          "emitted_rates_nonnegative": true
+        },
+        "emitted_refractory_bound": {
+          "E": {
+            "window_ms": 2,
+            "violations": 0,
+            "group_windows": 23560615,
+            "maximum_excess_spikes": -0.050104736328125066,
+            "fraction": 0.0
+          },
+          "I": {
+            "window_ms": 1,
+            "violations": 0,
+            "group_windows": 19925000,
+            "maximum_excess_spikes": -0.08228063964843746,
+            "fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "high_onset_ms": 10839.0,
+      "D_at_native_checkpoints": {
+        "10370": 0.17813362265465116,
+        "12500": 0.3564963941269599,
+        "8000": 0.07825631789829901,
+        "9000": 0.08811251143363974,
+        "9300": 0.10177402467466823,
+        "9420": 0.10866172630800042,
+        "9870": 0.139919870174803
+      },
+      "complete_event_windows": {
+        "500-3000": {
+          "n": 1,
+          "median_duration_ms": 52.0,
+          "iqr_duration_ms": [
+            52.0,
+            52.0
+          ],
+          "median_gap_ms": null,
+          "both_cores": 0,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.26543749999999994,
+          "median_surround_cells": 99.0,
+          "forward": 1,
+          "reverse": 0,
+          "undirected": 0,
+          "median_extent_mm": 7.588920606801165
+        },
+        "4000-8000": {
+          "n": 14,
+          "median_duration_ms": 73.5,
+          "iqr_duration_ms": [
+            52.5,
+            86.25
+          ],
+          "median_gap_ms": 227.0,
+          "both_cores": 14,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.33971874999999996,
+          "median_surround_cells": 121.0,
+          "forward": 6,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 13.150613946446075
+        },
+        "8000-9420": {
+          "n": 4,
+          "median_duration_ms": 80.0,
+          "iqr_duration_ms": [
+            76.75,
+            82.5
+          ],
+          "median_gap_ms": 230.0,
+          "both_cores": 4,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.335609375,
+          "median_surround_cells": 119.5,
+          "forward": 4,
+          "reverse": 0,
+          "undirected": 0,
+          "median_extent_mm": 14.86145679990684
+        },
+        "1000-9420": {
+          "n": 19,
+          "median_duration_ms": 74.0,
+          "iqr_duration_ms": [
+            53.0,
+            84.0
+          ],
+          "median_gap_ms": 228.5,
+          "both_cores": 18,
+          "coreA_only": 1,
+          "coreB_only": 0,
+          "median_area": 0.33215625,
+          "median_surround_cells": 118.0,
+          "forward": 11,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 14.278102028311192
+        }
+      },
+      "quiet_fraction_by_window": {
+        "500-3000": 0.8488,
+        "4000-8000": 0.71175,
+        "8000-9420": 0.44014084507042256,
+        "1000-9420": 0.6895486935866983
+      },
+      "tail_global_mean_hz": 263.0341249591747,
+      "tail_spatial_persistence": 0.5839375,
+      "total_complete_events": 19,
+      "qa": {
+        "weighted_rate_error_hz": 1.5408695617225021e-06,
+        "D_float32_error": 1.4006436011015921e-09,
+        "Z_physical": true,
+        "M_dynamic_peak_mV": 0.22966450452804565,
+        "expected_emitted_global_mean_difference_hz": 0.005388341940748396,
+        "final_tick": 250000,
+        "Z_and_M_dynamic": true,
+        "conditional_mean_roundoff": {
+          "minimum_hz": -9.486666010041778e-13,
+          "negative_values": 13,
+          "binary64_occupancy_bound_hz": 7.105427357601065e-10,
+          "raw_values_changed": false,
+          "emitted_rates_nonnegative": true
+        },
+        "emitted_refractory_bound": {
+          "E": {
+            "window_ms": 2,
+            "violations": 0,
+            "group_windows": 23560615,
+            "maximum_excess_spikes": 1.1901855430096475e-06,
+            "fraction": 0.0
+          },
+          "I": {
+            "window_ms": 1,
+            "violations": 0,
+            "group_windows": 19925000,
+            "maximum_excess_spikes": 0.0,
+            "fraction": 0.0
+          }
+        },
+        "same_actual_refractory_and_synaptic_counts": true
+      }
+    }
+  ],
+  "statistical_unit": "One native realization and the explicitly registered diagnostic trajectories. No population inference.",
+  "scope": "All Z/M dynamic, unchanged physical graph and frozen local response. Local validation remains FAIL; no accepted replacement or bifurcation claim.",
+  "completed": [
+    "recorded_drive_expected",
+    "recorded_drive_binomial_seed1"
+  ],
+  "model_promoted": false
+}

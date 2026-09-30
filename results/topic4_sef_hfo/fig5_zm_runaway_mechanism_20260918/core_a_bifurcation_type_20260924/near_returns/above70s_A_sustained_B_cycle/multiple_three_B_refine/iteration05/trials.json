@@ -1,0 +1,72 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 534.7191604860185,
+    "max_combined_relative_rms": 0.0035263444680471716,
+    "residual_ratio": 2.7421271894580506,
+    "predicted_gain": 0.6668214219962698,
+    "agreement": -9.77662280802007,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.16202405777391884,
+        "projected_step_norm": 0.16199189495529615,
+        "phase_error": 3.5388358909926865e-15
+      },
+      {
+        "projected_negative_coordinates": 5812,
+        "negative_steps_at_exact_zero": 2805,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 3670,
+        "negative_steps_at_exact_zero": 266,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 4080,
+        "negative_steps_at_exact_zero": 412,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 0.7625229752135878,
+    "step_norm": 0.762522975213752,
+    "lagrange_multiplier": 0.0015512180781918838,
+    "predicted_relative_residual": 0.5047627463799109
+  },
+  {
+    "status": "EVALUATED",
+    "period_ms": 534.6790087955636,
+    "max_combined_relative_rms": 0.0009008136245394983,
+    "residual_ratio": 0.9530905724067051,
+    "predicted_gain": 0.5860519941048525,
+    "agreement": 0.15633145473619395,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.07478239440282576,
+        "projected_step_norm": 0.07465016587145898,
+        "phase_error": 4.7878367936959876e-15
+      },
+      {
+        "projected_negative_coordinates": 2884,
+        "negative_steps_at_exact_zero": 2337,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 642,
+        "negative_steps_at_exact_zero": 230,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 587,
+        "negative_steps_at_exact_zero": 248,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 0.3812614876067939,
+    "step_norm": 0.3812614876067734,
+    "lagrange_multiplier": 0.004233898003681235,
+    "predicted_relative_residual": 0.6406081987132104
+  }
+]

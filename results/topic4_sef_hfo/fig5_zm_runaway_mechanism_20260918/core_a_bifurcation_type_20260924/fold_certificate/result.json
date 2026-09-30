@@ -1,0 +1,137 @@
+{
+  "status": "GENERIC_EQUILIBRIUM_SADDLE_NODE_CERTIFIED",
+  "D_A": 0.3531576412548057,
+  "Z_A": 0.6468423587451944,
+  "native_CoreA_field_time_ms": 9989.791390128607,
+  "D_global": 0.2187618554145202,
+  "regional_rates_hz": [
+    423.0021421063739,
+    367.9398654190426,
+    87.01205371671503
+  ],
+  "global_rate_hz": 101.82910954933477,
+  "static": {
+    "original_rate_residual_per_ms": 9.103828801926284e-15,
+    "logit_residual": 3.979039320256561e-13,
+    "right_null_relative": 3.5037722167005582e-15,
+    "left_null_relative": 3.8255138180551165e-15,
+    "closest_static_eigenvalues": [
+      [
+        -2.045274632969779e-15,
+        0.0
+      ],
+      [
+        -0.07414631451206259,
+        0.0
+      ],
+      [
+        -0.15260563231737762,
+        0.0
+      ],
+      [
+        -0.1935879630049079,
+        0.0
+      ]
+    ],
+    "left_right_product": 1.0000000000000018
+  },
+  "quadratic": [
+    {
+      "q_step": 0.001,
+      "quadratic_coefficient": 0.0007920077669351921
+    },
+    {
+      "q_step": 0.0005,
+      "quadratic_coefficient": 0.0007920077487404316
+    },
+    {
+      "q_step": 0.00025,
+      "quadratic_coefficient": 0.0007920077479425682
+    }
+  ],
+  "transversality": [
+    {
+      "D_step": 1e-06,
+      "parameter_coefficient": -51.204573347587896
+    },
+    {
+      "D_step": 5e-07,
+      "parameter_coefficient": -51.20457332287427
+    },
+    {
+      "D_step": 2.5e-07,
+      "parameter_coefficient": -51.20457346978472
+    }
+  ],
+  "coefficient_relative_refinement": {
+    "parameter": 2.869088478793715e-09,
+    "quadratic": 1.007393431469289e-09
+  },
+  "temporal": [
+    {
+      "dt_ms": 0.05,
+      "right_null_relative": 3.6579603960709075e-14,
+      "left_null_relative": 3.754654514245232e-15,
+      "derivatives": [
+        {
+          "lambda_step_per_ms": 1e-06,
+          "temporal_coefficient_ms": -8.084587913428972
+        },
+        {
+          "lambda_step_per_ms": 5e-07,
+          "temporal_coefficient_ms": -8.084586153711742
+        },
+        {
+          "lambda_step_per_ms": 2.5e-07,
+          "temporal_coefficient_ms": -8.084585641254794
+        }
+      ]
+    },
+    {
+      "dt_ms": 0.025,
+      "right_null_relative": 5.4861010761242784e-14,
+      "left_null_relative": 2.5277688384121177e-14,
+      "derivatives": [
+        {
+          "lambda_step_per_ms": 1e-06,
+          "temporal_coefficient_ms": -8.0817601599443
+        },
+        {
+          "lambda_step_per_ms": 5e-07,
+          "temporal_coefficient_ms": -8.081758408214052
+        },
+        {
+          "lambda_step_per_ms": 2.5e-07,
+          "temporal_coefficient_ms": -8.081758143967988
+        }
+      ]
+    },
+    {
+      "dt_ms": null,
+      "right_null_relative": 3.504231594568638e-14,
+      "left_null_relative": 8.74164520083464e-15,
+      "derivatives": [
+        {
+          "lambda_step_per_ms": 1e-06,
+          "temporal_coefficient_ms": -8.079027011009979
+        },
+        {
+          "lambda_step_per_ms": 5e-07,
+          "temporal_coefficient_ms": -8.079025278616772
+        },
+        {
+          "lambda_step_per_ms": 2.5e-07,
+          "temporal_coefficient_ms": -8.079024845576505
+        }
+      ]
+    }
+  ],
+  "mode_energy_A_B_surround": [
+    0.0002706672768583641,
+    0.0011084642417836161,
+    0.9986208684813582
+  ],
+  "scope": "Equilibrium fold of the actual full spatial network with CoreA-only Z variation. Stability of other modes and relevance to observed irregular local transition not established by this certificate.",
+  "onset_bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

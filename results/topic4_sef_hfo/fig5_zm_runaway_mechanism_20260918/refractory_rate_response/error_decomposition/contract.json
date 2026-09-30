@@ -1,0 +1,13 @@
+{
+  "created_local": "2026-09-20T05:47:06.406810+08:00",
+  "question": "Separate refractory-feedback propagation error, conditional-flux error, and input-feature conditioning before changing physical state variables.",
+  "budget": "Read-only analysis of2training arrays and64alreadyobserved fresh validation records. No simulation,new fitting,threshold change or spatial launch.",
+  "feature_check": "Training-only centered covariance spectrum and feature scales; invertible linear conditioning does not add physical information. Condition number is a numerical diagnosis, not a model-accuracy proof.",
+  "refractory_counterfactual": "Recompute the fixed network conditional p at all actual .1ms steps. Substitute OBSERVED available population fraction for its own refractory history only for diagnosis, then compare the phase waveform with the unchanged autonomous prediction.",
+  "waveform_metrics": "Original normL2 andmeanerror retained; report paired error changes per condition, never use supplied observed history as an autonomous pass.",
+  "precision": "For existing matched responses, report distance beyond original tolerance plus3SEM as a descriptive noise comparison; do not replace registered acceptance.",
+  "invariants": {
+    "I_final.pt": "8cb2832e14450c475e489eac94f392046a1822e32e5419c1661bea52ce2dd52d",
+    "E_final.pt": "3caf4e88a0396311caa5461368642cb98d475c3742e7bd47fe379938d1f2490c"
+  }
+}

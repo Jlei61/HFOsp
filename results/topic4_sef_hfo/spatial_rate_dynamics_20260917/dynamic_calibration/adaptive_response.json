@@ -1,0 +1,28 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "population": "E",
+      "tau0_ms": 6.007672866321451,
+      "current_scale_mv": 99.99999999999994,
+      "tau_min_ms": 0.1,
+      "fit_normalized_mse": 0.1500062225860225,
+      "heldout_normalized_mse": 0.22653368774701418,
+      "optimizer_success": true,
+      "iterations": 52
+    },
+    {
+      "population": "I",
+      "tau0_ms": 4.285936031265788,
+      "current_scale_mv": 99.99999999999994,
+      "tau_min_ms": 0.1,
+      "fit_normalized_mse": 0.09149718343917645,
+      "heldout_normalized_mse": 0.12363247405282564,
+      "optimizer_success": true,
+      "iterations": 45
+    }
+  ],
+  "equation": "tau(D)=0.1+(tau0-0.1)/(1+(D/c)^2)",
+  "fit_source": "Only same weak1mV and moderate6mV pulses; strong24mV pulse excluded from fitting",
+  "purpose": "Resolve observed faster native response at stronger drive; smooth state-dependent rate dynamics with analytic tangent"
+}

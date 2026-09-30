@@ -1,0 +1,70 @@
+{
+  "status": "RESUMED_FROM_VERIFIED_CHECKPOINT",
+  "condition": "isotropic",
+  "name": "z0.95_k0.02_high",
+  "old_pid": 3252774,
+  "old_command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_loop_axis_cuda_override.py",
+    "worker",
+    "--condition",
+    "isotropic",
+    "--name",
+    "z0.95_k0.02_high",
+    "--device",
+    "0"
+  ],
+  "step": 120000,
+  "time_s": 12.0,
+  "backup": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/isotropic/z0.95_k0.02_high/1790284593317891340/checkpoint.pkl",
+  "checkpoint_sha256": "fa5ac35caf783a2b03b02354a910b0848b74ed70ce54b707460b10a1f64dffbc",
+  "job_sha256": "8be2a4793464ff36e2221a9c7d725d0fbfc5f90545e66a2c8479425a9125d6e2",
+  "record_path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/axis_cpu_gpu/isotropic/z0.95_k0.02_high/1790284593317891340/handoff.json",
+  "new_backend": "locality_cpu",
+  "committed_observation_endpoints": {
+    "actual_current_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "conditional_drift_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "feedback_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "global_response_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "intrinsic_adaptation_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "mechanism_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "regional_chunks": {
+      "files": 0,
+      "end_step": 120000
+    },
+    "z_budget_chunks": {
+      "files": 0,
+      "end_step": 120000
+    }
+  },
+  "complete_engine_unmodified": true,
+  "maximum_uncommitted_time_to_recompute_s": 2.0,
+  "persisted_observations_discarded": false,
+  "source_files_verified": 24,
+  "prepared_initial_checkpoint": true,
+  "new_pid": 3265376,
+  "actual_backend": "locality_cpu",
+  "fresh_worker_progress_verified": true
+}

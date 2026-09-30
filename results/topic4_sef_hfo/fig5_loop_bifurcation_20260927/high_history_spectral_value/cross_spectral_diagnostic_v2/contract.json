@@ -1,0 +1,11 @@
+{
+  "status": "REGISTERED_BEFORE_READONLY_CROSS_SPECTRAL_AUDIT",
+  "created_epoch": 1790559549.096165,
+  "question": "Does omission of measured source cross spectra explain the input variance missing in the second-history diagonal approximation?",
+  "design": "Reuse the72-74s complete native source spike trains, original40000-cell graph and actual delay bins. At the union of39 preobserved targets and20 largest first-response E rate discrepancies, project complex source Fourier amplitudes with each edge delay, then filter with original synapses. Compare full source cross terms with squared-weight diagonal terms on the identical2s circular convention.",
+  "QA": "Sourceperiodograms match frozen inputPSDs; originalgraphidentity; full-power Parseval; at preobservedtargets reconstruct pure recurrentII waveform after1s boundary burn with the same1e-8 tolerance. Separately test that the earlier0.3s residual is precisely the original20.61155ms homogeneous filter tail. ForIE decompose observedtotal into reconstructedrecurrent and residualexternal, preserving their covariance.",
+  "preceding_failure": "Original0.3s cutoff left5.65718e-6mV II waveform residual, so its1e-8 gate failed. No input or equation is changed here, and the numerical tolerance is not loosened. Original diagnostic contract/producer/failure retained in cross_spectral_diagnostic.",
+  "interpretation": "Descriptive finite-window source-correlation decomposition. Selected20 cells are error diagnostics, not an independent acceptance set. Supplying measured source phases does not define a self-generated recurrent model or certify a bifurcation. No newnative simulation or physical change.",
+  "producer_sha256": "faad3aa30958ac2a9c173d79fb862621ae5266ae5db76d8b8568aa686f9ff38c",
+  "formal_bifurcation_allowed": false
+}

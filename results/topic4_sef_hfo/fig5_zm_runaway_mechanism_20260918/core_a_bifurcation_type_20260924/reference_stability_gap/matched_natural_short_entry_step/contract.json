@@ -1,0 +1,26 @@
+{
+  "time": "2026-09-25T07:14:34.119134+08:00",
+  "question": "Does a very small further CoreA resource depletion make the actual natural short-event dynamics enter seconds-long activity, independent of the already disqualified numerical flip candidate?",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "source_history": "Exact final state after4s uninterrupted original flow from native9584 root. Self-terminating CoreA activities, maxcomplete103ms. This is an actually evolved state, not another interpolated shooting iterate.",
+  "arms": {
+    "held_short_field": {
+      "native_field_theta_ms": 9583.9750181025,
+      "Z_A": 0.7015321738308211,
+      "field_change": false
+    },
+    "depleted_entry_field": {
+      "native_field_theta_ms": 9594.906685976377,
+      "Z_A": 0.7,
+      "field_change": "Only withinCoreA native field"
+    }
+  },
+  "shared": "All initial fast states, M, complete delayed history and physical clock bitwise identical. OutsideA Z unchanged. EveryZfrozen duringeacharm, everyE Mdynamic, locked full3479-group0.5mm spatial physical-delay rate, same original constant mean input/no innovations.",
+  "duration_ms_each": 10000,
+  "dt_ms": 0.05,
+  "observable": "Same10ms-smoothed regional E rate, quiet<5Hz foratleast20ms, allcomplete/censored activity durations, >=1s complete long episodes, original spatial persistent readout. Do not infer a bifurcation from finite duration.",
+  "decision": "Long activity onlyafterdepletion identifies an actual localstate-transition interval for invariant-set/mesh analysis. Short activity inboth despiteprior other-history long episodes motivates basin/history dependence and rejects a unique Z-alone onset attribution for this initialization; it does not yet prove bistability. Long activity inboth invalidates this10s operational bracket.",
+  "budget": "Two matched10s trajectories atalready tested endpointfields, no new model coefficients and no automatic parameter expansion.",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

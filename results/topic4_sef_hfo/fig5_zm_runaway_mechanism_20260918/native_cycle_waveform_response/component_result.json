@@ -1,0 +1,180 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "base_reproduction_relative_L2": [
+    1.7136597878376515e-08,
+    1.0321803440786749e-08,
+    4.4953279942339525e-08,
+    2.239563719113894e-09
+  ],
+  "groups": [
+    {
+      "group": 279,
+      "label": "Core A E",
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.32850563190034127,
+          "predicted_cycle_mean_hz": 88.35578779135226,
+          "relative_mean_error": 0.21492340219392772
+        },
+        {
+          "variant": "remove_slow_mean_mixing",
+          "relative_waveform_L2": 0.13658063772313925,
+          "predicted_cycle_mean_hz": 77.27204000097596,
+          "relative_mean_error": 0.06251794114657165
+        },
+        {
+          "variant": "remove_variance_transient_mean_shift",
+          "relative_waveform_L2": 0.32823054389972456,
+          "predicted_cycle_mean_hz": 88.44541792466603,
+          "relative_mean_error": 0.21615584829878068
+        },
+        {
+          "variant": "remove_variance_mixing",
+          "relative_waveform_L2": 0.330693956920092,
+          "predicted_cycle_mean_hz": 88.44625266019926,
+          "relative_mean_error": 0.21616732620825688
+        },
+        {
+          "variant": "instantaneous_static_with_existing_variance_filter",
+          "relative_waveform_L2": 0.13899669847896262,
+          "predicted_cycle_mean_hz": 77.64735614688955,
+          "relative_mean_error": 0.06767867119369003
+        },
+        {
+          "variant": "instantaneous_static_with_exact_continuous_synaptic_covariance",
+          "relative_waveform_L2": 0.13857142720048388,
+          "predicted_cycle_mean_hz": 77.63289070805727,
+          "relative_mean_error": 0.0674797662820861
+        }
+      ]
+    },
+    {
+      "group": 141,
+      "label": "Core B E",
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.3632681214415469,
+          "predicted_cycle_mean_hz": 65.5517441351825,
+          "relative_mean_error": 0.20987831142784227
+        },
+        {
+          "variant": "remove_slow_mean_mixing",
+          "relative_waveform_L2": 0.11429578903787072,
+          "predicted_cycle_mean_hz": 54.00861679711175,
+          "relative_mean_error": 0.00317138841814529
+        },
+        {
+          "variant": "remove_variance_transient_mean_shift",
+          "relative_waveform_L2": 0.36049240026279494,
+          "predicted_cycle_mean_hz": 65.37063916291396,
+          "relative_mean_error": 0.20653568521811724
+        },
+        {
+          "variant": "remove_variance_mixing",
+          "relative_waveform_L2": 0.3655629523302442,
+          "predicted_cycle_mean_hz": 65.61465804570734,
+          "relative_mean_error": 0.21103950365598717
+        },
+        {
+          "variant": "instantaneous_static_with_existing_variance_filter",
+          "relative_waveform_L2": 0.11458349415829036,
+          "predicted_cycle_mean_hz": 54.01365845708563,
+          "relative_mean_error": 0.0030783352868141577
+        },
+        {
+          "variant": "instantaneous_static_with_exact_continuous_synaptic_covariance",
+          "relative_waveform_L2": 0.11436131943905513,
+          "predicted_cycle_mean_hz": 54.01906502947685,
+          "relative_mean_error": 0.0029785470239449474
+        }
+      ]
+    },
+    {
+      "group": 39,
+      "label": "Surround E",
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.3844098434523068,
+          "predicted_cycle_mean_hz": 79.39309814885434,
+          "relative_mean_error": 0.23320173887910411
+        },
+        {
+          "variant": "remove_slow_mean_mixing",
+          "relative_waveform_L2": 0.20947884457242272,
+          "predicted_cycle_mean_hz": 69.0842832517084,
+          "relative_mean_error": 0.07307637844654073
+        },
+        {
+          "variant": "remove_variance_transient_mean_shift",
+          "relative_waveform_L2": 0.38419028463215077,
+          "predicted_cycle_mean_hz": 79.38371518804293,
+          "relative_mean_error": 0.2330559946789374
+        },
+        {
+          "variant": "remove_variance_mixing",
+          "relative_waveform_L2": 0.3865740817943051,
+          "predicted_cycle_mean_hz": 79.55336594796393,
+          "relative_mean_error": 0.2356911558833091
+        },
+        {
+          "variant": "instantaneous_static_with_existing_variance_filter",
+          "relative_waveform_L2": 0.21065696726801494,
+          "predicted_cycle_mean_hz": 69.20907082478679,
+          "relative_mean_error": 0.07501468612943595
+        },
+        {
+          "variant": "instantaneous_static_with_exact_continuous_synaptic_covariance",
+          "relative_waveform_L2": 0.21014217159839174,
+          "predicted_cycle_mean_hz": 69.18954987647697,
+          "relative_mean_error": 0.07471147000660494
+        }
+      ]
+    },
+    {
+      "group": 594,
+      "label": "I",
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.18221090460858724,
+          "predicted_cycle_mean_hz": 96.74602627905298,
+          "relative_mean_error": 0.0771211707618016
+        },
+        {
+          "variant": "remove_slow_mean_mixing",
+          "relative_waveform_L2": 0.042207759627907744,
+          "predicted_cycle_mean_hz": 90.14755810356546,
+          "relative_mean_error": 0.003657173946932268
+        },
+        {
+          "variant": "remove_variance_transient_mean_shift",
+          "relative_waveform_L2": 0.18256971300455027,
+          "predicted_cycle_mean_hz": 96.75260257191525,
+          "relative_mean_error": 0.07719438786993006
+        },
+        {
+          "variant": "remove_variance_mixing",
+          "relative_waveform_L2": 0.18248331926078756,
+          "predicted_cycle_mean_hz": 96.71579295455146,
+          "relative_mean_error": 0.07678456826622031
+        },
+        {
+          "variant": "instantaneous_static_with_existing_variance_filter",
+          "relative_waveform_L2": 0.042091227898717255,
+          "predicted_cycle_mean_hz": 90.1024798068507,
+          "relative_mean_error": 0.003155295062591295
+        },
+        {
+          "variant": "instantaneous_static_with_exact_continuous_synaptic_covariance",
+          "relative_waveform_L2": 0.04182240151974811,
+          "predicted_cycle_mean_hz": 90.1244832009014,
+          "relative_mean_error": 0.003400269688135725
+        }
+      ]
+    }
+  ],
+  "scope": "Open-loop diagnostic on the four already assayed groups. Report all six predefined conditions, never select or deploy a new closure from this test. Measured outputs are reused and therefore not held-out validation of any variant. Exact covariance is the continuous colored-Gaussian second-moment solution; it is not a new autonomous network."
+}

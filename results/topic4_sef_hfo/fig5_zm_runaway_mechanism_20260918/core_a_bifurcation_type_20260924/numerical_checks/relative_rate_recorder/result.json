@@ -1,0 +1,83 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0270/recurrence/nine_burst_fixed_grid_seed/node00.npz",
+  "dt_ms": 0.05,
+  "absolute_start_time_ms": 55896.15,
+  "original_chunk_physical_parity": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 121.28356038355194,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "GABA": {
+        "reference_rms": 175.82372715035612,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "M": {
+        "reference_rms": 0.020863253685072837,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "covariance": {
+        "reference_rms": 126.210767579691,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "input_memory": {
+        "reference_rms": 0.14294227334645207,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.04416103901774663,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      }
+    },
+    "combined_relative_rms": 0.0
+  },
+  "original_chunk_all_buffers_bitwise": true,
+  "relative_bins_max_absolute_hz_error": 0.0,
+  "native_absolute_bins_max_difference_hz": 641.4307952451517,
+  "exact_T_ms": 10.137,
+  "mean_flux_max_absolute_hz_error": 0.0,
+  "endpoint_parity": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 124.57529380495183,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "GABA": {
+        "reference_rms": 180.56212312551,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "M": {
+        "reference_rms": 0.020864689590286596,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "covariance": {
+        "reference_rms": 130.00791745790693,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "input_memory": {
+        "reference_rms": 0.1442326695973316,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.04504122357257751,
+        "difference_rms": 0.0,
+        "relative_rms": 0.0
+      }
+    },
+    "combined_relative_rms": 0.0
+  },
+  "interpretation": "Relative1ms bins and exactT per-step flux quadrature match independent original stepping. No feedback into physical dynamics. The original absolute-clock output cannot be concatenated as relative time from this fractional-ms source.",
+  "model_promoted": false
+}

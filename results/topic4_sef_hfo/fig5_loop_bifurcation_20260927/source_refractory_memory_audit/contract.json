@@ -1,0 +1,10 @@
+{
+  "status": "READONLY_TEMPORAL_COVARIANCE_DIAGNOSTIC",
+  "created_epoch": 1790569796.805693,
+  "question": "Does the independent-time residual assumption discard source refractory memory even after its same-bin variance and external count law are corrected?",
+  "data": "Existing unchanged72-74s native source spikes, plus last359 steps of three completed physical-time density probability histories. The native observer has its original varying background, not the fixed-background control; no paired trajectory claim. The refractory identity is exact for either background.",
+  "identity": "For each E source and lag1..19 atdt0.1ms, n(t)*n(t+lag)=0 because native refractory is20steps. Given marginal probabilities p(t), residual covariance must equal -p(t)*p(t+lag); independent-time residuals instead assume zero. This concerns the recurrent-input approximation, not a claim that the density cells themselves violate refractory updates.",
+  "phase_diagnostic": "For the native finite record only, decompose n into its measured22step phase conditional mean and residual. Evaluate the finite-record covariance identity exactly. This period is a diagnostic from earlier native observation, not an imposed new drive or a new physical model.",
+  "scope": "No simulation, parameter fitting, native seed or formal bifurcation. Nonzero covariance alone does not prove it causes the complete rate/spatial error.",
+  "producer_sha256": "072d3bc901cb36a94ef071134ea64ce2a3d8737ea6a0533a854c666f5fbf2939"
+}

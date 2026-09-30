@@ -1,0 +1,48 @@
+{
+  "status": "THREE_CONVERGED_MATCHED_PERIODS",
+  "rows": [
+    {
+      "T_ms": 266.5499999999999,
+      "D_coarse": 0.1449654649469926,
+      "D_fine": 0.1449654651543334,
+      "D_difference": 2.0734078343132012e-10,
+      "mean_difference_hz": -8.017862462850189e-07,
+      "peak_difference_hz": 0.0002698201559212521,
+      "coarse_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_small_period_G4097/point0004.npz",
+      "fine_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G8193_restart80/point0000.npz",
+      "residuals": [
+        1.1302070390684094e-10,
+        5.995204332975845e-12
+      ]
+    },
+    {
+      "T_ms": 267.1,
+      "D_coarse": 0.14497187800828826,
+      "D_fine": 0.14497187728110808,
+      "D_difference": -7.271801771846498e-10,
+      "mean_difference_hz": 3.0995876088013574e-07,
+      "peak_difference_hz": 0.0002666197246412594,
+      "coarse_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_period_G4097/point0000.npz",
+      "fine_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T2671_G8193/point0000.npz",
+      "residuals": [
+        6.161737786669619e-12,
+        5.384581669432009e-12
+      ]
+    },
+    {
+      "T_ms": 267.35,
+      "D_coarse": 0.14497189098181285,
+      "D_fine": 0.14497189143933634,
+      "D_difference": 4.5752349131511494e-10,
+      "mean_difference_hz": -3.0259271710519897e-07,
+      "peak_difference_hz": -0.0009620708752891005,
+      "coarse_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_period_G4097/point0002.npz",
+      "fine_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_refined_T26735_G8193/point0000.npz",
+      "residuals": [
+        4.884981308350689e-12,
+        5.9396931817445875e-12
+      ]
+    }
+  ],
+  "claim": "Periodic branch values agree across temporal meshes; critical tangent and Floquet certification remain separate"
+}

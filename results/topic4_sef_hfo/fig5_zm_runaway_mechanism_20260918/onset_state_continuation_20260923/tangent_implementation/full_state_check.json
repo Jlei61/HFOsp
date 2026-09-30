@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "phase_advance_ms": 100,
+  "dt_ms": 0.05,
+  "propagation_ms": 10,
+  "rows": [
+    {
+      "epsilon": 0.0001,
+      "relative_errors": {
+        "syn": 1.0999554236616334e-05,
+        "local": 5.4329905341756195e-05,
+        "history": 0.00016409618787166283
+      }
+    },
+    {
+      "epsilon": 5e-05,
+      "relative_errors": {
+        "syn": 2.7514930851330613e-06,
+        "local": 1.3592835028566109e-05,
+        "history": 4.104164822718278e-05
+      }
+    },
+    {
+      "epsilon": 2.5e-05,
+      "relative_errors": {
+        "syn": 6.879727435727484e-07,
+        "local": 3.3988590580117184e-06,
+        "history": 1.0261511837817603e-05
+      }
+    },
+    {
+      "epsilon": 1.25e-05,
+      "relative_errors": {
+        "syn": 1.719980093827798e-07,
+        "local": 8.497441176026362e-07,
+        "history": 2.565453418275717e-06
+      }
+    }
+  ],
+  "perturbed": [
+    "AMPA",
+    "GABA",
+    "M",
+    "six raw covariances",
+    "36 input memories",
+    "full delayed/refractory rate history"
+  ],
+  "scope": "Implementation verification; no orbit stability or onset classification."
+}

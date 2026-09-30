@@ -1,0 +1,45 @@
+{
+  "status": "REJECTED_FOR_BIFURCATION_THIS_ROUND",
+  "static": {
+    "status": "STATIC_VALIDATION_FAIL",
+    "passed": 241,
+    "total": 256,
+    "within_broad_cap": 254,
+    "maximum_error_Hz": 34.36004517571786,
+    "median_absolute_error_Hz": 3.757443966859583,
+    "zero_conductance_parent_exact": true,
+    "transient_validated": false,
+    "spatial_validated": false,
+    "formal_bifurcation_allowed": false,
+    "seconds": 804.9592001438141
+  },
+  "broad_cap_failures": [
+    {
+      "index": 76,
+      "g_over_gL": 6.3913687684333205,
+      "mean_effective_mV": -39.98068972235353,
+      "effective_sigma_E": 4.0825855293860664,
+      "effective_sigma_I": 51.657749801461776,
+      "native_MC_mean_Hz": 13.49755859375,
+      "native_MC_SEM_Hz": 0.2169968497061996,
+      "approximation_Hz": 29.022572479915578
+    },
+    {
+      "index": 184,
+      "g_over_gL": 9.606876441890908,
+      "mean_effective_mV": 1.789680369553441,
+      "effective_sigma_E": 6.965306750245886,
+      "effective_sigma_I": 1.0362164168132721,
+      "native_MC_mean_Hz": 13.783203125,
+      "native_MC_SEM_Hz": 0.10638688592956859,
+      "approximation_Hz": 38.71368028753499
+    }
+  ],
+  "validation_selected_refit": false,
+  "reason": "Two independent low-rate, noise-driven test conditions exceed the prespecified broad error cap. Such errors can alter the recovery-state interpretation.",
+  "transient_validation": "NOT_RUN_STATIC_GATE_FAILED",
+  "native_spatial_correspondence": "NOT_RUN_STATIC_GATE_FAILED",
+  "formal_continuation": "NOT_AUTHENTICATED",
+  "fallback": "Complete original native SNN conditional Z/K states and matched spatial-axis controls. Keep bifurcation type unknown; do not promote unrelated older branches.",
+  "limitation": "A failed finite calibration is not proof that no conductance-aware rate reduction is possible."
+}

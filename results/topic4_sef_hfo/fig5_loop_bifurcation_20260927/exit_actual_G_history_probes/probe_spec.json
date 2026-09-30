@@ -1,0 +1,33 @@
+{
+  "stage": "ACTUAL_EXIT_FIELD_INITIAL_G_CONTROLS",
+  "question": "In the actual16.7s exit-field family at heldZmean.21/Kmean9, can changing only the carried initial global conductance alter persistence of the high state that already has a directly corresponding conditional branch?",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9_actualfield_G_zero",
+      "Z": 0.21,
+      "K": 9.0,
+      "duration_s": 30.0,
+      "cut": "exit",
+      "history_label": "high",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "G_raw_override": 0.0,
+      "reason": "Only initialG changes within actualexitfield family; distinguish carriedfeedback history from conditional equilibrium disappearance."
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+      "Z": 0.21,
+      "K": 9.0,
+      "duration_s": 30.0,
+      "cut": "exit",
+      "history_label": "high",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_reconstruction/runs/source10_to16p70/checkpoint.pkl",
+      "G_raw_override": 11.495040572672318,
+      "reason": "Only initialG changes within actualexitfield family; distinguish carriedfeedback history from conditional equilibrium disappearance."
+    }
+  ],
+  "max_workers": 2
+}

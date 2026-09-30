@@ -1,0 +1,61 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_postcritical_endpoint_audit.json",
+  "panels": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2190000_dt0.05/trajectory.npz",
+      "D": 0.21899999999999997,
+      "global_Z": 0.781,
+      "samples": [
+        8000,
+        12000
+      ],
+      "category": "SELF_LIMITED"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2288448_dt0.05/trajectory.npz",
+      "D": 0.22884476056519154,
+      "global_Z": 0.7711552394348085,
+      "samples": [
+        8000,
+        12000
+      ],
+      "category": "PERSISTENT"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2400000_dt0.05/trajectory.npz",
+      "D": 0.23999999999999988,
+      "global_Z": 0.7600000000000001,
+      "samples": [
+        8000,
+        12000
+      ],
+      "category": "PERSISTENT"
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2563444_dt0.05/trajectory.npz",
+      "D": 0.25634442534475477,
+      "global_Z": 0.7436555746552452,
+      "samples": [
+        8000,
+        12000
+      ],
+      "category": "PERSISTENT"
+    }
+  ],
+  "Z": "held",
+  "M": "dynamic",
+  "time_window_ms": [
+    8000,
+    12000
+  ],
+  "row_A": "Spatial rate averaged over the final 4 s",
+  "row_B": "Fraction of final-4-s non-overlapping 10-ms bins at or above 50 Hz",
+  "limitation": "These are conditional finite-time spatial statistics, not snapshots or bifurcation branches.",
+  "human_visual_acceptance": "PENDING",
+  "agent_visual_review": {
+    "PNG": "CHECKED",
+    "same_state_PDF": "CHECKED",
+    "checked_local": "2026-09-19T13:59:55.855095",
+    "notes": "No title or gray annotations. Consistent geometry/core markers, labelled mean vs time fraction, separate colourbars; finite-time statistics explicitly distinguished from snapshots/branches."
+  }
+}

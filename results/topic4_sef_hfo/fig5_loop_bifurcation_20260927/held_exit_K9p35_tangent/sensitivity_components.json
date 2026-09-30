@@ -1,0 +1,67 @@
+{
+  "status": "COMPLETE_LINEAR_INPUT_PATH_DECOMPOSITION",
+  "rows": [
+    {
+      "region": "allE",
+      "contributions_Hz_per_K": {
+        "excitatory_mean": -45.3355894064412,
+        "local_inhibitory_mean": 7.796757773498514,
+        "excitatory_variance": -0.02369373342852564,
+        "inhibitory_variance": -0.0003031000099143898,
+        "global_G": 3.387632295389205,
+        "direct_K": -6.898058655546137
+      },
+      "total_Hz_per_K": -41.07325482653806
+    },
+    {
+      "region": "coreA",
+      "contributions_Hz_per_K": {
+        "excitatory_mean": -10.937535260531655,
+        "local_inhibitory_mean": 3.1557451348376464,
+        "excitatory_variance": 0.01807963514854511,
+        "inhibitory_variance": 0.0005395696680255585,
+        "global_G": 2.924765290470567,
+        "direct_K": -6.198345861712463
+      },
+      "total_Hz_per_K": -11.036751492119334
+    },
+    {
+      "region": "coreB",
+      "contributions_Hz_per_K": {
+        "excitatory_mean": -2.6098302608138852,
+        "local_inhibitory_mean": 0.7385364136822664,
+        "excitatory_variance": 0.022241022509078424,
+        "inhibitory_variance": 0.000628388280256145,
+        "global_G": 1.6263582452154355,
+        "direct_K": -3.6647350569056094
+      },
+      "total_Hz_per_K": -3.886801248032458
+    },
+    {
+      "region": "surround",
+      "contributions_Hz_per_K": {
+        "excitatory_mean": -47.289580854716924,
+        "local_inhibitory_mean": 8.093773056438955,
+        "excitatory_variance": -0.025913097777641468,
+        "inhibitory_variance": -0.00034799570043444106,
+        "global_G": 3.444538504356547,
+        "direct_K": -6.998812949540953
+      },
+      "total_Hz_per_K": -42.77634333694046
+    },
+    {
+      "region": "I",
+      "contributions_Hz_per_K": {
+        "excitatory_mean": -406.18650048408006,
+        "local_inhibitory_mean": 354.4949983754775,
+        "excitatory_variance": 0.49188546951786577,
+        "inhibitory_variance": 0.08182460440453115,
+        "global_G": 0.0,
+        "direct_K": 0.0
+      },
+      "total_Hz_per_K": -51.11779203468015
+    }
+  ],
+  "maximum_sum_error_Hz_per_K": 4.547473508864641e-13,
+  "scope": "Decomposition of measured local static tangent, each term includes implicitlocalM factor. Components depend on the solved recurrent tangent and are not independent intervention outcomes or a native trajectory. Dynamicstability and finiteamplitude failures remain unestablished."
+}

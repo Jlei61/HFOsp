@@ -1,0 +1,30 @@
+{
+  "status": "REGISTERED_BEFORE_FOUR_LOCAL_INPUT_RESPONSES",
+  "created_epoch": 1790560110.360655,
+  "question": "At the same supplied source means and native local equations, does retaining measured source correlation repair high-history local response errors, and is the full second-order Gaussian description sufficient?",
+  "design": "Exactly59existingtargets x512numericalreplicas x4conditions. OriginallocalLIF/refractory/individualtheta/dynamicM/heldspatialZK, G0, samefixedpercell externalPoisson.3s+uniform0-1s burn then2srecord. No recurrent network simulation or newparameterpoint.",
+  "conditions": {
+    "diagonal_independent_Gaussian": "Original squaredweight source-diagonal current PSDs, independent E/I Gaussian Fourier coefficients.",
+    "full_marginal_independent_Gaussian": "Measured full within-stream current PSDs, including sourcecross terms and originaldelays; still independent E/I Gaussian coefficients.",
+    "full_joint_Gaussian": "Same measuredfullcurrent PSDs plus measured E/I crossperiodogram; common Gaussian Fourier coefficient perfrequency/replica for both streams.",
+    "full_source_waveform": "Original reconstructed recurrent E/I waveform with one shared random circular timeshift perreplica; preserves joint waveform and crossfrequency phase, plus samefresh externalPoisson."
+  },
+  "pairing": "Same perreplica externalPoisson seed and extra burn acrossconditions. Gaussian diagonal/fullmarginal share normals; fulljoint shares E withfullmarginal and swaps I to the same E coefficient. No claim that these numericalPoisson streams reproduce native draws.",
+  "initialization": "All conditions use identical supplied recurrentmeans from the existing native-source projection and identical actualtargetparameters; native source data condition this diagnosis. No source statistics are promoted to an autonomous closed model.",
+  "reference": "Native72-74s pertarget rates are a development comparison under time-varying expected background. Fourlocalconditions alluse the samefixedmean. Changes betweenlocalconditions isolate represented inputstructure; closeness to that one nativewindow is not an independent network validation.",
+  "cross_spectrum_limit": "One2s complex source record gives a rank-one jointperiodogram at eachfrequency, not an accurately estimated stationary crossspectral matrix. This is a finite-record sufficiency diagnosis. Numericreplicas are not biological/native samples.",
+  "readout": "Percondition cellrate/MCSEM, pairedcondition ratechange/SEM, first-second1s, Mstart/end, inputmoments and resourceeligibility. Retain alltargets plus prespecified selectedcore masks and postselected20largesterror mask.",
+  "resources": "OneGPU, batch4, poollimit4GiB, start eachbatch only with at least5GiB free. Does not edit or restart the bounded highhistory map currently running.",
+  "stop": "Fourconditions only. No automatic parameterfit, networkupdate, root, gain/frequency scan or formal bifurcation claim.",
+  "replicas": 512,
+  "conditions_order": [
+    "diagonal_independent_Gaussian",
+    "full_marginal_independent_Gaussian",
+    "full_joint_Gaussian",
+    "full_source_waveform"
+  ],
+  "unchanged_sampler_sha256": "7de8f5cb04ac657aa40650426b60f4011b1212d1e2206d5401f1a7139a8ed3d2",
+  "producer_sha256": "6a93d83ba04a9f379b2d322b505749fee18b05a516ce823ef96140898e9b77c7",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

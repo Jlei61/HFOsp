@@ -1,0 +1,40 @@
+{
+  "specs": [
+    [
+      0,
+      15.0,
+      "pulse"
+    ],
+    [
+      0,
+      18.0,
+      "pulse"
+    ],
+    [
+      1,
+      18.0,
+      "pulse"
+    ],
+    [
+      0,
+      15.0,
+      "multisine"
+    ],
+    [
+      0,
+      18.0,
+      "multisine"
+    ],
+    [
+      1,
+      18.0,
+      "multisine"
+    ]
+  ],
+  "replicates": 8192,
+  "seed": 231001,
+  "calibration": "Constant-current transfer only; no transient fitting in this run",
+  "temporal_comparison": "Native and rate outputs use identical nonoverlapping 10-ms bins",
+  "reference": "Original independent colored-Poisson LIF units with prescribed common recurrent current",
+  "scope": "Local response qualification, not spatial or network acceptance"
+}

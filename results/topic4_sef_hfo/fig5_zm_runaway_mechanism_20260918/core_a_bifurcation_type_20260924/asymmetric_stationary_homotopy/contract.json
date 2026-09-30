@@ -1,0 +1,9 @@
+{
+  "question": "Can an asymmetric original equilibrium be reached when numerical continuation explicitly avoids the known high-both stationary root?",
+  "equations": "Exactly the existing native Core-A-only endpoint field, original stationary response, graph and dynamic-M equilibrium law. No physical parameter is varied.",
+  "method": "H(q,a)=(1-a)(q0-q)+a*G(q), G=(1+1/RMS(q-q_known)^2)*F(q). Pseudo-arclength with exact sparse-plus-rank-one Jacobian via Sherman-Morrison. Onlya=1 may represent an original equilibrium. Auxiliary turns are never network SN points.",
+  "initial": "Original actual spatial mean with a100mHz Core-B numerical guess, not the failed deflated minimizer.",
+  "reference": "https://arxiv.org/abs/1410.5620",
+  "budget": "One numerical path, at most120accepted points or180trials, with original residual<1e-11/ms and separation from known root>1e-3 required. No physical continuation of irrelevant high-both roots.",
+  "model_promoted": false
+}

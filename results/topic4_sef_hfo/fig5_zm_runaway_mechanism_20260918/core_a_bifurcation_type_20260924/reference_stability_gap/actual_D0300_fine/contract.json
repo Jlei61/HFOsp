@@ -1,0 +1,28 @@
+{
+  "question": "Does the earlier onset-like entry into prolonged Core-A activity at Z_A=.700 remain present after halving the integration step from the identical physical initial history?",
+  "coarse_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0300",
+  "coordinates": {
+    "from_interictal_history": {
+      "D_A": 0.3,
+      "Z_A": 0.7,
+      "native_interpolation_time_ms": 9594.906685976377
+    }
+  },
+  "conditions": {
+    "from_interictal_history": {
+      "label": "from_interictal_history",
+      "field": "from_interictal_history",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/final_state.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.025,
+      "duration_ms": 10000,
+      "previous_elapsed_ms": 0
+    }
+  },
+  "physical_scope": "Same full3479-group0.5mm spatial rate model and audited native within-A Z pattern family. Only A Z changes, outside-A Z bitwise native9s, entire Z held, every E M dynamic. Original constant input mean and private variance; no future count innovations or refitted parameters.",
+  "numerical_change": "Onlydt.05to.025ms. Preserve all original lag-grid history values; linearly interpolate intermediate physical lags. Same exact synaptic/covariance/memory/M initial state and full spatial Z field, same constant mean/private variance. No numerical or physical parameter refitting.",
+  "primary": "Same whole-record local activity and quiet definitions, first10s compared withcoarse first10s. Record complete and censored durations and spatial/global readouts. Sensitive trajectories need not match individual event timing; a finite mismatch does not by itself prove either convergence or no bifurcation.",
+  "budget": "One10s refined trajectory at the already observedD_A=.300 entry coordinate; no additional resource field.",
+  "acceptance": "Exact refined10ms replay and preserved physical-lag initialization before run; independent complete readout after run. This is a time-step control, not an independent replicate or a criticality certificate.",
+  "model_promoted": false
+}

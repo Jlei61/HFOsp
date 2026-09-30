@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "scope": "Integration integrity and bounded scientific re-evaluation; no upgraded scientific claims",
+  "imported_file_count": 18764,
+  "checks": {
+    "python": 1603,
+    "json": 15984,
+    "png": 392,
+    "fig5_manifest_files": 21
+  },
+  "source_equality_exceptions": [
+    {
+      "path": "scripts/paper_figures/build_fig5_single_seed_panels.py",
+      "source_sha256": "5af8fed2ab5b62423a6cfdafd1a9cbec3264f71d5438214ca4f3c078db1bb080",
+      "integrated_sha256": "654427e8e9615aaad13ca62128c74257ee49e7119293a7038643de53040b2cd9",
+      "reason": "Explicit data-root and export-local diagnostics; numerical formulas unchanged"
+    },
+    {
+      "path": "scripts/analyze_topic4_fig5_onset_z_field.py",
+      "source_sha256": "9c1c68b2d82f139625984dbf4e61976f6bbe440d275b3e4c6095231e25d7bf30",
+      "integrated_sha256": "381ac78ce3aa91b5e934505f8e9014ca7307bc46c7e4969a37bcdcdaf69d2f0c",
+      "reason": "Explicit data-root and export-local diagnostics; numerical formulas unchanged"
+    },
+    {
+      "path": "scripts/validate_topic4_fixed_rate_base.py",
+      "source_sha256": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+      "integrated_sha256": "9258e3a7d7c441ebe246eca7747b4ef2851b3cc3d169c7a28581234040825037",
+      "reason": "Explicit data-root and export-local diagnostics; numerical formulas unchanged"
+    }
+  ],
+  "six_rate_equations": "PASS",
+  "spatial_rate_equations": "PASS",
+  "v11_retired_path_resolution": "PASS",
+  "fig5_export": "Composite and all six panel PNGs regenerated from integrated code with retained external inputs: byte-identical",
+  "fig5_points": 70,
+  "regression_tests": 44,
+  "agent_visual_check": [
+    "spatial_rate_summary_PNG",
+    "fig5_rebuilt_PNG",
+    "fig5_rebuilt_PDF"
+  ],
+  "human_acceptance": "User authorized existing accepted results for integration on 2026-09-30; historical metadata kept verbatim",
+  "external_artifacts": "retained; excluded files are NOT all content-hashed",
+  "root_worktree": "Existing conflicts, in-flight figures and simulations retained"
+}

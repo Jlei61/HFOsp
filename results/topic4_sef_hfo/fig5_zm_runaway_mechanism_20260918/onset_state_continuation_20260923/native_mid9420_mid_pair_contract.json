@@ -1,0 +1,185 @@
+{
+  "created_local": "2026-09-23T16:56:25.925250+08:00",
+  "question": "At exactly the same spatial Z field, do settled self-limited and sustained complete histories approach the same activity or remain distinct?",
+  "field": "native_mid9420_mid",
+  "D": 0.23571967676008299,
+  "conditions": [
+    {
+      "label": "native_mid9420_mid_from_lower",
+      "field": "native_mid9420_mid",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    },
+    {
+      "label": "native_mid9420_mid_from_upper",
+      "field": "native_mid9420_mid",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native_mid9420_9870_from_upper/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 10000
+    }
+  ],
+  "equations": "Exactly the endpoint conditional-drift equations; Z entire field held, M dynamic, constant original external mean, no future count innovations.",
+  "intervention": "Only Z is replaced. Synapses, local response states, full delay/refractory history, M and clock are carried from the specified completed and audited source. Different M is part of the complete initial state, not a separately changed parameter.",
+  "readout": "Same original event/quiet/spatial readouts; final5s comparison, full E/I spatial-rate recurrence and saved exact checkpoints.",
+  "budget": "Two10s runs for this one target field. No adaptive extra run until these results have been audited.",
+  "interpretation": "Agreement narrows the activity-transition bracket. Persistence of distinct results supports finite-time history dependence and motivates basin/longer-time tests; it does not by itself certify bistability or a separatrix.",
+  "endpoint_evidence": {
+    "lower": {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_rates_global_A_B_surround": [
+        26.95051367405802,
+        78.18173186016067,
+        69.67267000105977,
+        24.579930831466225
+      ],
+      "smoothed_global_range_hz": [
+        0.014443289941771326,
+        129.02088206235308
+      ],
+      "quiet_fraction": 0.5422,
+      "longest_quiet_ms": 129,
+      "complete_events": {
+        "n": 21,
+        "median_duration_ms": 106.0,
+        "iqr_duration_ms": [
+          105.0,
+          106.0
+        ],
+        "median_gap_ms": 234.0,
+        "both_cores": 21,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.5709687499999998,
+        "median_surround_cells": 214.0,
+        "forward": 0,
+        "reverse": 21,
+        "undirected": 0,
+        "median_extent_mm": 16.068681459705815
+      },
+      "persistent_spatial_fraction": 0.0,
+      "group_rate_relative_variation": 0.9288567545745428,
+      "M_mean_global_A_B_surround": [
+        0.013138321806683204,
+        0.03793271735284817,
+        0.033830614547463514,
+        0.01199061608324059
+      ]
+    },
+    "upper": {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_rates_global_A_B_surround": [
+        197.81253194354287,
+        417.6044237734446,
+        411.513098642458,
+        186.8574521055548
+      ],
+      "smoothed_global_range_hz": [
+        192.4044411662106,
+        203.43821390171072
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.5142499999999999,
+      "group_rate_relative_variation": 0.2311445148960172,
+      "M_mean_global_A_B_surround": [
+        0.09890060782138425,
+        0.20880198001376152,
+        0.20575357368378608,
+        0.093422864361079
+      ]
+    }
+  },
+  "initial_source_evidence": {
+    "lower": {
+      "label": "native9420_from_lower",
+      "last_window": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          43.479443782303655,
+          127.48947649607737,
+          125.62701912042661,
+          39.28011486300131
+        ],
+        "smoothed_global_range_hz": [
+          0.01124232663022775,
+          197.75068974298563
+        ],
+        "quiet_fraction": 0.599,
+        "longest_quiet_ms": 168,
+        "complete_events": {
+          "n": 17,
+          "median_duration_ms": 119.0,
+          "iqr_duration_ms": [
+            115.0,
+            119.0
+          ],
+          "median_gap_ms": 284.5,
+          "both_cores": 17,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.5540624999999999,
+          "median_surround_cells": 207.0,
+          "forward": 9,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 3.3021906077507643
+        },
+        "persistent_spatial_fraction": 0.0,
+        "group_rate_relative_variation": 0.885667065624377,
+        "M_mean_global_A_B_surround": [
+          0.022491633314933528,
+          0.06577473385786235,
+          0.06516216391479672,
+          0.020319128559159995
+        ]
+      }
+    },
+    "upper": {
+      "label": "native_mid9420_9870_from_upper",
+      "last_window": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          162.28013127359088,
+          407.29088626279196,
+          398.6900468488397,
+          150.11478974686761
+        ],
+        "smoothed_global_range_hz": [
+          118.69435383017537,
+          192.4494907804836
+        ],
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "complete_events": {
+          "n": 0
+        },
+        "persistent_spatial_fraction": 0.3696875,
+        "group_rate_relative_variation": 0.4090815077935694,
+        "M_mean_global_A_B_surround": [
+          0.08113630527441329,
+          0.20364244059030842,
+          0.19940183158180522,
+          0.07505205282182642
+        ]
+      }
+    }
+  },
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

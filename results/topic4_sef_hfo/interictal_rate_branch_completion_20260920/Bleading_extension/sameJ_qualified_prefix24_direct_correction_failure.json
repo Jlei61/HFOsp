@@ -1,0 +1,18 @@
+{
+  "status": "TERMINAL_NONCONVERGENCE",
+  "pid": 527839,
+  "previous_worker": {
+    "status": "CORRECTING_AT_EXACT_SAME_J",
+    "pid": 527839,
+    "timestamp": 1789898700.8587751,
+    "seed": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0066_N256_accuracy_N2048.npz",
+    "J_EE_core": 0.9693444148956987,
+    "N": 2048
+  },
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/sameJ_qualified_prefix24_pair.log",
+  "seed_J_EE_core": 0.9645924161605287,
+  "target_J_EE_core": 0.9693444148956987,
+  "interpretation": "Direct large parameter correction did not converge. This does not establish absence of the branch.",
+  "recovery": "Bounded incremental fixed-J correction; halve a failed step and preserve all accepted intermediate orbits.",
+  "last_logged_error_Hz": 2.842028353013906
+}

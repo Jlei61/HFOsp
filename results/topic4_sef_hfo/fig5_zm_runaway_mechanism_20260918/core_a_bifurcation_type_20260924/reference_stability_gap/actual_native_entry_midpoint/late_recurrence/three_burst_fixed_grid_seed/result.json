@@ -1,0 +1,57 @@
+{
+  "status": "UNINTERRUPTED_FIXED_GRID_SEED",
+  "segments": 6,
+  "period_ms": 790.287011117063,
+  "fixed_grid_segment_ms": 131.70000000000002,
+  "durations_ms": [
+    131.70000000000002,
+    131.70000000000002,
+    131.70000000000002,
+    131.70000000000002,
+    131.70000000000002,
+    131.7870111170629
+  ],
+  "all_nodes_on_actual_steps": true,
+  "all_nodes_admissible": true,
+  "single_pass_parity_relative": 1.5209031090959607e-13,
+  "full_state_errors": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.91275794897386,
+        "difference_rms": 0.0015784757391352417,
+        "relative_rms": 9.919561047788264e-05
+      },
+      "GABA": {
+        "reference_rms": 8.277522586542542,
+        "difference_rms": 0.0014882919482040054,
+        "relative_rms": 0.00017979920110681977
+      },
+      "M": {
+        "reference_rms": 0.02080488472914656,
+        "difference_rms": 5.482892490860356e-07,
+        "relative_rms": 2.635387103673355e-05
+      },
+      "covariance": {
+        "reference_rms": 37.568389027301926,
+        "difference_rms": 0.0007159721796178364,
+        "relative_rms": 1.905783554087243e-05
+      },
+      "input_memory": {
+        "reference_rms": 0.08879161895163573,
+        "difference_rms": 2.2980498700214157e-05,
+        "relative_rms": 0.0002588138269303491
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004700825280918523,
+        "difference_rms": 9.870084017802502e-07,
+        "relative_rms": 0.00020996491951885362
+      }
+    },
+    "combined_relative_rms": 0.00016036162981926483
+  },
+  "final_cubic_endpoint_admissible": true,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "seconds": 197.41803216934204,
+  "model_promoted": false
+}

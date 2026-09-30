@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-20T05:58:20.655679+08:00",
+  "status": "FIXED_MODEL_PROTOCOL_DIAGNOSTIC",
+  "conditions": 282,
+  "source_contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditional_density_linear_response_contract.json",
+  "weights": {
+    "I_final.pt": "eef1d5b93300a427726f1040f179f8ed39aa3f486494ce1f7d2070789670153e",
+    "E_final.pt": "b179361da2a93a4f59ec92fe61bff1650ab2c889c73a9aa6f580fd2a929fa044"
+  },
+  "numerical": "Each original dt(0.05or0.1ms),amplitude,burn,duration and oscillator phase preserved. Unmodulated burn begins from reset/zero history; model uses own predicted refractory history.",
+  "reason": "Close the finite-amplitude versus infinitesimal-response ambiguity before attributing a gain failure to the rate model. Correct preliminary analytic covariance/history factors to each case own dt; preserve previous analytic file as historical.",
+  "driven_features_max_difference": 0.0,
+  "training_changes": false,
+  "boundary": "Local waveform rejection remains. These measurements cannot alone promote the spatial model or classify onset. No additional fitting or simulation extension."
+}

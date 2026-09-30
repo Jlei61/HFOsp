@@ -1,0 +1,5 @@
+{
+  "preserved_running_pid": 258261,
+  "cancelled_new_pid": 268703,
+  "reason": "Original worker advanced from resource wait to an active Floquet calculation before the restart guard. Guard correctly refused termination; cancel the inadvertently launched replacement and retain original computation."
+}

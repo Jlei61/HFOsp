@@ -1,0 +1,34 @@
+{
+  "status": "REGISTERED_BEFORE_FRESH_PHASE_CORRECTION_COUNTS",
+  "created_epoch": 1790546391.6547384,
+  "question": "Does one measured current-point correction reduce the repaired stationary-map residual under fresh independent phase-aware counts?",
+  "design": {
+    "targets": 40000,
+    "streams": 2,
+    "replicas": 256,
+    "record_ms": 16000,
+    "burn_ms": 1000,
+    "extra_burn_ms": [
+      0,
+      1000
+    ],
+    "seeds": [
+      929391,
+      929392
+    ]
+  },
+  "proposal": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/held_exit_phase_dc_operator_K9p35/joint_newton_proposal.npz",
+  "proposal_sha256": "a785f28088f65ed894846902f1cc231cdae2b9156f81794531c7fbaaeeebfb84",
+  "change": "Only proposed source/M coordinates at the same actualheldZ/K and externalmean. Fresh seeds, same verified localphase observer. CurrentK9.35DC is measured locally; K9derivatives never used.",
+  "bounds": {
+    "maximum_source_step_Hz": 5,
+    "maximum_rate_projection_Hz": 0.001,
+    "actual_target_projection_Hz": 1.6788850616401516e-05
+  },
+  "numerical_criterion": "Retain existing finiteprecision near-selfconsistency rule: E/I sourceweightedRMS<=2combinedSEM, no group beyond6combinedSEM+1e-7Hz; E individualtargetRMS<=2combinedSEM. PredictionSEM combines previous response sampling and8block derivativeaction. This is not exactroot, stability, nativecorrespondence or a complete approximation-error bound.",
+  "limits": "Source/M coordinates chosen from finite data, selectedphase convergence and measured amplitude failures remain explicit; SEM does not bound modelclosure or systematicderivative bias. No automatic nextNewton/Kpoint.",
+  "producer_sha256": "8df440e187f87ea3d29a2fd180606f4edb0596339a515e6a5c40ace665d123e3",
+  "wrapper_sha256": "bcdc18733f5a9562e6c039e93ce67e6b5b23602cd92adfb1bc6cb286b7969cd9",
+  "observer_sha256": "8d04426e279f4a1934113f68fb9913e26c6990c3c8bbd2c0be373052abb98fde",
+  "formal_bifurcation_allowed": false
+}

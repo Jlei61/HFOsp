@@ -1,0 +1,14 @@
+{
+  "fine_spectrum": {
+    "status": "STOPPED",
+    "pid": 3875227,
+    "command": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_zm_runaway_mechanism/endpoint_floquet.py results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M262144/point0000.npz --family native --device 1 --method rk4 --dt .000390625 --cpu-orbit-fft --stream-orbit --fast-time-grid --host-gain-cache --preinterpolate-delays --quotient --nev 3 --ncv 10 --eigen-tol 1e-6 --map-progress --ritz-progress --output-tag generic3 ",
+    "process_start_ticks": "44974483",
+    "updated_local": "2026-09-20T05:27:37.471928+08:00",
+    "reason": "Controlled stop of this task own obsolete-model single-orbit refinement after more than12hours. Independent family phase consistency and local-response correspondence already fail; completing this one spectrum cannot certify onset or repair those failures. Preserve all completed coarse evidence and progress logs; no final fine spectrum or stable/unstable verdict claimed.",
+    "completed_fine_spectrum": false,
+    "onset_bifurcation_type": "NOT_ESTABLISHED",
+    "restart_authorized_by_this_record": false,
+    "confirmed_ended_local": "2026-09-20T05:38:55.906958+08:00"
+  }
+}

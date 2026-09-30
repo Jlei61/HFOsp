@@ -1,0 +1,70 @@
+{
+  "status": "LOCKED_BEFORE_NEW_TARGETS",
+  "created_epoch": 1790487916.2473593,
+  "question": "Can independently calibrated zero/small-conductance data repair the inherited table-domain error without changing the native SNN?",
+  "identified_failure": "v2 index270 lies beyond parent sigmaE6.5 table; atg0 measured16.34Hz,parent2.37Hz. The forced g0-parent invariant prevents correcting this inherited error.",
+  "change": "Same4-96-96-96-1 residual architecture, remove g/(1+g) residual gate. Oldparent pluslog(1+g) is only a numerical baseline. No claim of exact old-rate closure atg0; directg0 independent MC replaces that invalid invariant.",
+  "training": {
+    "reused_v1_v2_training": 5120,
+    "known_v2_validation_now_development": 512,
+    "fresh_g0": 1024,
+    "fresh_small_g": 512,
+    "replicates": 512,
+    "design_seeds": [
+      927371,
+      927372,
+      927373,
+      927374
+    ],
+    "noise_seed": 927375,
+    "record_ms": 2000,
+    "burn_ms": 500
+  },
+  "fit": {
+    "seed": 927376,
+    "steps": 30000,
+    "batch": 512,
+    "loss": "Squared asinh(rate/2Hz) error",
+    "optimizer": "AdamW",
+    "weight_decay": 1e-06,
+    "gradient_clip": 10.0,
+    "learning_rate_schedule": [
+      [
+        0,
+        0.001
+      ],
+      [
+        12000,
+        0.0003
+      ],
+      [
+        24000,
+        0.0001
+      ]
+    ],
+    "selection": "Fixed final step only; no validation selection."
+  },
+  "validation": {
+    "total": 1024,
+    "strata": [
+      "broad256",
+      "low_mean256",
+      "zero_g_broad256",
+      "zero_g_low_mean256"
+    ],
+    "design_seeds": [
+      927381,
+      927382,
+      927383,
+      927384
+    ],
+    "noise_seed": 927385,
+    "replicates": 1024,
+    "burn_ms": 500,
+    "record_ms": 2000
+  },
+  "gate": "Unchanged error criteria, separately everystratum andoverall: >=90% withinmax(2Hz,10%MC,3SEM), everypoint withinmax(10Hz,25%MC,5SEM). Predictions/model frozen before newtesttargets.",
+  "source_sha256": "aac8a969b355114955816f246a14651acdbdd6709fe1a2adbcba3a379c2cc6a8",
+  "limits": "A static pass does not establish gain, dynamic conductance, shared/private noise, spatial propagation or bifurcation. Parent spline boundary derivatives and monotonicity must be inspected before stability claims.",
+  "reflection": "If this cause-specific repair still fails, diagnose actual native domain and approximation assumptions before another model expansion. No indefinite capacity sweep."
+}

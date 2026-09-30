@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "native_Z_time_ms": 9000,
+      "first10mscount_bitwise": true,
+      "first_step_conditional_rate_bitwise": true,
+      "private_operators_unchanged": true,
+      "count_changed_groups": 3302,
+      "M_expected_update_error": 2.6020852139652106e-16
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "first10mscount_bitwise": true,
+      "first_step_conditional_rate_bitwise": true,
+      "private_operators_unchanged": true,
+      "count_changed_groups": 3302,
+      "M_expected_update_error": 2.7755575615628914e-16
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "first10mscount_bitwise": true,
+      "first_step_conditional_rate_bitwise": true,
+      "private_operators_unchanged": true,
+      "count_changed_groups": 3302,
+      "M_expected_update_error": 2.706168622523819e-16
+    }
+  ],
+  "private_split": [
+    {
+      "synapse": "ampa",
+      "stationary_pairwise_relative_error": 8.883924858577115e-16,
+      "removed_fraction_range": [
+        0.0008403361344537816,
+        1.0
+      ],
+      "private_operator_minimum": 0.0,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 4.9639992158328995e-05,
+      "previous_Heun_fraction_max": 1.00001450111236,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 6790588
+    },
+    {
+      "synapse": "gaba",
+      "stationary_pairwise_relative_error": 7.979850840862656e-16,
+      "removed_fraction_range": [
+        0.0026041666666666665,
+        1.0
+      ],
+      "private_operator_minimum": 0.0,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 5.21886866792403e-06,
+      "previous_Heun_fraction_max": 1.0000008867395271,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 3125847
+    }
+  ],
+  "object": "Sampling removed only; private variance and shared self-history retained.",
+  "native_future_spikes_used": false,
+  "model_promoted": false
+}

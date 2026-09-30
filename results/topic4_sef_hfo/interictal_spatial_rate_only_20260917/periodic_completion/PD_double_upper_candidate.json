@@ -1,0 +1,108 @@
+{
+  "status": "UNREFINED_NEGATIVE_MULTIPLIER_CROSSING_CANDIDATE",
+  "bracket": {
+    "family": "double",
+    "ends": [
+      {
+        "index": 147,
+        "status": "NUMERICALLY_STABLE",
+        "J_EE_core": 0.944715021570113,
+        "T_ms": 761.9267012549612,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0001_N1024.npz"
+      },
+      {
+        "index": 168,
+        "status": "UNSTABLE",
+        "J_EE_core": 0.9447720644904876,
+        "T_ms": 761.9427234452309,
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024.npz"
+      }
+    ],
+    "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up."
+  },
+  "sources": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0001_N1024.npz",
+      "J": 0.944715021570113,
+      "T": 761.9267012549612,
+      "spectrum": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcDoubleRef_0001_N1024_accuracy_N2048_dt0.1_ritz.json",
+      "multipliers": [
+        [
+          1.0020973617844626,
+          0.0
+        ],
+        [
+          0.46972445396479273,
+          0.0
+        ],
+        [
+          0.4676591493732051,
+          0.0
+        ],
+        [
+          0.4657412341526287,
+          0.0
+        ],
+        [
+          0.4642263285640076,
+          0.0
+        ],
+        [
+          0.4551941117878549,
+          0.0
+        ],
+        [
+          0.2973733951123826,
+          0.0
+        ],
+        [
+          -0.08360604113338659,
+          0.0
+        ]
+      ],
+      "status": "NUMERICALLY_STABLE"
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024.npz",
+      "J": 0.9447720644904876,
+      "T": 761.9427234452309,
+      "spectrum": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcDoubleRef_0022_N1024_accuracy_N2048_dt0.1.json",
+      "multipliers": [
+        [
+          -25.05869134479329,
+          0.0
+        ],
+        [
+          1.0021571199568144,
+          0.0
+        ],
+        [
+          0.46883874051267727,
+          0.0
+        ],
+        [
+          0.4644743572322457,
+          -0.00016246942762130956
+        ],
+        [
+          0.4644743572322457,
+          0.00016246942762130956
+        ],
+        [
+          0.4552942746964006,
+          0.0
+        ],
+        [
+          0.21862734899000708,
+          0.0
+        ],
+        [
+          0.0009989416248621904,
+          0.0
+        ]
+      ],
+      "status": "UNSTABLE"
+    }
+  ],
+  "scope": "Opposite sampled stability and a large negative multiplier suggest a new PD; no critical location/type/child stability certified yet."
+}

@@ -1,0 +1,35 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/checkpoint5000.npz",
+  "candidate": {
+    "time1_ms": 8010.0,
+    "time2_ms": 8971.0,
+    "period_ms": 961.0,
+    "score": 0.15660590390077084,
+    "rate_history_squared_error_over_variance": 0.09680222208815348,
+    "M_squared_error_over_variance": 0.05980368181261737,
+    "regional_rates_A_B_S_1": [
+      393.69556669847395,
+      4.149393693060537e-05,
+      22.09667464640187
+    ],
+    "regional_rates_A_B_S_2": [
+      394.38085081469785,
+      4.8972401584422466e-05,
+      20.78812509169434
+    ]
+  },
+  "selection": "Lowest original all-group recurrence score with period>=200ms and continuously high Core A. Its actual B burst and quiet structure must be checked; no stable cycle is assumed.",
+  "times_ms": [
+    8010.0,
+    8250.25,
+    8490.5,
+    8730.75,
+    8971.0
+  ],
+  "number_segments": 4,
+  "dt_ms": 0.05,
+  "equations": "Original3479-group spatial field, same physical delays and locked response. All M dynamic. Entire Z held, only native Core-A resource pattern differs from native9s.",
+  "validation": "Every replayed1ms all-group rate must match the original float32 record bitwise; all stored Z fields must match exactly. Intermediate snapshots are exact actual steps, with no interpolated physical state.",
+  "interpretation": "A multi-segment shooting seed only; full closure, nontrivial amplitude, independent phase/mesh and stability remain required.",
+  "model_promoted": false
+}

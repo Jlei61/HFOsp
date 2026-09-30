@@ -1,0 +1,58 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD2_physical_20260920_a20.00000_N16384.npz",
+  "J_EE_core": 0.9447299638483305,
+  "T_ms": 1523.9081384140497,
+  "dt_ms": 0.0999939723368799,
+  "history_dimension": 345015,
+  "minimum_occupied_delay_ms": 0.1,
+  "bounded_harmonic_indices": true,
+  "multipliers": [
+    [
+      -0.10623185414124241,
+      0.14462684448084584
+    ],
+    [
+      -0.10623185414124241,
+      -0.14462684448084584
+    ]
+  ],
+  "residuals": [
+    1.0240079725614267e-13,
+    1.0240079725614267e-13
+  ],
+  "phase_tangent_relative_defect": 0.0029396893650282395,
+  "phase_overlap": [
+    7.18348466436479e-14,
+    7.18348466436479e-14
+  ],
+  "section_time_shift_coefficients": [
+    [
+      2.9200823490217758,
+      -0.2731677115626898
+    ],
+    [
+      2.9200823490217758,
+      0.2731677115626898
+    ]
+  ],
+  "full_state_generalized_eigen_residuals": [
+    1.0239704718462168e-13,
+    1.0239704718462168e-13
+  ],
+  "polynomial_filter_rho": 0.21785879870448982,
+  "transformed_eigenvalues": [
+    [
+      0.013511826817185449,
+      0.062236186294608316
+    ],
+    [
+      0.013511826817185449,
+      -0.062236186294608316
+    ]
+  ],
+  "filter_coverage_threshold": 0.7821412012955102,
+  "smallest_returned_transformed_modulus": 0.06368604516245928,
+  "method": "Full nine-state plus delay history Poincare return linearization P M P; autonomous phase removed by a section.",
+  "seconds": 220.35348892211914,
+  "limitation": "Numerical spectrum at this orbit only. Near-unit conclusions require time-step refinement; no continuum completeness claim."
+}

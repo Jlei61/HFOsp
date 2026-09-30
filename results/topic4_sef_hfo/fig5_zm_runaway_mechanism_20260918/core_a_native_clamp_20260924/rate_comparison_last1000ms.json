@@ -1,0 +1,127 @@
+{
+  "rows": [
+    {
+      "label": "reference",
+      "regions": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 36.366331635502604,
+          "quiet_fraction": 0.523,
+          "duty_above50": 0.263,
+          "range_10ms_hz": [
+            0.009261601931268935,
+            176.27342385141554
+          ],
+          "complete_local_episodes": 3,
+          "episode_durations_ms": [
+            154,
+            114,
+            117
+          ]
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 108.91034250840906,
+          "quiet_fraction": 0.652,
+          "duty_above50": 0.305,
+          "range_10ms_hz": [
+            1.529743277743728e-05,
+            473.03351304031503
+          ],
+          "complete_local_episodes": 3,
+          "episode_durations_ms": [
+            89,
+            88,
+            89
+          ]
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 97.0547682095537,
+          "quiet_fraction": 0.634,
+          "duty_above50": 0.306,
+          "range_10ms_hz": [
+            1.5283718936886585e-05,
+            474.6987833192935
+          ],
+          "complete_local_episodes": 3,
+          "episode_durations_ms": [
+            89,
+            91,
+            105
+          ]
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 33.00456882048699,
+          "quiet_fraction": 0.532,
+          "duty_above50": 0.251,
+          "range_10ms_hz": [
+            0.009728566866246775,
+            163.980794618041
+          ],
+          "complete_local_episodes": 3,
+          "episode_durations_ms": [
+            152,
+            111,
+            115
+          ]
+        }
+      ]
+    },
+    {
+      "label": "coreA_depleted",
+      "regions": [
+        {
+          "region": "Global E",
+          "mean_rate_hz": 59.58638957401986,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.775,
+          "range_10ms_hz": [
+            30.000670467677377,
+            94.29262161122176
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 419.8728361689064,
+          "quiet_fraction": 0.0,
+          "duty_above50": 1.0,
+          "range_10ms_hz": [
+            361.10266198985477,
+            434.8594601092349
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 189.68919416058105,
+          "quiet_fraction": 0.144,
+          "duty_above50": 0.79,
+          "range_10ms_hz": [
+            2.896801483811178e-05,
+            416.5712500373371
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 47.31072361415179,
+          "quiet_fraction": 0.0,
+          "duty_above50": 0.45,
+          "range_10ms_hz": [
+            20.967002420563574,
+            78.01261486980233
+          ],
+          "complete_local_episodes": 0,
+          "episode_durations_ms": []
+        }
+      ]
+    }
+  ],
+  "scope": "Matching1000ms averaging length only; histories/noise not matched between models."
+}

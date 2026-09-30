@@ -1,0 +1,95 @@
+{
+  "status": "COMPLETE",
+  "J_EE_core": 1.6,
+  "duration_ms": 3000,
+  "dt_ms": 0.1,
+  "seconds": 15.68386435508728,
+  "dynamics": [
+    {
+      "mean_rate_hz": 240.86896422069728,
+      "minimum_hz": 0.052289582331760204,
+      "maximum_hz": 384.25786031980766,
+      "quiet_fraction": 0.19555555555555557,
+      "self_limited_bursts": 3,
+      "peak_times_ms": [
+        1024,
+        1265,
+        1507
+      ],
+      "burst_windows_ms": [
+        [
+          982,
+          1098
+        ],
+        [
+          1223,
+          1340
+        ],
+        [
+          1464,
+          1581
+        ]
+      ],
+      "IEI_CV": 0.002927978390006408,
+      "median_IEI_ms": 241.5,
+      "oscillatory_peaks": 32
+    },
+    {
+      "mean_rate_hz": 271.4062743183419,
+      "minimum_hz": 0.06740289459398184,
+      "maximum_hz": 395.96784468005546,
+      "quiet_fraction": 0.16044444444444445,
+      "self_limited_bursts": 2,
+      "peak_times_ms": [
+        1031,
+        1274
+      ],
+      "burst_windows_ms": [
+        [
+          989,
+          1111
+        ],
+        [
+          1232,
+          1355
+        ]
+      ],
+      "IEI_CV": null,
+      "median_IEI_ms": 243.0,
+      "oscillatory_peaks": 31
+    },
+    {
+      "mean_rate_hz": 14.595634844656145,
+      "minimum_hz": 0.06421741980491713,
+      "maximum_hz": 46.324256098796695,
+      "quiet_fraction": 0.15688888888888888,
+      "self_limited_bursts": 3,
+      "peak_times_ms": [
+        786,
+        1028,
+        1270
+      ],
+      "burst_windows_ms": [
+        [
+          760,
+          888
+        ],
+        [
+          1002,
+          1132
+        ],
+        [
+          1243,
+          1376
+        ]
+      ],
+      "IEI_CV": 0.0,
+      "median_IEI_ms": 242.0,
+      "oscillatory_peaks": 25
+    }
+  ],
+  "trajectory": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J1.6000000/trajectory.npz",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/pilot/J1.6000000/contract.json",
+  "observation": "Rates in Hz/cell; fields and readouts are functions of this rate trajectory, not sampled spikes",
+  "native_equivalence": "NOT_VALIDATED"
+}

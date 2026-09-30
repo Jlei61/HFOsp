@@ -1,0 +1,67 @@
+[
+  {
+    "status": "INADMISSIBLE_NUMERICAL_PROPOSAL",
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 2.1041360724163405,
+        "projected_step_norm": 2.082748020234875,
+        "phase_error": 5.49256820581112e-16
+      },
+      {
+        "projected_negative_coordinates": 16532,
+        "negative_steps_at_exact_zero": 3126,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 16103,
+        "negative_steps_at_exact_zero": 1376,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 18020,
+        "negative_steps_at_exact_zero": 5357,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 3.0008135163390373,
+    "step_norm": 3.0008135163384018,
+    "lagrange_multiplier": 0.170621271866224,
+    "predicted_relative_residual": 0.4229133688753151
+  },
+  {
+    "status": "EVALUATED",
+    "period_ms": 536.4814989675926,
+    "max_combined_relative_rms": 0.04068992068032738,
+    "residual_ratio": 0.6700012115999587,
+    "predicted_gain": 0.5846897570536222,
+    "agreement": 0.9425483682691671,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 1.2419447062631976,
+        "projected_step_norm": 1.2305306320250264,
+        "phase_error": 7.587246803053228e-16
+      },
+      {
+        "projected_negative_coordinates": 7198,
+        "negative_steps_at_exact_zero": 2351,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 5690,
+        "negative_steps_at_exact_zero": 1333,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 11130,
+        "negative_steps_at_exact_zero": 5970,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 1.5004067581695186,
+    "step_norm": 1.500406758169228,
+    "lagrange_multiplier": 0.8934822044458991,
+    "predicted_relative_residual": 0.6404551138840587
+  }
+]

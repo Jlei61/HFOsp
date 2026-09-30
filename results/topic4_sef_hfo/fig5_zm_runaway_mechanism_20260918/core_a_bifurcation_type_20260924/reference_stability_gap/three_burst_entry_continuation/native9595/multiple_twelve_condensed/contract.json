@@ -1,0 +1,32 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/twelve_segment_seed",
+  "dt_ms": 0.05,
+  "segments": 12,
+  "condensed_linear_solve": true,
+  "condensed_linear_method": "Exact block elimination of the K-node Newton equations only; all nonlinear nodes remain independent. Solve the node-zero/period bordered Schur system, back-substitute every node, independently check the original full linear residual, and damp the entire recovered update within the original full-state radius. Original nonlinear matching, derivative and physical gates unchanged.",
+  "fixed_grid_segment_ms": 65.95,
+  "numerical_restart": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9595/multiple_twelve_segments/iteration00",
+  "target_D_A": null,
+  "target_native_path_time_ms": null,
+  "common_coordinate_scale": "cycle_rms",
+  "coordinate_scale_definition": "source uses the first node row RMS; cycle_rms uses cell-weighted row RMS across all complete nodes with the same existing row floors. Shared invertible coordinates only; original per-node physical closure gates unchanged.",
+  "parameter_continuation": "Only original native within-Core-A Z changes. target_native_path_time_ms follows the continuous recorded field path, with meanD_A only a display coordinate; target_D_A is the historical first-upcrossing lookup and must not be presumed continuous across mean-recovery loops. Outside-Core-A Z must match bitwise; other initial states including every M are preserved as numerical seeds. Each physical segment holds all Z and evolves all M.",
+  "cyclic_right_precondition": false,
+  "cyclic_M_precondition": false,
+  "cyclic_M_definition": null,
+  "orthogonal_phase_bound_projection": true,
+  "refractory_occupancy_projection": true,
+  "equations": "Unchanged3479-group spatial delayed rate model; entireZheld and allMdynamic. Exact observed recurrent trajectory supplies K complete initial nodes.",
+  "method": "Solve K full-state matching equations Phi(h_j,X_j)-X_(j+1)=0 and one autonomous phase condition. Default h_j=T/K. If fixed_grid_segment_ms is present, first K-1 h_j are anchored integer-step durations and only last h_j=T-sum(h_0..h_K-2) varies. Intermediate endpoints then use actual steps without fractional-history interpolation; final endpoint retains original cubic output. Exact full variational equations and all physical root gates unchanged.",
+  "gates": "Independent cached-versus-original variational products at every node and a full bordered actual-flow finite difference. Original nonlinear matching residual and actual-step hookstep prediction gate every accepted update. Full closure combined<1e-7 and every physical block<1e-6 at every node, phase<1e-9. Independent phase/mesh and Floquet remain separate.",
+  "period_interval_ms": [
+    633.2524866650152,
+    949.8787299975228
+  ],
+  "maximum_iterations": 4,
+  "Krylov_per_iteration": 24,
+  "linear_solve_tolerance_cap": 0.001,
+  "linear_solve_rule": "min(cap,max(1e-6,0.1*sqrt(maximum physical matching residual))). Only the inexact Newton solve tolerance changes; physical root gates and actual nonlinear/prediction checks remain unchanged.",
+  "interpretation": "A periodic root is only a candidate invariant skeleton. Must preserve actual A-sustained/B-burst structure, continue a relevant critical crossing and check stability/nondegeneracy before naming the onset bifurcation.",
+  "model_promoted": false
+}

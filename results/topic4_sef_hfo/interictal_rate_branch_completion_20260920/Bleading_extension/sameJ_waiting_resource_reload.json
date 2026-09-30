@@ -1,0 +1,11 @@
+{
+  "timestamp": 1789873575.4864976,
+  "old_worker": {
+    "status": "WAITING_RESOURCE",
+    "pid": 515285,
+    "timestamp": 1789873554.2113218,
+    "free_mib": 3178.0
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/solve_rate_sameJ_burst_pair.py --device 0 ",
+  "reason": "Reload only the sleeping, not-yet-started N2048 solver. It explicitly uses the independently checked 64-harmonic index capacity and host Krylov. Require 3 GiB free, instead of the earlier 3.5 GiB generic gate; preserve the exact target J, temporal mesh, all 935 groups and numerical acceptance checks."
+}

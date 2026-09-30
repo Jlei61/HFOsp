@@ -1,0 +1,1857 @@
+{
+  "status": "COMPLETE",
+  "model": "frozen spatial rate field; native checkpoint Z parameter path",
+  "Z": "held",
+  "M": "dynamic",
+  "D": 0.2196,
+  "global_Z": 0.7804,
+  "source_files": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2196000_dt0.05/trajectory.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_Z_D2196_long_from12s_dt005/trajectory.npz"
+  ],
+  "duration_ms": 72000,
+  "canonical_whole": {
+    "label": "native_Z_D2196_continuous72s",
+    "category": "UNRESOLVED",
+    "tail": {
+      "lo_bin": 6800,
+      "hi_bin": 7200,
+      "n_bins": 400,
+      "quiet_fraction": 0.0425,
+      "longest_quiet_ms": 170,
+      "quiet_runs_ge20ms": 1,
+      "n_events": 0,
+      "event_durations_ms": [],
+      "event_peaks_hz": [],
+      "inter_onset_ms": [],
+      "activity_duty": 0.9575,
+      "mean_rate_hz": 69.58617366070784,
+      "max_rate_hz": 170.68786983678825,
+      "trailing_activity_ms": 2840,
+      "persistent_fraction": {
+        "20Hz_duty80": 0.0,
+        "20Hz_duty90": 0.0,
+        "50Hz_duty80": 0.0,
+        "50Hz_duty90": 0.0,
+        "100Hz_duty80": 0.0,
+        "100Hz_duty90": 0.0
+      },
+      "high_confirmed_inside": false,
+      "mean_instantaneous_fraction_50Hz": 0.2311359375
+    },
+    "subwindows": [
+      {
+        "lo_bin": 6800,
+        "hi_bin": 6900,
+        "n_bins": 100,
+        "quiet_fraction": 0.01,
+        "longest_quiet_ms": 10,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 0.99,
+        "mean_rate_hz": 68.52720740154449,
+        "max_rate_hz": 155.27560231277607,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0850625,
+          "20Hz_duty90": 0.05009375,
+          "50Hz_duty80": 0.08034375,
+          "50Hz_duty90": 0.04571875,
+          "100Hz_duty80": 0.07828125,
+          "100Hz_duty90": 0.04090625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.22546062499999997
+      },
+      {
+        "lo_bin": 6900,
+        "hi_bin": 7000,
+        "n_bins": 100,
+        "quiet_fraction": 0.16,
+        "longest_quiet_ms": 160,
+        "quiet_runs_ge20ms": 1,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 0.84,
+        "mean_rate_hz": 61.87985992845848,
+        "max_rate_hz": 170.68786983678825,
+        "trailing_activity_ms": 840,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.20378843749999997
+      },
+      {
+        "lo_bin": 7000,
+        "hi_bin": 7100,
+        "n_bins": 100,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 72.70869217681654,
+        "max_rate_hz": 142.78688243544633,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.068125,
+          "20Hz_duty90": 0.0509375,
+          "50Hz_duty80": 0.061,
+          "50Hz_duty90": 0.0460625,
+          "100Hz_duty80": 0.0585,
+          "100Hz_duty90": 0.0380625
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.24344281250000002
+      },
+      {
+        "lo_bin": 7100,
+        "hi_bin": 7200,
+        "n_bins": 100,
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "quiet_runs_ge20ms": 0,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 1.0,
+        "mean_rate_hz": 75.22893513601188,
+        "max_rate_hz": 123.07359808821533,
+        "trailing_activity_ms": 1000,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0983125,
+          "20Hz_duty90": 0.00728125,
+          "50Hz_duty80": 0.06609375,
+          "50Hz_duty90": 0.0023125,
+          "100Hz_duty80": 0.04853125,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.251851875
+      }
+    ],
+    "events": [
+      {
+        "start_bin": 22,
+        "end_bin": 159,
+        "duration_ms": 1370,
+        "peak_hz": 181.2907363153686,
+        "qualifies": true,
+        "start_ms": 220.0,
+        "end_ms": 1590.0
+      },
+      {
+        "start_bin": 178,
+        "end_bin": 382,
+        "duration_ms": 2040,
+        "peak_hz": 204.57772407636142,
+        "qualifies": true,
+        "start_ms": 1780.0,
+        "end_ms": 3820.0
+      },
+      {
+        "start_bin": 393,
+        "end_bin": 523,
+        "duration_ms": 1300,
+        "peak_hz": 169.18781482652398,
+        "qualifies": true,
+        "start_ms": 3930.0,
+        "end_ms": 5230.0
+      },
+      {
+        "start_bin": 541,
+        "end_bin": 601,
+        "duration_ms": 600,
+        "peak_hz": 188.1925265284105,
+        "qualifies": true,
+        "start_ms": 5410.0,
+        "end_ms": 6010.0
+      },
+      {
+        "start_bin": 616,
+        "end_bin": 721,
+        "duration_ms": 1050,
+        "peak_hz": 170.5868936542538,
+        "qualifies": true,
+        "start_ms": 6160.0,
+        "end_ms": 7210.0
+      },
+      {
+        "start_bin": 740,
+        "end_bin": 860,
+        "duration_ms": 1200,
+        "peak_hz": 210.62386194365666,
+        "qualifies": true,
+        "start_ms": 7400.0,
+        "end_ms": 8600.0
+      },
+      {
+        "start_bin": 877,
+        "end_bin": 1104,
+        "duration_ms": 2270,
+        "peak_hz": 202.43457989832584,
+        "qualifies": true,
+        "start_ms": 8770.0,
+        "end_ms": 11040.0
+      },
+      {
+        "start_bin": 1123,
+        "end_bin": 1146,
+        "duration_ms": 230,
+        "peak_hz": 209.495424381437,
+        "qualifies": true,
+        "start_ms": 11230.0,
+        "end_ms": 11460.0
+      },
+      {
+        "start_bin": 1165,
+        "end_bin": 1245,
+        "duration_ms": 800,
+        "peak_hz": 215.51761102379504,
+        "qualifies": true,
+        "start_ms": 11650.0,
+        "end_ms": 12450.0
+      },
+      {
+        "start_bin": 1263,
+        "end_bin": 1378,
+        "duration_ms": 1150,
+        "peak_hz": 190.48879473681083,
+        "qualifies": true,
+        "start_ms": 12630.0,
+        "end_ms": 13780.0
+      },
+      {
+        "start_bin": 1396,
+        "end_bin": 1553,
+        "duration_ms": 1570,
+        "peak_hz": 210.35965611033646,
+        "qualifies": true,
+        "start_ms": 13960.0,
+        "end_ms": 15530.0
+      },
+      {
+        "start_bin": 1572,
+        "end_bin": 1664,
+        "duration_ms": 920,
+        "peak_hz": 198.6649785316816,
+        "qualifies": true,
+        "start_ms": 15720.0,
+        "end_ms": 16640.0
+      },
+      {
+        "start_bin": 1682,
+        "end_bin": 1792,
+        "duration_ms": 1100,
+        "peak_hz": 198.3708585201687,
+        "qualifies": true,
+        "start_ms": 16820.0,
+        "end_ms": 17920.0
+      },
+      {
+        "start_bin": 1805,
+        "end_bin": 2237,
+        "duration_ms": 4320,
+        "peak_hz": 174.08289483015488,
+        "qualifies": true,
+        "start_ms": 18050.0,
+        "end_ms": 22370.0
+      },
+      {
+        "start_bin": 2250,
+        "end_bin": 2352,
+        "duration_ms": 1020,
+        "peak_hz": 170.4502961782068,
+        "qualifies": true,
+        "start_ms": 22500.0,
+        "end_ms": 23520.0
+      },
+      {
+        "start_bin": 2364,
+        "end_bin": 2579,
+        "duration_ms": 2150,
+        "peak_hz": 166.7576268085588,
+        "qualifies": true,
+        "start_ms": 23640.0,
+        "end_ms": 25790.0
+      },
+      {
+        "start_bin": 2599,
+        "end_bin": 2634,
+        "duration_ms": 350,
+        "peak_hz": 214.08921254092093,
+        "qualifies": true,
+        "start_ms": 25990.0,
+        "end_ms": 26340.0
+      },
+      {
+        "start_bin": 2652,
+        "end_bin": 2730,
+        "duration_ms": 780,
+        "peak_hz": 190.65035068059768,
+        "qualifies": true,
+        "start_ms": 26520.0,
+        "end_ms": 27300.0
+      },
+      {
+        "start_bin": 2742,
+        "end_bin": 2814,
+        "duration_ms": 720,
+        "peak_hz": 161.4759192077949,
+        "qualifies": true,
+        "start_ms": 27420.0,
+        "end_ms": 28140.0
+      },
+      {
+        "start_bin": 2833,
+        "end_bin": 3139,
+        "duration_ms": 3060,
+        "peak_hz": 196.16575949193617,
+        "qualifies": true,
+        "start_ms": 28330.0,
+        "end_ms": 31390.0
+      },
+      {
+        "start_bin": 3148,
+        "end_bin": 3360,
+        "duration_ms": 2120,
+        "peak_hz": 168.7309412047335,
+        "qualifies": true,
+        "start_ms": 31480.0,
+        "end_ms": 33600.0
+      },
+      {
+        "start_bin": 3378,
+        "end_bin": 3421,
+        "duration_ms": 430,
+        "peak_hz": 203.1840197338343,
+        "qualifies": true,
+        "start_ms": 33780.0,
+        "end_ms": 34210.0
+      },
+      {
+        "start_bin": 3440,
+        "end_bin": 3562,
+        "duration_ms": 1220,
+        "peak_hz": 209.6861708898504,
+        "qualifies": true,
+        "start_ms": 34400.0,
+        "end_ms": 35620.0
+      },
+      {
+        "start_bin": 3580,
+        "end_bin": 3643,
+        "duration_ms": 630,
+        "peak_hz": 198.61210982538978,
+        "qualifies": true,
+        "start_ms": 35800.0,
+        "end_ms": 36430.0
+      },
+      {
+        "start_bin": 3661,
+        "end_bin": 3905,
+        "duration_ms": 2440,
+        "peak_hz": 212.51431122155142,
+        "qualifies": true,
+        "start_ms": 36610.0,
+        "end_ms": 39050.0
+      },
+      {
+        "start_bin": 3923,
+        "end_bin": 3971,
+        "duration_ms": 480,
+        "peak_hz": 194.72293708004472,
+        "qualifies": true,
+        "start_ms": 39230.0,
+        "end_ms": 39710.0
+      },
+      {
+        "start_bin": 3987,
+        "end_bin": 4077,
+        "duration_ms": 900,
+        "peak_hz": 169.37753456447484,
+        "qualifies": true,
+        "start_ms": 39870.0,
+        "end_ms": 40770.0
+      },
+      {
+        "start_bin": 4088,
+        "end_bin": 4537,
+        "duration_ms": 4490,
+        "peak_hz": 169.65306544069279,
+        "qualifies": true,
+        "start_ms": 40880.0,
+        "end_ms": 45370.0
+      },
+      {
+        "start_bin": 4547,
+        "end_bin": 4707,
+        "duration_ms": 1600,
+        "peak_hz": 200.93139899307485,
+        "qualifies": true,
+        "start_ms": 45470.0,
+        "end_ms": 47070.0
+      },
+      {
+        "start_bin": 4726,
+        "end_bin": 4826,
+        "duration_ms": 1000,
+        "peak_hz": 192.07308781828564,
+        "qualifies": true,
+        "start_ms": 47260.0,
+        "end_ms": 48260.0
+      },
+      {
+        "start_bin": 4835,
+        "end_bin": 5146,
+        "duration_ms": 3110,
+        "peak_hz": 168.82884910317054,
+        "qualifies": true,
+        "start_ms": 48350.0,
+        "end_ms": 51460.0
+      },
+      {
+        "start_bin": 5166,
+        "end_bin": 5201,
+        "duration_ms": 350,
+        "peak_hz": 215.32612155693425,
+        "qualifies": true,
+        "start_ms": 51660.0,
+        "end_ms": 52010.0
+      },
+      {
+        "start_bin": 5219,
+        "end_bin": 5650,
+        "duration_ms": 4310,
+        "peak_hz": 214.59069198476948,
+        "qualifies": true,
+        "start_ms": 52190.0,
+        "end_ms": 56500.0
+      },
+      {
+        "start_bin": 5660,
+        "end_bin": 5810,
+        "duration_ms": 1500,
+        "peak_hz": 168.14643410586342,
+        "qualifies": true,
+        "start_ms": 56600.0,
+        "end_ms": 58100.0
+      },
+      {
+        "start_bin": 5825,
+        "end_bin": 5848,
+        "duration_ms": 230,
+        "peak_hz": 216.49051141333769,
+        "qualifies": true,
+        "start_ms": 58250.0,
+        "end_ms": 58480.0
+      },
+      {
+        "start_bin": 5866,
+        "end_bin": 6165,
+        "duration_ms": 2990,
+        "peak_hz": 205.82581401294362,
+        "qualifies": true,
+        "start_ms": 58660.0,
+        "end_ms": 61650.0
+      },
+      {
+        "start_bin": 6184,
+        "end_bin": 6318,
+        "duration_ms": 1340,
+        "peak_hz": 212.5095579026737,
+        "qualifies": true,
+        "start_ms": 61840.0,
+        "end_ms": 63180.0
+      },
+      {
+        "start_bin": 6337,
+        "end_bin": 6455,
+        "duration_ms": 1180,
+        "peak_hz": 207.4652670534084,
+        "qualifies": true,
+        "start_ms": 63370.0,
+        "end_ms": 64550.0
+      },
+      {
+        "start_bin": 6473,
+        "end_bin": 6542,
+        "duration_ms": 690,
+        "peak_hz": 208.3933171720098,
+        "qualifies": true,
+        "start_ms": 64730.0,
+        "end_ms": 65420.0
+      },
+      {
+        "start_bin": 6556,
+        "end_bin": 6899,
+        "duration_ms": 3430,
+        "peak_hz": 196.06863687284107,
+        "qualifies": true,
+        "start_ms": 65560.0,
+        "end_ms": 68990.0
+      }
+    ],
+    "reasons": {
+      "n_events_tail": 0,
+      "every_subwindow_has_quiet": false,
+      "trailing_activity_ms": 2840,
+      "quiet_fraction_tail": 0.0425,
+      "tail_has_no_quiet_run": false,
+      "every_subwindow_persistent": false,
+      "high_rate_endpoint_reached": false
+    },
+    "sensitivity": {
+      "20Hz_duty80": "UNRESOLVED",
+      "20Hz_duty90": "UNRESOLVED",
+      "50Hz_duty80": "UNRESOLVED",
+      "50Hz_duty90": "UNRESOLVED",
+      "100Hz_duty80": "UNRESOLVED",
+      "100Hz_duty90": "UNRESOLVED"
+    },
+    "high_rate": null,
+    "start_ms": 0.0,
+    "duration_ms": 72000,
+    "temporal_unit": "10-ms non-overlapping bins",
+    "claim": "Finite-time category, not asymptotic attractor classification"
+  },
+  "blocks12s": [
+    {
+      "label": "block_0_12s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.1375,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 3,
+        "n_events": 2,
+        "event_durations_ms": [
+          2270,
+          230
+        ],
+        "event_peaks_hz": [
+          202.43457989832584,
+          209.495424381437
+        ],
+        "inter_onset_ms": [
+          2460
+        ],
+        "activity_duty": 0.8625,
+        "mean_rate_hz": 66.1086854217567,
+        "max_rate_hz": 215.51761102379504,
+        "trailing_activity_ms": 350,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.22135179687500003
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.17,
+          "longest_quiet_ms": 170,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.83,
+          "mean_rate_hz": 62.86437416401373,
+          "max_rate_hz": 202.43457989832584,
+          "trailing_activity_ms": 230,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.01325,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.01028125,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0075,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.21243125000000002
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 76.73305615455025,
+          "max_rate_hz": 169.5078638154319,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.056625,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.04615625,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0356875,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.25280125000000003
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 73.8153392327182,
+          "max_rate_hz": 144.93642493819516,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0729375,
+            "20Hz_duty90": 0.05834375,
+            "50Hz_duty80": 0.070375,
+            "50Hz_duty90": 0.05590625,
+            "100Hz_duty80": 0.0634375,
+            "100Hz_duty90": 0.0510625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.24576218749999998
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.38,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 1,
+          "event_durations_ms": [
+            230
+          ],
+          "event_peaks_hz": [
+            209.495424381437
+          ],
+          "inter_onset_ms": [],
+          "activity_duty": 0.62,
+          "mean_rate_hz": 51.021972135744655,
+          "max_rate_hz": 215.51761102379504,
+          "trailing_activity_ms": 350,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.1744125
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 22,
+          "end_bin": 159,
+          "duration_ms": 1370,
+          "peak_hz": 181.2907363153686,
+          "qualifies": true,
+          "start_ms": 220,
+          "end_ms": 1590
+        },
+        {
+          "start_bin": 178,
+          "end_bin": 382,
+          "duration_ms": 2040,
+          "peak_hz": 204.57772407636142,
+          "qualifies": true,
+          "start_ms": 1780,
+          "end_ms": 3820
+        },
+        {
+          "start_bin": 393,
+          "end_bin": 523,
+          "duration_ms": 1300,
+          "peak_hz": 169.18781482652398,
+          "qualifies": true,
+          "start_ms": 3930,
+          "end_ms": 5230
+        },
+        {
+          "start_bin": 541,
+          "end_bin": 601,
+          "duration_ms": 600,
+          "peak_hz": 188.1925265284105,
+          "qualifies": true,
+          "start_ms": 5410,
+          "end_ms": 6010
+        },
+        {
+          "start_bin": 616,
+          "end_bin": 721,
+          "duration_ms": 1050,
+          "peak_hz": 170.5868936542538,
+          "qualifies": true,
+          "start_ms": 6160,
+          "end_ms": 7210
+        },
+        {
+          "start_bin": 740,
+          "end_bin": 860,
+          "duration_ms": 1200,
+          "peak_hz": 210.62386194365666,
+          "qualifies": true,
+          "start_ms": 7400,
+          "end_ms": 8600
+        },
+        {
+          "start_bin": 877,
+          "end_bin": 1104,
+          "duration_ms": 2270,
+          "peak_hz": 202.43457989832584,
+          "qualifies": true,
+          "start_ms": 8770,
+          "end_ms": 11040
+        },
+        {
+          "start_bin": 1123,
+          "end_bin": 1146,
+          "duration_ms": 230,
+          "peak_hz": 209.495424381437,
+          "qualifies": true,
+          "start_ms": 11230,
+          "end_ms": 11460
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 2,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 350,
+        "quiet_fraction_tail": 0.1375,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 0,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    },
+    {
+      "label": "block_12_24s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0625,
+        "longest_quiet_ms": 130,
+        "quiet_runs_ge20ms": 2,
+        "n_events": 1,
+        "event_durations_ms": [
+          1020
+        ],
+        "event_peaks_hz": [
+          170.4502961782068
+        ],
+        "inter_onset_ms": [],
+        "activity_duty": 0.9375,
+        "mean_rate_hz": 64.197239809516,
+        "max_rate_hz": 170.4502961782068,
+        "trailing_activity_ms": 360,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.07828125,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.073,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.05940625,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.212593359375
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 67.75436704135994,
+          "max_rate_hz": 154.21620493352833,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0984375,
+            "20Hz_duty90": 0.07975,
+            "50Hz_duty80": 0.093,
+            "50Hz_duty90": 0.07746875,
+            "100Hz_duty80": 0.083125,
+            "100Hz_duty90": 0.0695625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.22361906249999997
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 72.1239269394772,
+          "max_rate_hz": 122.37288560371239,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.10325,
+            "20Hz_duty90": 0.07640625,
+            "50Hz_duty80": 0.0983125,
+            "50Hz_duty90": 0.07059375,
+            "100Hz_duty80": 0.0879375,
+            "100Hz_duty90": 0.06296875
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.24089281250000003
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.13,
+          "longest_quiet_ms": 130,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.87,
+          "mean_rate_hz": 57.271729626994095,
+          "max_rate_hz": 170.4502961782068,
+          "trailing_activity_ms": 500,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.18924343749999997
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.12,
+          "longest_quiet_ms": 120,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.88,
+          "mean_rate_hz": 59.63893563023278,
+          "max_rate_hz": 166.7576268085588,
+          "trailing_activity_ms": 360,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.020625,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.020625,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0136875,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.19661812499999998
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 63,
+          "end_bin": 178,
+          "duration_ms": 1150,
+          "peak_hz": 190.48879473681083,
+          "qualifies": true,
+          "start_ms": 12630,
+          "end_ms": 13780
+        },
+        {
+          "start_bin": 196,
+          "end_bin": 353,
+          "duration_ms": 1570,
+          "peak_hz": 210.35965611033646,
+          "qualifies": true,
+          "start_ms": 13960,
+          "end_ms": 15530
+        },
+        {
+          "start_bin": 372,
+          "end_bin": 464,
+          "duration_ms": 920,
+          "peak_hz": 198.6649785316816,
+          "qualifies": true,
+          "start_ms": 15720,
+          "end_ms": 16640
+        },
+        {
+          "start_bin": 482,
+          "end_bin": 592,
+          "duration_ms": 1100,
+          "peak_hz": 198.3708585201687,
+          "qualifies": true,
+          "start_ms": 16820,
+          "end_ms": 17920
+        },
+        {
+          "start_bin": 605,
+          "end_bin": 1037,
+          "duration_ms": 4320,
+          "peak_hz": 174.08289483015488,
+          "qualifies": true,
+          "start_ms": 18050,
+          "end_ms": 22370
+        },
+        {
+          "start_bin": 1050,
+          "end_bin": 1152,
+          "duration_ms": 1020,
+          "peak_hz": 170.4502961782068,
+          "qualifies": true,
+          "start_ms": 22500,
+          "end_ms": 23520
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 1,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 360,
+        "quiet_fraction_tail": 0.0625,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 12000,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    },
+    {
+      "label": "block_24_36s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.14,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 3,
+        "n_events": 2,
+        "event_durations_ms": [
+          430,
+          1220
+        ],
+        "event_peaks_hz": [
+          203.1840197338343,
+          209.6861708898504
+        ],
+        "inter_onset_ms": [
+          620
+        ],
+        "activity_duty": 0.86,
+        "mean_rate_hz": 61.62809360056434,
+        "max_rate_hz": 209.6861708898504,
+        "trailing_activity_ms": 200,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0325625,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.02734375,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.02265625,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.204699453125
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 65.02196805700393,
+          "max_rate_hz": 125.98277612567011,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.09078125,
+            "20Hz_duty90": 0.07765625,
+            "50Hz_duty80": 0.08796875,
+            "50Hz_duty90": 0.0704375,
+            "100Hz_duty80": 0.07765625,
+            "100Hz_duty90": 0.0618125
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.21196218749999995
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.18,
+          "longest_quiet_ms": 180,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.82,
+          "mean_rate_hz": 58.82490181420833,
+          "max_rate_hz": 203.1840197338343,
+          "trailing_activity_ms": 220,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.016125,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.01371875,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.00278125,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.19768906249999996
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.2,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.8,
+          "mean_rate_hz": 60.82521838442476,
+          "max_rate_hz": 209.6861708898504,
+          "trailing_activity_ms": 600,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0159375,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.010625,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.00784375,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2019503125
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.18,
+          "longest_quiet_ms": 180,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.82,
+          "mean_rate_hz": 61.84028614662037,
+          "max_rate_hz": 198.61210982538978,
+          "trailing_activity_ms": 200,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.20719624999999997
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 199,
+          "end_bin": 234,
+          "duration_ms": 350,
+          "peak_hz": 214.08921254092093,
+          "qualifies": true,
+          "start_ms": 25990,
+          "end_ms": 26340
+        },
+        {
+          "start_bin": 252,
+          "end_bin": 330,
+          "duration_ms": 780,
+          "peak_hz": 190.65035068059768,
+          "qualifies": true,
+          "start_ms": 26520,
+          "end_ms": 27300
+        },
+        {
+          "start_bin": 342,
+          "end_bin": 414,
+          "duration_ms": 720,
+          "peak_hz": 161.4759192077949,
+          "qualifies": true,
+          "start_ms": 27420,
+          "end_ms": 28140
+        },
+        {
+          "start_bin": 433,
+          "end_bin": 739,
+          "duration_ms": 3060,
+          "peak_hz": 196.16575949193617,
+          "qualifies": true,
+          "start_ms": 28330,
+          "end_ms": 31390
+        },
+        {
+          "start_bin": 748,
+          "end_bin": 960,
+          "duration_ms": 2120,
+          "peak_hz": 168.7309412047335,
+          "qualifies": true,
+          "start_ms": 31480,
+          "end_ms": 33600
+        },
+        {
+          "start_bin": 978,
+          "end_bin": 1021,
+          "duration_ms": 430,
+          "peak_hz": 203.1840197338343,
+          "qualifies": true,
+          "start_ms": 33780,
+          "end_ms": 34210
+        },
+        {
+          "start_bin": 1040,
+          "end_bin": 1162,
+          "duration_ms": 1220,
+          "peak_hz": 209.6861708898504,
+          "qualifies": true,
+          "start_ms": 34400,
+          "end_ms": 35620
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 2,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 200,
+        "quiet_fraction_tail": 0.14,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 24000,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    },
+    {
+      "label": "block_36_48s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0725,
+        "longest_quiet_ms": 190,
+        "quiet_runs_ge20ms": 2,
+        "n_events": 1,
+        "event_durations_ms": [
+          1600
+        ],
+        "event_peaks_hz": [
+          200.93139899307485
+        ],
+        "inter_onset_ms": [],
+        "activity_duty": 0.9275,
+        "mean_rate_hz": 70.55227906605019,
+        "max_rate_hz": 200.93139899307485,
+        "trailing_activity_ms": 740,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.03846875,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0305,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.024875,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.23501085937500002
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 78.55986021149073,
+          "max_rate_hz": 149.44046403797353,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.07115625,
+            "20Hz_duty90": 0.0585,
+            "50Hz_duty80": 0.06871875,
+            "50Hz_duty90": 0.0585,
+            "100Hz_duty80": 0.0585,
+            "100Hz_duty90": 0.04546875
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2614215625
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.1,
+          "longest_quiet_ms": 100,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9,
+          "mean_rate_hz": 66.74124819473838,
+          "max_rate_hz": 182.2019114877533,
+          "trailing_activity_ms": 530,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.22232343750000003
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 80.37873694356955,
+          "max_rate_hz": 200.93139899307485,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.08321875,
+            "20Hz_duty90": 0.0634375,
+            "50Hz_duty80": 0.07584375,
+            "50Hz_duty90": 0.0609375,
+            "100Hz_duty80": 0.068125,
+            "100Hz_duty90": 0.04840625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.26817281249999997
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.19,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.81,
+          "mean_rate_hz": 56.52927091440213,
+          "max_rate_hz": 192.07308781828564,
+          "trailing_activity_ms": 740,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0075,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.188125625
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 61,
+          "end_bin": 305,
+          "duration_ms": 2440,
+          "peak_hz": 212.51431122155142,
+          "qualifies": true,
+          "start_ms": 36610,
+          "end_ms": 39050
+        },
+        {
+          "start_bin": 323,
+          "end_bin": 371,
+          "duration_ms": 480,
+          "peak_hz": 194.72293708004472,
+          "qualifies": true,
+          "start_ms": 39230,
+          "end_ms": 39710
+        },
+        {
+          "start_bin": 387,
+          "end_bin": 477,
+          "duration_ms": 900,
+          "peak_hz": 169.37753456447484,
+          "qualifies": true,
+          "start_ms": 39870,
+          "end_ms": 40770
+        },
+        {
+          "start_bin": 488,
+          "end_bin": 937,
+          "duration_ms": 4490,
+          "peak_hz": 169.65306544069279,
+          "qualifies": true,
+          "start_ms": 40880,
+          "end_ms": 45370
+        },
+        {
+          "start_bin": 947,
+          "end_bin": 1107,
+          "duration_ms": 1600,
+          "peak_hz": 200.93139899307485,
+          "qualifies": true,
+          "start_ms": 45470,
+          "end_ms": 47070
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 1,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 740,
+        "quiet_fraction_tail": 0.0725,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 36000,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    },
+    {
+      "label": "block_48_60s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.1075,
+        "longest_quiet_ms": 180,
+        "quiet_runs_ge20ms": 3,
+        "n_events": 2,
+        "event_durations_ms": [
+          1500,
+          230
+        ],
+        "event_peaks_hz": [
+          168.14643410586342,
+          216.49051141333769
+        ],
+        "inter_onset_ms": [
+          1650
+        ],
+        "activity_duty": 0.8925,
+        "mean_rate_hz": 65.21380549292923,
+        "max_rate_hz": 216.49051141333769,
+        "trailing_activity_ms": 1340,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.01809375,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.016125,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.01071875,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.21684351562499998
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.1,
+          "longest_quiet_ms": 100,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9,
+          "mean_rate_hz": 63.29438381498436,
+          "max_rate_hz": 168.14643410586342,
+          "trailing_activity_ms": 400,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.20963906249999997
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 69.87753873669621,
+          "max_rate_hz": 124.65689736267828,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.08790625,
+            "20Hz_duty90": 0.04525,
+            "50Hz_duty80": 0.08553125,
+            "50Hz_duty90": 0.04053125,
+            "100Hz_duty80": 0.073,
+            "100Hz_duty90": 0.03384375
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2325803125
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.33,
+          "longest_quiet_ms": 180,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 1,
+          "event_durations_ms": [
+            230
+          ],
+          "event_peaks_hz": [
+            216.49051141333769
+          ],
+          "inter_onset_ms": [],
+          "activity_duty": 0.67,
+          "mean_rate_hz": 56.12536773031907,
+          "max_rate_hz": 216.49051141333769,
+          "trailing_activity_ms": 340,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.1910190625
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 71.55793168971726,
+          "max_rate_hz": 158.93761054791497,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0904375,
+            "20Hz_duty90": 0.05378125,
+            "50Hz_duty80": 0.07828125,
+            "50Hz_duty90": 0.04596875,
+            "100Hz_duty80": 0.07828125,
+            "100Hz_duty90": 0.034875
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.23413562499999999
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 35,
+          "end_bin": 346,
+          "duration_ms": 3110,
+          "peak_hz": 168.82884910317054,
+          "qualifies": true,
+          "start_ms": 48350,
+          "end_ms": 51460
+        },
+        {
+          "start_bin": 366,
+          "end_bin": 401,
+          "duration_ms": 350,
+          "peak_hz": 215.32612155693425,
+          "qualifies": true,
+          "start_ms": 51660,
+          "end_ms": 52010
+        },
+        {
+          "start_bin": 419,
+          "end_bin": 850,
+          "duration_ms": 4310,
+          "peak_hz": 214.59069198476948,
+          "qualifies": true,
+          "start_ms": 52190,
+          "end_ms": 56500
+        },
+        {
+          "start_bin": 860,
+          "end_bin": 1010,
+          "duration_ms": 1500,
+          "peak_hz": 168.14643410586342,
+          "qualifies": true,
+          "start_ms": 56600,
+          "end_ms": 58100
+        },
+        {
+          "start_bin": 1025,
+          "end_bin": 1048,
+          "duration_ms": 230,
+          "peak_hz": 216.49051141333769,
+          "qualifies": true,
+          "start_ms": 58250,
+          "end_ms": 58480
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 2,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 1340,
+        "quiet_fraction_tail": 0.1075,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 48000,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    },
+    {
+      "label": "block_60_72s",
+      "category": "UNRESOLVED",
+      "tail": {
+        "lo_bin": 800,
+        "hi_bin": 1200,
+        "n_bins": 400,
+        "quiet_fraction": 0.0425,
+        "longest_quiet_ms": 170,
+        "quiet_runs_ge20ms": 1,
+        "n_events": 0,
+        "event_durations_ms": [],
+        "event_peaks_hz": [],
+        "inter_onset_ms": [],
+        "activity_duty": 0.9575,
+        "mean_rate_hz": 69.58617366070784,
+        "max_rate_hz": 170.68786983678825,
+        "trailing_activity_ms": 2840,
+        "persistent_fraction": {
+          "20Hz_duty80": 0.0,
+          "20Hz_duty90": 0.0,
+          "50Hz_duty80": 0.0,
+          "50Hz_duty90": 0.0,
+          "100Hz_duty80": 0.0,
+          "100Hz_duty90": 0.0
+        },
+        "high_confirmed_inside": false,
+        "mean_instantaneous_fraction_50Hz": 0.2311359375
+      },
+      "subwindows": [
+        {
+          "lo_bin": 800,
+          "hi_bin": 900,
+          "n_bins": 100,
+          "quiet_fraction": 0.01,
+          "longest_quiet_ms": 10,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.99,
+          "mean_rate_hz": 68.52720740154449,
+          "max_rate_hz": 155.27560231277607,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0850625,
+            "20Hz_duty90": 0.05009375,
+            "50Hz_duty80": 0.08034375,
+            "50Hz_duty90": 0.04571875,
+            "100Hz_duty80": 0.07828125,
+            "100Hz_duty90": 0.04090625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.22546062499999997
+        },
+        {
+          "lo_bin": 900,
+          "hi_bin": 1000,
+          "n_bins": 100,
+          "quiet_fraction": 0.16,
+          "longest_quiet_ms": 160,
+          "quiet_runs_ge20ms": 1,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 0.84,
+          "mean_rate_hz": 61.87985992845848,
+          "max_rate_hz": 170.68786983678825,
+          "trailing_activity_ms": 840,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.20378843749999997
+        },
+        {
+          "lo_bin": 1000,
+          "hi_bin": 1100,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 72.70869217681654,
+          "max_rate_hz": 142.78688243544633,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.068125,
+            "20Hz_duty90": 0.0509375,
+            "50Hz_duty80": 0.061,
+            "50Hz_duty90": 0.0460625,
+            "100Hz_duty80": 0.0585,
+            "100Hz_duty90": 0.0380625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.24344281250000002
+        },
+        {
+          "lo_bin": 1100,
+          "hi_bin": 1200,
+          "n_bins": 100,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 75.22893513601188,
+          "max_rate_hz": 123.07359808821533,
+          "trailing_activity_ms": 1000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0983125,
+            "20Hz_duty90": 0.00728125,
+            "50Hz_duty80": 0.06609375,
+            "50Hz_duty90": 0.0023125,
+            "100Hz_duty80": 0.04853125,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.251851875
+        }
+      ],
+      "events": [
+        {
+          "start_bin": 184,
+          "end_bin": 318,
+          "duration_ms": 1340,
+          "peak_hz": 212.5095579026737,
+          "qualifies": true,
+          "start_ms": 61840,
+          "end_ms": 63180
+        },
+        {
+          "start_bin": 337,
+          "end_bin": 455,
+          "duration_ms": 1180,
+          "peak_hz": 207.4652670534084,
+          "qualifies": true,
+          "start_ms": 63370,
+          "end_ms": 64550
+        },
+        {
+          "start_bin": 473,
+          "end_bin": 542,
+          "duration_ms": 690,
+          "peak_hz": 208.3933171720098,
+          "qualifies": true,
+          "start_ms": 64730,
+          "end_ms": 65420
+        },
+        {
+          "start_bin": 556,
+          "end_bin": 899,
+          "duration_ms": 3430,
+          "peak_hz": 196.06863687284107,
+          "qualifies": true,
+          "start_ms": 65560,
+          "end_ms": 68990
+        }
+      ],
+      "reasons": {
+        "n_events_tail": 0,
+        "every_subwindow_has_quiet": false,
+        "trailing_activity_ms": 2840,
+        "quiet_fraction_tail": 0.0425,
+        "tail_has_no_quiet_run": false,
+        "every_subwindow_persistent": false,
+        "high_rate_endpoint_reached": false
+      },
+      "sensitivity": {
+        "20Hz_duty80": "UNRESOLVED",
+        "20Hz_duty90": "UNRESOLVED",
+        "50Hz_duty80": "UNRESOLVED",
+        "50Hz_duty90": "UNRESOLVED",
+        "100Hz_duty80": "UNRESOLVED",
+        "100Hz_duty90": "UNRESOLVED"
+      },
+      "high_rate": null,
+      "start_ms": 60000,
+      "duration_ms": 12000,
+      "temporal_unit": "10-ms non-overlapping bins",
+      "claim": "Finite-time category, not asymptotic attractor classification"
+    }
+  ],
+  "complete_event_count": 40,
+  "complete_events_ge1s": 26,
+  "maximum_complete_event_ms": 4490,
+  "last_complete_event_end_ms": 68990.0,
+  "first_broad75percent_and200Hz200ms_start_ms": null,
+  "high_rate_outcome": "NO_ENTRY_OBSERVED_FINITE72S",
+  "inference_limit": "No asymptotic attractor, basin boundary, chaos or bifurcation type inferred from finite-time survival or escape."
+}

@@ -1,0 +1,28 @@
+{
+  "created_local": "2026-09-25T01:03:01.854457+08:00",
+  "question": "Does the first long-activity field Z_A=.700 also recruit prolonged activity when it inherits a nearby short-event history atZ_A=.712351, instead of the common original9s interictal history?",
+  "conditions": {
+    "from_nearby_short_history": {
+      "label": "from_nearby_short_history",
+      "field": "entry",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/from_interictal_history/final_state.npz",
+      "source_dt_ms": 0.05,
+      "dt_ms": 0.05,
+      "duration_ms": 10000,
+      "previous_elapsed_ms": 0
+    }
+  },
+  "coordinates": {
+    "entry": {
+      "D_A": 0.3,
+      "Z_A": 0.7,
+      "native_interpolation_time_ms": 9594.906685976377
+    }
+  },
+  "intervention": "Only native within-Core-A Z changes from the original9507.453ms field to9594.907ms field. Preserve the entire20s short-field fast/M/delay state. OutsideCoreA Zbitwise unchanged. AllZheld thereafter; allMdynamic. Same originalconstantmeaninput, no futurecountinnovations.",
+  "baseline": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_D0300/from_interictal_history",
+  "readout": "Same CoreA5Hz/20ms quiet and local/global/spatial measures. The baseline startsfromcommonoriginalhistory, not the same fast state; this explicitly tests history sensitivity at the SAME final field.",
+  "decision": "Prolonged activity from both histories weakens a claim that only the initial large resource transplant explains the contrast. Continuedshortactivity fromnearbyhistory motivates coexistence/basin testing, but finite10s alone cannot prove bistability or branch survival. Neither outcome identifies the bifurcation.",
+  "budget": "One10s originalstep continuation; source/10ms replay and independent readout. No additionalparameterpoint, refit or automaticrampcampaign.",
+  "model_promoted": false
+}

@@ -1,0 +1,83 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "native_rates_Hz": [
+        98.44386875000001,
+        392.4824933687005,
+        132.21475826971835,
+        90.29386736703869
+      ],
+      "group_threshold": {
+        "rates_Hz": [
+          108.77010024630634,
+          393.5087824110232,
+          137.07244354770916,
+          100.9914197411489
+        ],
+        "mean_Graw": 2.7058779430724106e-05,
+        "causal_R_range_Hz": [
+          106.34153238459784,
+          109.64529892763356
+        ],
+        "field_RMS_from_native_Hz": 42.23461397117248
+      },
+      "exact_threshold": {
+        "rates_Hz": [
+          108.78310825334209,
+          393.48055792741485,
+          137.01690918596293,
+          101.00721709814559
+        ],
+        "mean_Graw": 2.7058534189267352e-05,
+        "causal_R_range_Hz": [
+          106.51554289868588,
+          109.63274030479293
+        ],
+        "field_RMS_from_native_Hz": 42.31279359366143
+      }
+    },
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "native_rates_Hz": [
+        196.9063125,
+        474.07161803713575,
+        474.1954198473267,
+        182.89016414970436
+      ],
+      "group_threshold": {
+        "rates_Hz": [
+          200.45667580503834,
+          472.3094808612018,
+          474.9951363553624,
+          186.64301050612534
+        ],
+        "mean_Graw": 0.11277464490271313,
+        "causal_R_range_Hz": [
+          200.6479136026873,
+          201.60962201905662
+        ],
+        "field_RMS_from_native_Hz": 18.52157552223716
+      },
+      "exact_threshold": {
+        "rates_Hz": [
+          200.45201286054132,
+          472.1143921231101,
+          474.815277818709,
+          186.6475821244586
+        ],
+        "mean_Graw": 0.11231533498115823,
+        "causal_R_range_Hz": [
+          200.6462555944344,
+          201.61014053415641
+        ],
+        "field_RMS_from_native_Hz": 18.52706241982418
+      }
+    }
+  ],
+  "final_Gaussian_RNG_bitwise": true,
+  "interpretation": "Only original individual thresholds restored, same complete initial histories and Gaussianstreams. No source-correlation correction or new native simulation. Finite conditional correspondence, not formal bifurcation.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "7a218a550fff1793269590c63adfbc078262bd36917a868a087d570cca4605f1"
+}

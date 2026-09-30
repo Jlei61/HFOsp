@@ -1,0 +1,47 @@
+{
+  "status": "LOCKED_BEFORE_FRESH_TARGETS",
+  "created_epoch": 1790263659.1278758,
+  "question": "Can the existing local response be extended to conductance by effective-current conversion and intrinsic hazard time compression?",
+  "unit": "One synthetic colored-LIF input condition;512 independent noise replicas. Not SNN seeds or patient observations.",
+  "physical_mean": "mu_eff=(I_E-ZI_I-etaM*M+G*EG+K*EK)/(1+G+K)",
+  "physical_noise": "Both effective current channels divide by1+G+K, so covariance intensities divide by its square. Input channel filters keep native physical time constants.",
+  "hypothesis": "lambda_g=(1+G+K)*lambda_parent(mu_eff,vE_eff,vI_eff); unchanged absolute refractory time. Exact deterministic integration-time scaling motivates but does not prove noisy validity.",
+  "equation_test": "Native exponential membrane step with tau_m/(1+g), same exact colored-current covariance update and reset/refractory ordering. Constant g isolates conductance response; not full dynamic-G/K or native-network correspondence.",
+  "design": {
+    "g": [
+      0,
+      0.5,
+      2,
+      8
+    ],
+    "normalized_mean": [
+      -0.5,
+      0.5,
+      1.2,
+      3
+    ],
+    "normalized_noise_pairs": [
+      [
+        0.5,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        5,
+        2
+      ]
+    ],
+    "replicates": 512,
+    "dt_ms": 0.1,
+    "burn_ms": 500,
+    "record_ms": 2000,
+    "noise_seed": 920924
+  },
+  "gate": "Each condition absolute mean-rate error <=max(2Hz,10%MC mean,3MC SEM). Report g0 baseline failures separately. Fixed approximation, no fit or tolerance adjustment after scoring.",
+  "next": "If any g>0 condition fails, do not install this approximation for formal branches. Inspect error by g/input; prepare a conductance-calibrated response. Even a local pass requires transient and native spatial validation.",
+  "parent": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/conditioned_refractory_rate",
+  "new_training": false
+}

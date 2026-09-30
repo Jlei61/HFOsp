@@ -1,0 +1,145 @@
+{
+  "label": "H6_highorder",
+  "J_EE_core": 1.029286112281978,
+  "frequency_hz": 7.552814827171479,
+  "gain_derivative_order": 4,
+  "gain_derivative_step": 0.0001,
+  "core_B_rate_Hz": 7.567518455268202,
+  "rates_hz": [
+    1.8366996450390534,
+    7.567518455268203,
+    0.31984659436601165
+  ],
+  "lambda_per_ms": [
+    5.63976250634553e-13,
+    0.04745573514993196
+  ],
+  "equilibrium_residual": 1.5265566588595902e-16,
+  "characteristic_residual": 1.025400002322674e-15,
+  "E_rate_mode_energy_by_region": [
+    0.5441415574537606,
+    0.00012500437003149883,
+    0.4557334381762078
+  ],
+  "transversality": {
+    "coordinate": "Core-B neuron-weighted E equilibrium rate, Hz",
+    "real_exponent_derivative_per_ms_per_Hz": 0.027647169595572903,
+    "J_derivative_per_Hz": 0.005405586758211456,
+    "real_exponent_derivative_per_ms_per_J": 5.114554780491676,
+    "coordinate_step_Hz": 0.0001,
+    "real_exponents": [
+      -2.7634936392953813e-06,
+      2.765940279819199e-06
+    ]
+  },
+  "source_mode": 9,
+  "source_branch_indices": [
+    257,
+    258
+  ],
+  "solver_evaluations": [
+    {
+      "core_B_rate_Hz": 7.564512782578319,
+      "J_EE_core": 1.0292698568535883,
+      "lambda_per_ms": [
+        -8.20194906710452e-05,
+        0.047484261405198666
+      ],
+      "equilibrium_residual_Hz": 1.5959455978986625e-13,
+      "characteristic_residual": 8.675947224132335e-16
+    },
+    {
+      "core_B_rate_Hz": 7.630437211284576,
+      "J_EE_core": 1.029618380891831,
+      "lambda_per_ms": [
+        0.0037243716780515313,
+        0.04615904915430511
+      ],
+      "equilibrium_residual_Hz": 1.8041124150158794e-13,
+      "characteristic_residual": 1.1078367349256482e-15
+    },
+    {
+      "core_B_rate_Hz": 7.565933311322106,
+      "J_EE_core": 1.0292775414132773,
+      "lambda_per_ms": [
+        -4.352132706712126e-05,
+        0.04747087839700362
+      ],
+      "equilibrium_residual_Hz": 1.3530843112619095e-13,
+      "characteristic_residual": 1.822247145854893e-12
+    },
+    {
+      "core_B_rate_Hz": 7.5675206390226615,
+      "J_EE_core": 1.029286124086448,
+      "lambda_per_ms": [
+        6.037581857572079e-08,
+        0.04745571413233401
+      ],
+      "equilibrium_residual_Hz": 1.1796119636642288e-13,
+      "characteristic_residual": 9.673660043963154e-16
+    },
+    {
+      "core_B_rate_Hz": 7.5675184400216375,
+      "J_EE_core": 1.0292861121995658,
+      "lambda_per_ms": [
+        -4.2153267554756427e-10,
+        0.04745573529686074
+      ],
+      "equilibrium_residual_Hz": 2.4572358037211472e-12,
+      "characteristic_residual": 1.015802615091992e-15
+    },
+    {
+      "core_B_rate_Hz": 7.567518455268202,
+      "J_EE_core": 1.029286112281978,
+      "lambda_per_ms": [
+        5.63976250634553e-13,
+        0.04745573514993196
+      ],
+      "equilibrium_residual_Hz": 1.5265566588595902e-13,
+      "characteristic_residual": 9.901630341306334e-16
+    },
+    {
+      "core_B_rate_Hz": 7.567518455217824,
+      "J_EE_core": 1.0292861122817059,
+      "lambda_per_ms": [
+        -8.351064844901782e-13,
+        0.04745573515037255
+      ],
+      "equilibrium_residual_Hz": 1.491862189340054e-13,
+      "characteristic_residual": 1.1553394558243447e-15
+    },
+    {
+      "core_B_rate_Hz": 7.567518455268202,
+      "J_EE_core": 1.029286112281978,
+      "lambda_per_ms": [
+        5.63976250634553e-13,
+        0.04745573514993196
+      ],
+      "equilibrium_residual_Hz": 1.5265566588595902e-13,
+      "characteristic_residual": 1.0393369049810531e-15
+    },
+    {
+      "core_B_rate_Hz": 7.567418455268203,
+      "J_EE_core": 1.0292855717143619,
+      "lambda_per_ms": [
+        -2.7634936392953813e-06,
+        0.04745669714015731
+      ],
+      "equilibrium_residual_Hz": 1.7694179454963432e-13,
+      "characteristic_residual": 1.150110501469129e-15
+    },
+    {
+      "core_B_rate_Hz": 7.567618455268202,
+      "J_EE_core": 1.0292866528317135,
+      "lambda_per_ms": [
+        2.765940279819199e-06,
+        0.047454772250400214
+      ],
+      "equilibrium_residual_Hz": 1.6653345369377348e-13,
+      "characteristic_residual": 1.2970283935468531e-15
+    }
+  ],
+  "status": "REFINED_HOPF_CANDIDATE",
+  "criticality": "NOT_COMPUTED",
+  "scope": "A new imaginary-axis crossing on an already unstable equilibrium branch; not the first resting instability. Derivative and independent full-state checks pending."
+}

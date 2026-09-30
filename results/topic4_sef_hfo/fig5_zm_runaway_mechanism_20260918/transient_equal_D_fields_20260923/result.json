@@ -1,0 +1,56 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "arm": "native_shape",
+      "D": 0.2,
+      "Z_held": true,
+      "M_dynamic": true,
+      "high_entry_ms": null,
+      "quiet_fraction": 0.4634285714285714,
+      "complete_events": {
+        "n": 13,
+        "median_duration_ms": 121.0,
+        "iqr_duration_ms": [
+          110.0,
+          140.0
+        ],
+        "median_gap_ms": 240.5,
+        "both_cores": 12,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6846874999999999,
+        "median_surround_cells": 258.0,
+        "forward": 2,
+        "reverse": 9,
+        "undirected": 2,
+        "median_extent_mm": 9.602453390207687
+      },
+      "tail_global_hz": 29.78228125,
+      "tail_persistent_fraction": 0.0,
+      "seconds": 92.35475254058838,
+      "same_initial_fast_and_M": true,
+      "same_future_innovation_keys": true
+    },
+    {
+      "arm": "free_rate_shape",
+      "D": 0.2,
+      "Z_held": true,
+      "M_dynamic": true,
+      "high_entry_ms": null,
+      "quiet_fraction": 0.0,
+      "complete_events": {
+        "n": 0
+      },
+      "tail_global_hz": 190.94403125,
+      "tail_persistent_fraction": 0.4747499999999999,
+      "seconds": 93.66836738586426,
+      "same_initial_fast_and_M": true,
+      "same_future_innovation_keys": true
+    }
+  ],
+  "statistical_unit": "One complete fast/M history, two paired fullZ fields; one shared future noise realization.",
+  "scope": "Finite-time spatial-field sensitivity at fixedmeanD, not a certified attractor, separatrix or bifurcation.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

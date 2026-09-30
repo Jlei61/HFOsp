@@ -1,0 +1,26 @@
+{
+  "created_local": "2026-09-24T09:45:48.866944+08:00",
+  "conditions": [
+    {
+      "label": "mid1_from_lower_ext",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 5000,
+      "prior_same_field_elapsed_ms": 10000,
+      "exact_same_Z_continuation": true
+    },
+    {
+      "label": "mid1_from_upper_ext",
+      "field": "mid1",
+      "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_upper/final_state.npz",
+      "previous_elapsed_ms": 0,
+      "duration_ms": 5000,
+      "prior_same_field_elapsed_ms": 10000,
+      "exact_same_Z_continuation": true
+    }
+  ],
+  "reason": "The initial10s contain late sustained segments preceded by self-limited activity. Extend exact histories to15s before attributing an attractor or narrowing from censored activity.",
+  "budget": "Two5s uninterrupted same-equation, same-Z continuations, allMdynamic. No state reset; local elapsed clock in these output files starts at0, cumulative exposure10–15s.",
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "REGISTERED_BEFORE_NATIVE_COUNTS",
+  "created_epoch": 1790544243.5120707,
+  "question": "Does the original native network retain a high state or become quiet near the density held-state transition between K9.35 and9.5, with the same actual exit-field family?",
+  "selection": "K9.35 remained active in the complete density8s hold; K9.5 became quiet. These are adaptive correspondence points, not independent discovery or a formal bifurcation interval.",
+  "design": {
+    "new_branches": 2,
+    "duration_s": 30.0,
+    "K_values": [
+      9.35,
+      9.5
+    ],
+    "Z_mean": 0.21,
+    "source_history": "Same full12s high state as existing K9 andK10.5 native controls.",
+    "future_input": "Same50s exogenous OU/Poisson/RNG handoff as previous native controls.",
+    "field_family": "Actual16.7s Z andK fields transformed by the same mapping.",
+    "numerical_density_protocol_difference": "Native K is set immediately at the branch start; density carried its own high state through a0.15/s ramp. Compare finite conditional states and spatial fields, not identical histories or exit timing."
+  },
+  "readouts": "Complete30s; tail20-30s core/allE/surround rates and400cell field, actualG, counterfactualZdrift, lowrate intervals and events using the existing observer.",
+  "interpretation": "State correspondence is required before extending a density branch towards native exit. Disagreement triggers diagnosis of history/noise/closure; no automatic criticalK assignment, bifurcation type, broad sweep or tolerance change.",
+  "statistical_unit": "One shared endogenous history and common future input; two parameter interventions, no new independent seeds.",
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "901f8cb3053d0ad79aed596496240ebd62720352938309e6bd1f22e3123eb8a8"
+}

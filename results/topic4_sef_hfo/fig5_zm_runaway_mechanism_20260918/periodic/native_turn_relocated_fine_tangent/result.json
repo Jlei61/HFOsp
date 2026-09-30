@@ -1,0 +1,26 @@
+{
+  "D": 0.21933565200803865,
+  "T_ms": 264.3623569561784,
+  "dD_dT": 3.8241489653019626e-08,
+  "bvp_residual_hz": 4.295036548640496e-10,
+  "linear_relative_residual": 8.896854241846933e-12,
+  "augmented_relative_residual": 8.896861234357017e-12,
+  "augmented_target_relative_residual": 1.3080907284124551e-08,
+  "original_rhs_norm": 1470283.388664083,
+  "requested_linear_tolerance": 1e-10,
+  "saved_tangent_defect_correction": true,
+  "N": 16875,
+  "M": 262144,
+  "parameterization": "log period; complete normalized phase gauge; native spatial Z path",
+  "scope": "Geometric branch derivative, not a Floquet stability certificate",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_relocated_G16875_M262144/point0000.npz",
+  "status": "TANGENT_COMPLETE",
+  "initial_tangent_source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "nearby_initial_guess_check": {
+    "period_difference_ms": 0.0005750929004193495,
+    "D_difference": 1.101285729276924e-12,
+    "max_Z_difference": 2.7688962234151404e-12,
+    "relative_waveform_difference": 4.827546100325661e-05,
+    "scope": "Numerical initial guess only; target Jacobian and full tangent residual are independently evaluated."
+  }
+}

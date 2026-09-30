@@ -1,0 +1,16 @@
+{
+  "status": "AGENT_VISUAL_REVIEWED",
+  "human_review": "PENDING",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.75_k2_high/figures/conditional_tail_fixed_window.png",
+      "sha256": "e59d6affaaaac13da629716abf2cc28e3c841a344f3f57ebc872883f536c0914"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.75_k2_high/figures/full_rate_context.png",
+      "sha256": "abde34362f8100983378f3713b333e9b1b70b80c26c6c137fa33ec6936c3484a"
+    }
+  ],
+  "observation": "Full30s context and final300ms raster/native fields/contact proxy inspected. Final10s E/core/other rates arezero and spatialframes show noEspikes. Isolated I spikes and shared external-input contact fluctuations persist. Paired original graph final10s regionalrates,meanfields,meancontacts and drifts match; no formal boundary equivalence inferred.",
+  "selection": "Prespecified final10s; fixedfinal300ms because no completebrief."
+}

@@ -1,0 +1,669 @@
+{
+  "status": "INDEPENDENT_COUNT_AUDIT_PASS",
+  "checks": [
+    {
+      "case": "millisecond_assay",
+      "rows_reproduced": 432,
+      "paired_reproduced": 216
+    },
+    {
+      "case": "threshold_phase",
+      "rows_reproduced": 432,
+      "paired_reproduced": 216
+    }
+  ],
+  "original_threshold_weights_exact": true,
+  "native_1ms_and_reference_50ms_bitwise": true,
+  "preentry_1ms": [
+    {
+      "case": "millisecond_assay",
+      "group": 279,
+      "N": 35,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 696.0,
+      "observed_dt005": 696.0,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 279,
+      "N": 35,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 5326.0,
+      "observed_dt005": 5326.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 279,
+      "N": 35,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 8.78636441031544,
+      "observed_dt005": 9.372060179814602,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 279,
+      "N": 35,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": -3.681443349293295,
+      "observed_dt005": -3.9851207812827103,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 141,
+      "N": 51,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 972.0,
+      "observed_dt005": 972.0,
+      "outside_same_side_both_steps": false,
+      "side": null
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 141,
+      "N": 51,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 19434.0,
+      "observed_dt005": 19434.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 141,
+      "N": 51,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 47.37137466327508,
+      "observed_dt005": 56.38817113638483,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 141,
+      "N": 51,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": -35.26531414012669,
+      "observed_dt005": -41.767439779193325,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 39,
+      "N": 102,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 2692.0,
+      "observed_dt005": 2692.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 39,
+      "N": 102,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 97370.0,
+      "observed_dt005": 97370.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 39,
+      "N": 102,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 42.61816682463861,
+      "observed_dt005": 43.46530556676623,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 39,
+      "N": 102,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": -27.582385397116333,
+      "observed_dt005": -27.687528203088725,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 594,
+      "N": 23,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 1144.0,
+      "observed_dt005": 1144.0,
+      "outside_same_side_both_steps": false,
+      "side": null
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 594,
+      "N": 23,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 16992.0,
+      "observed_dt005": 16992.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 594,
+      "N": 23,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 2.455804872805579,
+      "observed_dt005": 2.6482577645959235,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 594,
+      "N": 23,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": 0.34419864827550417,
+      "observed_dt005": 0.10209310959270645,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 293,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 361.0,
+      "observed_dt005": 361.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 293,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 1442.0,
+      "observed_dt005": 1442.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 293,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 0.6973538617241256,
+      "observed_dt005": 0.6828391201418552,
+      "outside_same_side_both_steps": false,
+      "side": null
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 293,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": -0.20422119814582382,
+      "observed_dt005": -0.18822946963340476,
+      "outside_same_side_both_steps": false,
+      "side": null
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 130,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "observed_dt01": 250.0,
+      "observed_dt005": 250.0,
+      "outside_same_side_both_steps": false,
+      "side": null
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 130,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "observed_dt01": 1122.0,
+      "observed_dt005": 1122.0,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 130,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "observed_dt01": 14.420512712017599,
+      "observed_dt005": 12.69685530777182,
+      "outside_same_side_both_steps": true,
+      "side": "high"
+    },
+    {
+      "case": "millisecond_assay",
+      "group": 130,
+      "N": 13,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "observed_dt01": -11.55355718238452,
+      "observed_dt005": -9.758788202892157,
+      "outside_same_side_both_steps": true,
+      "side": "low"
+    },
+    {
+      "case": "threshold_phase",
+      "group": 279,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 279,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 279,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 279,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 141,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": null,
+      "outside_same_side_both_steps": false
+    },
+    {
+      "case": "threshold_phase",
+      "group": 141,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 141,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 141,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 39,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 39,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 39,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 39,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 594,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": null,
+      "outside_same_side_both_steps": false
+    },
+    {
+      "case": "threshold_phase",
+      "group": 594,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 594,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 594,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 293,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 293,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 293,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": null,
+      "outside_same_side_both_steps": false
+    },
+    {
+      "case": "threshold_phase",
+      "group": 293,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": null,
+      "outside_same_side_both_steps": false
+    },
+    {
+      "case": "threshold_phase",
+      "group": 130,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "total_count",
+      "side": null,
+      "outside_same_side_both_steps": false
+    },
+    {
+      "case": "threshold_phase",
+      "group": 130,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "coincidence_sum",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 130,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_energy",
+      "side": "high",
+      "outside_same_side_both_steps": true
+    },
+    {
+      "case": "threshold_phase",
+      "group": 130,
+      "bin_ms": 1,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "metric": "residual_lag1_crossmoment",
+      "side": "low",
+      "outside_same_side_both_steps": true
+    }
+  ],
+  "scope": "Checks calculations and physical threshold control only. These are conditional Gaussian reference predictions, not a validated autonomous rate field or native confidence intervals.",
+  "model_promoted": false
+}

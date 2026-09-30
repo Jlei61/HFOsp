@@ -1,0 +1,62 @@
+{
+  "status": "DESCRIPTIVE_ENTRY_COORDINATES",
+  "rows": [
+    {
+      "label": "rate_1mm",
+      "entry_ms": 10746.0,
+      "D_interpolated": 0.23309307898692777,
+      "bracket_ms": [
+        10740.0,
+        10750.0
+      ],
+      "D_bracket": [
+        0.23259672963648503,
+        0.23342397892019084
+      ],
+      "regions": [
+        {
+          "region": "Core A",
+          "Z": 0.5517632010602826
+        },
+        {
+          "region": "Core B",
+          "Z": 0.5917966851296316
+        },
+        {
+          "region": "Surround",
+          "Z": 0.7767511432799398
+        }
+      ]
+    },
+    {
+      "label": "rate_0p5mm",
+      "entry_ms": 9345.0,
+      "D_interpolated": 0.1976790824662894,
+      "bracket_ms": [
+        9340.0,
+        9350.0
+      ],
+      "D_bracket": [
+        0.19722753889111844,
+        0.19813062599956577
+      ],
+      "regions": [
+        {
+          "region": "Core A",
+          "Z": 0.6000842221219596
+        },
+        {
+          "region": "Core B",
+          "Z": 0.6392393037108065
+        },
+        {
+          "region": "Surround",
+          "Z": 0.8115352516376259
+        }
+      ]
+    }
+  ],
+  "native_entry_ms": 9868.5,
+  "native_D_at9870": 0.2563444253447549,
+  "definition": "10ms rate slow-state samples bracket and linearly interpolate each trajectory own finite200Hz/200ms entry. This is a trajectorycoordinate, not a continuation bifurcationpoint. Native coordinate is original9870ms checkpoint1.5ms after readout start."
+}

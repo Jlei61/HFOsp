@@ -1,0 +1,79 @@
+{
+  "status": "DESCRIPTIVE_COMPLETE",
+  "rows": [
+    {
+      "label": "frozen",
+      "entry_ms": 8497.0,
+      "adjacent_measured_resource_samples": [
+        {
+          "time_ms": 8490.0,
+          "D": 0.18798196980578608,
+          "global_Z": 0.8120180301942139,
+          "Z_core_A": 0.6658533246352755,
+          "Z_core_B": 0.667318188052141,
+          "Z_surround": 0.8193700412974417,
+          "M_current_E_mean_mV": 0.03746834089263417
+        },
+        {
+          "time_ms": 8500.0,
+          "D": 0.18891993181906086,
+          "global_Z": 0.8110800681809391,
+          "Z_core_A": 0.6645229483314787,
+          "Z_core_B": 0.6659848897815054,
+          "Z_surround": 0.8184519943620371,
+          "M_current_E_mean_mV": 0.03808840306730001
+        }
+      ]
+    },
+    {
+      "label": "units",
+      "entry_ms": 8486.0,
+      "adjacent_measured_resource_samples": [
+        {
+          "time_ms": 8480.0,
+          "D": 0.1880747116746947,
+          "global_Z": 0.8119252883253053,
+          "Z_core_A": 0.665956775927101,
+          "Z_core_B": 0.6674052672531768,
+          "Z_surround": 0.819267802845469,
+          "M_current_E_mean_mV": 0.037540462826918225
+        },
+        {
+          "time_ms": 8490.0,
+          "D": 0.18901124711554806,
+          "global_Z": 0.8109887528844519,
+          "Z_core_A": 0.6646261944853026,
+          "Z_core_B": 0.6660717892586123,
+          "Z_surround": 0.818351263801909,
+          "M_current_E_mean_mV": 0.03816273695672612
+        }
+      ]
+    },
+    {
+      "label": "units_history",
+      "entry_ms": 10163.0,
+      "adjacent_measured_resource_samples": [
+        {
+          "time_ms": 10160.0,
+          "D": 0.18835564928030923,
+          "global_Z": 0.8116443507196908,
+          "Z_core_A": 0.628035404716942,
+          "Z_core_B": 0.6343633151084715,
+          "Z_surround": 0.8207639857471106,
+          "M_current_E_mean_mV": 0.04197275764733691
+        },
+        {
+          "time_ms": 10170.0,
+          "D": 0.18924759863698148,
+          "global_Z": 0.8107524013630185,
+          "Z_core_A": 0.6267805926363411,
+          "Z_core_B": 0.6330958563104537,
+          "Z_surround": 0.8198907071911654,
+          "M_current_E_mean_mV": 0.042557075609687425
+        }
+      ]
+    }
+  ],
+  "region_mapping": "group_region 0=Core A, 1=Core B, 2=Surround, as operator producer and resource_path_comparison.py",
+  "scope": "Adjacent measured samples at >=200Hz for200ms operational entry. Different histories and spatial fields; no interpolation, universal threshold or bifurcation claim."
+}

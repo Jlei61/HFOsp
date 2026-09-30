@@ -1,0 +1,52 @@
+{
+  "status": "COMPLETE_OPERATORS_ONLY",
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "physical_sources": 40000,
+  "physical_targets": 40000,
+  "original_source_groups": 3479,
+  "max_delay_steps": 358,
+  "dt_ms": 0.1,
+  "checks": [
+    {
+      "pathway": "ampa",
+      "moment": "mean",
+      "physical_edges": 32000000,
+      "source_group_projection_max_abs_error": 0.0
+    },
+    {
+      "pathway": "ampa",
+      "moment": "variance",
+      "physical_edges": 32000000,
+      "source_group_projection_max_abs_error": 0.0
+    },
+    {
+      "pathway": "gaba",
+      "moment": "mean",
+      "physical_edges": 8000000,
+      "source_group_projection_max_abs_error": 0.0
+    },
+    {
+      "pathway": "gaba",
+      "moment": "variance",
+      "physical_edges": 8000000,
+      "source_group_projection_max_abs_error": 0.0
+    }
+  ],
+  "source_index": "Flattened column=(delay_steps-1)*40000+original_cell_id; GABA source IDs offset by32000.",
+  "units": "Source rate is spikes/ms; weights are native synaptic jump divided by target tau_m/tau_r, matching the frozen density membrane update.",
+  "variance_limit": "Squared physical weights are cached exactly. Treating source fluctuations as independent whiteGaussian processes would remain an additional approximation requiring validation.",
+  "fixed_phase_period_imposed": false,
+  "physical_model_simulated": false,
+  "formal_bifurcation_allowed": false,
+  "elapsed_s": 120.69822382926941,
+  "producer_sha256": "33445d7b5f8e4a286dbebf7c3feebbe9d1a44c50e6cdac0c48e8c5dc961d8525"
+}

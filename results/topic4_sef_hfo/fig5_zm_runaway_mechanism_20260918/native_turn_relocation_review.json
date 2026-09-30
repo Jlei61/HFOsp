@@ -1,0 +1,21 @@
+{
+  "updated_local": "2026-09-20T00:31:27.480485+08:00",
+  "status": "GEOMETRIC_TURN_REFINEMENT_REQUIRED",
+  "result": "periodic/native_turn_relocated_fine_tangent/result.json",
+  "left_T_ms": 264.3623569561784,
+  "right_T_ms": 264.36293204907884,
+  "left_dD_dT": 3.8241489653019626e-08,
+  "right_dD_dT": -4.424067755509798e-08,
+  "bracket_width_ms": 0.0005750929004193495,
+  "secant_curvature": -0.0001434240748720299,
+  "derivative_gate": 1e-09,
+  "root_and_augmented_gates_pass": true,
+  "derivative_gate_pass": false,
+  "scope": "Same discretized old-v3 branch only. Opposite derivative signs do not certify a physical LPC. No new correction launched while independent physical-flow check remains pending.",
+  "coordinate_resolution_context": {
+    "relocation_abs_D_change": 1.101285729276924e-12,
+    "observed_previous_mesh_D_change": 1.7279719322083054e-10,
+    "ratio_mesh_change_to_relocation": 156.9049599274157,
+    "interpretation": "This compares observed changes, not a rigorous discretization error bound. Further decimal localization alone cannot resolve physical criticality; prioritize independent physical-flow and multiplier consistency."
+  }
+}

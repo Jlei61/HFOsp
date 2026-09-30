@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "whole_physical_engine_bitwise": true,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+  "replay": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_state_continuation_qa/runs/source16p70_to20/checkpoint.pkl",
+  "checkpoint_sha256": "a638faa0a37b6d27703b1d5b4cb1aa66824e7528d12a3c555d8a88a49e479b81",
+  "verified_epoch": 1790514008.8261242,
+  "only_metadata_normalization": {
+    "path": "slow.kind",
+    "values": [
+      "ConditionalSlow",
+      "GlobalResponseSlow"
+    ],
+    "reason": "ConditionalSlow with clampFalse delegates original GlobalResponseSlow physical update; no numerical state omitted. Tracker is an observer outside engine."
+  },
+  "scope": "Reconstructed16.7s natural state continued without intervention reaches the original20s full engine exactly. Together with168bitwise observation arrays over10to16.7s, validates the snapshot lineage. Not a new scientific replicate."
+}

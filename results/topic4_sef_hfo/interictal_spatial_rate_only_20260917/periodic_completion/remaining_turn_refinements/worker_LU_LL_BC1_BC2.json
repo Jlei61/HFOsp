@@ -1,0 +1,31 @@
+{
+  "status": "BATCH_FINISHED",
+  "rows": [
+    {
+      "case": "LU",
+      "label": "LPC_resonance_upper",
+      "status": "REFINEMENT_FAILED",
+      "N": 512
+    },
+    {
+      "case": "LL",
+      "label": "LPC_resonance_lower",
+      "status": "REFINEMENT_FAILED",
+      "N": 512
+    },
+    {
+      "case": "BC1",
+      "label": "LPC_B_connection1",
+      "status": "VALIDATION_INCOMPLETE",
+      "validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B_connection1_validation.json"
+    },
+    {
+      "case": "BC2",
+      "label": "LPC_B_connection2",
+      "status": "REFINEMENT_FAILED",
+      "N": 256
+    }
+  ],
+  "pid": 4190955,
+  "scope": "Batch completion is separate from the scientific status of each candidate."
+}

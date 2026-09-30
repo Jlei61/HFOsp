@@ -1,0 +1,49 @@
+{
+  "status": "REGISTERED_FOUR_COMPLETE_STATE_RETURN_TESTS",
+  "created_epoch": 1790577818.9998949,
+  "question": "At the commonK9.425, do high states arriving from the two neighboringK values return to the same spatial pattern, while a paired quiet history remains distinct?",
+  "reason": "Finite persistence at severalKpoints is not local stability. Complete physically generated neighboringstates avoid constructing an artificial microscopic lift from meanrates. The priorquietK9.35 and highK9.35 references had different future intervals; this test also provides an exactly paired high/quiet comparison at oneK.",
+  "design": "Four5s R64 trajectories at identical actualZfield/heldK9.425, originalgraph andfixedpercellPoissonlaw. Sources are the complete200000clock outputs ofthe precedingfour probes. Retain V/ref/synapses/M/G/fullsource-delayhistory, clock andbothRNGs; changeonlyK. Threehighhistories bracket the target; fourthquiet. No imposedrate, period, spatialpattern, timingorZreset.",
+  "guards": "Report each1s rate/field/coreZdrift and first100ms lowactivity; final4-5s EfieldRMS andIfieldRMS relative to same-Kcontrol each<=1Hz, eachEcoremeanrate difference<=1Hz and allE<=.2Hz, E-MfieldRMS<=1count for eachneighbor highhistory. Report penultimate-to-final1s fieldRMS<=1Hz for allthreehighhistories. Quiet is originaljoint allE/A/B<5Hz in>=95percent10msbins. These are selected-direction macroreturn guards, not fullmicroscopic attraction or stability certification.",
+  "decision": "If either highhistory retains a distinctspatialstate, do not assume one smoothupperbranch. If allthreeconverge, report only tested-direction macroreturn; separately report quiet coexistence under pairedfuturestreams. No universalbasin, deterministiclimit, eigenvalue or formalbifurcation follows.",
+  "stop": "Exactly four5s trajectories andanalysis. No automatic extension, perturbation, parameterpoint, seed, root or iteration.",
+  "duration_s": 5,
+  "replicas": 64,
+  "K": 9.425,
+  "sources": {
+    "from_lower_K": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_exit_interval/runs/high_K9p3875/final_state.npz",
+      "sha256": "84fcdee5b0b92cd125b02c28862fb2fd05475d1d78604b111af7fde86edd7e3f",
+      "preceding_condition": "high_K9p3875"
+    },
+    "same_K_control": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_exit_interval/runs/high_K9p425/final_state.npz",
+      "sha256": "47cad7f381690f2a82b9985cbcb26811ab24f1806cc1b1b68804cb47b65c8529",
+      "preceding_condition": "high_K9p425"
+    },
+    "from_upper_K": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_exit_interval/runs/high_K9p4625/final_state.npz",
+      "sha256": "56477dc72fcf1fc070413b1ecb7de54057afb733e0cf6c50e7c01e7335437a42",
+      "preceding_condition": "high_K9p4625"
+    },
+    "from_quiet": {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/mean_exit_interval/runs/quiet_K9p35/final_state.npz",
+      "sha256": "4d8d488a12bb0f57d9764d03853dba6f395dd7b49c6ae3dde944cbe9eb77f8cf",
+      "preceding_condition": "quiet_K9p35"
+    }
+  },
+  "initial_field_contrasts_Hz": {
+    "from_lower_K": 6.023608105837861,
+    "same_K_control": 0.0,
+    "from_upper_K": 17.149553906189997,
+    "from_quiet": 289.2115485337509
+  },
+  "dependencies": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/physical_history_return.py": "2dbdee9cac64bc1bc79abe0500ca2b7e75d0fc9cab4f5716b5793951b7b3ce15",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_history_pair.py": "26d3da49c34293adcbda3d30ed43cf2f50f1d0660c22eda068a92c3d78049bb8",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_input_pilot.py": "2d0f1482f0761a02cddce83230dec6d919ac8203390fde751e15bca6fce8affa",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_individual_source_pilot.py": "e02b9ee463458fb0bfe053121f37c9e176369c3f197acd5640cd10a590f22fe1",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_poisson_external_pilot.py": "1858427dc7405fa4f54b3988a148c5f76a2c4f11aa212be8309c80d9b0411e1f"
+  },
+  "formal_bifurcation_allowed": false
+}

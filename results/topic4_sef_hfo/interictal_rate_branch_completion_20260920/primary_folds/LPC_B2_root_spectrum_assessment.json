@@ -1,0 +1,163 @@
+{
+  "label": "LPC_B2",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N256.npz",
+  "J_EE_core": 0.9463101206889282,
+  "T_ms": 296.72680168084366,
+  "status": "FOLD_WITH_VERIFIED_UNSTABLE_MODES",
+  "fold_validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_validation.json",
+  "critical_mode_identity": [
+    {
+      "requested_dt_ms": 0.05,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/LPC_B2_N256_dt0.05.json",
+      "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_monodromy_check_N256_dt0.05_analytic.npz",
+      "critical_mode_index": 3,
+      "multiplier": [
+        1.0002614480706227,
+        0.0
+      ],
+      "overlap_with_projected_fold_tangent": 0.9999999928367432,
+      "all_tangent_overlaps": [
+        0.5452970289958755,
+        0.9145549489939656,
+        0.9145549489939656,
+        0.9999999928367432,
+        0.859324497025851,
+        0.276316125344797
+      ],
+      "highest_overlap_mode": 3,
+      "identity_checked": true
+    },
+    {
+      "requested_dt_ms": 0.025,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/LPC_B2_N256_dt0.025_ritz.json",
+      "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_B2_monodromy_check_N256_dt0.025_analytic.npz",
+      "critical_mode_index": 3,
+      "multiplier": [
+        1.0000660619583086,
+        0.0
+      ],
+      "overlap_with_projected_fold_tangent": 0.9999999995431009,
+      "all_tangent_overlaps": [
+        0.5452073514813222,
+        0.9145321473053878,
+        0.9145321473053878,
+        0.9999999995431009,
+        0.8592252233661987,
+        0.276327783203608
+      ],
+      "highest_overlap_mode": 3,
+      "identity_checked": true
+    }
+  ],
+  "physical_profile_check": {
+    "fast": {
+      "minimum_Hz": 4.412716249890938e-05,
+      "phase_index": 352,
+      "group": 18
+    },
+    "slow": {
+      "minimum_Hz": 0.005694712758268147,
+      "phase_index": 435,
+      "group": 17
+    },
+    "positive": true,
+    "N": 256,
+    "check_N": 1024
+  },
+  "critical_mode_near_plus_one": true,
+  "paired_spectrum": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        23.00481956522512,
+        0.0
+      ],
+      [
+        1.2169993474229197,
+        -0.8225914988409359
+      ],
+      [
+        1.2169993474229197,
+        0.8225914988409359
+      ],
+      [
+        1.0000660619583086,
+        0.0
+      ],
+      [
+        0.39298779878557016,
+        0.0
+      ],
+      [
+        -0.0037633669103032162,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.05606206605124697,
+      0.020627656621277315,
+      0.020627656621277315,
+      0.020627656621277315,
+      0.020627656621277315,
+      0.020627656621277315
+    ],
+    "reliable_mode_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.009343677675207829,
+      1.939144331941518e-05,
+      1.939144331941518e-05,
+      0.00019538611231406655,
+      0.00010297990135699209,
+      1.6842751504554318e-07
+    ],
+    "reliable_outside_count": 3,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 23.00481956522512,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "remaining_multipliers": [
+    [
+      23.00481956522512,
+      0.0
+    ],
+    [
+      1.2169993474229197,
+      -0.8225914988409359
+    ],
+    [
+      1.2169993474229197,
+      0.8225914988409359
+    ],
+    [
+      0.39298779878557016,
+      0.0
+    ],
+    [
+      -0.0037633669103032162,
+      0.0
+    ]
+  ],
+  "remaining_maximum_modulus": 23.00481956522512,
+  "remaining_reliable_outside_count": 3,
+  "numerical_unstable_dimension_excluding_fold": 3,
+  "remaining_spectrum_classified": true,
+  "remaining_spectrum_checked": false,
+  "scope": "Paired-step numerical spectrum at this validated fold. This does not certify whole adjacent intervals or global branch connections."
+}

@@ -1,0 +1,30 @@
+{
+  "question": "Can the closest individual recurrence of the self-terminating side seed a complete-state periodic solution?",
+  "candidate": {
+    "time1_ms": 2462.0,
+    "time2_ms": 2727.0,
+    "period_ms": 265.0,
+    "score": 0.0014420897915968566,
+    "rate_history_squared_error_over_variance": 6.670380937667919e-05,
+    "M_squared_error_over_variance": 0.0013753859822201774,
+    "regional_rates_A_B_S_1": [
+      1.3750171918886407,
+      1.9157042995701916,
+      0.065435490130718
+    ],
+    "regional_rates_A_B_S_2": [
+      1.5767784160549494,
+      11.857577957459384,
+      0.09201370826084598
+    ]
+  },
+  "source_condition": {
+    "label": "mid1_from_lower",
+    "field": "mid1",
+    "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/final_state.npz",
+    "previous_elapsed_ms": 0,
+    "duration_ms": 10000
+  },
+  "controls": "Exact replay of unchanged full spatial equations with all M dynamic and the original local frozen Z field; require1ms recorded rates to match. Recurrence is not a closed orbit.",
+  "model_promoted": false
+}

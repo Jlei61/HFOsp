@@ -1,0 +1,26 @@
+{
+  "status": "REGISTERED_AFTER_FIRST_DIRECT_NONLINEAR_K_POINT",
+  "created_epoch": 1790538252.252279,
+  "question": "Does the directly corresponding high conditional state extend beyond its first tiny verified K step, with nonlinear rather than fitted responses?",
+  "design": {
+    "requested_K": [
+      9.0125,
+      9.025
+    ],
+    "maximum_halvings_per_point": 2,
+    "maximum_evaluations_per_point": 3,
+    "replicas_per_stream": 256,
+    "streams": 2,
+    "record_ms": 4000,
+    "burn_ms": 1000
+  },
+  "predictor": "Secant of the latest two directly checked input states. Keep the same maximum5Hz projection/100Hz predictedchange guard. A failed predictor may halve this point at mosttwice; no increase of tolerances.",
+  "corrector": "Same measured K9 Jacobian, at mosttwo fresh nonlinear corrector validations. Stop if both population RMS residuals worsen, linear solve fails, correction leaves guard, or point remains unresolved. No continuation through a failed point.",
+  "numerical_stopping": "Near-equilibrium candidate only if each E/I source weightedRMS residual and E individualtargetRMS is <=2 times its combined prediction/newcount samplingSEM (absolute roundoff floor1e-7Hz), and no source group exceeds6 combinedSEM+1e-7Hz. These numerical criteria do not certify exactroot/nativecorrespondence or dynamical stability. All inherited amplitude failures and unestimable components remain.",
+  "physics": "Actual16.7s spatial Z remains fixed atmean.21; K scales its own fixedactualfield. Graph/externalmean unchanged. Source rates, localM and causalR/G follow selfconsistency. Original density cell equations evaluate every nonlinear residual.",
+  "limits": "Approximate conditional stationary candidates at recorded sampling precision. Frozen derivatives only generate proposals. No true root, dynamic stability, autonomous native event, or bifurcation type is certified. Source/target/finite-record approximations and inherited derivative failures remain.",
+  "producer_sha256": "675c3036aaa6b5a91d27374311842f13eaf04d46c3062dd3c54595ddccb0f043",
+  "helper_sha256": "697b66d33399111024d6ac2ff68692ad407c01b3e84caa7f8fc8bcfdbb153336",
+  "system_sha256": "432bcd2268c5d93493aab5d8c1b478bf267ffb61977917197633dd116d0456df",
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,59 @@
+{
+  "stage": "ACTUAL_ENTERING_Z_FIELD_PROBES",
+  "question": "Does the spatial distribution of core fatigue shift entry at the same meanZ?",
+  "rows": [
+    {
+      "name": "entry_z0.74_k0.0002_Z10_high",
+      "Z": 0.74,
+      "K": 0.0002,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "entry",
+      "duration_s": 30.0,
+      "reason": "Change only held Z spatial shape fromt20 tot10 at matchedallEmean; Kshape andfutureinput unchanged. t10 is60ms after operationalentry, not exactentry state."
+    },
+    {
+      "name": "entry_z0.74_k0.0002_Z10_interictal",
+      "Z": 0.74,
+      "K": 0.0002,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t50s.pkl",
+      "history_label": "interictal",
+      "cut": "entry",
+      "duration_s": 30.0,
+      "reason": "Change only held Z spatial shape fromt20 tot10 at matchedallEmean; Kshape andfutureinput unchanged. t10 is60ms after operationalentry, not exactentry state."
+    },
+    {
+      "name": "entry_z0.78_k0.0002_Z10_high",
+      "Z": 0.78,
+      "K": 0.0002,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/entry1_checkpoint.pkl",
+      "history_label": "high",
+      "cut": "entry",
+      "duration_s": 30.0,
+      "reason": "Change only held Z spatial shape fromt20 tot10 at matchedallEmean; Kshape andfutureinput unchanged. t10 is60ms after operationalentry, not exactentry state."
+    },
+    {
+      "name": "entry_z0.78_k0.0002_Z10_interictal",
+      "Z": 0.78,
+      "K": 0.0002,
+      "Z_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t10s.pkl",
+      "K_template": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t20s.pkl",
+      "history_checkpoint": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405/states/t50s.pkl",
+      "history_label": "interictal",
+      "cut": "entry",
+      "duration_s": 30.0,
+      "reason": "Change only held Z spatial shape fromt20 tot10 at matchedallEmean; Kshape andfutureinput unchanged. t10 is60ms after operationalentry, not exactentry state."
+    }
+  ],
+  "max_workers": 1,
+  "local_probe_allocation": {
+    "first_four_of_twelve": 4,
+    "remaining": 8
+  }
+}

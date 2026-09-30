@@ -1,0 +1,86 @@
+{
+  "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBtoBurstFurther_0119_N256.npz",
+  "J_EE_core": 0.9802026650104526,
+  "T_ms": 390.1772140947955,
+  "dt_ms": 0.09999416045484251,
+  "history_dimension": 345015,
+  "multipliers": [
+    [
+      106518409349.82834,
+      0.0
+    ],
+    [
+      -2079516.2105662252,
+      0.0
+    ],
+    [
+      40198.769868115814,
+      0.0
+    ],
+    [
+      18.835961429170958,
+      0.0
+    ]
+  ],
+  "residuals": [
+    0.0014083559708652686,
+    1.0548777788372248,
+    89.48659010879334,
+    26.034185664764646
+  ],
+  "phase_multiplier_error": 17.835961429170958,
+  "phase_tangent_relative_defect": 726357.0844207954,
+  "raw_multipliers_above_1p001": 4,
+  "requested_multipliers": 4,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 500.3316614627838,
+  "polynomial_filter_rho": 0.6769369011078273,
+  "transformed_eigenvalues": [
+    [
+      1.1346171530345143e+22,
+      0.0
+    ],
+    [
+      4324389765533.596,
+      0.0
+    ],
+    [
+      1613897300.462045,
+      0.0
+    ],
+    [
+      -2297413.6160318013,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.32306309889217266,
+  "smallest_returned_transformed_modulus": 2297413.6160318013,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.41525769828560677,
+    0.018559733987690067,
+    0.5705468271107896,
+    0.38681509095219624
+  ],
+  "identified_neutral_index": null,
+  "nontrivial_multipliers": [
+    [
+      106518409349.82834,
+      0.0
+    ],
+    [
+      -2079516.2105662252,
+      0.0
+    ],
+    [
+      40198.769868115814,
+      0.0
+    ],
+    [
+      18.835961429170958,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 106518409349.82834,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

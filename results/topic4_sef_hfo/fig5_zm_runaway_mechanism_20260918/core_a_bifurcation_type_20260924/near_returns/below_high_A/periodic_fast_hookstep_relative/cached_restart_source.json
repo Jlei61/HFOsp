@@ -1,0 +1,6 @@
+{
+  "source_iteration": 2,
+  "period_ms": 32.56318466960964,
+  "combined_relative_rms": 0.08249778758196634,
+  "reason": "State-relative right preconditioning gives worse Krylov convergence than the original M-only scaling. Preserve accepted iterate, restore M-only scaling and use the independently verified exact cached derivative for a larger linear solve."
+}

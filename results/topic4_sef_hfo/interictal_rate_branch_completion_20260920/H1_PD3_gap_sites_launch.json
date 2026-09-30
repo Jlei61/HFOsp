@@ -1,0 +1,30 @@
+{
+  "pid": 563792,
+  "started": 1789908848.8160098,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/complete_rate_positive_stability.py",
+    "--indices",
+    "21",
+    "7",
+    "0",
+    "--device",
+    "0",
+    "--require-dimension",
+    "--min-free-gib",
+    "8",
+    "--worker-label",
+    "H1_PD3_gap_sites_worker",
+    "--after-pids",
+    "559640"
+  ],
+  "indices": [
+    21,
+    7,
+    0
+  ],
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/current_interval_evidence.json",
+  "purpose": "Subdivide the long H1 bracket from resolved unstable dimension 2 after TR2 to dimension 3 before PD3, in continuation order. Use frozen survey sites at family indices 144, 240, 398. Do not infer a new bifurcation solely from this endpoint difference.",
+  "global_branch_completeness": false
+}

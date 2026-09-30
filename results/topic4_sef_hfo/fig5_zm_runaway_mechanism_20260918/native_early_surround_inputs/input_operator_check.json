@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "index": 0,
+      "max_abs_error": 0.0
+    },
+    {
+      "index": 1,
+      "max_abs_error": 0.0
+    },
+    {
+      "index": 50,
+      "max_abs_error": 0.0
+    },
+    {
+      "index": 4999,
+      "max_abs_error": 1.3877787807814457e-17
+    },
+    {
+      "index": 29999,
+      "max_abs_error": 3.979039320256561e-13
+    }
+  ],
+  "object": "Originalphysical g40mean/fullvariance and repairedprivatevariance; actualnativecounts dividedbyoriginalgroupN/0.1ms. Truezero pre0history.",
+  "native_future_spikes_used_as_diagnostic_inputs": true,
+  "autonomous_validation": false
+}

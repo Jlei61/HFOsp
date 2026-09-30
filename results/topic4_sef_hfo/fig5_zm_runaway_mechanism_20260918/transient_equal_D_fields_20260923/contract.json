@@ -1,0 +1,21 @@
+{
+  "created_local": "2026-09-23T14:25:03.359498+08:00",
+  "question": "At exactly the same meanD=.20, does the excessive core depletion in the free rate trajectory change the conditional state relative to the native spatial field?",
+  "rationale": "Native-Z-driven fixed rate model recovered entry9.844s versus native9.8685s and both lead directions; autonomousZ version enters7.674s and overdepletes cores at matchedmeanD. This is a prospective paired spatial-field intervention.",
+  "mean_D": 0.2,
+  "parameter_selection": "One shared depletion within the previously identified preentry interval; native and free fields both cross it. No scanning for a favorable field.",
+  "field_construction": "First observed upward crossing of meanD=.20 in each completed path. Linear interpolation of the entire groupZ between adjacent stored samples, using originalEcell weights; spatial pattern unaltered otherwise.",
+  "initialization": "Exactly the same complete9000ms fast/local/refractory/delay/M state from the completed nativeZ-driven rate run. Intervene only in fullZ field and freeze it. InitialM and all fast histories identical.",
+  "future": "Original externalinputclock9-12.5s and originalseed1 Philox(group,tick) innovation keys shared. M dynamic; Z held in both arms.",
+  "arms": [
+    "native_shape",
+    "free_rate_shape"
+  ],
+  "duration_ms": 3500,
+  "dt_ms": 0.05,
+  "observable": "Original10ms rate quiet<5Hz, completeevents requiring20ms quiet both sides, high>=200Hz for200ms, final1s globalmean and spatial persistent fraction >50Hz in>=90percentofbins.",
+  "interpretation": "Different outcomes establish spatialZ-pattern dependence at fixedmean in this finite-time comparison. This alone is not a separatrix or a bifurcation type. Same outcomes would reject these two shapes as sufficient to explain the observed discrepancy under this chosen history.",
+  "budget": "Two paired3.5s trajectories, checkpoint replay check, original readouts and one comparison figure. No fit, newseed, extension or branch.",
+  "model_promoted": false,
+  "original_local_failures_retained": true
+}

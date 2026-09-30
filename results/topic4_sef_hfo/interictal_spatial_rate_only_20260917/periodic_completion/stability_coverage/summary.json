@@ -1,0 +1,1442 @@
+{
+  "timestamp_utc": "2026-09-18T15:28:26.260934+00:00",
+  "planned_sites": 120,
+  "classification_counts": {
+    "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 71,
+    "UNSTABLE": 35,
+    "NUMERICALLY_STABLE": 3,
+    "UNRESOLVED": 8,
+    "COMPUTATION_FAILED": 1,
+    "PENDING": 2
+  },
+  "computed_multiplier_counts": {
+    "UNSTABLE": 94,
+    "NUMERICALLY_STABLE": 15,
+    "UNRESOLVED": 8,
+    "COMPUTATION_FAILED": 1,
+    "PENDING": 2
+  },
+  "physical_profile_audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/constituent_filter_audit.json",
+  "continued_orbits": 3011,
+  "families": {
+    "A": {
+      "continued_orbits": 1219,
+      "planned_sites": 34,
+      "classification_counts": {
+        "NUMERICALLY_STABLE": 3,
+        "UNSTABLE": 27,
+        "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 4
+      },
+      "sites": [
+        {
+          "index": 0,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9380343115170252,
+          "T_ms": 152.72636709125075,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HA_a0.10000_N32.npz"
+        },
+        {
+          "index": 24,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9455820663745905,
+          "T_ms": 165.2457728993363,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0015_N64.npz"
+        },
+        {
+          "index": 48,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9458381477591895,
+          "T_ms": 165.79636337513392,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0039_N64.npz"
+        },
+        {
+          "index": 52,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9458427243306455,
+          "T_ms": 165.80649878481304,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0043_N64.npz"
+        },
+        {
+          "index": 61,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.945755302478177,
+          "T_ms": 165.61976930708667,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0052_N64.npz"
+        },
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        },
+        {
+          "index": 72,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9457716410128536,
+          "T_ms": 165.65482036589032,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0063_N64.npz"
+        },
+        {
+          "index": 96,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9460343175647821,
+          "T_ms": 166.22407389846154,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0087_N64.npz"
+        },
+        {
+          "index": 106,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9461514845753326,
+          "T_ms": 166.4781885118682,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0097_N64.npz"
+        },
+        {
+          "index": 107,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9461632064631065,
+          "T_ms": 166.50359671894327,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0098_N64.npz"
+        },
+        {
+          "index": 110,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9466348713000243,
+          "T_ms": 167.51851464237046,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HA_a3.60000_N64.npz"
+        },
+        {
+          "index": 111,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9472134918256869,
+          "T_ms": 168.7147023453843,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HA_a3.70000_N64.npz"
+        },
+        {
+          "index": 120,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9512382138741038,
+          "T_ms": 173.22388630366288,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0007_N64.npz"
+        },
+        {
+          "index": 140,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9609390991177194,
+          "T_ms": 167.90138936640946,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0027_N64.npz"
+        },
+        {
+          "index": 144,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9610888382119596,
+          "T_ms": 161.55319958074975,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0031_N64.npz"
+        },
+        {
+          "index": 168,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9503887639081002,
+          "T_ms": 145.71933722916938,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0055_N64.npz"
+        },
+        {
+          "index": 185,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9396056565256691,
+          "T_ms": 137.35868160084425,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0072_N64.npz"
+        },
+        {
+          "index": 187,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9393378955433941,
+          "T_ms": 136.57780121635727,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0074_N64.npz"
+        },
+        {
+          "index": 189,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9394705624413894,
+          "T_ms": 135.8199560540212,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0076_N64.npz"
+        },
+        {
+          "index": 191,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9393457839454545,
+          "T_ms": 135.41623212818274,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0078_N64.npz"
+        },
+        {
+          "index": 192,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9392487898396883,
+          "T_ms": 135.285018516502,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0079_N64.npz"
+        },
+        {
+          "index": 198,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9382531685252172,
+          "T_ms": 134.72457608321193,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0085_N64.npz"
+        },
+        {
+          "index": 202,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.938249263188002,
+          "T_ms": 134.71960403938058,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0089_N64.npz"
+        },
+        {
+          "index": 216,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9403300247475398,
+          "T_ms": 134.3398422784982,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0103_N64.npz"
+        },
+        {
+          "index": 217,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9405280733175705,
+          "T_ms": 134.17706435106362,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0104_N64.npz"
+        },
+        {
+          "index": 221,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9405273508163805,
+          "T_ms": 133.35802736287184,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0108_N64.npz"
+        },
+        {
+          "index": 240,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9304084622038246,
+          "T_ms": 128.72242321042555,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0127_N64.npz"
+        },
+        {
+          "index": 264,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9065478958285424,
+          "T_ms": 122.81114581638616,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0151_N64.npz"
+        },
+        {
+          "index": 288,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.8825603212545299,
+          "T_ms": 121.23683763594109,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0175_N64.npz"
+        },
+        {
+          "index": 312,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.8508090325941798,
+          "T_ms": 119.99163645129438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAextended_0023_N128.npz"
+        },
+        {
+          "index": 336,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.8172140100857402,
+          "T_ms": 118.85954433146681,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAextended_0047_N128.npz"
+        },
+        {
+          "index": 360,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.7836195217615174,
+          "T_ms": 117.6782568963295,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAextended_0071_N128.npz"
+        },
+        {
+          "index": 384,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.7500262145505575,
+          "T_ms": 116.42265511934322,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAextended_0095_N128.npz"
+        },
+        {
+          "index": 398,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.7304292475008973,
+          "T_ms": 115.85940013939604,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAextended_0109_N128.npz"
+        }
+      ]
+    },
+    "B": {
+      "continued_orbits": 846,
+      "planned_sites": 23,
+      "classification_counts": {
+        "UNSTABLE": 8,
+        "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 15
+      },
+      "sites": [
+        {
+          "index": 0,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9457594738219046,
+          "T_ms": 165.47810667588007,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a0.10000_N32.npz"
+        },
+        {
+          "index": 24,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9529134349081203,
+          "T_ms": 195.32119999065395,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0015_N64.npz"
+        },
+        {
+          "index": 48,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9593616241472155,
+          "T_ms": 208.2353485705315,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0039_N64.npz"
+        },
+        {
+          "index": 72,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9655504253946388,
+          "T_ms": 224.1063771892101,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0063_N64.npz"
+        },
+        {
+          "index": 81,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9706781825126958,
+          "T_ms": 246.139376145517,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0072_N64.npz"
+        },
+        {
+          "index": 85,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9704664659823615,
+          "T_ms": 266.0940255536428,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0076_N64.npz"
+        },
+        {
+          "index": 96,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9600733875691013,
+          "T_ms": 282.80752682906973,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0087_N64.npz"
+        },
+        {
+          "index": 109,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.947205893190792,
+          "T_ms": 290.86713248035227,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0100_N64.npz"
+        },
+        {
+          "index": 113,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9465596459862857,
+          "T_ms": 299.7283833138458,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0104_N64.npz"
+        },
+        {
+          "index": 117,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9475969930136562,
+          "T_ms": 303.21491680577145,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0108_N64.npz"
+        },
+        {
+          "index": 120,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476777577324328,
+          "T_ms": 303.3760609696811,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0111_N64.npz"
+        },
+        {
+          "index": 121,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.947671676062654,
+          "T_ms": 303.3600784413521,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0112_N64.npz"
+        },
+        {
+          "index": 123,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.947656589700595,
+          "T_ms": 303.3187696404996,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0114_N64.npz"
+        },
+        {
+          "index": 127,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9476524499436086,
+          "T_ms": 303.3130917492765,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0118_N64.npz"
+        },
+        {
+          "index": 133,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9476794716308171,
+          "T_ms": 303.3674926165453,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0124_N64.npz"
+        },
+        {
+          "index": 137,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476746665312357,
+          "T_ms": 303.3303735581331,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0128_N64.npz"
+        },
+        {
+          "index": 141,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.947654084690572,
+          "T_ms": 303.25741568936695,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0132_N64.npz"
+        },
+        {
+          "index": 144,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476856573291267,
+          "T_ms": 303.288797281248,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0135_N64.npz"
+        },
+        {
+          "index": 149,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.947705757725806,
+          "T_ms": 303.29936544622376,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0140_N64.npz"
+        },
+        {
+          "index": 153,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9477012236546857,
+          "T_ms": 303.2997491554592,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0144_N64.npz"
+        },
+        {
+          "index": 157,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476450224008186,
+          "T_ms": 303.25035858760066,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0148_N64.npz"
+        },
+        {
+          "index": 161,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476604430114868,
+          "T_ms": 303.39538638704914,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0152_N64.npz"
+        },
+        {
+          "index": 165,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9476970717490772,
+          "T_ms": 303.51158651323766,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0156_N64.npz"
+        }
+      ]
+    },
+    "single": {
+      "continued_orbits": 304,
+      "planned_sites": 28,
+      "classification_counts": {
+        "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 27,
+        "UNRESOLVED": 1
+      },
+      "sites": [
+        {
+          "index": 0,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9663051075132434,
+          "T_ms": 267.68644325761807,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0115_N256.npz"
+        },
+        {
+          "index": 12,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9660327509052546,
+          "T_ms": 268.0839737291257,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0103_N256.npz"
+        },
+        {
+          "index": 16,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9660279666763448,
+          "T_ms": 268.08420043138545,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0099_N256.npz"
+        },
+        {
+          "index": 17,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.966039251898546,
+          "T_ms": 268.0628918680163,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0098_N256.npz"
+        },
+        {
+          "index": 21,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.965466004467718,
+          "T_ms": 268.80782637709416,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0094_N256.npz"
+        },
+        {
+          "index": 24,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9642494678128221,
+          "T_ms": 269.47498515165074,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0091_N256.npz"
+        },
+        {
+          "index": 28,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9644049728136824,
+          "T_ms": 270.12216371067495,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0087_N256.npz"
+        },
+        {
+          "index": 29,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.964969793826752,
+          "T_ms": 270.0915331418878,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0086_N256.npz"
+        },
+        {
+          "index": 33,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9651845059923813,
+          "T_ms": 270.38234409129063,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0082_N256.npz"
+        },
+        {
+          "index": 48,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9646467868146731,
+          "T_ms": 270.8642081318129,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0067_N256.npz"
+        },
+        {
+          "index": 50,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9645442026012844,
+          "T_ms": 270.8950064325355,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0065_N256.npz"
+        },
+        {
+          "index": 54,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9645079392493958,
+          "T_ms": 270.91819236884777,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0061_N256.npz"
+        },
+        {
+          "index": 57,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9645381160126862,
+          "T_ms": 270.9102393655318,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0058_N256.npz"
+        },
+        {
+          "index": 59,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9645422247909607,
+          "T_ms": 270.90857706131385,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0056_N256.npz"
+        },
+        {
+          "index": 61,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9645411162420824,
+          "T_ms": 270.9087572460057,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0054_N256.npz"
+        },
+        {
+          "index": 63,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9649050498961566,
+          "T_ms": 270.79901913047485,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0052_N256.npz"
+        },
+        {
+          "index": 65,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9652749296795355,
+          "T_ms": 270.68987006832725,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0050_N256.npz"
+        },
+        {
+          "index": 69,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9655825121949358,
+          "T_ms": 270.69059837245345,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0046_N256.npz"
+        },
+        {
+          "index": 72,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9633462158466538,
+          "T_ms": 275.21869474685917,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0043_N256.npz"
+        },
+        {
+          "index": 76,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9575887984733535,
+          "T_ms": 293.99842850141806,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz"
+        },
+        {
+          "index": 80,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9577861497084698,
+          "T_ms": 293.2195886114274,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0035_N256.npz"
+        },
+        {
+          "index": 96,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.1038840435091706,
+          "T_ms": 255.8801706026163,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0019_N256.npz"
+        },
+        {
+          "index": 120,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.3267733664936305,
+          "T_ms": 248.57700553790806,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0003_N256.npz"
+        },
+        {
+          "index": 144,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.566111176505257,
+          "T_ms": 242.8804640679872,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0027_N256.npz"
+        },
+        {
+          "index": 150,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.6251725691286658,
+          "T_ms": 241.1009511826622,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0033_N256.npz"
+        },
+        {
+          "index": 154,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.6264477575618144,
+          "T_ms": 237.99630517469956,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0037_N256.npz"
+        },
+        {
+          "index": 168,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.6198741676927502,
+          "T_ms": 196.50365679929504,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0051_N256.npz"
+        },
+        {
+          "index": 183,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 1.590641661158667,
+          "T_ms": 153.85487113545716,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleUp_0066_N256.npz"
+        }
+      ]
+    },
+    "double": {
+      "continued_orbits": 256,
+      "planned_sites": 26,
+      "classification_counts": {
+        "UNRESOLVED": 6,
+        "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 18,
+        "PENDING": 1,
+        "COMPUTATION_FAILED": 1
+      },
+      "sites": [
+        {
+          "index": 0,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9403552866469054,
+          "T_ms": 861.3090271163127,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0044_N512.npz"
+        },
+        {
+          "index": 1,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.940346284025211,
+          "T_ms": 858.4135047420745,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0043_N512.npz"
+        },
+        {
+          "index": 5,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9403614107915849,
+          "T_ms": 850.2933529895186,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0039_N512.npz"
+        },
+        {
+          "index": 6,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9403830414771726,
+          "T_ms": 850.0997641543205,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0038_N512.npz"
+        },
+        {
+          "index": 10,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9403547265544696,
+          "T_ms": 855.0302734843727,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0034_N512.npz"
+        },
+        {
+          "index": 19,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9391275339118786,
+          "T_ms": 878.8179077034036,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0025_N512.npz"
+        },
+        {
+          "index": 23,
+          "status": "PENDING",
+          "J_EE_core": 0.9391251879758398,
+          "T_ms": 880.1490055280769,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz"
+        },
+        {
+          "index": 24,
+          "status": "COMPUTATION_FAILED",
+          "J_EE_core": 0.9391336510694974,
+          "T_ms": 878.2729441431189,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0020_N512.npz"
+        },
+        {
+          "index": 28,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9391208256179518,
+          "T_ms": 870.7419203372593,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0016_N512.npz"
+        },
+        {
+          "index": 39,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9381628955613394,
+          "T_ms": 856.1385525248754,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512.npz"
+        },
+        {
+          "index": 43,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9381852613871512,
+          "T_ms": 844.8377419936132,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0001_N512.npz"
+        },
+        {
+          "index": 48,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9383727453059275,
+          "T_ms": 835.883152944345,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0076_N512.npz"
+        },
+        {
+          "index": 72,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9388905024897037,
+          "T_ms": 821.4792785199052,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0052_N512.npz"
+        },
+        {
+          "index": 96,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9390405371190071,
+          "T_ms": 817.7282227735489,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0028_N512.npz"
+        },
+        {
+          "index": 120,
+          "status": "UNRESOLVED",
+          "J_EE_core": 0.9405543265927518,
+          "T_ms": 797.4919306732166,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0004_N512.npz"
+        },
+        {
+          "index": 143,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9447374960718655,
+          "T_ms": 761.9892166833886,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0016_N512.npz"
+        },
+        {
+          "index": 144,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9447440065490874,
+          "T_ms": 761.987182363417,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0017_N512.npz"
+        },
+        {
+          "index": 147,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.944715021570113,
+          "T_ms": 761.9267012549612,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0001_N1024.npz"
+        },
+        {
+          "index": 148,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9447179976417638,
+          "T_ms": 761.9313452777848,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0002_N1024.npz"
+        },
+        {
+          "index": 168,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9447720644904876,
+          "T_ms": 761.9427234452309,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0022_N1024.npz"
+        },
+        {
+          "index": 192,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9448231328395374,
+          "T_ms": 761.8659668334826,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0046_N1024.npz"
+        },
+        {
+          "index": 208,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9449445511277904,
+          "T_ms": 760.842682164111,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0012_N1536.npz"
+        },
+        {
+          "index": 212,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9449457046554455,
+          "T_ms": 760.4756685979236,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0016_N1536.npz"
+        },
+        {
+          "index": 216,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9449349118544971,
+          "T_ms": 759.8977714242193,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0020_N1536.npz"
+        },
+        {
+          "index": 240,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9446688271495516,
+          "T_ms": 754.0531838010118,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0044_N1536.npz"
+        },
+        {
+          "index": 255,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9444457411107372,
+          "T_ms": 745.6757096848903,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0059_N1536.npz"
+        }
+      ]
+    },
+    "Bleading": {
+      "continued_orbits": 231,
+      "planned_sites": 7,
+      "classification_counts": {
+        "PHYSICAL_PROFILE_REFINEMENT_REQUIRED": 7
+      },
+      "sites": [
+        {
+          "index": 0,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.95,
+          "T_ms": 312.7455307353431,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512.npz"
+        },
+        {
+          "index": 24,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9495255647538952,
+          "T_ms": 314.99313520442905,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0023_N512.npz"
+        },
+        {
+          "index": 48,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9490448762482077,
+          "T_ms": 317.0511335793126,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0047_N512.npz"
+        },
+        {
+          "index": 71,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9488497025479843,
+          "T_ms": 317.8357382178816,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0070_N512.npz"
+        },
+        {
+          "index": 72,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9488489167801094,
+          "T_ms": 317.8388709160101,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz"
+        },
+        {
+          "index": 75,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9488490067214715,
+          "T_ms": 317.8385772668172,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0074_N512.npz"
+        },
+        {
+          "index": 90,
+          "status": "PHYSICAL_PROFILE_REFINEMENT_REQUIRED",
+          "J_EE_core": 0.9488782269394016,
+          "T_ms": 317.72297303664874,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0089_N512.npz"
+        }
+      ]
+    },
+    "PDupperchild": {
+      "continued_orbits": 5,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "PDreturnchild": {
+      "continued_orbits": 4,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H3": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H4": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H5": {
+      "continued_orbits": 83,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H6": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H7": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H8": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H9": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H10": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H11": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H12": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H13": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H14": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H15": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H16": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H17": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H18": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H19": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H20": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H21": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H22": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H23": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    },
+    "H24": {
+      "continued_orbits": 3,
+      "planned_sites": 0,
+      "classification_counts": {},
+      "sites": []
+    }
+  },
+  "stability_change_brackets": [
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 24,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9455820663745905,
+          "T_ms": 165.2457728993363,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0015_N64.npz"
+        },
+        {
+          "index": 48,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9458381477591895,
+          "T_ms": 165.79636337513392,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0039_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up."
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 61,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.945755302478177,
+          "T_ms": 165.61976930708667,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0052_N64.npz"
+        },
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up."
+    },
+    {
+      "family": "A",
+      "ends": [
+        {
+          "index": 65,
+          "status": "NUMERICALLY_STABLE",
+          "J_EE_core": 0.9457530045115764,
+          "T_ms": 165.61466555869438,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0056_N64.npz"
+        },
+        {
+          "index": 72,
+          "status": "UNSTABLE",
+          "J_EE_core": 0.9457716410128536,
+          "T_ms": 165.65482036589032,
+          "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0063_N64.npz"
+        }
+      ],
+      "interpretation": "Opposite sampled stability along this traced family; intermediate sites may be unresolved. Known critical points may lie inside; crossing count, location and type require follow-up."
+    }
+  ],
+  "overlapping_restart_comparisons": [],
+  "workers": [
+    {
+      "status": "COMPLETE",
+      "task_indices": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78,
+        80,
+        82,
+        84,
+        86,
+        88,
+        90,
+        92,
+        94,
+        96,
+        98,
+        100,
+        102,
+        104,
+        106,
+        108,
+        110,
+        112,
+        114,
+        116,
+        118
+      ],
+      "pid": 3481321,
+      "file": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/worker0.json",
+      "process_alive": false
+    },
+    {
+      "status": "RESOURCE_WAIT_REQUIRED",
+      "task_index": 115,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0020_N512.npz",
+      "pid": 251368,
+      "error": "OutOfMemoryError('Out of memory allocating 1,118,000,128 bytes (allocated so far: 12,526,867,456 bytes).')",
+      "file": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/worker1.json",
+      "process_alive": false
+    }
+  ],
+  "critical_orbits": [
+    {
+      "label": "TR_A_B",
+      "J_EE_core": 0.9458266272237216,
+      "N": 128
+    },
+    {
+      "label": "LPC_resonance_upper",
+      "J_EE_core": 0.9458472114142701,
+      "N": 512
+    },
+    {
+      "label": "LPC_resonance_lower",
+      "J_EE_core": 0.945751951597284,
+      "N": 512
+    },
+    {
+      "label": "LPC_A1",
+      "J_EE_core": 0.9614345887728242,
+      "N": 128
+    },
+    {
+      "label": "LPC_B1",
+      "J_EE_core": 0.971261892416582,
+      "N": 128
+    },
+    {
+      "label": "LPC_burst_low",
+      "J_EE_core": 0.956897572805052,
+      "N": 1024
+    },
+    {
+      "label": "LPC_burst_high",
+      "J_EE_core": 1.626501518560538,
+      "N": 1024
+    },
+    {
+      "label": "LPC_Bleading_low",
+      "J_EE_core": 0.9488485317657943,
+      "N": 2048
+    },
+    {
+      "label": "LPC_double_high",
+      "J_EE_core": 0.9449471475293998,
+      "N": 3072
+    },
+    {
+      "label": "LPC_A2",
+      "J_EE_core": 0.939333107388464,
+      "N": 256
+    },
+    {
+      "label": "LPC_A3",
+      "J_EE_core": 0.9394710284040595,
+      "N": 256
+    },
+    {
+      "label": "LPC_A4",
+      "J_EE_core": 0.9382319284104846,
+      "N": 256
+    },
+    {
+      "label": "LPC_A5",
+      "J_EE_core": 0.9406839080905371,
+      "N": 256
+    },
+    {
+      "label": "LPC_B2",
+      "J_EE_core": 0.9463101206889282,
+      "N": 256
+    },
+    {
+      "label": "LPC_B3",
+      "J_EE_core": 0.9476814192142715,
+      "N": 256
+    },
+    {
+      "label": "LPC_B4",
+      "J_EE_core": 0.9476505250084494,
+      "N": 256
+    },
+    {
+      "label": "LPC_B5",
+      "J_EE_core": 0.9476981541529192,
+      "N": 256
+    },
+    {
+      "label": "LPC_B6",
+      "J_EE_core": 0.9476486217000467,
+      "N": 256
+    },
+    {
+      "label": "LPC_B7",
+      "J_EE_core": 0.9477081392136185,
+      "N": 256
+    },
+    {
+      "label": "LPC_B8",
+      "J_EE_core": 0.9476334668030755,
+      "N": 256
+    },
+    {
+      "label": "LPC_double_low",
+      "J_EE_core": 0.9381101414696122,
+      "N": 3072
+    },
+    {
+      "label": "LPC_double_secondary1",
+      "J_EE_core": 0.9391433309540169,
+      "N": 4096
+    },
+    {
+      "label": "LPC_double_secondary2",
+      "J_EE_core": 0.939085506707117,
+      "N": 2048
+    },
+    {
+      "label": "LPC_double_secondary3",
+      "J_EE_core": 0.9404148873760471,
+      "N": 2048
+    },
+    {
+      "label": "LPC_double_secondary4",
+      "J_EE_core": 0.940343489690564,
+      "N": 4096
+    },
+    {
+      "label": "LPC_A_low_extension",
+      "J_EE_core": 0.7057755003569962,
+      "N": 512
+    },
+    {
+      "label": "LPC_A_return_exchange",
+      "J_EE_core": 0.9459767886094599,
+      "N": 512
+    },
+    {
+      "label": "LPC_A_return_recruitment",
+      "J_EE_core": 0.9438163372922354,
+      "N": 512
+    },
+    {
+      "label": "LPC_A_large_return1",
+      "J_EE_core": 1.0761836153250073,
+      "N": 1024
+    },
+    {
+      "label": "LPC_A_large_return2",
+      "J_EE_core": 1.0717683543624708,
+      "N": 1024
+    },
+    {
+      "label": "LPC_A_large_return3",
+      "J_EE_core": 1.0866976587440011,
+      "N": 1024
+    },
+    {
+      "label": "LPC_single_upper1",
+      "J_EE_core": 1.569234886663887,
+      "N": 1024
+    },
+    {
+      "label": "LPC_single_upper2",
+      "J_EE_core": 1.5757028697657414,
+      "N": 1024
+    },
+    {
+      "label": "LPC_single_upper3",
+      "J_EE_core": 1.5585735213787404,
+      "N": 1024
+    },
+    {
+      "label": "LPC_single_upper4",
+      "J_EE_core": 1.580897229627566,
+      "N": 1024
+    },
+    {
+      "label": "LPC_A_global_turn1",
+      "J_EE_core": 1.0387480258884794,
+      "N": 1024
+    },
+    {
+      "label": "LPC_B_burst_turn1",
+      "J_EE_core": 0.9476496937693254,
+      "N": 512
+    },
+    {
+      "label": "LPC_B_burst_turn2",
+      "J_EE_core": 0.9475846096212432,
+      "N": 512
+    },
+    {
+      "label": "LPC_A_connection1",
+      "J_EE_core": 1.068621108088585,
+      "N": 1024
+    },
+    {
+      "label": "LPC_A_connection2",
+      "J_EE_core": 1.0669734719268986,
+      "N": 1024
+    },
+    {
+      "label": "LPC_B_connection1",
+      "J_EE_core": 0.9837713307806173,
+      "N": 512
+    },
+    {
+      "label": "LPC_B_connection2",
+      "J_EE_core": 0.9688715736052305,
+      "N": 512
+    },
+    {
+      "label": "LPC_A_next1",
+      "J_EE_core": 1.1041306472658425,
+      "N": 1024
+    },
+    {
+      "label": "LPC_A_stage4_turn1",
+      "J_EE_core": 1.2115992495880454,
+      "N": 2048
+    },
+    {
+      "label": "LPC_A_stage4_turn2",
+      "J_EE_core": 1.198713442456352,
+      "N": 2048
+    },
+    {
+      "label": "LPC_A_stage4_turn3",
+      "J_EE_core": 1.3068816112324584,
+      "N": 2048
+    },
+    {
+      "label": "TR_A_return",
+      "J_EE_core": 0.9457603915251053,
+      "N": 128
+    },
+    {
+      "label": "PD_double_upper",
+      "J_EE_core": 0.944728374157131,
+      "N": 2048
+    },
+    {
+      "label": "PD_A_return",
+      "J_EE_core": 1.0758067726710216,
+      "N": 1024
+    }
+  ],
+  "complete": false,
+  "counting_rules": [
+    "UNSTABLE requires a residual-checked nontrivial multiplier clearly outside the unit circle.",
+    "NUMERICALLY_STABLE is sampled numerical evidence, not a rigorous complete-spectrum theorem.",
+    "Outside multiplier counts are lower bounds, never exact unstable dimensions.",
+    "Adjacent sample sites are not certified intervals; no unobserved crossing is excluded.",
+    "A computation failure or unresolved near-unit mode is not a bifurcation."
+  ]
+}

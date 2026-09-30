@@ -1,0 +1,48 @@
+{
+  "status": "COMPLETE_NATIVE_QUIET_TAIL_EQUATION_CHECK",
+  "interval_s": [
+    16.868,
+    49.31
+  ],
+  "duration_s": 32.44200000000001,
+  "continuous_R_upper_bound_Hz": 4.68332641839415,
+  "K_start": 11.093778275626784,
+  "K_at_first_return": 0.016873421885322606,
+  "K_exact_exponential_max_relative_error": 3.5242697649096044e-11,
+  "observed_K_log_ratio_times_tau_s": 32.44199999982379,
+  "G_blocking_bound": 2.669402995841955,
+  "G_start": 10.44574850016614,
+  "G_unblocking_predicted_s": 17.550170101595544,
+  "G_unblocking_observed_s": 17.551,
+  "first_post_global_clear_Z_sample_s": 17.56,
+  "maximum_recovery_bound_gap_at_that_start": [
+    5.448594798593276e-05,
+    3.155253835984695e-13
+  ],
+  "complete_core_eligibility_interval_start_s": 17.58,
+  "Z_prediction_start_s": 17.58,
+  "core_Z_prediction_start": [
+    0.15279443973783371,
+    0.14635481396950284
+  ],
+  "core_reference": [
+    0.7603118191859897,
+    0.7344912026970221
+  ],
+  "fastest_discrete_core_reference_elapsed_s": [
+    6.3129594965027165,
+    5.839279903613262
+  ],
+  "core_Z_max_discrete_prediction_error": [
+    3.1186164761720647e-13,
+    3.141931159689193e-13
+  ],
+  "core_Z_last_sample_before_return": [
+    0.9985113347449243,
+    0.9985000193716707
+  ],
+  "interpretation": "Measured32.442s low-activity interval follows the original5s K decay exactly and has no timed hold. The K value at the first return is measured retrospectively, not a prespecified universal release threshold or an independent onset-time prediction. G crossing is necessary but not immediately sufficient for every core cell: small residual CoreA consumption remains in the first post-clear budget. After the last nonzero-consumption block, both core means follow the maximum-recovery discrete law through the remaining quiet segment. Other exits, backgrounds and intervening events need separate assessment.",
+  "statistical_unit": "One existing autonomous native episode; no new simulation, seed or loop count.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "8f54e213ea85f2f3b9855c582a3ad8af53dccb62c02e256934fdabf877d77484"
+}

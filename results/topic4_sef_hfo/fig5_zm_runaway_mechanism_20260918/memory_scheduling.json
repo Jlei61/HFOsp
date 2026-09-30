@@ -1,0 +1,26 @@
+{
+  "scope": "Temporary scheduling only; no restarted process, changed model or relaxed gate",
+  "max_pause_seconds": 5400,
+  "leader_pid": 247078,
+  "paused_pids": [
+    3875227,
+    396788
+  ],
+  "initial_memory_pressure": "some avg10=66.35 avg60=60.67 avg300=59.87 total=4410410200\nfull avg10=66.35 avg60=60.66 avg300=59.86 total=4409555809\n",
+  "events": [
+    {
+      "at": "2026-09-19T23:16:14.575816+08:00",
+      "event": "PAUSED_OWN_CHECKS",
+      "reason": "Measured memory full-stall avg10 about58percent; preserve states and allow large reconstruction to finish."
+    },
+    {
+      "at": "2026-09-20T00:07:14.628463+08:00",
+      "event": "LEADER_EXITED"
+    },
+    {
+      "at": "2026-09-20T00:07:14.630249+08:00",
+      "event": "RESUMED_OWN_CHECKS",
+      "memory_pressure": "some avg10=23.33 avg60=67.13 avg300=79.98 total=6278350611\nfull avg10=23.33 avg60=67.13 avg300=79.97 total=6277318562\n"
+    }
+  ]
+}

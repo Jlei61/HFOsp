@@ -1,0 +1,22 @@
+{
+  "timestamp": 1789857118.68078,
+  "old_worker": {
+    "status": "CHILD_RADIAL_N1024",
+    "pid": 482473,
+    "timestamp": 1789855999.7995749,
+    "child_pid": 482631,
+    "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/CHILD_RADIAL_N1024_1789855999798540992.log"
+  },
+  "identities": {
+    "482473": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD4_child_modes.py --device 0 --after-pid 480071 ",
+    "482631": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u /home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/rate_real_floquet_mode.py /home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz --seed /home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz --N 1024 --growth 0.0 --device 0 --label PD4_physical_child_radial_20260920 --stream-harmonics --antiperiodic-seed "
+  },
+  "evidence": {
+    "status": "ZERO_GROWTH_NEWTON_NULL_CONFIRMED",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+    "phase_operator_relative_residual": 4.5940164950378934e-10,
+    "normalization_covector_phase_overlap": 8.137008648723321e-18,
+    "reason": "At zero growth, the augmented real Floquet Newton system has the exact autonomous phase direction in its right nullspace. A nonzero growth seed avoids this singular starting system without changing the variational equations."
+  },
+  "reason": "Replace the demonstrably singular zero-growth eigenpair initialization, preserve physical child waveforms and all existing logs. Use the smallest nonzero child for local criticality, with a nonzero initial growth predicted from the measured parent crossing. This is a solver initialization correction, not a timeout retry."
+}

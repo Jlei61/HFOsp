@@ -1,0 +1,9 @@
+{
+  "status": "READONLY_FILTERED_MEMORY_AUDIT",
+  "created_epoch": 1790570153.178032,
+  "question": "How much does discarding the measured source residual temporal spectrum change target current variance after the unchanged graph and synaptic filters?",
+  "design": "Reuse the already validated native72-74s phase residual PSD, original physical jumpweights and exact discretefilter power. Compare independent coloredsource prediction W2*integral(H2*S) with whiteprediction W2*var(epsilon)*filterenergy. Also report a finite2s zeroDC white comparison. No neuronal simulation or fittedparameter.",
+  "interpretation": "This is a conditionalinput-statistics diagnostic using an existing native record, not autonomous covariance closure. Both approximations omit cross-source residual spectra; measured59target residualvariance is shown separately. Source auto spectra alone may still be insufficient.",
+  "producer_sha256": "efcc51f1d5420f74475cd3895b494c571fea5d7fea39bfa923550b031a3207ed",
+  "formal_bifurcation_allowed": false
+}

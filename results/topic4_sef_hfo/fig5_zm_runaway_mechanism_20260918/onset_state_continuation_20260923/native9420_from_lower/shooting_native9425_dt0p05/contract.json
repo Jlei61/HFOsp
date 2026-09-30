@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-23T17:28:01.393413+08:00",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/shooting_corrector_dt0p05/latest_state.npz",
+  "source_dt_ms": 0.05,
+  "dt_ms": 0.05,
+  "seed_period_ms": 568.7855153495209,
+  "equations": "Unchanged full g40 conditional drift, full spatial Z held, M dynamic, constant original input mean, no future count innovations.",
+  "method": "Solve P(x)-x=0 on a fixed hyperplane through the seed, normal to its full-state flow. Integrate the actual delay/refractory/synaptic/local/M states. Positive crossing searched within declared period window, refined to actual step then linearly interpolated in canonical lag coordinates. Anderson memory3, otherwise physical Picard iterate. No state clamp.",
+  "return_search_halfwidth_ms": 20.0,
+  "target_field": "native9425",
+  "field_change": "Only full spatial Z changes when an explicit target field is supplied. Every initial fast, M and delay state comes from the declared source.",
+  "residual_gate": "Combined six-block relative RMS <1e-7 and every block <1e-6, section residual <1e-9; at least two evaluated returns. At most declared iterations. This is a numerical shooting-root check, not continuous-time, stability, fundamental-period or bifurcation certification.",
+  "iterations": 8,
+  "model_promoted": false
+}

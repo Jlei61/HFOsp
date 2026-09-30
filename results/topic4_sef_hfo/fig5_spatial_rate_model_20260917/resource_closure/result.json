@@ -1,0 +1,26 @@
+{
+  "status": "CONDITIONAL_RESOURCE_CLOSURE_FITTED",
+  "variance_a_mv": 0.00010000037403508209,
+  "variance_b": 0.022869200446098165,
+  "native_I_th_mv": 95.19851312666987,
+  "rows": [
+    {
+      "seed": 9108401,
+      "role": "training",
+      "rmse_old": 0.048343596034724046,
+      "rmse_new": 0.039438709019167836,
+      "mean_bias_old": -0.0012752814554275488,
+      "mean_bias_new": -0.00015280703773373639
+    },
+    {
+      "seed": 9108402,
+      "role": "held_out_input",
+      "rmse_old": 0.052227850787124566,
+      "rmse_new": 0.04097466999229422,
+      "mean_bias_old": -0.0013940691914079693,
+      "mean_bias_new": -0.000250884693901756
+    }
+  ],
+  "optimizer_success": true,
+  "network_validation": "PENDING; local probability improvement does not establish autonomous dynamics"
+}

@@ -1,0 +1,7 @@
+{
+  "status": "STOPPED_DURING_CPU_POSTPROCESSING_NO_SCIENTIFIC_RESULT",
+  "pid": 2108707,
+  "source": "initial_states/rate_D14496_dt00625.npz",
+  "reason": "Uncropped whole-record cubic spline retained 142 GiB; remaining host memory fell below 9 GiB while another closer-to-critical fine cycle was already processing. Stop this owned process to prevent host OOM, retain original initial state and logs. Numerical trajectory was not written and cannot be claimed as completed.",
+  "next": "Use the finer D=0.144970 cycle already processing; if needed re-record D=0.144960 with disk-backed recording and bounded local cubic interpolation."
+}

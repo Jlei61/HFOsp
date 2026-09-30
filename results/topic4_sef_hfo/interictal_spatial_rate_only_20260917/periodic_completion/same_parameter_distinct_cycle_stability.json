@@ -1,0 +1,47 @@
+{
+  "rows": [
+    {
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0110_N512.npz",
+      "J_EE_core": 1.029396761345014,
+      "T_ms": 122.30221190129895,
+      "mean_rates_hz": [
+        40.530936944684925,
+        7.475386277971131,
+        10.855709153534773
+      ],
+      "dominant_nontrivial_multipliers": [
+        [
+          10272.403501382956,
+          0.0
+        ],
+        [
+          3.9526423067064567,
+          0.0
+        ]
+      ],
+      "status": "H1-family cycle: unstable"
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/strong_sameJ_H1_J1.029396761_N512_accuracy_N1024.npz",
+      "J_EE_core": 1.029396761345014,
+      "T_ms": 258.62900147648895,
+      "mean_rates_hz": [
+        16.43594554673926,
+        27.482442072258827,
+        5.712964750323848
+      ],
+      "dominant_nontrivial_multipliers": [
+        [
+          0.7697629677848454,
+          0.0
+        ],
+        [
+          0.7694049570123964,
+          0.0
+        ]
+      ],
+      "status": "A-leading burst: numerically stable"
+    }
+  ],
+  "scope": "Exact same-J periodic BVPs and their own full-state Floquet evidence. An unstable periodic profile is not a stable free-running trajectory. Spatial frames align to the core A peak; electrode weights, channel order and color scales are shared."
+}

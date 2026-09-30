@@ -1,0 +1,14 @@
+{
+  "status": "REGISTERED_BEFORE_THREE_PHASE_HISTORY_UPDATES",
+  "created_epoch": 1790563431.4821298,
+  "question": "Does preserving phase-conditioned V/ref/M history retain the native coherent state under self-generated source feedback?",
+  "evidence": "Paired80target localresponse atinputphase0 changesonlyinitialV/ref/M: E phaseprofileRMS frommatchednative10s is0.0103 fortruenativehistory versus0.0715 forreset, despite almostidenticalrates. Withinreplica phasevariance agreeswithnative; unconditionalresetting/averaging cannot be assumed tohave forgottenhistory.",
+  "design": "Exactly3 source-statistic mapupdates,40000targets x64 numericalreplicas, fixed22step candidateperiod. Initialphase0 with true72s jointV/ref/M replicated acrossnumericalcopies. Eachsubsequentupdate carries the preceding outputreplicaV/ref/M and exactnextinputphase, plus self-generatedsourcephaseprobability andresidualPSD. No additional nativeforcing, parameter/period fitting or physicalequationchange.",
+  "remaining_approximation": "Recurrentresidualinput remains stationaryindependent-sourceGaussian. Externalfilter initializedatstationarymean eachlocalassay then3-4sburn; this is not fullnativeengine continuation. Source-statistic iteration is notphysicaltime. Period/frequency/stability stilluncertified.",
+  "validation": "Newhistorykernel must reproduce unchangedphasekernel everyspike/stat when supplied the sameuniforminitialparameters. Preserve phasealignment across eachrecord endpoint; count/exposure andresidualParseval verified eachbatch. Local80pairedhistorytest provides motivation, not allcellacceptance.",
+  "stop": "At most3updates. Stop ifphase-specificcausalR crosses200, matchednativefieldRMS>10Hz oranycoremeandrift>10Hz. No automaticroot/periodsearch/frequencyresponse/nativeextra.",
+  "producer_sha256": "5532e1dc1cee95e278d5d968631151a7ff1e974d605d146d28c2594482897fa1",
+  "map_sha256": "1b5db1b349dc8367780eb4b21271b169b80851b484f036e349fa57270c5065b5",
+  "history_sampler_sha256": "619fb4779d4355181fef20eb8f34ca92631e9aabbd0dc97065a08ac50ec339ec",
+  "formal_bifurcation_allowed": false
+}

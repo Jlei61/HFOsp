@@ -1,0 +1,7967 @@
+{
+  "status": "READ_ONLY_DIAGNOSTIC_COMPLETE",
+  "sampling_ms": 5,
+  "samples": 274,
+  "rows": [
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 2205.6172151860387,
+      "window_offset_variance_mv2": 79.93642977605477,
+      "remaining_variance_mv2": 2125.6807854099843,
+      "offset_fraction": 0.03624220432524703,
+      "decomposition_error": 4.547473508864641e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 2144.5163951856694,
+      "window_offset_variance_mv2": 90.73297668945152,
+      "remaining_variance_mv2": 2053.7834184962185,
+      "offset_fraction": 0.04230929495020064,
+      "decomposition_error": 4.547473508864641e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 1168.7614968426858,
+      "window_offset_variance_mv2": 51.62656228583108,
+      "remaining_variance_mv2": 1117.1349345568547,
+      "offset_fraction": 0.0441720251952995,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 2.02754653890316e-06,
+      "window_offset_variance_mv2": 1.6039673698128955e-06,
+      "remaining_variance_mv2": 4.235791690902642e-07,
+      "offset_fraction": 0.7910878192125702,
+      "decomposition_error": 2.6469779601696886e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 614.5816319765564,
+      "window_offset_variance_mv2": 12.543046800114315,
+      "remaining_variance_mv2": 602.0385851764421,
+      "offset_fraction": 0.020409081800532525,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 1379.8970403428955,
+      "window_offset_covariance_mv2": 59.50818064880227,
+      "remaining_covariance_mv2": 1320.3888596940933
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 1382.2381836953277,
+      "window_offset_variance_mv2": 6.398548980549737,
+      "remaining_variance_mv2": 1375.839634714778,
+      "offset_fraction": 0.004629121851809661,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 1892.0285863245924,
+      "window_offset_variance_mv2": 9.916283669516623,
+      "remaining_variance_mv2": 1882.1123026550756,
+      "offset_fraction": 0.005241085542359457,
+      "decomposition_error": 2.2737367544323206e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 1021.5671113724787,
+      "window_offset_variance_mv2": 3.7982326750951327,
+      "remaining_variance_mv2": 1017.7688786973835,
+      "offset_fraction": 0.0037180451805972833,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 2.41858351653313e-07,
+      "window_offset_variance_mv2": 1.64710742483936e-07,
+      "remaining_variance_mv2": 7.714760916937699e-08,
+      "offset_fraction": 0.6810215208943345,
+      "decomposition_error": 1.3234889800848443e-23
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 797.9785388684902,
+      "window_offset_variance_mv2": 2.134850472112199,
+      "remaining_variance_mv2": 795.843688396378,
+      "offset_fraction": 0.002675323167386623,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 802.9147008638276,
+      "window_offset_covariance_mv2": 4.030855220140006,
+      "remaining_covariance_mv2": 798.8838456436874
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 1236.6961351436323,
+      "window_offset_variance_mv2": 50.14962069856641,
+      "remaining_variance_mv2": 1186.5465144450648,
+      "offset_fraction": 0.04055128763925662,
+      "decomposition_error": 1.1368683772161603e-12
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 1259.4210721808035,
+      "window_offset_variance_mv2": 74.96465783117287,
+      "remaining_variance_mv2": 1184.4564143496304,
+      "offset_fraction": 0.05952310905943845,
+      "decomposition_error": 2.2737367544323206e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 747.4921497431906,
+      "window_offset_variance_mv2": 44.95580063829208,
+      "remaining_variance_mv2": 702.5363491048987,
+      "offset_fraction": 0.060142170929470176,
+      "decomposition_error": 2.2737367544323206e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 7.753466021235978e-07,
+      "window_offset_variance_mv2": 6.913296658630007e-07,
+      "remaining_variance_mv2": 8.401693626059739e-08,
+      "offset_fraction": 0.8916395118899303,
+      "decomposition_error": 3.044024654195142e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 662.8896148018706,
+      "window_offset_variance_mv2": 9.645409688936445,
+      "remaining_variance_mv2": 653.2442051129345,
+      "offset_fraction": 0.014550551816714366,
+      "decomposition_error": 3.410605131648481e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 660.6492840578464,
+      "window_offset_covariance_mv2": 42.72940821925856,
+      "remaining_covariance_mv2": 617.9198758385874
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 3441.2405475512846,
+      "window_offset_variance_mv2": 1258.4609553273533,
+      "remaining_variance_mv2": 2182.7795922239306,
+      "offset_fraction": 0.365699792832805,
+      "decomposition_error": 4.547473508864641e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 3529.5785382493677,
+      "window_offset_variance_mv2": 1913.8499928173737,
+      "remaining_variance_mv2": 1615.7285454319938,
+      "offset_fraction": 0.5422318761510325,
+      "decomposition_error": 2.2737367544323206e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 1696.3739924932013,
+      "window_offset_variance_mv2": 866.9891280143182,
+      "remaining_variance_mv2": 829.3848644788832,
+      "offset_fraction": 0.5110837184788972,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 3.3219918312276204e-06,
+      "window_offset_variance_mv2": 2.810120918653238e-06,
+      "remaining_variance_mv2": 5.118709125743832e-07,
+      "offset_fraction": 0.8459144577772114,
+      "decomposition_error": 7.411538288475128e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 755.9547743263013,
+      "window_offset_variance_mv2": 129.88384064901095,
+      "remaining_variance_mv2": 626.0709336772902,
+      "offset_fraction": 0.17181430035250722,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 2190.821522798076,
+      "window_offset_covariance_mv2": 997.770592385625,
+      "remaining_covariance_mv2": 1193.050930412451
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 5021.018663102305,
+      "window_offset_variance_mv2": 2368.0445789461787,
+      "remaining_variance_mv2": 2652.974084156127,
+      "offset_fraction": 0.4716263248229095,
+      "decomposition_error": 4.547473508864641e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 4606.88791945328,
+      "window_offset_variance_mv2": 2570.0215704582297,
+      "remaining_variance_mv2": 2036.8663489950504,
+      "offset_fraction": 0.5578650089588517,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 2051.436644561808,
+      "window_offset_variance_mv2": 1088.972365557732,
+      "remaining_variance_mv2": 962.4642790040754,
+      "offset_fraction": 0.5308340223152928,
+      "decomposition_error": 5.684341886080801e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 6.352180154220133e-06,
+      "window_offset_variance_mv2": 3.700248293726251e-06,
+      "remaining_variance_mv2": 2.6519318604938807e-06,
+      "offset_fraction": 0.5825162706174124,
+      "decomposition_error": 8.470329472543003e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 1241.1330508923643,
+      "window_offset_variance_mv2": 324.36789579211774,
+      "remaining_variance_mv2": 916.7651551002465,
+      "offset_fraction": 0.2613482056246105,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 2915.6183985104976,
+      "window_offset_covariance_mv2": 1566.2930014694314,
+      "remaining_covariance_mv2": 1349.325397041066
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 3742.190442279724,
+      "window_offset_variance_mv2": 1866.100720992999,
+      "remaining_variance_mv2": 1876.089721286724,
+      "offset_fraction": 0.49866535382848654,
+      "decomposition_error": 9.094947017729282e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 3298.5321256306015,
+      "window_offset_variance_mv2": 1871.9010848242358,
+      "remaining_variance_mv2": 1426.631040806364,
+      "offset_fraction": 0.5674951807438808,
+      "decomposition_error": 1.8189894035458565e-12
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 1626.9065667857683,
+      "window_offset_variance_mv2": 860.5726565269568,
+      "remaining_variance_mv2": 766.3339102588108,
+      "offset_fraction": 0.5289625563606674,
+      "decomposition_error": 6.821210263296962e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 5.6975316292397835e-06,
+      "window_offset_variance_mv2": 3.894417532985366e-06,
+      "remaining_variance_mv2": 1.8031140962544193e-06,
+      "offset_fraction": 0.6835271458607057,
+      "decomposition_error": 1.9058241313221758e-21
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 987.8515261963341,
+      "window_offset_variance_mv2": 298.2723324274277,
+      "remaining_variance_mv2": 689.5791937689063,
+      "offset_fraction": 0.30194044805084047,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 2190.588941533878,
+      "window_offset_covariance_mv2": 1214.1722999264248,
+      "remaining_covariance_mv2": 976.4166416074515
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 43.96003036441157,
+      "window_offset_variance_mv2": 15.358756759139146,
+      "remaining_variance_mv2": 28.601273605272432,
+      "offset_fraction": 0.34938003071929247,
+      "decomposition_error": 7.105427357601002e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 47.962170839928945,
+      "window_offset_variance_mv2": 32.71522534790214,
+      "remaining_variance_mv2": 15.246945492026807,
+      "offset_fraction": 0.6821047666313389,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 19.308418439017707,
+      "window_offset_variance_mv2": 13.112261655974216,
+      "remaining_variance_mv2": 6.196156783043495,
+      "offset_fraction": 0.6790955819290441,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 1.8077585001981321e-06,
+      "window_offset_variance_mv2": 1.7538201555884755e-06,
+      "remaining_variance_mv2": 5.393834460965673e-08,
+      "offset_fraction": 0.9701628593621632,
+      "decomposition_error": 1.1249656330721176e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 60.361465424209605,
+      "window_offset_variance_mv2": 29.37184530532579,
+      "remaining_variance_mv2": 30.989620118883817,
+      "offset_fraction": 0.48659927486693216,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 1.450416034985013,
+      "window_offset_covariance_mv2": -0.453443817267395,
+      "remaining_covariance_mv2": 1.9038598522524082
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 54.2052279892327,
+      "window_offset_variance_mv2": 22.350971626330523,
+      "remaining_variance_mv2": 31.854256362902177,
+      "offset_fraction": 0.41233977709254005,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 111.83971781579677,
+      "window_offset_variance_mv2": 50.88815274145533,
+      "remaining_variance_mv2": 60.95156507434146,
+      "offset_fraction": 0.4550096668275717,
+      "decomposition_error": 1.4210854715202004e-14
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 54.124957398730984,
+      "window_offset_variance_mv2": 25.4730681208628,
+      "remaining_variance_mv2": 28.651889277868182,
+      "offset_fraction": 0.47063442347319134,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 8.502216023559945e-06,
+      "window_offset_variance_mv2": 8.378572490349136e-06,
+      "remaining_variance_mv2": 1.236435332108088e-07,
+      "offset_fraction": 0.9854574933325396,
+      "decomposition_error": 1.3234889800848443e-22
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 114.60167437581602,
+      "window_offset_variance_mv2": 70.1035244243748,
+      "remaining_variance_mv2": 44.49814995144122,
+      "offset_fraction": 0.6117146612926669,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": -3.1558112608941196,
+      "window_offset_covariance_mv2": -11.160023569449017,
+      "remaining_covariance_mv2": 8.004212308554898
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 4023.843972821028,
+      "window_offset_variance_mv2": 2673.6797277391793,
+      "remaining_variance_mv2": 1350.1642450818451,
+      "offset_fraction": 0.664459095779681,
+      "decomposition_error": 3.410605131648481e-12
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 3727.607326275477,
+      "window_offset_variance_mv2": 2741.4394117845163,
+      "remaining_variance_mv2": 986.1679144909632,
+      "offset_fraction": 0.7354421138890955,
+      "decomposition_error": 2.3874235921539366e-12
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 1748.7075749939172,
+      "window_offset_variance_mv2": 1186.037070606319,
+      "remaining_variance_mv2": 562.6705043875974,
+      "offset_fraction": 0.6782363658546195,
+      "decomposition_error": 7.958078640513122e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 2.000599672796214e-05,
+      "window_offset_variance_mv2": 1.7216647273475902e-05,
+      "remaining_variance_mv2": 2.7893494544862407e-06,
+      "offset_fraction": 0.8605743321657352,
+      "decomposition_error": 1.6940658945086007e-21
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 984.6701799212054,
+      "window_offset_variance_mv2": 490.29623056423577,
+      "remaining_variance_mv2": 494.37394935696955,
+      "offset_fraction": 0.49792939865759916,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 2393.864728297349,
+      "window_offset_covariance_mv2": 1684.6392265964923,
+      "remaining_covariance_mv2": 709.2255017008528
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 496.84973754220124,
+      "window_offset_variance_mv2": 16.91257808734127,
+      "remaining_variance_mv2": 479.9371594548601,
+      "offset_fraction": 0.03403962367174393,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 499.5576699010112,
+      "window_offset_variance_mv2": 18.501201530267924,
+      "remaining_variance_mv2": 481.05646837074335,
+      "offset_fraction": 0.03703516659835088,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 271.4926873191748,
+      "window_offset_variance_mv2": 10.439102950979438,
+      "remaining_variance_mv2": 261.05358436819535,
+      "offset_fraction": 0.0384507702732594,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 6.01257362053906e-07,
+      "window_offset_variance_mv2": 4.748879325754441e-07,
+      "remaining_variance_mv2": 1.263694294784619e-07,
+      "offset_fraction": 0.7898247282215695,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 191.86378411140112,
+      "window_offset_variance_mv2": 4.593443577719984,
+      "remaining_variance_mv2": 187.2703405336811,
+      "offset_fraction": 0.023941170549690142,
+      "decomposition_error": 2.842170943040401e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 288.2387579648534,
+      "window_offset_covariance_mv2": 11.378506038204007,
+      "remaining_covariance_mv2": 276.8602519266494
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 384.27790093625174,
+      "window_offset_variance_mv2": 2.0018456890092233,
+      "remaining_variance_mv2": 382.27605524724254,
+      "offset_fraction": 0.005209369792361054,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 496.7127456740464,
+      "window_offset_variance_mv2": 2.927286256827837,
+      "remaining_variance_mv2": 493.7854594172187,
+      "offset_fraction": 0.0058933181850517385,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 267.9519271312238,
+      "window_offset_variance_mv2": 1.1971716380347193,
+      "remaining_variance_mv2": 266.754755493189,
+      "offset_fraction": 0.004467859779371655,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 1.401365848408654e-07,
+      "window_offset_variance_mv2": 1.1286803720407684e-07,
+      "remaining_variance_mv2": 2.7268547636788506e-08,
+      "offset_fraction": 0.8054144985211832,
+      "decomposition_error": 3.970466940254533e-23
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 256.3396451743797,
+      "window_offset_variance_mv2": 1.0232056234234326,
+      "remaining_variance_mv2": 255.3164395509562,
+      "offset_fraction": 0.003991601153724694,
+      "decomposition_error": 8.526512829121202e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 197.9454825042685,
+      "window_offset_covariance_mv2": 1.0879020185116832,
+      "remaining_covariance_mv2": 196.85758048575678
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 330.1132926942723,
+      "window_offset_variance_mv2": 12.79055634855498,
+      "remaining_variance_mv2": 317.3227363457174,
+      "offset_fraction": 0.03874595974055699,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 334.98277705546906,
+      "window_offset_variance_mv2": 19.76721207448177,
+      "remaining_variance_mv2": 315.2155649809871,
+      "offset_fraction": 0.05900963699757185,
+      "decomposition_error": 1.7053025658242404e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 198.94040006455742,
+      "window_offset_variance_mv2": 11.885198552771948,
+      "remaining_variance_mv2": 187.05520151178533,
+      "offset_fraction": 0.05974250855489949,
+      "decomposition_error": 1.4210854715202004e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 2.7156316622125504e-07,
+      "window_offset_variance_mv2": 2.393658126754307e-07,
+      "remaining_variance_mv2": 3.2197353545824336e-08,
+      "offset_fraction": 0.8814369636580549,
+      "decomposition_error": 6.617444900424222e-24
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 204.44764891434022,
+      "window_offset_variance_mv2": 3.912756223659453,
+      "remaining_variance_mv2": 200.5348926906807,
+      "offset_fraction": 0.019138181556193026,
+      "decomposition_error": 8.526512829121202e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 162.30292456596217,
+      "window_offset_covariance_mv2": 10.381290967221338,
+      "remaining_covariance_mv2": 151.9216335987408
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 786.481250546589,
+      "window_offset_variance_mv2": 296.413687747418,
+      "remaining_variance_mv2": 490.06756279917084,
+      "offset_fraction": 0.37688589211938156,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 911.2231039123157,
+      "window_offset_variance_mv2": 509.58971700866203,
+      "remaining_variance_mv2": 401.6333869036538,
+      "offset_fraction": 0.5592370461424323,
+      "decomposition_error": 1.7053025658242404e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 434.63382834622496,
+      "window_offset_variance_mv2": 228.97427762844242,
+      "remaining_variance_mv2": 205.65955071778248,
+      "offset_fraction": 0.5268211139930963,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 9.525367017668337e-07,
+      "window_offset_variance_mv2": 7.839175881713511e-07,
+      "remaining_variance_mv2": 1.6861911359548242e-07,
+      "offset_fraction": 0.8229788802019747,
+      "decomposition_error": 1.0587911840678754e-22
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 253.86813655219623,
+      "window_offset_variance_mv2": 62.13944462244887,
+      "remaining_variance_mv2": 191.7286919297473,
+      "offset_fraction": 0.2447705547705581,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 483.6204704987805,
+      "window_offset_covariance_mv2": 231.62012401272753,
+      "remaining_covariance_mv2": 252.00034648605288
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 1215.6052200465792,
+      "window_offset_variance_mv2": 545.8404197913255,
+      "remaining_variance_mv2": 669.7648002552538,
+      "offset_fraction": 0.4490277030649886,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 1179.0011571723778,
+      "window_offset_variance_mv2": 625.9833420554035,
+      "remaining_variance_mv2": 553.0178151169744,
+      "offset_fraction": 0.530943789365493,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 530.4238229675434,
+      "window_offset_variance_mv2": 267.46727738254566,
+      "remaining_variance_mv2": 262.9565455849978,
+      "offset_fraction": 0.5042520071707111,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 1.643089511758953e-06,
+      "window_offset_variance_mv2": 9.455994578642959e-07,
+      "remaining_variance_mv2": 6.974900538946569e-07,
+      "offset_fraction": 0.575500878739112,
+      "decomposition_error": 1.0587911840678754e-22
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 394.59581684080354,
+      "window_offset_variance_mv2": 110.0630548931898,
+      "remaining_variance_mv2": 284.5327619476137,
+      "offset_fraction": 0.2789260559687936,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 675.7043577832846,
+      "window_offset_covariance_mv2": 351.61359839158104,
+      "remaining_covariance_mv2": 324.0907593917036
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 966.6543001828331,
+      "window_offset_variance_mv2": 467.5928892555801,
+      "remaining_variance_mv2": 499.0614109272519,
+      "offset_fraction": 0.4837229702150391,
+      "decomposition_error": 1.1368683772161603e-12
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 893.3034840234176,
+      "window_offset_variance_mv2": 499.3109194693429,
+      "remaining_variance_mv2": 393.9925645540754,
+      "offset_fraction": 0.5589488101182125,
+      "decomposition_error": 6.821210263296962e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 441.8238904405374,
+      "window_offset_variance_mv2": 230.15175706474557,
+      "remaining_variance_mv2": 211.67213337579193,
+      "offset_fraction": 0.5209128841703511,
+      "decomposition_error": 8.526512829121202e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 1.7635847348280484e-06,
+      "window_offset_variance_mv2": 1.1927793249564099e-06,
+      "remaining_variance_mv2": 5.70805409871638e-07,
+      "offset_fraction": 0.676337973107205,
+      "decomposition_error": 5.293955920339377e-22
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 326.7646211334298,
+      "window_offset_variance_mv2": 102.72970813282812,
+      "remaining_variance_mv2": 224.03491300060153,
+      "offset_fraction": 0.3143844268589894,
+      "decomposition_error": 1.1368683772161603e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 540.8464241293509,
+      "window_offset_covariance_mv2": 297.4987828006003,
+      "remaining_covariance_mv2": 243.34764132875117
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "total_variance_mv2": 25.456464530642506,
+      "window_offset_variance_mv2": 4.2016994216187555,
+      "remaining_variance_mv2": 21.254765109023747,
+      "offset_fraction": 0.16505431917150465,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_raw",
+      "total_variance_mv2": 16.819233849401275,
+      "window_offset_variance_mv2": 10.777719742540361,
+      "remaining_variance_mv2": 6.041514106860911,
+      "offset_fraction": 0.6407973061700443,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "total_variance_mv2": 7.172635774998667,
+      "window_offset_variance_mv2": 4.692513444110739,
+      "remaining_variance_mv2": 2.480122330887927,
+      "offset_fraction": 0.6542244150284644,
+      "decomposition_error": 4.440892098500626e-16
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "M_current",
+      "total_variance_mv2": 6.475924266779391e-07,
+      "window_offset_variance_mv2": 6.182789467841584e-07,
+      "remaining_variance_mv2": 2.9313479893780702e-08,
+      "offset_fraction": 0.954734677729085,
+      "decomposition_error": 5.624828165360588e-23
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "total_variance_mv2": 32.20954887260167,
+      "window_offset_variance_mv2": 9.365327555284328,
+      "remaining_variance_mv2": 22.84422131731735,
+      "offset_fraction": 0.29076245657233446,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 0.20881010547004658,
+      "window_offset_covariance_mv2": -0.2364925694971795,
+      "remaining_covariance_mv2": 0.4453026749672259
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "total_variance_mv2": 29.83407278021628,
+      "window_offset_variance_mv2": 6.264783174862508,
+      "remaining_variance_mv2": 23.569289605353774,
+      "offset_fraction": 0.2099875273823439,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_raw",
+      "total_variance_mv2": 43.266624157145245,
+      "window_offset_variance_mv2": 19.00400327489374,
+      "remaining_variance_mv2": 24.2626208822515,
+      "offset_fraction": 0.4392300912100473,
+      "decomposition_error": 3.552713678800501e-15
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "total_variance_mv2": 21.67271926034783,
+      "window_offset_variance_mv2": 10.246807453272423,
+      "remaining_variance_mv2": 11.425911807075401,
+      "offset_fraction": 0.47279749855939257,
+      "decomposition_error": 5.329070518200751e-15
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "M_current",
+      "total_variance_mv2": 2.4436091055299835e-06,
+      "window_offset_variance_mv2": 2.3939388740394445e-06,
+      "remaining_variance_mv2": 4.967023149053884e-08,
+      "offset_fraction": 0.9796734136494526,
+      "decomposition_error": 2.117582368135751e-22
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "total_variance_mv2": 52.15131598423303,
+      "window_offset_variance_mv2": 22.492711978526945,
+      "remaining_variance_mv2": 29.658604005706085,
+      "offset_fraction": 0.4312971121443454,
+      "decomposition_error": 0.0
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": -0.32764748050719805,
+      "window_offset_covariance_mv2": -2.995951517217313,
+      "remaining_covariance_mv2": 2.668304036710115
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "total_variance_mv2": 999.2387848605013,
+      "window_offset_variance_mv2": 639.9193605322542,
+      "remaining_variance_mv2": 359.3194243282463,
+      "offset_fraction": 0.6404068479203299,
+      "decomposition_error": 6.821210263296962e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_raw",
+      "total_variance_mv2": 994.422046878091,
+      "window_offset_variance_mv2": 721.7369409723717,
+      "remaining_variance_mv2": 272.68510590572,
+      "offset_fraction": 0.7257853375618607,
+      "decomposition_error": 6.821210263296962e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "total_variance_mv2": 471.5849520516228,
+      "window_offset_variance_mv2": 316.27436546560216,
+      "remaining_variance_mv2": 155.31058658602058,
+      "offset_fraction": 0.6706625478392718,
+      "decomposition_error": 5.684341886080802e-14
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "M_current",
+      "total_variance_mv2": 5.793837810793727e-06,
+      "window_offset_variance_mv2": 4.928463945154845e-06,
+      "remaining_variance_mv2": 8.653738656388822e-07,
+      "offset_fraction": 0.8506389212299454,
+      "decomposition_error": 2.117582368135751e-22
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "total_variance_mv2": 323.0761863721915,
+      "window_offset_variance_mv2": 155.51368304567347,
+      "remaining_variance_mv2": 167.56250332651825,
+      "offset_fraction": 0.48135297371164953,
+      "decomposition_error": 2.2737367544323206e-13
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA_x_GABA_effective",
+      "total_covariance_mv2": 573.8522172334782,
+      "window_offset_covariance_mv2": 400.31991119459553,
+      "remaining_covariance_mv2": 173.53230603888252
+    }
+  ],
+  "temporal": [
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9493013528836859
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9599288775814858
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.899732866716049
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8349777910332176
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8554945721732647
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7118514023340481
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5509648247180455
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5811392921332472
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.314372027632466
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.21237089045657165
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.2707706471178429
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.005335882307393722
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.04375718796223212
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.08381127703094374
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.08383992371525013
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9473266011481118
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.95802497355029
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8975280221547282
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8283951474451631
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8485506691075568
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7051244694803056
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5332212251447338
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5617053500804108
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.2962160271386434
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.19065594645480785
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.24949688225826308
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.0303538443767176
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.016042154751715436
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.06045004113807913
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.08452570158946174
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8630984182940723
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9327198872796895
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7975806411061804
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.597870802315315
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.761707749541624
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.4386799215419437
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.09397131676035522
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.3337472840655684
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.09488970898315896
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.17376431527204067
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.11834697735304445
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.19642785515263386
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.1603317230568891
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.25962375129540216
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.04658252952526737
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8623860845588432
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9324517874886773
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7969864485418731
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.595552410189382
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7607059588850754
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.43694107048399616
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.0883854807629398
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.3310849351123375
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.09799025639587536
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.17966492155251013
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.11998971431433023
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.19911723525526095
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.16280197387526707
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.26706640178490265
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.0477184148166674
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8635064781351949
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9339056110990408
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8098005507582547
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.6118088312749641
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7684749171530274
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.48567724026318404
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.13719387081124879
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.36317391945140554
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.0641844897263865
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.04663197300831473
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.009015028807389492
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.15195189771696513
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.03481136431245135
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.06875359577039618
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.028547549644168467
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8576526501041257
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9296547927010743
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8069552246344905
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5949644489127952
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7535603434038511
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.4779208920351212
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.09947189721378193
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.3225879952397204
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.07997697107767379
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.08669466502239773
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.06696734124468012
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.1651270162575469
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.05610549768726406
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.11857444993403476
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.03925710338534238
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9900603813198027
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9896056047691429
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9641300155187962
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9724525881932754
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9645626500864701
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9129507619934998
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9282013484943121
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9161446512880238
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8251306710581554
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8311915971854469
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8767839114237528
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7225688243419017
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5970122910974973
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.741462298704016
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3311817816877161
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9842817626513144
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.978532750423576
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9566518365728693
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9563142061346216
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9262079376066431
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8946996136050429
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8853172242211342
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8225812981586929
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7881510204792879
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7217038568930141
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7251290300733874
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.662277564669083
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.28494746058546866
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.33401467106763166
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.1849911295620649
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9822712144942359
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9821872748909861
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9564152098421718
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9439176568654327
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9361809647843341
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8757797543557809
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8520658244459017
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8181650467494508
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7151064161930168
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7334752768735622
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6803962903720768
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5916556775574253
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5708327235635814
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.603056255933745
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.2988729426330378
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9661629813633925
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9615565905816341
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9408116569103161
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8920939953361117
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8606110931968528
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8308001067083033
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7108430719956647
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5940488758604078
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6094833604386368
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.46334980331827064
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.25843181367070095
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.4331454233397874
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.10983331612633795
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.051650517635037294
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.007466651741136513
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9768639862839377
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.984099447410448
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9316369653218969
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9373017951177512
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9446036062357025
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8268875496451475
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8572760683588901
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8497686674847563
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6443536157673736
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7886630209233658
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7533541618796548
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5695019365195221
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.652575708329114
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.6425963847309052
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.4191423753520671
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9534421903329517
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9658638118509081
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9017302062660062
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8728197783643784
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8799372275079329
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7503800698694042
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7065109375061028
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6690135280084987
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.4846605097528831
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5557104362759909
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.44338508619209044
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.37096452090312776
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.24751583815858638
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.17081215725577875
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.1355108060695755
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.6399924859428594
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9896802524485593
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7339976029532892
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.3772135536920247
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9834507484387081
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5395057107921227
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.33548583307665475
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9781847256872546
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5062439378411239
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.2948221157530176
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.9489215962978687
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.4698201358662558
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3723190415779785
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8581251921958228
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5101566689710307
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.4458046602881992
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9676854447832871
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.481195058608765
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.039351423255603944
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9479850620106915
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.10054785792679345
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.028801799272160627
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9310579966640866
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.034073321229319525
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.09945968795892178
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8373990308081003
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.04016868139814486
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.01522229558066694
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5455358912682897
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.03916558152130489
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7179888886917377
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9940930175902757
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8670996508711305
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5053431064353803
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9873582586804557
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7707502379016388
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.41807001083054257
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9714915691012657
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7350453215735399
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.36621685028270157
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.9176647624189571
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7107491871324974
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.39072915115587964
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.7915286807618962
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.6956121344807662
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.5186710919495013
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9894419701414119
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.6538094974703238
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.1544359695740111
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9783031473910067
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.39614911648791346
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.004555675182340287
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9525641853953727
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.2878718157505238
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.08336658064351996
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8462250261316927
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.20006674101745903
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.045542138329646535
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5420826489876347
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.1349692934057696
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9854486176019419
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9918439327099992
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9521228213664986
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9633026439714101
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9717725565114788
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8891472314502504
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.921404953735071
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9231002180361593
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7834898702956997
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.897073013261331
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8754929147215021
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7520818832964865
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8539414711194462
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.829417173982443
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.7162224433996957
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9563434664636042
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9745142288816497
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9042610895220067
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.889154272342331
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9113395344229345
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7774196279861506
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.758459924596204
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.755095060399342
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5611244220762869
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6691518754343972
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5821360279946014
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.48549264687584576
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.497703478823987
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3740341736585895
+    },
+    {
+      "grid": 20,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3839256899723122
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.929157140566891
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9552436499721997
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8687530252916804
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7992018672091727
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8395397558866404
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.6758326611651508
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.4935124021900891
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5382039148901518
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.2898815319280301
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.1627752332335926
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.22086103801204157
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.0019292870691820592
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.040221129225779785
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.09212188845288945
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.0444028486638242
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9265787754381596
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9534089521000668
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8653973099644598
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7917251793159173
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8329005264617112
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.6671915246895912
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.4745740412122117
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.519691452879082
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.26929882934120986
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.14009520781511292
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.20085154934766106
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.023713687916166005
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.01719734113636921
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.07166638954514025
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.04625104468523747
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.843127022307551
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9303812990782336
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.785417869607105
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5729828905048171
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7555225853943613
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.44397921662961615
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.0807874145866243
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.32528583154759544
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.061215504388781275
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.16631458569141494
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.12396206749817965
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.17307352490063946
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.14381053418639395
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.2549923093544386
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.05490885563832325
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8422264573277082
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9300506902876522
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7844983425591958
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5703264576286122
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7543132223807593
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.44148182277154197
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.0749257263856496
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.32217322130240583
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.0657607695878251
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.17226172419563002
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.12621240513263368
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.1770332917898147
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.1478594432136171
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.26285246282540586
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.057962274649647046
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8379637484155679
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9329505565018592
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7850209622450094
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5837167183205674
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7668210275965013
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.4776114522309593
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.1252765371995989
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.36279946352093434
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.025510807034979096
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.04496889184177444
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.0053860924047736385
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.12398461179676942
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.03335565916161037
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.07079064159330406
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.02952315878197742
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8313356974776943
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9286678437840291
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7807865308574271
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.5664855108487461
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7518970697269326
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.4672696267437098
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.08874356464730275
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.32240324216780913
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.04555080535554709
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.08346682133527657
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.0631683388449319
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.14226933579367668
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.054258307645129955
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.12079765405385243
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9000,
+        9420
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.04414651351466559
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9790678628149546
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9878282886544015
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9373257585837338
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9551143243959846
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9594419085367265
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8732611192790002
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9064888659287463
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9079270946446792
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7784288290987396
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8119968032371173
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8801181857138324
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6954745981433657
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5843745269844074
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.7450299852847225
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3924647833410185
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9662866787937444
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9739997085939298
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9167847730426545
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9274710938280375
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9125626567939228
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8312645405838819
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8477340273483761
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7978855339476074
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7034395138662407
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6851165896455519
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7227397925159594
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5875510224533296
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.25866171847546743
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.3312732226569936
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.15831362989415612
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9736009459393448
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9809869515413628
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9368657159508592
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9282727193218255
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9326928013553653
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8455026149391642
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8285409574897477
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8101512636329031
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6768927574949383
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7121474112796777
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6705794479178623
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5611851724763353
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5524467416069072
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5811482737831427
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.31802728264868235
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9517331299052727
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9612099021400982
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9121663958497889
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8679419593812292
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8611972267010826
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7844392457142406
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6800175089410488
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.600696274502924
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5466438069028138
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.44908394142922997
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.2827540487452398
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.37772852789025796
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.12025062271140802
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.0633963337800952
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.018352907806130362
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9669257680205473
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9839691120104206
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9147200192820756
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9235901807015168
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9447615368394221
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8155964278605686
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8422241570772401
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.8509145365765141
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6538051320019099
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7734759849358684
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.7537367642509518
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5758537956308338
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.6362403836569551
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.638614971485017
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.4261061371835815
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9354105838618075
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9661655895628967
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.8751382345469686
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8496451615583174
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.882306650283211
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7290514804912116
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.6854689301242333
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.677079351054925
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.48841857570298114
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5388491940908707
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.45340854413217624
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.3673029233748715
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.2380614449525006
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.17568265493337895
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9420,
+        9868.5
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.1283135788291286
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.4911104522495434
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.979085079444392
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.5933563705810394
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.14021176031752375
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9687327149395252
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.3131528121115415
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.07582176699299593
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9667255134481301
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.25941086695234156
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.033309779852189345
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.9344662035572957
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.21977783577962684
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.1373408549931016
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8422369428751751
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.2857235653241306
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.3903720159327884
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9391887545613113
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.4262946659736181
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": -0.030646068902280964
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9086917939765844
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.03065082935961397
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.10941643976757846
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9020759370895353
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.045356411333239435
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.16406734109149695
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8048109601430653
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.10394660053253471
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.04113122285578947
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5253770166534385
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core A",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.010163555328227878
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.5739042395960904
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9906165969875135
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.7551531152132073
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.26972046990539295
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9834386038607477
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.584286268661201
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.15907715764841682
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.970819118154099
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5253197273475244
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.10747097431278177
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.9225065906388973
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.4924024130340023
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.15637235996543225
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8023580610399497
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.49200260232111687
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.46139139339409463
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9822923986175247
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.5673658997316199
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.07806615499358324
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9690601904144202
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.2616168465596345
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": -0.05817787369710122
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9462370149068647
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.150640533116779
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": -0.1186105522170429
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8451655683252768
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.08164625243210838
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": -0.057461961452078464
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.5547769095987004
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Core B",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.07189807800857946
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9748916773050885
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9916292023885265
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9297614855125331
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9469175619953913
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9717543718901276
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8614616106831133
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9012276602690286
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.9237770329427252
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7631969747499836
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8758854481197388
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.8761205667473597
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.727902494954395
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8319638758309188
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.8276811750619901
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "raw_residual",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.6859853137958052
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9297462039249133
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.9744406854969752
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 5,
+      "normalized_cross_moment": 0.864065467851019
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.8505479814728022
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.9133001849740197
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 10,
+      "normalized_cross_moment": 0.7308684020546181
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7174381164852207
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.7628216907769951
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 20,
+      "normalized_cross_moment": 0.5359220760853054
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.6298564865352129
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.5945648620472551
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 40,
+      "normalized_cross_moment": 0.45449419710621797
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "AMPA",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.4664558810827936
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "GABA_effective",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.38535137769213895
+    },
+    {
+      "grid": 40,
+      "window_ms": [
+        9868.5,
+        10370
+      ],
+      "region": "Surround",
+      "current": "net",
+      "residual": "offset_removed",
+      "lag_ms": 80,
+      "normalized_cross_moment": 0.34385007834879755
+    }
+  ],
+  "scope": "One nativehistory, Ecellphysicalregions. Algebraicwindowoffsets are not causal allocation or proof of quenchedparameters. No fittedmodel, population inference or bifurcationclaim.",
+  "model_promoted": false
+}

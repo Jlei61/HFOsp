@@ -1,0 +1,51 @@
+{
+  "status": "INDEPENDENT_ENDPOINT_NOT_MATCHED",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_cycle_long_connection_contract.json",
+  "rows": [
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_unstable_period_extension_G8505_M65536/point0001.npz",
+      "target": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_arm_connection_G8505_M65536/point0000.npz",
+      "D": 0.21933527332814526,
+      "T_ms": 264.45,
+      "residual_hz": 6.38378239159465e-12,
+      "phase_aligned_relative_L2": 0.004299846857651265,
+      "phase_shift_cycles": 0.999999999895886,
+      "unaligned_relative_L2": 0.004299846857729208
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_arm_connection_G8505_M65536/point0000.npz",
+      "target": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_arm_connection_G8505_M65536/point0001.npz",
+      "D": 0.21933443935249905,
+      "T_ms": 264.5,
+      "residual_hz": 1.353951672999898e-11,
+      "phase_aligned_relative_L2": 0.0044548205629057775,
+      "phase_shift_cycles": 0.9999999995060916,
+      "unaligned_relative_L2": 0.004454820562905714
+    },
+    {
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_arm_connection_G8505_M65536/point0001.npz",
+      "target": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_arm_connection_G8505_M65536/point0002.npz",
+      "D": 0.21933094411268253,
+      "T_ms": 264.5528502512292,
+      "residual_hz": 1.4036202755640659e-09,
+      "phase_aligned_relative_L2": 0.005304631752376308,
+      "phase_shift_cycles": 0.9999999999763878,
+      "unaligned_relative_L2": 0.005304631752317708
+    }
+  ],
+  "independently_solved_endpoint": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_period_bridge_G8505_M65536/point0000.npz",
+  "endpoint": {
+    "D_difference": 9.010316070284796e-06,
+    "period_difference_ms": 0.0,
+    "max_Z_difference": 2.26540043043455e-05,
+    "phase_aligned_relative_L2": 0.0035352100347063355,
+    "phase_shift_cycles": 0.9999820729370502,
+    "unaligned_relative_L2": 0.003576588511834186
+  },
+  "gates": {
+    "endpoint_D": false,
+    "endpoint_waveform": false,
+    "endpoint_period": true
+  },
+  "scope": "Explicit branch connection only. No stability interpolation, onset type, or SNN correspondence inherited."
+}

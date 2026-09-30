@@ -1,0 +1,514 @@
+{
+  "status": "AUDITED_TRAJECTORY_SUPPORT_READOUT",
+  "rows": [
+    {
+      "label": "returning",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_lower_30s_regional.npz",
+      "audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_lower_30s_history.json",
+      "D_A": 0.3281215991278547,
+      "analyzed_window_ms": [
+        2000,
+        30000
+      ],
+      "minimum10ms_hz": 2.110467862830322e-05,
+      "time_sample_quantiles_hz": {
+        "q0001": 2.1529005304394575e-05,
+        "q001": 2.3553224051560714e-05,
+        "q01": 3.540530646858181e-05,
+        "q05": 0.0005900057865012368,
+        "q50": 394.0361331094817
+      },
+      "thresholds": [
+        {
+          "threshold_hz": 1.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.08439285714285714,
+          "complete_quiet_visits_after2s": 19,
+          "qualified_intervals_ms": [
+            [
+              2017,
+              2084
+            ],
+            [
+              2104,
+              2188
+            ],
+            [
+              2310,
+              2458
+            ],
+            [
+              2574,
+              2722
+            ],
+            [
+              2834,
+              2899
+            ],
+            [
+              19111,
+              19261
+            ],
+            [
+              19377,
+              19528
+            ],
+            [
+              19656,
+              19805
+            ],
+            [
+              19907,
+              19961
+            ],
+            [
+              23318,
+              23474
+            ],
+            [
+              23553,
+              23710
+            ],
+            [
+              23828,
+              23979
+            ],
+            [
+              24122,
+              24253
+            ],
+            [
+              24377,
+              24525
+            ],
+            [
+              24644,
+              24793
+            ],
+            [
+              24912,
+              25061
+            ],
+            [
+              25170,
+              25229
+            ],
+            [
+              25308,
+              25397
+            ],
+            [
+              25456,
+              25614
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 5.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.09239285714285714,
+          "complete_quiet_visits_after2s": 19,
+          "qualified_intervals_ms": [
+            [
+              2015,
+              2090
+            ],
+            [
+              2096,
+              2200
+            ],
+            [
+              2308,
+              2469
+            ],
+            [
+              2572,
+              2732
+            ],
+            [
+              2832,
+              2902
+            ],
+            [
+              19108,
+              19273
+            ],
+            [
+              19375,
+              19540
+            ],
+            [
+              19654,
+              19816
+            ],
+            [
+              19905,
+              19964
+            ],
+            [
+              23316,
+              23486
+            ],
+            [
+              23551,
+              23723
+            ],
+            [
+              23826,
+              23990
+            ],
+            [
+              24117,
+              24264
+            ],
+            [
+              24375,
+              24537
+            ],
+            [
+              24642,
+              24804
+            ],
+            [
+              24911,
+              25072
+            ],
+            [
+              25167,
+              25232
+            ],
+            [
+              25305,
+              25399
+            ],
+            [
+              25454,
+              25623
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 10.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.09503571428571428,
+          "complete_quiet_visits_after2s": 18,
+          "qualified_intervals_ms": [
+            [
+              2014,
+              2202
+            ],
+            [
+              2307,
+              2471
+            ],
+            [
+              2571,
+              2735
+            ],
+            [
+              2831,
+              2903
+            ],
+            [
+              19107,
+              19276
+            ],
+            [
+              19374,
+              19543
+            ],
+            [
+              19652,
+              19819
+            ],
+            [
+              19904,
+              19966
+            ],
+            [
+              23315,
+              23488
+            ],
+            [
+              23549,
+              23725
+            ],
+            [
+              23824,
+              23993
+            ],
+            [
+              24113,
+              24267
+            ],
+            [
+              24373,
+              24539
+            ],
+            [
+              24641,
+              24807
+            ],
+            [
+              24909,
+              25074
+            ],
+            [
+              25166,
+              25233
+            ],
+            [
+              25302,
+              25400
+            ],
+            [
+              25453,
+              25625
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 50.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.10225,
+          "complete_quiet_visits_after2s": 18,
+          "qualified_intervals_ms": [
+            [
+              2007,
+              2208
+            ],
+            [
+              2302,
+              2476
+            ],
+            [
+              2565,
+              2740
+            ],
+            [
+              2825,
+              2908
+            ],
+            [
+              19100,
+              19280
+            ],
+            [
+              19367,
+              19548
+            ],
+            [
+              19646,
+              19824
+            ],
+            [
+              19898,
+              19971
+            ],
+            [
+              23310,
+              23492
+            ],
+            [
+              23544,
+              23731
+            ],
+            [
+              23818,
+              23998
+            ],
+            [
+              24099,
+              24272
+            ],
+            [
+              24368,
+              24544
+            ],
+            [
+              24636,
+              24812
+            ],
+            [
+              24904,
+              25079
+            ],
+            [
+              25160,
+              25238
+            ],
+            [
+              25293,
+              25403
+            ],
+            [
+              25449,
+              25630
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "late_return",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/late_return_counterexample/joined70s_regional.npz",
+      "audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/late_return_counterexample/result.json",
+      "D_A": 0.3431576412548057,
+      "analyzed_window_ms": [
+        2000,
+        70000
+      ],
+      "minimum10ms_hz": 2.182093491440616e-05,
+      "time_sample_quantiles_hz": {
+        "q0001": 2.549784612025211e-05,
+        "q001": 3.341776980876246e-05,
+        "q01": 158.0850800487728,
+        "q05": 313.73617253057733,
+        "q50": 408.61673957966343
+      },
+      "thresholds": [
+        {
+          "threshold_hz": 1.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.005647058823529412,
+          "complete_quiet_visits_after2s": 3,
+          "qualified_intervals_ms": [
+            [
+              64833,
+              64918
+            ],
+            [
+              64975,
+              65104
+            ],
+            [
+              65163,
+              65320
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 5.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.006014705882352941,
+          "complete_quiet_visits_after2s": 3,
+          "qualified_intervals_ms": [
+            [
+              64830,
+              64919
+            ],
+            [
+              64973,
+              65105
+            ],
+            [
+              65161,
+              65330
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 10.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.006176470588235294,
+          "complete_quiet_visits_after2s": 4,
+          "qualified_intervals_ms": [
+            [
+              64759,
+              64781
+            ],
+            [
+              64828,
+              64920
+            ],
+            [
+              64972,
+              65106
+            ],
+            [
+              65160,
+              65332
+            ]
+          ]
+        },
+        {
+          "threshold_hz": 50.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.006735294117647059,
+          "complete_quiet_visits_after2s": 4,
+          "qualified_intervals_ms": [
+            [
+              64752,
+              64786
+            ],
+            [
+              64821,
+              64923
+            ],
+            [
+              64968,
+              65109
+            ],
+            [
+              65156,
+              65337
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "label": "no_return_observed",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/joined70s_regional.npz",
+      "audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/censoring_controls/above_SN/joined70s_audit.json",
+      "D_A": 0.3631576412548057,
+      "analyzed_window_ms": [
+        2000,
+        70000
+      ],
+      "minimum10ms_hz": 172.81981248393987,
+      "time_sample_quantiles_hz": {
+        "q0001": 180.56877247278194,
+        "q001": 245.9414513565474,
+        "q01": 300.55469825146434,
+        "q05": 364.33872881400214,
+        "q50": 416.9418995090792
+      },
+      "thresholds": [
+        {
+          "threshold_hz": 1.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.0,
+          "complete_quiet_visits_after2s": 0,
+          "qualified_intervals_ms": []
+        },
+        {
+          "threshold_hz": 5.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.0,
+          "complete_quiet_visits_after2s": 0,
+          "qualified_intervals_ms": []
+        },
+        {
+          "threshold_hz": 10.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.0,
+          "complete_quiet_visits_after2s": 0,
+          "qualified_intervals_ms": []
+        },
+        {
+          "threshold_hz": 50.0,
+          "min_duration_ms": 20,
+          "time_fraction_below": 0.0,
+          "complete_quiet_visits_after2s": 0,
+          "qualified_intervals_ms": []
+        }
+      ]
+    }
+  ],
+  "observable": "Core-A E rate, cell-count weighted Hz/neuron,10ms smoothing; previously audited whole trajectories at dt.05ms, remove only first2s for displayed occupancy. Quiet visits require20ms. Each threshold is a diagnostic sensitivity, not a new state classifier.",
+  "statistical_unit": "One deterministic complete history per local Z field. Time samples/events are dependent; no independent-replicate inference, lifetime-law fit or infinite-time no-return claim.",
+  "interpretation": "The visited low-activity region becomes rare and is not seen in the stronger-field70s record. This motivates distinguishing an invariant-set change from finite sampling or a smooth shift of rate minima. These observations alone do not establish an interior crisis, a boundary crisis, a periodic bifurcation, or an asymptotic critical parameter.",
+  "phase_and_mesh_limit": "All rows are original coarse trajectories; separate complete fine trajectories also return at the weaker fields, but the specific late-return time was not locally mesh-converged.",
+  "model_promoted": false
+}

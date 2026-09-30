@@ -1,0 +1,32 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+  "N": 16384,
+  "check_N": 65536,
+  "J_EE_core": 0.9387255555312313,
+  "T_ms": 1650.727135368106,
+  "maximum_group_defect_Hz": 1.6653345369377348e-11,
+  "regional_defect_Hz": [
+    2.468299842442596e-13,
+    2.6643854571208185e-13,
+    4.0288241092230644e-14
+  ],
+  "minimum_rate_Hz": 5.123606103765388e-06,
+  "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+  "harmonic_chunk_size": 64,
+  "phase_chunk_size": 512,
+  "filter_state_check": {
+    "fast": {
+      "minimum_Hz": -1.7948141108373953e-12,
+      "phase_index": 54044,
+      "group": 915
+    },
+    "slow": {
+      "minimum_Hz": 7.181388356783348e-06,
+      "phase_index": 37604,
+      "group": 237
+    },
+    "positive": true,
+    "N": 16384,
+    "check_N": 65536
+  }
+}

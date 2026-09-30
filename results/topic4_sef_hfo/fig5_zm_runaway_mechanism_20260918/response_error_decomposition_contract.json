@@ -1,0 +1,7 @@
+{
+  "created_local": "2026-09-19T18:30:41.607736",
+  "question": "Are the recorded dynamic-response validation failures mainly due to static DC-gain errors or remaining frequency-response shape errors?",
+  "data": "Existing untouched held-out validation assays; no new fits or MC",
+  "method": "Reproduce original predictions, then diagnostically replace both mean and variance DC gains by empirical DC gains while retaining all fitted poles/weights. Keep original eligibility and tolerance.",
+  "scope": "Error decomposition only. Uses held-out measurements, so the diagnostic cannot become a validation pass or a deployed closure. No frozen files changed."
+}

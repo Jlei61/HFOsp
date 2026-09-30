@@ -1,0 +1,109 @@
+{
+  "rows": [
+    {
+      "label": "native9420_from_lower",
+      "D": 0.22884476056519176,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/block01.npz",
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "readout": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          43.479443782303655,
+          127.48947649607737,
+          125.62701912042661,
+          39.28011486300131
+        ],
+        "smoothed_global_range_hz": [
+          0.01124232663022775,
+          197.75068974298563
+        ],
+        "quiet_fraction": 0.599,
+        "longest_quiet_ms": 168,
+        "complete_events": {
+          "n": 17,
+          "median_duration_ms": 119.0,
+          "iqr_duration_ms": [
+            115.0,
+            119.0
+          ],
+          "median_gap_ms": 284.5,
+          "both_cores": 17,
+          "coreA_only": 0,
+          "coreB_only": 0,
+          "median_area": 0.5540624999999999,
+          "median_surround_cells": 207.0,
+          "forward": 9,
+          "reverse": 8,
+          "undirected": 0,
+          "median_extent_mm": 3.3021906077507643
+        },
+        "persistent_spatial_fraction": 0.0,
+        "group_rate_relative_variation": 0.885667065624377,
+        "M_mean_global_A_B_surround": [
+          0.022491633314933528,
+          0.06577473385786235,
+          0.06516216391479672,
+          0.020319128559159995
+        ]
+      },
+      "original_high_onset_elapsed_ms": null
+    },
+    {
+      "label": "native_mid9420_9870_from_lower",
+      "D": 0.24259459295497288,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native_mid9420_9870_from_lower/block01.npz",
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "readout": {
+        "window_ms": [
+          5000,
+          10000
+        ],
+        "mean_rates_global_A_B_surround": [
+          160.48967366708402,
+          407.72339302088034,
+          399.15881688818513,
+          148.21100751591723
+        ],
+        "smoothed_global_range_hz": [
+          115.49836718390172,
+          195.9483295551192
+        ],
+        "quiet_fraction": 0.0,
+        "longest_quiet_ms": 0,
+        "complete_events": {
+          "n": 0
+        },
+        "persistent_spatial_fraction": 0.3619375,
+        "group_rate_relative_variation": 0.4095183453646689,
+        "M_mean_global_A_B_surround": [
+          0.08043858452497318,
+          0.20365864584756924,
+          0.19974406920540427,
+          0.07430982427559525
+        ]
+      },
+      "original_high_onset_elapsed_ms": null
+    }
+  ],
+  "meaning": "Final5s finite-window spatial means and duty; mean is not an equilibrium or period mean. Fixed fullZ, dynamicM, constantmean external input, no future count innovations.",
+  "core_centers_mm": [
+    [
+      4.199214315969863,
+      9.128901353649564
+    ],
+    [
+      16.47920304043638,
+      3.965511533006886
+    ]
+  ],
+  "model_promoted": false
+}

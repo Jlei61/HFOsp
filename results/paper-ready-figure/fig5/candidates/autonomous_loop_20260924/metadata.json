@@ -1,0 +1,242 @@
+{
+  "asset_id": "native_autonomous_loop_candidate",
+  "seed": 9108405,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_autonomous_loop.py",
+  "producer_sha256": "57ac6d188e8d8f4e3b860967b2906fed089bcb94d7a83342f7c7e874e2744b37",
+  "accepted_raster_producer": "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_fig5_clean_panels.py",
+  "time_window_s": [
+    0,
+    60
+  ],
+  "next_high_entry_s": 59.74,
+  "first_high_entry_s": 9.94,
+  "first_exit_s": 16.7,
+  "joint_low_activity_s": [
+    16.83,
+    49.31
+  ],
+  "first_return_event_s": 49.31,
+  "recovery_markers": {
+    "first_both_core_Z_at_reference_s": 23.9,
+    "core_Z_reference": [
+      0.7603118191859897,
+      0.7344912026970221
+    ],
+    "first_returned_brief_s": 49.31,
+    "reference_to_brief_s": 25.410000000000004,
+    "meaning": "Observed landmarks, not intervention times or a certified bifurcation threshold."
+  },
+  "trajectory_landmarks": [
+    {
+      "label": "Start",
+      "observed_landmark_s": 0.0,
+      "plotted_sample_s": 0.0025
+    },
+    {
+      "label": "Low activity",
+      "observed_landmark_s": 16.83,
+      "plotted_sample_s": 16.8325
+    },
+    {
+      "label": "Z at reference",
+      "observed_landmark_s": 23.9,
+      "plotted_sample_s": 23.9025
+    },
+    {
+      "label": "Returned brief",
+      "observed_landmark_s": 49.31,
+      "plotted_sample_s": 49.3125
+    }
+  ],
+  "raster_zoom_windows_s": [
+    [
+      0.55,
+      0.85
+    ],
+    [
+      16.52,
+      16.82
+    ],
+    [
+      49.3,
+      49.6
+    ]
+  ],
+  "spatial_field_windows_s": [
+    [
+      0.595,
+      0.645
+    ],
+    [
+      10.375,
+      10.425
+    ],
+    [
+      16.825,
+      16.875
+    ],
+    [
+      34.975,
+      35.025
+    ],
+    [
+      49.315,
+      49.365
+    ]
+  ],
+  "sample_ids": [
+    25115,
+    2463,
+    388,
+    13821,
+    29176,
+    3525,
+    24047,
+    14680,
+    30486,
+    11018,
+    26013,
+    25581,
+    23448,
+    20193,
+    29128,
+    5848,
+    18959,
+    6389,
+    2637,
+    805,
+    28165,
+    7856,
+    11636,
+    21849,
+    29930,
+    7520,
+    31097,
+    13091,
+    19004,
+    14079,
+    20100,
+    16813,
+    400,
+    29431,
+    10361,
+    27008,
+    20834,
+    23182,
+    28935,
+    27315,
+    17930,
+    16209,
+    8005,
+    1033,
+    17437,
+    7124,
+    29345,
+    22686,
+    19121,
+    25489,
+    22581,
+    17651,
+    466,
+    16623,
+    7097,
+    26539,
+    23880,
+    20550,
+    3586,
+    7874,
+    36748,
+    39528,
+    38980,
+    36668,
+    32856,
+    36079,
+    38529,
+    37276,
+    32895,
+    37018,
+    39485,
+    34256,
+    38909,
+    38617,
+    36222,
+    34849,
+    37557,
+    37612,
+    35741,
+    38407
+  ],
+  "original_prefix_bitwise": true,
+  "regional_and_spatial_counts_conserved": true,
+  "original_state_coordinates": "Mean E Z; original recorded H_E=<Z*local inhibitory current>; global E rate.",
+  "new_state_coordinates": "Mean E Z; mean intrinsic K/gL; global E rate. G and M remain dynamic in simulation.",
+  "projection": "Successive 5-ms observations, Z/H/K interpolated from20ms; rate Gaussian sigma5ms as accepted producer; no closing line.",
+  "limitations": [
+    "Single selected successful seed; four full returns in240s; displayed first60s.",
+    "Projection is not proof of a limit cycle or bistability.",
+    "A/B core recruitment retained; direction distribution not claimed identical.",
+    "Old E etaM-tauM map and old F patient comparison have not been recomputed for this feedback model."
+  ],
+  "scientific_status": "AUTONOMOUS_RETURN_OBSERVED_BIFURCATION_NOT_ESTABLISHED",
+  "agent_visual_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "human_review": "PENDING",
+  "files": {
+    "fig5-panela-loop": [
+      {
+        "path": "figures/fig5-panela-loop.png",
+        "sha256": "98f2fbddf4e37462114af4198f6e6bbfad6b01b7ab6837d4b267adc527c2bce2"
+      },
+      {
+        "path": "figures/fig5-panela-loop.pdf",
+        "sha256": "0322952705ae4d17142bd2e4128e3019ffeb4c7f0192a026fdc6c3aea88bf0e1"
+      },
+      {
+        "path": "figures/fig5-panela-loop.svg",
+        "sha256": "01f6b1e789f173edb562042e76d83dde7e6523b833af7f47f21bc6b91557694f"
+      }
+    ],
+    "fig5-panelb-loop": [
+      {
+        "path": "figures/fig5-panelb-loop.png",
+        "sha256": "04904054858364d60ff49aa02777b53b32ff159108869fd9f314fedf0d9db2cc"
+      },
+      {
+        "path": "figures/fig5-panelb-loop.pdf",
+        "sha256": "15d5ce6f6a16336c28b4a28ba5beac5b068ceff4ee681b27f586efc8ecff18c2"
+      },
+      {
+        "path": "figures/fig5-panelb-loop.svg",
+        "sha256": "690d89e78a9ff2f689705e40fd2a2db9fb5676a700a829cbadee1dada7175d7a"
+      }
+    ],
+    "fig5-panelc-loop": [
+      {
+        "path": "figures/fig5-panelc-loop.png",
+        "sha256": "63a1f15053f49d5c48da9c5f720e1546689165b66e5e001aebe7ab2b69de65dd"
+      },
+      {
+        "path": "figures/fig5-panelc-loop.pdf",
+        "sha256": "0fff37e75f47c0cd77c697a0a4b63ff587dd5e139199a4f10d2eea4c5bf806ff"
+      },
+      {
+        "path": "figures/fig5-panelc-loop.svg",
+        "sha256": "9f5dd5bc2f7b9617d5325dc9a8c4c094b97f215aaa939b4f3cc45a9ccc4da989"
+      }
+    ],
+    "fig5-state-return": [
+      {
+        "path": "figures/fig5-state-return.png",
+        "sha256": "6150f1e2850f22bade9e1c7e92d76438d1d28141e6ea0713b9c00f70fd52bd28"
+      },
+      {
+        "path": "figures/fig5-state-return.pdf",
+        "sha256": "882393915df08f9bf8e9cb01d792cd848279a2da32ca0a9a1d4a970c01d2534d"
+      },
+      {
+        "path": "figures/fig5-state-return.svg",
+        "sha256": "5a8cdd5f7ed6d7c805b25a6f89e882fa2d82ed736910a453d43a798ab9d2de4b"
+      }
+    ]
+  }
+}

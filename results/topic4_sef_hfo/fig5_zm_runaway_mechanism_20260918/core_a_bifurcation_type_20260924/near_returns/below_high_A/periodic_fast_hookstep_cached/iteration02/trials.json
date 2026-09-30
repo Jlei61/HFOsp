@@ -1,0 +1,55 @@
+[
+  {
+    "status": "INADMISSIBLE_NO_FLOW",
+    "radius": 2.21124399377359,
+    "step_norm": 2.211243993773593,
+    "lagrange_multiplier": 0.09482983772563323,
+    "predicted_relative_residual": 0.6428323527982016,
+    "admissibility_diagnostic": {
+      "negative_steps_at_exact_zero": 1537,
+      "zero_boundary_projection": true,
+      "phase_error": -2.8969882048666246e-16,
+      "min_syn_M": 0.0,
+      "min_covariance": 1.4374430424102275e-211,
+      "min_history": 0.0,
+      "max_refractory_occupancy_E_I": [
+        0.9262341652741753,
+        1.1757167752306288
+      ]
+    }
+  },
+  {
+    "status": "EVALUATED",
+    "radius": 1.105621996886795,
+    "step_norm": 1.1056219968867966,
+    "lagrange_multiplier": 0.4089553761437583,
+    "predicted_relative_residual": 0.7498759988179351,
+    "admissibility_diagnostic": {
+      "negative_steps_at_exact_zero": 1671,
+      "zero_boundary_projection": true
+    },
+    "actual_step_norm": 1.0186181642559844,
+    "retraction_relative_change": 0.3361515070692094,
+    "residual_ratio": 1.1170209829772322,
+    "predicted_gain": -0.7697154146346621,
+    "agreement": null,
+    "period_ms": 33.02419435712111
+  },
+  {
+    "status": "EVALUATED",
+    "radius": 0.5528109984433975,
+    "step_norm": 0.5528109984433989,
+    "lagrange_multiplier": 1.449304385584321,
+    "predicted_relative_residual": 0.8425353565508142,
+    "admissibility_diagnostic": {
+      "negative_steps_at_exact_zero": 1549,
+      "zero_boundary_projection": true
+    },
+    "actual_step_norm": 0.5198166285813288,
+    "retraction_relative_change": 0.23200807996381445,
+    "residual_ratio": 0.9207918383603533,
+    "predicted_gain": 0.10164096586829685,
+    "agreement": 1.4968609271787356,
+    "period_ms": 32.873071001903725
+  }
+]

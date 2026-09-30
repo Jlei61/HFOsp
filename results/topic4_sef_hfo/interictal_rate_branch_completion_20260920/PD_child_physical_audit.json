@@ -1,0 +1,37 @@
+{
+  "rows": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a10.00000_N4096.npz",
+      "fast": {
+        "minimum_Hz": -0.007139328614605345,
+        "phase_index": 5252,
+        "group": 915
+      },
+      "slow": {
+        "minimum_Hz": 3.2766381848128845e-05,
+        "phase_index": 9271,
+        "group": 379
+      },
+      "positive": false,
+      "N": 4096,
+      "check_N": 16384
+    },
+    {
+      "orbit": "/data/hfosp_interictal_rate_periodic_completion_20260918/orbits/PDchild_a120.00000_N4096.npz",
+      "fast": {
+        "minimum_Hz": -0.014055539859485822,
+        "phase_index": 5208,
+        "group": 915
+      },
+      "slow": {
+        "minimum_Hz": 4.423533062742312e-06,
+        "phase_index": 9376,
+        "group": 237
+      },
+      "positive": false,
+      "N": 4096,
+      "check_N": 16384
+    }
+  ],
+  "scope": "Constituent filter positivity only; criticality requires independent child stability and departure geometry."
+}

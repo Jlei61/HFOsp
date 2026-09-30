@@ -1,0 +1,117 @@
+{
+  "status": "CHILD_DEPARTS_TO_PARENT_STABLE_SIDE",
+  "timestamp": 1789901871.3863473,
+  "parent_witnesses": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD1_parent_witnesses/result.json",
+  "physical_children": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/result.json",
+  "critical_J": 0.9387254738385757,
+  "parent_rows": [
+    {
+      "side": "below",
+      "J_EE_core": 0.9387114392273715,
+      "status": "UNSTABLE",
+      "numerical_unstable_dimension": 1,
+      "negative_multiplier": -1.0505949751744947,
+      "margin": 0.0104775292552485,
+      "spectra_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_parent_below_physical_k2_PD_double_low_eval_J0.93871143923_N2048_accuracy_N8192_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_parent_below_physical_k2_PD_double_low_eval_J0.93871143923_N2048_accuracy_N8192_dt0.05.json"
+      ]
+    },
+    {
+      "side": "above",
+      "J_EE_core": 0.9387287147151253,
+      "status": "NUMERICALLY_STABLE",
+      "numerical_unstable_dimension": 0,
+      "negative_multiplier": -0.989350999577025,
+      "margin": 0.009246533515708463,
+      "spectra_sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_parent_above_physical_k2_PD_double_low_eval_J0.93872871472_N2048_accuracy_N8192_dt0.1.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD1_parent_above_physical_k2_PD_double_low_eval_J0.93872871472_N2048_accuracy_N8192_dt0.05.json"
+      ]
+    }
+  ],
+  "child_J_shifts": [
+    8.169265552915306e-08,
+    3.2808494343505856e-07,
+    1.3287663768180025e-06
+  ],
+  "quadratic_departure_coefficients": [
+    8.169265552915306e-10,
+    8.202123585876464e-10,
+    8.304789855112515e-10
+  ],
+  "coefficient_relative_spread": 0.01647633155408965,
+  "physical_child_classification": {
+    "status": "UNSTABLE",
+    "multipliers": [
+      [
+        1.017217126086245,
+        0.0
+      ],
+      [
+        0.19128119499872873,
+        0.0
+      ],
+      [
+        0.1902297078684823,
+        0.0
+      ],
+      [
+        0.1899424394760947,
+        0.0
+      ],
+      [
+        0.144688120697635,
+        0.0
+      ],
+      [
+        0.0023036242018664803,
+        0.0
+      ]
+    ],
+    "per_mode_margin": [
+      0.006108536097427564,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343,
+      0.0034750799581254343
+    ],
+    "reliable_mode_mask": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ],
+    "outside_unit_disk_mask": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "paired_absolute_changes": [
+      0.0010180893495712606,
+      1.299894826556347e-06,
+      9.412130547170605e-08,
+      2.6865511537632614e-08,
+      3.991334707187377e-06,
+      3.91946666943822e-05
+    ],
+    "reliable_outside_count": 1,
+    "numerical_unstable_dimension": null,
+    "filter_coverage": true,
+    "section_projection_checked": true,
+    "maximum_returned_modulus": 1.017217126086245,
+    "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+  },
+  "branch_departure_identity": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_low/departure_identity.json",
+  "proposed_local_criticality": "SUBCRITICAL_PD",
+  "canonical_criticality_promoted": true,
+  "remaining_check": null,
+  "scope": "Local subcritical flip: physical 2T children depart toward the numerically stable parent side, with quadratic parameter scaling and an identified growing radial return direction. The checked child is unstable; its total unstable dimension remains unresolved. This does not establish an attracting irregular state, a propagation-template switch, a global branch connection or an exhaustive interval crossing count.",
+  "combined_classification_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_child_validation.json"
+}

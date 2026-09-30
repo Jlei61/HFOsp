@@ -1,0 +1,24 @@
+{
+  "question": "Does crossing the certified high-equilibrium recruitment fold change actual self-termination when starting from the same complete interictal-like quiet history?",
+  "reference_fold": 0.3531576412548057,
+  "coordinates": {
+    "below": {
+      "D_A": 0.3431576412548057,
+      "Z_A": 0.6568423587451944,
+      "D_global": 0.21852623041452024,
+      "native_time_ms": 9913.085481004982
+    },
+    "above": {
+      "D_A": 0.3631576412548057,
+      "Z_A": 0.6368423587451943,
+      "D_global": 0.21899748041452027,
+      "native_time_ms": 10067.69345650688
+    }
+  },
+  "equations": "Unchanged full spatial conditional drift, only native within-Core-A Z pattern varies; all non-Core-A Z fixed native9s and all M dynamic. Same complete initial state for both fields, original constant input, no future count innovations.",
+  "source_history": "Last full state of the already audited30s midpoint trajectory that returned to quiet. Neither equilibrium nor ad hoc high/low rate reset is used.",
+  "interpretation": "A field above this SN that still returns to quiet rejects identifying this equilibrium fold with irreversible local activation for this history. Contrasting finite-window outcomes supports a candidate correspondence but does not certify a new attractor or permanence. Identical outcomes do not prove absence of a bifurcation elsewhere.",
+  "duration_ms": 20000,
+  "additional_readout": "Record actual AMPA current, raw GABA current and M every10ms to distinguish changing slow adaptation from fast inhibitory interruption of activity.",
+  "model_promoted": false
+}

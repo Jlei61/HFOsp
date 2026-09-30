@@ -1,0 +1,19 @@
+{
+  "checked_local": "2026-09-19T23:52:35.240868+08:00",
+  "status": "NO_ACCEPTED_REPLACEMENT_IN_INSPECTED_CURRENT_RATE_PACKAGES",
+  "sources": [
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/model_audit_20260918/audit_status.json",
+    "results/topic4_sef_hfo/interictal_rate_bifurcation_focus_20260919/figures/README.md",
+    "results/topic4_sef_hfo/interictal_rate_small_burst_connection_20260919/figures/README.md"
+  ],
+  "upstream": {
+    "status": "MODEL_INTERNALLY_CHECKED_BIFURCATION_INCOMPLETE",
+    "model": "400 spatial cells, 935 rate groups, 8415 local states plus full delay history; fixed Z=1",
+    "spatial_correspondence": "INITIAL_SUPPORT_AT_J_0P942",
+    "full_interictal_dynamics": "NOT_VALIDATED",
+    "stable_irregular_attractor": "NOT_ESTABLISHED",
+    "no_model_parameter_changes": true
+  },
+  "decision": "Retain own scoped Z/M analysis and response-validation gap. Fixed-Z1 J_EE_core folds/PD/Hopf do not identify conditional spatial-Z critical points or autonomous Z/M onset. No upstream process or result modified.",
+  "scope": "Read-only check of current related packages, not a claim about all repository artifacts."
+}

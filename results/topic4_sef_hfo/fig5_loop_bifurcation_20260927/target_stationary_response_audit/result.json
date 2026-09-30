@@ -1,0 +1,53 @@
+{
+  "status": "COMPLETE_ONE_POINT_RESPONSE_AUDIT",
+  "rows": [
+    {
+      "region": "allE",
+      "measured_density_rate_Hz": 244.1108344202021,
+      "frozen_static_rate_Hz": 244.87088731406428,
+      "group_weighted_RMS_Hz": 3.2162467405720503,
+      "group_weighted_MAE_Hz": 2.085507138213186,
+      "max_group_error_Hz": 15.242159957292472
+    },
+    {
+      "region": "coreA",
+      "measured_density_rate_Hz": 469.23104069150725,
+      "frozen_static_rate_Hz": 467.3198936622153,
+      "group_weighted_RMS_Hz": 4.340019924697632,
+      "group_weighted_MAE_Hz": 3.6703662929160332,
+      "max_group_error_Hz": 15.197702294769044
+    },
+    {
+      "region": "coreB",
+      "measured_density_rate_Hz": 474.301867885444,
+      "frozen_static_rate_Hz": 468.9888062829689,
+      "group_weighted_RMS_Hz": 5.901669041047431,
+      "group_weighted_MAE_Hz": 5.532525718185847,
+      "max_group_error_Hz": 15.242159957292472
+    },
+    {
+      "region": "surround",
+      "measured_density_rate_Hz": 232.5983331781717,
+      "frozen_static_rate_Hz": 233.5812210272598,
+      "group_weighted_RMS_Hz": 3.082566275250518,
+      "group_weighted_MAE_Hz": 1.9573278733903212,
+      "max_group_error_Hz": 7.192893982520388
+    },
+    {
+      "region": "I",
+      "measured_density_rate_Hz": 309.8031591495926,
+      "frozen_static_rate_Hz": 308.93114701857314,
+      "group_weighted_RMS_Hz": 1.1453988987549184,
+      "group_weighted_MAE_Hz": 0.8725586958286254,
+      "max_group_error_Hz": 2.554682624088116
+    }
+  ],
+  "G_from_mean_rate": 4.492544156608088,
+  "observed_G": 4.492972254218486,
+  "E_fraction_outside_static_training_domain": 0.0,
+  "E_M_rate_equivalent_Hz": 244.05938288864544,
+  "measured_E_rate_Hz": 244.11083467031366,
+  "elapsed_s": 27.85515022277832,
+  "root_established": false,
+  "formal_bifurcation_allowed": false
+}

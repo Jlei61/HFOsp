@@ -1,0 +1,144 @@
+{
+  "status": "PASS",
+  "operators": [
+    {
+      "lam": [
+        0.0,
+        0.0
+      ],
+      "kind": "ampa",
+      "relative_error": 1.891461605936787e-15
+    },
+    {
+      "lam": [
+        0.0,
+        0.0
+      ],
+      "kind": "gaba",
+      "relative_error": 1.1072193718552486e-15
+    },
+    {
+      "lam": [
+        0.002,
+        0.03
+      ],
+      "kind": "ampa",
+      "relative_error": 1.2262244163598747e-15
+    },
+    {
+      "lam": [
+        0.002,
+        0.03
+      ],
+      "kind": "gaba",
+      "relative_error": 7.159775482334571e-16
+    },
+    {
+      "lam": [
+        -0.0001,
+        0.1
+      ],
+      "kind": "ampa",
+      "relative_error": 1.2548279784604083e-15
+    },
+    {
+      "lam": [
+        -0.0001,
+        0.1
+      ],
+      "kind": "gaba",
+      "relative_error": 7.107759570881416e-16
+    }
+  ],
+  "rows": [
+    {
+      "native_Z_time_ms": 9000,
+      "D": 0.2164660210396102,
+      "Jacobian": [
+        {
+          "h": 0.0001,
+          "relative_error": 4.084788505401309e-11
+        },
+        {
+          "h": 5e-05,
+          "relative_error": 5.586517879520632e-11
+        }
+      ],
+      "temporal_DC": [
+        {
+          "dt_ms": null,
+          "relative_error": 2.12226701174635e-16
+        },
+        {
+          "dt_ms": 0.05,
+          "relative_error": 1.358250887517664e-14
+        },
+        {
+          "dt_ms": 0.025,
+          "relative_error": 4.06414132749426e-14
+        }
+      ]
+    },
+    {
+      "native_Z_time_ms": 9420,
+      "D": 0.22884476056519176,
+      "Jacobian": [
+        {
+          "h": 0.0001,
+          "relative_error": 7.407196539518211e-09
+        },
+        {
+          "h": 5e-05,
+          "relative_error": 1.3182607998149328e-09
+        }
+      ],
+      "temporal_DC": [
+        {
+          "dt_ms": null,
+          "relative_error": 1.830638118406519e-16
+        },
+        {
+          "dt_ms": 0.05,
+          "relative_error": 9.336254403873247e-15
+        },
+        {
+          "dt_ms": 0.025,
+          "relative_error": 3.6933124038851525e-14
+        }
+      ]
+    },
+    {
+      "native_Z_time_ms": 9870,
+      "D": 0.25634442534475455,
+      "Jacobian": [
+        {
+          "h": 0.0001,
+          "relative_error": 1.2340097532772763e-08
+        },
+        {
+          "h": 5e-05,
+          "relative_error": 2.159605780720242e-09
+        }
+      ],
+      "temporal_DC": [
+        {
+          "dt_ms": null,
+          "relative_error": 1.8449747686502002e-16
+        },
+        {
+          "dt_ms": 0.05,
+          "relative_error": 8.071764612844626e-16
+        },
+        {
+          "dt_ms": 0.025,
+          "relative_error": 1.4759798149201602e-15
+        }
+      ]
+    }
+  ],
+  "object": "Corrected physical-delay private-Q conditional drift,3479groups,constantmeanexternalinput,Zfieldheld,Mdynamic.",
+  "mean_graph_response_and_slow_laws_unchanged": true,
+  "scope": "Analytic operator checks only. Actual engine two-step check and originalnativecorrespondence remain required.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

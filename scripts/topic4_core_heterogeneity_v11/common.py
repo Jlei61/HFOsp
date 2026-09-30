@@ -45,5 +45,11 @@ def resolve(path):
     path = Path(path)
     if not path.is_absolute(): return ROOT/path
     old = Path('/home/honglab/leijiaxin/HFOsp')
+    # Published v11 tables also retain the original isolated-worktree paths.
+    # Resolve to the same artifact in this checkout after that worktree retires.
+    try:
+        return ROOT/path.relative_to(old/'.worktrees/topic4-six-rate-heterogeneity')
+    except ValueError:
+        pass
     try: return ROOT/path.relative_to(old)
     except ValueError: return path

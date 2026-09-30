@@ -1,0 +1,98 @@
+[
+  {
+    "segment": 2,
+    "period_ms": 2369.0337201696943,
+    "segment_duration_ms": 394.8389533616157,
+    "fractional_step": 0.7790672323144463,
+    "actual_matching": {
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 52.11937549820652,
+          "difference_rms": 1.2113227016869513e-08,
+          "relative_rms": 2.3241312661711268e-10
+        },
+        "GABA": {
+          "reference_rms": 157.300584786447,
+          "difference_rms": 2.59323805352487e-08,
+          "relative_rms": 1.6485876750207119e-10
+        },
+        "M": {
+          "reference_rms": 0.024049902907126063,
+          "difference_rms": 2.069013286746298e-12,
+          "relative_rms": 8.603000580652003e-11
+        },
+        "covariance": {
+          "reference_rms": 50.90236921459935,
+          "difference_rms": 1.4530551982493658e-08,
+          "relative_rms": 2.854592469209889e-10
+        },
+        "input_memory": {
+          "reference_rms": 0.4495695101589181,
+          "difference_rms": 5.101384840460163e-11,
+          "relative_rms": 1.1347266051598732e-10
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.08676176530913397,
+          "difference_rms": 8.794167253941828e-08,
+          "relative_rms": 1.013599391691493e-06
+        }
+      },
+      "combined_relative_rms": 4.138002557184299e-07
+    },
+    "positivity_only_lower_bound": {
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 52.11937549820652,
+          "difference_rms": 0.0,
+          "relative_rms": 0.0
+        },
+        "GABA": {
+          "reference_rms": 157.300584786447,
+          "difference_rms": 0.0,
+          "relative_rms": 0.0
+        },
+        "M": {
+          "reference_rms": 0.024049902907126063,
+          "difference_rms": 0.0,
+          "relative_rms": 0.0
+        },
+        "covariance": {
+          "reference_rms": 50.90236921459935,
+          "difference_rms": 0.0,
+          "relative_rms": 0.0
+        },
+        "input_memory": {
+          "reference_rms": 0.4495695101589181,
+          "difference_rms": 0.0,
+          "relative_rms": 0.0
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.08676176530913397,
+          "difference_rms": 8.794166880254579e-08,
+          "relative_rms": 1.0135993486209945e-06
+        }
+      },
+      "combined_relative_rms": 4.1380020128980613e-07
+    },
+    "negative": [
+      {
+        "block": "syn",
+        "negative_count": 0,
+        "minimum": 0.0
+      },
+      {
+        "block": "local",
+        "negative_count": 0,
+        "minimum": 3.052664219619511e-06
+      },
+      {
+        "block": "history",
+        "negative_count": 208,
+        "minimum": -5.678685465916043e-05
+      }
+    ],
+    "cubic_admissible": false,
+    "linear_admissible": true,
+    "negative_floor_fraction_of_squared_error": 0.9999997369328828
+  }
+]

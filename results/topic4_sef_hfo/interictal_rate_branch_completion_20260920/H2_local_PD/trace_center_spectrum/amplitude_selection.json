@@ -1,0 +1,168 @@
+{
+  "status": "INITIAL_GUESS_SELECTED",
+  "requested_amplitude_Hz": 0.03589661039700412,
+  "endpoint_spectral_invariants": [
+    {
+      "amplitude_Hz": 0.03,
+      "trace": 82.71982323257532,
+      "determinant": 249.71267124814767,
+      "real_multipliers": [
+        79.58202063265382,
+        3.1378025999215007
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            79.58202063265382,
+            0.0
+          ],
+          [
+            3.1378025999215007,
+            0.0
+          ],
+          [
+            0.8299009004566352,
+            2.003670412648451
+          ],
+          [
+            0.8299009004566352,
+            -2.003670412648451
+          ],
+          [
+            0.5509842394810486,
+            0.0
+          ],
+          [
+            0.49533146121749577,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          1.624392366346882,
+          0.07272778312758721,
+          0.0038968082410107607,
+          0.0038968082410107607,
+          0.0038968082410107607,
+          0.0038968082410107607
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.27073206105781367,
+          0.012121297187931201,
+          5.1441988055435325e-05,
+          5.1441988055435325e-05,
+          5.328585239716688e-09,
+          6.207249769712986e-05
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 79.58202063265382,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_midpoint_20260920_k6_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_midpoint_20260920_k6_dt0.025.json"
+      ]
+    },
+    {
+      "amplitude_Hz": 0.04,
+      "trace": -66.29934259619957,
+      "determinant": 242.06793650046757,
+      "real_multipliers": [
+        -62.42137727283916,
+        -3.8779653233604052
+      ],
+      "paired_classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            -62.42137727283916,
+            0.0
+          ],
+          [
+            -3.8779653233604052,
+            0.0
+          ],
+          [
+            0.8349285377073657,
+            1.9999045897114203
+          ],
+          [
+            0.8349285377073558,
+            -1.999904589711423
+          ],
+          [
+            0.5509842134428051,
+            0.0
+          ],
+          [
+            0.5105800881487893,
+            0.0
+          ]
+        ],
+        "per_mode_margin": [
+          1.4446831253037118,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585,
+          0.09107308792190585
+        ],
+        "reliable_mode_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "outside_unit_disk_mask": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "paired_absolute_changes": [
+          0.24078052088395197,
+          0.013100688297994711,
+          5.087577750478379e-05,
+          5.087577751103423e-05,
+          2.7748578101949306e-08,
+          6.271399843582603e-05
+        ],
+        "reliable_outside_count": 4,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": true,
+        "section_projection_checked": false,
+        "maximum_returned_modulus": 62.42137727283916,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      },
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.025.json"
+      ]
+    }
+  ],
+  "rule": "Interpolate the real-pair trace linearly in squared child amplitude and select its zero as one interior sample.",
+  "scope": "Adaptive sample location only. A new physical BVP and paired full-history spectrum must test whether this pair becomes complex. No collision, unit-circle crossing, extra PD, or interval completeness is inferred from interpolation."
+}

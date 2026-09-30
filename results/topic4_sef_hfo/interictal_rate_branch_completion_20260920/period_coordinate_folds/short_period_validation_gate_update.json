@@ -1,0 +1,15 @@
+{
+  "timestamp": 1789857951.1577084,
+  "old_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 485307,
+    "rows": [],
+    "timestamp": 1789857946.2224157,
+    "label": "LPC_burst_high",
+    "stage": "FULL_VALIDATION",
+    "free_mib": 4087.0,
+    "required_free_gib": 8
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_period_coordinate_folds.py --device 0 ",
+  "reason": "The N2048, T239.7ms root is finished and physical. Its validation uses exact streamed actions and bounded gain evaluation, without a Newton Krylov basis; separate the validation memory gate (4GiB) from the unchanged root-solve gate. All scientific acceptance thresholds and saved numerical results are retained."
+}

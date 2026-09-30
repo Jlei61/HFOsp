@@ -1,0 +1,53 @@
+{
+  "status": "AUDIT_PASS",
+  "D_A": 0.3431576412548057,
+  "Z_A": 0.6568423587451944,
+  "observed_ms": 70000,
+  "exact_original_terminal_state_resumed": true,
+  "nominal_flow_unaltered_by_passive_tangent": true,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "quiet_intervals_ms": [
+    [
+      0,
+      40
+    ],
+    [
+      149,
+      308
+    ],
+    [
+      407,
+      467
+    ],
+    [
+      64830,
+      64919
+    ],
+    [
+      64973,
+      65105
+    ],
+    [
+      65161,
+      65330
+    ]
+  ],
+  "first_quiet_after60s_ms": [
+    64830,
+    64919
+  ],
+  "ended_activity": {
+    "start_ms": 467,
+    "end_ms": 64830,
+    "duration_ms": 64363
+  },
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/joined60s_regional.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block01.npz"
+  ],
+  "conclusion": "The activity episode previously right-censored at60s ends at64.830s. D_A=.34315764 cannot serve as a demonstrated asymptotic sustained-side endpoint or certified onset bracket againstD_A=.33564.",
+  "distinction": "Long irregular activity and its later termination are directly observed. This does not identify a crisis, chaos in the infinite-time limit, a unique transition parameter, or the native-SNN onset mechanism.",
+  "model_promoted": false
+}

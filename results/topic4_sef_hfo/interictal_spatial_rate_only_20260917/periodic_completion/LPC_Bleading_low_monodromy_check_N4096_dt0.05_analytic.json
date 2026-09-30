@@ -1,0 +1,21 @@
+{
+  "label": "LPC_Bleading_low",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N4096.npz",
+  "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_Bleading_low_tangent_N4096.npz",
+  "J_EE_core": 0.9488485317657749,
+  "T_ms": 317.84042426489776,
+  "N": 4096,
+  "dt_ms": 0.049998493670740565,
+  "dT_dcoordinate_ms": -0.0005379962446573323,
+  "dJ_dcoordinate": 3.451852123984426e-14,
+  "seed_method": "analytic harmonic derivative",
+  "analytic_vs_finite_difference_relative_change": 4.4848583171154695e-11,
+  "derivative_step": 8.713847847403347e-05,
+  "reconstruction_step_halving_relative_change": 4.971760675964157e-11,
+  "generalized_plus_one_relative_defect": 0.00013163593602091413,
+  "generalized_plus_one_defect_over_tangent": 0.00013168746097535128,
+  "phase_relative_defect": 0.00021189513032633341,
+  "tangent_fraction_orthogonal_to_phase": 0.990180867723816,
+  "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+  "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+}

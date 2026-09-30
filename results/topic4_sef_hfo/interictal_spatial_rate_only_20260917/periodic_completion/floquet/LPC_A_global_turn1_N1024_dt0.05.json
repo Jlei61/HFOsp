@@ -1,0 +1,44 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_global_turn1_N1024.npz",
+  "J_EE_core": 1.0387480258884794,
+  "T_ms": 122.57781285229113,
+  "dt_ms": 0.049990951407949076,
+  "history_dimension": 679745,
+  "multipliers": [
+    [
+      -3362.5858922977727,
+      0.0
+    ],
+    [
+      -3.9364843721375404,
+      0.0
+    ]
+  ],
+  "residuals": [
+    6.495127502055565e-12,
+    4.3566262645766786e-07
+  ],
+  "phase_multiplier_error": 4.93648437213754,
+  "phase_tangent_relative_defect": 0.000775634939218012,
+  "raw_multipliers_above_1p001": 2,
+  "requested_multipliers": 2,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 78.60853290557861,
+  "phase_eigenvector_overlaps": [
+    0.7873901497119149,
+    0.657707648274923
+  ],
+  "identified_neutral_index": null,
+  "nontrivial_multipliers": [
+    [
+      -3362.5858922977727,
+      0.0
+    ],
+    [
+      -3.9364843721375404,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 3362.5858922977727,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

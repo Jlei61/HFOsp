@@ -1,0 +1,23 @@
+{
+  "label": "LPC_A_large_return2",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_large_return2_N2048.npz",
+  "tangent_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_A_large_return2_tangent_N2048.npz",
+  "J_EE_core": 1.071768354362471,
+  "T_ms": 101.20897954523652,
+  "N": 2048,
+  "dt_ms": 0.024996043355207834,
+  "dT_dcoordinate_ms": 0.39621715710492084,
+  "dJ_dcoordinate": -4.592573326164416e-13,
+  "seed_method": "analytic harmonic derivative",
+  "analytic_vs_finite_difference_relative_change": 5.102546176111655e-11,
+  "derivative_step": 0.0002144158003826758,
+  "reconstruction_step_halving_relative_change": 5.3782665603646834e-11,
+  "generalized_plus_one_relative_defect": 7.813074712469964e-05,
+  "generalized_plus_one_defect_over_tangent": 0.00011540395825255049,
+  "phase_relative_defect": 3.643247036170726e-05,
+  "tangent_fraction_orthogonal_to_phase": 0.9100882906173601,
+  "streamed_exact_harmonic_actions": false,
+  "bounded_reconstruction_harmonic_indices": false,
+  "equation": "(M-I)v + T_prime*f = 0; M*f = f",
+  "scope": "Independent full-state/delay-history check of the fold tangent. Not the complete Floquet spectrum or stability of either adjacent branch."
+}

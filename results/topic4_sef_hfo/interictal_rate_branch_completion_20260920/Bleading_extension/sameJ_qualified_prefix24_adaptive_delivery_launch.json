@@ -1,0 +1,14 @@
+{
+  "pid": 560124,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/finish_rate_sameJ_burst_readouts.py",
+    "--after-pid",
+    "560123",
+    "--pair-source",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/sameJ_qualified_prefix24_adaptive.json",
+    "--output-prefix",
+    "sameJ_qualified_burst_adaptive"
+  ]
+}

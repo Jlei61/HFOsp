@@ -1,0 +1,40 @@
+{
+  "index": 24,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0015_N64.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0015_N64.npz",
+  "status": "PASS",
+  "check": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0015_N64.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0015_N64.npz",
+    "N": 64,
+    "check_N": 256,
+    "J_EE_core": 0.9529134349081203,
+    "T_ms": 195.32119999065395,
+    "maximum_group_defect_Hz": 3.5237818331659843e-06,
+    "regional_defect_Hz": [
+      3.867862491663722e-16,
+      1.3871133465426045e-09,
+      1.988725722786501e-08
+    ],
+    "minimum_rate_Hz": 0.016421379175397433,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": 0.005173412129639585,
+        "phase_index": 113,
+        "group": 18
+      },
+      "slow": {
+        "minimum_Hz": 0.01783341492575233,
+        "phase_index": 131,
+        "group": 17
+      },
+      "positive": true,
+      "N": 64,
+      "check_N": 256
+    }
+  },
+  "phase_aligned_relative_waveform_change": 1.0548329166008907e-08,
+  "relative_period_change": 0.0,
+  "branch_match_pass": true
+}

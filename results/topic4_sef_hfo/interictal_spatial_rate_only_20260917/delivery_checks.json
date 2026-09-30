@@ -1,0 +1,38 @@
+{
+  "status": "PASS_NUMERICAL_AND_PROVENANCE",
+  "model": "rate_field.py autonomous two-filter spatial DDE",
+  "spatial_cells": 400,
+  "rate_groups": 935,
+  "continuous_local_states": 8415,
+  "equilibrium_points": 2370,
+  "spectral_samples": 183,
+  "uncertified_instability_samples": 0,
+  "main_contracts": [
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J0.6000000/contract.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J0.9340000/contract.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J0.9420000/contract.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J0.9500000/contract.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J1.3000000/contract.json",
+    "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/runs/main/J2.0000000/contract.json"
+  ],
+  "maximum_tangent_relative_error": 7.744472690729315e-10,
+  "maximum_step_halving_waveform_relative_RMS": 0.0038167897646286474,
+  "burst_counts_preserved_under_step_halving": true,
+  "middle_state": "alternating intervals; not established irregularity or period-doubling bifurcation",
+  "SNN_equivalence": "NOT_VALIDATED",
+  "periodic_orbit_Floquet_analysis": "NOT_COMPUTED",
+  "human_visual_acceptance": false,
+  "figures": [
+    "rate_alternating_intervals.pdf",
+    "rate_case_a.pdf",
+    "rate_case_b.pdf",
+    "rate_case_c.pdf",
+    "rate_case_d.pdf",
+    "rate_case_e.pdf",
+    "rate_only_propagation_metrics.pdf",
+    "rate_two_direction_examples.pdf",
+    "spatial_rate_only_bifurcation_composite.pdf"
+  ],
+  "all_dynamic_panel_sources_are_rate_trajectories": true,
+  "visual_checks": "Main PNG and rendered PDF, two-direction examples and propagation metrics inspected; human acceptance pending"
+}

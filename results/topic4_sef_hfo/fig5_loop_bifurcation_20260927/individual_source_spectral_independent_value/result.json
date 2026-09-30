@@ -1,0 +1,252 @@
+{
+  "status": "COMPLETE_INDEPENDENT_FINITE_WINDOW_VALUE",
+  "rows": [
+    {
+      "region": "allE",
+      "rate_residual_RMS_Hz": 0.05863604815860701,
+      "rate_MCSEM_RMS_Hz": 0.025392160744153784,
+      "targets_exceeding6SEM": 141,
+      "zeroSEM_nonzero_residual": 6,
+      "mean_rate_input_output_Hz": [
+        98.49206493432759,
+        98.4943212890625
+      ],
+      "PSD_L1_residual_mean": 0.0004911609193040057,
+      "PSD_L1_SEM_sum_mean": 0.0003210571729077743,
+      "filtered_variance_residual_RMS": [
+        1.6596626559644268e-06,
+        9.75683703309447e-07
+      ],
+      "filtered_variance_MCSEM_RMS": [
+        7.34803317079726e-07,
+        4.713300408140785e-07
+      ]
+    },
+    {
+      "region": "coreA",
+      "rate_residual_RMS_Hz": 0.1306287357468515,
+      "rate_MCSEM_RMS_Hz": 0.056687950388345835,
+      "targets_exceeding6SEM": 4,
+      "zeroSEM_nonzero_residual": 1,
+      "mean_rate_input_output_Hz": [
+        392.72793048927906,
+        392.73646800397876
+      ],
+      "PSD_L1_residual_mean": 0.0019339016443683202,
+      "PSD_L1_SEM_sum_mean": 0.0012637382487104788,
+      "filtered_variance_residual_RMS": [
+        2.2853993931388126e-06,
+        1.911399600997278e-06
+      ],
+      "filtered_variance_MCSEM_RMS": [
+        1.069506373113157e-06,
+        7.686765986378319e-07
+      ]
+    },
+    {
+      "region": "coreB",
+      "rate_residual_RMS_Hz": 0.10074609931904452,
+      "rate_MCSEM_RMS_Hz": 0.040671004828533516,
+      "targets_exceeding6SEM": 5,
+      "zeroSEM_nonzero_residual": 0,
+      "mean_rate_input_output_Hz": [
+        132.50355391918228,
+        132.51016817748092
+      ],
+      "PSD_L1_residual_mean": 0.001011360136560639,
+      "PSD_L1_SEM_sum_mean": 0.000693223407751669,
+      "filtered_variance_residual_RMS": [
+        3.0037015487762445e-06,
+        2.495061596031141e-06
+      ],
+      "filtered_variance_MCSEM_RMS": [
+        1.0882577441545251e-06,
+        8.495219784721592e-07
+      ]
+    },
+    {
+      "region": "surroundE",
+      "rate_residual_RMS_Hz": 0.05410832646061201,
+      "rate_MCSEM_RMS_Hz": 0.0235611795726718,
+      "targets_exceeding6SEM": 132,
+      "zeroSEM_nonzero_residual": 5,
+      "mean_rate_input_output_Hz": [
+        90.33097258467134,
+        90.33296100418582
+      ],
+      "PSD_L1_residual_mean": 0.00044202424525731463,
+      "PSD_L1_SEM_sum_mean": 0.0002881187555820178,
+      "filtered_variance_residual_RMS": [
+        1.5911124317319686e-06,
+        8.654540571363336e-07
+      ],
+      "filtered_variance_MCSEM_RMS": [
+        7.129932677784869e-07,
+        4.4736430094240953e-07
+      ]
+    },
+    {
+      "region": "I",
+      "rate_residual_RMS_Hz": 0.24650520701344353,
+      "rate_MCSEM_RMS_Hz": 0.10249845307911139,
+      "targets_exceeding6SEM": 104,
+      "zeroSEM_nonzero_residual": 12,
+      "mean_rate_input_output_Hz": [
+        129.0810264750264,
+        129.0803505859375
+      ],
+      "PSD_L1_residual_mean": 0.0020515927536728967,
+      "PSD_L1_SEM_sum_mean": 0.0015320086292071287,
+      "filtered_variance_residual_RMS": [
+        7.918903931230095e-06,
+        6.1702807203066145e-06
+      ],
+      "filtered_variance_MCSEM_RMS": [
+        3.2953970700246334e-06,
+        2.554380503426604e-06
+      ]
+    }
+  ],
+  "original_collect": {
+    "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+    "generation": 1,
+    "rows": [
+      {
+        "region": "allE",
+        "targets": 32000,
+        "input_rate_Hz": 98.49206493432759,
+        "output_rate_Hz": 98.4943212890625,
+        "native_reference_rate_Hz": 98.49206493432759,
+        "individual_rate_RMS_change_Hz": 0.05863604815860701,
+        "mean_first_second_1s_Hz": [
+          98.4946181640625,
+          98.4940244140625
+        ],
+        "mean_M_start_end": [
+          98.49677976436186,
+          98.4946198020024
+        ],
+        "mean_M": 98.49540127024213,
+        "counterfactual_mean_Zdot_per_s": 0.08059809194824219,
+        "mean_PSD_L1_change": 0.0004911609193040057,
+        "mean_spike_variance": 0.009419799600256348,
+        "mean_negative_IE_II_fractions": [
+          0.0,
+          0.02771179455566398
+        ]
+      },
+      {
+        "region": "coreA",
+        "targets": 754,
+        "input_rate_Hz": 392.72793048927906,
+        "output_rate_Hz": 392.73646800397876,
+        "native_reference_rate_Hz": 392.72793048927906,
+        "individual_rate_RMS_change_Hz": 0.1306287357468515,
+        "mean_first_second_1s_Hz": [
+          392.73835377984085,
+          392.7345822281167
+        ],
+        "mean_M_start_end": [
+          392.7414632394088,
+          392.73619724335106
+        ],
+        "mean_M": 392.73910100200794,
+        "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+        "mean_PSD_L1_change": 0.0019339016443683207,
+        "mean_spike_variance": 0.037516195714418936,
+        "mean_negative_IE_II_fractions": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "region": "coreB",
+        "targets": 786,
+        "input_rate_Hz": 132.50355391918228,
+        "output_rate_Hz": 132.51016817748092,
+        "native_reference_rate_Hz": 132.50355391918228,
+        "individual_rate_RMS_change_Hz": 0.10074609931904452,
+        "mean_first_second_1s_Hz": [
+          132.51123171119593,
+          132.5091046437659
+        ],
+        "mean_M_start_end": [
+          132.5164672961608,
+          132.51010055471468
+        ],
+        "mean_M": 132.51335154820396,
+        "counterfactual_mean_Zdot_per_s": -0.015246011650226748,
+        "mean_PSD_L1_change": 0.001011360136560639,
+        "mean_spike_variance": 0.012702301091016619,
+        "mean_negative_IE_II_fractions": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "region": "surroundE",
+        "targets": 30460,
+        "input_rate_Hz": 90.33097258467134,
+        "output_rate_Hz": 90.33296100418582,
+        "native_reference_rate_Hz": 90.33097258467134,
+        "individual_rate_RMS_change_Hz": 0.05410832646061201,
+        "mean_first_second_1s_Hz": [
+          90.33319876477347,
+          90.33272324359817
+        ],
+        "mean_M_start_end": [
+          90.33525757985194,
+          90.33328305668378
+        ],
+        "mean_M": 90.33394826576975,
+        "counterfactual_mean_Zdot_per_s": 0.08592866221029075,
+        "mean_PSD_L1_change": 0.00044202424525731463,
+        "mean_spike_variance": 0.008639604956729883,
+        "mean_negative_IE_II_fractions": [
+          0.0,
+          0.029112850485267478
+        ]
+      },
+      {
+        "region": "I",
+        "targets": 8000,
+        "input_rate_Hz": 129.0810264750264,
+        "output_rate_Hz": 129.0803505859375,
+        "native_reference_rate_Hz": 129.0810264750264,
+        "individual_rate_RMS_change_Hz": 0.24650520701344353,
+        "mean_first_second_1s_Hz": [
+          129.08010546875,
+          129.080595703125
+        ],
+        "mean_M_start_end": [
+          0.0,
+          0.0
+        ],
+        "mean_M": 0.0,
+        "counterfactual_mean_Zdot_per_s": null,
+        "mean_PSD_L1_change": 0.002051592753672897,
+        "mean_spike_variance": 0.012216774703979492,
+        "mean_negative_IE_II_fractions": [
+          0.0,
+          0.027976140917968777
+        ]
+      }
+    ],
+    "G_used": 0.0,
+    "G_implied_by_output": 0.0,
+    "output_causal_R_DC_Hz": 98.82300048687173,
+    "development_native_field_weighted_RMS_Hz": 0.011008916007350393,
+    "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+    "formal_bifurcation_allowed": false,
+    "root_established": false,
+    "physical_stability_established": false,
+    "elapsed_worker_s": [
+      107.99263048171997,
+      109.15300035476685
+    ]
+  },
+  "root_certified": false,
+  "formal_bifurcation_allowed": false,
+  "limitations": "ZeroSEM/weak channels remain unresolved. SEM does not bound2s-periodic/window bias or the difference from a native network, and is not a simultaneous confidence interval over frequencies or targets.",
+  "producer_sha256": "0b28f1b4c9be5013e5a9968dd35b477f7959b1d801f3ee466bdcd5a1a5f470a7"
+}

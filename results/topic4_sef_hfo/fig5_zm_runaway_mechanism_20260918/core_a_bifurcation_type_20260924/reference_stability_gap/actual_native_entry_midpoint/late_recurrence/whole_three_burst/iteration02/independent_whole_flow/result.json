@@ -1,0 +1,520 @@
+{
+  "status": "UNSEGMENTED_CANDIDATE_FLOW_AUDITED_NOT_A_PERIODIC_CERTIFICATE",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/whole_three_burst/iteration02",
+  "period_seed_ms": 790.2861378603747,
+  "dt_ms": 0.05,
+  "segments": 6,
+  "exact_period_returns": [
+    {
+      "divisor": 1,
+      "actual_time_ms": 790.2861378603747,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 1.9304953869987213e-11,
+          "relative_rms": 1.2131574639804606e-12
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 1.9756534300039134e-11,
+          "relative_rms": 2.386770947691636e-12
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 5.821158230343222e-13,
+          "relative_rms": 2.7979945101641046e-11
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 1.0947522640227853e-11,
+          "relative_rms": 2.914017576263798e-13
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 2.3693234087268053e-12,
+          "relative_rms": 2.668438020483065e-11
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 1.4377476438016054e-14,
+          "relative_rms": 3.0584916563841997e-12
+        }
+      },
+      "combined_relative_rms": 1.587209914489616e-11
+    },
+    {
+      "divisor": 2,
+      "actual_time_ms": 395.1430689301873,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 24.860494016491476,
+          "relative_rms": 1.5622774380847662
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 96.52321421767319,
+          "relative_rms": 11.660891529548392
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 0.003548635304414157,
+          "relative_rms": 0.170568496980023
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 37.93393268081921,
+          "relative_rms": 1.0097274991012413
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 0.4527999085134152,
+          "relative_rms": 5.099635140977792
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 0.05485560203211711,
+          "relative_rms": 11.66932193173628
+        }
+      },
+      "combined_relative_rms": 7.090428973971913
+    },
+    {
+      "divisor": 3,
+      "actual_time_ms": 263.4287126201249,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 69.31125473220457,
+          "relative_rms": 4.355641903239663
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 107.55681723295464,
+          "relative_rms": 12.993852195892815
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 0.0007279596493977151,
+          "relative_rms": 0.034990065929125236
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 60.99009574160466,
+          "relative_rms": 1.6234377110669194
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 0.08858230112199031,
+          "relative_rms": 0.9976535047312065
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 0.030375668977336474,
+          "relative_rms": 6.461754990508735
+        }
+      },
+      "combined_relative_rms": 6.234289262581858
+    },
+    {
+      "divisor": 4,
+      "actual_time_ms": 197.57153446509366,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 6.9335145628700285,
+          "relative_rms": 0.4357143249453705
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 11.356647563223015,
+          "relative_rms": 1.371987417196953
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 0.0017049980756771558,
+          "relative_rms": 0.08195233777907059
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 3.319976927349503,
+          "relative_rms": 0.08837132780650157
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 0.19727463639760462,
+          "relative_rms": 2.2217952108244194
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 0.004700076904508977,
+          "relative_rms": 0.9998379102743575
+        }
+      },
+      "combined_relative_rms": 1.1563427929481829
+    },
+    {
+      "divisor": 6,
+      "actual_time_ms": 131.71435631006244,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 97.27071767381814,
+          "relative_rms": 6.112664032633958
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 210.3210494916314,
+          "relative_rms": 25.408716072922072
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 0.0031447248764348824,
+          "relative_rms": 0.15115416197375037
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 68.20980942893728,
+          "relative_rms": 1.8156124456792213
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 0.4725835800329499,
+          "relative_rms": 5.3224477003482455
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 0.10127325559980568,
+          "relative_rms": 21.543656051340506
+        }
+      },
+      "combined_relative_rms": 14.016326050747722
+    },
+    {
+      "divisor": 9,
+      "actual_time_ms": 87.80957087337497,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 15.912982809870543,
+          "difference_rms": 323.8491268686616,
+          "relative_rms": 20.351252228324135
+        },
+        "GABA": {
+          "reference_rms": 8.277515829135869,
+          "difference_rms": 453.5832741758229,
+          "relative_rms": 54.79702890802865
+        },
+        "M": {
+          "reference_rms": 0.02080475215086039,
+          "difference_rms": 0.003883609509095749,
+          "relative_rms": 0.18666934750939299
+        },
+        "covariance": {
+          "reference_rms": 37.568485274080594,
+          "difference_rms": 284.1852789098331,
+          "relative_rms": 7.564459329050973
+        },
+        "input_memory": {
+          "reference_rms": 0.08879064795733531,
+          "difference_rms": 0.5411166321694543,
+          "relative_rms": 6.0942975934747725
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.004700838862190439,
+          "difference_rms": 0.1756094505189715,
+          "relative_rms": 37.35704534172081
+        }
+      },
+      "combined_relative_rms": 28.597298924361077
+    }
+  ],
+  "shooting_joint_errors": [
+    {
+      "node": 1,
+      "time_ms": 131.70000000000002,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 100.42954355677318,
+          "difference_rms": 1.8049999912245064e-12,
+          "relative_rms": 1.7972798912544427e-14
+        },
+        "GABA": {
+          "reference_rms": 210.6082210425463,
+          "difference_rms": 2.7298438249503766e-12,
+          "relative_rms": 1.29617154137535e-14
+        },
+        "M": {
+          "reference_rms": 0.023849768438672658,
+          "difference_rms": 9.526186993394374e-17,
+          "relative_rms": 3.9942471634012e-15
+        },
+        "covariance": {
+          "reference_rms": 80.28878890485088,
+          "difference_rms": 1.2926100447667089e-12,
+          "relative_rms": 1.609950856648944e-14
+        },
+        "input_memory": {
+          "reference_rms": 0.4512396175121178,
+          "difference_rms": 1.502883784957697e-14,
+          "relative_rms": 3.330567012807421e-14
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.10123085575858615,
+          "difference_rms": 7.812199547508625e-15,
+          "relative_rms": 7.717211801645778e-14
+        }
+      },
+      "combined_relative_rms": 3.612704253863229e-14
+    },
+    {
+      "node": 2,
+      "time_ms": 263.40000000000003,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 74.00005018797285,
+          "difference_rms": 3.483124190245094e-12,
+          "relative_rms": 4.706921389103602e-14
+        },
+        "GABA": {
+          "reference_rms": 107.29647871187338,
+          "difference_rms": 5.255423007265911e-12,
+          "relative_rms": 4.898038659198187e-14
+        },
+        "M": {
+          "reference_rms": 0.02098157334080104,
+          "difference_rms": 8.296270045050082e-17,
+          "relative_rms": 3.9540743252638006e-15
+        },
+        "covariance": {
+          "reference_rms": 74.84460750989456,
+          "difference_rms": 3.545179515062328e-12,
+          "relative_rms": 4.73672002968771e-14
+        },
+        "input_memory": {
+          "reference_rms": 0.1298882520613788,
+          "difference_rms": 3.6187789500045606e-15,
+          "relative_rms": 2.7860710207221077e-14
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.03049318402132219,
+          "difference_rms": 1.4536714129597554e-15,
+          "relative_rms": 4.7672011290893195e-14
+        }
+      },
+      "combined_relative_rms": 4.066676646543236e-14
+    },
+    {
+      "node": 3,
+      "time_ms": 395.1,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 29.926950413755392,
+          "difference_rms": 9.151463249130163e-12,
+          "relative_rms": 3.057933776280745e-13
+        },
+        "GABA": {
+          "reference_rms": 96.82257236545759,
+          "difference_rms": 2.0033820777348495e-11,
+          "relative_rms": 2.0691270938072864e-13
+        },
+        "M": {
+          "reference_rms": 0.024082903397161095,
+          "difference_rms": 1.9071569060768505e-16,
+          "relative_rms": 7.919131985978349e-15
+        },
+        "covariance": {
+          "reference_rms": 54.80528799434806,
+          "difference_rms": 1.4528388747494287e-11,
+          "relative_rms": 2.650910026965384e-13
+        },
+        "input_memory": {
+          "reference_rms": 0.4309469399537595,
+          "difference_rms": 2.5905952905291628e-14,
+          "relative_rms": 6.011401985606704e-14
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.05476717088765251,
+          "difference_rms": 1.6339678400530387e-14,
+          "relative_rms": 2.9834804565766304e-13
+        }
+      },
+      "combined_relative_rms": 2.2333967523241743e-13
+    },
+    {
+      "node": 4,
+      "time_ms": 526.8000000000001,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 17.576199202821183,
+          "difference_rms": 9.926053911607164e-14,
+          "relative_rms": 5.647440494423799e-15
+        },
+        "GABA": {
+          "reference_rms": 13.193686013921422,
+          "difference_rms": 1.0305800888526809e-13,
+          "relative_rms": 7.811161246108602e-15
+        },
+        "M": {
+          "reference_rms": 0.021125608855650103,
+          "difference_rms": 1.6759457080314562e-16,
+          "relative_rms": 7.933242158761355e-15
+        },
+        "covariance": {
+          "reference_rms": 37.93960428797062,
+          "difference_rms": 4.061372450010466e-14,
+          "relative_rms": 1.070483608417126e-15
+        },
+        "input_memory": {
+          "reference_rms": 0.10123760915240619,
+          "difference_rms": 4.675281522095981e-15,
+          "relative_rms": 4.618127157722254e-14
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0064276164310095325,
+          "difference_rms": 1.179646057649057e-16,
+          "relative_rms": 1.8352776185553742e-14
+        }
+      },
+      "combined_relative_rms": 2.092257285271267e-14
+    },
+    {
+      "node": 5,
+      "time_ms": 658.5000000000001,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.775346775516708,
+          "difference_rms": 2.93550021993305e-15,
+          "relative_rms": 2.297785157236424e-16
+        },
+        "GABA": {
+          "reference_rms": 49.07205066189142,
+          "difference_rms": 1.1680162824017898e-12,
+          "relative_rms": 2.3802067911314187e-14
+        },
+        "M": {
+          "reference_rms": 0.023723106823954173,
+          "difference_rms": 1.6453992941389456e-16,
+          "relative_rms": 6.93585079875592e-15
+        },
+        "covariance": {
+          "reference_rms": 36.764077194569694,
+          "difference_rms": 1.5842140890488434e-14,
+          "relative_rms": 4.309136009764561e-16
+        },
+        "input_memory": {
+          "reference_rms": 0.37488727495574514,
+          "difference_rms": 3.570876959086344e-15,
+          "relative_rms": 9.52520183435909e-15
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.006126436762502821,
+          "difference_rms": 2.0338882292354714e-15,
+          "relative_rms": 3.3198550937210216e-13
+        }
+      },
+      "combined_relative_rms": 1.3596567633713948e-13
+    }
+  ],
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_hz": 34.080387663559804,
+      "complete_1ms_bins_mean_hz": 34.091555201568625,
+      "min_10ms_hz": 0.012431893754675587,
+      "max_10ms_hz": 178.12646647750222,
+      "quiet_intervals_relative_ms": [
+        [
+          127,
+          257
+        ],
+        [
+          377,
+          527
+        ],
+        [
+          621,
+          790
+        ]
+      ]
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 113.92929176057488,
+      "complete_1ms_bins_mean_hz": 113.9350495282598,
+      "min_10ms_hz": 1.797419864517942e-05,
+      "max_10ms_hz": 474.8880271132425,
+      "quiet_intervals_relative_ms": [
+        [
+          89,
+          255
+        ],
+        [
+          347,
+          515
+        ],
+        [
+          614,
+          780
+        ]
+      ]
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 88.06697412013197,
+      "complete_1ms_bins_mean_hz": 88.09596154846433,
+      "min_10ms_hz": 2.2007055394022185e-05,
+      "max_10ms_hz": 474.6875300811794,
+      "quiet_intervals_relative_ms": [
+        [
+          92,
+          246
+        ],
+        [
+          380,
+          537
+        ],
+        [
+          619,
+          789
+        ]
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 30.7107379378863,
+      "complete_1ms_bins_mean_hz": 30.72157955774114,
+      "min_10ms_hz": 0.013058289875569595,
+      "max_10ms_hz": 165.03507082818913,
+      "quiet_intervals_relative_ms": [
+        [
+          128,
+          259
+        ],
+        [
+          376,
+          529
+        ],
+        [
+          621,
+          790
+        ]
+      ]
+    }
+  ],
+  "shared_prefix": true,
+  "shared_prefix_independent_parity": [
+    {
+      "time_ms": 790.2861378603747,
+      "state_relative_error": 0.0,
+      "slope_relative_error": 0.0
+    },
+    {
+      "time_ms": 197.57153446509366,
+      "state_relative_error": 0.0,
+      "slope_relative_error": 0.0
+    }
+  ],
+  "definitions": "One original uninterrupted full-network flow from accepted node0. All Z held and all E M dynamic. Exact T/divisor closure uses original cubic dense output, without rounding to milliseconds. Passive rate bins are1ms relative to the arbitrary starting clock, followed by10ms smoothing. Means integrate original per-step flux across exactT, including fractional last-step weight. Step quadrature error still needs mesh refinement. Edge quiet intervals can be censored.",
+  "scope": "A saved solver iterate can be approximate. Whole-flow residual, even if small, still requires independent phase/mesh, fundamental period, Floquet and onset correspondence. A subperiod mismatch does not certify the full period.",
+  "model_promoted": false
+}

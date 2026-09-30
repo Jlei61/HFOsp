@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_resonance_upper_N512.npz",
+  "N": 512,
+  "spatial_groups": 935,
+  "operator_relative_errors": [
+    1.0747564435741861e-16,
+    9.299272383598765e-17,
+    1.053644756461025e-16,
+    9.066438795156168e-17,
+    9.909855649146226e-17,
+    6.888806434730848e-17,
+    1.0413105163846147e-16,
+    7.45268616623564e-17,
+    1.0350958386056475e-16,
+    1.5154341569120275e-16,
+    7.390743092480917e-17,
+    6.244381978620901e-17,
+    7.85432345655961e-17
+  ],
+  "monodromy_relative_errors": {
+    "phase": 2.97044203280788e-17,
+    "gains": 6.481433768149135e-12,
+    "flow": 5.319268611751152e-13
+  },
+  "original_index_bytes": 214862296,
+  "bounded_index_bytes": 53506576,
+  "scope": "Compare all four delay operators and their period/J derivatives with full cached banks, then compare phase, every temporal gain and a full-history monodromy action. All harmonics, spatial groups, delays, equations, central differences and integration steps are unchanged; only repeated CSR index storage is bounded."
+}

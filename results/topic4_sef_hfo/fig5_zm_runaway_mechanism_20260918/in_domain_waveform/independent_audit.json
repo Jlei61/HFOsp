@@ -1,0 +1,94 @@
+{
+  "status": "COUNT_LEVEL_AUDIT_PASS",
+  "maximum_readout_difference": 2.1158422236489116e-14,
+  "cases": 12,
+  "observations": [
+    {
+      "source_label": "Core A E",
+      "condition": 0.1,
+      "MC_rate_min_hz": 26.144866206219806,
+      "MC_rate_max_hz": 30.88793708282767,
+      "mean_hz": 27.329962170554914
+    },
+    {
+      "source_label": "Core A E",
+      "condition": 0.5,
+      "MC_rate_min_hz": 24.124404131355927,
+      "MC_rate_max_hz": 43.97782517403147,
+      "mean_hz": 27.316294395887315
+    },
+    {
+      "source_label": "Core A E",
+      "condition": 0.9,
+      "MC_rate_min_hz": 22.31042361953883,
+      "MC_rate_max_hz": 56.70210351089588,
+      "mean_hz": 27.252457576705027
+    },
+    {
+      "source_label": "Core B E",
+      "condition": 0.1,
+      "MC_rate_min_hz": 25.68489111564009,
+      "MC_rate_max_hz": 30.72987432065217,
+      "mean_hz": 27.32661448925964
+    },
+    {
+      "source_label": "Core B E",
+      "condition": 0.5,
+      "MC_rate_min_hz": 20.560296837258452,
+      "MC_rate_max_hz": 43.31125796419902,
+      "mean_hz": 27.35189525490326
+    },
+    {
+      "source_label": "Core B E",
+      "condition": 0.9,
+      "MC_rate_min_hz": 15.60377038043478,
+      "MC_rate_max_hz": 56.97009632888349,
+      "mean_hz": 27.394837925311595
+    },
+    {
+      "source_label": "Surround E",
+      "condition": 0.1,
+      "MC_rate_min_hz": 25.75594922820823,
+      "MC_rate_max_hz": 30.642018734830096,
+      "mean_hz": 27.329569683782367
+    },
+    {
+      "source_label": "Surround E",
+      "condition": 0.5,
+      "MC_rate_min_hz": 22.820941472457626,
+      "MC_rate_max_hz": 43.42636624396135,
+      "mean_hz": 27.31273892747716
+    },
+    {
+      "source_label": "Surround E",
+      "condition": 0.9,
+      "MC_rate_min_hz": 19.049471284806295,
+      "MC_rate_max_hz": 56.5680904664855,
+      "mean_hz": 27.265802126971707
+    },
+    {
+      "source_label": "I",
+      "condition": 0.1,
+      "MC_rate_min_hz": 46.345338983050844,
+      "MC_rate_max_hz": 55.8574879227053,
+      "mean_hz": 48.55209136161179
+    },
+    {
+      "source_label": "I",
+      "condition": 0.5,
+      "MC_rate_min_hz": 38.26741733504842,
+      "MC_rate_max_hz": 84.81812708586165,
+      "mean_hz": 48.609810004633744
+    },
+    {
+      "source_label": "I",
+      "condition": 0.9,
+      "MC_rate_min_hz": 31.33039497578692,
+      "MC_rate_max_hz": 112.59504892293688,
+      "mean_hz": 48.72834100994364
+    }
+  ],
+  "predictions_locked_before_observations": true,
+  "exact_counterfactual_input_identity": true,
+  "scope": "Validates assay inputs, clock, raw-count readouts and unchanged local gates. No model, SNN or bifurcation promotion."
+}

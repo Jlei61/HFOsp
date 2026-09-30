@@ -1,0 +1,20 @@
+{
+  "training": "Six earlier prescribed-current pulse/multisine responses; former held-out waveform is now development data",
+  "validation": "New chirp/ramp waveform and second spatial-network input; not used here",
+  "extra_state": "One effective-input memory variable per rate group, du_f/dt=(u-u_f)/tau_f",
+  "free_parameters": "E/I active damping, low-rate damping and input memory time; six globally shared parameters",
+  "bounds": {
+    "damping": [
+      0.05,
+      20.0
+    ],
+    "memory_ms": [
+      0.02,
+      20.0
+    ]
+  },
+  "starts": 2,
+  "max_evaluations": 90,
+  "native_biology": "Unchanged; only the local dynamic transfer is identified",
+  "selection": "Retain additional memory only if it improves independent local response and autonomous network behavior"
+}

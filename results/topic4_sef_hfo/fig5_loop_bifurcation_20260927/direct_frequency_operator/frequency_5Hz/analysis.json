@@ -1,0 +1,66 @@
+{
+  "status": "SAMPLED_LOOP_MODES_ONLY",
+  "frequency_Hz": 5.0,
+  "eigenvalues": [
+    {
+      "real": 0.938274701154177,
+      "imag": -0.21563757206581097,
+      "distance_to_one": 0.22429796032073937,
+      "eigen_residual": 2.554741506296757e-15,
+      "block_action_SEM_norm": 0.010502458775956488
+    },
+    {
+      "real": 0.9172065272783216,
+      "imag": -0.20671736334754398,
+      "distance_to_one": 0.22268099926728327,
+      "eigen_residual": 2.674905323313995e-15,
+      "block_action_SEM_norm": 0.009977948828068892
+    },
+    {
+      "real": 0.8568508840405078,
+      "imag": -0.18666748163712785,
+      "distance_to_one": 0.23523694034043974,
+      "eigen_residual": 3.188427595639435e-15,
+      "block_action_SEM_norm": 0.010536130743584964
+    },
+    {
+      "real": 0.8104877627018224,
+      "imag": -0.17876296704813646,
+      "distance_to_one": 0.2605207985432524,
+      "eigen_residual": 2.740654673023321e-15,
+      "block_action_SEM_norm": 0.008729175406069961
+    },
+    {
+      "real": 0.7943750108859782,
+      "imag": -0.17036398453143517,
+      "distance_to_one": 0.2670309408543674,
+      "eigen_residual": 3.3329821273333093e-15,
+      "block_action_SEM_norm": 0.009069116549242345
+    },
+    {
+      "real": 0.693282020789969,
+      "imag": -0.13529996186143056,
+      "distance_to_one": 0.3352342441493553,
+      "eigen_residual": 3.835159621454038e-13,
+      "block_action_SEM_norm": 0.008223979396160751
+    },
+    {
+      "real": 0.6536987067488638,
+      "imag": -0.12768974196900748,
+      "distance_to_one": 0.36909247609714446,
+      "eigen_residual": 2.489419659193349e-10,
+      "block_action_SEM_norm": 0.007893150670551283
+    },
+    {
+      "real": 0.6485085017391223,
+      "imag": -0.15281291940696978,
+      "distance_to_one": 0.3832728293100851,
+      "eigen_residual": 1.707894891047426e-09,
+      "block_action_SEM_norm": 0.010606508339671474
+    }
+  ],
+  "minimum_absolute_local_M_denominator": 0.9999997886761631,
+  "interpretation": "These are eigenvalues of the frequency-domain loop operator at a fixed imaginary frequency, not growth rates of the delayed dynamics. Two frequencies cannot establish or exclude a temporal instability.",
+  "dynamic_stability_established": false,
+  "formal_bifurcation_allowed": false
+}

@@ -1,0 +1,81 @@
+{
+  "time": "2026-09-25T08:37:47.368900+08:00",
+  "previous_checkpoint": "classification_checkpoint_20260925_0817.json",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "numerical_method": "exponential_midpoint_v1",
+  "all_Z_held": true,
+  "all_E_M_dynamic": true,
+  "outside_A_Z": "native9s_unchanged",
+  "matching_variational_checks": "PASS_UNCACHED_CACHED_AND_OFFGRID_IMPLICIT_SECTION_ON_TWO_MESHES",
+  "original_grid_knot_check": "Superseded as derivativevalidation because centered perturbations straddled two cubicpolynomials; preserved separately, no physical significance.",
+  "matched_same_history_new_flow": [
+    {
+      "label": "restored_A_fine",
+      "Z_A": 1.0,
+      "max_complete_A_ms": 71,
+      "tail": {
+        "start_ms": 4800,
+        "end_ms": 4845,
+        "duration_ms": 45,
+        "left_censored": false,
+        "right_censored": false
+      },
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine"
+    },
+    {
+      "label": "native8000_fine",
+      "Z_A": 0.7524298884449775,
+      "max_complete_A_ms": 1442,
+      "tail": {
+        "start_ms": 4736,
+        "end_ms": 4824,
+        "duration_ms": 88,
+        "left_censored": false,
+        "right_censored": false
+      },
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native8000_fine"
+    },
+    {
+      "label": "native9000_fine",
+      "Z_A": 0.7442783003859392,
+      "max_complete_A_ms": 1708,
+      "tail": {
+        "start_ms": 4834,
+        "end_ms": 4930,
+        "duration_ms": 96,
+        "left_censored": false,
+        "right_censored": false
+      },
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native9000_fine"
+    },
+    {
+      "label": "native9420_fine",
+      "Z_A": 0.7248786168531299,
+      "max_complete_A_ms": 2037,
+      "tail": {
+        "start_ms": 4980,
+        "end_ms": 5000,
+        "duration_ms": 20,
+        "left_censored": false,
+        "right_censored": true
+      },
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native9420_fine"
+    }
+  ],
+  "interpretation": "Fully restoringonlyA Z gives repeatedshortAactivities<=71ms; native8s/9s/9.42sAfields producecomplete longactivities. This supports A-resource sensitivity but the5s records are not attractors or a bifurcation type. Criticalinterval must be relocated using the converged numericalmethod.",
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/restored_A_fine/one_burst_root",
+      "purpose": "Correct the observed232.425ms fullstate oneburst seed; not yet aroot.",
+      "numerical_method": "exponential_midpoint_v1",
+      "dt_ms": 0.025
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine",
+      "purpose": "Matchedhistory5s finiteflow at midpoint nativefieldpath4000ms, ZA.8365893776571304.",
+      "dt_ms": 0.025
+    }
+  ],
+  "new_solver_promoted": false,
+  "model_promoted": false
+}

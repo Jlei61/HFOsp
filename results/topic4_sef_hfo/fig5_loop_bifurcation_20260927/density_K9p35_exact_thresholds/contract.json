@@ -1,0 +1,34 @@
+{
+  "status": "REGISTERED_BEFORE_EXACT_THRESHOLD_REPAIR",
+  "created_epoch": 1790551911.3222883,
+  "question": "How much of the two-history correspondence error and incorrect Gactivation segment follows from replacing original targetthresholds with groupmeans?",
+  "design": "Exactly two10s40000targetx128replica density runs, same12s/42s nativehistories, heldZ/Kfields,50-60s expectedexternalinput andGaussianseed928751 as their completed controls. Only targetthresholds restored from native substrate. Synapticweights, sourcegroupmean/whitevariance closure, membrane kernels, M/G dynamics unchanged.",
+  "rationale": "Local current replay exposed corethreshold mismatch:1193targets differ, max.455mV. Exactthreshold replay matches every selected spike/V; the30selected edge cells already have exact18mVthresholds. This repair cannot by itself claim to solve source-mean or temporalvariance mismatch.",
+  "stop": "Two10s runs and paired comparisons, no automatic horizon extension,newKpoint or stability promotion.",
+  "threshold_source": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/historical_manual_hard_native_z_v1/substrate.npz",
+    "file_sha256": "4c77176cfe8a129903a312ed897b3e2dddfb0931f64c0e71ed7429b172918ee5",
+    "native_vtheta_float32_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b"
+  },
+  "jobs": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "native_root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_exit_K_bracket",
+      "baseline_density_root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_exit_bracket_protocol",
+      "job_sha256": "3a73b58a538a08f51ee2ae0988eafb563b31915083d6b44ccd4cc5581f96e6ce"
+    },
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "native_root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history",
+      "baseline_density_root": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_K9p35_held_history",
+      "job_sha256": "efb94b16f8de892c2253f13464b555282db369b78a147370e5dd9b39e40ea4eb"
+    }
+  ],
+  "producer_sha256": "b86fc090c24a85c38abd08944393cd275c0b24c998a0a0407aaf7f34cd3db31e",
+  "base_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "family_sha256": "eb6dc66d9b5e4a23d458561799aa8ea102e085539b8105d973e06580573fb476",
+  "physical_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "wrapper_sha256": "7a218a550fff1793269590c63adfbc078262bd36917a868a087d570cca4605f1",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

@@ -1,0 +1,36 @@
+{
+  "timestamp": 1789878030.4775324,
+  "old_pid": 520330,
+  "old_cmd": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_positive_stability.py --device 0 --require-dimension --min-free-gib 4 --indices 42 44 45 --worker-label Aleading_before_LPC6_stability_worker --after-pids 488306 520184 ",
+  "old_worker": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 520330,
+    "device": 0,
+    "requested_indices": [
+      42,
+      44,
+      45
+    ],
+    "completed": [],
+    "timestamp": 1789878006.9010777,
+    "dependencies": [
+      488306
+    ]
+  },
+  "old_state": "S",
+  "old_wchan": "hrtimer_nanosleep",
+  "free_mib_before": [
+    2068.0,
+    8511.0
+  ],
+  "new_device": 1,
+  "min_free_gib": 5,
+  "retained_indices": [
+    42,
+    44,
+    45
+  ],
+  "reason": "All three required physical profiles now pass. Independent per-site spectrum outputs do not depend on sites 19/24/25/27/28/40/41; the former dependency only serialized GPU0 resources. Move the sleeping coordinator to free GPU1 capacity with a higher memory gate, retaining full unstable-dimension refinement.",
+  "scientific_requirements_unchanged": true,
+  "old_coordinator_terminated": true
+}

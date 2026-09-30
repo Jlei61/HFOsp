@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_validation.json",
+  "rows": [
+    {
+      "N": 64,
+      "gain_relative_difference": 3.075953756739688e-11,
+      "trials": [
+        {
+          "raw_relative_difference": 4.344889267272769e-12,
+          "same_gain_relative_difference": 8.781687895737267e-17
+        },
+        {
+          "raw_relative_difference": 3.2561666769656937e-12,
+          "same_gain_relative_difference": 8.041997554973058e-17
+        },
+        {
+          "raw_relative_difference": 3.5620514716097556e-12,
+          "same_gain_relative_difference": 7.967326725895571e-17
+        }
+      ]
+    },
+    {
+      "N": 128,
+      "gain_relative_difference": 2.9804974228291295e-11,
+      "trials": [
+        {
+          "raw_relative_difference": 1.9996604888936086e-12,
+          "same_gain_relative_difference": 6.261354285253708e-17
+        },
+        {
+          "raw_relative_difference": 1.7607148493337838e-12,
+          "same_gain_relative_difference": 6.434675528437651e-17
+        },
+        {
+          "raw_relative_difference": 2.0128556725965143e-12,
+          "same_gain_relative_difference": 6.291432965035928e-17
+        }
+      ]
+    }
+  ],
+  "scope": "Identical low-memory coupling action tested with shared gains; independent finite-difference gain construction introduces separately measured rounding, constrained below 1e-9. No equation or spatial mode is changed."
+}

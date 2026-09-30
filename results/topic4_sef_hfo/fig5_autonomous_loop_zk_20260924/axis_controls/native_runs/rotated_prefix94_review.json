@@ -1,0 +1,157 @@
+{
+  "condition": "rotated",
+  "name": "rotated_s9108405",
+  "observed_s": 94.0,
+  "run_status": "RUNNING_PARTIAL",
+  "full120s": false,
+  "entries": [
+    {
+      "onset_s": 89.64,
+      "confirmation_s": 89.84
+    }
+  ],
+  "exits": [
+    {
+      "start_s": 90.34,
+      "confirmation_s": 92.34,
+      "mechanism": "AUTONOMOUS",
+      "all_and_core_means_Hz": [
+        [
+          43.347281250000016,
+          47.29973474801061,
+          46.82061068702289,
+          43.15981615233093
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "quiet_fraction": [
+        [
+          0.82,
+          0.87,
+          0.87,
+          0.82
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "initial_short_events": {
+    "window_s": [
+      0.5,
+      8.0
+    ],
+    "finite_events": [],
+    "brief_events": [],
+    "finite_count": 0,
+    "brief_count": 0,
+    "event_span_s": 0.0,
+    "brief_fraction": 0.0,
+    "event_rate_Hz": 0.0
+  },
+  "initial_features": {
+    "duration_ms": null,
+    "interval_ms": null,
+    "peak_Hz": null,
+    "core_peak_Hz": null,
+    "active_cell_fraction": null
+  },
+  "initial_core_recruitment": null,
+  "initial_event_metrics": [],
+  "common_current_graph_Z_reference": [
+    0.7603118191859897,
+    0.7344912026970221
+  ],
+  "own_preentry_Z_reference": [
+    0.660637776862684,
+    0.5942425808134909
+  ],
+  "own_reference_time_s": 7.98,
+  "episodes": [
+    {
+      "exit": {
+        "start_s": 90.34,
+        "confirmation_s": 92.34,
+        "mechanism": "AUTONOMOUS",
+        "all_and_core_means_Hz": [
+          [
+            43.347281250000016,
+            47.29973474801061,
+            46.82061068702289,
+            43.15981615233093
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "quiet_fraction": [
+          [
+            0.82,
+            0.87,
+            0.87,
+            0.82
+          ],
+          [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        ]
+      },
+      "window_end_s": 94.0,
+      "peak_joint_core_Z": 0.793726634576885,
+      "first_recovered_current_graph_reference_s": 93.22,
+      "first_recovered_own_preentry_reference_s": 91.48,
+      "short_events_after_recovery": {
+        "window_s": [
+          93.22,
+          94.0
+        ],
+        "finite_events": [],
+        "brief_events": [],
+        "finite_count": 0,
+        "brief_count": 0,
+        "event_span_s": 0.0,
+        "brief_fraction": 0.0,
+        "event_rate_Hz": 0.0
+      },
+      "features": {
+        "duration_ms": null,
+        "interval_ms": null,
+        "peak_Hz": null,
+        "core_peak_Hz": null,
+        "active_cell_fraction": null
+      },
+      "ratios_to_own_initial": {
+        "duration_ms": null,
+        "interval_ms": null,
+        "peak_Hz": null
+      },
+      "temporal_return_screen": false,
+      "core_recruitment": null,
+      "event_metrics": [],
+      "next_entry_censored": true
+    }
+  ],
+  "temporal_returns": 0,
+  "paired_exogenous_records_exact": true,
+  "spike_field_integrity": "PASS",
+  "autonomous": true,
+  "externally_clamped": false,
+  "certified_bifurcation": false,
+  "scientific_unit": "One trajectory per fixed graph, common seed9108405; events nested within trajectory.",
+  "human_spatial_review": "PENDING"
+}

@@ -1,0 +1,42 @@
+{
+  "status": "EXACT_MEMBRANE_BALANCE_PASS",
+  "rows": [
+    {
+      "condition": "full",
+      "membrane_tau_ms": 20.000000000000473,
+      "max_step_balance_error_mv": 8.215650382226158e-14,
+      "max_full_reconstruction_error_mv": 7.123190925995004e-13,
+      "no_reset_or_clamp_RMSE_mv": 105.85230663820708,
+      "reset_history_RMS_mv": 19.022295886094074,
+      "clamp_history_RMS_mv": 87.14649801526987,
+      "peak_error_phase_ms": 44.40471124261871,
+      "at_rate_overprediction": {
+        "actual_V_mv": -2.0249119816271843,
+        "membrane_lowpass_only_mv": 157.58995227315248,
+        "reset_memory_mv": -30.105478544125994,
+        "refractory_clamp_memory_mv": -129.50938571065367
+      }
+    },
+    {
+      "condition": "mean_only",
+      "membrane_tau_ms": 20.000000000000473,
+      "max_step_balance_error_mv": 8.154588115871775e-14,
+      "max_full_reconstruction_error_mv": 9.166001291305292e-13,
+      "no_reset_or_clamp_RMSE_mv": 105.74756164260072,
+      "reset_history_RMS_mv": 19.09128515322344,
+      "clamp_history_RMS_mv": 87.00414305550909,
+      "peak_error_phase_ms": 46.47004664925214,
+      "at_rate_overprediction": {
+        "actual_V_mv": 5.468131604718524,
+        "membrane_lowpass_only_mv": 149.085345727725,
+        "reset_memory_mv": -27.13751257792659,
+        "refractory_clamp_memory_mv": -116.4797015450798
+      }
+    }
+  ],
+  "spike_counts_bitwise": true,
+  "max_voltage_error_mv": 9.166001291305292e-13,
+  "scope": "Diagnostic identity using measured impulses and currents. The exact reconstruction is not a predictive rate closure and does not identify onset criticality.",
+  "model_promoted": false,
+  "onset_type": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDreturnchild_a0.50000_N2048.npz",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_1_20260920_a0.50000_N4096.npz",
+  "physical": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_1_20260920_a0.50000_N4096.npz",
+    "N": 4096,
+    "check_N": 16384,
+    "J_EE_core": 1.0758067720929807,
+    "T_ms": 210.79958366057028,
+    "maximum_group_defect_Hz": 1.27675647831893e-12,
+    "regional_defect_Hz": [
+      1.2261147465000129e-13,
+      1.096122878814537e-13,
+      6.681177475745179e-15
+    ],
+    "minimum_rate_Hz": 2.304323966519437e-08,
+    "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+    "harmonic_chunk_size": 64,
+    "phase_chunk_size": 512,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -1.2770952914978317e-12,
+        "phase_index": 8115,
+        "group": 776
+      },
+      "slow": {
+        "minimum_Hz": 3.389718333928797e-08,
+        "phase_index": 12108,
+        "group": 518
+      },
+      "positive": true,
+      "N": 4096,
+      "check_N": 16384
+    }
+  },
+  "relative_waveform_refinement_change": 5.5190551932664155e-09,
+  "relative_period_change": 1.3322676295501878e-14,
+  "J_change_from_source": 1.5543122344752192e-15,
+  "amplitude_constraint_Hz": 0.4999999999996263,
+  "continuation_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD3_physical_amplitude_1_20260920_branch_N4096.json",
+  "scope": "Same doubled-period branch corrected with a nonzero amplitude border; J is corrected rather than fixed. Physical profiles only, no stability or criticality inherited."
+}

@@ -1,0 +1,16 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/from_interictal_history",
+  "coordinates": {
+    "native_midpoint": {
+      "D_A": 0.28764862467548047,
+      "Z_A": 0.7123513753245195,
+      "native_interpolation_time_ms": 9507.453342988189
+    }
+  },
+  "question": "Is expansion of the still-short-event state already robust before the seconds-long activity at Z_A=.700? The coarse pre-entry growth was positive, so numerical refinement is needed before separating loss of periodicity from long-event entry.",
+  "equations": "Unchanged full3479-group physical-delay spatial rate field. Same actual CoreA native9507.453342988ms Z field, outsideA native9s, everyZ held and allE M dynamic; original constant external mean and locked response.",
+  "controls": "Start from the exact same full10s checkpoint as the completed coarse growth run. Only dt is halved, with physical-lag-preserving history interpolation. Original full-state nominal/tangent and centered finite-difference checks required; no stochastic replicate claim.",
+  "readout": "Compare matched2--5s growth and local activities; retain all1s blocks and independently audit the complete rate record. Finite-time expansion does not certify asymptotic chaos, a crisis, or a bifurcation.",
+  "budget": "One5s fine control. No extension or new parameter sweep in this batch.",
+  "model_promoted": false
+}

@@ -1,0 +1,79 @@
+{
+  "stage": "RUNNING",
+  "supervisor_pid": 2640170,
+  "updated_epoch": 1790268677.7128146,
+  "completed": [
+    "z0.75_k2_high",
+    "z0.75_k2_interictal"
+  ],
+  "pending": [
+    "z0.75_k8_high",
+    "z0.75_k8_interictal",
+    "z0.95_k0.02_high",
+    "z0.95_k0.02_interictal",
+    "z0.95_k2_high",
+    "z0.95_k2_interictal",
+    "z0.95_k8_high",
+    "z0.95_k8_interictal"
+  ],
+  "active": {
+    "z0.25_k0.02_high": {
+      "pid": 2571961,
+      "time_s": 18.0,
+      "state": "RUNNING",
+      "backend": "serial_cpu_adopted"
+    },
+    "z0.25_k0.02_interictal": {
+      "pid": 2571962,
+      "time_s": 56.0,
+      "state": "RUNNING",
+      "backend": "serial_cpu_adopted"
+    },
+    "z0.25_k2_high": {
+      "pid": 2593827,
+      "time_s": 17.0,
+      "state": "RUNNING",
+      "backend": "serial_cpu_adopted"
+    },
+    "z0.25_k2_interictal": {
+      "pid": 2593962,
+      "time_s": 54.0,
+      "state": "RUNNING",
+      "backend": "serial_cpu_adopted"
+    },
+    "z0.25_k8_high": {
+      "pid": 2640174,
+      "time_s": 18.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    "z0.25_k8_interictal": {
+      "pid": 2640175,
+      "time_s": 56.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    "z0.75_k0.02_high": {
+      "pid": 2640176,
+      "time_s": 23.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    },
+    "z0.75_k0.02_interictal": {
+      "pid": 2640177,
+      "time_s": 58.0,
+      "state": "RUNNING",
+      "backend": "locality_cpu"
+    }
+  },
+  "failed": {},
+  "total": 18,
+  "available_memory_GiB": 101.49605178833008,
+  "backend": "Existing serial workers retained; new workers use validated ordered locality CPU,8threads",
+  "max_total_workers": 8,
+  "max_locality_workers": 4,
+  "CPU_busy_percent_at_dispatch": 31.7,
+  "memory_policy": "Reserve80GiB plus8GiB per not-yet-resident worker; at most4locality workers even after serial workers finish.",
+  "new_gpu_processes": 0,
+  "diagnostic_only": true
+}

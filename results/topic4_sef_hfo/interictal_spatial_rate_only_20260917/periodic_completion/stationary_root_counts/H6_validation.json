@@ -1,0 +1,391 @@
+{
+  "label": "H6",
+  "status": "VALIDATED_LOCAL_HOPF",
+  "criticality": "subcritical",
+  "J_EE_core": 1.02928611228195,
+  "frequency_hz": 7.552814827182412,
+  "eigenpair_validation": {
+    "label": "H6",
+    "status": "VALIDATED_IMAGINARY_PAIR_CROSSING",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stationary_root_counts/H6_highorder_half.npz",
+    "J_EE_core": 1.02928611228195,
+    "frequency_hz": 7.552814827182412,
+    "gain_step_halving_parameter_difference": 2.7977620220553945e-14,
+    "gain_step_halving_frequency_difference_hz": 1.0933476346508542e-11,
+    "full_rhs_checks": [
+      {
+        "epsilon": 0.02,
+        "relative_full_rhs_error": 1.4436158818163699e-05
+      },
+      {
+        "epsilon": 0.01,
+        "relative_full_rhs_error": 3.6090624679058698e-06
+      },
+      {
+        "epsilon": 0.005,
+        "relative_full_rhs_error": 9.022837618434317e-07
+      },
+      {
+        "epsilon": 0.0025,
+        "relative_full_rhs_error": 2.2558975316978701e-07
+      },
+      {
+        "epsilon": 0.00125,
+        "relative_full_rhs_error": 5.641507394190589e-08
+      },
+      {
+        "epsilon": 0.000625,
+        "relative_full_rhs_error": 1.4131394174839208e-08
+      }
+    ],
+    "full_DDE_mode_checks": [
+      {
+        "dt_ms": 0.0999252594431239,
+        "period_ms": 132.40096876213917,
+        "relative_full_DDE_mode_error": 0.29240180936867755
+      },
+      {
+        "dt_ms": 0.04998149066143419,
+        "period_ms": 132.40096876213917,
+        "relative_full_DDE_mode_error": 0.07163724651074871
+      },
+      {
+        "dt_ms": 0.024995463236197692,
+        "period_ms": 132.40096876213917,
+        "relative_full_DDE_mode_error": 0.017699212742558014
+      }
+    ],
+    "time_step_error_reductions": [
+      4.081700841542039,
+      4.047482085940236
+    ],
+    "quarter_period_mode_checks": [
+      {
+        "dt_ms": 0.09969952467028552,
+        "horizon_ms": 33.10024219053479,
+        "relative_full_DDE_mode_error": 1.3725943853957385e-05
+      },
+      {
+        "dt_ms": 0.04992495051362714,
+        "horizon_ms": 33.10024219053479,
+        "relative_full_DDE_mode_error": 3.410951037318403e-06
+      },
+      {
+        "dt_ms": 0.024981314860780975,
+        "horizon_ms": 33.10024219053479,
+        "relative_full_DDE_mode_error": 8.489826303779875e-07
+      }
+    ],
+    "equilibrium_rhs_residual": 1.9829319706715824e-16,
+    "transversality": {
+      "coordinate": "Core-B neuron-weighted E equilibrium rate, Hz",
+      "real_exponent_derivative_per_ms_per_Hz": 0.027647169752754462,
+      "J_derivative_per_Hz": 0.005405586752660341,
+      "real_exponent_derivative_per_ms_per_J": 5.1145548148215365,
+      "coordinate_step_Hz": 0.0001,
+      "real_exponents": [
+        -2.7634937241556626e-06,
+        2.7659402263952303e-06
+      ]
+    },
+    "criticality": "NOT_YET_VALIDATED",
+    "scope": "A complex eigenpair crosses on an already unstable equilibrium branch. This alone does not establish a stable emerging cycle or first resting instability."
+  },
+  "normal_form": {
+    "core": "H6",
+    "J_EE_core": 1.02928611228195,
+    "omega_per_ms": 0.04745573515000066,
+    "frequency_hz": 7.552814827182412,
+    "eigenvector_max_rate_hz": 1.0,
+    "cubic": [
+      0.024699211685201408,
+      -0.011088120326443858
+    ],
+    "lambda_J": [
+      5.114552662067226,
+      -1.7804621584692941
+    ],
+    "J_shift_per_amplitude_squared": -0.00482920273133298,
+    "omega_shift_per_amplitude_squared": -0.002489907607728931,
+    "criticality": "subcritical",
+    "first_derivative_relative_error": 3.0590243728533687e-12,
+    "cubic_taylor_checks": [
+      {
+        "epsilon": 0.04,
+        "relative_cubic_error": 7.94443384500206e-06
+      },
+      {
+        "epsilon": 0.02,
+        "relative_cubic_error": 2.107573612334202e-06
+      },
+      {
+        "epsilon": 0.01,
+        "relative_cubic_error": 4.854333918105146e-06
+      }
+    ],
+    "characteristic_residual": 7.143274787729222e-12,
+    "normalization": "max abs rate eigenvector 1 Hz; z is dimensionless; cubic per ms",
+    "parameter_step": 1e-07,
+    "stationary_continuation_rate_steps_Hz": [
+      8.18241805700115e-05,
+      8.182364053671565e-05
+    ],
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stationary_root_counts/H6_highorder_half.npz",
+    "interpretation": "Local Hopf center manifold. Criticality alone does not imply full-system stability when other transverse modes are already unstable."
+  },
+  "parameter_derivative_halving": {
+    "core": "H6_half",
+    "J_EE_core": 1.02928611228195,
+    "omega_per_ms": 0.04745573515000066,
+    "frequency_hz": 7.552814827182412,
+    "eigenvector_max_rate_hz": 1.0,
+    "cubic": [
+      0.024699211685201415,
+      -0.011088120326443856
+    ],
+    "lambda_J": [
+      5.114552453089783,
+      -1.780462791577691
+    ],
+    "J_shift_per_amplitude_squared": -0.004829202928651211,
+    "omega_shift_per_amplitude_squared": -0.002489904199002361,
+    "criticality": "subcritical",
+    "first_derivative_relative_error": 3.0590243728533687e-12,
+    "cubic_taylor_checks": [
+      {
+        "epsilon": 0.04,
+        "relative_cubic_error": 7.94443384500206e-06
+      },
+      {
+        "epsilon": 0.02,
+        "relative_cubic_error": 2.107573612334202e-06
+      },
+      {
+        "epsilon": 0.01,
+        "relative_cubic_error": 4.854333918105146e-06
+      }
+    ],
+    "characteristic_residual": 7.143274787729222e-12,
+    "normalization": "max abs rate eigenvector 1 Hz; z is dimensionless; cubic per ms",
+    "parameter_step": 5e-08,
+    "stationary_continuation_rate_steps_Hz": [
+      4.091202258221793e-05,
+      4.091188770399823e-05
+    ],
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stationary_root_counts/H6_highorder_half.npz",
+    "interpretation": "Local Hopf center manifold. Criticality alone does not imply full-system stability when other transverse modes are already unstable."
+  },
+  "child_cycles": [
+    {
+      "amplitude": 0.05,
+      "versions": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.05000_N32.npz",
+          "N": 32,
+          "J_EE_core": 1.0292740283328523,
+          "T_ms": 132.41835729344072,
+          "residual_hz": 8.326672684688674e-14,
+          "mean_rates_hz": [
+            1.8366363944318016,
+            7.565320297822487,
+            0.3197549337604131
+          ],
+          "min_rates_hz": [
+            1.830261073554482,
+            7.565139664558688,
+            0.31945573170252783
+          ],
+          "max_rates_hz": [
+            1.8430349678184594,
+            7.565501027974136,
+            0.3200605666133112
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.05000_N64.npz",
+          "N": 64,
+          "J_EE_core": 1.0292740283328523,
+          "T_ms": 132.41835729344072,
+          "residual_hz": 8.326672684688674e-14,
+          "mean_rates_hz": [
+            1.8366363944318014,
+            7.565320297822488,
+            0.3197549337604132
+          ],
+          "min_rates_hz": [
+            1.8302529117971944,
+            7.565139589047947,
+            0.3194554130465611
+          ],
+          "max_rates_hz": [
+            1.8430438568789185,
+            7.565501498471104,
+            0.3200605666133112
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        }
+      ],
+      "continuous_defect": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.05000_N64.npz",
+        "N": 64,
+        "check_N": 256,
+        "J_EE_core": 1.0292740283328523,
+        "T_ms": 132.41835729344072,
+        "maximum_group_defect_Hz": 9.020562075079397e-14,
+        "regional_defect_Hz": [
+          7.675241887995651e-16,
+          5.452758433198656e-15,
+          8.420706891302173e-17
+        ],
+        "minimum_rate_Hz": 0.00020411318830840719
+      },
+      "relative_normal_form_J_shift_error": 0.0009063416942902691
+    },
+    {
+      "amplitude": 0.1,
+      "versions": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.10000_N32.npz",
+          "N": 32,
+          "J_EE_core": 1.029237644483372,
+          "T_ms": 132.47078240545676,
+          "residual_hz": 9.367506770274758e-14,
+          "mean_rates_hz": [
+            1.8364450712895628,
+            7.558707470715791,
+            0.31947934651270604
+          ],
+          "min_rates_hz": [
+            1.8236860962296808,
+            7.5583446130015055,
+            0.3188859842688629
+          ],
+          "max_rates_hz": [
+            1.8492970917805143,
+            7.559070730657312,
+            0.32009848511341155
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.10000_N64.npz",
+          "N": 64,
+          "J_EE_core": 1.029237644483372,
+          "T_ms": 132.47078240545676,
+          "residual_hz": 9.020562075079397e-14,
+          "mean_rates_hz": [
+            1.8364450712895632,
+            7.55870747071579,
+            0.31947934651270604
+          ],
+          "min_rates_hz": [
+            1.8236704361544556,
+            7.5583446130015055,
+            0.3188850234037017
+          ],
+          "max_rates_hz": [
+            1.8493155622099042,
+            7.559071808025176,
+            0.32009848511341155
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        }
+      ],
+      "continuous_defect": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.10000_N64.npz",
+        "N": 64,
+        "check_N": 256,
+        "J_EE_core": 1.029237644483372,
+        "T_ms": 132.47078240545676,
+        "maximum_group_defect_Hz": 9.020562075079397e-14,
+        "regional_defect_Hz": [
+          1.3386724388494326e-14,
+          5.945874935958656e-15,
+          8.471815899266861e-16
+        ],
+        "minimum_rate_Hz": 0.00020549247641733233
+      },
+      "relative_normal_form_J_shift_error": 0.003639757421536549
+    },
+    {
+      "amplitude": 0.2,
+      "versions": [
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.20000_N32.npz",
+          "N": 32,
+          "J_EE_core": 1.029090086959873,
+          "T_ms": 132.68445986351716,
+          "residual_hz": 1.0408340855860843e-13,
+          "mean_rates_hz": [
+            1.8356557462345304,
+            7.531975446106753,
+            0.31836774627556114
+          ],
+          "min_rates_hz": [
+            1.8099742150024658,
+            7.5312365221231605,
+            0.31719601324403474
+          ],
+          "max_rates_hz": [
+            1.861710055318709,
+            7.532716227004386,
+            0.3196434576120032
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        },
+        {
+          "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.20000_N64.npz",
+          "N": 64,
+          "J_EE_core": 1.029090086959873,
+          "T_ms": 132.68445986351716,
+          "residual_hz": 1.1102230246251565e-13,
+          "mean_rates_hz": [
+            1.83565574623453,
+            7.531975446106756,
+            0.31836774627556114
+          ],
+          "min_rates_hz": [
+            1.8099447576289602,
+            7.531236522123161,
+            0.3171929442596324
+          ],
+          "max_rates_hz": [
+            1.861749137765348,
+            7.532717714731948,
+            0.3196434576120032
+          ],
+          "status": "CONVERGED",
+          "method": "Full-space Fourier periodic boundary-value solve"
+        }
+      ],
+      "continuous_defect": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/H6_a0.20000_N64.npz",
+        "N": 64,
+        "check_N": 256,
+        "J_EE_core": 1.029090086959873,
+        "T_ms": 132.68445986351716,
+        "maximum_group_defect_Hz": 1.3877787807814457e-13,
+        "regional_defect_Hz": [
+          3.507929658374228e-16,
+          1.001138306796535e-14,
+          2.3144290640400235e-16
+        ],
+        "minimum_rate_Hz": 0.00021124939479391698
+      },
+      "relative_normal_form_J_shift_error": 0.014791327796870757
+    }
+  ],
+  "cubic_asymptotic_relative_error_growth_factors": [
+    4.015877725217907,
+    4.063822415568149
+  ],
+  "parent_already_unstable": true,
+  "full_child_Floquet_spectrum": "NOT_COMPUTED",
+  "scope": "Local center-manifold criticality and nonlinear cycle birth validated. Existing transverse unstable equilibrium modes prevent an inference of stable cycle birth; the new cycles do not identify a resting-to-burst boundary."
+}

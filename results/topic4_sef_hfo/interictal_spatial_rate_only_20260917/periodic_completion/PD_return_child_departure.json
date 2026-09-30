@@ -1,0 +1,124 @@
+{
+  "status": "PHYSICAL_DOUBLED_BRANCH_CHECKED",
+  "rows": [
+    {
+      "N": 4096,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_0_20260920_a0.20000_N4096.npz",
+      "J_EE_core": 1.075806772578604,
+      "J_shift": -9.241762910505713e-11,
+      "odd_rate_RMS_Hz": 0.006399197828276025,
+      "physical": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_0_20260920_a0.20000_N4096.npz",
+        "N": 4096,
+        "check_N": 16384,
+        "J_EE_core": 1.075806772578604,
+        "T_ms": 210.79958756573916,
+        "maximum_group_defect_Hz": 9.992007221626409e-13,
+        "regional_defect_Hz": [
+          1.0930023280499755e-13,
+          9.942189097375152e-14,
+          1.1959559146514906e-14
+        ],
+        "minimum_rate_Hz": 2.3078649979052116e-08,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.3329812548082496e-12,
+            "phase_index": 8119,
+            "group": 796
+          },
+          "slow": {
+            "minimum_Hz": 3.394956278985474e-08,
+            "phase_index": 12109,
+            "group": 518
+          },
+          "positive": true,
+          "N": 4096,
+          "check_N": 16384
+        }
+      }
+    },
+    {
+      "N": 4096,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_1_20260920_a0.50000_N4096.npz",
+      "J_EE_core": 1.0758067720929807,
+      "J_shift": -5.780409484401616e-10,
+      "odd_rate_RMS_Hz": 0.015997994599488807,
+      "physical": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_1_20260920_a0.50000_N4096.npz",
+        "N": 4096,
+        "check_N": 16384,
+        "J_EE_core": 1.0758067720929807,
+        "T_ms": 210.79958366057028,
+        "maximum_group_defect_Hz": 1.27675647831893e-12,
+        "regional_defect_Hz": [
+          1.2261147465000129e-13,
+          1.096122878814537e-13,
+          6.681177475745179e-15
+        ],
+        "minimum_rate_Hz": 2.304323966519437e-08,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.2770952914978317e-12,
+            "phase_index": 8115,
+            "group": 776
+          },
+          "slow": {
+            "minimum_Hz": 3.389718333928797e-08,
+            "phase_index": 12108,
+            "group": 518
+          },
+          "positive": true,
+          "N": 4096,
+          "check_N": 16384
+        }
+      }
+    },
+    {
+      "N": 4096,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_2_20260920_a1.00000_N4096.npz",
+      "J_EE_core": 1.0758067703586256,
+      "J_shift": -2.312396052417398e-09,
+      "odd_rate_RMS_Hz": 0.03199598942095918,
+      "physical": {
+        "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD3_physical_amplitude_2_20260920_a1.00000_N4096.npz",
+        "N": 4096,
+        "check_N": 16384,
+        "J_EE_core": 1.0758067703586256,
+        "T_ms": 210.79956971373397,
+        "maximum_group_defect_Hz": 9.992007221626409e-13,
+        "regional_defect_Hz": [
+          1.0529644960994634e-13,
+          7.228869706324408e-14,
+          1.1066407711888712e-14
+        ],
+        "minimum_rate_Hz": 2.2984438101734288e-08,
+        "computation": "Exact blocked harmonic actions, CPU FFT, identical GPU Phi in time blocks",
+        "harmonic_chunk_size": 64,
+        "phase_chunk_size": 512,
+        "filter_state_check": {
+          "fast": {
+            "minimum_Hz": -1.4447061711005127e-12,
+            "phase_index": 8187,
+            "group": 776
+          },
+          "slow": {
+            "minimum_Hz": 3.3810128436654654e-08,
+            "phase_index": 12107,
+            "group": 518
+          },
+          "positive": true,
+          "N": 4096,
+          "check_N": 16384
+        }
+      }
+    }
+  ],
+  "physical_profiles_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/PD3_child_followup/physical_profiles.json",
+  "scope": "Local departure from the three corrected small children; all-population neuron-weighted odd-component RMS. The larger child is used separately for mode and readout checks."
+}

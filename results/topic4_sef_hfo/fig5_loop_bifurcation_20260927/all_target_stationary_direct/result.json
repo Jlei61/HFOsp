@@ -1,0 +1,55 @@
+{
+  "status": "COMPLETE_ALL_TARGET_LOCAL_RESPONSE",
+  "rows": [
+    {
+      "region": "allE",
+      "observed_density_rate_Hz": 244.11083442473205,
+      "direct_stationary_rate_Hz": 244.10617012023926,
+      "regional_MC_SEM_Hz": 0.00011571502551899784,
+      "group_weighted_RMS_Hz": 0.03406916173791142,
+      "maximum_group_error_Hz": 0.4096285502115862
+    },
+    {
+      "region": "coreA",
+      "observed_density_rate_Hz": 469.23104069150725,
+      "direct_stationary_rate_Hz": 469.17232766391743,
+      "regional_MC_SEM_Hz": 0.0005057957084971635,
+      "group_weighted_RMS_Hz": 0.09943549029721543,
+      "maximum_group_error_Hz": 0.20001220703125
+    },
+    {
+      "region": "coreB",
+      "observed_density_rate_Hz": 474.301867885444,
+      "direct_stationary_rate_Hz": 474.23194042720263,
+      "regional_MC_SEM_Hz": 0.0003746483813901747,
+      "group_weighted_RMS_Hz": 0.11643501146965414,
+      "maximum_group_error_Hz": 0.204864501953125
+    },
+    {
+      "region": "surround",
+      "observed_density_rate_Hz": 232.5983331829307,
+      "direct_stationary_rate_Hz": 232.59669086058048,
+      "regional_MC_SEM_Hz": 0.00012053180308175373,
+      "group_weighted_RMS_Hz": 0.024996156529013568,
+      "maximum_group_error_Hz": 0.4096285502115862
+    },
+    {
+      "region": "I",
+      "observed_density_rate_Hz": 309.80315906686303,
+      "direct_stationary_rate_Hz": 309.8182625732422,
+      "regional_MC_SEM_Hz": 0.0025274487538493977,
+      "group_weighted_RMS_Hz": 0.20264470511193156,
+      "maximum_group_error_Hz": 1.89093017578125
+    }
+  ],
+  "implied_stationary_Graw": 4.492076145023011,
+  "group_selfconsistency_maximum_Hz": 1.89093017578125,
+  "weighted_field_RMS_Hz": 0.019429119939734157,
+  "stream_difference_rms_Hz": 0.2061873776128197,
+  "stream_combined_SEM_rms_Hz": 0.2055585433290076,
+  "target_response_difference_from_old_surrogate_RMS_Hz": 3.2745931039272285,
+  "elapsed_s": 284.2618935108185,
+  "root_established": false,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "Direct fixed-input local response. Finite group residuals, fixedM and supplied mean source/G still require a selfconsistent dynamic treatment."
+}

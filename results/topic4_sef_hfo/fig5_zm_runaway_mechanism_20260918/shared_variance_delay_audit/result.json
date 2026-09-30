@@ -1,0 +1,507 @@
+{
+  "status": "STATIONARY_POISSON_SPLIT_DIAGNOSTIC_COMPLETE",
+  "checks": [
+    {
+      "kind": "ampa",
+      "independent_double_sum_relative_max": 2.3810316687382837e-15,
+      "DC_gain": 0.9999999999999996,
+      "continuous_C0_per_ms": 0.11904761904761904,
+      "Heun_C0_per_ms": 0.11906192758190264,
+      "Heun_to_continuous_C0_ratio": 1.0001201916879823
+    },
+    {
+      "kind": "gaba",
+      "independent_double_sum_relative_max": 2.7135403838195618e-15,
+      "DC_gain": 1.000000000000005,
+      "continuous_C0_per_ms": 0.023135776420103202,
+      "Heun_C0_per_ms": 0.023135944548646887,
+      "Heun_to_continuous_C0_ratio": 1.0000072670370181
+    }
+  ],
+  "rows": [
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "groups": 535,
+      "E_or_I_cell_weighted_delay_error": -0.10811050111138855,
+      "E_or_I_cell_weighted_Heun_total_error": -0.10820352838523853,
+      "delay_error_quantiles": [
+        -0.16497339409433276,
+        -0.10980504236419417,
+        -0.10032291846669428,
+        -0.09372205593727607,
+        -0.05951929582738383
+      ],
+      "Heun_total_error_quantiles": [
+        -0.1650938401430451,
+        -0.10990417271188221,
+        -0.10041004019740687,
+        -0.09381757156223398,
+        -0.05961157856760019
+      ],
+      "weighted_old_removed_fraction": 0.6036515970865362,
+      "weighted_actual_shared_fraction": 0.4955410959751477
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "groups": 400,
+      "E_or_I_cell_weighted_delay_error": -0.12332377489296588,
+      "E_or_I_cell_weighted_Heun_total_error": -0.1234351020135832,
+      "delay_error_quantiles": [
+        -0.17675240197712097,
+        -0.1287329658285143,
+        -0.11781709111315543,
+        -0.11405707047105516,
+        -0.09827591908649366
+      ],
+      "Heun_total_error_quantiles": [
+        -0.17687054412253403,
+        -0.12884023889825616,
+        -0.11792131474500242,
+        -0.11416605710454832,
+        -0.09839261810749618
+      ],
+      "weighted_old_removed_fraction": 0.7115468445495147,
+      "weighted_actual_shared_fraction": 0.5882230696565489
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "groups": 73,
+      "E_or_I_cell_weighted_delay_error": -0.08918660821228473,
+      "E_or_I_cell_weighted_Heun_total_error": -0.08928007661531186,
+      "delay_error_quantiles": [
+        -0.09944366943075877,
+        -0.08883541027984702,
+        -0.0814616138429204,
+        -0.07152462852509774,
+        -0.060913552165656734
+      ],
+      "Heun_total_error_quantiles": [
+        -0.09953141142750373,
+        -0.08892170245911117,
+        -0.08154745334603507,
+        -0.07162181166103665,
+        -0.061006946365313744
+      ],
+      "weighted_old_removed_fraction": 0.5808510671492776,
+      "weighted_actual_shared_fraction": 0.4916644589369928
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "groups": 70,
+      "E_or_I_cell_weighted_delay_error": -0.09005972353562038,
+      "E_or_I_cell_weighted_Heun_total_error": -0.09015533737822409,
+      "delay_error_quantiles": [
+        -0.10680337732080712,
+        -0.09056788467223309,
+        -0.08282255888938045,
+        -0.07232082888283937,
+        -0.05951929582738383
+      ],
+      "Heun_total_error_quantiles": [
+        -0.10689312226220671,
+        -0.09066399713019442,
+        -0.08291670772722312,
+        -0.07242141840972997,
+        -0.05961157856760019
+      ],
+      "weighted_old_removed_fraction": 0.5914072166267681,
+      "weighted_actual_shared_fraction": 0.5013474930911477
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "groups": 392,
+      "E_or_I_cell_weighted_delay_error": -0.10904472719216589,
+      "E_or_I_cell_weighted_Heun_total_error": -0.1091376768017204,
+      "delay_error_quantiles": [
+        -0.16497339409433276,
+        -0.11603000603482613,
+        -0.1027198783141825,
+        -0.09938888962029321,
+        -0.07881877385466016
+      ],
+      "Heun_total_error_quantiles": [
+        -0.1650938401430451,
+        -0.11612916994963621,
+        -0.1028070155670355,
+        -0.09947750705222043,
+        -0.0789215722137988
+      ],
+      "weighted_old_removed_fraction": 0.604531954362113,
+      "weighted_actual_shared_fraction": 0.4954872271699471
+    },
+    {
+      "synapse": "ampa",
+      "profile": "candidate_cycle_mean",
+      "target": "E",
+      "groups": 535,
+      "E_or_I_cell_weighted_delay_error": -0.09692676311767354,
+      "E_or_I_cell_weighted_Heun_total_error": -0.09701000382752616,
+      "delay_error_quantiles": [
+        -0.16546753772856512,
+        -0.10598850938581764,
+        -0.09794335564356918,
+        -0.07981817980533001,
+        -0.011954877122470854
+      ],
+      "Heun_total_error_quantiles": [
+        -0.1655967231188543,
+        -0.1060754919810341,
+        -0.09803251227822352,
+        -0.07991594205175517,
+        -0.011965254190405672
+      ],
+      "weighted_old_removed_fraction": 0.5406020624817323,
+      "weighted_actual_shared_fraction": 0.4436752993640587
+    },
+    {
+      "synapse": "ampa",
+      "profile": "candidate_cycle_mean",
+      "target": "I",
+      "groups": 400,
+      "E_or_I_cell_weighted_delay_error": -0.11269378207599828,
+      "E_or_I_cell_weighted_Heun_total_error": -0.11279553540599913,
+      "delay_error_quantiles": [
+        -0.17662236764072495,
+        -0.124457448881787,
+        -0.11650213017959493,
+        -0.11026425545883195,
+        -0.024508016237802275
+      ],
+      "Heun_total_error_quantiles": [
+        -0.17674434163714606,
+        -0.12456810484170255,
+        -0.11661077681575514,
+        -0.1103772604518172,
+        -0.02452981671575431
+      ],
+      "weighted_old_removed_fraction": 0.650477487775414,
+      "weighted_actual_shared_fraction": 0.5377837056994158
+    },
+    {
+      "synapse": "ampa",
+      "profile": "candidate_cycle_mean",
+      "target": "Core A E",
+      "groups": 73,
+      "E_or_I_cell_weighted_delay_error": -0.09019255044695988,
+      "E_or_I_cell_weighted_Heun_total_error": -0.09028709643874205,
+      "delay_error_quantiles": [
+        -0.10032115223463244,
+        -0.09092454088982109,
+        -0.0829215317551733,
+        -0.07200291783698429,
+        -0.06048309217668408
+      ],
+      "Heun_total_error_quantiles": [
+        -0.10041009157622251,
+        -0.09102314775548997,
+        -0.08300955040957934,
+        -0.07209405834884389,
+        -0.06057542689069607
+      ],
+      "weighted_old_removed_fraction": 0.5879208840612037,
+      "weighted_actual_shared_fraction": 0.49772833361424373
+    },
+    {
+      "synapse": "ampa",
+      "profile": "candidate_cycle_mean",
+      "target": "Core B E",
+      "groups": 70,
+      "E_or_I_cell_weighted_delay_error": -0.09103969190777456,
+      "E_or_I_cell_weighted_Heun_total_error": -0.09113646764395485,
+      "delay_error_quantiles": [
+        -0.10751748700191029,
+        -0.09176788099287574,
+        -0.08422307440068597,
+        -0.07299248205892722,
+        -0.06037269991310883
+      ],
+      "Heun_total_error_quantiles": [
+        -0.10760832007433353,
+        -0.09186526944905037,
+        -0.08431596376071335,
+        -0.07309379076947783,
+        -0.06046473734509896
+      ],
+      "weighted_old_removed_fraction": 0.5988211103178036,
+      "weighted_actual_shared_fraction": 0.5077814184100291
+    },
+    {
+      "synapse": "ampa",
+      "profile": "candidate_cycle_mean",
+      "target": "Surround E",
+      "groups": 392,
+      "E_or_I_cell_weighted_delay_error": -0.09724537225505696,
+      "E_or_I_cell_weighted_Heun_total_error": -0.09732798385416537,
+      "delay_error_quantiles": [
+        -0.16546753772856512,
+        -0.11218856449295574,
+        -0.10149446304723649,
+        -0.09314474131910996,
+        -0.011954877122470854
+      ],
+      "Heun_total_error_quantiles": [
+        -0.1655967231188543,
+        -0.1122787779260553,
+        -0.10158385304004272,
+        -0.09322879745093493,
+        -0.011965254190405672
+      ],
+      "weighted_old_removed_fraction": 0.5379284392686635,
+      "weighted_actual_shared_fraction": 0.4406830670136065
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "groups": 535,
+      "E_or_I_cell_weighted_delay_error": -0.021609833569059204,
+      "E_or_I_cell_weighted_Heun_total_error": -0.021625026441629152,
+      "delay_error_quantiles": [
+        -0.03172530710569562,
+        -0.02165506563843724,
+        -0.020299821583094794,
+        -0.0188725122026865,
+        -0.012784932368214295
+      ],
+      "Heun_total_error_quantiles": [
+        -0.03174306687174896,
+        -0.02167014460119454,
+        -0.020314396689563693,
+        -0.018887435119299766,
+        -0.012799135444410083
+      ],
+      "weighted_old_removed_fraction": 0.7107062120082716,
+      "weighted_actual_shared_fraction": 0.6890963784392122
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "groups": 400,
+      "E_or_I_cell_weighted_delay_error": -0.02142391140606364,
+      "E_or_I_cell_weighted_Heun_total_error": -0.021438942952667652,
+      "delay_error_quantiles": [
+        -0.032870901783230086,
+        -0.0224663650494273,
+        -0.02060020381626213,
+        -0.01974643002924077,
+        -0.01693133145430458
+      ],
+      "Heun_total_error_quantiles": [
+        -0.0328882126707902,
+        -0.02248186312742211,
+        -0.020614386727629844,
+        -0.01976106660740383,
+        -0.016945646218030925
+      ],
+      "weighted_old_removed_fraction": 0.7060942791846667,
+      "weighted_actual_shared_fraction": 0.6846703677786031
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "groups": 73,
+      "E_or_I_cell_weighted_delay_error": -0.01866234369547174,
+      "E_or_I_cell_weighted_Heun_total_error": -0.01867710086597612,
+      "delay_error_quantiles": [
+        -0.022331987400874446,
+        -0.018773190543855917,
+        -0.01738924485651744,
+        -0.015355012598773933,
+        -0.012920409116107492
+      ],
+      "Heun_total_error_quantiles": [
+        -0.022345695913853672,
+        -0.018787986282209346,
+        -0.017403831587846363,
+        -0.015369019408437056,
+        -0.012935282013529188
+      ],
+      "weighted_old_removed_fraction": 0.6909919735307088,
+      "weighted_actual_shared_fraction": 0.672329629835237
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "groups": 70,
+      "E_or_I_cell_weighted_delay_error": -0.018695192495241743,
+      "E_or_I_cell_weighted_Heun_total_error": -0.018710021478365577,
+      "delay_error_quantiles": [
+        -0.02248252515574532,
+        -0.018664438938950395,
+        -0.017533115160146717,
+        -0.01571237067541536,
+        -0.012784932368214295
+      ],
+      "Heun_total_error_quantiles": [
+        -0.02249610321662081,
+        -0.01867969578324205,
+        -0.017548225834574185,
+        -0.0157271977370366,
+        -0.012799135444410083
+      ],
+      "weighted_old_removed_fraction": 0.6931814982253519,
+      "weighted_actual_shared_fraction": 0.6744863057301101
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "groups": 392,
+      "E_or_I_cell_weighted_delay_error": -0.02175800544196483,
+      "E_or_I_cell_weighted_Heun_total_error": -0.02177321848973052,
+      "delay_error_quantiles": [
+        -0.03172530710569562,
+        -0.02242682993459051,
+        -0.020675931061348553,
+        -0.019958387319950317,
+        -0.013897144480108101
+      ],
+      "Heun_total_error_quantiles": [
+        -0.03174306687174896,
+        -0.022442393236936524,
+        -0.020690876593908503,
+        -0.019972872541141128,
+        -0.013910940960697329
+      ],
+      "weighted_old_removed_fraction": 0.7116464274004402,
+      "weighted_actual_shared_fraction": 0.6898884219584753
+    },
+    {
+      "synapse": "gaba",
+      "profile": "candidate_cycle_mean",
+      "target": "E",
+      "groups": 535,
+      "E_or_I_cell_weighted_delay_error": -0.02004229842589169,
+      "E_or_I_cell_weighted_Heun_total_error": -0.020056383424606507,
+      "delay_error_quantiles": [
+        -0.031719135012748666,
+        -0.021218853948904458,
+        -0.01991259249356193,
+        -0.017352109499364145,
+        -0.0057908791433501534
+      ],
+      "Heun_total_error_quantiles": [
+        -0.03173689088841082,
+        -0.02123398435400846,
+        -0.019925819314157277,
+        -0.017366509398717304,
+        -0.005795535504183839
+      ],
+      "weighted_old_removed_fraction": 0.6589835121828894,
+      "weighted_actual_shared_fraction": 0.6389412137569978
+    },
+    {
+      "synapse": "gaba",
+      "profile": "candidate_cycle_mean",
+      "target": "I",
+      "groups": 400,
+      "E_or_I_cell_weighted_delay_error": -0.020002301461831417,
+      "E_or_I_cell_weighted_Heun_total_error": -0.020016309681834103,
+      "delay_error_quantiles": [
+        -0.03286942484272159,
+        -0.021891805999643892,
+        -0.02032714719209916,
+        -0.01876880501137146,
+        -0.00552046015891483
+      ],
+      "Heun_total_error_quantiles": [
+        -0.0328867343968829,
+        -0.021906779985714657,
+        -0.020342030713405977,
+        -0.018783202671142658,
+        -0.005524950932415036
+      ],
+      "weighted_old_removed_fraction": 0.6582922479470462,
+      "weighted_actual_shared_fraction": 0.6382899464852149
+    },
+    {
+      "synapse": "gaba",
+      "profile": "candidate_cycle_mean",
+      "target": "Core A E",
+      "groups": 73,
+      "E_or_I_cell_weighted_delay_error": -0.018837935226180033,
+      "E_or_I_cell_weighted_Heun_total_error": -0.018852846492143183,
+      "delay_error_quantiles": [
+        -0.02256924953930048,
+        -0.018973890308304663,
+        -0.01760149840235518,
+        -0.01551516375447975,
+        -0.013040688649229717
+      ],
+      "Heun_total_error_quantiles": [
+        -0.022583128938845037,
+        -0.01898773258940019,
+        -0.017616335843083954,
+        -0.015529814761666972,
+        -0.013055677843020818
+      ],
+      "weighted_old_removed_fraction": 0.6981337862248851,
+      "weighted_actual_shared_fraction": 0.6792958509987053
+    },
+    {
+      "synapse": "gaba",
+      "profile": "candidate_cycle_mean",
+      "target": "Core B E",
+      "groups": 70,
+      "E_or_I_cell_weighted_delay_error": -0.0188016682362426,
+      "E_or_I_cell_weighted_Heun_total_error": -0.018816582385952095,
+      "delay_error_quantiles": [
+        -0.022693031054835586,
+        -0.018775352920431823,
+        -0.017602490496533355,
+        -0.015797745047223907,
+        -0.012792405798132952
+      ],
+      "Heun_total_error_quantiles": [
+        -0.022706736342774616,
+        -0.018790710271400033,
+        -0.017617667014250084,
+        -0.015812558127797027,
+        -0.012806642254415204
+      ],
+      "weighted_old_removed_fraction": 0.6971203132986301,
+      "weighted_actual_shared_fraction": 0.6783186450623878
+    },
+    {
+      "synapse": "gaba",
+      "profile": "candidate_cycle_mean",
+      "target": "Surround E",
+      "groups": 392,
+      "E_or_I_cell_weighted_delay_error": -0.020104124597318043,
+      "E_or_I_cell_weighted_Heun_total_error": -0.02011816774711011,
+      "delay_error_quantiles": [
+        -0.031719135012748666,
+        -0.022031168194451854,
+        -0.02051161251849308,
+        -0.019112852788812126,
+        -0.0057908791433501534
+      ],
+      "Heun_total_error_quantiles": [
+        -0.03173689088841082,
+        -0.022046899344337605,
+        -0.02052661503572896,
+        -0.0191273207651481,
+        -0.005795535504183839
+      ],
+      "weighted_old_removed_fraction": 0.6570303003541095,
+      "weighted_actual_shared_fraction": 0.6369261757567914
+    }
+  ],
+  "formula": "Q_total - A_sum^2/N + sum_de A_d*A_e*K(delay_d-delay_e)/N; each term weighted by stationary source rate",
+  "units": "Dimensionless relative error in stationary recurrent current variance; per-source operator intensity before tm and area factors.",
+  "scope": "Independent Poisson stationary input identity only. Does not measure actual native spike correlations, time-varying variance, full network dynamics or bifurcation type. No candidate promotion or extra simulation from this diagnostic.",
+  "model_modified": false
+}

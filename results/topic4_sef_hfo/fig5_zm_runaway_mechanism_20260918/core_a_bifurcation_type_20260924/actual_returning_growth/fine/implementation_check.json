@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "dt_ms": 0.025,
+  "exact_nominal_replay": true,
+  "passive_tangent_nominal_bitwise": true,
+  "full_state_FD": [
+    {
+      "epsilon": 5e-05,
+      "relative_errors": {
+        "syn": 0.00030935016734229693,
+        "local": 0.0001520380945747009,
+        "history": 0.00032532680558966564
+      }
+    },
+    {
+      "epsilon": 2.5e-05,
+      "relative_errors": {
+        "syn": 7.752625440644964e-05,
+        "local": 3.807937365519001e-05,
+        "history": 8.144989102236736e-05
+      }
+    },
+    {
+      "epsilon": 1.25e-05,
+      "relative_errors": {
+        "syn": 1.939298647745412e-05,
+        "local": 9.52409892697113e-06,
+        "history": 2.036994028019914e-05
+      }
+    }
+  ],
+  "Z_held": true,
+  "M_dynamic": true,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/final_state.npz"
+}

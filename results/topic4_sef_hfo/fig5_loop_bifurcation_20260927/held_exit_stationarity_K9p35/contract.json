@@ -1,0 +1,24 @@
+{
+  "status": "FROZEN_BEFORE_FRESH_COUNTS",
+  "created_epoch": 1790544435.290198,
+  "question": "Does the K9.35 state that persists in the coupled density hold also satisfy direct stationary cell-response selfconsistency near the observed core-exit region?",
+  "selection": "One relevant active state chosen after complete K9.2/9.35/9.5/9.65 holds. No new broad parameter grid.",
+  "design": {
+    "targets": 40000,
+    "streams": 2,
+    "replicas": 256,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "seeds": [
+      929351,
+      929352
+    ]
+  },
+  "inputs": "Exact same individual target weights, heldactualZ/K, expectedexternalmean, original density-cell filters/membrane/refractory; upstream rates and individualM measured in the last3s of the completed held trajectory. Stationary G is recomputed from the supplied mean rate.",
+  "readouts": "Independent counts/SEM per physical target, source-group residuals, individualM equilibrium residuals, core/allE/I and400cell field. Adjacent1s source blocks retain finite trajectory drift.",
+  "interpretation": "This is a nonlinear stationarity check, not a root or stability certificate. Count SEM excludes upstream finite-window/density-closure error. Do not reuse the K9 Jacobian as K9.35 derivatives. No automatic Newton or continuation.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/carried_exit_lower_holds/held_K9p35",
+  "source_observation_sha256": "1dbe80b0b78a9a7ea48b5ec6aab1c45c2537c9e15d99aa9ee4eef6b87934bcc6",
+  "producer_sha256": "6740cadb648a15bef4025dd11d35fdb468360ebcaaaff8066c4aa60c93fa57c2",
+  "formal_bifurcation_allowed": false
+}

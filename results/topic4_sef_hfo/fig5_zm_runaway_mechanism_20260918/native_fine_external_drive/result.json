@@ -1,0 +1,168 @@
+{
+  "status": "FORCING_RECONSTRUCTION_COMPLETE",
+  "pid": 503965,
+  "seconds": 36.80994749069214,
+  "original_coarse_roundoff_max": 1.1915429043440895e-07,
+  "checkpoints": [
+    {
+      "time_ms": 8000,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 9000,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 9300,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 9420,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 9870,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 10370,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    },
+    {
+      "time_ms": 12500,
+      "spatial_state_bitwise": true,
+      "rng_bitwise": true
+    }
+  ],
+  "rows": [
+    {
+      "window_ms": [
+        0,
+        12500
+      ],
+      "region": "Core A",
+      "cell_weighted_RMS_per_ms": 0.04518929765539051,
+      "pooled_RMS_per_ms": 0.04587113317861066,
+      "max_abs_per_ms": 0.3390071132172112
+    },
+    {
+      "window_ms": [
+        0,
+        12500
+      ],
+      "region": "Core B",
+      "cell_weighted_RMS_per_ms": 0.04482417084582981,
+      "pooled_RMS_per_ms": 0.045508565566678476,
+      "max_abs_per_ms": 0.3087773803834175
+    },
+    {
+      "window_ms": [
+        0,
+        12500
+      ],
+      "region": "Surround",
+      "cell_weighted_RMS_per_ms": 0.04411097502663374,
+      "pooled_RMS_per_ms": 0.04413884231227766,
+      "max_abs_per_ms": 0.31337060295929686
+    },
+    {
+      "window_ms": [
+        1000,
+        9420
+      ],
+      "region": "Core A",
+      "cell_weighted_RMS_per_ms": 0.04567283968957341,
+      "pooled_RMS_per_ms": 0.04636717819695731,
+      "max_abs_per_ms": 0.3390071132172112
+    },
+    {
+      "window_ms": [
+        1000,
+        9420
+      ],
+      "region": "Core B",
+      "cell_weighted_RMS_per_ms": 0.0448487984353945,
+      "pooled_RMS_per_ms": 0.04555241724239666,
+      "max_abs_per_ms": 0.3087773803834175
+    },
+    {
+      "window_ms": [
+        1000,
+        9420
+      ],
+      "region": "Surround",
+      "cell_weighted_RMS_per_ms": 0.04401023170651369,
+      "pooled_RMS_per_ms": 0.04403766815836353,
+      "max_abs_per_ms": 0.2765032228505899
+    },
+    {
+      "window_ms": [
+        8000,
+        9420
+      ],
+      "region": "Core A",
+      "cell_weighted_RMS_per_ms": 0.04556050143943191,
+      "pooled_RMS_per_ms": 0.046142558363022466,
+      "max_abs_per_ms": 0.2679682461723629
+    },
+    {
+      "window_ms": [
+        8000,
+        9420
+      ],
+      "region": "Core B",
+      "cell_weighted_RMS_per_ms": 0.04382087860757491,
+      "pooled_RMS_per_ms": 0.04447499200040333,
+      "max_abs_per_ms": 0.2416746484430381
+    },
+    {
+      "window_ms": [
+        8000,
+        9420
+      ],
+      "region": "Surround",
+      "cell_weighted_RMS_per_ms": 0.04389363178529781,
+      "pooled_RMS_per_ms": 0.043919324284552794,
+      "max_abs_per_ms": 0.25985610626338485
+    },
+    {
+      "window_ms": [
+        9420,
+        10370
+      ],
+      "region": "Core A",
+      "cell_weighted_RMS_per_ms": 0.04495926032995653,
+      "pooled_RMS_per_ms": 0.045577947849471716,
+      "max_abs_per_ms": 0.32380570110414
+    },
+    {
+      "window_ms": [
+        9420,
+        10370
+      ],
+      "region": "Core B",
+      "cell_weighted_RMS_per_ms": 0.04508750634774979,
+      "pooled_RMS_per_ms": 0.0457467115060778,
+      "max_abs_per_ms": 0.24953128702846294
+    },
+    {
+      "window_ms": [
+        9420,
+        10370
+      ],
+      "region": "Surround",
+      "cell_weighted_RMS_per_ms": 0.043943967235555256,
+      "pooled_RMS_per_ms": 0.04397235429780779,
+      "max_abs_per_ms": 0.27582257069289984
+    }
+  ],
+  "neural_simulations": 0,
+  "input_precision": "Originalfloat32globalrate and1ms sampling retained; spatialOU exactat checkpoints. Not exactsub-msnativeforcing.",
+  "model_promoted": false
+}

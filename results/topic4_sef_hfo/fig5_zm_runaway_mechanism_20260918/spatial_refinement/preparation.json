@@ -1,0 +1,184 @@
+{
+  "status": "PREPARATION_PASS",
+  "coarse_groups": 935,
+  "fine_groups": 3479,
+  "coarse_grid": 20,
+  "fine_grid": 40,
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "exact_parent_partition": true,
+  "state_aggregation_max_error": 4.547473508864641e-13,
+  "history_aggregation_max_error": 2.220446049250313e-16,
+  "linear_moment_checks": [
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 0,
+      "probe": 0,
+      "relative_error": 4.210709481362648e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 0,
+      "probe": 1,
+      "relative_error": 4.0996383326788767e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 1,
+      "probe": 0,
+      "relative_error": 3.8327809456452135e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 1,
+      "probe": 1,
+      "relative_error": 3.7585445134482307e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 2,
+      "probe": 0,
+      "relative_error": 3.980688044357533e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 2,
+      "probe": 1,
+      "relative_error": 3.9796958642681337e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 3,
+      "probe": 0,
+      "relative_error": 3.5542574444292444e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.0
+      ],
+      "moment": 3,
+      "probe": 1,
+      "relative_error": 3.492657295408528e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 0,
+      "probe": 0,
+      "relative_error": 3.906636865735253e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 0,
+      "probe": 1,
+      "relative_error": 4.0090860015806396e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 1,
+      "probe": 0,
+      "relative_error": 3.4108373522953055e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 1,
+      "probe": 1,
+      "relative_error": 3.2411585184535696e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 2,
+      "probe": 0,
+      "relative_error": 4.1953933140628733e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 2,
+      "probe": 1,
+      "relative_error": 4.0659758942072014e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 3,
+      "probe": 0,
+      "relative_error": 3.107858809918038e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.03
+      ],
+      "moment": 3,
+      "probe": 1,
+      "relative_error": 3.1795156435465644e-16
+    }
+  ],
+  "Z_fields": [
+    {
+      "D": 0.219,
+      "global_D_lifted": 0.21899999999999986,
+      "global_D_native_fine": 0.21899999999999997,
+      "E_cell_weighted_Z_detail_RMS": 0.0033921606986732143,
+      "max_Z_detail": 0.013280994535300295
+    },
+    {
+      "D": 0.22884476056519154,
+      "global_D_lifted": 0.2288447605651912,
+      "global_D_native_fine": 0.22884476056519132,
+      "E_cell_weighted_Z_detail_RMS": 0.0036482126382480443,
+      "max_Z_detail": 0.014938223103200032
+    }
+  ],
+  "initial_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+  "scope": "Projection and application correctness only; fine dynamics not inferred."
+}

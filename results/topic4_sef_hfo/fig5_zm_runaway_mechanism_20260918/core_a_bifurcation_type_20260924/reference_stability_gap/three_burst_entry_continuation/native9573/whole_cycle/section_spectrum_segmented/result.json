@@ -1,0 +1,51 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.904334001825914,
+        "difference_rms": 6.86811432574337e-10,
+        "relative_rms": 4.3183916566106254e-11
+      },
+      "GABA": {
+        "reference_rms": 8.235980232905108,
+        "difference_rms": 4.52222233070468e-10,
+        "relative_rms": 5.4908125114690076e-11
+      },
+      "M": {
+        "reference_rms": 0.021056259378505453,
+        "difference_rms": 3.927671939061229e-12,
+        "relative_rms": 1.865322737746409e-10
+      },
+      "covariance": {
+        "reference_rms": 37.56372606527978,
+        "difference_rms": 2.9140980453788003e-10,
+        "relative_rms": 7.75774490612183e-12
+      },
+      "input_memory": {
+        "reference_rms": 0.08871364402841525,
+        "difference_rms": 1.0146329571002642e-11,
+        "relative_rms": 1.1437169199985452e-10
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.0047084885553699135,
+        "difference_rms": 4.357552110778382e-13,
+        "relative_rms": 9.25467283085716e-11
+      }
+    },
+    "combined_relative_rms": 1.0114346697529463e-10
+  },
+  "verified": [
+    {
+      "real": -0.8185894685707278,
+      "imag": 0.0,
+      "relative_residual": 1.926812900239063e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 837.826004743576,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "NOT_QUALIFIED_PRIOR_NEUTRAL_GATE_FAILED",
+  "prior_physical_neutral_gate_failed": true,
+  "model_promoted": false
+}

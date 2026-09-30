@@ -1,0 +1,581 @@
+{
+  "status": "UNINTERRUPTED_CANDIDATE_FLOW_COMPLETE",
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_hz": 39.949147637846615,
+      "quiet_intervals_ms": [
+        [
+          85,
+          214
+        ],
+        [
+          327,
+          477
+        ],
+        [
+          590,
+          733
+        ],
+        [
+          2609,
+          2766
+        ],
+        [
+          2893,
+          3038
+        ],
+        [
+          3157,
+          3292
+        ],
+        [
+          4724,
+          4845
+        ],
+        [
+          4940,
+          5000
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 85,
+          "duration_ms": 85,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 214,
+          "end_ms": 327,
+          "duration_ms": 113,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 477,
+          "end_ms": 590,
+          "duration_ms": 113,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 733,
+          "end_ms": 2609,
+          "duration_ms": 1876,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2766,
+          "end_ms": 2893,
+          "duration_ms": 127,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3038,
+          "end_ms": 3157,
+          "duration_ms": 119,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3292,
+          "end_ms": 4724,
+          "duration_ms": 1432,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4845,
+          "end_ms": 4940,
+          "duration_ms": 95,
+          "left_censored": false,
+          "right_censored": false
+        }
+      ]
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 200.3884504866802,
+      "quiet_intervals_ms": [
+        [
+          39,
+          211
+        ],
+        [
+          298,
+          472
+        ],
+        [
+          561,
+          735
+        ],
+        [
+          820,
+          894
+        ],
+        [
+          2602,
+          2754
+        ],
+        [
+          2852,
+          3027
+        ],
+        [
+          3116,
+          3296
+        ],
+        [
+          3380,
+          3453
+        ],
+        [
+          4699,
+          4834
+        ],
+        [
+          4930,
+          5000
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 39,
+          "duration_ms": 39,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 211,
+          "end_ms": 298,
+          "duration_ms": 87,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 472,
+          "end_ms": 561,
+          "duration_ms": 89,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 735,
+          "end_ms": 820,
+          "duration_ms": 85,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 894,
+          "end_ms": 2602,
+          "duration_ms": 1708,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2754,
+          "end_ms": 2852,
+          "duration_ms": 98,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3027,
+          "end_ms": 3116,
+          "duration_ms": 89,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3296,
+          "end_ms": 3380,
+          "duration_ms": 84,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3453,
+          "end_ms": 4699,
+          "duration_ms": 1246,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4834,
+          "end_ms": 4930,
+          "duration_ms": 96,
+          "left_censored": false,
+          "right_censored": false
+        }
+      ]
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 116.67933005843265,
+      "quiet_intervals_ms": [
+        [
+          47,
+          203
+        ],
+        [
+          332,
+          467
+        ],
+        [
+          573,
+          722
+        ],
+        [
+          1134,
+          1208
+        ],
+        [
+          1256,
+          1386
+        ],
+        [
+          1435,
+          1556
+        ],
+        [
+          1797,
+          1840
+        ],
+        [
+          1877,
+          1912
+        ],
+        [
+          1955,
+          2003
+        ],
+        [
+          2044,
+          2118
+        ],
+        [
+          2165,
+          2240
+        ],
+        [
+          2375,
+          2399
+        ],
+        [
+          2609,
+          2768
+        ],
+        [
+          2853,
+          3031
+        ],
+        [
+          3122,
+          3281
+        ],
+        [
+          3687,
+          3767
+        ],
+        [
+          3814,
+          3941
+        ],
+        [
+          3990,
+          4106
+        ],
+        [
+          4154,
+          4250
+        ],
+        [
+          4298,
+          4342
+        ],
+        [
+          4716,
+          4871
+        ],
+        [
+          4931,
+          5000
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 47,
+          "duration_ms": 47,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 203,
+          "end_ms": 332,
+          "duration_ms": 129,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 467,
+          "end_ms": 573,
+          "duration_ms": 106,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 722,
+          "end_ms": 1134,
+          "duration_ms": 412,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1208,
+          "end_ms": 1256,
+          "duration_ms": 48,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1386,
+          "end_ms": 1435,
+          "duration_ms": 49,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1556,
+          "end_ms": 1797,
+          "duration_ms": 241,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1840,
+          "end_ms": 1877,
+          "duration_ms": 37,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 1912,
+          "end_ms": 1955,
+          "duration_ms": 43,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2003,
+          "end_ms": 2044,
+          "duration_ms": 41,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2118,
+          "end_ms": 2165,
+          "duration_ms": 47,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2240,
+          "end_ms": 2375,
+          "duration_ms": 135,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2399,
+          "end_ms": 2609,
+          "duration_ms": 210,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2768,
+          "end_ms": 2853,
+          "duration_ms": 85,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3031,
+          "end_ms": 3122,
+          "duration_ms": 91,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3281,
+          "end_ms": 3687,
+          "duration_ms": 406,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3767,
+          "end_ms": 3814,
+          "duration_ms": 47,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3941,
+          "end_ms": 3990,
+          "duration_ms": 49,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4106,
+          "end_ms": 4154,
+          "duration_ms": 48,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4250,
+          "end_ms": 4298,
+          "duration_ms": 48,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4342,
+          "end_ms": 4716,
+          "duration_ms": 374,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4871,
+          "end_ms": 4931,
+          "duration_ms": 60,
+          "left_censored": false,
+          "right_censored": false
+        }
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 33.99769794216043,
+      "quiet_intervals_ms": [
+        [
+          85,
+          217
+        ],
+        [
+          327,
+          480
+        ],
+        [
+          590,
+          736
+        ],
+        [
+          2610,
+          2768
+        ],
+        [
+          2893,
+          3041
+        ],
+        [
+          3157,
+          3295
+        ],
+        [
+          4687,
+          4709
+        ],
+        [
+          4725,
+          4847
+        ],
+        [
+          4940,
+          5000
+        ]
+      ],
+      "activities": [
+        {
+          "start_ms": 0,
+          "end_ms": 85,
+          "duration_ms": 85,
+          "left_censored": true,
+          "right_censored": false
+        },
+        {
+          "start_ms": 217,
+          "end_ms": 327,
+          "duration_ms": 110,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 480,
+          "end_ms": 590,
+          "duration_ms": 110,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 736,
+          "end_ms": 2610,
+          "duration_ms": 1874,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 2768,
+          "end_ms": 2893,
+          "duration_ms": 125,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3041,
+          "end_ms": 3157,
+          "duration_ms": 116,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 3295,
+          "end_ms": 4687,
+          "duration_ms": 1392,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4709,
+          "end_ms": 4725,
+          "duration_ms": 16,
+          "left_censored": false,
+          "right_censored": false
+        },
+        {
+          "start_ms": 4847,
+          "end_ms": 4940,
+          "duration_ms": 93,
+          "left_censored": false,
+          "right_censored": false
+        }
+      ]
+    }
+  ],
+  "spatial_persistent_fraction_last1s": 0.0,
+  "seconds": 454.43187499046326,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/uninterrupted_root_control/final_state.npz",
+  "onset_bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

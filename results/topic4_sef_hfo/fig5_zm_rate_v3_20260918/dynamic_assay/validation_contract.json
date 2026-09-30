@@ -1,0 +1,18 @@
+{
+  "status": "REGISTERED_BEFORE_VALIDATION",
+  "registered": "2026-09-18 10:13",
+  "science_question": "Does the finite-dimensional response closure (filters whose constants may depend on the workpoint), fitted on the coarse-grid assay at frequencies {0,2,5,10,20,40,80} Hz, reproduce the colored-LIF linear response at held-out workpoints and held-out frequencies, separately for mean, AMPA-variance and GABA-variance modulation?",
+  "primary_readout": "complex response normalised by the zero-frequency response of the same channel at the same workpoint: relative complex error |H_model - H_MC| / |H_MC(0)| at 6 Hz and 25 Hz (frequencies NOT in the fitting set) and at 15 Hz / 60 Hz for random held-out workpoints",
+  "held_out_data": [
+    "the 8 v2-assayed workpoints at 6 and 25 Hz, three channels, from results/topic4_sef_hfo/fig5_zm_rate_synchronized_20260917/local_response*/result.json (independent seeds, R=4096, T=4 s) - never used for fitting",
+    "12 random workpoints per population (seed 11) at 15 and 60 Hz, run with a new seed after the fit is frozen"
+  ],
+  "tolerances": {
+    "shape": "normalised complex error <= 0.10 for f <= 25 Hz and <= 0.15 for f = 60 Hz, when the channel's zero-frequency gain exceeds 10 SEM (otherwise the point is reported as underpowered, not counted)",
+    "dc_consistency": "the zero-frequency paired response of the assay must agree with the transfer-spline derivative within 15 % (cross-check of the two estimators)",
+    "sign": "no sign inversion of the real part at f <= 10 Hz"
+  },
+  "channel_separation_rule": "a common filter for the three channels is accepted only if, after removing the known synaptic variance filters 1/(1+i w tau_syn/2), the per-channel shapes agree within the same tolerance at all coarse-grid points with adequate SNR; otherwise channel-specific filters are used",
+  "failure_action": "refit with a richer filter structure on the SAME assay data; the held-out set is used once per candidate structure and the count of candidates tried is reported",
+  "scope": "local single-neuron linear response under Gaussian-diffusion input; network-level validation is stage A4"
+}

@@ -1,0 +1,23 @@
+{
+  "pid": 541530,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/check_rate_PD4_mid_child.py",
+    "--device",
+    "0",
+    "--min-free-gib",
+    "8",
+    "--after-pids",
+    "536618",
+    "--trace-center-seed",
+    "--label",
+    "PD4_child_trace_center_20260920",
+    "--output-name",
+    "trace_center_spectrum"
+  ],
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/trace_center_spectrum/worker.log",
+  "dependency_identity": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u /home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/check_rate_PD4_mid_child.py --device 0 --min-free-gib 8 ",
+  "timestamp": 1789889587.42522,
+  "scope": "One adaptive interior child, conditional on completed paired endpoint spectra. The 8 GiB gate, full 935-population equations and all physical delays remain unchanged."
+}

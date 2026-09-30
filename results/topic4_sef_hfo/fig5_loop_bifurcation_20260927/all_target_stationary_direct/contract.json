@@ -1,0 +1,25 @@
+{
+  "status": "FROZEN_BEFORE_ALL_TARGET_COUNTS",
+  "created_epoch": 1790534646.1758184,
+  "question": "Does the direct density-cell stationary response at all physical targets reproduce the corresponding network working point before building any new equilibrium/stability approximation?",
+  "design": {
+    "physical_targets": 40000,
+    "replicas_per_stream": 256,
+    "independent_streams": 2,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "base_seeds": [
+      928831,
+      928832
+    ],
+    "device": 0,
+    "batch": 256
+  },
+  "input": "Measured group source rates and exact expected external mean over5-10s, exact individual target weights and actual heldZ/K, selfconsistent stationary G from discrete causalR relation, observed individualM endpoint. Identical inputs to the prior one-point frozen-response audit.",
+  "simulator": "Original density one-increment Gaussian synaptic filters, native membrane/reset/refractory. Each physical cell uses its own noise stream; paired stream identities are fixed. No neural transfer, no network fit. M remains fixed locally and upstream mean rates/G remain supplied.",
+  "readouts": "Per-target rates/SEM, source-group selfconsistency residuals, core/allE/I means,400cell spatial field, impliedG. Independent numerical streams assess estimator precision; not native network seeds.",
+  "stopping": "Exactly two fixed-input arrays, no automatic root or continuation. Classify bias versus numerical error and document the remaining fixedM/upstream-stationarity assumptions.",
+  "producer_sha256": "1c7f22e4750e1360cf332564cb47fd8fca558c9d55adaec079d02233b41e45d9",
+  "input_sha256": "9c6fde9e6bc7798f470f793b869732545eb5e8d04c81ac3558abbde3ba0bcfd5",
+  "formal_bifurcation_allowed": false
+}

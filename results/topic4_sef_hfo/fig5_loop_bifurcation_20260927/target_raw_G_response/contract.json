@@ -1,0 +1,1563 @@
+{
+  "status": "FROZEN_BEFORE_PHYSICAL_G_RESPONSE",
+  "created_epoch": 1790534765.261362,
+  "question": "What local response must enter the G feedback stability calculation when G changes the full membrane conductance rather than only its decay time?",
+  "equation": "At delta appliedg: vinf(t)=[(1+g0)*(mu+IA-IG)+delta_g*EG]/(1+g0+delta_g); membrane decay exp(-dt*(1+g0+delta_g)/tm). Original unscaled currents stay unchanged. This includes instantaneous rescaling of existing current noise, unlike modulating its innovation intensity.",
+  "design": {
+    "targets": 11,
+    "conditions": 110,
+    "replicas": 8192,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "seed": 928841,
+    "device": 0,
+    "amplitude": ".002*(1+g0) and half, frequencies0/1/5/20/80Hz"
+  },
+  "check": "DC must agree with the independently measured chain rule for mu,varianceE,varianceI,and fixed-effective-input g; include paired covariance of those four prior channels. This chain rule is not assumed valid at nonzero frequency. Half-amplitude test uses the same10%DC/15%at80Hz and2SEM rule.",
+  "limits": "AppliedG=Z_i*Graw, so networkglobal response still needs multiplying by heldZ_i. No physical Z restoration is simulated here. Full spatial stability not yet computed.",
+  "producer_sha256": "a440b081da800140c9718a246db98eb57bc08c48b6f4ef098f762aca6556c4ff",
+  "parent_sha256": "6a292fd5b1b83bffc8af5e1e3b172f05bb6762d40fbbf3f166398733ce23c5d0",
+  "formal_bifurcation_allowed": false,
+  "rows": [
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023479986223681148,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011739993111840574,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023479986223681148,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011739993111840574,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023479986223681148,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011739993111840574,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023479986223681148,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011739993111840574,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023479986223681148,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23177,
+      "region": 0,
+      "physical": [
+        74.52521929366509,
+        2.256134386998079,
+        0.2561974144261675,
+        10.739993111840574
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011739993111840574,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023187367960563806,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011593683980281903,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023187367960563806,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011593683980281903,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023187367960563806,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011593683980281903,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023187367960563806,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011593683980281903,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023187367960563806,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 26259,
+      "region": 0,
+      "physical": [
+        56.89915248067579,
+        1.8463055467132827,
+        0.21755903361044107,
+        10.593683980281902
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011593683980281903,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023647078617011943,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011823539308505972,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023647078617011943,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011823539308505972,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023647078617011943,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011823539308505972,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023647078617011943,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011823539308505972,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023647078617011943,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14074,
+      "region": 1,
+      "physical": [
+        75.13564416810429,
+        2.2237171658563275,
+        0.22851766583553454,
+        10.823539308505971
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011823539308505972,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02356530493001019,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011782652465005095,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02356530493001019,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011782652465005095,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02356530493001019,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011782652465005095,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02356530493001019,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011782652465005095,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02356530493001019,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 23113,
+      "region": 1,
+      "physical": [
+        73.48896816518392,
+        2.1992903599936033,
+        0.23843919616943793,
+        10.782652465005095
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011782652465005095,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.021054968438897738,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.010527484219448869,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.021054968438897738,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.010527484219448869,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.021054968438897738,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.010527484219448869,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.021054968438897738,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.010527484219448869,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.021054968438897738,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 14150,
+      "region": 2,
+      "physical": [
+        -24.336103163329355,
+        0.05768382271928612,
+        0.00025959709414919053,
+        9.52748421944887
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.010527484219448869,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022069638817717386,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011034819408858693,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022069638817717386,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011034819408858693,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022069638817717386,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011034819408858693,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022069638817717386,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011034819408858693,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022069638817717386,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 5059,
+      "region": 2,
+      "physical": [
+        15.587516778447727,
+        1.0500219553454821,
+        0.19141135671123535,
+        10.034819408858693
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011034819408858693,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022083993714073363,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011041996857036681,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022083993714073363,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011041996857036681,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022083993714073363,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011041996857036681,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022083993714073363,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011041996857036681,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.022083993714073363,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 24021,
+      "region": 2,
+      "physical": [
+        16.971327310209315,
+        1.076582357670613,
+        0.1892487874020006,
+        10.04199685703668
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011041996857036681,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02314519849691287,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011572599248456435,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02314519849691287,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011572599248456435,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02314519849691287,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011572599248456435,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02314519849691287,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011572599248456435,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.02314519849691287,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 6080,
+      "region": 2,
+      "physical": [
+        21.48794308732691,
+        1.0097018375633027,
+        0.16907135053079544,
+        10.572599248456434
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011572599248456435,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023106539303100367,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011553269651550183,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023106539303100367,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011553269651550183,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023106539303100367,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011553269651550183,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023106539303100367,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011553269651550183,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023106539303100367,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 28605,
+      "region": 2,
+      "physical": [
+        42.48199661209255,
+        1.5666622936681502,
+        0.18495287755226036,
+        10.553269651550183
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011553269651550183,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.0236600837607983,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.01183004188039915,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.0236600837607983,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.01183004188039915,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.0236600837607983,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.01183004188039915,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.0236600837607983,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.01183004188039915,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.0236600837607983,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 7981,
+      "region": 2,
+      "physical": [
+        73.20616615728665,
+        2.2544587897758315,
+        0.25457874840704386,
+        10.83004188039915
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.01183004188039915,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023182585365262416,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 0.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011591292682631208,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023182585365262416,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 1.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011591292682631208,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023182585365262416,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 5.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011591292682631208,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023182585365262416,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 20.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011591292682631208,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 1.0,
+      "amplitude": 0.023182585365262416,
+      "channel": "physical_applied_G"
+    },
+    {
+      "cell": 12923,
+      "region": 2,
+      "physical": [
+        16.66489041288044,
+        0.9433008184399762,
+        0.15043303909016223,
+        10.591292682631208
+      ],
+      "frequency_Hz": 80.0,
+      "amplitude_factor": 0.5,
+      "amplitude": 0.011591292682631208,
+      "channel": "physical_applied_G"
+    }
+  ]
+}

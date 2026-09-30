@@ -1,0 +1,6 @@
+{
+  "question": "What changes the core input balance as the prescribedK trajectory loses recruitment?",
+  "method": "Descriptive posthoc decomposition of mean current evaluated at each group threshold. Synaptic input is measured from the free density trajectory, not replaced with instantaneous W*r. This is not a causal ablation, native measurement or a bifurcation test.",
+  "timing": "Stored G is after the last0.1ms global update, whereas voltage uses preupdateG. Bound its error using0<=q<=1; M sampledafterupdate has a separate per-step bound. Z/K are clamped as recorded.",
+  "producer_sha256": "7dbcc381c336344c4cbf9000f58fa10477d878b3294007f73973ed8effe3d833"
+}

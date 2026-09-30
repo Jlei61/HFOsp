@@ -1,0 +1,22 @@
+{
+  "created_local": "2026-09-20T11:13:00.793996+08:00",
+  "status": "REGISTERED_BEFORE_CONDITIONAL_FIELD_RUNS",
+  "question": "With bidirectional propagation restored, is the remaining error primarily the free Z depletion path or also the conditional fast-network response at the actual native spatial Z fields?",
+  "model": "Unchanged conditioned39 refractory-rate response; same0.5mm graph, thresholds, delays, actual-member external field and Binomial counts. Failed voltage-memory candidate is NOT used.",
+  "initial": "Replay the completed count arm from0to9000ms; verify every stored1ms count/conditional-rate sample and10ms Z/M sample at original float32 precision. Save the full own-model fast, synaptic, history, Z/M and clock state.",
+  "arms": [
+    "dynamic_reference",
+    "own_Z9000_held",
+    "native_Z9000_held",
+    "native_Z9420_held",
+    "native_Z9870_held"
+  ],
+  "intervention": "All forks start from exactly the same saved rate-model9s state. Held arms freeze the entire projected E Z field; I Z stays1. M starts identically and remains dynamic in every arm. Z means are coordinates, not substitutes for spatial fields.",
+  "input": "Same external forcing9-12.5s and same seed1 Philox(group,tick) innovation keys. Actual output counts differ with conditional probabilities, not identical spikes.",
+  "clock": "dt0.05ms; each arm9-12.5s,10ms fullslow samples and1ms rates. Dynamic reference must reproduce the completed trajectory including full final states.",
+  "readout": "Original global10ms-smoothed quiet<5Hz, complete events with20ms quiet before/after, >=200Hz for200ms entry, tail rate and spatial persistent fraction (>50Hz in>=90percent of last1s). Report both-core order and all fields; no new scalar bifurcation threshold.",
+  "interpretation": "If native preentry fields return to self-limited activity and later field sustains, conditional correspondence is supported in this finite window even if free Z clock differs. If not, fast conditional response also fails. Mixed/censored outcomes remain unresolved, never converted into a bifurcation name.",
+  "comparability": "One own-rate history; native late clamps have native histories at their own clamp times. This is NOT identical fast-state transplantation across model classes and does not establish basin completeness or universal necessity/sufficiency.",
+  "budget": "One9s checkpoint replay plus5fixed3.5s arms,26.5s total. No extra seed, extension, newfit, network parameter change, modelpromotion or continuation.",
+  "prerequisite": "Completed original six-gate comparison remains5/6; broad local-response failures remain. This is a discriminating correspondence test before mathematical onset attribution, not an acceptance waiver."
+}

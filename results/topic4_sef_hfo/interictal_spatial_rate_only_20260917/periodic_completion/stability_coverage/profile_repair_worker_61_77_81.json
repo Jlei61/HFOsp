@@ -1,0 +1,28 @@
+{
+  "status": "BATCH_FINISHED",
+  "pid": 402059,
+  "rows": [
+    {
+      "index": 61,
+      "original_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0056_N256.npz",
+      "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0056_N256_accuracy_N1024.npz",
+      "resolution": {
+        "status": "REFINEMENT_FAILED",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0056_N256.npz",
+        "residual_Hz": 0.008721970830260746
+      },
+      "status": "UNRESOLVED",
+      "reason": "Temporal profile has not passed residual and positivity checks"
+    },
+    {
+      "index": 77,
+      "status": "UNSTABLE",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/arcB_0118_N64_positive_followup.json"
+    },
+    {
+      "index": 81,
+      "status": "UNSTABLE",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/arcB_0124_N64_positive_followup.json"
+    }
+  ]
+}

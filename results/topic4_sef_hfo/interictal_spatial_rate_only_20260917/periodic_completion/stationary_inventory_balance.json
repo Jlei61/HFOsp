@@ -1,0 +1,816 @@
+{
+  "timestamp_utc": "2026-09-17T21:06:30.929114+00:00",
+  "intervals": [
+    {
+      "branch_indices": [
+        180,
+        230
+      ],
+      "J_endpoints": [
+        1.0155259783993953,
+        1.0170874520550361
+      ],
+      "observed_unstable_root_counts": [
+        4,
+        5
+      ],
+      "observed_change": 1,
+      "known_hopfs": [],
+      "known_folds": [
+        {
+          "label": "LP1",
+          "approximate_branch_index": 216,
+          "J_EE_core": 1.0173027588818748
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        230,
+        252
+      ],
+      "J_endpoints": [
+        1.0170874520550361,
+        1.0151467591298569
+      ],
+      "observed_unstable_root_counts": [
+        5,
+        10
+      ],
+      "observed_change": 5,
+      "known_hopfs": [
+        {
+          "label": "H3",
+          "branch_bracket": [
+            244,
+            245
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H4",
+          "branch_bracket": [
+            248,
+            249
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP2",
+          "approximate_branch_index": 248,
+          "J_EE_core": 1.0073769428307213
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        252,
+        267
+      ],
+      "J_endpoints": [
+        1.0151467591298569,
+        1.0253915705709689
+      ],
+      "observed_unstable_root_counts": [
+        10,
+        13
+      ],
+      "observed_change": 3,
+      "known_hopfs": [
+        {
+          "label": "H5",
+          "branch_bracket": [
+            254,
+            255
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H6",
+          "branch_bracket": [
+            257,
+            258
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP3",
+          "approximate_branch_index": 258,
+          "J_EE_core": 1.0296186338952622
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        267,
+        278
+      ],
+      "J_endpoints": [
+        1.0253915705709689,
+        1.0104962102590649
+      ],
+      "observed_unstable_root_counts": [
+        13,
+        10
+      ],
+      "observed_change": -3,
+      "known_hopfs": [
+        {
+          "label": "H7",
+          "branch_bracket": [
+            267,
+            268
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H8",
+          "branch_bracket": [
+            276,
+            277
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP4",
+          "approximate_branch_index": 276,
+          "J_EE_core": 1.007275360202733
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        278,
+        284
+      ],
+      "J_endpoints": [
+        1.0104962102590649,
+        1.0060290247153596
+      ],
+      "observed_unstable_root_counts": [
+        10,
+        7
+      ],
+      "observed_change": -3,
+      "known_hopfs": [
+        {
+          "label": "H9",
+          "branch_bracket": [
+            278,
+            279
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H10",
+          "branch_bracket": [
+            280,
+            281
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP5",
+          "approximate_branch_index": 280,
+          "J_EE_core": 1.0172797102503686
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        284,
+        292
+      ],
+      "J_endpoints": [
+        1.0060290247153596,
+        1.0126137531729096
+      ],
+      "observed_unstable_root_counts": [
+        7,
+        10
+      ],
+      "observed_change": 3,
+      "known_hopfs": [
+        {
+          "label": "H11",
+          "branch_bracket": [
+            286,
+            287
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP6",
+          "approximate_branch_index": 287,
+          "J_EE_core": 1.0043007478606636
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        292,
+        304
+      ],
+      "J_endpoints": [
+        1.0126137531729096,
+        1.0142026087904814
+      ],
+      "observed_unstable_root_counts": [
+        10,
+        13
+      ],
+      "observed_change": 3,
+      "known_hopfs": [
+        {
+          "label": "H12",
+          "branch_bracket": [
+            292,
+            293
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H13",
+          "branch_bracket": [
+            294,
+            295
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP7",
+          "approximate_branch_index": 296,
+          "J_EE_core": 1.0166552572171121
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        304,
+        328
+      ],
+      "J_endpoints": [
+        1.0142026087904814,
+        1.0227870933018506
+      ],
+      "observed_unstable_root_counts": [
+        13,
+        20
+      ],
+      "observed_change": 7,
+      "known_hopfs": [
+        {
+          "label": "H14",
+          "branch_bracket": [
+            305,
+            306
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H15",
+          "branch_bracket": [
+            307,
+            308
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H16",
+          "branch_bracket": [
+            311,
+            312
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H17",
+          "branch_bracket": [
+            318,
+            319
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H18",
+          "branch_bracket": [
+            320,
+            321
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP8",
+          "approximate_branch_index": 312,
+          "J_EE_core": 1.0070170047005285
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        328,
+        350
+      ],
+      "J_endpoints": [
+        1.0227870933018506,
+        1.0588273107840034
+      ],
+      "observed_unstable_root_counts": [
+        20,
+        23
+      ],
+      "observed_change": 3,
+      "known_hopfs": [
+        {
+          "label": "H19",
+          "branch_bracket": [
+            335,
+            336
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP9",
+          "approximate_branch_index": 347,
+          "J_EE_core": 1.0593241152020922
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        350,
+        400
+      ],
+      "J_endpoints": [
+        1.0588273107840034,
+        1.1000337308020172
+      ],
+      "observed_unstable_root_counts": [
+        23,
+        24
+      ],
+      "observed_change": 1,
+      "known_hopfs": [],
+      "known_folds": [
+        {
+          "label": "LP10",
+          "approximate_branch_index": 353,
+          "J_EE_core": 1.0579958610171492
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        400,
+        1000
+      ],
+      "J_endpoints": [
+        1.1000337308020172,
+        1.136966732690319
+      ],
+      "observed_unstable_root_counts": [
+        24,
+        24
+      ],
+      "observed_change": 0,
+      "known_hopfs": [],
+      "known_folds": [],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        1000,
+        1250
+      ],
+      "J_endpoints": [
+        1.136966732690319,
+        1.1555803865456933
+      ],
+      "observed_unstable_root_counts": [
+        24,
+        25
+      ],
+      "observed_change": 1,
+      "known_hopfs": [],
+      "known_folds": [
+        {
+          "label": "LP11",
+          "approximate_branch_index": 1154,
+          "J_EE_core": 1.2012835770138564
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        1250,
+        1450
+      ],
+      "J_endpoints": [
+        1.1555803865456933,
+        1.1370845918201216
+      ],
+      "observed_unstable_root_counts": [
+        25,
+        28
+      ],
+      "observed_change": 3,
+      "known_hopfs": [
+        {
+          "label": "H20",
+          "branch_bracket": [
+            1390,
+            1395
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H21",
+          "branch_bracket": [
+            1390,
+            1395
+          ],
+          "signed_root_change": 2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [
+        {
+          "label": "LP12",
+          "approximate_branch_index": 1366,
+          "J_EE_core": 1.0942360814984398
+        }
+      ],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    },
+    {
+      "branch_indices": [
+        1450,
+        2000
+      ],
+      "J_endpoints": [
+        1.1370845918201216,
+        1.458867251787653
+      ],
+      "observed_unstable_root_counts": [
+        28,
+        22
+      ],
+      "observed_change": -6,
+      "known_hopfs": [
+        {
+          "label": "H22",
+          "branch_bracket": [
+            1570,
+            1580
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H23",
+          "branch_bracket": [
+            1790,
+            1800
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        },
+        {
+          "label": "H24",
+          "branch_bracket": [
+            1940,
+            1950
+          ],
+          "signed_root_change": -2,
+          "validation_status": "VALIDATED_LOCAL_HOPF"
+        }
+      ],
+      "known_folds": [],
+      "minimum_unaccounted_root_change": 0,
+      "status": "ACCOUNTING_NOT_CONTRADICTED"
+    }
+  ],
+  "status": "NECESSARY_ACCOUNTING_PASSES_ONLY",
+  "total_minimum_unaccounted_root_change": 0,
+  "stationary_fold_locations": [
+    {
+      "label": "LP1",
+      "approximate_branch_index": 216,
+      "J_EE_core": 1.0173027588818748
+    },
+    {
+      "label": "LP2",
+      "approximate_branch_index": 248,
+      "J_EE_core": 1.0073769428307213
+    },
+    {
+      "label": "LP3",
+      "approximate_branch_index": 258,
+      "J_EE_core": 1.0296186338952622
+    },
+    {
+      "label": "LP4",
+      "approximate_branch_index": 276,
+      "J_EE_core": 1.007275360202733
+    },
+    {
+      "label": "LP5",
+      "approximate_branch_index": 280,
+      "J_EE_core": 1.0172797102503686
+    },
+    {
+      "label": "LP6",
+      "approximate_branch_index": 287,
+      "J_EE_core": 1.0043007478606636
+    },
+    {
+      "label": "LP7",
+      "approximate_branch_index": 296,
+      "J_EE_core": 1.0166552572171121
+    },
+    {
+      "label": "LP8",
+      "approximate_branch_index": 312,
+      "J_EE_core": 1.0070170047005285
+    },
+    {
+      "label": "LP9",
+      "approximate_branch_index": 347,
+      "J_EE_core": 1.0593241152020922
+    },
+    {
+      "label": "LP10",
+      "approximate_branch_index": 353,
+      "J_EE_core": 1.0579958610171492
+    },
+    {
+      "label": "LP11",
+      "approximate_branch_index": 1154,
+      "J_EE_core": 1.2012835770138564
+    },
+    {
+      "label": "LP12",
+      "approximate_branch_index": 1366,
+      "J_EE_core": 1.0942360814984398
+    }
+  ],
+  "hopf_crossings": [
+    {
+      "label": "H3",
+      "branch_bracket": [
+        244,
+        245
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H4",
+      "branch_bracket": [
+        248,
+        249
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H5",
+      "branch_bracket": [
+        254,
+        255
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H6",
+      "branch_bracket": [
+        257,
+        258
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H7",
+      "branch_bracket": [
+        267,
+        268
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H8",
+      "branch_bracket": [
+        276,
+        277
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H9",
+      "branch_bracket": [
+        278,
+        279
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H10",
+      "branch_bracket": [
+        280,
+        281
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H11",
+      "branch_bracket": [
+        286,
+        287
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H12",
+      "branch_bracket": [
+        292,
+        293
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H13",
+      "branch_bracket": [
+        294,
+        295
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H14",
+      "branch_bracket": [
+        305,
+        306
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H15",
+      "branch_bracket": [
+        307,
+        308
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H16",
+      "branch_bracket": [
+        311,
+        312
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H17",
+      "branch_bracket": [
+        318,
+        319
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H18",
+      "branch_bracket": [
+        320,
+        321
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H19",
+      "branch_bracket": [
+        335,
+        336
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H20",
+      "branch_bracket": [
+        1390,
+        1395
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H21",
+      "branch_bracket": [
+        1390,
+        1395
+      ],
+      "signed_root_change": 2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H22",
+      "branch_bracket": [
+        1570,
+        1580
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H23",
+      "branch_bracket": [
+        1790,
+        1800
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    },
+    {
+      "label": "H24",
+      "branch_bracket": [
+        1940,
+        1950
+      ],
+      "signed_root_change": -2,
+      "validation_status": "VALIDATED_LOCAL_HOPF"
+    }
+  ],
+  "meaning": "Lower bound conditional on the resolved contour counts and generic known crossings. A deficit is missing crossings or a numerical inconsistency, never an automatically named Hopf. Zero deficit does not exclude cancelling crossings. Fold branch positions use nearest full regional equilibrium and lie well inside the listed count intervals."
+}

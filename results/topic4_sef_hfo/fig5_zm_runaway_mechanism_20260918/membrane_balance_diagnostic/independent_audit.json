@@ -1,0 +1,24 @@
+{
+  "status": "MEMBRANE_BALANCE_INDEPENDENT_AUDIT_PASS",
+  "rows": [
+    {
+      "condition": "full",
+      "independent_lfilter_error_mv": 1.6342482922482304e-13,
+      "max_block_conservation_error": 5.10880227011512e-12,
+      "mean_reset_jump_per_spike_mv": 7.963697455582171,
+      "threshold_reset_gap_mv": 7.0,
+      "overshoot_fraction_of_reset_charge": 0.12101130925141623
+    },
+    {
+      "condition": "mean_only",
+      "independent_lfilter_error_mv": 1.7053025658242404e-13,
+      "max_block_conservation_error": 4.959588295605499e-12,
+      "mean_reset_jump_per_spike_mv": 7.895930136505535,
+      "threshold_reset_gap_mv": 7.0,
+      "overshoot_fraction_of_reset_charge": 0.11346733329913206
+    }
+  ],
+  "spike_counts_bitwise": true,
+  "max_ensemble_reconstruction_error_mv": 1.7053025658242404e-13,
+  "scope": "Diagnostic identity using measured impulses and currents. The exact reconstruction is not a predictive rate closure and does not identify onset criticality."
+}

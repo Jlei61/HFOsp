@@ -1,0 +1,51 @@
+{
+  "status": "FILTER_PROFILE_CHECKED",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+  "J_EE_core": 0.9387255555312313,
+  "T_ms": 1650.727135368106,
+  "filter_state_check": {
+    "fast": {
+      "minimum_Hz": -1.7948141108373953e-12,
+      "phase_index": 54044,
+      "group": 915
+    },
+    "slow": {
+      "minimum_Hz": 7.181388356783348e-06,
+      "phase_index": 37604,
+      "group": 237
+    },
+    "positive": true,
+    "N": 16384,
+    "check_N": 65536
+  },
+  "primitive_period_diagnostic": {
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD1_physical_20260920_a10.00000_N16384.npz",
+    "N": 16384,
+    "temporal_RMS_Hz": 38.12029682138796,
+    "first_harmonic_RMS_fraction": 0.0005337517803708004,
+    "nyquist_energy_fraction": 1.5025179978120869e-34,
+    "period_divisor_mismatches": [
+      {
+        "divisor": 2,
+        "relative_difference": 0.012584764851780754
+      },
+      {
+        "divisor": 3,
+        "relative_difference": 1.4598304980028485
+      },
+      {
+        "divisor": 4,
+        "relative_difference": 1.3804640414466185
+      },
+      {
+        "divisor": 5,
+        "relative_difference": 1.437828315871091
+      },
+      {
+        "divisor": 6,
+        "relative_difference": 1.4598305316089508
+      }
+    ]
+  },
+  "scope": "Constituent-filter positivity and full-space half-period mismatch only. Off-grid nonlinear defect, stability and nonlinear criticality remain separate checks."
+}

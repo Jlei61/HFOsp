@@ -1,0 +1,86 @@
+{
+  "status": "COMPLETE",
+  "D": 2.220446049250313e-16,
+  "global_E_hz": 0.12368770774896289,
+  "equilibrium_residual_hz": 5.672545766444159e-13,
+  "roots": [
+    {
+      "lambda_per_ms": [
+        0.014769983044243384,
+        0.032135653375604846
+      ],
+      "residual": 3.2910473412768867e-15,
+      "frequency_hz": 5.114548084215264,
+      "mode_energy_A_B_surround": [
+        2.17380416918737e-08,
+        0.9599887613963797,
+        0.04001121686557875
+      ]
+    }
+  ],
+  "contour": {
+    "unstable_roots": 4,
+    "radius_per_ms": 0.5,
+    "refinements": [
+      {
+        "N": 256,
+        "winding": 4.000000000000001,
+        "max_phase_step": 1.9326929039486225,
+        "count": 4
+      },
+      {
+        "N": 512,
+        "winding": 3.9999999999999996,
+        "max_phase_step": 1.026172638504054,
+        "count": 4
+      },
+      {
+        "N": 1024,
+        "winding": 4.000000000000001,
+        "max_phase_step": 0.5713883622792343,
+        "count": 4
+      }
+    ],
+    "status": "RESOLVED",
+    "det_zero_sign": 1.0,
+    "dynamic_z": false,
+    "seconds": 110.8598644733429
+  },
+  "checks": [
+    {
+      "lambda_per_ms": 0.0,
+      "error": 0.0
+    },
+    {
+      "lambda_per_ms": [
+        0.01,
+        0.03
+      ],
+      "error": 2.220446049250313e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        0.2
+      ],
+      "error": 1.1102230246251565e-16
+    },
+    {
+      "lambda_per_ms": [
+        0.0,
+        2.0
+      ],
+      "error": 1.788112030672749e-18
+    }
+  ],
+  "classification": "UNSTABLE",
+  "contract": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equilibria/native_low_seed/endpoint.npz",
+    "D": 2.220446049250313e-16,
+    "Z": "held",
+    "M": "dynamic",
+    "question": "Is the low equilibrium already unstable at D=0, before later equilibrium turns?",
+    "methods": "Independent characteristic root and refined right-half-plane contour count; do not inherit full Z/M stability"
+  },
+  "scope": "One conditional low equilibrium at physical D=0; does not prove existence or stability of a bursting attractor, or locate the prior instability."
+}

@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-19T19:18:33.221880",
+  "question": "Does reading the existing response coefficients at a filtered operating state reduce the strong-signal stop error without deleting small-signal dynamics?",
+  "variants": [
+    "frozen_response",
+    "alpha_at_filtered_mean_only",
+    "all_weights_at_filtered_mean_and_variance"
+  ],
+  "acceptance": {
+    "waveform_L2_max": 0.15,
+    "relative_mean_error_max": 0.1,
+    "all_selected_groups_required": true
+  },
+  "scope": "Zero-fit open-loop diagnostic using existing MC targets. No new coefficients, network integration, or deployment. Both variants retain the original steady response and first-order susceptibility because coefficient derivatives multiply zero differences at equilibrium; the existing65/146small-signal failures therefore remain. Passing selected waveforms would require independent new waveform validation and response repair before promotion."
+}

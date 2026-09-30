@@ -1,0 +1,25 @@
+{
+  "registered_local": "2026-09-19T23:01:14.140257+08:00",
+  "question": "Does the corrected stationary shared/private variance allocation remain consistent under time-dependent rate drive?",
+  "cycle_source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "frequencies_Hz": [
+    0,
+    2,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "additional_frequency": "Old candidate1/period",
+  "profiles": [
+    "uniform10Hz",
+    "existingoldcyclemean"
+  ],
+  "scope": "Analytical current-covariance diagnostic on the unchanged graph under independent Poisson source groups with a coherent small fractional rate modulation. Exact synaptic current-square kernels on both sides isolate allocation error. This does not alter the response fit, does not recover native cell correlations, and authorizes no new network run or model promotion.",
+  "checks": [
+    "DC equality to completed stationary audit",
+    "Independent direct double-delay sums",
+    "Direct time-domain common kernel integral and selected private-kernel positivity"
+  ]
+}

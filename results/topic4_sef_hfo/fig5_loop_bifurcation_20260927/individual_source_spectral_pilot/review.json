@@ -1,0 +1,865 @@
+{
+  "status": "COMPLETE_BOUNDED_SPECTRAL_PILOT_REVIEW",
+  "generations": [
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 1,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.481484375,
+          "output_rate_Hz": 98.4894072265625,
+          "native_reference_rate_Hz": 98.481484375,
+          "individual_rate_RMS_change_Hz": 0.30402015257845677,
+          "mean_first_second_1s_Hz": [
+            98.48983203125,
+            98.488982421875
+          ],
+          "mean_M_start_end": [
+            98.49119278827585,
+            98.48952238575465
+          ],
+          "mean_M": 98.49024242782319,
+          "counterfactual_mean_Zdot_per_s": 0.08060117814453124,
+          "mean_PSD_L1_change": 0.0019422420522818814,
+          "mean_spike_variance": 0.009419333937993164,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.028221633984375116
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.64522546419096,
+          "output_rate_Hz": 392.72065649867375,
+          "native_reference_rate_Hz": 392.64522546419096,
+          "individual_rate_RMS_change_Hz": 0.7277557557221636,
+          "mean_first_second_1s_Hz": [
+            392.7247181697613,
+            392.7165948275862
+          ],
+          "mean_M_start_end": [
+            392.72586140670313,
+            392.7193265578941
+          ],
+          "mean_M": 392.72392392307785,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.007762605132134464,
+          "mean_spike_variance": 0.037514765140915125,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.47582697201017,
+          "output_rate_Hz": 132.49598441475828,
+          "native_reference_rate_Hz": 132.47582697201017,
+          "individual_rate_RMS_change_Hz": 0.6098972406590195,
+          "mean_first_second_1s_Hz": [
+            132.5009541984733,
+            132.49101463104327
+          ],
+          "mean_M_start_end": [
+            132.50250953862778,
+            132.49623241156877
+          ],
+          "mean_M": 132.49912297828772,
+          "counterfactual_mean_Zdot_per_s": -0.015253120826435401,
+          "mean_PSD_L1_change": 0.004709000860685562,
+          "mean_spike_variance": 0.012700931451375635,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.3226198292843,
+          "output_rate_Hz": 90.32855589297439,
+          "native_reference_rate_Hz": 90.3226198292843,
+          "individual_rate_RMS_change_Hz": 0.27274968305998765,
+          "mean_first_second_1s_Hz": [
+            90.3287733913329,
+            90.32833839461588
+          ],
+          "mean_M_start_end": [
+            90.33013451171402,
+            90.32870339606025
+          ],
+          "mean_M": 90.3292714508013,
+          "counterfactual_mean_Zdot_per_s": 0.08593208788638235,
+          "mean_PSD_L1_change": 0.0017267717244547592,
+          "mean_spike_variance": 0.008639186506196652,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029648466431385547
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.05975,
+          "output_rate_Hz": 129.11075,
+          "native_reference_rate_Hz": 129.05975,
+          "individual_rate_RMS_change_Hz": 1.0216926920709817,
+          "mean_first_second_1s_Hz": [
+            129.1114453125,
+            129.1100546875
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.009749102019922106,
+          "mean_spike_variance": 0.012219504571640625,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.028523161718750044
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.81807002596318,
+      "development_native_field_weighted_RMS_Hz": 0.05192499550260131,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        52.17057967185974,
+        52.09289336204529
+      ]
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 2,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4894072265625,
+          "output_rate_Hz": 98.4898525390625,
+          "native_reference_rate_Hz": 98.481484375,
+          "individual_rate_RMS_change_Hz": 0.04598437765460407,
+          "mean_first_second_1s_Hz": [
+            98.4899765625,
+            98.489728515625
+          ],
+          "mean_M_start_end": [
+            98.49203013492436,
+            98.49012234498824
+          ],
+          "mean_M": 98.4908064340307,
+          "counterfactual_mean_Zdot_per_s": 0.08059440109375,
+          "mean_PSD_L1_change": 0.0005456048869332124,
+          "mean_spike_variance": 0.009419375025366213,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027577689941406223
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.72065649867375,
+          "output_rate_Hz": 392.7241379310345,
+          "native_reference_rate_Hz": 392.64522546419096,
+          "individual_rate_RMS_change_Hz": 0.09679515084336844,
+          "mean_first_second_1s_Hz": [
+            392.72538129973475,
+            392.7228945623342
+          ],
+          "mean_M_start_end": [
+            392.73289536474886,
+            392.72483556914284
+          ],
+          "mean_M": 392.72816782883746,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.002263904030857056,
+          "mean_spike_variance": 0.03751503895598476,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.49598441475828,
+          "output_rate_Hz": 132.4924856870229,
+          "native_reference_rate_Hz": 132.47582697201017,
+          "individual_rate_RMS_change_Hz": 0.09043107376921627,
+          "mean_first_second_1s_Hz": [
+            132.49491094147584,
+            132.49006043256998
+          ],
+          "mean_M_start_end": [
+            132.49822798791556,
+            132.49458735835856
+          ],
+          "mean_M": 132.49430600180136,
+          "counterfactual_mean_Zdot_per_s": -0.015212106990557535,
+          "mean_PSD_L1_change": 0.0014045258210540262,
+          "mean_spike_variance": 0.012700598904460878,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32855589297439,
+          "output_rate_Hz": 90.32902782337491,
+          "native_reference_rate_Hz": 90.3226198292843,
+          "individual_rate_RMS_change_Hz": 0.04217254528720449,
+          "mean_first_second_1s_Hz": [
+            90.32906475705843,
+            90.3289908896914
+          ],
+          "mean_M_start_end": [
+            90.33095055857036,
+            90.32923976877282
+          ],
+          "mean_M": 90.32988321827388,
+          "counterfactual_mean_Zdot_per_s": 0.0859239098660278,
+          "mean_PSD_L1_change": 0.0004809066135012511,
+          "mean_spike_variance": 0.008639231474064346,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02897196579530529
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 129.11075,
+          "output_rate_Hz": 128.8732265625,
+          "native_reference_rate_Hz": 129.05975,
+          "individual_rate_RMS_change_Hz": 0.9257000887419613,
+          "mean_first_second_1s_Hz": [
+            128.875625,
+            128.870828125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0035462765405091384,
+          "mean_spike_variance": 0.012197874455820313,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.027863385937500068
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.81851682448747,
+      "development_native_field_weighted_RMS_Hz": 0.054996667206251716,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        55.29642987251282,
+        55.77514958381653
+      ]
+    },
+    {
+      "status": "COMPLETE_STATIONARY_SPECTRAL_GENERATION",
+      "generation": 3,
+      "rows": [
+        {
+          "region": "allE",
+          "targets": 32000,
+          "input_rate_Hz": 98.4898525390625,
+          "output_rate_Hz": 98.5100380859375,
+          "native_reference_rate_Hz": 98.481484375,
+          "individual_rate_RMS_change_Hz": 0.21356680174735435,
+          "mean_first_second_1s_Hz": [
+            98.510046875,
+            98.510029296875
+          ],
+          "mean_M_start_end": [
+            98.51166118733069,
+            98.5102920001896
+          ],
+          "mean_M": 98.51072267950809,
+          "counterfactual_mean_Zdot_per_s": 0.08062465890625001,
+          "mean_PSD_L1_change": 0.0006322888301484539,
+          "mean_spike_variance": 0.009421280220883791,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0278471176757812
+          ]
+        },
+        {
+          "region": "coreA",
+          "targets": 754,
+          "input_rate_Hz": 392.7241379310345,
+          "output_rate_Hz": 392.7674900530504,
+          "native_reference_rate_Hz": 392.64522546419096,
+          "individual_rate_RMS_change_Hz": 0.21130520130090735,
+          "mean_first_second_1s_Hz": [
+            392.77039124668437,
+            392.76458885941645
+          ],
+          "mean_M_start_end": [
+            392.776402629077,
+            392.76795060508994
+          ],
+          "mean_M": 392.7717160650441,
+          "counterfactual_mean_Zdot_per_s": -0.03483387722099209,
+          "mean_PSD_L1_change": 0.0020113618994666844,
+          "mean_spike_variance": 0.03751913524743038,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "coreB",
+          "targets": 786,
+          "input_rate_Hz": 132.4924856870229,
+          "output_rate_Hz": 132.62511927480915,
+          "native_reference_rate_Hz": 132.47582697201017,
+          "individual_rate_RMS_change_Hz": 0.5821827586523068,
+          "mean_first_second_1s_Hz": [
+            132.62857824427482,
+            132.6216603053435
+          ],
+          "mean_M_start_end": [
+            132.6286403033137,
+            132.6241336932777
+          ],
+          "mean_M": 132.62737257982718,
+          "counterfactual_mean_Zdot_per_s": -0.015151009662313263,
+          "mean_PSD_L1_change": 0.001773828824247433,
+          "mean_spike_variance": 0.012713171766261133,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "region": "surroundE",
+          "targets": 30460,
+          "input_rate_Hz": 90.32902782337491,
+          "output_rate_Hz": 90.34573826329613,
+          "native_reference_rate_Hz": 90.3226198292843,
+          "individual_rate_RMS_change_Hz": 0.19510377471466822,
+          "mean_first_second_1s_Hz": [
+            90.34558642481943,
+            90.34589010177282
+          ],
+          "mean_M_start_end": [
+            90.34713194792694,
+            90.34601904684536
+          ],
+          "mean_M": 90.3462947138369,
+          "counterfactual_mean_Zdot_per_s": 0.08595412088047295,
+          "mean_PSD_L1_change": 0.0005686948862998741,
+          "mean_spike_variance": 0.008640807159666367,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.029255015286441182
+          ]
+        },
+        {
+          "region": "I",
+          "targets": 8000,
+          "input_rate_Hz": 128.8732265625,
+          "output_rate_Hz": 130.46046484375,
+          "native_reference_rate_Hz": 129.05975,
+          "individual_rate_RMS_change_Hz": 5.241338732982937,
+          "mean_first_second_1s_Hz": [
+            130.4621015625,
+            130.458828125
+          ],
+          "mean_M_start_end": [
+            0.0,
+            0.0
+          ],
+          "mean_M": 0.0,
+          "counterfactual_mean_Zdot_per_s": null,
+          "mean_PSD_L1_change": 0.0056618934661609175,
+          "mean_spike_variance": 0.012343109380839844,
+          "mean_negative_IE_II_fractions": [
+            0.0,
+            0.02812904179687497
+          ]
+        }
+      ],
+      "G_used": 0.0,
+      "G_implied_by_output": 0.0,
+      "output_causal_R_DC_Hz": 98.83876973127995,
+      "development_native_field_weighted_RMS_Hz": 0.10935903789372242,
+      "protocol_difference": "Fixed native-window-mean external expected drive; native reference has time-varying external modulation. Native reference is one developmenttrajectory, not an independent acceptance set.",
+      "formal_bifurcation_allowed": false,
+      "root_established": false,
+      "physical_stability_established": false,
+      "elapsed_worker_s": [
+        53.064215898513794,
+        54.700668811798096
+      ]
+    }
+  ],
+  "next_generation_input_variances": [
+    {
+      "generation": 0,
+      "rows": [
+        {
+          "region": "allE",
+          "IE_II_variance": [
+            18.30517286160931,
+            1.375346293108131
+          ]
+        },
+        {
+          "region": "coreA",
+          "IE_II_variance": [
+            26.135437190525074,
+            3.246542139039369
+          ]
+        },
+        {
+          "region": "coreB",
+          "IE_II_variance": [
+            20.73656649664369,
+            3.7780431573828186
+          ]
+        },
+        {
+          "region": "surroundE",
+          "IE_II_variance": [
+            18.048603764395228,
+            1.2670271400171176
+          ]
+        },
+        {
+          "region": "I",
+          "IE_II_variance": [
+            15.464844381978706,
+            0.6741342282001134
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "IE_II_variance": [
+            22.547032432769704,
+            3.8466924708349404
+          ]
+        }
+      ]
+    },
+    {
+      "generation": 1,
+      "rows": [
+        {
+          "region": "allE",
+          "IE_II_variance": [
+            18.281671661521116,
+            1.528840335838823
+          ]
+        },
+        {
+          "region": "coreA",
+          "IE_II_variance": [
+            26.109367471466925,
+            3.6429085121123244
+          ]
+        },
+        {
+          "region": "coreB",
+          "IE_II_variance": [
+            20.60867111525354,
+            4.320129156698036
+          ]
+        },
+        {
+          "region": "surroundE",
+          "IE_II_variance": [
+            18.027859967124073,
+            1.4044818191577493
+          ]
+        },
+        {
+          "region": "I",
+          "IE_II_variance": [
+            15.448239171106394,
+            0.7491795044765444
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "IE_II_variance": [
+            22.42658847221692,
+            4.409442023390215
+          ]
+        }
+      ]
+    },
+    {
+      "generation": 2,
+      "rows": [
+        {
+          "region": "allE",
+          "IE_II_variance": [
+            18.28146041531576,
+            1.569948023286802
+          ]
+        },
+        {
+          "region": "coreA",
+          "IE_II_variance": [
+            26.109534988432735,
+            3.759636112370511
+          ]
+        },
+        {
+          "region": "coreB",
+          "IE_II_variance": [
+            20.608032419775196,
+            4.455912341591389
+          ]
+        },
+        {
+          "region": "surroundE",
+          "IE_II_variance": [
+            18.027650375143836,
+            1.4412745901496968
+          ]
+        },
+        {
+          "region": "I",
+          "IE_II_variance": [
+            15.448085200980337,
+            0.7692978219732393
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "IE_II_variance": [
+            22.425241668271195,
+            4.565833458639975
+          ]
+        }
+      ]
+    },
+    {
+      "generation": 3,
+      "rows": [
+        {
+          "region": "allE",
+          "IE_II_variance": [
+            18.281395489056212,
+            1.5652736256323119
+          ]
+        },
+        {
+          "region": "coreA",
+          "IE_II_variance": [
+            26.107442742686704,
+            3.7455015780566128
+          ]
+        },
+        {
+          "region": "coreB",
+          "IE_II_variance": [
+            20.604858254320018,
+            4.357911036903835
+          ]
+        },
+        {
+          "region": "surroundE",
+          "IE_II_variance": [
+            18.02771586454093,
+            1.439242605232201
+          ]
+        },
+        {
+          "region": "I",
+          "IE_II_variance": [
+            15.44803729498201,
+            0.7668614487374297
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "IE_II_variance": [
+            22.42338768315951,
+            4.604717185074157
+          ]
+        }
+      ]
+    }
+  ],
+  "numerical_replica_uncertainty": [
+    {
+      "generation": 1,
+      "rows": [
+        {
+          "region": "allE",
+          "independent_replica_meanrate_SEM_Hz": 0.00028536118759434314,
+          "target_MC_SEM_RMS_Hz": 0.051046961088081676,
+          "native_IE_II_variance": [
+            21.938172242046537,
+            2.041943656409205
+          ],
+          "sampled_IE_II_variance": [
+            18.251383653631503,
+            1.3755797315449894
+          ]
+        },
+        {
+          "region": "coreA",
+          "independent_replica_meanrate_SEM_Hz": 0.0041870610637036705,
+          "target_MC_SEM_RMS_Hz": 0.11497276279533436,
+          "native_IE_II_variance": [
+            34.50592501031454,
+            3.3711924323173617
+          ],
+          "sampled_IE_II_variance": [
+            26.07898708893614,
+            3.2393291927093637
+          ]
+        },
+        {
+          "region": "coreB",
+          "independent_replica_meanrate_SEM_Hz": 0.0030599406716413846,
+          "target_MC_SEM_RMS_Hz": 0.08578755279396068,
+          "native_IE_II_variance": [
+            28.88045145274919,
+            9.281724479688679
+          ],
+          "sampled_IE_II_variance": [
+            20.6572372779165,
+            3.775765713747914
+          ]
+        },
+        {
+          "region": "surroundE",
+          "independent_replica_meanrate_SEM_Hz": 0.00026999279163694744,
+          "target_MC_SEM_RMS_Hz": 0.047121284315518,
+          "native_IE_II_variance": [
+            21.4479320238296,
+            1.8222220114935015
+          ],
+          "sampled_IE_II_variance": [
+            17.99553946653702,
+            1.2675096962288375
+          ]
+        },
+        {
+          "region": "I",
+          "independent_replica_meanrate_SEM_Hz": 0.002297465733275018,
+          "target_MC_SEM_RMS_Hz": 0.20549158222317362,
+          "native_IE_II_variance": [
+            17.124880959259368,
+            1.001669333970359
+          ],
+          "sampled_IE_II_variance": [
+            15.411353104536655,
+            0.6743216809787566
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "independent_replica_meanrate_SEM_Hz": 0.005011972713569091,
+          "target_MC_SEM_RMS_Hz": 0.14042470697147807,
+          "native_IE_II_variance": [
+            28.5966205170934,
+            6.8428059273188175
+          ],
+          "sampled_IE_II_variance": [
+            22.44625688503428,
+            3.8461152966217274
+          ]
+        }
+      ]
+    },
+    {
+      "generation": 2,
+      "rows": [
+        {
+          "region": "allE",
+          "independent_replica_meanrate_SEM_Hz": 0.00028558323216016756,
+          "target_MC_SEM_RMS_Hz": 0.051086681627539106,
+          "native_IE_II_variance": [
+            21.938172242046537,
+            2.041943656409205
+          ],
+          "sampled_IE_II_variance": [
+            18.227919236197064,
+            1.5290700845016465
+          ]
+        },
+        {
+          "region": "coreA",
+          "independent_replica_meanrate_SEM_Hz": 0.00417569540173886,
+          "target_MC_SEM_RMS_Hz": 0.11466067239655324,
+          "native_IE_II_variance": [
+            34.50592501031454,
+            3.3711924323173617
+          ],
+          "sampled_IE_II_variance": [
+            26.054271774205237,
+            3.6346394981845136
+          ]
+        },
+        {
+          "region": "coreB",
+          "independent_replica_meanrate_SEM_Hz": 0.0030868569141546016,
+          "target_MC_SEM_RMS_Hz": 0.08654216826641656,
+          "native_IE_II_variance": [
+            28.88045145274919,
+            9.281724479688679
+          ],
+          "sampled_IE_II_variance": [
+            20.53033357427385,
+            4.31632043280813
+          ]
+        },
+        {
+          "region": "surroundE",
+          "independent_replica_meanrate_SEM_Hz": 0.0002701556962408247,
+          "target_MC_SEM_RMS_Hz": 0.047149715719590195,
+          "native_IE_II_variance": [
+            21.4479320238296,
+            1.8222220114935015
+          ],
+          "sampled_IE_II_variance": [
+            17.974775195377145,
+            1.4050261543741092
+          ]
+        },
+        {
+          "region": "I",
+          "independent_replica_meanrate_SEM_Hz": 0.0022944094618541464,
+          "target_MC_SEM_RMS_Hz": 0.20521822099698325,
+          "native_IE_II_variance": [
+            17.124880959259368,
+            1.001669333970359
+          ],
+          "sampled_IE_II_variance": [
+            15.394865347818795,
+            0.7493685016449603
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "independent_replica_meanrate_SEM_Hz": 0.005065002284692568,
+          "target_MC_SEM_RMS_Hz": 0.14191048161779182,
+          "native_IE_II_variance": [
+            28.5966205170934,
+            6.8428059273188175
+          ],
+          "sampled_IE_II_variance": [
+            22.32914453984488,
+            4.408645030727646
+          ]
+        }
+      ]
+    },
+    {
+      "generation": 3,
+      "rows": [
+        {
+          "region": "allE",
+          "independent_replica_meanrate_SEM_Hz": 0.00028497615335204703,
+          "target_MC_SEM_RMS_Hz": 0.05097808406892653,
+          "native_IE_II_variance": [
+            21.938172242046537,
+            2.041943656409205
+          ],
+          "sampled_IE_II_variance": [
+            18.227698960352715,
+            1.5701603839901106
+          ]
+        },
+        {
+          "region": "coreA",
+          "independent_replica_meanrate_SEM_Hz": 0.0041525122692741764,
+          "target_MC_SEM_RMS_Hz": 0.11402408536112148,
+          "native_IE_II_variance": [
+            34.50592501031454,
+            3.3711924323173617
+          ],
+          "sampled_IE_II_variance": [
+            26.054402520402828,
+            3.7511923675845424
+          ]
+        },
+        {
+          "region": "coreB",
+          "independent_replica_meanrate_SEM_Hz": 0.00310767957829838,
+          "target_MC_SEM_RMS_Hz": 0.08712594605534574,
+          "native_IE_II_variance": [
+            28.88045145274919,
+            9.281724479688679
+          ],
+          "sampled_IE_II_variance": [
+            20.529574366778025,
+            4.451089468967297
+          ]
+        },
+        {
+          "region": "surroundE",
+          "independent_replica_meanrate_SEM_Hz": 0.00026950739247279227,
+          "target_MC_SEM_RMS_Hz": 0.04703656860187989,
+          "native_IE_II_variance": [
+            21.4479320238296,
+            1.8222220114935015
+          ],
+          "sampled_IE_II_variance": [
+            17.97456013718391,
+            1.4418311529847667
+          ]
+        },
+        {
+          "region": "I",
+          "independent_replica_meanrate_SEM_Hz": 0.00228358252434805,
+          "target_MC_SEM_RMS_Hz": 0.20424983026691235,
+          "native_IE_II_variance": [
+            17.124880959259368,
+            1.001669333970359
+          ],
+          "sampled_IE_II_variance": [
+            15.394719507473615,
+            0.7694980462480092
+          ]
+        },
+        {
+          "region": "selected_edges",
+          "independent_replica_meanrate_SEM_Hz": 0.004942155888930123,
+          "target_MC_SEM_RMS_Hz": 0.13846858954987612,
+          "native_IE_II_variance": [
+            28.5966205170934,
+            6.8428059273188175
+          ],
+          "sampled_IE_II_variance": [
+            22.327971983622124,
+            4.565262369494051
+          ]
+        }
+      ]
+    }
+  ],
+  "native_correspondence_certified": false,
+  "root_established": false,
+  "formal_bifurcation_allowed": false,
+  "physical_stability_established": false,
+  "producer_sha256": "f3b9194d8443091bd8581d3a26cdc12ef742ec964bd0249a9c6a000b9423a3dd"
+}

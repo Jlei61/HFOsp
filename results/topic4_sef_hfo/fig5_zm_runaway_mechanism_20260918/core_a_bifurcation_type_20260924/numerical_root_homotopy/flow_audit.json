@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/numerical_root_homotopy/physical_candidate.npz",
+  "static_residual_per_ms": 9.71445146547012e-15,
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "one_step_errors": {
+        "rate_per_ms": 2.1760371282653068e-14,
+        "syn": 2.2737367544323206e-13,
+        "local": 4.547473508864641e-13
+      },
+      "ten_ms_rate_error_per_ms": 1.3322676295501878e-13,
+      "Z_held": true,
+      "M_dynamic": true
+    },
+    {
+      "dt_ms": 0.025,
+      "one_step_errors": {
+        "rate_per_ms": 1.915134717478395e-14,
+        "syn": 2.2737367544323206e-13,
+        "local": 4.547473508864641e-13
+      },
+      "ten_ms_rate_error_per_ms": 4.3175185648891556e-13,
+      "Z_held": true,
+      "M_dynamic": true
+    }
+  ],
+  "scope": "Actual corrected complete-model stationary flow identity at two steps; stability and onset attribution are separate.",
+  "model_promoted": false
+}

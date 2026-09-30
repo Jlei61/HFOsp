@@ -1,0 +1,78 @@
+{
+  "status": "COMPLETE",
+  "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+  "rows": [
+    {
+      "interval_s": [
+        0,
+        5
+      ],
+      "native_rates_Hz": [
+        191.37848125000005,
+        463.2859416445621,
+        472.5417302798959,
+        177.39251477347344
+      ],
+      "density_rates_Hz": [
+        196.25242878438567,
+        465.34359272868215,
+        474.24902276914605,
+        182.41788970079972
+      ],
+      "native_Graw": 0.5621846358024392,
+      "density_Graw": 0.6235263864466943,
+      "native_dZ_per_s": [
+        0.034768537000000044,
+        -0.0348338772209919,
+        -0.033073757753916404,
+        0.03824208473470801
+      ],
+      "density_dZ_per_s": [
+        0.03236653932980478,
+        -0.03483387689533417,
+        -0.03307375779645461,
+        0.03571864659753267
+      ],
+      "spatial_field_weighted_RMS_Hz": 15.080238996253598
+    },
+    {
+      "interval_s": [
+        5,
+        10
+      ],
+      "native_rates_Hz": [
+        196.9063125,
+        474.07161803713575,
+        474.1954198473267,
+        182.89016414970436
+      ],
+      "density_rates_Hz": [
+        200.45667580503834,
+        472.3094808612018,
+        474.9951363553624,
+        186.64301050612534
+      ],
+      "native_Graw": 2.6878804695846753e-05,
+      "density_Graw": 0.11277464490271313,
+      "native_dZ_per_s": [
+        0.040240903125,
+        -0.0348338772209919,
+        -0.033073757753916404,
+        0.043991123342718534
+      ],
+      "density_dZ_per_s": [
+        0.03816512537349025,
+        -0.03483387689533417,
+        -0.03307375779645461,
+        0.041810398186434235
+      ],
+      "spatial_field_weighted_RMS_Hz": 18.52157552223716
+    }
+  ],
+  "native_complete30s": true,
+  "density_complete10s": true,
+  "scope": "Same declared initial physical state, heldfields and expectedexternaldrive; different microscopic noise. No posthoc acceptance gate, stability or bifurcation promotion.",
+  "producer_sha256": "ce94aa595aafcbef6e97e00ef753c4fd1f40ed59d5c8c1101733ea4608fb9852",
+  "formal_bifurcation_allowed": false,
+  "native_correspondence_certified": false
+}

@@ -1,0 +1,30 @@
+{
+  "status": "SEED_ONLY",
+  "amplitude_Hz": 0.049174332177732,
+  "endpoints": [
+    {
+      "amplitude_Hz": 0.04,
+      "J_EE_core": 0.9463110304889113,
+      "weak_multiplier": -3.8779653233604052,
+      "weak_margin": 0.09107308792190585,
+      "block_at_minus_one": 176.768593904268,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k6_20260920_dt0.025.json"
+      ]
+    },
+    {
+      "amplitude_Hz": 0.08,
+      "J_EE_core": 0.9463114738407228,
+      "weak_multiplier": -0.20845921245533774,
+      "weak_margin": 0.4707888217396826,
+      "block_at_minus_one": -860.3585919459823,
+      "sources": [
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index2_full_k6_20260920_dt0.05.json",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index2_full_k6_20260920_dt0.025.json"
+      ]
+    }
+  ],
+  "rule": "Interpolate the selected two-mode characteristic evaluated at -1 linearly in squared child amplitude.",
+  "scope": "Numerical initial guess only; not a located root or a certified continuation of this spectral block."
+}

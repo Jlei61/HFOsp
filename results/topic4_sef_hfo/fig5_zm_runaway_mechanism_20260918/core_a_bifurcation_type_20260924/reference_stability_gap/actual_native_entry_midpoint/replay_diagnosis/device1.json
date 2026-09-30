@@ -1,0 +1,276 @@
+{
+  "status": "REPLAY_DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "mode": "graph",
+      "full_initial_bits": true,
+      "terminal_bits_vs_first": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      },
+      "original_blocks_vs_first": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 12.79902709565935,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "GABA": {
+            "reference_rms": 1.859490223370314,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "M": {
+            "reference_rms": 0.021784923594454615,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "covariance": {
+            "reference_rms": 36.77559027950902,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "input_memory": {
+            "reference_rms": 0.1392228847382295,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "delay_refractory_history": {
+            "reference_rms": 6.696229197451866e-05,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        "combined_relative_rms": 0.0
+      },
+      "expected_emitted_bitwise": true,
+      "output_max_difference_vs_first": 0.0
+    },
+    {
+      "mode": "graph",
+      "full_initial_bits": true,
+      "terminal_bits_vs_first": {
+        "syn": false,
+        "local": false,
+        "history": false,
+        "clock": true,
+        "rate": false,
+        "physical": false,
+        "emitted": false,
+        "accumulator": true,
+        "output": false,
+        "arrivals": false,
+        "parameters": true
+      },
+      "original_blocks_vs_first": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 12.79902709565935,
+            "difference_rms": 2.730336161416495e-16,
+            "relative_rms": 2.1332372695284462e-17
+          },
+          "GABA": {
+            "reference_rms": 1.859490223370314,
+            "difference_rms": 9.343659606360139e-18,
+            "relative_rms": 5.024850084677948e-18
+          },
+          "M": {
+            "reference_rms": 0.021784923594454615,
+            "difference_rms": 1.1888673950683415e-22,
+            "relative_rms": 5.4572943068341516e-21
+          },
+          "covariance": {
+            "reference_rms": 36.77559027950902,
+            "difference_rms": 2.4263004993405384e-16,
+            "relative_rms": 6.597584106467621e-18
+          },
+          "input_memory": {
+            "reference_rms": 0.1392228847382295,
+            "difference_rms": 2.6276745576656128e-18,
+            "relative_rms": 1.8873869497864773e-17
+          },
+          "delay_refractory_history": {
+            "reference_rms": 6.696229197451866e-05,
+            "difference_rms": 3.062653960798294e-19,
+            "relative_rms": 4.5736994217039856e-15
+          }
+        },
+        "combined_relative_rms": 1.8672442471207937e-15
+      },
+      "expected_emitted_bitwise": true,
+      "output_max_difference_vs_first": 2.4868995751603507e-14
+    },
+    {
+      "mode": "manual",
+      "full_initial_bits": true,
+      "terminal_bits_vs_first": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      },
+      "original_blocks_vs_first": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 12.79902709565935,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "GABA": {
+            "reference_rms": 1.859490223370314,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "M": {
+            "reference_rms": 0.021784923594454615,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "covariance": {
+            "reference_rms": 36.77559027950902,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "input_memory": {
+            "reference_rms": 0.1392228847382295,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          },
+          "delay_refractory_history": {
+            "reference_rms": 6.696229197451866e-05,
+            "difference_rms": 0.0,
+            "relative_rms": 0.0
+          }
+        },
+        "combined_relative_rms": 0.0
+      },
+      "expected_emitted_bitwise": true,
+      "output_max_difference_vs_first": 0.0
+    },
+    {
+      "mode": "manual",
+      "full_initial_bits": true,
+      "terminal_bits_vs_first": {
+        "syn": false,
+        "local": false,
+        "history": false,
+        "clock": true,
+        "rate": false,
+        "physical": false,
+        "emitted": false,
+        "accumulator": true,
+        "output": false,
+        "arrivals": false,
+        "parameters": true
+      },
+      "original_blocks_vs_first": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 12.79902709565935,
+            "difference_rms": 2.887604503422533e-16,
+            "relative_rms": 2.256112501239905e-17
+          },
+          "GABA": {
+            "reference_rms": 1.859490223370314,
+            "difference_rms": 2.570070548545729e-18,
+            "relative_rms": 1.3821371665442222e-18
+          },
+          "M": {
+            "reference_rms": 0.021784923594454615,
+            "difference_rms": 3.127406119146037e-20,
+            "relative_rms": 1.4355827807181857e-18
+          },
+          "covariance": {
+            "reference_rms": 36.77559027950902,
+            "difference_rms": 2.2638403489221365e-16,
+            "relative_rms": 6.155823283096356e-18
+          },
+          "input_memory": {
+            "reference_rms": 0.1392228847382295,
+            "difference_rms": 1.8882229689532405e-18,
+            "relative_rms": 1.3562590464229546e-17
+          },
+          "delay_refractory_history": {
+            "reference_rms": 6.696229197451866e-05,
+            "difference_rms": 4.512713905989384e-19,
+            "relative_rms": 6.7391867466343884e-15
+          }
+        },
+        "combined_relative_rms": 2.7512837252088913e-15
+      },
+      "expected_emitted_bitwise": true,
+      "output_max_difference_vs_first": 5.417888360170764e-14
+    },
+    {
+      "mode": "graph_sync",
+      "full_initial_bits": true,
+      "terminal_bits_vs_first": {
+        "syn": false,
+        "local": false,
+        "history": false,
+        "clock": true,
+        "rate": false,
+        "physical": false,
+        "emitted": false,
+        "accumulator": true,
+        "output": false,
+        "arrivals": false,
+        "parameters": true
+      },
+      "original_blocks_vs_first": {
+        "blocks": {
+          "AMPA": {
+            "reference_rms": 12.79902709565935,
+            "difference_rms": 1.9296174420447116e-16,
+            "relative_rms": 1.5076282186316493e-17
+          },
+          "GABA": {
+            "reference_rms": 1.859490223370314,
+            "difference_rms": 5.247192633977453e-18,
+            "relative_rms": 2.82184470132193e-18
+          },
+          "M": {
+            "reference_rms": 0.021784923594454615,
+            "difference_rms": 8.720737942160426e-23,
+            "relative_rms": 4.003106967233203e-21
+          },
+          "covariance": {
+            "reference_rms": 36.77559027950902,
+            "difference_rms": 1.1850995692531311e-16,
+            "relative_rms": 3.22251678421993e-18
+          },
+          "input_memory": {
+            "reference_rms": 0.1392228847382295,
+            "difference_rms": 2.0375071981435975e-18,
+            "relative_rms": 1.4634858356616958e-17
+          },
+          "delay_refractory_history": {
+            "reference_rms": 6.696229197451866e-05,
+            "difference_rms": 2.614389322363605e-19,
+            "relative_rms": 3.904270963960531e-15
+          }
+        },
+        "combined_relative_rms": 1.5939359868381865e-15
+      },
+      "expected_emitted_bitwise": true,
+      "output_max_difference_vs_first": 2.6645352591003757e-14
+    }
+  ],
+  "scope": "Diagnostic only. The prior failed exact replay remains failed; no implementation gate or bifurcation certificate is changed."
+}

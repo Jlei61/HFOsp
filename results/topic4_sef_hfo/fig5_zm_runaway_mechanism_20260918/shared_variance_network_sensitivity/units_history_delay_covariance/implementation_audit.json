@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "stationary_split": [
+    {
+      "synapse": "ampa",
+      "stationary_pairwise_relative_error": 1.306459538026045e-15,
+      "removed_fraction_range": [
+        9.70873786407767e-05,
+        1.0
+      ],
+      "private_operator_minimum": 0.0,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 0.00018423994367459823,
+      "previous_Heun_fraction_max": 1.0001201916879823,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 1788698
+    },
+    {
+      "synapse": "gaba",
+      "stationary_pairwise_relative_error": 1.3772356521005136e-15,
+      "removed_fraction_range": [
+        0.0003527336860670194,
+        0.9934266453494045
+      ],
+      "private_operator_minimum": 8.193921358523384e-05,
+      "fraction_roundoff_cleanup_count": 0,
+      "fraction_roundoff_max": 0.0,
+      "finite_Heun_remaining_variance_relative_max": 2.2038376751168848e-05,
+      "previous_Heun_fraction_max": 0.9934090790229431,
+      "all_pair_fractions_physical": true,
+      "operator_nnz": 905662
+    }
+  ],
+  "actual_input_RHS": [
+    {
+      "tick": 0,
+      "drive_index": 0,
+      "RHS_error": 1.0658141036401503e-14,
+      "rate_error": 2.1094237467877974e-15
+    },
+    {
+      "tick": 10013,
+      "drive_index": 1001,
+      "RHS_error": 1.0658141036401503e-14,
+      "rate_error": 3.4416913763379853e-15
+    },
+    {
+      "tick": 94209,
+      "drive_index": 9420,
+      "RHS_error": 1.0658141036401503e-14,
+      "rate_error": 2.4424906541753444e-15
+    }
+  ],
+  "same_initial_state_and_history": true
+}

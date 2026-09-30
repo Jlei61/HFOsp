@@ -1,0 +1,31 @@
+{
+  "status": "REGISTERED_TWO_LONGER_HISTORY_TESTS",
+  "created_epoch": 1790571663.1053483,
+  "question": "Does the leading recurrent mean retain native spatial recruitment, core activity, resource balance and feedback over10s from both high and asymmetric complete native histories at identical held Z/K?",
+  "design": "Exactly two10s physical trajectories,40000 targets x64 numericalreplicas. Native full72s and42s states with all membrane/ref/synaptic/M/global states and pending pulses. Same individualthresholds, graphweights/full delays, fixedpercell externalmeans and Poissonlaw. Z/K held; G/M/recurrent rates free. No periodforcing or biological parameter fitting.",
+  "rationale": "The preceding1s high-state result passed unchanged spatial/core/feedback relevance guards after omitting an independently approximated recurrent residual whose white temporal structure was shown to overstate filtered variance. This pair tests persistence and an independent native history, not another noise fit.",
+  "references": {
+    "high": {
+      "initial": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_held_history/runs/exit_z0.21_k9.35_fields16p7_held_K9_history/checkpoint.pkl",
+      "initial_sha256": "e6f898b416a18b43b881a1ae83a892b630b07be1d59ec156a0e8e1e5a6551f12",
+      "initial_step": 720000,
+      "native": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/runs/high_history_constant_background"
+    },
+    "asymmetric": {
+      "initial": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_exit_K_bracket/runs/exit_z0.21_k9.35_fields16p7_high/checkpoint.pkl",
+      "initial_sha256": "e23265ca72727d4872c60b9687495360c6c834f8828c92e922e1ddf5acfa3580",
+      "initial_step": 420000,
+      "native": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/runs/asymmetric_history_constant_background"
+    }
+  },
+  "guards": "For each0-5s and5-10s interval: spatial fieldRMS<=10Hz, eachcore absolute meanrate error<=10Hz, eachcore Zdrift error<=.01/s; whole causalR<200 and Graw<.1 as both native references remainfeedback-off. Same thresholds across histories. Passing is conditional development correspondence, not branch/stability certification.",
+  "outputs": "Continuous1ms groupoutputs plus globalR/G; final fullmodelstate and numericalRNG. Compare native5ms space,1msR/G,20msdrift without temporal phase alignment. Replicas are not native seeds.",
+  "stop": "Stop each after10s and analyze both. No automatic extension, scan, root or bifurcation calculation. If one fails, inspect the discrepancy before changing closure.",
+  "dependencies": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_history_pair.py": "26d3da49c34293adcbda3d30ed43cf2f50f1d0660c22eda068a92c3d78049bb8",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_mean_input_pilot.py": "2d0f1482f0761a02cddce83230dec6d919ac8203390fde751e15bca6fce8affa",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_individual_source_pilot.py": "e02b9ee463458fb0bfe053121f37c9e176369c3f197acd5640cd10a590f22fe1",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/dynamic_poisson_external_pilot.py": "1858427dc7405fa4f54b3988a148c5f76a2c4f11aa212be8309c80d9b0411e1f"
+  },
+  "formal_bifurcation_allowed": false
+}

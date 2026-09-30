@@ -1,0 +1,17 @@
+{
+  "created_local": "2026-09-19T19:04:55.556685",
+  "question": "Separate stationary transfer accuracy from nonstationary cycle response failure at the same selected groups and actual input range.",
+  "source": "native_cycle_waveform_response/prepared.npz",
+  "selection": "The already selected four groups; 32 equally spaced phase midpoints, each held constant independently.",
+  "phases": 32,
+  "replicates": 2048,
+  "burn_ms": 500,
+  "duration_ms": 2000,
+  "seed": 919782,
+  "dt_ms": 0.1,
+  "pointwise_min_rate_hz": 1,
+  "acceptance": {
+    "relative_L2_max": 0.1
+  },
+  "scope": "Stationary response diagnostic only. Raw variance intensities are held constant until synaptic equilibrium, then compared to the frozen static transfer at those same intensities. Phase averages are NOT actual cycle mean rates. No closure fit, model change, or bifurcation certificate."
+}

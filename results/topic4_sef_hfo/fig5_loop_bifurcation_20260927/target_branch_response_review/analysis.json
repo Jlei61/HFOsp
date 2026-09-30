@@ -1,0 +1,58 @@
+{
+  "status": "COMPLETE_REVIEW_OF_REJECTED_STATIC_RESPONSE",
+  "accepted_numerical_roots": 22,
+  "maximum_K_sampled": 9.200426502689474,
+  "last_allE_coreA_coreB_Hz": [
+    237.39570137306828,
+    466.37072861512263,
+    468.05771011823185
+  ],
+  "turn_change_E_cells_for_90percent_absolute_change": 1602,
+  "turn_change_E_fraction": 0.0500625,
+  "turn_change_absolute_fraction_by_coreA_coreB_surround": [
+    0.002815553351362904,
+    0.0008989161795289727,
+    0.9962855304691081
+  ],
+  "turn_change_definition": "Finite difference of individual target rates between v2 points006 and008. This is NOT a Jacobian eigenmode or certified nullvector.",
+  "root_native_weighted_field_RMS_Hz": 6.30724845489125,
+  "root_native_weighted_field_MAE_Hz": 4.444538526937155,
+  "static_response_audit_summary": [
+    {
+      "kernel": "exact_colored",
+      "population": "E",
+      "primary": 44,
+      "estimable": 31,
+      "derivative_pass": 2,
+      "mean_pass": 36
+    },
+    {
+      "kernel": "exact_colored",
+      "population": "I",
+      "primary": 21,
+      "estimable": 19,
+      "derivative_pass": 14,
+      "mean_pass": 21
+    },
+    {
+      "kernel": "density_discrete",
+      "population": "E",
+      "primary": 44,
+      "estimable": 32,
+      "derivative_pass": 2,
+      "mean_pass": 36
+    },
+    {
+      "kernel": "density_discrete",
+      "population": "I",
+      "primary": 21,
+      "estimable": 19,
+      "derivative_pass": 15,
+      "mean_pass": 21
+    }
+  ],
+  "decision": "Reject use of these roots/turns for formal bifurcation until the local response is repaired. The first numerical turn changes recruitment in the surround; high global and both core rates remain. No certified stable/unstable labels or native fold.",
+  "native_physics_changed": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "7342c6053eaf3ed05726d4b842a5c83de144056586055d056acf8b9da03c41e2"
+}

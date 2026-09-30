@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "dt": 0.05,
+      "tick": 0,
+      "maximum_error": 1.7763568394002505e-15
+    },
+    {
+      "dt": 0.05,
+      "tick": 19,
+      "maximum_error": 1.7763568394002505e-15
+    },
+    {
+      "dt": 0.05,
+      "tick": 188400,
+      "maximum_error": 1.7763568394002505e-15
+    },
+    {
+      "dt": 0.025,
+      "tick": 0,
+      "maximum_error": 1.7763568394002505e-15
+    },
+    {
+      "dt": 0.025,
+      "tick": 39,
+      "maximum_error": 1.7763568394002505e-15
+    },
+    {
+      "dt": 0.025,
+      "tick": 376800,
+      "maximum_error": 1.7763568394002505e-15
+    }
+  ],
+  "DC_same": true,
+  "finite_prefix_ms": 10,
+  "scope": "Onlyexternalmeanfilterchange independentlychecked at bothsteps,heterogeneousgroups andthreeclocks. LocalrateCUDA andtransportchecks inheritedunchanged."
+}

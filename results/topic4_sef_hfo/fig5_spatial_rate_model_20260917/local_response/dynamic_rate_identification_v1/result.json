@@ -1,0 +1,158 @@
+{
+  "status": "LOCAL_IDENTIFICATION_COMPLETE",
+  "rows": [
+    {
+      "model": "linear",
+      "parameters": [
+        4.98140083252336,
+        19.99999999999999,
+        0.05000000000000003,
+        19.99999999999999
+      ],
+      "optimizer_success": true,
+      "cost": 0.1254501970021584,
+      "optimizer_evaluations": 17,
+      "minimum_raw_rate_per_ms": 0.0,
+      "responses": [
+        {
+          "population": 0,
+          "theta": 15.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 89.2586669921875,
+          "model_mean_hz": 90.45292076960477,
+          "normalized_rmse_10ms": 0.03967610773196359,
+          "rmse_10ms_hz": 6.332486309885025
+        },
+        {
+          "population": 0,
+          "theta": 18.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 64.831787109375,
+          "model_mean_hz": 65.47183110428799,
+          "normalized_rmse_10ms": 0.02839244159164943,
+          "rmse_10ms_hz": 3.502052025982721
+        },
+        {
+          "population": 1,
+          "theta": 18.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 129.2181396484375,
+          "model_mean_hz": 130.14772225263872,
+          "normalized_rmse_10ms": 0.011343706437913619,
+          "rmse_10ms_hz": 2.8093719251709985
+        },
+        {
+          "population": 0,
+          "theta": 15.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 75.04248046875,
+          "model_mean_hz": 81.90512027856524,
+          "normalized_rmse_10ms": 0.15659993472187933,
+          "rmse_10ms_hz": 15.843781897063328
+        },
+        {
+          "population": 0,
+          "theta": 18.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 41.3746337890625,
+          "model_mean_hz": 46.39041848934902,
+          "normalized_rmse_10ms": 0.22052658181146015,
+          "rmse_10ms_hz": 13.47039337257091
+        },
+        {
+          "population": 1,
+          "theta": 18.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 80.23095703125,
+          "model_mean_hz": 86.74624098487695,
+          "normalized_rmse_10ms": 0.1285469906876234,
+          "rmse_10ms_hz": 14.924417244372217
+        }
+      ]
+    },
+    {
+      "model": "nonlinear",
+      "parameters": [
+        19.999999768855,
+        17.77696459410301,
+        0.05000000000000003,
+        19.99999999999999
+      ],
+      "optimizer_success": true,
+      "cost": 134501.71804896908,
+      "optimizer_evaluations": 11,
+      "minimum_raw_rate_per_ms": -249.01118787289556,
+      "responses": [
+        {
+          "population": 0,
+          "theta": 15.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 89.2586669921875,
+          "model_mean_hz": 5013.310284249389,
+          "normalized_rmse_10ms": 43.65905231606216,
+          "rmse_10ms_hz": 6968.182286471855
+        },
+        {
+          "population": 0,
+          "theta": 18.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 64.831787109375,
+          "model_mean_hz": 65.61561649576106,
+          "normalized_rmse_10ms": 0.03193950733850724,
+          "rmse_10ms_hz": 3.939563141220192
+        },
+        {
+          "population": 1,
+          "theta": 18.0,
+          "input": "pulse",
+          "role": "training",
+          "native_mean_hz": 129.2181396484375,
+          "model_mean_hz": 5029.663064286487,
+          "normalized_rmse_10ms": 27.998580173119482,
+          "rmse_10ms_hz": 6934.102668605237
+        },
+        {
+          "population": 0,
+          "theta": 15.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 75.04248046875,
+          "model_mean_hz": 81.3504671049001,
+          "normalized_rmse_10ms": 0.1809545474293293,
+          "rmse_10ms_hz": 18.307826167641004
+        },
+        {
+          "population": 0,
+          "theta": 18.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 41.3746337890625,
+          "model_mean_hz": 45.833191311064965,
+          "normalized_rmse_10ms": 0.25176447015662584,
+          "rmse_10ms_hz": 15.378492798415104
+        },
+        {
+          "population": 1,
+          "theta": 18.0,
+          "input": "multisine",
+          "role": "held_out_waveform",
+          "native_mean_hz": 80.23095703125,
+          "model_mean_hz": 86.32888929941122,
+          "normalized_rmse_10ms": 0.14462574111036214,
+          "rmse_10ms_hz": 16.79117413065523
+        }
+      ]
+    }
+  ],
+  "wall_s": 0.9827065467834473,
+  "network_equivalence": "NOT_TESTED",
+  "bifurcation": "NOT_STARTED"
+}

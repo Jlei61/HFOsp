@@ -1,0 +1,37 @@
+{
+  "status": "UNRESOLVED",
+  "reliable_outside_count": 1,
+  "margin": 0.07452582858512728,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512.npz",
+  "J_EE_core": 0.9381628955613394,
+  "T_ms": 856.1385525248754,
+  "memberships": [
+    {
+      "family": "double",
+      "index": 39
+    }
+  ],
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512_accuracy_N2048.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 0.9381628955613394,
+    "T_ms": 856.1558280669718,
+    "maximum_group_defect_Hz": 0.05617000584712262,
+    "regional_defect_Hz": [
+      0.00031664274093999394,
+      0.00032810800469807583,
+      0.00011047886603569343
+    ],
+    "minimum_rate_Hz": -3.2465474197884703e-06
+  },
+  "floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcDoubleLow_0005_N512_accuracy_N2048_dt0.1.json",
+  "elapsed_seconds": 961.7799985408783,
+  "scope": "Full state and delay-history Arnoldi at this orbit; sampled stability, not a continuum completeness certificate.",
+  "classification_basis": "Continuous Fourier-interpolated rate becomes negative beyond roundoff tolerance; temporal resolution must be repaired before retaining the stability classification.",
+  "prior_classification_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/attempt_history/arcDoubleLow_0005_N512_before_positivity_1789701391448732561.json",
+  "positivity_review_required": true
+}

@@ -1,0 +1,30 @@
+{
+  "created_local": "2026-09-19T21:13:13.050614+08:00",
+  "question": "Can moving the same convex mean-filter mixing through the static nonlinearity improve strong-waveform response without changing static and first-order local response?",
+  "variants": [
+    [
+      "input_mix_instantaneous",
+      false,
+      false
+    ],
+    [
+      "input_mix_history",
+      true,
+      false
+    ],
+    [
+      "output_mix_instantaneous",
+      false,
+      true
+    ],
+    [
+      "output_mix_history",
+      true,
+      true
+    ]
+  ],
+  "changes": "All include diagnosed voltage scaling, same poles/weights/Phi/variance filters. Input Phi(alpha*mu+(1-alpha)*mus+cross,vEeff,vIeff); output alpha*Phi(mu+cross,vEeff,vIeff)+(1-alpha)*Phi(mus+cross,vEeff,vIeff). Both use existing alpha in[0,1]. No fitting.",
+  "waveform_gate": 0.15,
+  "mean_gate": 0.1,
+  "scope": "Four predetermined diagnostic readouts on already observed selected group waveforms. Check static/linear identity and physicalratebounds. Even all-selected pass requires fresh response/domain/native tests; none enters network automatically."
+}

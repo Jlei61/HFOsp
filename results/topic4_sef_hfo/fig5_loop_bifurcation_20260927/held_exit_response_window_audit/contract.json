@@ -1,0 +1,157 @@
+{
+  "status": "FROZEN_BEFORE_WINDOW_AUDIT",
+  "created_epoch": 1790545268.350717,
+  "question": "How much of the new K9.35 fixed-input response discrepancy is sensitive to record length and starting phase, rather than independent count SEM?",
+  "selection": "Median per nonempty region/rate stratum, plus largest source-group residual cell and E individualM residual. Targets selected from completed observations before fresh counts; retain all selected results.",
+  "design": {
+    "targets": 21,
+    "replicas": 2048,
+    "record_ms": [
+      4000.0,
+      16000.0
+    ],
+    "burn_ms": [
+      1000.0,
+      1000.5,
+      1001.0,
+      1001.5
+    ],
+    "seed": 929361,
+    "device": 0
+  },
+  "pairing": "Same seed, target order and original kernel for every duration/start. Replica paths are independent across physicaltargets (crn=False) and shared across record choices. Start offsets change counted parts of the same fixed-input path; zero kernel changes.",
+  "readouts": "Every target mean/SEM, paired differences between four starts and between4s and16s. Also report original suppliedM and previous4s response; these do not become reference truth.",
+  "interpretation": "Starting-phase spread and finite-record bias are separate from count SEM. Longer records are a convergence comparison, not exact truth. No posthoc root gate change, native simulation, new response fit, branch or stability certification.",
+  "producer_sha256": "622a28279d37c2ef2758d7b46d7b2b3aad98c555e54bce110a95c857666eeae3",
+  "kernel_source": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_zm_runaway_mechanism/frozen_v3/lif_mc.py",
+  "kernel_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f",
+  "input_sha256": "c1cfd7d6e6e4592bde8adfa10dd1938bb6b918ebda63588727745bf66852a687",
+  "selected": [
+    {
+      "cell": 6591,
+      "reason": [
+        "coreA: median rate in [450,500.01)Hz; N=754"
+      ]
+    },
+    {
+      "cell": 2822,
+      "reason": [
+        "coreA: cell in largest source-group residual"
+      ]
+    },
+    {
+      "cell": 16370,
+      "reason": [
+        "coreA: largest individual M residual"
+      ]
+    },
+    {
+      "cell": 26748,
+      "reason": [
+        "coreB: median rate in [450,500.01)Hz; N=786"
+      ]
+    },
+    {
+      "cell": 16813,
+      "reason": [
+        "coreB: cell in largest source-group residual"
+      ]
+    },
+    {
+      "cell": 4558,
+      "reason": [
+        "coreB: largest individual M residual"
+      ]
+    },
+    {
+      "cell": 16011,
+      "reason": [
+        "surround: median rate in [0,0.1)Hz; N=17493"
+      ]
+    },
+    {
+      "cell": 15699,
+      "reason": [
+        "surround: median rate in [0.1,10)Hz; N=148"
+      ]
+    },
+    {
+      "cell": 7066,
+      "reason": [
+        "surround: median rate in [10,100)Hz; N=148"
+      ]
+    },
+    {
+      "cell": 29742,
+      "reason": [
+        "surround: median rate in [100,300)Hz; N=346"
+      ]
+    },
+    {
+      "cell": 1770,
+      "reason": [
+        "surround: median rate in [300,450)Hz; N=2223"
+      ]
+    },
+    {
+      "cell": 9850,
+      "reason": [
+        "surround: median rate in [450,500.01)Hz; N=10102"
+      ]
+    },
+    {
+      "cell": 4104,
+      "reason": [
+        "surround: cell in largest source-group residual"
+      ]
+    },
+    {
+      "cell": 31678,
+      "reason": [
+        "surround: largest individual M residual"
+      ]
+    },
+    {
+      "cell": 35049,
+      "reason": [
+        "I: median rate in [0,1)Hz; N=3860"
+      ]
+    },
+    {
+      "cell": 39578,
+      "reason": [
+        "I: median rate in [1,50)Hz; N=238"
+      ]
+    },
+    {
+      "cell": 34905,
+      "reason": [
+        "I: median rate in [50,200)Hz; N=276"
+      ]
+    },
+    {
+      "cell": 38604,
+      "reason": [
+        "I: median rate in [200,400)Hz; N=360"
+      ]
+    },
+    {
+      "cell": 36402,
+      "reason": [
+        "I: median rate in [400,700)Hz; N=3256"
+      ]
+    },
+    {
+      "cell": 38502,
+      "reason": [
+        "I: median rate in [700,1000.01)Hz; N=10"
+      ]
+    },
+    {
+      "cell": 39972,
+      "reason": [
+        "I: cell in largest source-group residual"
+      ]
+    }
+  ]
+}

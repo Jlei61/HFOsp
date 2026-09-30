@@ -1,0 +1,20 @@
+{
+  "status": "STOPPED_WITH_ACCEPTED_STATE_FOR_COUPLED_PHASE_PRECONDITION",
+  "pid": 2197229,
+  "iteration": 1,
+  "stage": "KRYLOV",
+  "last_residual": 0.020184994216977975,
+  "last_accepted": {
+    "period_ms": 168.2977538274768,
+    "durations_ms": [
+      42.13287975088637,
+      42.21378664834642,
+      42.0636276090101,
+      41.88745981923393
+    ],
+    "max_combined_relative_rms": 0.020184994216977975,
+    "directory": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/multiphase_single_B/iteration00"
+  },
+  "stopped_local": "2026-09-24T20:35:29.326332+08:00",
+  "reason": "Retain last accepted variable-time state and replace uncoupled numerical time/phase preconditioning by independently checked exact cyclic state/phase/time block inverse. Same nonlinear equations and root gates. This stop is not scientific evidence."
+}

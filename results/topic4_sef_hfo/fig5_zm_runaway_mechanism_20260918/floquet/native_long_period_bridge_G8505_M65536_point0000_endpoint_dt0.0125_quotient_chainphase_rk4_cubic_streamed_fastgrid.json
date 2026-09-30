@@ -1,0 +1,90 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_long_period_bridge_G8505_M65536/point0000.npz",
+  "N": 8505,
+  "D": 0.21932193379661225,
+  "T_ms": 264.5528502512292,
+  "dt_ms": 0.01224781714126061,
+  "multipliers": [
+    [
+      0.7679396149066855,
+      0.0
+    ]
+  ],
+  "eigen_residuals": [
+    1.6066696707282626e-07
+  ],
+  "phase_index": null,
+  "phase_defect": 0.0009946380364925357,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 0.7679396149066855,
+  "phase_projection": 1.000878499272172,
+  "phase_quotient": true,
+  "phase_method": "spectral state derivative; chain rule for rate history",
+  "graph_schedule": "RK4 with cubic delayed history",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "STABLE",
+  "calls": 21,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral",
+  "eigenvector_initial_guess": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/native_near_N2048_endpoint_dt0.025_quotient.npz",
+  "eigenvector_refined_orbit_check": {
+    "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_near_N2048.npz",
+    "source_N": 2048,
+    "target_N": 8505,
+    "rate_relative_difference": 0.0010979920641806735,
+    "max_Z_difference": 4.308616163850587e-08,
+    "source_phase_valid": false,
+    "kind": "nearby-orbit Krylov guess",
+    "scope": "Krylov initial guess only. Independent refined operator, phase and eigen-residual checks remain required."
+  },
+  "time_grid": {
+    "requested_maximum_dt_ms": 0.0125,
+    "steps": 21600,
+    "fft_friendly": true
+  },
+  "gain_cache": "GPU float64",
+  "phase_component_diagnostics": {
+    "state_component_relative_defects": [
+      0.0009907436568481322,
+      0.00111783526439005,
+      0.0010844036621720438,
+      0.001206417608978037,
+      0.0008514603966919993,
+      0.0009322137961474031,
+      0.0009861019606174119,
+      0.0010843730124160443,
+      0.0009245089516484653,
+      0.0010721973510245692,
+      0.003224896950426689,
+      0.0,
+      0.0010164465681008524,
+      0.0011789576577410279
+    ],
+    "state_component_phase_norms": [
+      715.0391701664367,
+      390.6344300241037,
+      229.36892893017617,
+      573.0131966816971,
+      1408.8244121346495,
+      1272.173347338205,
+      3179.870939646785,
+      1029.7221725196603,
+      344.1061808538596,
+      1354.67490339337,
+      0.0027447801479906627,
+      0.0,
+      304.41838182728185,
+      724.7278665734931
+    ],
+    "state_relative_defect": 0.000994608753558628,
+    "history_relative_defect": 0.00120315032244449,
+    "propagated_phase_norm_ratio": 1.000878607948619
+  },
+  "requested_eigenpairs": 1,
+  "arnoldi_basis_size": 12
+}

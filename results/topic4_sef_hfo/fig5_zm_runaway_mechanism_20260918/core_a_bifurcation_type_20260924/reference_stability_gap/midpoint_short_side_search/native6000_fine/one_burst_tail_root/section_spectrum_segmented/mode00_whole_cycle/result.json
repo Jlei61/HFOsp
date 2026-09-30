@@ -1,0 +1,39 @@
+{
+  "status": "LIFTED_NUMERICAL_MODE_SPATIAL_PROFILE",
+  "checks": {
+    "section_eigen_residual": 3.126617677694812e-13,
+    "neutral_mode_residual": 6.670526022027096e-05,
+    "lifted_fixed_time_eigen_residual": 1.4463921541288017e-05,
+    "phase_lift_coefficient_ms": 0.4428489143549885,
+    "return_time_derivative_ms": 1.2262172849942266
+  },
+  "multiplier": -1.7689291883671379,
+  "period_ms": 232.50926695821317,
+  "dt_ms": 0.025,
+  "rows": [
+    {
+      "block": "rate",
+      "cycle_integrated_A_B_surround_I_squared_amplitude": [
+        0.0001089225107332527,
+        8.686476002800338e-06,
+        0.7279046031097961,
+        0.27197778790346794
+      ]
+    },
+    {
+      "block": "M",
+      "cycle_integrated_A_B_surround_I_squared_amplitude": [
+        4.124543379710627e-05,
+        4.7188139314593666e-06,
+        0.9999540357522717,
+        0.0
+      ]
+    }
+  ],
+  "numerical_method": "exponential_midpoint",
+  "spectrum_source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native6000_fine/one_burst_tail_root/section_spectrum_segmented",
+  "method": "For DP_section v=mu v, restore full autonomous phase with w=v-T_derivative(v)*flow/(mu-1). Verify original fixed-time derivative Fw=mu w and neutral Fflow=flow. Integrate squared physical rate/M perturbations times exp(-2 log|mu| t/T), cell-count weighted;1ms sampling with exact cubic endpoint. Negative multiplier phase factor has unit modulus.",
+  "scope": "Localization of the verified lifted numerical mode over this one closed numerical orbit. Existing independent orbit phase/mesh gates remain pending; no critical crossing, complete spectrum, native correspondence or physical Floquet certificate.",
+  "seconds": 318.77889943122864,
+  "model_promoted": false
+}

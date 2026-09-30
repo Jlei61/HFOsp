@@ -1,0 +1,18 @@
+{
+  "pid": 556096,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/complete_rate_PD_physical_children.py",
+    "--label",
+    "PD_double_upper",
+    "--device",
+    "0",
+    "--min-free-gib",
+    "8"
+  ],
+  "timestamp": 1789901792.5033593,
+  "terminal_cause_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/physical_children/PD_double_upper/terminated_resource_wait_532739.json",
+  "base_free_gpu_gate_GiB": 8,
+  "large_child_BVP_free_gpu_gate_GiB": 15
+}

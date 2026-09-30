@@ -1,0 +1,74 @@
+{
+  "status": "COMPLETE_REPLICA_PHASE_AVERAGING_DECOMPOSITION",
+  "rows": [
+    {
+      "region": "sampled_E",
+      "targets": 60,
+      "mean_within_replica_phase_variance": 0.003630871122978005,
+      "phase_variance_of_mean_profile": 0.003089144211261968,
+      "native_fixed_background_2s_phase_variance": [
+        0.003531414659247589,
+        0.003607948632592763,
+        0.003442195992895607,
+        0.003840162092328544,
+        0.003616735342166276
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0033610038789067868,
+      "mean_rate_Hz": 397.80271809895834,
+      "native_matched_sample_rate_Hz": 397.75
+    },
+    {
+      "region": "sampled_coreA",
+      "targets": 20,
+      "mean_within_replica_phase_variance": 0.003072550104021888,
+      "phase_variance_of_mean_profile": 0.0022908739354189724,
+      "native_fixed_background_2s_phase_variance": [
+        0.0030620850398566596,
+        0.0032976307356605604,
+        0.003015238167568833,
+        0.0032487517098445497,
+        0.003021576152138353
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0027218012458074385,
+      "mean_rate_Hz": 473.45693359375,
+      "native_matched_sample_rate_Hz": 473.3300000000001
+    },
+    {
+      "region": "sampled_coreB",
+      "targets": 20,
+      "mean_within_replica_phase_variance": 0.0009159982170173291,
+      "phase_variance_of_mean_profile": 0.0006655389104955104,
+      "native_fixed_background_2s_phase_variance": [
+        0.0008319789824291471,
+        0.0005437365264712378,
+        0.0005397366019311712,
+        0.001305630391814023,
+        0.0005391620024982528
+      ],
+      "native_fixed_background_10s_phase_variance": 0.0005529990068003936,
+      "mean_rate_Hz": 475.161474609375,
+      "native_matched_sample_rate_Hz": 475.1450000000001
+    },
+    {
+      "region": "sampled_I",
+      "targets": 20,
+      "mean_within_replica_phase_variance": 2.0815463218838263e-05,
+      "phase_variance_of_mean_profile": 6.683520764630747e-06,
+      "native_fixed_background_2s_phase_variance": [
+        2.058246808301593e-05,
+        2.0013858255457683e-05,
+        3.17518974323032e-05,
+        2.4304970962620893e-05,
+        2.14942874376781e-05
+      ],
+      "native_fixed_background_10s_phase_variance": 1.0526655146548549e-05,
+      "mean_rate_Hz": 165.57255859375,
+      "native_matched_sample_rate_Hz": 165.38
+    }
+  ],
+  "total_variance_identity_max_error": 4.85722573273506e-17,
+  "spike_count_conservation": true,
+  "elapsed_s": 4.58984899520874,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "f47295e9d87acf3eb31ea23bafd0645b72dcb1a86b14b825ad4f021d5f208f5c"
+}

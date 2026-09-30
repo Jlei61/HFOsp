@@ -1,0 +1,17 @@
+{
+  "created_local": "2026-09-19T19:58:17.972757+08:00",
+  "question": "Does response interpolation fail even between existing training workpoints, and does interpolating absolute normalized susceptibility corrections avoid unstable gain-ratio transfer?",
+  "data": "Existing dynamic_assay/rows.json only. No independent validation, error-selected local capacity data or network trajectories are read.",
+  "design": "Use identical per-workpoint five-pole fits with original eligibility, noise floor, ridge and frequencies. For every interior coordinate in each of three axes, exclude its entire coordinate plane and predict from four closest eligible source points along that axis, retaining other coordinates. Four-source complete cases are common to all variants; report coverage. No across-axis combined extrapolation claim.",
+  "variants": [
+    "dimensionless coefficient ratio, local cubic",
+    "dimensionless coefficient ratio, local linear",
+    "absolute normalized gain correction, local cubic",
+    "absolute normalized gain correction, local linear"
+  ],
+  "control": "Direct target-workpoint fit is an explicitly in-sample control, never scored as held-out validation.",
+  "observables": "Error magnitude relative to independently measured same-channel training DC gain; median and p90; frequency counts against .10 up to25Hz and .15 above. Statistical unit is operating point; frequencies and axis-specific repetitions are correlated descriptive summaries.",
+  "decision": "Diagnostic only; do not choose or promote a network based on the lowest error. Preserve all failed candidate outcomes. A followup calibration must separately check unobserved workpoints, frequency response and strong nonlinear waveforms.",
+  "scope": "Training-only operating-point transfer diagnosis, not validation of a replacement model, not SNN equivalence or a bifurcation certificate. Existing frozen equations and tables unchanged.",
+  "timestamp_basis": "Original contract file mtime before assay execution; replaces mistaken manually typed20:00 timestamp."
+}

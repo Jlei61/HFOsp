@@ -1,0 +1,38 @@
+{
+  "status": "UNSTABLE",
+  "reliable_outside_count": 1,
+  "margin": 0.1,
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0052_N256.npz",
+  "J_EE_core": 0.9649050498961566,
+  "T_ms": 270.79906621317593,
+  "memberships": [
+    {
+      "family": "single",
+      "index": 63
+    }
+  ],
+  "analyzed_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0052_N256_accuracy_N512_accuracy_N1024.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0052_N256_accuracy_N512.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0052_N256_accuracy_N512_accuracy_N1024.npz",
+    "N": 1024,
+    "check_N": 4096,
+    "J_EE_core": 0.9649050498961566,
+    "T_ms": 270.79906621317593,
+    "maximum_group_defect_Hz": 0.00010132224914638499,
+    "regional_defect_Hz": [
+      5.956434902532428e-13,
+      6.885186583695002e-13,
+      2.0639298686186035e-08
+    ],
+    "minimum_rate_Hz": 4.6525118583157785e-06
+  },
+  "floquet_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/arcSingleDown_0052_N256_positive_leading_dt0.05.json",
+  "elapsed_seconds": 331.22393131256104,
+  "scope": "Full state and delay-history Arnoldi at this orbit; sampled stability, not a continuum completeness certificate.",
+  "classification_basis": "Positive, refined full spatial periodic orbit at the same J. Paired physical-time DDE monodromy. A leading-mode instability verdict does not supply a complete spectrum or locate a bifurcation.",
+  "prior_classification_source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/attempt_history/arcSingleDown_0052_N256_before_positivity_1789701391437765465.json",
+  "positivity_review_required": false,
+  "positive_profile_followup": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/stability_coverage/arcSingleDown_0052_N256_positive_followup.json"
+}

@@ -1,0 +1,68 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "pop": "E",
+      "beta": -2.0,
+      "frequency_hz": 5.0,
+      "relative_gain_error": 5.032165212880677e-10
+    },
+    {
+      "pop": "E",
+      "beta": -2.0,
+      "frequency_hz": 25.0,
+      "relative_gain_error": 6.170656930367383e-10
+    },
+    {
+      "pop": "E",
+      "beta": 1.0,
+      "frequency_hz": 5.0,
+      "relative_gain_error": 1.3542635205249358e-09
+    },
+    {
+      "pop": "E",
+      "beta": 1.0,
+      "frequency_hz": 25.0,
+      "relative_gain_error": 1.2009854148865616e-09
+    },
+    {
+      "pop": "E",
+      "embedding_logit_error": 0.0,
+      "parent_gain_error": 0.0,
+      "parent_autonomous_rate_error_hz": 9.370282327836321e-14
+    },
+    {
+      "pop": "I",
+      "beta": -2.0,
+      "frequency_hz": 5.0,
+      "relative_gain_error": 6.701650678485234e-10
+    },
+    {
+      "pop": "I",
+      "beta": -2.0,
+      "frequency_hz": 25.0,
+      "relative_gain_error": 8.09470384360429e-10
+    },
+    {
+      "pop": "I",
+      "beta": 1.0,
+      "frequency_hz": 5.0,
+      "relative_gain_error": 1.4293561643994167e-09
+    },
+    {
+      "pop": "I",
+      "beta": 1.0,
+      "frequency_hz": 25.0,
+      "relative_gain_error": 1.2873244109775768e-09
+    },
+    {
+      "pop": "I",
+      "embedding_logit_error": 0.0,
+      "parent_gain_error": 0.0,
+      "parent_autonomous_rate_error_hz": 5.1514348342607263e-14
+    }
+  ],
+  "causal_impulse_check": true,
+  "nonzero_feedback_gain_check": true,
+  "scope": "Exact embedding, autonomous implementation and feedback derivative checks only; no scientific validation."
+}

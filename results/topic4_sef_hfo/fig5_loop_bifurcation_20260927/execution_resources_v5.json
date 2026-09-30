@@ -1,0 +1,13 @@
+{
+  "stage": "RESOURCE_ONLY_AMENDMENT",
+  "created_epoch": 1790522526.0564082,
+  "global_native_cap": 16,
+  "per_GPU_cap": {
+    "0": 8,
+    "1": 8
+  },
+  "per_worker_reserved_GPU_GiB": 3,
+  "host_available_gate_GiB": 70,
+  "reason": "Admit remaining already-frozenGmemoryandnoiseprobes with3GiBreservationperworker; no newconditions,seeds,horizons or nativeworkerrestart. SharedlockandmemorygateincludeotherGPUoccupants. Fine-densitydiagnosticusesitsownactualmemoryandcanlimitadmission.",
+  "host_available_observed_GiB": 168.55525970458984
+}

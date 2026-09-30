@@ -1,0 +1,39 @@
+{
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_seed_N1024.npz",
+  "N": 1024,
+  "D": 0.14298039269556007,
+  "T_ms": 263.497128273787,
+  "dt_ms": 0.024999727540207493,
+  "multipliers": [
+    [
+      0.7685878989719829,
+      0.00010060893166450822
+    ],
+    [
+      0.7685878989719829,
+      -0.00010060893166450822
+    ]
+  ],
+  "eigen_residuals": [
+    3.5366581312918764e-09,
+    3.5366581312918764e-09
+  ],
+  "phase_index": null,
+  "phase_defect": 0.0009071885901066059,
+  "phase_alignment": null,
+  "phase_valid": true,
+  "max_transverse_modulus": 0.7685879055568883,
+  "phase_projection": 1.0000729261986159,
+  "phase_quotient": true,
+  "phase_method": "chain rule for the rate history",
+  "graph_schedule": "reusable blocks with cached exact local gradients",
+  "status": "STEP_REFINEMENT_REQUIRED",
+  "sampled_stability": "STABLE",
+  "calls": 57,
+  "Z": "held",
+  "M": "dynamic",
+  "history": "instantaneous rate at its labelled endpoint",
+  "orbit_source": "spectral BVP LTI reconstruction",
+  "eigen_tolerance": 1e-06,
+  "state_interpolation": "spectral"
+}

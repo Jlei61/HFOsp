@@ -1,0 +1,74 @@
+{
+  "label": "PD_double_upper",
+  "J_EE_core": 0.944728374157131,
+  "T_ms": 761.9648707070426,
+  "normalization": "Largest absolute E-group rate mode component = 1 Hz; all derivatives per this unit.",
+  "E_mode_energy_A_B_surround": [
+    0.03880621119602612,
+    0.04312159173471088,
+    0.918072197069263
+  ],
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mode_RMS_relative_to_network": [
+    1.2833347011863323,
+    1.3249854459379984,
+    0.982083596886915
+  ],
+  "core_peak_derivatives": {
+    "A": [
+      {
+        "peak_ms": 433.7605689398729,
+        "peak_rate_Hz": 207.3585950356101,
+        "delta_peak_height_Hz_per_unit": -0.01576223626381381,
+        "delta_peak_time_ms_per_unit": -0.006980650202574567
+      },
+      {
+        "peak_ms": 761.254172855407,
+        "peak_rate_Hz": 169.28164083269806,
+        "delta_peak_height_Hz_per_unit": 0.0015951837009146302,
+        "delta_peak_time_ms_per_unit": -0.006201505219902984
+      }
+    ],
+    "B": [
+      {
+        "peak_ms": 60.51779356362374,
+        "peak_rate_Hz": 249.78370416851175,
+        "delta_peak_height_Hz_per_unit": 0.07351201309187376,
+        "delta_peak_time_ms_per_unit": 0.005221489821680604
+      },
+      {
+        "peak_ms": 382.6919607218899,
+        "peak_rate_Hz": 118.6759219271483,
+        "delta_peak_height_Hz_per_unit": -0.007578434606732051,
+        "delta_peak_time_ms_per_unit": -1.884148901717378e-05
+      }
+    ]
+  },
+  "maximum_regional_mode_Hz": [
+    0.09321222407566203,
+    0.09791189280816985,
+    0.02233759501828395
+  ],
+  "maximum_contact_mode_Hz": [
+    0.16191566530342327,
+    0.0006043776485301638,
+    0.07383128080469192,
+    0.00514517252293098,
+    0.05948162010674819,
+    0.04496037428109845,
+    0.1542740378680435,
+    0.005903246984704968,
+    0.2187059146701044,
+    0.2549215739793268,
+    0.46557786404813567,
+    0.4605330901555597,
+    0.3004747975559893,
+    0.1292131058878312,
+    0.14336039206795373
+  ],
+  "meaning": "The mode changes sign after one parent period, so adjacent parent-length windows receive opposite first-order changes. This does not establish child stability, a propagation-template switch, or irregular dynamics."
+}

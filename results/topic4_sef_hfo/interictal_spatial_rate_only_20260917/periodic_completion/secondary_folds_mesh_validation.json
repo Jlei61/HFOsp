@@ -1,0 +1,81 @@
+{
+  "rows": [
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary1_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "J_EE_core": 0.9391433309651367,
+      "T_ms": 875.8164641079585,
+      "maximum_group_defect_Hz": 0.060374578618738184,
+      "regional_defect_Hz": [
+        0.0004111051560363314,
+        0.0002404658805515265,
+        0.00011332237517416609
+      ],
+      "minimum_rate_Hz": -1.281960863592363e-05,
+      "label": "LPC_double_secondary1",
+      "J_mesh_difference": 1.5206531922551392e-08,
+      "T_mesh_difference_ms": 0.01612102721321662,
+      "stationary_parameter_derivative": 2.8187116881076364e-12,
+      "parameter_curvature": -0.0002522229120383194
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary2_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "J_EE_core": 0.939085506707117,
+      "T_ms": 883.099333768848,
+      "maximum_group_defect_Hz": 0.07202214180568323,
+      "regional_defect_Hz": [
+        0.0005168378074135498,
+        0.0001104694967392357,
+        0.0001209570812821744
+      ],
+      "minimum_rate_Hz": -1.3949579345278102e-05,
+      "label": "LPC_double_secondary2",
+      "J_mesh_difference": 1.3656175856802122e-08,
+      "T_mesh_difference_ms": 0.00015466627462501492,
+      "stationary_parameter_derivative": 1.405753105685055e-11,
+      "parameter_curvature": 0.0062246306695890995
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary3_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "J_EE_core": 0.9404148873760471,
+      "T_ms": 851.2571312429081,
+      "maximum_group_defect_Hz": 0.05214024516331239,
+      "regional_defect_Hz": [
+        0.0002395690539301959,
+        5.0251177312865966e-05,
+        0.0001283586822381546
+      ],
+      "minimum_rate_Hz": 9.12894823271301e-06,
+      "label": "LPC_double_secondary3",
+      "J_mesh_difference": 8.487745728480434e-09,
+      "T_mesh_difference_ms": 0.004228768995517385,
+      "stationary_parameter_derivative": 1.0087304132800805e-14,
+      "parameter_curvature": -0.0004072711673907332
+    },
+    {
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_double_secondary4_N2048.npz",
+      "N": 2048,
+      "check_N": 8192,
+      "J_EE_core": 0.9403434896928378,
+      "T_ms": 856.8099144464917,
+      "maximum_group_defect_Hz": 0.04201754909521904,
+      "regional_defect_Hz": [
+        0.00025942266949338915,
+        3.0614127367393717e-06,
+        0.00013646897446104828
+      ],
+      "minimum_rate_Hz": 2.879418218725856e-05,
+      "label": "LPC_double_secondary4",
+      "J_mesh_difference": 1.1405295818889272e-08,
+      "T_mesh_difference_ms": 0.004331851705728695,
+      "stationary_parameter_derivative": -3.888888175707558e-11,
+      "parameter_curvature": 3.2607640167397385
+    }
+  ],
+  "meaning": "Independent mesh doubling plus oversampled continuous defect. Fold-location convergence does not classify stability of adjacent cycles."
+}

@@ -1,0 +1,28 @@
+{
+  "status": "REGISTERED_BEFORE_ALLTARGET_PHASE_COUNTS",
+  "created_epoch": 1790545764.5073726,
+  "question": "What stationary selfconsistency residual remains at K9.35 after repairing the demonstrated finite-count phase bias, without changing any network or input coordinate?",
+  "design": {
+    "targets": 40000,
+    "streams": 2,
+    "replicas": 256,
+    "record_ms": 16000,
+    "burn_ms": 1000,
+    "extra_burn_ms": [
+      0,
+      1000
+    ],
+    "seeds": [
+      929381,
+      929382
+    ]
+  },
+  "basis": "Selected-cell4/16s phase-randomized rates21/21 agree at3pairedSEM; all51estimable stationaryDC components agree between original4s andphase16s within existing10%/2SEM; all51full/half pairs pass. This selected validation is not an alltarget root/stability certificate.",
+  "change": "Only the stationary count observer: randomized extra burn and16s record. Exact inputs byte-identical to previous K9.35check; native/coupled density physics untouched. Fresh numericalstreams; no new native seeds.",
+  "gate": "No posthoc relaxation. Report remaining source andlocalM residuals against countSEM, observation/closure separately. The biased fixed-start4s proposal must not be promoted; reconstruct any correction using this response and independently verify it.",
+  "stopping": "Exactly two response arrays at one fixed input point; no automatic nonlinear iteration or parameter sweep.",
+  "input_sha256": "c1cfd7d6e6e4592bde8adfa10dd1938bb6b918ebda63588727745bf66852a687",
+  "observer_sha256": "8d04426e279f4a1934113f68fb9913e26c6990c3c8bbd2c0be373052abb98fde",
+  "producer_sha256": "8df440e187f87ea3d29a2fd180606f4edb0596339a515e6a5c40ace665d123e3",
+  "formal_bifurcation_allowed": false
+}

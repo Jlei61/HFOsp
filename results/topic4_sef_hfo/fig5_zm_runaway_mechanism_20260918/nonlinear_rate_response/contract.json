@@ -1,0 +1,58 @@
+{
+  "created_local": "2026-09-20T04:01:41.153630+08:00",
+  "question": "Can a differentiable finite-state nonlinear rate response retain local LIF reset/recovery dynamics and frequency response, before using it in the unchanged spatial network?",
+  "model": {
+    "history": "Three normalized input moments drive12linear history states each:tau=[1,4,16,64]ms,orders1..3.36states per group,strictly stable local filter poles.",
+    "normalization": "u=[asinh((mu-Vreset)/(theta-Vreset)),log1p(vE/(theta-Vreset)^2),log1p(vI/(theta-Vreset)^2)]",
+    "output": "Smooth bounded nonlinear readout of u and h-u, separate E/I calibrations. Two64unit tanh layers; static LIF transfer supplies a baseline, with a separately calibrated static residual. All response functions are explicit and differentiable.",
+    "interpretation": "Approximate LIF-calibrated nonlinear response, not an exact derivation or a result asserted by the Brunel paper. No neuron particles or density grid are dynamic network states.",
+    "spatial_invariants": "Same spatial group projection, graph, threshold field, AMPA/GABA mean/variance operators, propagation delays, external-input definitions and Z/M equations. No fitting of onset times, Z/M trajectories or propagation targets."
+  },
+  "stage": "LOCAL_CALIBRATION_ONLY; no autonomous spatial or bifurcation launch by this data script",
+  "source_linear_calibration": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/dynamic_assay/rows.json",
+  "source_static_calibration": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/frozen_data/transfer_table",
+  "new_data": {
+    "per_population": {
+      "train_periodic": 96,
+      "train_startup": 16,
+      "validation_periodic": 24,
+      "validation_startup": 8
+    },
+    "wave_samples": 2048,
+    "phase_bins": 128,
+    "dt_ms": 0.1,
+    "threshold_mv": 18.0,
+    "reset_mv": 11.0,
+    "train_replicates": 4096,
+    "validation_replicates": 8192,
+    "periodic_periods_ms": [
+      100.0,
+      200.0,
+      400.0
+    ],
+    "burn_cycles": 3,
+    "record_cycles": 8,
+    "startup_duration_ms": 500.0,
+    "train_generator_seed": 920041,
+    "validation_generator_seed": 920042,
+    "train_noise_seed": 920043,
+    "validation_noise_seed": 920044,
+    "startup_endpoint": "Record0.1through499.9ms,4999steps; exclude exact500ms to avoid periodic-kernel wrap. Native initial voltage/reset and currents unchanged.",
+    "period_family_assignment": "Cross each periodic family with every registered period, cyclic balanced design; no family-period confounding."
+  },
+  "families": [
+    "smooth multisine,low/moderate mean",
+    "positive burst then inhibition/recovery",
+    "smooth alternating plateaus",
+    "startup from reset and zero current"
+  ],
+  "sampling_unit": "Independent local noise paths; input profiles are designed conditions. Common streams across profiles are retained, so frequency/profile counts are not independent biological samples.",
+  "training_budget": "One fixed architecture and one optimizer schedule, random seed fixed before fitting. Calibrate only original training tables and train profiles. Do not fit original24waveforms,32validationworkpoints,64newvalidationprofiles or native network trajectories.",
+  "validation": {
+    "original_waveforms": "All24retain waveformL2<=0.15 andmeanerror<=0.10",
+    "original_linear": "Original146eligibleAC:max14fail; original76eligibleDC retain per-row0.15. Signs and numerical checks separate. No relaxation to fit this candidate.",
+    "fresh_waveforms": "At least90percent of64newindependentprofiles satisfy the same waveform andmean gates; report all failures and near-zero-rate profiles.",
+    "other_requirements": "Verify history-state/derivative implementation, time-step/feature quadrature and full static response before any network acceptance. Original autonomous interictal/propagation/ZM gates remain required."
+  },
+  "stop": "One bounded local candidate. A fit or waveform match does not accept the spatial model. If local validation fails, report the actual failure; no automatic architecture enlargement or onset fitting."
+}

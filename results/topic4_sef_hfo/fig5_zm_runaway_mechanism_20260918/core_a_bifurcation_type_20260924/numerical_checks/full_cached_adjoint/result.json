@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "direction": 0,
+      "forward_inner_product": -0.001712497746921108,
+      "adjoint_inner_product": -0.0017124977469210824,
+      "relative_bilinear_error": 1.494143353861981e-14,
+      "adjoint_nominal_state_bitwise_unchanged": true,
+      "forward_product_norm": 10.697183154336166,
+      "adjoint_product_norm": 12.454243280850031
+    },
+    {
+      "direction": 1,
+      "forward_inner_product": 0.016161666128429977,
+      "adjoint_inner_product": 0.0161616661284299,
+      "relative_bilinear_error": 4.722770061974692e-15,
+      "adjoint_nominal_state_bitwise_unchanged": true,
+      "forward_product_norm": 11.522918452620159,
+      "adjoint_product_norm": 12.48483831072927
+    },
+    {
+      "direction": 2,
+      "forward_inner_product": -0.008153341007758684,
+      "adjoint_inner_product": -0.008153341007758814,
+      "relative_bilinear_error": 1.5957171492576087e-14,
+      "adjoint_nominal_state_bitwise_unchanged": true,
+      "forward_product_norm": 11.802165836597053,
+      "adjoint_product_norm": 11.382593563899627
+    }
+  ],
+  "seconds": 32.932790756225586,
+  "scope": "Full-state transpose derivative implementation at actual A-sustained/B-intermittent state. Does not provide any critical multiplier, manifold, bifurcation, or native-SNN mechanism evidence.",
+  "model_promoted": false
+}

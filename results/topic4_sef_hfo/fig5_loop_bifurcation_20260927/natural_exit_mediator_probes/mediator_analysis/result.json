@@ -1,0 +1,339 @@
+{
+  "status": "COMPLETE_TWO_NATIVE_MEDIATOR_CONTROLS",
+  "rows": [
+    {
+      "name": "original_unmodified",
+      "absolute_window_s": [
+        16.8,
+        26.8
+      ],
+      "first_R_at_or_below5_for100ms_s": 16.868,
+      "first_R_at_or_above200_for100ms_after_low_s": null,
+      "first_G_below_global_recovery_block_s": 17.551,
+      "first_both_core_net_positive_1s_budget_endpoint_s": 17.58,
+      "first_both_core_Z_reference_s": 23.9,
+      "initial_Z_allE_A_B_other": [
+        0.209178323166825,
+        0.173650694242451,
+        0.16490648782636327,
+        0.21120017132134175
+      ],
+      "final_Z_allE_A_B_other": [
+        0.8709547080737338,
+        0.8659885938133377,
+        0.8649699705358149,
+        0.8712320703146117
+      ],
+      "maximum_core_Z": [
+        0.8654514692844435,
+        0.8644287633130391
+      ],
+      "accumulated_Z_recovery": [
+        0.6910462160700978,
+        0.7167899095892325,
+        0.7231358332710928,
+        0.6895809112758291
+      ],
+      "accumulated_Z_consumption": [
+        0.029269831163189423,
+        0.02445201001834593,
+        0.02307235056164149,
+        0.029549012282560017
+      ],
+      "actual_Z_delta": [
+        0.6617763849069087,
+        0.6923378995708867,
+        0.7000634827094516,
+        0.66003189899327
+      ],
+      "native_budget_max_abs_error": 4.1557469271369385e-16,
+      "minimum_causal_R_Hz": 1.3761140940176693e-287,
+      "sampled_R_at_or_below5_duration_s": 9.932,
+      "core_reference": [
+        0.7603118191859897,
+        0.7344912026970221
+      ],
+      "G_resource_block_threshold": 2.669402995841955,
+      "expected_low_rate_K_tau_s": 5.0,
+      "actual_low_rate_K_tau_verified": true,
+      "certified_low_rate_1ms_intervals": 9931,
+      "low_rate_K_exponential_max_abs_error": 1.4210854715202004e-14,
+      "complete_population_events": [],
+      "complete_brief_count": 0,
+      "complete_brief_after_Z_reference": [],
+      "rate_censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.03,
+          "observed_duration_lower_bound_s": 0.03,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      },
+      "final1s_rates_allE_A_B_other_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diagnostic_intervention": false,
+      "counts_as_autonomous_loop": false,
+      "claim_limit": "R thresholds are diagnostic markers, not a new onset/exit classifier. Z reference recovery and complete brief-event return are separate. Event times/censoring are relative to16.8s; no spatial propagation acceptance from counts."
+    },
+    {
+      "name": "remove_existing_G_tail_once",
+      "absolute_window_s": [
+        16.8,
+        26.8
+      ],
+      "first_R_at_or_below5_for100ms_s": 17.921,
+      "first_R_at_or_above200_for100ms_after_low_s": null,
+      "first_G_below_global_recovery_block_s": 16.8,
+      "first_both_core_net_positive_1s_budget_endpoint_s": 18.36,
+      "first_both_core_Z_reference_s": 24.28,
+      "initial_Z_allE_A_B_other": [
+        0.209178323166825,
+        0.173650694242451,
+        0.16490648782636327,
+        0.21120017132134175
+      ],
+      "final_Z_allE_A_B_other": [
+        0.856453965520283,
+        0.8556442029025089,
+        0.851401923005711,
+        0.8566043747924514
+      ],
+      "maximum_core_Z": [
+        0.8550656175289536,
+        0.8508063343586594
+      ],
+      "accumulated_Z_recovery": [
+        0.7017588810323038,
+        0.728384683645826,
+        0.7323914196163105,
+        0.7003093396502408
+      ],
+      "accumulated_Z_consumption": [
+        0.054483238678846045,
+        0.046391174985768176,
+        0.04589598443696354,
+        0.05490513617913169
+      ],
+      "actual_Z_delta": [
+        0.647275642353458,
+        0.6819935086600579,
+        0.6864954351793477,
+        0.6454042034711097
+      ],
+      "native_budget_max_abs_error": 3.045523902511782e-16,
+      "minimum_causal_R_Hz": 4.471336735841798e-257,
+      "sampled_R_at_or_below5_duration_s": 8.879,
+      "core_reference": [
+        0.7603118191859897,
+        0.7344912026970221
+      ],
+      "G_resource_block_threshold": 2.669402995841955,
+      "expected_low_rate_K_tau_s": 5.0,
+      "actual_low_rate_K_tau_verified": true,
+      "certified_low_rate_1ms_intervals": 8878,
+      "low_rate_K_exponential_max_abs_error": 1.0658141036401503e-14,
+      "complete_population_events": [],
+      "complete_brief_count": 0,
+      "complete_brief_after_Z_reference": [],
+      "rate_censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 1.11,
+          "observed_duration_lower_bound_s": 1.11,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      },
+      "final1s_rates_allE_A_B_other_Hz": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diagnostic_intervention": true,
+      "counts_as_autonomous_loop": false,
+      "claim_limit": "R thresholds are diagnostic markers, not a new onset/exit classifier. Z reference recovery and complete brief-event return are separate. Event times/censoring are relative to16.8s; no spatial propagation acceptance from counts."
+    },
+    {
+      "name": "remove_low_rate_K_retention",
+      "absolute_window_s": [
+        16.8,
+        26.8
+      ],
+      "first_R_at_or_below5_for100ms_s": 16.868,
+      "first_R_at_or_above200_for100ms_after_low_s": 19.939,
+      "first_G_below_global_recovery_block_s": 17.551,
+      "first_both_core_net_positive_1s_budget_endpoint_s": 17.58,
+      "first_both_core_Z_reference_s": 25.48,
+      "initial_Z_allE_A_B_other": [
+        0.209178323166825,
+        0.173650694242451,
+        0.16490648782636327,
+        0.21120017132134175
+      ],
+      "final_Z_allE_A_B_other": [
+        0.796551566379567,
+        0.7842331371287724,
+        0.7838866237216375,
+        0.797183304415819
+      ],
+      "maximum_core_Z": [
+        0.7892368439928931,
+        0.786806651217363
+      ],
+      "accumulated_Z_recovery": [
+        0.7145747995374734,
+        0.7378344621234206,
+        0.7445738326289083,
+        0.7132249300168009
+      ],
+      "accumulated_Z_consumption": [
+        0.12720155632473265,
+        0.12725201923710053,
+        0.12559369673363496,
+        0.12724179692232557
+      ],
+      "actual_Z_delta": [
+        0.5873732432127421,
+        0.6105824428863214,
+        0.6189801358952742,
+        0.5859831330944772
+      ],
+      "native_budget_max_abs_error": 2.955535122195485e-16,
+      "minimum_causal_R_Hz": 8.769010204501628e-75,
+      "sampled_R_at_or_below5_duration_s": 8.959,
+      "core_reference": [
+        0.7603118191859897,
+        0.7344912026970221
+      ],
+      "G_resource_block_threshold": 2.669402995841955,
+      "expected_low_rate_K_tau_s": 0.5,
+      "actual_low_rate_K_tau_verified": true,
+      "certified_low_rate_1ms_intervals": 8951,
+      "low_rate_K_exponential_max_abs_error": 3.552713678800501e-15,
+      "complete_population_events": [
+        {
+          "start_s": 3.0700000000000003,
+          "end_s": 3.4,
+          "duration_s": 0.33,
+          "quiet_gap_s": 3.04,
+          "peak_s": 3.105,
+          "peak_Hz": 476.0814249363868,
+          "onset_interval_s": null,
+          "interevent_gap_s": null
+        },
+        {
+          "start_s": 6.46,
+          "end_s": 6.65,
+          "duration_s": 0.19,
+          "quiet_gap_s": 3.06,
+          "peak_s": 6.505,
+          "peak_Hz": 449.4694960212201,
+          "onset_interval_s": 3.3899999999999997,
+          "interevent_gap_s": 3.06
+        },
+        {
+          "start_s": 9.07,
+          "end_s": 9.28,
+          "duration_s": 0.21,
+          "quiet_gap_s": 2.42,
+          "peak_s": 9.235,
+          "peak_Hz": 438.4615384615385,
+          "onset_interval_s": 2.6100000000000003,
+          "interevent_gap_s": 2.42
+        },
+        {
+          "start_s": 9.67,
+          "end_s": 9.790000000000001,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.39,
+          "peak_s": 9.695,
+          "peak_Hz": 414.8854961832061,
+          "onset_interval_s": 0.5999999999999996,
+          "interevent_gap_s": 0.39000000000000057
+        }
+      ],
+      "complete_brief_count": 2,
+      "complete_brief_after_Z_reference": [
+        {
+          "start_s": 9.67,
+          "end_s": 9.790000000000001,
+          "duration_s": 0.12,
+          "quiet_gap_s": 0.39,
+          "peak_s": 9.695,
+          "peak_Hz": 414.8854961832061,
+          "onset_interval_s": 0.5999999999999996,
+          "interevent_gap_s": 0.39000000000000057
+        }
+      ],
+      "rate_censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.03,
+          "observed_duration_lower_bound_s": 0.03,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": {
+          "start_s": 9.93,
+          "observed_end_s": 10.0,
+          "observed_duration_lower_bound_s": 0.07,
+          "left_boundary_confirmed": true,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            16.507589285714285,
+            0.9283819628647214,
+            0.32715376226826604,
+            17.31075884063409
+          ],
+          "peak_Hz_allE_A_B_other": [
+            34.2125,
+            1.7241379310344827,
+            0.7633587786259541,
+            35.92252133946159
+          ]
+        },
+        "both_describe_same_unbounded_episode": false
+      },
+      "final1s_rates_allE_A_B_other_Hz": [
+        14.666374999999995,
+        23.729442970822284,
+        20.31933842239185,
+        14.29615889691398
+      ],
+      "diagnostic_intervention": true,
+      "counts_as_autonomous_loop": false,
+      "claim_limit": "R thresholds are diagnostic markers, not a new onset/exit classifier. Z reference recovery and complete brief-event return are separate. Event times/censoring are relative to16.8s; no spatial propagation acceptance from counts."
+    }
+  ],
+  "original_source": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+  "statistical_unit": "One verified16.8s internal state and one common future noise path; two diagnostic interventions plus reused original. No added autonomous seed.",
+  "paired_recorded_future_inputs_bitwise": 100,
+  "paired_final_full_exogenous_state_bitwise": true,
+  "K_intervention_certified_active_prefix_R_K_bitwise": true,
+  "K_intervention_certified_active_prefix_end_s": 16.867,
+  "source_state_gate": {
+    "status": "PASS",
+    "complete20s_engine_bitwise": true,
+    "only_metadata_normalization": "ConditionalSlow withoutclamp versusGlobalResponseSlow classname",
+    "initial16p8_state_sha256": "ed3a46a3ad495afd7aa3fb68386ea018a249cf2039b8b7de329c545c47145f3b"
+  },
+  "initial_control_gate": {
+    "status": "PASS",
+    "complete_engine_changes_exactly_as_declared": true,
+    "paired_future_exogenous_state_exact": true,
+    "original_endogenous_Z_K_M_fields_carried": true
+  },
+  "counts_as_autonomous_loop": false,
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "90d1a7f20eecf846402ef4e5f7b3aedab9d89c7986bd092b40f270a1155874d1"
+}

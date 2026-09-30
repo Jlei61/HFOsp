@@ -1,0 +1,12 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9551/whole_cycle/iteration03/node00.npz",
+  "source_dt_ms": 0.05,
+  "dt_ms": 0.05,
+  "old_period_ms": 790.979087721665,
+  "target_native_time_ms": 9573.043350229,
+  "search_halfwidth_ms": 50.0,
+  "question": "Follow the actual three-burst return toward the prolonged-activity field, or refine that same full-state orbit. Is a nearby full-state return available as a phase-aligned Newton starting guess?",
+  "method": "One original cubic Poincare return near the old period. Preserve every initial M, synapse, covariance and input-memory state; any finer delay history uses the existing physical-lag refinement. Optional parameter change selects only native within-CoreA Z on the continuous recorded-time path, outsideCoreA remains bitwise unchanged.",
+  "limits": "This prepares a numerical guess only. A return is not a closed orbit or proof that the same branch survives. Subsequent whole-state Newton residual, subperiod, independent-flow, stability and mesh checks remain separate. Failed section search is not a bifurcation or nonexistence proof.",
+  "model_promoted": false
+}

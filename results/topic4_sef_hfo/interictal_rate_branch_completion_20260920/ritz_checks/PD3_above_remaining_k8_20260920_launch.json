@@ -1,0 +1,27 @@
+{
+  "pid": 551749,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/refine_rate_poincare_complement.py",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD3_parent_above_full_k16_20260920_dt0.0125.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD3_parent_above_full_k16_20260920_dt0.00625.json",
+    "--device",
+    "0",
+    "--label",
+    "PD3_above_remaining_k8_20260920",
+    "--lock",
+    "all-reliable",
+    "--nev",
+    "8",
+    "--min-free-gib",
+    "8",
+    "--after-pids",
+    "550333"
+  ],
+  "timestamp": 1789897555.8696265,
+  "checked_source_modes": 16,
+  "known_unstable_lower_bound": 3,
+  "remaining_spectrum_covered": false,
+  "control": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/qa/locked_stable_mode_complement_control.json"
+}

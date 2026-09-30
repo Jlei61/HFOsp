@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "one_step_rate_error_per_ms": 6.938893903907228e-17,
+      "one_step_syn_error_mV": 1.7763568394002505e-15,
+      "one_step_local_error": 1.4210854715202004e-14,
+      "ten_ms_history_error_per_ms": 6.990935608186533e-16,
+      "Z_held": true,
+      "M_dynamic": true
+    },
+    {
+      "dt_ms": 0.025,
+      "one_step_rate_error_per_ms": 8.153200337090993e-17,
+      "one_step_syn_error_mV": 1.7763568394002505e-15,
+      "one_step_local_error": 1.4210854715202004e-14,
+      "ten_ms_history_error_per_ms": 1.9871257417314325e-15,
+      "Z_held": true,
+      "M_dynamic": true
+    }
+  ],
+  "D": 0.0,
+  "global_rate_hz": 0.09702911695912818,
+  "scope": "One baseline equilibrium identity at two steps in the actual corrected private-Q engine. No stability or bifurcation claim; native/local correspondence still required.",
+  "model_promoted": false
+}

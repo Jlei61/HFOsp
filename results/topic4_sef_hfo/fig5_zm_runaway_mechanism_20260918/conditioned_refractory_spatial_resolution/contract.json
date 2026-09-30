@@ -1,0 +1,33 @@
+{
+  "created_local": "2026-09-20T08:06:07.773445+08:00",
+  "status": "REGISTERED_BEFORE_FINE_RATE_RUNS",
+  "question": "Does resolving spatialcurrentvariation at0.5mm improve autonomousinterictal/onset/spreading behavior under the unchanged refractoryrate response?",
+  "reason": "Native9-9.42s within-group netcurrentspread falls to31-32percent with actual0.5mm subdivision,versus84-96percent with matchedsize shuffledsubgroups.",
+  "graph": "Original nativegraph projectedg40,3479groups; all40000originalcells,samephysicalweights,delays,thresholdmembers,externalinputandZMparameters.",
+  "response": "Frozen conditioned_refractory_rate weights, unchanged42localstates andownrate refractory integral. BothZandMdynamic; externalmeanAMPAfilter restored.",
+  "external_drive": "Original1mm recordeddrive is lifted via exactgroupmembership to0.5mmsubgroups. No newinputresolution or newexternalrealization; not exactpercell nativeforcing.",
+  "output": "Primarymetrics use original20x20cellfields after originalcell-count-weighted restriction; fine40x40fields also stored. No changed participation threshold or spatialmetricresolution.",
+  "noise": "Expectedrate arm andoneactual-count Binomial/refractory/M arm, with same originalcellN pernewgroup. StationaryPoisson privatevariance splitting remains approximate.",
+  "initialization": "Zero synapses/covariance/history,Z1,M0 at0s; no nativefuture spikes or state transplant.",
+  "runs": [
+    {
+      "label": "recorded_drive_expected",
+      "noise": false,
+      "seed": 1
+    },
+    {
+      "label": "recorded_drive_binomial_seed1",
+      "noise": true,
+      "seed": 1
+    }
+  ],
+  "dt_ms": 0.05,
+  "duration_ms": 12500.0,
+  "coarse_sources": [
+    "conditioned_refractory_external_filter_pair/recorded_drive_expected",
+    "conditioned_refractory_count_consistency/recorded_drive_binomial_seed1"
+  ],
+  "verification": "Exactnestedmembership andweightedthresholdmean; delayedoperators commute under parent-constant history; externalforcing invariant; count/conservation checks before fullruns.",
+  "acceptance": "Same nativeearlyinterictal/lateinterictal,quiettime,eventsize,propagation,entryandDgates. Mesh sensitivity alone cannot waive localresponse failures or certify bifurcation.",
+  "budget": "Two12.5s runs only; no fitting, extra seeds, networkparametersearch or continuation."
+}

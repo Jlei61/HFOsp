@@ -1,0 +1,12 @@
+{
+  "created_local": "2026-09-19T20:51:17.995788+08:00",
+  "question": "Is the 1.677-s entry shift of history-conditioned response coefficients robust to one timestep halving?",
+  "variant": "units_history",
+  "dt_ms": 0.025,
+  "reference_dt_ms": 0.05,
+  "duration_ms": 12500,
+  "entry_difference_ms_max": 50,
+  "D_difference_max": 0.005,
+  "initial": "Same stored physical zero state and constant delay prehistory; all common history samples bitwise equal.",
+  "scope": "Numerical sensitivity check, not SNN equivalence or replacement acceptance. Same graph, mean input, response coefficients, Z/M dynamic. One fixed run; report a failure without adjusting tolerances."
+}

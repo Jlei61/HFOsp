@@ -1,0 +1,39 @@
+{
+  "candidate": {
+    "index1": 33,
+    "index2": 36,
+    "burst_count": 3,
+    "time1_ms": 18778.098379052637,
+    "time2_ms": 19568.374403551123,
+    "period_ms": 790.2760244984856,
+    "history_relative_rms": 0.0007551668185927583,
+    "M_relative_rms": 0.008028220484583093,
+    "score": 0.0057018681619703864
+  },
+  "screen": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/late_recurrence/result.json",
+  "coordinates": {
+    "D_A": 0.28764862467548047,
+    "Z_A": 0.7123513753245195,
+    "native_interpolation_time_ms": 9507.453342988189
+  },
+  "segments": 6,
+  "dt_ms": 0.05,
+  "device": 1,
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/actual_native_entry_midpoint/from_interictal_history/checkpoint15000.npz",
+  "times_ms": [
+    18778.100000000002,
+    18909.8,
+    19041.5,
+    19173.2,
+    19304.95,
+    19436.65,
+    19568.350000000002
+  ],
+  "question": "Does the actual short-event spatial trajectory admit its observed multi-burst full-state periodic candidate, rather than the unstable one-burst root?",
+  "selection": "Explicitly selected 3-burst candidate from the stored all-group history/M screen. Longer near-returns are not declared distinct periods before checking this candidate.",
+  "equations": "Same original3479-group drift, frozen originalCoreAfield recorded in coordinates andnative9s outsideA, allE M dynamic. No parameter, response or futureinput changes.",
+  "numerical": "K complete-state nodes partition only the shooting equation, not the physical model. All nodes are nearest actual.05ms states; subsequent matching removes segment timing offsets.",
+  "acceptance": "Numerical replay gate: every savedfloat32 rate within one float32 ULP plus1e-12Hz; continue to original20000ms checkpoint and require original six-block full-float64 state agreement combined<1e-10, eachblock<1e-9. Report exact bitwise differences separately. This is a seed-source check, not a relaxation of periodic closure, stability, phase or mesh gates.",
+  "reason_for_precision_check": "The earlier D_A=.270 replay differed by onefloat32 ULP at one0.000188Hz sample; independentGPU0/GPU1 andCPUthread1/2 replays agreed bitwise with eachother. That failed attempt is retained. Apply the separately declared complete-float64 checkpoint comparison to this source; no physical or periodic acceptance gate changes.",
+  "model_promoted": false
+}

@@ -1,0 +1,20 @@
+{
+  "pid": 552634,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_brunel_spatial_bifurcation/locate_rate_PD4_later_flip.py",
+    "--device",
+    "1",
+    "--after-pids",
+    "547431",
+    "--min-free-gib",
+    "8"
+  ],
+  "timestamp": 1789898536.6343522,
+  "scope": "One candidate anti-periodic root, temporal N1024; all 935 spatial populations retained; validation and mesh convergence remain required",
+  "minimum_free_gpu_GiB": 8,
+  "after_pids": [
+    547431
+  ]
+}

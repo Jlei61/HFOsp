@@ -1,0 +1,9 @@
+{
+  "status": "COMMON_FULL_STATE_COORDINATE_AUDIT",
+  "source_phase_norm_all_nodes": 9110.894831306352,
+  "cycle_RMS_norm_all_nodes": 55.28109984434103,
+  "source_radius_at2percent": 182.21789662612704,
+  "cycle_RMS_radius_at2percent": 1.1056219968868206,
+  "maximum_row_scale_ratio": 398.3198546919986,
+  "interpretation": "Quiet first-phase history scale heavily weights activity at other nodes and gives a large initial trust radius. CycleRMS is an invertible common rescaling of the same full states, with existing floors. Original per-node physical closure/error gates and full nonlinear/derivative checks remain unchanged; no new physical parameter or state reduction."
+}

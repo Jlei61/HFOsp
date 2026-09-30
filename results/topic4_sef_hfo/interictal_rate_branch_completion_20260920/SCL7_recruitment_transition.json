@@ -1,0 +1,81 @@
+{
+  "status": "FROZEN_OBSERVER_RECRUITMENT_BRACKET_CHECKED",
+  "sources": [
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/live_CPU_observer/point_0031.json",
+    "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/Bleading_extension/live_CPU_observer/point_0032.json"
+  ],
+  "J_bracket": [
+    0.9749987863147617,
+    0.9758525579909363
+  ],
+  "T_ms": [
+    271.4264314465069,
+    271.2082176549475
+  ],
+  "common_phase_aligned_935_population_RMS_difference_Hz": 0.40501419844168524,
+  "relative_waveform_difference": 0.011021039792170272,
+  "common_phase_shift_cycles": -7.731245696712163e-06,
+  "SCL7_group_participation_by_bin_origin": [
+    [
+      0.0,
+      0.375
+    ],
+    [
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.375
+    ],
+    [
+      0.0,
+      0.25
+    ]
+  ],
+  "original_three_metric_differences": [
+    {
+      "mean_rank_difference": 0.010044642857142844,
+      "within_shaft_order_difference": 0.0,
+      "participation_difference": 0.046875
+    },
+    {
+      "mean_rank_difference": 0.013392857142857137,
+      "within_shaft_order_difference": 0.0,
+      "participation_difference": 0.0625
+    },
+    {
+      "mean_rank_difference": 0.010044642857142844,
+      "within_shaft_order_difference": 0.0,
+      "participation_difference": 0.046875
+    },
+    {
+      "mean_rank_difference": 0.006696428571428575,
+      "within_shaft_order_difference": 0.0,
+      "participation_difference": 0.03125
+    }
+  ],
+  "common_order_checks": [
+    {
+      "ordered_pairs": 32,
+      "maximum_absolute_change": 0.0
+    },
+    {
+      "ordered_pairs": 32,
+      "maximum_absolute_change": 0.0
+    },
+    {
+      "ordered_pairs": 32,
+      "maximum_absolute_change": 0.0
+    },
+    {
+      "ordered_pairs": 32,
+      "maximum_absolute_change": 0.0
+    }
+  ],
+  "fixed_participant_rank_control": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/SCL7_fixed_participant_rank_control.json",
+  "observer_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_surrogate_6101_20260916/observer_firing.json",
+  "minimum_detection_ms": 4.0,
+  "statistical_unit": "One physical periodic solution at each J; eight repeats and four bin origins are deterministic sampling checks, not independent events or confidence intervals.",
+  "scope": "SCL7 begins meeting the original amplitude-and-duration detector within this bracket. This is an observation boundary, not an independently identified dynamical bifurcation. Stability of these return-arm profiles remains unclassified."
+}

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "relative_JVP_error": 3.055038769951034e-15,
+  "max_residual_difference": 3.552713678800501e-12,
+  "N": 1025,
+  "M": 4096,
+  "model_change": false,
+  "residual_roundoff_tolerance": 1e-10,
+  "root_tolerance": 2e-08,
+  "input_harmonics": "direct zero-padding onto M nodes, algebraically identical for odd N",
+  "response_schedule": "same phi_batch kernel in blocks of 1024 temporal nodes",
+  "inverse_fft_population_block": 64,
+  "initial_stricter_check": "Residual difference 2.998e-12 exceeded 1e-12; JVP parity passed"
+}

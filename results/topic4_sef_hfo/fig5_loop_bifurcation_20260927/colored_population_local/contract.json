@@ -1,0 +1,19 @@
+{
+  "status": "FROZEN_BEFORE_LOCAL_CHECKS",
+  "created_epoch": 1790517220.2501554,
+  "question": "Does explicitly retaining voltage, refractory state and both colored-current pairs give a faithful resumable local Markov solver, including changing conductance?",
+  "scope": "No fitted response, no new native trajectory, no new network parameters. Exact reference Gaussian-current diffusion remains an approximation to native shot noise. These checks certify implementation only; no spatial closure or bifurcation promotion.",
+  "reason": "Static v3/v4 pass independent mean rates but their independent gains fail, including DC variance signs. Stop generic history-MLP expansion. Retain the physical distribution before deciding whether the remaining network moment approximation is usable.",
+  "candidate": "Per particle V,qA,IA,qG,IG,absolute refractory counter and independent numerical RNG. Current fluctuations stay raw when g changes. Population rate is threshold flux, not a fitted function of recent input means.",
+  "checks": [
+    "Eight heterogeneous E/I conditions,64 particles,400 supplied-noise steps versus independent CPU; g and raw mean/variance vary, including deterministic and zero-g endpoints.",
+    "Exactly identical final states and counts for whole versus irregular chunked evolution, same initial state and RNG.",
+    "E constant-g Gaussian-LIF counts at18 predefined workpoints against existing independent local solver; same random streams,8192 replicas,500ms burn and1000ms record. Compare per-replica counts, not a fitted population mean."
+  ],
+  "source_sha256": "87d458f7bd3d9be277d26522516b7bf07a0d419b765af1a007e4398354994c74",
+  "kernel_sha256": "37c6d3a8fc8659ee70efef97ed585dfcb42f56823b1fb8876e92fdfeff2c3106",
+  "reference_sha256": "a13e9173df1bd9f270c9cbf9899d32132d3f3bb3a2f7b8f36fead56a00c4200f",
+  "dt_ms": 0.1,
+  "device": 1,
+  "boundary": "Particles approximate a density. Their number is numerical resolution, not native network size or independent native seeds. No physical finite-population noise is inferred from particle sampling noise."
+}

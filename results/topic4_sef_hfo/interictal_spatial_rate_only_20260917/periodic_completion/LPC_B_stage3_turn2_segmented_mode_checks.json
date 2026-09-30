@@ -1,0 +1,389 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "label": "LPC_B_stage3_turn2",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B_stage3_turn2_N2048.npz",
+  "N": 2048,
+  "J_EE_core": 0.9500667321547613,
+  "T_ms": 328.47982704571154,
+  "dT": -29.368902059043844,
+  "dJ": -7.993880941413956e-13,
+  "checks": [
+    {
+      "dt_ms": 0.09999385907023182,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.498741109397525,
+          "fold_relative_defect": 9.009658575312678e-06,
+          "phase_relative_defect": 7.071445704073734e-06,
+          "permuted_group_control_defect": 0.5437350718887233
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.498741109397525,
+          "end_ms": 40.99748221879505,
+          "fold_relative_defect": 4.4420861584815935e-05,
+          "phase_relative_defect": 3.919239291474734e-05
+        },
+        {
+          "segment": 2,
+          "start_ms": 40.99748221879505,
+          "end_ms": 61.49622332819257,
+          "fold_relative_defect": 3.123295251241555e-05,
+          "phase_relative_defect": 6.337513761594969e-05
+        },
+        {
+          "segment": 3,
+          "start_ms": 61.49622332819257,
+          "end_ms": 82.09495829666032,
+          "fold_relative_defect": 2.8961596588656863e-05,
+          "phase_relative_defect": 7.634263233356167e-05
+        },
+        {
+          "segment": 4,
+          "start_ms": 82.09495829666032,
+          "end_ms": 102.59369940605785,
+          "fold_relative_defect": 0.00011726296082668956,
+          "phase_relative_defect": 6.87285453311436e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 102.59369940605785,
+          "end_ms": 123.09244051545538,
+          "fold_relative_defect": 7.067342278148372e-05,
+          "phase_relative_defect": 6.173751437613131e-05
+        },
+        {
+          "segment": 6,
+          "start_ms": 123.09244051545538,
+          "end_ms": 143.69117548392313,
+          "fold_relative_defect": 7.877342524912733e-06,
+          "phase_relative_defect": 8.85947906911099e-06
+        },
+        {
+          "segment": 7,
+          "start_ms": 143.69117548392313,
+          "end_ms": 164.18991659332065,
+          "fold_relative_defect": 3.960557474334128e-06,
+          "phase_relative_defect": 7.688828046288927e-06
+        },
+        {
+          "segment": 8,
+          "start_ms": 164.18991659332065,
+          "end_ms": 184.6886577027182,
+          "fold_relative_defect": 1.2600332525316227e-05,
+          "phase_relative_defect": 1.9515158576835808e-05,
+          "permuted_group_control_defect": 0.5218411277837489
+        },
+        {
+          "segment": 9,
+          "start_ms": 184.6886577027182,
+          "end_ms": 205.28739267118593,
+          "fold_relative_defect": 3.846935135851341e-05,
+          "phase_relative_defect": 4.373717943819263e-05
+        },
+        {
+          "segment": 10,
+          "start_ms": 205.28739267118593,
+          "end_ms": 225.78613378058347,
+          "fold_relative_defect": 3.472989557221347e-05,
+          "phase_relative_defect": 3.7449353754358035e-05
+        },
+        {
+          "segment": 11,
+          "start_ms": 225.78613378058347,
+          "end_ms": 246.28487488998098,
+          "fold_relative_defect": 0.00010181168392674917,
+          "phase_relative_defect": 0.00010014583236145636
+        },
+        {
+          "segment": 12,
+          "start_ms": 246.28487488998098,
+          "end_ms": 266.8836098584487,
+          "fold_relative_defect": 9.184942885062733e-05,
+          "phase_relative_defect": 6.353969370524268e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 266.8836098584487,
+          "end_ms": 287.38235096784626,
+          "fold_relative_defect": 8.586175439242526e-05,
+          "phase_relative_defect": 7.879758960074538e-05
+        },
+        {
+          "segment": 14,
+          "start_ms": 287.38235096784626,
+          "end_ms": 307.8810920772438,
+          "fold_relative_defect": 4.214128370449584e-06,
+          "phase_relative_defect": 4.611790445116556e-06
+        },
+        {
+          "segment": 15,
+          "start_ms": 307.8810920772438,
+          "end_ms": 328.47982704571154,
+          "fold_relative_defect": 3.1588922277335697e-06,
+          "phase_relative_defect": 3.715727901030065e-06
+        }
+      ],
+      "maximum_fold_relative_defect": 0.00011726296082668956,
+      "maximum_phase_relative_defect": 0.00010014583236145636,
+      "minimum_negative_control_defect": 0.5218411277837489,
+      "phase_reconstruction_relative_error": 2.0881015423056955e-15,
+      "generalized_boundary_relative_error": 8.773182605809946e-15
+    },
+    {
+      "dt_ms": 0.04999692953511591,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.498741109397525,
+          "fold_relative_defect": 2.2255902741915485e-06,
+          "phase_relative_defect": 1.7278835229964406e-06,
+          "permuted_group_control_defect": 0.5437625344981324
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.498741109397525,
+          "end_ms": 41.04747914833016,
+          "fold_relative_defect": 1.1082667843033366e-05,
+          "phase_relative_defect": 9.793431718130082e-06
+        },
+        {
+          "segment": 2,
+          "start_ms": 41.04747914833016,
+          "end_ms": 61.54622025772769,
+          "fold_relative_defect": 7.866110905949335e-06,
+          "phase_relative_defect": 1.5359121954356685e-05
+        },
+        {
+          "segment": 3,
+          "start_ms": 61.54622025772769,
+          "end_ms": 82.09495829666032,
+          "fold_relative_defect": 7.135852055228098e-06,
+          "phase_relative_defect": 1.8821864944795594e-05
+        },
+        {
+          "segment": 4,
+          "start_ms": 82.09495829666032,
+          "end_ms": 102.64369633559296,
+          "fold_relative_defect": 2.9202520639061546e-05,
+          "phase_relative_defect": 1.7010231540954448e-05
+        },
+        {
+          "segment": 5,
+          "start_ms": 102.64369633559296,
+          "end_ms": 123.14243744499049,
+          "fold_relative_defect": 1.685021881500483e-05,
+          "phase_relative_defect": 1.4596087084834482e-05
+        },
+        {
+          "segment": 6,
+          "start_ms": 123.14243744499049,
+          "end_ms": 143.69117548392313,
+          "fold_relative_defect": 1.8853441005360142e-06,
+          "phase_relative_defect": 2.133422788476315e-06
+        },
+        {
+          "segment": 7,
+          "start_ms": 143.69117548392313,
+          "end_ms": 164.23991352285577,
+          "fold_relative_defect": 9.933748838862806e-07,
+          "phase_relative_defect": 1.9016168812279197e-06
+        },
+        {
+          "segment": 8,
+          "start_ms": 164.23991352285577,
+          "end_ms": 184.7386546322533,
+          "fold_relative_defect": 3.1503351676500227e-06,
+          "phase_relative_defect": 4.89073120462288e-06,
+          "permuted_group_control_defect": 0.522876846228582
+        },
+        {
+          "segment": 9,
+          "start_ms": 184.7386546322533,
+          "end_ms": 205.28739267118593,
+          "fold_relative_defect": 9.179674218123407e-06,
+          "phase_relative_defect": 1.0399883916477521e-05
+        },
+        {
+          "segment": 10,
+          "start_ms": 205.28739267118593,
+          "end_ms": 225.78613378058347,
+          "fold_relative_defect": 8.446855681281683e-06,
+          "phase_relative_defect": 9.151413343279893e-06
+        },
+        {
+          "segment": 11,
+          "start_ms": 225.78613378058347,
+          "end_ms": 246.3348718195161,
+          "fold_relative_defect": 2.5071212823889792e-05,
+          "phase_relative_defect": 2.480524826584006e-05
+        },
+        {
+          "segment": 12,
+          "start_ms": 246.3348718195161,
+          "end_ms": 266.8836098584487,
+          "fold_relative_defect": 2.2298640711782748e-05,
+          "phase_relative_defect": 1.5391030596938447e-05
+        },
+        {
+          "segment": 13,
+          "start_ms": 266.8836098584487,
+          "end_ms": 287.38235096784626,
+          "fold_relative_defect": 2.0702522252592276e-05,
+          "phase_relative_defect": 1.892359353483268e-05
+        },
+        {
+          "segment": 14,
+          "start_ms": 287.38235096784626,
+          "end_ms": 307.9310890067789,
+          "fold_relative_defect": 1.0449369648985774e-06,
+          "phase_relative_defect": 1.1426330974932808e-06
+        },
+        {
+          "segment": 15,
+          "start_ms": 307.9310890067789,
+          "end_ms": 328.47982704571154,
+          "fold_relative_defect": 7.911687646079994e-07,
+          "phase_relative_defect": 9.263138655048862e-07
+        }
+      ],
+      "maximum_fold_relative_defect": 2.9202520639061546e-05,
+      "maximum_phase_relative_defect": 2.480524826584006e-05,
+      "minimum_negative_control_defect": 0.522876846228582,
+      "phase_reconstruction_relative_error": 2.484924801450143e-15,
+      "generalized_boundary_relative_error": 8.774043714889749e-15
+    },
+    {
+      "dt_ms": 0.024998464767557956,
+      "segments": 16,
+      "matches": [
+        {
+          "segment": 0,
+          "start_ms": 0.0,
+          "end_ms": 20.52373957416508,
+          "fold_relative_defect": 5.573663111167812e-07,
+          "phase_relative_defect": 4.300612402628094e-07,
+          "permuted_group_control_defect": 0.5448616099097734
+        },
+        {
+          "segment": 1,
+          "start_ms": 20.52373957416508,
+          "end_ms": 41.04747914833016,
+          "fold_relative_defect": 2.770758689393679e-06,
+          "phase_relative_defect": 2.453384960471376e-06
+        },
+        {
+          "segment": 2,
+          "start_ms": 41.04747914833016,
+          "end_ms": 61.571218722495246,
+          "fold_relative_defect": 1.9773008262212606e-06,
+          "phase_relative_defect": 3.8062780204537714e-06
+        },
+        {
+          "segment": 3,
+          "start_ms": 61.571218722495246,
+          "end_ms": 82.11995676142789,
+          "fold_relative_defect": 1.7772393081919133e-06,
+          "phase_relative_defect": 4.7362111276829575e-06
+        },
+        {
+          "segment": 4,
+          "start_ms": 82.11995676142789,
+          "end_ms": 102.64369633559296,
+          "fold_relative_defect": 7.26603590594315e-06,
+          "phase_relative_defect": 4.253510803899589e-06
+        },
+        {
+          "segment": 5,
+          "start_ms": 102.64369633559296,
+          "end_ms": 123.16743590975805,
+          "fold_relative_defect": 4.142703827969868e-06,
+          "phase_relative_defect": 3.570493051739141e-06
+        },
+        {
+          "segment": 6,
+          "start_ms": 123.16743590975805,
+          "end_ms": 143.69117548392313,
+          "fold_relative_defect": 4.61297440513557e-07,
+          "phase_relative_defect": 5.235781065222018e-07
+        },
+        {
+          "segment": 7,
+          "start_ms": 143.69117548392313,
+          "end_ms": 164.23991352285577,
+          "fold_relative_defect": 2.4928787044084505e-07,
+          "phase_relative_defect": 4.717517444293132e-07
+        },
+        {
+          "segment": 8,
+          "start_ms": 164.23991352285577,
+          "end_ms": 184.76365309702086,
+          "fold_relative_defect": 7.925289174438128e-07,
+          "phase_relative_defect": 1.2332168717795016e-06,
+          "permuted_group_control_defect": 0.5239289262777193
+        },
+        {
+          "segment": 9,
+          "start_ms": 184.76365309702086,
+          "end_ms": 205.28739267118593,
+          "fold_relative_defect": 2.2596861234073867e-06,
+          "phase_relative_defect": 2.5543929733602777e-06
+        },
+        {
+          "segment": 10,
+          "start_ms": 205.28739267118593,
+          "end_ms": 225.81113224535102,
+          "fold_relative_defect": 2.0826579705471767e-06,
+          "phase_relative_defect": 2.283447424930831e-06
+        },
+        {
+          "segment": 11,
+          "start_ms": 225.81113224535102,
+          "end_ms": 246.35987028428366,
+          "fold_relative_defect": 6.241357334102133e-06,
+          "phase_relative_defect": 6.191938501804041e-06
+        },
+        {
+          "segment": 12,
+          "start_ms": 246.35987028428366,
+          "end_ms": 266.8836098584487,
+          "fold_relative_defect": 5.560007790376852e-06,
+          "phase_relative_defect": 3.834721857629846e-06
+        },
+        {
+          "segment": 13,
+          "start_ms": 266.8836098584487,
+          "end_ms": 287.40734943261384,
+          "fold_relative_defect": 5.10259733937066e-06,
+          "phase_relative_defect": 4.650562304703507e-06
+        },
+        {
+          "segment": 14,
+          "start_ms": 287.40734943261384,
+          "end_ms": 307.9310890067789,
+          "fold_relative_defect": 2.6239871485300613e-07,
+          "phase_relative_defect": 2.8699689524755155e-07
+        },
+        {
+          "segment": 15,
+          "start_ms": 307.9310890067789,
+          "end_ms": 328.47982704571154,
+          "fold_relative_defect": 1.9920264896268345e-07,
+          "phase_relative_defect": 2.3231060374341259e-07
+        }
+      ],
+      "maximum_fold_relative_defect": 7.26603590594315e-06,
+      "maximum_phase_relative_defect": 6.191938501804041e-06,
+      "minimum_negative_control_defect": 0.5239289262777193,
+      "phase_reconstruction_relative_error": 3.11602247825225e-15,
+      "generalized_boundary_relative_error": 8.775837791642522e-15
+    }
+  ],
+  "equation": "w(t)=dY(t/T)/ds - (t/T)*T_prime*y_dot(t); w_dot=A(t)w+A_delay(t)w_delayed; w(T)-w(0)+T_prime*f(0)=0",
+  "scope": "Independent physical-time variational matching of the periodic BVP tangent on all sections. All nine states and the full delayed rate history are retained. This diagnostic does not classify full Floquet stability or automatically promote a fold."
+}

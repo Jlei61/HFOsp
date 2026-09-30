@@ -1,0 +1,441 @@
+{
+  "status": "POST_VALIDATION_INPUT_SUPPORT_DIAGNOSTIC",
+  "training_input_bounds": {
+    "E": [
+      [
+        -36.24887260253737,
+        0.15572001717692172,
+        0.035149071745730245
+      ],
+      [
+        88.8038667369016,
+        2.536849631588834,
+        3.0726730841013925
+      ]
+    ],
+    "I": [
+      [
+        -38.21179944856291,
+        0.1649456470990711,
+        0.03577740770173083
+      ],
+      [
+        89.75047634338162,
+        2.360229659138536,
+        3.2192525850075167
+      ]
+    ]
+  },
+  "rows": [
+    {
+      "dataset": "factorial_waveform",
+      "index": 0,
+      "pop": "E",
+      "minimum": [
+        -6.525456696856524,
+        0.3603293221715243,
+        0.001399043631872766
+      ],
+      "maximum": [
+        70.80824279465091,
+        2.467500931634775,
+        4.3844780032868655
+      ],
+      "fraction_outside_training_input_box": 0.52569580078125,
+      "reference_rate_weighted_outside_fraction": 0.7511689140583215,
+      "squared_error_weighted_outside_fraction": 0.30182866098087946
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 1,
+      "pop": "E",
+      "minimum": [
+        -6.525456696856524,
+        1.093509946677888,
+        1.471701965705213
+      ],
+      "maximum": [
+        70.80824279465091,
+        1.093509946677888,
+        1.471701965705213
+      ],
+      "fraction_outside_training_input_box": 0.0,
+      "reference_rate_weighted_outside_fraction": 0.0,
+      "squared_error_weighted_outside_fraction": 0.0
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 2,
+      "pop": "E",
+      "minimum": [
+        6.3242609050492575,
+        0.3603293221715243,
+        0.001399043631872766
+      ],
+      "maximum": [
+        6.3242609050492575,
+        2.467500931634775,
+        4.3844780032868655
+      ],
+      "fraction_outside_training_input_box": 0.52569580078125,
+      "reference_rate_weighted_outside_fraction": 0.5236426814870897,
+      "squared_error_weighted_outside_fraction": 0.3291510933074518
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 3,
+      "pop": "E",
+      "minimum": [
+        -39.476588574301,
+        0.3615890790439992,
+        0.0013584537941499525
+      ],
+      "maximum": [
+        77.86270949006108,
+        2.4937733337381207,
+        4.519333592964372
+      ],
+      "fraction_outside_training_input_box": 0.661468505859375,
+      "reference_rate_weighted_outside_fraction": 0.8072416584092786,
+      "squared_error_weighted_outside_fraction": 0.2533154669325516
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 4,
+      "pop": "E",
+      "minimum": [
+        -39.476588574301,
+        1.0045907219940893,
+        1.4882376410235676
+      ],
+      "maximum": [
+        77.86270949006108,
+        1.0045907219940893,
+        1.4882376410235676
+      ],
+      "fraction_outside_training_input_box": 0.0343017578125,
+      "reference_rate_weighted_outside_fraction": 0.0,
+      "squared_error_weighted_outside_fraction": 2.8270862567782482e-11
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 5,
+      "pop": "E",
+      "minimum": [
+        0.22949171426194542,
+        0.3615890790439992,
+        0.0013584537941499525
+      ],
+      "maximum": [
+        0.22949171426194542,
+        2.4937733337381207,
+        4.519333592964372
+      ],
+      "fraction_outside_training_input_box": 0.661468505859375,
+      "reference_rate_weighted_outside_fraction": 0.7412137411739296,
+      "squared_error_weighted_outside_fraction": 0.12171901512161173
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 6,
+      "pop": "E",
+      "minimum": [
+        -21.930641313924756,
+        0.35805661946802153,
+        0.0012878673215714932
+      ],
+      "maximum": [
+        92.08678420061811,
+        2.5097586330970914,
+        4.396323319559923
+      ],
+      "fraction_outside_training_input_box": 0.670257568359375,
+      "reference_rate_weighted_outside_fraction": 0.8429192741664936,
+      "squared_error_weighted_outside_fraction": 0.6183102489580053
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 7,
+      "pop": "E",
+      "minimum": [
+        -21.930641313924756,
+        1.0573126311482561,
+        1.4291547921381689
+      ],
+      "maximum": [
+        92.08678420061811,
+        1.0573126311482561,
+        1.4291547921381689
+      ],
+      "fraction_outside_training_input_box": 0.01708984375,
+      "reference_rate_weighted_outside_fraction": 0.11460366786392982,
+      "squared_error_weighted_outside_fraction": 0.00044739536977762785
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 8,
+      "pop": "E",
+      "minimum": [
+        4.89745399053068,
+        0.35805661946802153,
+        0.0012878673215714932
+      ],
+      "maximum": [
+        4.89745399053068,
+        2.5097586330970914,
+        4.396323319559923
+      ],
+      "fraction_outside_training_input_box": 0.670257568359375,
+      "reference_rate_weighted_outside_fraction": 0.6682114254298249,
+      "squared_error_weighted_outside_fraction": 0.6987289948498645
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 9,
+      "pop": "I",
+      "minimum": [
+        -26.50650717947195,
+        0.47298107291284147,
+        0.001799293418022751
+      ],
+      "maximum": [
+        65.79957421860529,
+        2.9555266176604627,
+        6.036469856882732
+      ],
+      "fraction_outside_training_input_box": 0.64593505859375,
+      "reference_rate_weighted_outside_fraction": 0.9096680897389786,
+      "squared_error_weighted_outside_fraction": 0.7713772729836347
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 10,
+      "pop": "I",
+      "minimum": [
+        -26.50650717947195,
+        1.2512492977646275,
+        1.9711092499369252
+      ],
+      "maximum": [
+        65.79957421860529,
+        1.2512492977646275,
+        1.9711092499369252
+      ],
+      "fraction_outside_training_input_box": 0.0,
+      "reference_rate_weighted_outside_fraction": 0.0,
+      "squared_error_weighted_outside_fraction": 0.0
+    },
+    {
+      "dataset": "factorial_waveform",
+      "index": 11,
+      "pop": "I",
+      "minimum": [
+        0.44142265337542497,
+        0.47298107291284147,
+        0.001799293418022751
+      ],
+      "maximum": [
+        0.44142265337542497,
+        2.9555266176604627,
+        6.036469856882732
+      ],
+      "fraction_outside_training_input_box": 0.64593505859375,
+      "reference_rate_weighted_outside_fraction": 0.7549013526096794,
+      "squared_error_weighted_outside_fraction": 0.9633660589154329
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 0,
+      "pop": "E",
+      "minimum": [
+        0.9800730084815409,
+        0.6923330409839163,
+        1.3910833626670787
+      ],
+      "maximum": [
+        1.1000000000000003,
+        0.734166193719106,
+        1.468332387438212
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 1,
+      "pop": "E",
+      "minimum": [
+        0.9003650424077035,
+        0.6607762088560591,
+        1.3548301035353985
+      ],
+      "maximum": [
+        1.5,
+        0.8573214099741122,
+        1.7146428199482244
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 2,
+      "pop": "E",
+      "minimum": [
+        0.8206570763338661,
+        0.6276347319439353,
+        1.3175797118210077
+      ],
+      "maximum": [
+        1.8999999999999997,
+        0.9648834126463154,
+        1.9297668252926308
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 3,
+      "pop": "E",
+      "minimum": [
+        0.9488542644165128,
+        0.694073238191156,
+        1.391459755700433
+      ],
+      "maximum": [
+        1.1000000000000003,
+        0.734166193719106,
+        1.468332387438212
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 4,
+      "pop": "E",
+      "minimum": [
+        0.7442713220825645,
+        0.6698419961944652,
+        1.3567613123425737
+      ],
+      "maximum": [
+        1.5,
+        0.8573214099741122,
+        1.7146428199482244
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 5,
+      "pop": "E",
+      "minimum": [
+        0.5396883797486159,
+        0.6447006590336436,
+        1.321151870757173
+      ],
+      "maximum": [
+        1.8999999999999997,
+        0.9648834126463154,
+        1.9297668252926308
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 6,
+      "pop": "E",
+      "minimum": [
+        0.96923007065221,
+        0.6932818253223774,
+        1.391703954829385
+      ],
+      "maximum": [
+        1.1000000000000003,
+        0.734166193719106,
+        1.468332387438212
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 7,
+      "pop": "E",
+      "minimum": [
+        0.8461503532610491,
+        0.6657315124069443,
+        1.3580130667408015
+      ],
+      "maximum": [
+        1.5,
+        0.8573214099741122,
+        1.7146428199482244
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 8,
+      "pop": "E",
+      "minimum": [
+        0.7230706358698876,
+        0.6369907408282691,
+        1.3234648015681274
+      ],
+      "maximum": [
+        1.8999999999999997,
+        0.9648834126463154,
+        1.9297668252926308
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 9,
+      "pop": "I",
+      "minimum": [
+        0.9587688311442645,
+        0.6934181258967526,
+        1.3916204553929283
+      ],
+      "maximum": [
+        1.1000000000000003,
+        0.734166193719106,
+        1.468332387438212
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 10,
+      "pop": "I",
+      "minimum": [
+        0.7938441557213233,
+        0.6664409100669187,
+        1.35758515730694
+      ],
+      "maximum": [
+        1.5,
+        0.8573214099741122,
+        1.7146428199482244
+      ],
+      "fraction_outside_training_input_box": 0.0
+    },
+    {
+      "dataset": "in_domain_waveform",
+      "index": 11,
+      "pop": "I",
+      "minimum": [
+        0.6289194802983816,
+        0.6383245850658436,
+        1.3226743464708903
+      ],
+      "maximum": [
+        1.8999999999999997,
+        0.9648834126463154,
+        1.9297668252926308
+      ],
+      "fraction_outside_training_input_box": 0.0
+    }
+  ],
+  "scope": "Axis-aligned input box only. Being inside does not demonstrate sufficient history/function coverage; no targets or weights changed.",
+  "weighting_scope": "Descriptive overlap of uniform input-phase box exceedance with128binreference rate and squared prediction error; this does not isolate causal extrapolation error or prove adequate history coverage inside the box."
+}

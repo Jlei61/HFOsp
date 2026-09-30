@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-19T18:15:55.798242",
+  "source": "periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "question": "Relocate the geometric D-turn on the accepted finer temporal representation; no spatial convergence or LPC inference",
+  "predicted_T_ms": 264.3623569561784,
+  "shift_T_ms": -0.0005750929004193495,
+  "N": 16875,
+  "M": 262144,
+  "budget": "One prescribed-period root correction, then one analytic tangent; further correction only if derivative not resolved",
+  "acceptance": {
+    "root_residual_hz": 2e-08,
+    "target_derivative_abs": 1e-09,
+    "full_augmented_tangent_relative": 1e-06
+  },
+  "scope": "Fixed1mm spatial grid. New0.5mm forward-state difference means no automatic physical-mesh criticality."
+}

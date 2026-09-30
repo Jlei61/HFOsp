@@ -1,0 +1,20 @@
+{
+  "timestamp": 1789864207.2443578,
+  "status": "QUEUED_AFTER_LIVE_LOCAL_CHECKS",
+  "worker": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcBconnectionStage5_20260920_worker.json",
+  "pid": 494734,
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/continue_rate_checked_endpoints.py --device 1 --label arcBconnectionStage5_20260920 --predecessor arcBconnectionStage4_20260920 --steps 80 --ds .13 --wait-pids 489093 487162 --min-free-gib 6 --stream-harmonics --quadratic-predictor --tol 2e-11 --check-stride 1 --maximum-group-defect .001 --stop-after-turns 2 ",
+  "predecessor": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/arcBconnectionStage4_20260920_accuracy.json",
+  "seed_orbits": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0021_N2048.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz"
+  ],
+  "maximum_steps": 80,
+  "stop_after_new_J_turns": 2,
+  "same_spatial_model": true,
+  "geometry_groups": 935,
+  "spatial_cells": 400,
+  "physical_checks_per_new_point": true,
+  "global_connection_confirmed": false,
+  "scope": "Extend the stopped computational H2 endpoint after the existing fold and PD4 checks release resources. The new path is included only after physical off-grid validation; a parameter reversal is a root candidate, not automatically a fold."
+}

@@ -1,0 +1,53 @@
+{
+  "status": "COMMON_BIN_ROOT_COMPARISON_DIAGNOSTIC",
+  "sources": [
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root",
+    "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/midpoint_short_side_search/native4000_fine/one_burst_root_dt0p0125"
+  ],
+  "periods_ms": [
+    233.24589150399794,
+    233.24480671929103
+  ],
+  "period_difference_ms": -0.0010847847069044292,
+  "period_relative_change": -4.650820213422004e-06,
+  "same_complete_Z": true,
+  "full_state_comparison": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 16.732372533525083,
+        "difference_rms": 0.03357079472966326,
+        "relative_rms": 0.0020063379931567153
+      },
+      "GABA": {
+        "reference_rms": 11.066962578957812,
+        "difference_rms": 0.06040942456689594,
+        "relative_rms": 0.005458536986630415
+      },
+      "M": {
+        "reference_rms": 0.015719705374472134,
+        "difference_rms": 1.1078507798421147e-06,
+        "relative_rms": 7.047528903698147e-05
+      },
+      "covariance": {
+        "reference_rms": 37.738611779212,
+        "difference_rms": 0.024490337282731076,
+        "relative_rms": 0.0006489464272297735
+      },
+      "input_memory": {
+        "reference_rms": 0.09763852839704848,
+        "difference_rms": 6.297599418986127e-05,
+        "relative_rms": 0.0006449912265552435
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.005488581486318461,
+        "difference_rms": 2.1444262442405837e-05,
+        "relative_rms": 0.003907068246296524
+      }
+    },
+    "combined_relative_rms": 0.002884681160097459
+  },
+  "method": "Restrict refined flux bins by exact pair averaging to the common coarse history grid. Omit only the unused oldest coarse padding bin. All continuous state variables compared directly; no phase optimization or fitting.",
+  "phase_status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+  "scope": "Quantifies numerical change at the anchor only. Does not waive independent phase failure or qualify the critical parameter.",
+  "model_promoted": false
+}

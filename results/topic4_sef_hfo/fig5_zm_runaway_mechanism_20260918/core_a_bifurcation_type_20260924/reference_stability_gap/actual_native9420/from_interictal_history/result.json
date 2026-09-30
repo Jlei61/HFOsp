@@ -1,0 +1,124 @@
+{
+  "status": "COMPLETE",
+  "label": "from_interictal_history",
+  "D": 0.21692312608285202,
+  "conditions": {
+    "label": "from_interictal_history",
+    "field": "from_interictal_history",
+    "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_resource_bifurcation_20260923/reference/final_state.npz",
+    "source_dt_ms": 0.05,
+    "dt_ms": 0.05,
+    "duration_ms": 20000,
+    "previous_elapsed_ms": 0
+  },
+  "windows": [
+    {
+      "window_ms": [
+        0.0,
+        5000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.77408713035497,
+        109.97592406449385,
+        91.73969152108609,
+        31.442598289269778
+      ],
+      "global_range_hz": [
+        0.008703039257983446,
+        180.98873065365254
+      ],
+      "quiet_fraction": 0.5582,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.017472681632333145,
+        0.05437068195699466,
+        0.046132825233575786,
+        0.015819760912852792
+      ],
+      "M_start_end_weighted_abs_change": 0.0011082891665732035,
+      "group_rate_relative_variation": 0.9120090234326681
+    },
+    {
+      "window_ms": [
+        5000.0,
+        10000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.879444258152766,
+        110.45003991278803,
+        90.1529813644245,
+        31.582489915108553
+      ],
+      "global_range_hz": [
+        0.00919848216967966,
+        181.16503951711132
+      ],
+      "quiet_fraction": 0.5436,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.017394374239079566,
+        0.055161347177827814,
+        0.045505027697700096,
+        0.015734122393567675
+      ],
+      "M_start_end_weighted_abs_change": 0.0009025812419795343,
+      "group_rate_relative_variation": 0.9127714455229025
+    },
+    {
+      "window_ms": [
+        10000.0,
+        15000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.82243847960051,
+        110.30020297129106,
+        91.66795861876014,
+        31.487218083799082
+      ],
+      "global_range_hz": [
+        0.00921878883689254,
+        181.22909343525555
+      ],
+      "quiet_fraction": 0.5518,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.01737005127657097,
+        0.05515742428292067,
+        0.04537632258340686,
+        0.015711987964228225
+      ],
+      "M_start_end_weighted_abs_change": 0.0006873014713653196,
+      "group_rate_relative_variation": 0.9122201014322524
+    },
+    {
+      "window_ms": [
+        15000.0,
+        20000.0
+      ],
+      "mean_rates_global_A_B_surround": [
+        34.83697972015031,
+        110.41174930360233,
+        91.3672311610853,
+        31.507493380737852
+      ],
+      "global_range_hz": [
+        0.009202961870555188,
+        181.19676915553092
+      ],
+      "quiet_fraction": 0.5518,
+      "spatial_persistent_fraction": 0.0,
+      "M_mean_global_A_B_surround": [
+        0.01737739065857269,
+        0.055159608385469266,
+        0.04544318844996861,
+        0.015717918917597086
+      ],
+      "M_start_end_weighted_abs_change": 0.000533763615460816,
+      "group_rate_relative_variation": 0.9121737114945258
+    }
+  ],
+  "seconds": 1360.1387720108032,
+  "dt_ms": 0.05,
+  "scope": "Finite-duration state continuation; no certified branch, attractor or bifurcation yet.",
+  "model_promoted": false
+}

@@ -1,0 +1,84 @@
+{
+  "status": "COMPLETE_EVENT_BOUNDARY_ANNOTATED_SPATIAL_CANDIDATE",
+  "selected": [
+    [
+      "Original interictal reference",
+      0.57,
+      {
+        "start_s": 0.58,
+        "end_s": 0.66,
+        "duration_s": 0.08,
+        "quiet_gap_s": 0.03,
+        "peak_s": 0.625,
+        "peak_Hz": 390.3183023872679,
+        "onset_interval_s": 0.12999999999999995,
+        "interevent_gap_s": 0.029999999999999916
+      }
+    ],
+    [
+      "Returned event 1",
+      26.47,
+      {
+        "start_s": 26.47,
+        "end_s": 26.59,
+        "duration_s": 0.12,
+        "quiet_gap_s": 0.39,
+        "peak_s": 26.495,
+        "peak_Hz": 414.8854961832061,
+        "onset_interval_s": 0.5999999999999979,
+        "interevent_gap_s": 0.389999999999997
+      }
+    ],
+    [
+      "Returned event 2",
+      26.73,
+      {
+        "start_s": 26.73,
+        "end_s": 26.91,
+        "duration_s": 0.18,
+        "quiet_gap_s": 0.14,
+        "peak_s": 26.835,
+        "peak_Hz": 421.61803713527854,
+        "onset_interval_s": 0.26000000000000156,
+        "interevent_gap_s": 0.14000000000000057
+      }
+    ],
+    [
+      "Returned event 3",
+      27.02,
+      {
+        "start_s": 27.02,
+        "end_s": 27.17,
+        "duration_s": 0.15,
+        "quiet_gap_s": 0.11,
+        "peak_s": 27.145,
+        "peak_Hz": 391.98473282442745,
+        "onset_interval_s": 0.28999999999999915,
+        "interevent_gap_s": 0.10999999999999943
+      }
+    ],
+    [
+      "First weak returned event",
+      27.44,
+      {
+        "start_s": 27.44,
+        "end_s": 27.53,
+        "duration_s": 0.09,
+        "quiet_gap_s": 0.03,
+        "peak_s": 27.465,
+        "peak_Hz": 42.953125,
+        "onset_interval_s": 0.120000000000001,
+        "interevent_gap_s": 0.030000000000001137
+      }
+    ]
+  ],
+  "common_window_ms": 200,
+  "frame_bin_ms": 5,
+  "supersedes_display": "constant_tau_return_spatial_sequence.png",
+  "event_definitions_unchanged": true,
+  "analysis_unchanged": true,
+  "agent_visual": "PASS_BOUNDARIES_AND_CONTEXT_VISIBLE",
+  "human_visual": "PENDING",
+  "producer_sha256": "af38e5078d3210d03239aae2b76c49c0f3883f6d1b5c1cadce7b74e84fed4169",
+  "SVG_XML": "PASS"
+}

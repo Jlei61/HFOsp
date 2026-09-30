@@ -1,0 +1,44 @@
+{
+  "status": "MATCHED_DURATION_NUMERICAL_CONTROL_COMPLETE",
+  "rows": [
+    {
+      "label": "coarse",
+      "dt_ms": 0.05,
+      "growth_2_5_s": -2.0528457101608053,
+      "growth_2_10_s": 1.2899451350992859,
+      "one_second_blocks_per_s": [
+        7.713329772077533,
+        3.0587958911792574,
+        5.204380228485142,
+        -9.076803409285795,
+        -2.2861139496817646,
+        14.750007426016753,
+        5.3952918589632235,
+        -1.1220441316091065,
+        -7.569213846503299,
+        5.024056904409118
+      ]
+    },
+    {
+      "label": "fine",
+      "dt_ms": 0.025,
+      "growth_2_5_s": 3.496371098346058,
+      "growth_2_10_s": 7.240540351210592,
+      "one_second_blocks_per_s": [
+        10.400545576709133,
+        -0.2321986051388003,
+        8.527796335632976,
+        -3.576140135717212,
+        5.537457095122411,
+        9.747285990629354,
+        14.502660382413856,
+        1.8723361916459351,
+        7.293385330851042,
+        14.01954161910637
+      ]
+    }
+  ],
+  "full_fine_activity_audit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/preentry_fine_growth/fine/whole_record_audit.json",
+  "interpretation": "Same physical10s initial checkpoint and matched10s duration. These are numerical controls, not independent realizations. Positive finite-time growth, especially with phase-dependent block variation, does not establish an asymptotic attractor or name the prolonged-event bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,56 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "dt_ms": 0.00625,
+      "epsilon": 0.4222871219517527,
+      "fraction": 1.0,
+      "elapsed_ms": 264.18125000000003,
+      "period_offset_ms": 0.0007277154400640029,
+      "norm_gain": 15.098881568179525,
+      "rayleigh": 15.09880730565202,
+      "relative_eigendirection_residual": 0.003136367450774543,
+      "relative_to_unvalidated_prediction": 0.14411326367747745
+    },
+    {
+      "dt_ms": 0.00625,
+      "epsilon": 0.04222871219517527,
+      "fraction": 0.1,
+      "elapsed_ms": 264.18125000000003,
+      "period_offset_ms": 0.0007277154400640029,
+      "norm_gain": 15.384967754531878,
+      "rayleigh": 15.384879540803974,
+      "relative_eigendirection_residual": 0.00338636812806518,
+      "relative_to_unvalidated_prediction": 0.16003005667921755
+    },
+    {
+      "dt_ms": 0.003125,
+      "epsilon": 0.4222871219517527,
+      "fraction": 1.0,
+      "elapsed_ms": 264.18125000000003,
+      "period_offset_ms": 0.0007277154400640029,
+      "norm_gain": 15.507073471283944,
+      "rayleigh": 15.50700276615776,
+      "relative_eigendirection_residual": 0.003019778104936492,
+      "relative_to_unvalidated_prediction": 0.16663708593727605
+    },
+    {
+      "dt_ms": 0.003125,
+      "epsilon": 0.04222871219517527,
+      "fraction": 0.1,
+      "elapsed_ms": 264.18125000000003,
+      "period_offset_ms": 0.0007277154400640029,
+      "norm_gain": 15.47979816037328,
+      "rayleigh": 15.479728737987292,
+      "relative_eigendirection_residual": 0.0029948952205769174,
+      "relative_to_unvalidated_prediction": 0.16516853037170798
+    }
+  ],
+  "orbit": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_Z78_refinement_G8193_M65536/point0000.npz",
+  "spectrum": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/floquet/native_Z78_refinement_G8193_M65536_point0000_endpoint_dt0.025_chainphase_rk4_cubic_streamed_fastgrid_UNVALIDATED_diagnostic.npz",
+  "unvalidated_multiplier": 12.923373571427291,
+  "spectrum_phase_valid": false,
+  "Z": "held",
+  "M": "dynamic",
+  "scope": "Central differences of nonlinear EndpointHeun full-state/history flow; not accepted Floquet stability or bifurcation classification."
+}

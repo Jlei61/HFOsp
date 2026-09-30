@@ -1,0 +1,12 @@
+{
+  "question": "Does the matched natural-history ZA.701532-to.700 long-activity contrast survive a factor-two time-step refinement over the same first5s?",
+  "source_pair": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/matched_natural_short_entry_step",
+  "dt_ms": 0.025,
+  "source_dt_ms": 0.05,
+  "duration_ms": 5000,
+  "initial": "Exact common original4s natural short-history checkpoint; preserve all synaptic/local/M variables and physical history lag points; linear midlag insertion from existing factor-two regrid.",
+  "controls": "Identical refinedhistory in both arms. OnlywithinCoreA nativeZ changes. AllZheld/allE Mdynamic, original physicaldelays/privateQ/constantmeaninput/lockedresponse.",
+  "decision": "If only depletedfield shows complete long activity, the qualitative finite-time contrast replicates. If both or neither do, do not use coarse interval as mesh-qualified bifurcation bracket; retain the original outcomes and inspect numerical limit before further critical classification.",
+  "scope": "A finite5s numerical-control pair, not new independentreplicates or an asymptotic/type certificate.",
+  "model_promoted": false
+}

@@ -1,0 +1,21 @@
+{
+  "timestamp": 1789858385.1956244,
+  "old_worker": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 485524,
+    "rows": [
+      {
+        "label": "LPC_burst_high",
+        "status": "VALIDATED_CYCLE_FOLD",
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_burst_high_validation.json"
+      }
+    ],
+    "timestamp": 1789858360.3004234,
+    "label": "LPC_double_secondary4",
+    "stage": "ROOT",
+    "free_mib": 3521.0,
+    "required_free_gib": 11
+  },
+  "cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/complete_rate_period_coordinate_folds.py --device 0 --validation-free-gib 4 ",
+  "reason": "LPC6 validation is complete. Reload the waiting coordinator so the reduced validation resource gate applies only to N<=2048; preserve the original larger-mesh reserves and reuse the exact validated LPC6 root."
+}

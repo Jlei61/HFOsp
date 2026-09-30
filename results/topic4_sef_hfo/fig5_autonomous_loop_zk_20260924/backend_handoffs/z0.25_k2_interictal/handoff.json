@@ -1,0 +1,29 @@
+{
+  "status": "RESUMED_FROM_VERIFIED_CHECKPOINT",
+  "old_pid": 2593962,
+  "step": 540000,
+  "time_s": 54.0,
+  "checkpoint_sha256": "71884faeef3ca9d5d72b3dee2416b62ee6c014e84f1290351d3126b84dbaac50",
+  "backup": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/backend_handoffs/z0.25_k2_interictal/checkpoint_step540000.pkl",
+  "committed_observation_endpoints": {
+    "chunks": 540000,
+    "actual_current_chunks": 540000,
+    "conditional_drift_chunks": 540000,
+    "feedback_chunks": 540000,
+    "global_response_chunks": 540000,
+    "intrinsic_adaptation_chunks": 540000,
+    "mechanism_chunks": 540000,
+    "regional_chunks": 540000
+  },
+  "identical_job": true,
+  "identical_identity": true,
+  "complete_engine_unmodified": true,
+  "source_files_verified": 24,
+  "latest_reported_time_s": 55.0,
+  "maximum_uncommitted_time_to_recompute_s": 2.0,
+  "persisted_observations_discarded": false,
+  "new_backend": "locality_cpu",
+  "threads": 8,
+  "epoch": 1790269753.4591248,
+  "new_pid": 2718095
+}

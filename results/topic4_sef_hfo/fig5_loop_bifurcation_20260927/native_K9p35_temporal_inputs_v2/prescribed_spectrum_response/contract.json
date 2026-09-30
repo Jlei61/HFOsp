@@ -1,0 +1,12 @@
+{
+  "status": "FROZEN_BEFORE_PRESCRIBED_SPECTRUM_RESPONSE",
+  "created_epoch": 1790552065.3753853,
+  "question": "Does preserving the measured netcurrent temporal spectrum resolve the remaining scalarvariance Gaussian response error, or is spectral information alone insufficient?",
+  "selection": "Six developmenttargets fixed before new counts: remainingcoreoutlier5148, Imeaninputcontrol38408, and four previouslyassayed recruitmentedge targets20590/17487/28942/27474.",
+  "design": "Actual native individualthreshold/Z/K, fixedobservedmeanM/G. Prescribe full2s netcurrent autospectrum including measured E/Icrosscovariance. Generate1024 independentGaussian Fourier realizations per target,2speriodic,1s+uniform0-1s burn,16srecord (eight repeats, not eight independent samples). Seed929491. Compare to earlier samevariance low-passGaussian andnative2scount.",
+  "limits": "Data-prescribed2sspectrum andfiniteperiodic input, not a selfconsistent autonomous closure, native-network trial or dynamicstability validation. No fitted frequency/time constant; conditional explanatory test only.",
+  "unit": "Independent Gaussianrealizations estimate MCprecision; six selectedtargets from one nativeconditionaltrajectory are not native seeds.",
+  "physical_kernel": "Original membrane/refractory arithmetic, independently checked against every supplied-current native spike before stochasticassay.",
+  "producer_sha256": "a0f882abe87018ff3bd01fd45f028bd6caed8928d19ecc34d06928b9e0a7a307",
+  "formal_bifurcation_allowed": false
+}

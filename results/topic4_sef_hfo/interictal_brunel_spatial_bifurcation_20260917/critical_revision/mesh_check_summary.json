@@ -1,0 +1,51 @@
+{
+  "status": "REPEATED_B_FOLD_STRUCTURE_REPRODUCED_POSITIONS_GRID_SENSITIVE",
+  "rows": [
+    {
+      "source": "results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/critical_revision/gridcheck_projected/low_arclength_0/result.json",
+      "J_1mm": 1.0073769428307213,
+      "J_0p5mm": 0.9596704533937943,
+      "relative_parameter_change": -0.047357138533340004,
+      "rates_0p5mm": [
+        0.8641877930383205,
+        3.988673072310612,
+        0.19625375396378966
+      ],
+      "regional_energy": [
+        2.0768048610518807e-06,
+        0.31126332857309735,
+        0.5168155301650774
+      ]
+    },
+    {
+      "source": "results/topic4_sef_hfo/interictal_brunel_spatial_bifurcation_20260917/critical_revision/gridcheck_repeatedpair/low_arclength_2/result.json",
+      "J_1mm": 1.007275360202733,
+      "J_0p5mm": 0.9595080511411868,
+      "relative_parameter_change": -0.047422294785342545,
+      "rates_0p5mm": [
+        2.3137228921889386,
+        3.9966229147195738,
+        0.2522117718263404
+      ],
+      "regional_energy": [
+        3.300685488883735e-05,
+        0.30969589215463134,
+        0.51832650144846
+      ]
+    }
+  ],
+  "weighted_null_mode_overlap": 0.999896731055307,
+  "grid_cells": [
+    400,
+    1600
+  ],
+  "rate_groups": [
+    935,
+    3479
+  ],
+  "limits": [
+    "This verifies two fine-grid folds with the same B-dominated mode and different A backgrounds, not the complete twelve-fold pattern.",
+    "High-fold refinement from J=1.201 stopped without convergence; this is not evidence that the fold is absent.",
+    "Fine-grid identities were obtained from projected coarse seeds, not a full homotopy of every branch."
+  ]
+}

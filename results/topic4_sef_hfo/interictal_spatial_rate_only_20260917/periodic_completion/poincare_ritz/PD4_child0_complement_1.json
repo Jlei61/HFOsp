@@ -1,0 +1,169 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.02000_N1024.npz",
+  "J_EE_core": 0.9463109196512791,
+  "T_ms": 593.7951662930823,
+  "dt_ms": 0.024999796492635663,
+  "minimum_occupied_delay_ms": 0.1,
+  "history_dimension": 1349205,
+  "multipliers": [
+    [
+      187.77616154153287,
+      0.0
+    ],
+    [
+      0.8282697600149996,
+      -2.000299485751324
+    ],
+    [
+      0.8282697600149996,
+      2.000299485751324
+    ],
+    [
+      1.386819823758941,
+      0.0
+    ],
+    [
+      0.5512631662947667,
+      0.0
+    ],
+    [
+      0.5511542410674238,
+      0.0
+    ],
+    [
+      0.5509842215104744,
+      0.0
+    ],
+    [
+      0.47737068402024024,
+      0.0
+    ]
+  ],
+  "residuals": [
+    4.5738482539255566e-09,
+    5.123559272972578e-10,
+    5.123559272972578e-10,
+    1.1076786542501613e-09,
+    3.6679266600467735e-09,
+    1.0031608894610824e-08,
+    4.830999048225932e-09,
+    2.8344243468141523e-09
+  ],
+  "phase_overlap": [
+    5.1090445177423866e-17,
+    2.869704955831008e-18,
+    2.869704955831008e-18,
+    1.636413417653621e-17,
+    1.4542217092984444e-18,
+    5.964158576805049e-17,
+    1.7350625165652616e-18,
+    3.2835607238845486e-17
+  ],
+  "phase_tangent_relative_defect": 0.0062881885095055455,
+  "full_state_generalized_eigen_residuals": [
+    4.5738482539255566e-09,
+    5.123559272972578e-10,
+    5.123559272972578e-10,
+    1.1076786542501613e-09,
+    3.6679266600467735e-09,
+    1.0031608894610824e-08,
+    4.830999048225932e-09,
+    2.8344243468141523e-09
+  ],
+  "section_time_shift_coefficients": [
+    [
+      -8731.048130127754,
+      0.0
+    ],
+    [
+      0.08821827572129247,
+      -0.1117354048350737
+    ],
+    [
+      0.08821827572129247,
+      0.1117354048350737
+    ],
+    [
+      21.657175393050103,
+      0.0
+    ],
+    [
+      0.0011325350646609709,
+      0.0
+    ],
+    [
+      4.942250746957434,
+      0.0
+    ],
+    [
+      -0.00073699873801655,
+      0.0
+    ],
+    [
+      34.871093601929516,
+      0.0
+    ]
+  ],
+  "polynomial_filter_rho": 0.5522275075302883,
+  "transformed_eigenvalues": [
+    [
+      35156.191681610166,
+      0.0
+    ],
+    [
+      -3.7725605824775,
+      -2.2089547507121816
+    ],
+    [
+      -3.7725605824775,
+      2.2089547507121816
+    ],
+    [
+      1.1574291689027867,
+      0.0
+    ],
+    [
+      -0.0005316058028822345,
+      0.0
+    ],
+    [
+      -0.0005915353628031637,
+      0.0
+    ],
+    [
+      -0.000685030979741978,
+      0.0
+    ],
+    [
+      -0.03573445304257403,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.44777249246971174,
+  "smallest_returned_transformed_modulus": 0.0005316058028822345,
+  "complement_filter_relative_changes": [
+    7.878932922755766e-11,
+    2.7514086712102093e-11,
+    1.271463432369474e-09,
+    1.0649256324858636e-11
+  ],
+  "locked_subspace_dimension": 4,
+  "locked_subspace_invariance_defect": 9.177258982917949e-08,
+  "complementary_subspace_dimension": 4,
+  "lift_condition_numbers": [
+    128220.09745307492,
+    138541.97792649828,
+    138516.31009139595,
+    138558.42733542382
+  ],
+  "source": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_ritz/PD4_child0_k6_1.json",
+  "locked_source_indices": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "method": "Full Poincare spectrum: checked growing invariant block plus filtered Arnoldi on its orthogonal quotient; every lifted mode checked with the original full-delay operator.",
+  "seconds": 6122.596234321594,
+  "limitation": "Numerical, paired-step spectrum only. Approximate invariant-subspace and full original residual checks are required; not a rigorous enclosure or an interval-wide statement."
+}

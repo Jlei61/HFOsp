@@ -1,0 +1,490 @@
+{
+  "status": "COMPLETE_EXISTING_PAIRED_FEEDBACK_BUILDUP_AUDIT",
+  "rows": [
+    {
+      "seed": 9108402,
+      "job_differences": {
+        "name": [
+          "G30_response0_s9108402",
+          "G30_response0.5_s9108402"
+        ],
+        "global_tau_s": [
+          0.0,
+          0.5
+        ]
+      },
+      "recorded_future_input_bitwise": true,
+      "twenty_second_exogenous_state_bitwise": true,
+      "complete_certified_feedback_off_prefix_R_K_bitwise": true,
+      "certified_feedback_off_prefix_end_s": 9.767,
+      "onset_s": 9.87,
+      "delayed_first_R5_s": 17.416,
+      "conditions": [
+        {
+          "name": "G30_response0_s9108402",
+          "windows": [
+            {
+              "absolute_window_s": [
+                9.87,
+                10.37
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                0.5
+              ],
+              "R_mean_peak_Hz": [
+                212.49469911920622,
+                219.08771716102447
+              ],
+              "G_mean_peak": [
+                1.2528636850427137,
+                1.9087717161024471
+              ],
+              "K_start_end_peak": [
+                0.0,
+                0.4996444900671271,
+                0.49843964491935955
+              ],
+              "gate_mean": 0.04176212283475713,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                10.87
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                1.0
+              ],
+              "R_mean_peak_Hz": [
+                217.97797741553316,
+                231.14652035754148
+              ],
+              "G_mean_peak": [
+                1.799494628114358,
+                3.1146520357541476
+              ],
+              "K_start_end_peak": [
+                0.0,
+                1.1207234039299565,
+                1.1192051556250016
+              ],
+              "gate_mean": 0.05998315427047861,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                11.87
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                2.0
+              ],
+              "R_mean_peak_Hz": [
+                227.27165880386775,
+                250.19291810432838
+              ],
+              "G_mean_peak": [
+                2.7280143236672973,
+                5.019291810432838
+              ],
+              "K_start_end_peak": [
+                0.0,
+                2.3004556583357467,
+                2.2985998476049025
+              ],
+              "gate_mean": 0.09093381078890991,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                17.416
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                7.546000000000001
+              ],
+              "R_mean_peak_Hz": [
+                261.9675087786247,
+                391.82765181971934
+              ],
+              "G_mean_peak": [
+                6.19697575018702,
+                19.182765181971934
+              ],
+              "K_start_end_peak": [
+                0.0,
+                6.712850344310331,
+                10.669346127409124
+              ],
+              "gate_mean": 0.20656585833956734,
+              "G_with_q_zero_duration_s": 0.0
+            }
+          ],
+          "at_delayed_first_R5": {
+            "R_Hz": 329.94579705802283,
+            "G": 12.994579705802282,
+            "K": 6.712850344310331
+          }
+        },
+        {
+          "name": "G30_response0.5_s9108402",
+          "windows": [
+            {
+              "absolute_window_s": [
+                9.87,
+                10.37
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                0.5
+              ],
+              "R_mean_peak_Hz": [
+                220.17493892676663,
+                243.34854254135607
+              ],
+              "G_mean_peak": [
+                0.623652883086994,
+                1.3941951790583913
+              ],
+              "K_start_end_peak": [
+                0.0,
+                0.8558718171072122,
+                0.8520642673891746
+              ],
+              "gate_mean": 0.0673629221932917,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                10.87
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                1.0
+              ],
+              "R_mean_peak_Hz": [
+                218.30186945606843,
+                258.9019024978932
+              ],
+              "G_mean_peak": [
+                1.086168920106973,
+                2.2694052974929884
+              ],
+              "K_start_end_peak": [
+                0.0,
+                1.43499099868354,
+                1.4606388238712515
+              ],
+              "gate_mean": 0.07355445766370874,
+              "G_with_q_zero_duration_s": 0.168
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                11.87
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                2.0
+              ],
+              "R_mean_peak_Hz": [
+                219.61843987254136,
+                290.2682249118002
+              ],
+              "G_mean_peak": [
+                1.8356158314519102,
+                3.7141967693551647
+              ],
+              "K_start_end_peak": [
+                0.0,
+                1.8373012370010473,
+                2.6275300016716048
+              ],
+              "gate_mean": 0.08304292110263967,
+              "G_with_q_zero_duration_s": 0.592
+            },
+            {
+              "absolute_window_s": [
+                9.87,
+                17.416
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                7.546000000000001
+              ],
+              "R_mean_peak_Hz": [
+                228.9370999923546,
+                460.4815008231498
+              ],
+              "G_mean_peak": [
+                4.922125096986141,
+                12.607020495592412
+              ],
+              "K_start_end_peak": [
+                0.0,
+                11.272248427443913,
+                13.714249843268586
+              ],
+              "gate_mean": 0.18743120161888557,
+              "G_with_q_zero_duration_s": 2.986
+            }
+          ],
+          "at_delayed_first_R5": {
+            "R_Hz": 4.845996495774278,
+            "G": 10.565153690626513,
+            "K": 11.272248427443913
+          }
+        }
+      ]
+    },
+    {
+      "seed": 9108403,
+      "job_differences": {
+        "name": [
+          "G30_response0_s9108403",
+          "G30_response0.5_s9108403"
+        ],
+        "global_tau_s": [
+          0.0,
+          0.5
+        ]
+      },
+      "recorded_future_input_bitwise": true,
+      "twenty_second_exogenous_state_bitwise": true,
+      "complete_certified_feedback_off_prefix_R_K_bitwise": true,
+      "certified_feedback_off_prefix_end_s": 9.343,
+      "onset_s": 10.29,
+      "delayed_first_R5_s": 14.236,
+      "conditions": [
+        {
+          "name": "G30_response0_s9108403",
+          "windows": [
+            {
+              "absolute_window_s": [
+                10.29,
+                10.79
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                0.5
+              ],
+              "R_mean_peak_Hz": [
+                212.53670108547638,
+                219.54786224744907
+              ],
+              "G_mean_peak": [
+                1.2622836250071814,
+                1.9547862247449075
+              ],
+              "K_start_end_peak": [
+                0.018328289121840157,
+                0.5083241352050805,
+                0.5070425996977671
+              ],
+              "gate_mean": 0.042076120833572726,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                11.29
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                1.0
+              ],
+              "R_mean_peak_Hz": [
+                218.99381586627453,
+                229.91572790399033
+              ],
+              "G_mean_peak": [
+                1.9036883448572273,
+                2.991572790399033
+              ],
+              "K_start_end_peak": [
+                0.018328289121840157,
+                1.187211854636027,
+                1.1864154103694415
+              ],
+              "gate_mean": 0.06345627816190759,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                12.29
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                2.0
+              ],
+              "R_mean_peak_Hz": [
+                228.0097892969892,
+                251.74634867565217
+              ],
+              "G_mean_peak": [
+                2.803132308813805,
+                5.174634867565217
+              ],
+              "K_start_end_peak": [
+                0.018328289121840157,
+                2.316142664174847,
+                2.3143729718892994
+              ],
+              "gate_mean": 0.09343774362712687,
+              "G_with_q_zero_duration_s": 0.0
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                14.236
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                3.9460000000000015
+              ],
+              "R_mean_peak_Hz": [
+                243.7229170528451,
+                295.8613998526036
+              ],
+              "G_mean_peak": [
+                4.373383129062962,
+                9.58613998526036
+              ],
+              "K_start_end_peak": [
+                0.018328289121840157,
+                4.788679301665056,
+                4.906730944919929
+              ],
+              "gate_mean": 0.14577943763543208,
+              "G_with_q_zero_duration_s": 0.0
+            }
+          ],
+          "at_delayed_first_R5": {
+            "R_Hz": 266.4782972720079,
+            "G": 6.647829727200792,
+            "K": 4.788679301665056
+          }
+        },
+        {
+          "name": "G30_response0.5_s9108403",
+          "windows": [
+            {
+              "absolute_window_s": [
+                10.29,
+                10.79
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                0.5
+              ],
+              "R_mean_peak_Hz": [
+                219.44253440011272,
+                254.6622035526961
+              ],
+              "G_mean_peak": [
+                0.6610595929017908,
+                1.4514441211850788
+              ],
+              "K_start_end_peak": [
+                0.04841092474108379,
+                0.9261165348157301,
+                0.9204518683893791
+              ],
+              "gate_mean": 0.06777932557848525,
+              "G_with_q_zero_duration_s": 0.098
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                11.29
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                1.0
+              ],
+              "R_mean_peak_Hz": [
+                211.5843451820027,
+                260.65324500800614
+              ],
+              "G_mean_peak": [
+                1.095267958149258,
+                2.2559541713043028
+              ],
+              "K_start_end_peak": [
+                0.04841092474108379,
+                1.4821129446532795,
+                1.480879433605642
+              ],
+              "gate_mean": 0.07273664220532954,
+              "G_with_q_zero_duration_s": 0.323
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                12.29
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                2.0
+              ],
+              "R_mean_peak_Hz": [
+                214.58010678139462,
+                294.76063710046685
+              ],
+              "G_mean_peak": [
+                1.8561009381420341,
+                3.7577656114636593
+              ],
+              "K_start_end_peak": [
+                0.04841092474108379,
+                1.9970409447210877,
+                2.7013444010011245
+              ],
+              "gate_mean": 0.08454332387300326,
+              "G_with_q_zero_duration_s": 0.756
+            },
+            {
+              "absolute_window_s": [
+                10.29,
+                14.236
+              ],
+              "relative_to_entry_s": [
+                0.0,
+                3.9460000000000015
+              ],
+              "R_mean_peak_Hz": [
+                221.0405515746348,
+                381.49400304380794
+              ],
+              "G_mean_peak": [
+                3.1624166389895394,
+                7.475146773848794
+              ],
+              "K_start_end_peak": [
+                0.04841092474108379,
+                4.8165848179217265,
+                6.677671380361333
+              ],
+              "gate_mean": 0.12812493168133715,
+              "G_with_q_zero_duration_s": 1.565
+            }
+          ],
+          "at_delayed_first_R5": {
+            "R_Hz": 4.878774842496279,
+            "G": 5.45603576697312,
+            "K": 4.8165848179217265
+          }
+        }
+      ]
+    }
+  ],
+  "formal_bifurcation_allowed": false,
+  "scope": "PairedtauG intervention establishes a total effect; temporalbuildup and Gtail are candidate mediators. Do not identify their individual necessity from this descriptive comparison or transfer conditionalKthresholds across spatialfields. Separate onsetovershoot, delayedqoffGcarryover and subsequentZrecovery.",
+  "producer_sha256": "ce59a6e97c5cc60a031b463f0ba4cfa71c610a8d44733685dd0ce5e09826663a"
+}

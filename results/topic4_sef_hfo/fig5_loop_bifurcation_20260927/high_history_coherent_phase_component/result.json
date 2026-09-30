@@ -1,0 +1,53 @@
+{
+  "status": "COMPLETE_22_STEP_PHASE_COMPONENT_DESCRIPTION",
+  "source_rows": [
+    {
+      "region": "allE",
+      "active_targets": 14022,
+      "phase_explained_source_variance_median": 0.000882453850005528,
+      "active_fraction_phase_explained_above_half": 0.3524461560405078,
+      "total_variance_weighted_phase_fraction": 0.3664928075102839
+    },
+    {
+      "region": "coreA",
+      "active_targets": 754,
+      "phase_explained_source_variance_median": 5.631528647741198e-06,
+      "active_fraction_phase_explained_above_half": 0.07559681697612732,
+      "total_variance_weighted_phase_fraction": 0.08470438113971993
+    },
+    {
+      "region": "coreB",
+      "active_targets": 786,
+      "phase_explained_source_variance_median": 5.362278378903055e-06,
+      "active_fraction_phase_explained_above_half": 0.04961832061068702,
+      "total_variance_weighted_phase_fraction": 0.05765495760127817
+    },
+    {
+      "region": "I",
+      "active_targets": 3920,
+      "phase_explained_source_variance_median": 0.0010315488181828125,
+      "active_fraction_phase_explained_above_half": 0.0,
+      "total_variance_weighted_phase_fraction": 0.002182755555788989
+    }
+  ],
+  "selected20_IE_II_full_variance_mV2": [
+    239.60906537522015,
+    1.9443815040295003
+  ],
+  "selected20_IE_II_coherent_variance_mV2": [
+    235.64307646487737,
+    0.040654750166283525
+  ],
+  "selected20_IE_II_residual_variance_mV2": [
+    3.965988910349593,
+    1.9037267538631866
+  ],
+  "source_phase_period_s": 0.0022,
+  "QA": {
+    "exact_variance_budget_max_error": 3.487921063083377e-11,
+    "conditional_residual_mean_max_error": 4.528463168563557e-12,
+    "finite_record_to_uniform_phase_mean_offset_max_mV": 0.002211945695535178
+  },
+  "limits": "One native highhistory2s window. A spectral peak near a timestep multiple is a model-level observation, not a physiological frequency or a certified periodic orbit. Period locking and timestep sensitivity remain separate questions. This decomposition supplies no newautonomous model.",
+  "producer_sha256": "664ec1e710f921f9208e42ecf5e731330de2461cf373774a1fc321f58cd48d1d"
+}

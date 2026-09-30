@@ -1,0 +1,228 @@
+{
+  "status": "COMPLETE_CANDIDATE",
+  "history": "interictal",
+  "coordinate": {
+    "Z": 0.95,
+    "K": 0.02
+  },
+  "rows": [
+    {
+      "condition": "current",
+      "reference_s": 72.31,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.95_k0.02_interictal/figures/conditional_tail_first_brief_inputs.npz",
+      "source_npz_sha256": "7bff8d335d41b86943ca1d0b1c0d708ff4295b0204d92c73e3b3c9c39ffd7d2f",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/spatial_review/z0.95_k0.02_interictal/review.json",
+      "review_sha256": "76066d3a8194ed9f01d6a78de990f55860e53ca055cfbf8745fe8c7c0bc018a3",
+      "selection": "first_complete_brief",
+      "tail_brief_count": 5,
+      "core_recruitment": {
+        "n": 5,
+        "core_over100": 4,
+        "median_peak_5ms_Hz": [
+          35.60625,
+          284.8806366047745,
+          366.66666666666663,
+          35.35784635587656
+        ],
+        "median_core_to_other_peak_ratio": 11.366442770879978,
+        "core_recruitment_order": {
+          "A_first": 3,
+          "B_first": 1,
+          "same_5ms_bin": 0,
+          "both_reach100Hz_for10ms": 4
+        }
+      },
+      "frame_absolute_times_s": [
+        72.31,
+        72.33500000000001,
+        72.36,
+        72.385,
+        72.41,
+        72.435
+      ],
+      "feedback_tail": {
+        "window_s": [
+          70.0,
+          80.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 1.5869121360827283e-54,
+          "maximum": 7.397257558150232e-46,
+          "mean": 3.7730944842335914e-47
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 1.5075665292785917e-54,
+          "maximum": 7.027394680242719e-46,
+          "mean": 3.5844397600219106e-47
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 0.011925230772089917,
+          "maximum": 44.85818713524192,
+          "mean": 1.130603080775821
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "condition": "rotated",
+      "reference_s": 79.74,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/spatial_review/z0.95_k0.02_interictal/figures/conditional_tail_fixed_window_inputs.npz",
+      "source_npz_sha256": "89069afb578b709f850865c7e0c400079bda0983acf805cf12385e198af74feb",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/rotated/spatial_review/z0.95_k0.02_interictal/review.json",
+      "review_sha256": "a953e814799dd2a2fad86ba7b18599eaf69a0ef205dc0d2c8ce0437a8fae98f6",
+      "selection": "fixed_final300ms_no_brief_events",
+      "tail_brief_count": 0,
+      "core_recruitment": null,
+      "frame_absolute_times_s": [
+        79.74000000000001,
+        79.765,
+        79.78999999999999,
+        79.815,
+        79.84,
+        79.86500000000001
+      ],
+      "feedback_tail": {
+        "window_s": [
+          70.0,
+          80.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 1.5869121360827283e-54,
+          "maximum": 7.397257558150232e-46,
+          "mean": 3.7730944842335914e-47
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 1.5075665292785917e-54,
+          "maximum": 7.027394680242719e-46,
+          "mean": 3.5844397600219106e-47
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 15.366202157115865,
+          "maximum": 48.04912245782437,
+          "mean": 31.754675086401914
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    },
+    {
+      "condition": "isotropic",
+      "reference_s": 72.31,
+      "source_npz": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.95_k0.02_interictal/figures/conditional_tail_first_brief_inputs.npz",
+      "source_npz_sha256": "463b0f40c143aa5beb75a71d53a890decf726f807ec4b5d026c80801017867a8",
+      "review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/isotropic/spatial_review/z0.95_k0.02_interictal/review.json",
+      "review_sha256": "71f7191fef7dc26bfd9674b4e2d5a63ea5115cd79b818875535f5b4f059773de",
+      "selection": "first_complete_brief",
+      "tail_brief_count": 3,
+      "core_recruitment": {
+        "n": 3,
+        "core_over100": 3,
+        "median_peak_5ms_Hz": [
+          109.83125,
+          346.41909814323606,
+          351.6539440203562,
+          110.34799737360473
+        ],
+        "median_core_to_other_peak_ratio": 3.1549141091439847,
+        "core_recruitment_order": {
+          "A_first": 2,
+          "B_first": 1,
+          "same_5ms_bin": 0,
+          "both_reach100Hz_for10ms": 3
+        }
+      },
+      "frame_absolute_times_s": [
+        72.31,
+        72.33500000000001,
+        72.36,
+        72.385,
+        72.41,
+        72.435
+      ],
+      "feedback_tail": {
+        "window_s": [
+          70.0,
+          80.0
+        ],
+        "G_raw": {
+          "n": 500,
+          "minimum": 1.5869121360827283e-54,
+          "maximum": 7.397257558150232e-46,
+          "mean": 3.7730944842335914e-47
+        },
+        "G_applied_mean": {
+          "n": 500,
+          "minimum": 1.5075665292785917e-54,
+          "maximum": 7.027394680242719e-46,
+          "mean": 3.5844397600219106e-47
+        },
+        "K_mean": {
+          "n": 500,
+          "minimum": 0.02,
+          "maximum": 0.02,
+          "mean": 0.02
+        },
+        "global_E_rate_Hz": {
+          "n": 10000,
+          "minimum": 0.00432775113666661,
+          "maximum": 98.27974512588978,
+          "mean": 1.9381928460913918
+        },
+        "q": {
+          "n": 10000,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "mean": 0.0
+        }
+      }
+    }
+  ],
+  "paired_future_input_records_exact": true,
+  "geometry_exact": true,
+  "role": "Visual diagnostic companion, not the main Figure5 layout or a new state criterion.",
+  "limits": "One selected illustration per completed trajectory; all final10s events remain in the native reviews. Each row uses its own first complete brief, or the existing fixed final300ms fallback when absent. Rows may have different absolute event times; no temporal warping or event identity is inferred. Graph controls also change outdegree and low-threshold source strength.",
+  "producer_sha256": "1467e659fbdf3cf30a6586f9068511febb7e4a0a4062a8b068760e3d2b428619",
+  "files": [
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/interictal/figures/axis_highZ_lowK_propagation.png",
+      "sha256": "f9450ca30755a35b1ba5c636d778aba7d45b2dd667088e3ce0de8be5011471b8"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/interictal/figures/axis_highZ_lowK_propagation.pdf",
+      "sha256": "c52a2fb494987a7dd2e724d38ccb3517be4ac77ba7d35c57a2b169c02f19a36b"
+    },
+    {
+      "path": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/axis_controls/conditional_runs/event_comparison/interictal/figures/axis_highZ_lowK_propagation.svg",
+      "sha256": "328e9bc43d2b0a98c999cdb8a4f90093a367f34510f64ddccfb6274ac206db75"
+    }
+  ],
+  "agent_visual_review": "PASS_PNG_AND_SAME_STATE_PDF",
+  "human_review": "PENDING"
+}

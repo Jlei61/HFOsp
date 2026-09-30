@@ -1,0 +1,16 @@
+{
+  "training": "Three pulse responses, E threshold15/18 and I18",
+  "validation": "Three multisine responses, not passed to the optimizer",
+  "parameters": "Four shared damping factors: active/low-rate for E and I. No individual theta or network/D fit.",
+  "bounds": [
+    0.05,
+    20.0
+  ],
+  "max_evaluations_per_start": 65,
+  "starts": 2,
+  "candidates": [
+    "linear complex rate",
+    "positive nonlinear rate and phase"
+  ],
+  "scope": "Local response structural check only. Both candidates are approximations, not accepted SNN reductions."
+}

@@ -1,0 +1,13 @@
+{
+  "status": "REGISTERED_BEFORE_SOURCE_SPECTRA",
+  "created_epoch": 1790550864.2749615,
+  "question": "How much of the independent-white current variance excess is removed by keeping each source own observed temporal autocorrelation while still neglecting correlations between distinct sources?",
+  "method": "Use each originalsource0.1ms binarytrain, remove DC, periodic2s FFT, multiply by exact discrete native synaptic transfer and sum frequency power. Original squared targetweights project single-source filtered variances. Native external Poisson variance is retained from inferred actual counts. Check white variance against prior independent calculation and frequency/time Parseval identities.",
+  "limits": "Data-conditioned source spectra, not predicted or autonomous. Periodic2s estimate has boundary and finite-window effects. Residual target variance includes cross-source/input correlations, nonstationarity and boundary errors; it is not a pure cross-covariance estimate. No fitted factor, no new network or bifurcation.",
+  "references": [
+    "https://doi.org/10.3389/fncom.2014.00104",
+    "https://doi.org/10.1103/PhysRevResearch.1.023024"
+  ],
+  "producer_sha256": "3b7daf3e5d2e35a5253d8c10cca4999ed720fb57037a44b60162ee19032d4f85",
+  "formal_bifurcation_allowed": false
+}

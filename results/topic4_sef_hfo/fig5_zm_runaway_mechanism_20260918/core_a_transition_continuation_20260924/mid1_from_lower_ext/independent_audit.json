@@ -1,0 +1,89 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "mid1_from_lower_ext",
+  "D": 0.21817194367190396,
+  "observed_ms": 5000.0,
+  "spatial_reconstruction_errors_hz": [
+    1.5869140725044417e-05
+  ],
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        5000
+      ],
+      "mean_rates_global_A_B_surround": [
+        55.94394186230911,
+        382.4567976215151,
+        140.9888828072156,
+        45.6669879284567
+      ],
+      "smoothed_global_range_hz": [
+        16.18481479829261,
+        106.88905899676709
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.0625625,
+      "group_rate_relative_variation": 0.6330657306946373,
+      "M_mean_global_A_B_surround": [
+        0.027054232353022345,
+        0.19180072194173453,
+        0.06401328378457521,
+        0.022022431053774487
+      ]
+    }
+  ],
+  "original_high_onset_elapsed_ms": null,
+  "complete_events_all": {
+    "n": 0
+  },
+  "recurrence": {
+    "status": "RATE_RECURRENCE_ONLY",
+    "best_local_minima": [
+      {
+        "lag_ms": 35,
+        "relative_MSE": 1.0773493775508232
+      },
+      {
+        "lag_ms": 69,
+        "relative_MSE": 1.3266479231873396
+      },
+      {
+        "lag_ms": 102,
+        "relative_MSE": 1.5253617863324884
+      },
+      {
+        "lag_ms": 134,
+        "relative_MSE": 1.6332602064141266
+      },
+      {
+        "lag_ms": 1207,
+        "relative_MSE": 1.7004367879513744
+      },
+      {
+        "lag_ms": 1075,
+        "relative_MSE": 1.7251854600596739
+      },
+      {
+        "lag_ms": 605,
+        "relative_MSE": 1.7259025299080644
+      },
+      {
+        "lag_ms": 1811,
+        "relative_MSE": 1.7362738069415589
+      }
+    ],
+    "direct_formula_errors": [
+      0.0,
+      6.661338147750939e-16,
+      1.9984014443252818e-15
+    ],
+    "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied."
+  },
+  "scope": "Longer finite-time state/recurrence readout; no certified attractor, periodic stability, separatrix or bifurcation.",
+  "model_promoted": false
+}

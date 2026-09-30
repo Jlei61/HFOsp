@@ -1,0 +1,13 @@
+{
+  "created_local": "2026-09-23T17:37:16.396910+08:00",
+  "question": "Can an actual full-state Newton correction improve the adjacent native9425 periodic shooting equation when bounded Picard/Anderson correction did not?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/onset_state_continuation_20260923/native9420_from_lower/shooting_corrector_dt0p05/latest_state.npz",
+  "target_field": "native9425",
+  "dt_ms": 0.05,
+  "M_dynamic": true,
+  "derivative": "DP = A_T - slope*(normal dot A_T)/(normal dot slope), including the derivative of return time for the exact linearly interpolated section crossing. A_T uses verified actual variational equations.",
+  "check": "One-sided derivatives along residual P(x)-x at epsilon1e-3 and5e-4 preserve physical admissibility by convex interpolation. RelativeJVPerror<1e-3 and phase leakage<1e-9 required before linear solve.",
+  "budget": "One nonlinear Newton correction only. Two finite-difference section returns, one derivative verification, at most6Krylovproducts and3physicallyadmissible line-searchreturns. No branchcampaign.",
+  "acceptance": "A nonlinear residual decrease is solver evidence only. A new orbit requires the existing full residual and independent checks; a solver failure is not a bifurcation.",
+  "model_promoted": false
+}

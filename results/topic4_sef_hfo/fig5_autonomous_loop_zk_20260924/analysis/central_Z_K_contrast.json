@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "names": [
+    "z0.75_k0.02_high",
+    "z0.75_k2_high"
+  ],
+  "job_difference": {
+    "target_K": [
+      0.02,
+      2.0
+    ],
+    "name": [
+      "z0.75_k0.02_high",
+      "z0.75_k2_high"
+    ]
+  },
+  "same_network_identity": true,
+  "identical_Z_state_summary_columns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "column8_is_threshold_exposure_not_Z_state": true,
+  "prescribed_mean_Z": 0.75,
+  "actual_allE_coreA_coreB_Z": [
+    0.75,
+    0.7356161362662088,
+    0.7325100837040679
+  ],
+  "tail_recovery_eligible_fraction_allE": [
+    0.3250814375,
+    1.0
+  ],
+  "common_future_input_audit": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/conditional_summary.json",
+  "interpretation": "At the same heldZ field and carried high-state history, K0.02 permits persistent mixed activity whereas K2 suppresses it. Neither completed condition has recovered isolated brief events. Both histories at K0.02 now completed30s: no brief events, similar allEmean but different core/spatial readouts; not certified bistability. Z summary column8 is the instantaneous J>=Ith fraction and is expected to differ with activity.",
+  "agent_visual_review": "Inspected full30s regional rates and fixedfinal300ms80cellraster/native5msfields/15contactcurrent. No jointquiet gaps in last10s; persistent activity bands, not recovered brief propagation.",
+  "human_review": "PENDING",
+  "complete_saved_Z_fields_bitwise": true,
+  "full_K_fields_same_template_scale_100": true
+}

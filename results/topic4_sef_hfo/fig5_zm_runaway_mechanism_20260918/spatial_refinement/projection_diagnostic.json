@@ -1,0 +1,114 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "snapshot": "initial",
+      "moment_aggregation_relative": [
+        1.6960839772133189e-15,
+        1.2376925525560972e-15,
+        1.6261108677655189e-15,
+        1.2230898352791962e-15
+      ],
+      "original_global_E_rate_hz": 184.05871349195712,
+      "lifted_fine_global_E_rate_hz": 184.05891953826585,
+      "aggregated_rate_RMS_hz": 0.00907772545993137,
+      "fine_vs_parent_rate_RMS_hz": 0.12973445313366802,
+      "parent_theta_evaluator_max_error_hz": 0.0,
+      "actual_theta_vs_parent_effect_RMS_hz": 0.12973445313366802,
+      "input_forcing_dispersion": {
+        "AMPA_rise": {
+          "weighted_RMS_mV_per_ms": 66.78400925673783,
+          "maximum_abs_mV_per_ms": 296.1619386785526,
+          "projected_max_abs_difference": 9.052314453583676e-12
+        },
+        "AMPA_decay": {
+          "weighted_RMS_mV_per_ms": 0.0,
+          "maximum_abs_mV_per_ms": 0.0,
+          "projected_max_abs_difference": 1.4210854715202004e-14
+        },
+        "GABA_rise": {
+          "weighted_RMS_mV_per_ms": 78.43589409551475,
+          "maximum_abs_mV_per_ms": 305.0793377059157,
+          "projected_max_abs_difference": 8.185452315956354e-12
+        },
+        "GABA_decay": {
+          "weighted_RMS_mV_per_ms": 0.0,
+          "maximum_abs_mV_per_ms": 0.0,
+          "projected_max_abs_difference": 1.4210854715202004e-14
+        }
+      },
+      "full_RHS_aggregation_max_error_by_coordinate": [
+        7.105427357601002e-15,
+        7.105427357601002e-15,
+        3.552713678800501e-15,
+        7.105427357601002e-15,
+        9.052314453583676e-12,
+        1.4210854715202004e-14,
+        8.185452315956354e-12,
+        1.4210854715202004e-14,
+        9.938716516444401e-13,
+        5.826450433232822e-13,
+        3.2671943197765184e-07,
+        0.0,
+        3.552713678800501e-15,
+        7.105427357601002e-15
+      ]
+    },
+    {
+      "snapshot": "coarse_12000ms",
+      "moment_aggregation_relative": [
+        1.6831115336813026e-15,
+        1.2531150228187637e-15,
+        1.4461926910752394e-15,
+        1.2905360780264205e-15
+      ],
+      "original_global_E_rate_hz": 0.017835912268857362,
+      "lifted_fine_global_E_rate_hz": 0.017835912262961415,
+      "aggregated_rate_RMS_hz": 1.2973060001238981e-09,
+      "fine_vs_parent_rate_RMS_hz": 5.257686572268202e-09,
+      "parent_theta_evaluator_max_error_hz": 0.0,
+      "actual_theta_vs_parent_effect_RMS_hz": 5.257686572268202e-09,
+      "input_forcing_dispersion": {
+        "AMPA_rise": {
+          "weighted_RMS_mV_per_ms": 0.0104951699120675,
+          "maximum_abs_mV_per_ms": 0.05604536779324055,
+          "projected_max_abs_difference": 1.5817808776799657e-15
+        },
+        "AMPA_decay": {
+          "weighted_RMS_mV_per_ms": 0.0,
+          "maximum_abs_mV_per_ms": 0.0,
+          "projected_max_abs_difference": 2.168404344971009e-19
+        },
+        "GABA_rise": {
+          "weighted_RMS_mV_per_ms": 0.017257724842609623,
+          "maximum_abs_mV_per_ms": 0.08525819691961994,
+          "projected_max_abs_difference": 2.108122704180815e-15
+        },
+        "GABA_decay": {
+          "weighted_RMS_mV_per_ms": 0.0,
+          "maximum_abs_mV_per_ms": 0.0,
+          "projected_max_abs_difference": 4.440892098500626e-16
+        }
+      },
+      "full_RHS_aggregation_max_error_by_coordinate": [
+        2.220446049250313e-16,
+        4.440892098500626e-16,
+        1.3877787807814457e-17,
+        2.220446049250313e-16,
+        1.5817808776799657e-15,
+        2.168404344971009e-19,
+        2.108122704180815e-15,
+        4.440892098500626e-16,
+        1.1302384131687757e-16,
+        1.4983674023749671e-16,
+        4.36071331496625e-14,
+        0.0,
+        5.421010862427522e-20,
+        2.7755575615628914e-17
+      ]
+    }
+  ],
+  "theta_within_parent_RMS_mV": 0.010313575913786175,
+  "theta_within_parent_max_mV": 0.29591333966356004,
+  "scope": "Pointwise closure/projection diagnostic at two saved states. Does not prove that a specific discrepancy causes the changed attractor or that the bifurcation itself shifted."
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "status": "INADMISSIBLE_NO_FLOW",
+    "radius": 2.21124399377359,
+    "step_norm": 2.211243993773568,
+    "lagrange_multiplier": 0.05978069025769508,
+    "predicted_relative_residual": 0.6585014146134731,
+    "admissibility_diagnostic": {
+      "projected_negative_coordinates": 38798,
+      "negative_steps_at_exact_zero": 13445,
+      "zero_boundary_projection": true,
+      "phase_error": -1.7347188759887812e-18,
+      "min_syn_M": 0.0,
+      "min_covariance": 0.0,
+      "min_history": 0.0,
+      "max_refractory_occupancy_E_I": [
+        0.9252106358321512,
+        1.0145123214857905
+      ]
+    }
+  },
+  {
+    "status": "EVALUATED",
+    "radius": 1.105621996886795,
+    "step_norm": 1.1056219968867906,
+    "lagrange_multiplier": 0.19592977119108382,
+    "predicted_relative_residual": 0.7762072128161925,
+    "admissibility_diagnostic": {
+      "projected_negative_coordinates": 24409,
+      "negative_steps_at_exact_zero": 14378,
+      "zero_boundary_projection": true
+    },
+    "actual_step_norm": 1.0831882399842199,
+    "retraction_relative_change": 0.13082588777530552,
+    "residual_ratio": 0.9224895748827656,
+    "predicted_gain": 0.15229322557728275,
+    "agreement": 0.9784610160285572,
+    "period_ms": 32.81147879552767
+  }
+]

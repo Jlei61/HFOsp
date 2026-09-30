@@ -1,0 +1,81 @@
+{
+  "status": "EXACT_REPLAY_PASS_RECURRENCE_ONLY",
+  "period_ms": 172.0,
+  "times_ms": [
+    45007.0,
+    45050.0,
+    45093.0,
+    45136.0,
+    45179.0
+  ],
+  "full_state_errors": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 254.91438302731024,
+        "difference_rms": 34.2375401795895,
+        "relative_rms": 0.13430995839854773
+      },
+      "GABA": {
+        "reference_rms": 268.64745175877454,
+        "difference_rms": 94.09684625018691,
+        "relative_rms": 0.35026145096168226
+      },
+      "M": {
+        "reference_rms": 0.051688983554347125,
+        "difference_rms": 0.0011722758453851828,
+        "relative_rms": 0.02267941377010484
+      },
+      "covariance": {
+        "reference_rms": 191.63259043736133,
+        "difference_rms": 85.09213164110064,
+        "relative_rms": 0.44403789275558836
+      },
+      "input_memory": {
+        "reference_rms": 0.37969122312614073,
+        "difference_rms": 0.07656648466790986,
+        "relative_rms": 0.2016546077560318
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.11584332893814259,
+        "difference_rms": 0.05562427615209561,
+        "relative_rms": 0.48016814314614154
+      }
+    },
+    "combined_relative_rms": 0.3187559885681193
+  },
+  "actual_state_structure": [
+    {
+      "region": "Global E",
+      "mean_hz": 44.25792942689627,
+      "min_hz": 20.61013739462166,
+      "max_hz": 81.50531715313056,
+      "fraction_below5": 0.0
+    },
+    {
+      "region": "Core A",
+      "mean_hz": 411.96514080725876,
+      "min_hz": 375.6518998755185,
+      "max_hz": 423.61992598718274,
+      "fraction_below5": 0.0
+    },
+    {
+      "region": "Core B",
+      "mean_hz": 68.27568685786801,
+      "min_hz": 2.5376733185538065e-05,
+      "max_hz": 451.3264664899908,
+      "fraction_below5": 0.7441860465116279
+    },
+    {
+      "region": "Surround",
+      "mean_hz": 34.536025463615346,
+      "min_hz": 12.093145663525853,
+      "max_hz": 63.71328559335571,
+      "fraction_below5": 0.0
+    }
+  ],
+  "all_original_1ms_group_rates_bitwise": true,
+  "all_Z_held": true,
+  "all_M_dynamic": true,
+  "seconds": 17.046241998672485,
+  "model_promoted": false
+}

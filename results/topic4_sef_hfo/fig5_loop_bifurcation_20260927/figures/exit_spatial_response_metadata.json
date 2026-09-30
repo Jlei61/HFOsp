@@ -1,0 +1,426 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/exit_return_probes/extended_analysis_summary.json",
+  "rows": [
+    {
+      "name": "exit_z0.21_k6_high",
+      "field_family": "Common t20 fields",
+      "history": "high",
+      "mean_Z": 0.21,
+      "mean_K": 6.0,
+      "rate_Hz": [
+        454.95375000000024,
+        463.4816976127321,
+        462.5924936386779
+      ],
+      "drift": [
+        [
+          -0.04200000000000024,
+          50.231848889077
+        ],
+        [
+          -0.039407173141449904,
+          50.39934905577696
+        ],
+        [
+          -0.03890604860178709,
+          49.473825591100926
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            454.98796249999975,
+            463.89730327144076,
+            462.98545377438717,
+            454.56105274676565
+          ],
+          "peak_Hz_allE_A_B_other": [
+            477.55,
+            480.7692307692307,
+            480.78880407124683,
+            477.43926460932374
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "exit_z0.21_k9_high",
+      "field_family": "Common t20 fields",
+      "history": "high",
+      "mean_Z": 0.21,
+      "mean_K": 9.0,
+      "rate_Hz": [
+        84.9976625,
+        54.12095490716201,
+        0.0
+      ],
+      "drift": [
+        [
+          0.10710349825,
+          -17.998200119993076
+        ],
+        [
+          0.023051405107886867,
+          -19.49718769106891
+        ],
+        [
+          0.16109395139821447,
+          -20.70255856816567
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            87.5772531250001,
+            61.94535809018534,
+            6.3818914334181525,
+            90.30693149485681
+          ],
+          "peak_Hz_allE_A_B_other": [
+            262.1875,
+            467.3740053050398,
+            463.86768447837153,
+            252.1339461588969
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "exit_z0.21_k12_high",
+      "field_family": "Common t20 fields",
+      "history": "high",
+      "mean_Z": 0.21,
+      "mean_K": 12.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -2.3999760001469617
+        ],
+        [
+          0.16059282685854867,
+          -2.5998589979531954
+        ],
+        [
+          0.16109395139821447,
+          -2.7605895797348055
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.11,
+          "observed_duration_lower_bound_s": 0.11,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_high",
+      "field_family": "Actual-exit t16.7 fields",
+      "history": "high",
+      "mean_Z": 0.21,
+      "mean_K": 9.0,
+      "rate_Hz": [
+        242.57829687500012,
+        464.5328912466845,
+        470.7650127226468
+      ],
+      "drift": [
+        [
+          -0.04200000000000024,
+          -12.38688183359338
+        ],
+        [
+          -0.03483387722099196,
+          -9.197639681193634
+        ],
+        [
+          -0.03307375775391635,
+          -9.29509780803218
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 0.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_censored": true,
+          "right_boundary_confirmed": false
+        },
+        "final_right_censored": {
+          "start_s": 0.0,
+          "observed_end_s": 30.0,
+          "observed_duration_lower_bound_s": 30.0,
+          "left_boundary_confirmed": false,
+          "right_censored": true,
+          "mean_Hz_allE_A_B_other": [
+            242.50047500000028,
+            464.55862068965456,
+            470.9960135708231,
+            231.1075224337934
+          ],
+          "peak_Hz_allE_A_B_other": [
+            262.49375000000003,
+            469.36339522546416,
+            479.89821882951657,
+            252.32764281024296
+          ]
+        },
+        "both_describe_same_unbounded_episode": true
+      }
+    },
+    {
+      "name": "exit_z0.21_k12_fields16p7_high",
+      "field_family": "Actual-exit t16.7 fields",
+      "history": "high",
+      "mean_Z": 0.21,
+      "mean_K": 12.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -2.3999760001469617
+        ],
+        [
+          0.1651661227790085,
+          -2.6591812120649845
+        ],
+        [
+          0.16692624224608293,
+          -2.692187950175984
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": {
+          "observed_start_s": 0.0,
+          "observed_end_s": 0.14,
+          "observed_duration_lower_bound_s": 0.14,
+          "left_censored": true,
+          "right_boundary_confirmed": true
+        },
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k6_recovery",
+      "field_family": "Common t20 fields",
+      "history": "recovery",
+      "mean_Z": 0.21,
+      "mean_K": 6.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -1.1999880000734808
+        ],
+        [
+          0.16059282685854867,
+          -1.2999294989765977
+        ],
+        [
+          0.16109395139821447,
+          -1.3802947898674027
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k9_recovery",
+      "field_family": "Common t20 fields",
+      "history": "recovery",
+      "mean_Z": 0.21,
+      "mean_K": 9.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -1.799982000110244
+        ],
+        [
+          0.16059282685854867,
+          -1.9498942484649193
+        ],
+        [
+          0.16109395139821447,
+          -2.0704421848010957
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k12_recovery",
+      "field_family": "Common t20 fields",
+      "history": "recovery",
+      "mean_Z": 0.21,
+      "mean_K": 12.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -2.3999760001469617
+        ],
+        [
+          0.16059282685854867,
+          -2.5998589979531954
+        ],
+        [
+          0.16109395139821447,
+          -2.7605895797348055
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k9_fields16p7_recovery",
+      "field_family": "Actual-exit t16.7 fields",
+      "history": "recovery",
+      "mean_Z": 0.21,
+      "mean_K": 9.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -1.799982000110244
+        ],
+        [
+          0.1651661227790085,
+          -1.9943859090487586
+        ],
+        [
+          0.16692624224608293,
+          -2.019140962632008
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    },
+    {
+      "name": "exit_z0.21_k12_fields16p7_recovery",
+      "field_family": "Actual-exit t16.7 fields",
+      "history": "recovery",
+      "mean_Z": 0.21,
+      "mean_K": 12.0,
+      "rate_Hz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        [
+          0.15800000000000117,
+          -2.3999760001469617
+        ],
+        [
+          0.1651661227790085,
+          -2.6591812120649845
+        ],
+        [
+          0.16692624224608293,
+          -2.692187950175984
+        ]
+      ],
+      "tail_brief_events": 0,
+      "joint_quiet_fraction": 1.0,
+      "censoring": {
+        "initial_left_censored": null,
+        "final_right_censored": null,
+        "both_describe_same_unbounded_episode": false
+      }
+    }
+  ],
+  "producer_sha256": "67c909e4905258e00192e15e4fbc8ef525a9a610d386b33b910187ce1de4d8e5",
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS",
+  "formal_bifurcation": false,
+  "interpretation": "Z/K spatialfields change together at fixedmeans, intrinsic/G/Mhistory and futureinput. No single-field attribution and no autonomous-exitcount. Guide lines are finite-window responses, not equilibrium branches.",
+  "agent_visual_review_epoch": 1790522993.107563,
+  "visual_check": "PNG inspected: rates and drift signs consistentwithcompletedJSON, fixedcorecolors, templateandhistorylabels legible, no clipping. Same-figureSVGsaved."
+}

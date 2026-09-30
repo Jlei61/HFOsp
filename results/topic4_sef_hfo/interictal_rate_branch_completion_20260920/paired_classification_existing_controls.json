@@ -1,0 +1,180 @@
+{
+  "status": "SUPERSEDED_BY_DELAY_STEP_AUDIT",
+  "rows": [
+    {
+      "stem": "smallA_J0.942000000_N64",
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.8869532082685956,
+            -0.1803130966503163
+          ],
+          [
+            0.8869532082685956,
+            0.1803130966503163
+          ],
+          [
+            0.8124700929542609,
+            0.0
+          ],
+          [
+            0.008855154964249566,
+            -0.008722043925971479
+          ],
+          [
+            0.008855154964249566,
+            0.008722043925971479
+          ],
+          [
+            0.0030433840421599826,
+            -0.009283199761009348
+          ]
+        ],
+        "per_mode_margin": [
+          0.00012992918468119336,
+          0.00012992918468119336,
+          0.00011302055176681168,
+          0.00011302055176681168,
+          0.00011302055176681168,
+          0.00011302055176681168
+        ],
+        "paired_absolute_changes": [
+          2.1654864113532227e-05,
+          2.1654864113532227e-05,
+          2.9213748384826488e-06,
+          4.83767272406846e-07,
+          4.83767272406846e-07,
+          4.263309194473379e-07
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.9050960205865348,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "connection_J0942_H1_middle_N128",
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            701.3831914794465,
+            0.0
+          ],
+          [
+            0.5466013492947054,
+            0.7358664049549818
+          ],
+          [
+            0.5466013492947054,
+            -0.7358664049549818
+          ],
+          [
+            0.33052030470924815,
+            0.0
+          ],
+          [
+            -0.07956176379844453,
+            0.0
+          ],
+          [
+            0.01909673552191417,
+            -0.006445741406019072
+          ]
+        ],
+        "per_mode_margin": [
+          0.5067301352764844,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934
+        ],
+        "paired_absolute_changes": [
+          0.08445502254608073,
+          1.974293755433685e-05,
+          1.974293755433685e-05,
+          5.663162632840724e-06,
+          2.7316900004237255e-06,
+          9.401880792551896e-07
+        ],
+        "reliable_outside_count": 1,
+        "numerical_unstable_dimension": 1,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 701.3831914794465,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "connection_J0942_H1_return_N512",
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            2507.748315271168,
+            0.0
+          ],
+          [
+            -22.618578841135314,
+            594.7042822986895
+          ],
+          [
+            -22.618578841135314,
+            -594.7042822986895
+          ]
+        ],
+        "per_mode_margin": [
+          2.5618837690199143,
+          0.5830249668486527,
+          0.5830249668486527
+        ],
+        "paired_absolute_changes": [
+          0.4269806281699857,
+          0.09717082780810878,
+          0.09717082780810878
+        ],
+        "reliable_outside_count": 3,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": false,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 2507.748315271168,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "refined_J0.942000000_N1536_accuracy_N3072_accuracy_N6144",
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.4401521875097474,
+            -0.00688604189420074
+          ],
+          [
+            0.4401521875097474,
+            0.00688604189420074
+          ]
+        ],
+        "per_mode_margin": [
+          0.014891323164801101,
+          0.014891323164801101
+        ],
+        "paired_absolute_changes": [
+          0.00013736994980852022,
+          0.00013736994980852022
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.44020604918899575,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    }
+  ],
+  "superseding_check": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/delay_step_audit.json"
+}

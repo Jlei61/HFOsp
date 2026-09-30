@@ -1,0 +1,1698 @@
+{
+  "status": "COMPLETE",
+  "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_near_turn_matched_contract.json",
+  "batch": "native_near_turn",
+  "dt_ms": 0.05,
+  "initial": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+  "rows": [
+    {
+      "D": 0.21932,
+      "global_Z": 0.78068,
+      "canonical": {
+        "label": "endpoint_D0.2193200_dt0.05",
+        "category": "SELF_LIMITED",
+        "tail": {
+          "lo_bin": 2600,
+          "hi_bin": 3000,
+          "n_bins": 400,
+          "quiet_fraction": 0.6475,
+          "longest_quiet_ms": 170,
+          "quiet_runs_ge20ms": 16,
+          "n_events": 15,
+          "event_durations_ms": [
+            90,
+            90,
+            100,
+            90,
+            100,
+            90,
+            100,
+            90,
+            100,
+            90,
+            100,
+            90,
+            90,
+            100,
+            90
+          ],
+          "event_peaks_hz": [
+            179.9590887025414,
+            182.59821283990934,
+            181.55854159083887,
+            181.15526625826834,
+            182.65553411442374,
+            179.15714259087054,
+            183.25621939194906,
+            176.64321417244838,
+            183.51189883172646,
+            177.99258891533952,
+            183.3594310694118,
+            179.96146995397885,
+            182.59666965944473,
+            181.5603557470651,
+            181.15279704248385
+          ],
+          "inter_onset_ms": [
+            260,
+            260,
+            270,
+            260,
+            270,
+            260,
+            270,
+            260,
+            270,
+            260,
+            270,
+            260,
+            260,
+            270
+          ],
+          "activity_duty": 0.3525,
+          "mean_rate_hz": 31.032815597679654,
+          "max_rate_hz": 183.51189883172646,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.10566812500000002
+        },
+        "subwindows": [
+          {
+            "lo_bin": 2600,
+            "hi_bin": 2700,
+            "n_bins": 100,
+            "quiet_fraction": 0.66,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              90,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              179.9590887025414,
+              182.59821283990934,
+              181.55854159083887
+            ],
+            "inter_onset_ms": [
+              260,
+              260
+            ],
+            "activity_duty": 0.34,
+            "mean_rate_hz": 31.84818033243346,
+            "max_rate_hz": 182.59821283990934,
+            "trailing_activity_ms": 60,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.10732625000000001
+          },
+          {
+            "lo_bin": 2700,
+            "hi_bin": 2800,
+            "n_bins": 100,
+            "quiet_fraction": 0.68,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 3,
+            "event_durations_ms": [
+              100,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              182.65553411442374,
+              179.15714259087054,
+              183.25621939194906
+            ],
+            "inter_onset_ms": [
+              270,
+              260
+            ],
+            "activity_duty": 0.32,
+            "mean_rate_hz": 26.112009818837322,
+            "max_rate_hz": 183.25621939194906,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.08997156249999999
+          },
+          {
+            "lo_bin": 2800,
+            "hi_bin": 2900,
+            "n_bins": 100,
+            "quiet_fraction": 0.62,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 4,
+            "n_events": 4,
+            "event_durations_ms": [
+              90,
+              100,
+              90,
+              100
+            ],
+            "event_peaks_hz": [
+              176.64321417244838,
+              183.51189883172646,
+              177.99258891533952,
+              183.3594310694118
+            ],
+            "inter_onset_ms": [
+              260,
+              270,
+              260
+            ],
+            "activity_duty": 0.38,
+            "mean_rate_hz": 33.070831623657945,
+            "max_rate_hz": 183.51189883172646,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.1128646875
+          },
+          {
+            "lo_bin": 2900,
+            "hi_bin": 3000,
+            "n_bins": 100,
+            "quiet_fraction": 0.63,
+            "longest_quiet_ms": 170,
+            "quiet_runs_ge20ms": 5,
+            "n_events": 4,
+            "event_durations_ms": [
+              90,
+              90,
+              100,
+              90
+            ],
+            "event_peaks_hz": [
+              179.96146995397885,
+              182.59666965944473,
+              181.5603557470651,
+              181.15279704248385
+            ],
+            "inter_onset_ms": [
+              260,
+              260,
+              270
+            ],
+            "activity_duty": 0.37,
+            "mean_rate_hz": 33.10024061578989,
+            "max_rate_hz": 182.59666965944473,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.11251
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 22,
+            "end_bin": 32,
+            "duration_ms": 100,
+            "peak_hz": 181.01898571452872,
+            "qualifies": true,
+            "start_ms": 220.0,
+            "end_ms": 320.0
+          },
+          {
+            "start_bin": 48,
+            "end_bin": 58,
+            "duration_ms": 100,
+            "peak_hz": 180.1658351296823,
+            "qualifies": true,
+            "start_ms": 480.0,
+            "end_ms": 580.0
+          },
+          {
+            "start_bin": 75,
+            "end_bin": 84,
+            "duration_ms": 90,
+            "peak_hz": 180.74205750981662,
+            "qualifies": true,
+            "start_ms": 750.0,
+            "end_ms": 840.0
+          },
+          {
+            "start_bin": 101,
+            "end_bin": 111,
+            "duration_ms": 100,
+            "peak_hz": 182.17616682631117,
+            "qualifies": true,
+            "start_ms": 1010.0,
+            "end_ms": 1110.0
+          },
+          {
+            "start_bin": 128,
+            "end_bin": 137,
+            "duration_ms": 90,
+            "peak_hz": 179.11850389670803,
+            "qualifies": true,
+            "start_ms": 1280.0,
+            "end_ms": 1370.0
+          },
+          {
+            "start_bin": 154,
+            "end_bin": 164,
+            "duration_ms": 100,
+            "peak_hz": 183.10943996856224,
+            "qualifies": true,
+            "start_ms": 1540.0,
+            "end_ms": 1640.0
+          },
+          {
+            "start_bin": 181,
+            "end_bin": 190,
+            "duration_ms": 90,
+            "peak_hz": 176.7051719645498,
+            "qualifies": true,
+            "start_ms": 1810.0,
+            "end_ms": 1900.0
+          },
+          {
+            "start_bin": 207,
+            "end_bin": 217,
+            "duration_ms": 100,
+            "peak_hz": 183.47893967882982,
+            "qualifies": true,
+            "start_ms": 2070.0,
+            "end_ms": 2170.0
+          },
+          {
+            "start_bin": 234,
+            "end_bin": 243,
+            "duration_ms": 90,
+            "peak_hz": 177.92656465206687,
+            "qualifies": true,
+            "start_ms": 2340.0,
+            "end_ms": 2430.0
+          },
+          {
+            "start_bin": 260,
+            "end_bin": 270,
+            "duration_ms": 100,
+            "peak_hz": 183.36644728889007,
+            "qualifies": true,
+            "start_ms": 2600.0,
+            "end_ms": 2700.0
+          },
+          {
+            "start_bin": 287,
+            "end_bin": 296,
+            "duration_ms": 90,
+            "peak_hz": 179.9290888534582,
+            "qualifies": true,
+            "start_ms": 2870.0,
+            "end_ms": 2960.0
+          },
+          {
+            "start_bin": 313,
+            "end_bin": 322,
+            "duration_ms": 90,
+            "peak_hz": 182.62077413131334,
+            "qualifies": true,
+            "start_ms": 3130.0,
+            "end_ms": 3220.0
+          },
+          {
+            "start_bin": 339,
+            "end_bin": 349,
+            "duration_ms": 100,
+            "peak_hz": 181.54355940188734,
+            "qualifies": true,
+            "start_ms": 3390.0,
+            "end_ms": 3490.0
+          },
+          {
+            "start_bin": 366,
+            "end_bin": 375,
+            "duration_ms": 90,
+            "peak_hz": 181.18415781635878,
+            "qualifies": true,
+            "start_ms": 3660.0,
+            "end_ms": 3750.0
+          },
+          {
+            "start_bin": 392,
+            "end_bin": 402,
+            "duration_ms": 100,
+            "peak_hz": 182.64966228728827,
+            "qualifies": true,
+            "start_ms": 3920.0,
+            "end_ms": 4020.0
+          },
+          {
+            "start_bin": 419,
+            "end_bin": 428,
+            "duration_ms": 90,
+            "peak_hz": 179.18896677681602,
+            "qualifies": true,
+            "start_ms": 4190.0,
+            "end_ms": 4280.0
+          },
+          {
+            "start_bin": 445,
+            "end_bin": 455,
+            "duration_ms": 100,
+            "peak_hz": 183.25422684913664,
+            "qualifies": true,
+            "start_ms": 4450.0,
+            "end_ms": 4550.0
+          },
+          {
+            "start_bin": 472,
+            "end_bin": 481,
+            "duration_ms": 90,
+            "peak_hz": 176.6775822508223,
+            "qualifies": true,
+            "start_ms": 4720.0,
+            "end_ms": 4810.0
+          },
+          {
+            "start_bin": 498,
+            "end_bin": 508,
+            "duration_ms": 100,
+            "peak_hz": 183.51248343419343,
+            "qualifies": true,
+            "start_ms": 4980.0,
+            "end_ms": 5080.0
+          },
+          {
+            "start_bin": 525,
+            "end_bin": 534,
+            "duration_ms": 90,
+            "peak_hz": 177.9698883382515,
+            "qualifies": true,
+            "start_ms": 5250.0,
+            "end_ms": 5340.0
+          },
+          {
+            "start_bin": 551,
+            "end_bin": 561,
+            "duration_ms": 100,
+            "peak_hz": 183.36508508870304,
+            "qualifies": true,
+            "start_ms": 5510.0,
+            "end_ms": 5610.0
+          },
+          {
+            "start_bin": 578,
+            "end_bin": 587,
+            "duration_ms": 90,
+            "peak_hz": 179.94267656259774,
+            "qualifies": true,
+            "start_ms": 5780.0,
+            "end_ms": 5870.0
+          },
+          {
+            "start_bin": 604,
+            "end_bin": 613,
+            "duration_ms": 90,
+            "peak_hz": 182.60945042409188,
+            "qualifies": true,
+            "start_ms": 6040.0,
+            "end_ms": 6130.0
+          },
+          {
+            "start_bin": 630,
+            "end_bin": 640,
+            "duration_ms": 100,
+            "peak_hz": 181.54609422510617,
+            "qualifies": true,
+            "start_ms": 6300.0,
+            "end_ms": 6400.0
+          },
+          {
+            "start_bin": 657,
+            "end_bin": 666,
+            "duration_ms": 90,
+            "peak_hz": 181.17261213855295,
+            "qualifies": true,
+            "start_ms": 6570.0,
+            "end_ms": 6660.0
+          },
+          {
+            "start_bin": 683,
+            "end_bin": 693,
+            "duration_ms": 100,
+            "peak_hz": 182.64827924073242,
+            "qualifies": true,
+            "start_ms": 6830.0,
+            "end_ms": 6930.0
+          },
+          {
+            "start_bin": 710,
+            "end_bin": 719,
+            "duration_ms": 90,
+            "peak_hz": 179.1790285637273,
+            "qualifies": true,
+            "start_ms": 7100.0,
+            "end_ms": 7190.0
+          },
+          {
+            "start_bin": 736,
+            "end_bin": 746,
+            "duration_ms": 100,
+            "peak_hz": 183.25226328676894,
+            "qualifies": true,
+            "start_ms": 7360.0,
+            "end_ms": 7460.0
+          },
+          {
+            "start_bin": 763,
+            "end_bin": 772,
+            "duration_ms": 90,
+            "peak_hz": 176.66925030251954,
+            "qualifies": true,
+            "start_ms": 7630.0,
+            "end_ms": 7720.0
+          },
+          {
+            "start_bin": 789,
+            "end_bin": 799,
+            "duration_ms": 100,
+            "peak_hz": 183.51089414019094,
+            "qualifies": true,
+            "start_ms": 7890.0,
+            "end_ms": 7990.0
+          },
+          {
+            "start_bin": 816,
+            "end_bin": 825,
+            "duration_ms": 90,
+            "peak_hz": 177.97275294803939,
+            "qualifies": true,
+            "start_ms": 8160.0,
+            "end_ms": 8250.0
+          },
+          {
+            "start_bin": 842,
+            "end_bin": 852,
+            "duration_ms": 100,
+            "peak_hz": 183.3633348983559,
+            "qualifies": true,
+            "start_ms": 8420.0,
+            "end_ms": 8520.0
+          },
+          {
+            "start_bin": 869,
+            "end_bin": 878,
+            "duration_ms": 90,
+            "peak_hz": 179.94483264729237,
+            "qualifies": true,
+            "start_ms": 8690.0,
+            "end_ms": 8780.0
+          },
+          {
+            "start_bin": 895,
+            "end_bin": 904,
+            "duration_ms": 90,
+            "peak_hz": 182.60706045693112,
+            "qualifies": true,
+            "start_ms": 8950.0,
+            "end_ms": 9040.0
+          },
+          {
+            "start_bin": 921,
+            "end_bin": 931,
+            "duration_ms": 100,
+            "peak_hz": 181.54768853110403,
+            "qualifies": true,
+            "start_ms": 9210.0,
+            "end_ms": 9310.0
+          },
+          {
+            "start_bin": 948,
+            "end_bin": 957,
+            "duration_ms": 90,
+            "peak_hz": 181.169619387179,
+            "qualifies": true,
+            "start_ms": 9480.0,
+            "end_ms": 9570.0
+          },
+          {
+            "start_bin": 974,
+            "end_bin": 984,
+            "duration_ms": 100,
+            "peak_hz": 182.64915401813306,
+            "qualifies": true,
+            "start_ms": 9740.0,
+            "end_ms": 9840.0
+          },
+          {
+            "start_bin": 1001,
+            "end_bin": 1010,
+            "duration_ms": 90,
+            "peak_hz": 179.1755163441631,
+            "qualifies": true,
+            "start_ms": 10010.0,
+            "end_ms": 10100.0
+          },
+          {
+            "start_bin": 1027,
+            "end_bin": 1037,
+            "duration_ms": 100,
+            "peak_hz": 183.252678638341,
+            "qualifies": true,
+            "start_ms": 10270.0,
+            "end_ms": 10370.0
+          },
+          {
+            "start_bin": 1054,
+            "end_bin": 1063,
+            "duration_ms": 90,
+            "peak_hz": 176.66528367474365,
+            "qualifies": true,
+            "start_ms": 10540.0,
+            "end_ms": 10630.0
+          },
+          {
+            "start_bin": 1080,
+            "end_bin": 1090,
+            "duration_ms": 100,
+            "peak_hz": 183.51095209414848,
+            "qualifies": true,
+            "start_ms": 10800.0,
+            "end_ms": 10900.0
+          },
+          {
+            "start_bin": 1107,
+            "end_bin": 1116,
+            "duration_ms": 90,
+            "peak_hz": 177.97560941564848,
+            "qualifies": true,
+            "start_ms": 11070.0,
+            "end_ms": 11160.0
+          },
+          {
+            "start_bin": 1133,
+            "end_bin": 1143,
+            "duration_ms": 100,
+            "peak_hz": 183.3627491628763,
+            "qualifies": true,
+            "start_ms": 11330.0,
+            "end_ms": 11430.0
+          },
+          {
+            "start_bin": 1160,
+            "end_bin": 1169,
+            "duration_ms": 90,
+            "peak_hz": 179.94720248243087,
+            "qualifies": true,
+            "start_ms": 11600.0,
+            "end_ms": 11690.0
+          },
+          {
+            "start_bin": 1186,
+            "end_bin": 1195,
+            "duration_ms": 90,
+            "peak_hz": 182.60553788505288,
+            "qualifies": true,
+            "start_ms": 11860.0,
+            "end_ms": 11950.0
+          },
+          {
+            "start_bin": 1212,
+            "end_bin": 1222,
+            "duration_ms": 100,
+            "peak_hz": 181.54950535465304,
+            "qualifies": true,
+            "start_ms": 12120.0,
+            "end_ms": 12220.0
+          },
+          {
+            "start_bin": 1239,
+            "end_bin": 1248,
+            "duration_ms": 90,
+            "peak_hz": 181.1671923391256,
+            "qualifies": true,
+            "start_ms": 12390.0,
+            "end_ms": 12480.0
+          },
+          {
+            "start_bin": 1265,
+            "end_bin": 1275,
+            "duration_ms": 100,
+            "peak_hz": 182.6502217359407,
+            "qualifies": true,
+            "start_ms": 12650.0,
+            "end_ms": 12750.0
+          },
+          {
+            "start_bin": 1292,
+            "end_bin": 1301,
+            "duration_ms": 90,
+            "peak_hz": 179.17237853847428,
+            "qualifies": true,
+            "start_ms": 12920.0,
+            "end_ms": 13010.0
+          },
+          {
+            "start_bin": 1318,
+            "end_bin": 1328,
+            "duration_ms": 100,
+            "peak_hz": 183.2532457414847,
+            "qualifies": true,
+            "start_ms": 13180.0,
+            "end_ms": 13280.0
+          },
+          {
+            "start_bin": 1345,
+            "end_bin": 1354,
+            "duration_ms": 90,
+            "peak_hz": 176.6615579351601,
+            "qualifies": true,
+            "start_ms": 13450.0,
+            "end_ms": 13540.0
+          },
+          {
+            "start_bin": 1371,
+            "end_bin": 1381,
+            "duration_ms": 100,
+            "peak_hz": 183.51111334712846,
+            "qualifies": true,
+            "start_ms": 13710.0,
+            "end_ms": 13810.0
+          },
+          {
+            "start_bin": 1398,
+            "end_bin": 1407,
+            "duration_ms": 90,
+            "peak_hz": 177.97846322812546,
+            "qualifies": true,
+            "start_ms": 13980.0,
+            "end_ms": 14070.0
+          },
+          {
+            "start_bin": 1424,
+            "end_bin": 1434,
+            "duration_ms": 100,
+            "peak_hz": 183.36220490925922,
+            "qualifies": true,
+            "start_ms": 14240.0,
+            "end_ms": 14340.0
+          },
+          {
+            "start_bin": 1451,
+            "end_bin": 1460,
+            "duration_ms": 90,
+            "peak_hz": 179.94959075019096,
+            "qualifies": true,
+            "start_ms": 14510.0,
+            "end_ms": 14600.0
+          },
+          {
+            "start_bin": 1477,
+            "end_bin": 1486,
+            "duration_ms": 90,
+            "peak_hz": 182.60407991234877,
+            "qualifies": true,
+            "start_ms": 14770.0,
+            "end_ms": 14860.0
+          },
+          {
+            "start_bin": 1503,
+            "end_bin": 1513,
+            "duration_ms": 100,
+            "peak_hz": 181.55132804171342,
+            "qualifies": true,
+            "start_ms": 15030.0,
+            "end_ms": 15130.0
+          },
+          {
+            "start_bin": 1530,
+            "end_bin": 1539,
+            "duration_ms": 90,
+            "peak_hz": 181.16484819590477,
+            "qualifies": true,
+            "start_ms": 15300.0,
+            "end_ms": 15390.0
+          },
+          {
+            "start_bin": 1556,
+            "end_bin": 1566,
+            "duration_ms": 100,
+            "peak_hz": 182.65127485607485,
+            "qualifies": true,
+            "start_ms": 15560.0,
+            "end_ms": 15660.0
+          },
+          {
+            "start_bin": 1583,
+            "end_bin": 1592,
+            "duration_ms": 90,
+            "peak_hz": 179.16928554878604,
+            "qualifies": true,
+            "start_ms": 15830.0,
+            "end_ms": 15920.0
+          },
+          {
+            "start_bin": 1609,
+            "end_bin": 1619,
+            "duration_ms": 100,
+            "peak_hz": 183.25381838137727,
+            "qualifies": true,
+            "start_ms": 16090.0,
+            "end_ms": 16190.0
+          },
+          {
+            "start_bin": 1636,
+            "end_bin": 1645,
+            "duration_ms": 90,
+            "peak_hz": 176.65786561873185,
+            "qualifies": true,
+            "start_ms": 16360.0,
+            "end_ms": 16450.0
+          },
+          {
+            "start_bin": 1662,
+            "end_bin": 1672,
+            "duration_ms": 100,
+            "peak_hz": 183.5112897920339,
+            "qualifies": true,
+            "start_ms": 16620.0,
+            "end_ms": 16720.0
+          },
+          {
+            "start_bin": 1689,
+            "end_bin": 1698,
+            "duration_ms": 90,
+            "peak_hz": 177.98129071135423,
+            "qualifies": true,
+            "start_ms": 16890.0,
+            "end_ms": 16980.0
+          },
+          {
+            "start_bin": 1715,
+            "end_bin": 1725,
+            "duration_ms": 100,
+            "peak_hz": 183.36165913654062,
+            "qualifies": true,
+            "start_ms": 17150.0,
+            "end_ms": 17250.0
+          },
+          {
+            "start_bin": 1742,
+            "end_bin": 1751,
+            "duration_ms": 90,
+            "peak_hz": 179.95196077510923,
+            "qualifies": true,
+            "start_ms": 17420.0,
+            "end_ms": 17510.0
+          },
+          {
+            "start_bin": 1768,
+            "end_bin": 1777,
+            "duration_ms": 90,
+            "peak_hz": 182.60261821755864,
+            "qualifies": true,
+            "start_ms": 17680.0,
+            "end_ms": 17770.0
+          },
+          {
+            "start_bin": 1794,
+            "end_bin": 1804,
+            "duration_ms": 100,
+            "peak_hz": 181.55313718694154,
+            "qualifies": true,
+            "start_ms": 17940.0,
+            "end_ms": 18040.0
+          },
+          {
+            "start_bin": 1821,
+            "end_bin": 1830,
+            "duration_ms": 90,
+            "peak_hz": 181.16248645281422,
+            "qualifies": true,
+            "start_ms": 18210.0,
+            "end_ms": 18300.0
+          },
+          {
+            "start_bin": 1847,
+            "end_bin": 1857,
+            "duration_ms": 100,
+            "peak_hz": 182.6523288630677,
+            "qualifies": true,
+            "start_ms": 18470.0,
+            "end_ms": 18570.0
+          },
+          {
+            "start_bin": 1874,
+            "end_bin": 1883,
+            "duration_ms": 90,
+            "peak_hz": 179.16621364003757,
+            "qualifies": true,
+            "start_ms": 18740.0,
+            "end_ms": 18830.0
+          },
+          {
+            "start_bin": 1900,
+            "end_bin": 1910,
+            "duration_ms": 100,
+            "peak_hz": 183.25440674328433,
+            "qualifies": true,
+            "start_ms": 19000.0,
+            "end_ms": 19100.0
+          },
+          {
+            "start_bin": 1927,
+            "end_bin": 1936,
+            "duration_ms": 90,
+            "peak_hz": 176.65417396885616,
+            "qualifies": true,
+            "start_ms": 19270.0,
+            "end_ms": 19360.0
+          },
+          {
+            "start_bin": 1953,
+            "end_bin": 1963,
+            "duration_ms": 100,
+            "peak_hz": 183.5114837396279,
+            "qualifies": true,
+            "start_ms": 19530.0,
+            "end_ms": 19630.0
+          },
+          {
+            "start_bin": 1980,
+            "end_bin": 1989,
+            "duration_ms": 90,
+            "peak_hz": 177.98410977274517,
+            "qualifies": true,
+            "start_ms": 19800.0,
+            "end_ms": 19890.0
+          },
+          {
+            "start_bin": 2006,
+            "end_bin": 2016,
+            "duration_ms": 100,
+            "peak_hz": 183.36111097291894,
+            "qualifies": true,
+            "start_ms": 20060.0,
+            "end_ms": 20160.0
+          },
+          {
+            "start_bin": 2033,
+            "end_bin": 2042,
+            "duration_ms": 90,
+            "peak_hz": 179.9543219012506,
+            "qualifies": true,
+            "start_ms": 20330.0,
+            "end_ms": 20420.0
+          },
+          {
+            "start_bin": 2059,
+            "end_bin": 2068,
+            "duration_ms": 90,
+            "peak_hz": 182.6011779037854,
+            "qualifies": true,
+            "start_ms": 20590.0,
+            "end_ms": 20680.0
+          },
+          {
+            "start_bin": 2085,
+            "end_bin": 2095,
+            "duration_ms": 100,
+            "peak_hz": 181.55492352486823,
+            "qualifies": true,
+            "start_ms": 20850.0,
+            "end_ms": 20950.0
+          },
+          {
+            "start_bin": 2112,
+            "end_bin": 2121,
+            "duration_ms": 90,
+            "peak_hz": 181.1601244233988,
+            "qualifies": true,
+            "start_ms": 21120.0,
+            "end_ms": 21210.0
+          },
+          {
+            "start_bin": 2138,
+            "end_bin": 2148,
+            "duration_ms": 100,
+            "peak_hz": 182.65338253319996,
+            "qualifies": true,
+            "start_ms": 21380.0,
+            "end_ms": 21480.0
+          },
+          {
+            "start_bin": 2165,
+            "end_bin": 2174,
+            "duration_ms": 90,
+            "peak_hz": 179.16319464181805,
+            "qualifies": true,
+            "start_ms": 21650.0,
+            "end_ms": 21740.0
+          },
+          {
+            "start_bin": 2191,
+            "end_bin": 2201,
+            "duration_ms": 100,
+            "peak_hz": 183.25500287085075,
+            "qualifies": true,
+            "start_ms": 21910.0,
+            "end_ms": 22010.0
+          },
+          {
+            "start_bin": 2218,
+            "end_bin": 2227,
+            "duration_ms": 90,
+            "peak_hz": 176.65050010908146,
+            "qualifies": true,
+            "start_ms": 22180.0,
+            "end_ms": 22270.0
+          },
+          {
+            "start_bin": 2244,
+            "end_bin": 2254,
+            "duration_ms": 100,
+            "peak_hz": 183.51162720679844,
+            "qualifies": true,
+            "start_ms": 22440.0,
+            "end_ms": 22540.0
+          },
+          {
+            "start_bin": 2271,
+            "end_bin": 2280,
+            "duration_ms": 90,
+            "peak_hz": 177.9869329374962,
+            "qualifies": true,
+            "start_ms": 22710.0,
+            "end_ms": 22800.0
+          },
+          {
+            "start_bin": 2297,
+            "end_bin": 2307,
+            "duration_ms": 100,
+            "peak_hz": 183.3605622961644,
+            "qualifies": true,
+            "start_ms": 22970.0,
+            "end_ms": 23070.0
+          },
+          {
+            "start_bin": 2324,
+            "end_bin": 2333,
+            "duration_ms": 90,
+            "peak_hz": 179.9566964441442,
+            "qualifies": true,
+            "start_ms": 23240.0,
+            "end_ms": 23330.0
+          },
+          {
+            "start_bin": 2350,
+            "end_bin": 2359,
+            "duration_ms": 90,
+            "peak_hz": 182.59968337510898,
+            "qualifies": true,
+            "start_ms": 23500.0,
+            "end_ms": 23590.0
+          },
+          {
+            "start_bin": 2376,
+            "end_bin": 2386,
+            "duration_ms": 100,
+            "peak_hz": 181.55672326827573,
+            "qualifies": true,
+            "start_ms": 23760.0,
+            "end_ms": 23860.0
+          },
+          {
+            "start_bin": 2403,
+            "end_bin": 2412,
+            "duration_ms": 90,
+            "peak_hz": 181.15769193469941,
+            "qualifies": true,
+            "start_ms": 24030.0,
+            "end_ms": 24120.0
+          },
+          {
+            "start_bin": 2429,
+            "end_bin": 2439,
+            "duration_ms": 100,
+            "peak_hz": 182.65445590313877,
+            "qualifies": true,
+            "start_ms": 24290.0,
+            "end_ms": 24390.0
+          },
+          {
+            "start_bin": 2456,
+            "end_bin": 2465,
+            "duration_ms": 90,
+            "peak_hz": 179.16014776490493,
+            "qualifies": true,
+            "start_ms": 24560.0,
+            "end_ms": 24650.0
+          },
+          {
+            "start_bin": 2482,
+            "end_bin": 2492,
+            "duration_ms": 100,
+            "peak_hz": 183.2556123298405,
+            "qualifies": true,
+            "start_ms": 24820.0,
+            "end_ms": 24920.0
+          },
+          {
+            "start_bin": 2509,
+            "end_bin": 2518,
+            "duration_ms": 90,
+            "peak_hz": 176.64681966645568,
+            "qualifies": true,
+            "start_ms": 25090.0,
+            "end_ms": 25180.0
+          },
+          {
+            "start_bin": 2535,
+            "end_bin": 2545,
+            "duration_ms": 100,
+            "peak_hz": 183.51177196297357,
+            "qualifies": true,
+            "start_ms": 25350.0,
+            "end_ms": 25450.0
+          },
+          {
+            "start_bin": 2562,
+            "end_bin": 2571,
+            "duration_ms": 90,
+            "peak_hz": 177.98977400460606,
+            "qualifies": true,
+            "start_ms": 25620.0,
+            "end_ms": 25710.0
+          },
+          {
+            "start_bin": 2588,
+            "end_bin": 2598,
+            "duration_ms": 100,
+            "peak_hz": 183.3600084964919,
+            "qualifies": true,
+            "start_ms": 25880.0,
+            "end_ms": 25980.0
+          },
+          {
+            "start_bin": 2615,
+            "end_bin": 2624,
+            "duration_ms": 90,
+            "peak_hz": 179.9590887025414,
+            "qualifies": true,
+            "start_ms": 26150.0,
+            "end_ms": 26240.0
+          },
+          {
+            "start_bin": 2641,
+            "end_bin": 2650,
+            "duration_ms": 90,
+            "peak_hz": 182.59821283990934,
+            "qualifies": true,
+            "start_ms": 26410.0,
+            "end_ms": 26500.0
+          },
+          {
+            "start_bin": 2667,
+            "end_bin": 2677,
+            "duration_ms": 100,
+            "peak_hz": 181.55854159083887,
+            "qualifies": true,
+            "start_ms": 26670.0,
+            "end_ms": 26770.0
+          },
+          {
+            "start_bin": 2694,
+            "end_bin": 2703,
+            "duration_ms": 90,
+            "peak_hz": 181.15526625826834,
+            "qualifies": true,
+            "start_ms": 26940.0,
+            "end_ms": 27030.0
+          },
+          {
+            "start_bin": 2720,
+            "end_bin": 2730,
+            "duration_ms": 100,
+            "peak_hz": 182.65553411442374,
+            "qualifies": true,
+            "start_ms": 27200.0,
+            "end_ms": 27300.0
+          },
+          {
+            "start_bin": 2747,
+            "end_bin": 2756,
+            "duration_ms": 90,
+            "peak_hz": 179.15714259087054,
+            "qualifies": true,
+            "start_ms": 27470.0,
+            "end_ms": 27560.0
+          },
+          {
+            "start_bin": 2773,
+            "end_bin": 2783,
+            "duration_ms": 100,
+            "peak_hz": 183.25621939194906,
+            "qualifies": true,
+            "start_ms": 27730.0,
+            "end_ms": 27830.0
+          },
+          {
+            "start_bin": 2800,
+            "end_bin": 2809,
+            "duration_ms": 90,
+            "peak_hz": 176.64321417244838,
+            "qualifies": true,
+            "start_ms": 28000.0,
+            "end_ms": 28090.0
+          },
+          {
+            "start_bin": 2826,
+            "end_bin": 2836,
+            "duration_ms": 100,
+            "peak_hz": 183.51189883172646,
+            "qualifies": true,
+            "start_ms": 28260.0,
+            "end_ms": 28360.0
+          },
+          {
+            "start_bin": 2853,
+            "end_bin": 2862,
+            "duration_ms": 90,
+            "peak_hz": 177.99258891533952,
+            "qualifies": true,
+            "start_ms": 28530.0,
+            "end_ms": 28620.0
+          },
+          {
+            "start_bin": 2879,
+            "end_bin": 2889,
+            "duration_ms": 100,
+            "peak_hz": 183.3594310694118,
+            "qualifies": true,
+            "start_ms": 28790.0,
+            "end_ms": 28890.0
+          },
+          {
+            "start_bin": 2906,
+            "end_bin": 2915,
+            "duration_ms": 90,
+            "peak_hz": 179.96146995397885,
+            "qualifies": true,
+            "start_ms": 29060.0,
+            "end_ms": 29150.0
+          },
+          {
+            "start_bin": 2932,
+            "end_bin": 2941,
+            "duration_ms": 90,
+            "peak_hz": 182.59666965944473,
+            "qualifies": true,
+            "start_ms": 29320.0,
+            "end_ms": 29410.0
+          },
+          {
+            "start_bin": 2958,
+            "end_bin": 2968,
+            "duration_ms": 100,
+            "peak_hz": 181.5603557470651,
+            "qualifies": true,
+            "start_ms": 29580.0,
+            "end_ms": 29680.0
+          },
+          {
+            "start_bin": 2985,
+            "end_bin": 2994,
+            "duration_ms": 90,
+            "peak_hz": 181.15279704248385,
+            "qualifies": true,
+            "start_ms": 29850.0,
+            "end_ms": 29940.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 15,
+          "every_subwindow_has_quiet": true,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.6475,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "SELF_LIMITED",
+          "20Hz_duty90": "SELF_LIMITED",
+          "50Hz_duty80": "SELF_LIMITED",
+          "50Hz_duty90": "SELF_LIMITED",
+          "100Hz_duty80": "SELF_LIMITED",
+          "100Hz_duty90": "SELF_LIMITED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 30000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2193200_dt0.05/trajectory.npz",
+        "D": 0.21931999999999985,
+        "global_Z": 0.7806800000000002,
+        "global_mean_hz": 31.032815595916073,
+        "global_std_hz": 55.89182334308067,
+        "weighted_spatial_temporal_RMS_hz": 95.91369843442936,
+        "temporal_RMS_over_spatial_mean_RMS": 2.296907699126354,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 529,
+            "correlation": 0.9999558947281468,
+            "normalized_return_error": 0.009392046832642035
+          },
+          {
+            "lag_ms": 794,
+            "correlation": 0.9992968568025176,
+            "normalized_return_error": 0.037500485263419495
+          },
+          {
+            "lag_ms": 265,
+            "correlation": 0.9989091215292593,
+            "normalized_return_error": 0.046709281106654316
+          },
+          {
+            "lag_ms": 933,
+            "correlation": -0.19009746742662303,
+            "normalized_return_error": 1.5427139067327764
+          },
+          {
+            "lag_ms": 669,
+            "correlation": -0.19018873128263578,
+            "normalized_return_error": 1.5427840886362771
+          }
+        ],
+        "initial_history": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "complete_events_whole_30s": 113,
+      "maximum_complete_event_ms": 100
+    },
+    {
+      "D": 0.21934,
+      "global_Z": 0.78066,
+      "canonical": {
+        "label": "endpoint_D0.2193400_dt0.05",
+        "category": "UNRESOLVED",
+        "tail": {
+          "lo_bin": 2600,
+          "hi_bin": 3000,
+          "n_bins": 400,
+          "quiet_fraction": 0.0775,
+          "longest_quiet_ms": 180,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 1,
+          "event_durations_ms": [
+            3130
+          ],
+          "event_peaks_hz": [
+            188.3318278448579
+          ],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9225,
+          "mean_rate_hz": 65.69307708521748,
+          "max_rate_hz": 188.3318278448579,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0,
+            "20Hz_duty90": 0.0,
+            "50Hz_duty80": 0.0,
+            "50Hz_duty90": 0.0,
+            "100Hz_duty80": 0.0,
+            "100Hz_duty90": 0.0
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.22072187499999998
+        },
+        "subwindows": [
+          {
+            "lo_bin": 2600,
+            "hi_bin": 2700,
+            "n_bins": 100,
+            "quiet_fraction": 0.18,
+            "longest_quiet_ms": 180,
+            "quiet_runs_ge20ms": 1,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 0.82,
+            "mean_rate_hz": 58.35079989390477,
+            "max_rate_hz": 188.3318278448579,
+            "trailing_activity_ms": 260,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.19538812500000002
+          },
+          {
+            "lo_bin": 2700,
+            "hi_bin": 2800,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 69.14952284099327,
+            "max_rate_hz": 136.3872889416662,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0983125,
+              "20Hz_duty90": 0.08584375,
+              "50Hz_duty80": 0.093,
+              "50Hz_duty90": 0.07803125,
+              "100Hz_duty80": 0.083125,
+              "100Hz_duty90": 0.06315625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.23101937500000003
+          },
+          {
+            "lo_bin": 2800,
+            "hi_bin": 2900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 68.3509877541027,
+            "max_rate_hz": 129.17523632945858,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.02921875,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0208125,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.008375,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.23047062499999998
+          },
+          {
+            "lo_bin": 2900,
+            "hi_bin": 3000,
+            "n_bins": 100,
+            "quiet_fraction": 0.13,
+            "longest_quiet_ms": 130,
+            "quiet_runs_ge20ms": 1,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 0.87,
+            "mean_rate_hz": 66.92099785186919,
+            "max_rate_hz": 157.64529261126333,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0510625,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.04059375,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.03034375,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.226009375
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 22,
+            "end_bin": 32,
+            "duration_ms": 100,
+            "peak_hz": 181.03870861162335,
+            "qualifies": true,
+            "start_ms": 220.0,
+            "end_ms": 320.0
+          },
+          {
+            "start_bin": 48,
+            "end_bin": 58,
+            "duration_ms": 100,
+            "peak_hz": 180.18369630471318,
+            "qualifies": true,
+            "start_ms": 480.0,
+            "end_ms": 580.0
+          },
+          {
+            "start_bin": 60,
+            "end_bin": 171,
+            "duration_ms": 1110,
+            "peak_hz": 116.24013612935468,
+            "qualifies": true,
+            "start_ms": 600.0,
+            "end_ms": 1710.0
+          },
+          {
+            "start_bin": 183,
+            "end_bin": 193,
+            "duration_ms": 100,
+            "peak_hz": 170.60052529217106,
+            "qualifies": true,
+            "start_ms": 1830.0,
+            "end_ms": 1930.0
+          },
+          {
+            "start_bin": 210,
+            "end_bin": 380,
+            "duration_ms": 1700,
+            "peak_hz": 173.79667198089825,
+            "qualifies": true,
+            "start_ms": 2100.0,
+            "end_ms": 3800.0
+          },
+          {
+            "start_bin": 397,
+            "end_bin": 521,
+            "duration_ms": 1240,
+            "peak_hz": 172.58541541394527,
+            "qualifies": true,
+            "start_ms": 3970.0,
+            "end_ms": 5210.0
+          },
+          {
+            "start_bin": 540,
+            "end_bin": 690,
+            "duration_ms": 1500,
+            "peak_hz": 204.8752921270056,
+            "qualifies": true,
+            "start_ms": 5400.0,
+            "end_ms": 6900.0
+          },
+          {
+            "start_bin": 704,
+            "end_bin": 759,
+            "duration_ms": 550,
+            "peak_hz": 196.2071792175986,
+            "qualifies": true,
+            "start_ms": 7040.0,
+            "end_ms": 7590.0
+          },
+          {
+            "start_bin": 777,
+            "end_bin": 1348,
+            "duration_ms": 5710,
+            "peak_hz": 198.1964062215394,
+            "qualifies": true,
+            "start_ms": 7770.0,
+            "end_ms": 13480.0
+          },
+          {
+            "start_bin": 1365,
+            "end_bin": 1466,
+            "duration_ms": 1010,
+            "peak_hz": 206.10309560534293,
+            "qualifies": true,
+            "start_ms": 13650.0,
+            "end_ms": 14660.0
+          },
+          {
+            "start_bin": 1484,
+            "end_bin": 1628,
+            "duration_ms": 1440,
+            "peak_hz": 182.31108591411981,
+            "qualifies": true,
+            "start_ms": 14840.0,
+            "end_ms": 16280.0
+          },
+          {
+            "start_bin": 1644,
+            "end_bin": 1653,
+            "duration_ms": 90,
+            "peak_hz": 167.82158428665764,
+            "qualifies": true,
+            "start_ms": 16440.0,
+            "end_ms": 16530.0
+          },
+          {
+            "start_bin": 1671,
+            "end_bin": 2104,
+            "duration_ms": 4330,
+            "peak_hz": 181.70620545066987,
+            "qualifies": true,
+            "start_ms": 16710.0,
+            "end_ms": 21040.0
+          },
+          {
+            "start_bin": 2122,
+            "end_bin": 2402,
+            "duration_ms": 2800,
+            "peak_hz": 184.02557532864154,
+            "qualifies": true,
+            "start_ms": 21220.0,
+            "end_ms": 24020.0
+          },
+          {
+            "start_bin": 2404,
+            "end_bin": 2476,
+            "duration_ms": 720,
+            "peak_hz": 118.57541836114392,
+            "qualifies": true,
+            "start_ms": 24040.0,
+            "end_ms": 24760.0
+          },
+          {
+            "start_bin": 2495,
+            "end_bin": 2656,
+            "duration_ms": 1610,
+            "peak_hz": 211.35880426661134,
+            "qualifies": true,
+            "start_ms": 24950.0,
+            "end_ms": 26560.0
+          },
+          {
+            "start_bin": 2674,
+            "end_bin": 2987,
+            "duration_ms": 3130,
+            "peak_hz": 188.3318278448579,
+            "qualifies": true,
+            "start_ms": 26740.0,
+            "end_ms": 29870.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 1,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.0775,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "UNRESOLVED",
+          "20Hz_duty90": "UNRESOLVED",
+          "50Hz_duty80": "UNRESOLVED",
+          "50Hz_duty90": "UNRESOLVED",
+          "100Hz_duty80": "UNRESOLVED",
+          "100Hz_duty90": "UNRESOLVED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 30000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "spatial": {
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/endpoint_D0.2193400_dt0.05/trajectory.npz",
+        "D": 0.21933999999999987,
+        "global_Z": 0.7806600000000001,
+        "global_mean_hz": 65.69307702835177,
+        "global_std_hz": 33.78778119084032,
+        "weighted_spatial_temporal_RMS_hz": 117.45074709932368,
+        "temporal_RMS_over_spatial_mean_RMS": 1.201919189211624,
+        "spatial_recurrence_peaks": [
+          {
+            "lag_ms": 108,
+            "correlation": 0.331699653372096,
+            "normalized_return_error": 1.1561165582970248
+          },
+          {
+            "lag_ms": 218,
+            "correlation": 0.18965978864692465,
+            "normalized_return_error": 1.2730619972200488
+          },
+          {
+            "lag_ms": 359,
+            "correlation": 0.0954105010820153,
+            "normalized_return_error": 1.345058738099021
+          },
+          {
+            "lag_ms": 314,
+            "correlation": 0.08674408206329033,
+            "normalized_return_error": 1.3514890774841308
+          },
+          {
+            "lag_ms": 673,
+            "correlation": 0.08666848255407908,
+            "normalized_return_error": 1.3515474908195022
+          }
+        ],
+        "initial_history": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/initial_states/seed_N1024_dt0.05.npz",
+        "time_step_ms": 0.05,
+        "history_scheme": "instantaneous rate at the labelled endpoint",
+        "tail_duration_ms": 4000,
+        "Z": "held",
+        "M": "dynamic"
+      },
+      "complete_events_whole_30s": 17,
+      "maximum_complete_event_ms": 5710
+    }
+  ],
+  "question": "Does the original short-period attractor remain reachable from the matched reference history immediately below the native cycle-turn candidate and disappear above it?",
+  "limitation": "Finite 30 s conditional trajectories. No bifurcation, asymptotic survival, or branch connectivity is inferred solely from these readouts."
+}

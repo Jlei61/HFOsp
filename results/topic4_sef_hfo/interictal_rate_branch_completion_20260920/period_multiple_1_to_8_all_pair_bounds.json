@@ -1,0 +1,1597 @@
+{
+  "status": "ALL_FINITE_WINDOW_PAIRS_BOUNDED",
+  "timestamp": 1789892290.7208931,
+  "catalog_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/period_multiple_bounds/period_multiple_1_to_8_all_pair_bounds_catalog.json",
+  "moments_source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/period_multiple_bounds/period_multiple_1_to_8_all_pair_bounds_moments.json",
+  "checked_profiles": 1793,
+  "rows": [
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 924,
+      "excluded_pairs": 924,
+      "minimum_normalized_lower_bound": 0.5404770992934667,
+      "weakest_bounds": [
+        {
+          "first_index": 976,
+          "second_index": 93,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0017_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0022_N256.npz",
+          "first_J": 1.064324803111833,
+          "second_J": 1.0741004200226179,
+          "first_T_ms": 132.861378786937,
+          "second_T_ms": 256.9863005748964,
+          "waveform_RMS_lower_bound_Hz": 23.049129070293603,
+          "normalization_RMS_Hz": 42.64589397113097,
+          "normalized_distance_lower_bound": 0.5404770992934667
+        },
+        {
+          "first_index": 977,
+          "second_index": 93,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0018_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0022_N256.npz",
+          "first_J": 1.0653959616992363,
+          "second_J": 1.0741004200226179,
+          "first_T_ms": 132.52204584625042,
+          "second_T_ms": 256.9863005748964,
+          "waveform_RMS_lower_bound_Hz": 23.05405360947474,
+          "normalization_RMS_Hz": 42.64589397113097,
+          "normalized_distance_lower_bound": 0.5405925744007413
+        },
+        {
+          "first_index": 973,
+          "second_index": 92,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0014_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0023_N256.npz",
+          "first_J": 1.061276522768858,
+          "second_J": 1.0641863434412933,
+          "first_T_ms": 133.82480036865832,
+          "second_T_ms": 257.3526225814983,
+          "waveform_RMS_lower_bound_Hz": 22.81761241491756,
+          "normalization_RMS_Hz": 42.20000254460388,
+          "normalized_distance_lower_bound": 0.5407016833897146
+        },
+        {
+          "first_index": 974,
+          "second_index": 92,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0015_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0023_N256.npz",
+          "first_J": 1.0622560403408086,
+          "second_J": 1.0641863434412933,
+          "first_T_ms": 133.5156202074869,
+          "second_T_ms": 257.3526225814983,
+          "waveform_RMS_lower_bound_Hz": 22.817855397404387,
+          "normalization_RMS_Hz": 42.20000254460388,
+          "normalized_distance_lower_bound": 0.5407074412682021
+        },
+        {
+          "first_index": 978,
+          "second_index": 93,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage3_0019_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0022_N256.npz",
+          "first_J": 1.0664828086225857,
+          "second_J": 1.0741004200226179,
+          "first_T_ms": 132.1773645769467,
+          "second_T_ms": 256.9863005748964,
+          "waveform_RMS_lower_bound_Hz": 23.06106119092974,
+          "normalization_RMS_Hz": 42.64589397113097,
+          "normalized_distance_lower_bound": 0.5407568945920296
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 181,
+      "excluded_pairs": 181,
+      "minimum_normalized_lower_bound": 0.5576931838041636,
+      "weakest_bounds": [
+        {
+          "first_index": 1143,
+          "second_index": 109,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0084_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0006_N256.npz",
+          "first_J": 1.2429858167134857,
+          "second_J": 1.2333205169720916,
+          "first_T_ms": 91.9352781265896,
+          "second_T_ms": 251.35463641750135,
+          "waveform_RMS_lower_bound_Hz": 26.558605757239786,
+          "normalization_RMS_Hz": 47.622252752090226,
+          "normalized_distance_lower_bound": 0.5576931838041636
+        },
+        {
+          "first_index": 1143,
+          "second_index": 110,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0084_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0005_N256.npz",
+          "first_J": 1.2429858167134857,
+          "second_J": 1.2432901520929927,
+          "first_T_ms": 91.9352781265896,
+          "second_T_ms": 251.03840821752524,
+          "waveform_RMS_lower_bound_Hz": 26.690141248132214,
+          "normalization_RMS_Hz": 47.85137780899713,
+          "normalized_distance_lower_bound": 0.5577716352216272
+        },
+        {
+          "first_index": 1144,
+          "second_index": 110,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0085_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0005_N256.npz",
+          "first_J": 1.2445900065365088,
+          "second_J": 1.2432901520929927,
+          "first_T_ms": 91.57056707402855,
+          "second_T_ms": 251.03840821752524,
+          "waveform_RMS_lower_bound_Hz": 26.883922733136576,
+          "normalization_RMS_Hz": 47.85137780899713,
+          "normalized_distance_lower_bound": 0.5618212884161049
+        },
+        {
+          "first_index": 1144,
+          "second_index": 111,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0085_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0004_N256.npz",
+          "first_J": 1.2445900065365088,
+          "second_J": 1.2532608206995188,
+          "first_T_ms": 91.57056707402855,
+          "second_T_ms": 250.72710285941193,
+          "waveform_RMS_lower_bound_Hz": 27.01413550303188,
+          "normalization_RMS_Hz": 48.07462211590178,
+          "normalized_distance_lower_bound": 0.5619209119918664
+        },
+        {
+          "first_index": 1145,
+          "second_index": 110,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0086_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0005_N256.npz",
+          "first_J": 1.246198094272256,
+          "second_J": 1.2432901520929927,
+          "first_T_ms": 91.2123986787913,
+          "second_T_ms": 251.03840821752524,
+          "waveform_RMS_lower_bound_Hz": 27.088904203218952,
+          "normalization_RMS_Hz": 47.85137780899713,
+          "normalized_distance_lower_bound": 0.566104999344985
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "single"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 29783,
+      "excluded_pairs": 29783,
+      "minimum_normalized_lower_bound": 1.0540600148461734,
+      "weakest_bounds": [
+        {
+          "first_index": 171,
+          "second_index": 70,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0069_N512.npz",
+          "first_J": 0.9489492461758047,
+          "second_J": 0.9488509536523604,
+          "first_T_ms": 144.4972008384791,
+          "second_T_ms": 317.8307619192694,
+          "waveform_RMS_lower_bound_Hz": 41.33158022968487,
+          "normalization_RMS_Hz": 39.21179026577219,
+          "normalized_distance_lower_bound": 1.0540600148461734
+        },
+        {
+          "first_index": 171,
+          "second_index": 69,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0068_N512.npz",
+          "first_J": 0.9489492461758047,
+          "second_J": 0.9488527026671582,
+          "first_T_ms": 144.4972008384791,
+          "second_T_ms": 317.8238120014567,
+          "waveform_RMS_lower_bound_Hz": 41.33577922276918,
+          "normalization_RMS_Hz": 39.21576794692845,
+          "normalized_distance_lower_bound": 1.054060174945695
+        },
+        {
+          "first_index": 171,
+          "second_index": 71,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0070_N512.npz",
+          "first_J": 0.9489492461758047,
+          "second_J": 0.9488497025479843,
+          "first_T_ms": 144.4972008384791,
+          "second_T_ms": 317.8357382178816,
+          "waveform_RMS_lower_bound_Hz": 41.32673625576043,
+          "normalization_RMS_Hz": 39.20718520420165,
+          "normalized_distance_lower_bound": 1.0540602708539157
+        },
+        {
+          "first_index": 171,
+          "second_index": 68,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0067_N512.npz",
+          "first_J": 0.9489492461758047,
+          "second_J": 0.948854981257046,
+          "first_T_ms": 144.4972008384791,
+          "second_T_ms": 317.81476155283593,
+          "waveform_RMS_lower_bound_Hz": 41.3392757742232,
+          "normalization_RMS_Hz": 39.21906276679726,
+          "normalized_distance_lower_bound": 1.0540607770265462
+        },
+        {
+          "first_index": 171,
+          "second_index": 72,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0058_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512.npz",
+          "first_J": 0.9489492461758047,
+          "second_J": 0.9488489167801094,
+          "first_T_ms": 144.4972008384791,
+          "second_T_ms": 317.8388709160101,
+          "waveform_RMS_lower_bound_Hz": 41.321301027790966,
+          "normalization_RMS_Hz": 39.202004755897555,
+          "normalized_distance_lower_bound": 1.0540609156365806
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 421,
+      "excluded_pairs": 421,
+      "minimum_normalized_lower_bound": 0.4509050905506152,
+      "weakest_bounds": [
+        {
+          "first_index": 582,
+          "second_index": 28,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0027_N512.npz",
+          "first_J": 0.9571376338920623,
+          "second_J": 0.9494429739500899,
+          "first_T_ms": 115.60753007990166,
+          "second_T_ms": 315.36194471843083,
+          "waveform_RMS_lower_bound_Hz": 17.248781670198884,
+          "normalization_RMS_Hz": 38.25368582363048,
+          "normalized_distance_lower_bound": 0.4509050905506152
+        },
+        {
+          "first_index": 582,
+          "second_index": 29,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0028_N512.npz",
+          "first_J": 0.9571376338920623,
+          "second_J": 0.9494221995837424,
+          "first_T_ms": 115.60753007990166,
+          "second_T_ms": 315.4536469086618,
+          "waveform_RMS_lower_bound_Hz": 17.282106036202308,
+          "normalization_RMS_Hz": 38.30230030828795,
+          "normalized_distance_lower_bound": 0.4512028232534839
+        },
+        {
+          "first_index": 582,
+          "second_index": 30,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0029_N512.npz",
+          "first_J": 0.9571376338920623,
+          "second_J": 0.9494013834866811,
+          "first_T_ms": 115.60753007990166,
+          "second_T_ms": 315.545109839232,
+          "waveform_RMS_lower_bound_Hz": 17.315271611990674,
+          "normalization_RMS_Hz": 38.350407177554416,
+          "normalized_distance_lower_bound": 0.45150163678379124
+        },
+        {
+          "first_index": 582,
+          "second_index": 31,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0030_N512.npz",
+          "first_J": 0.9571376338920623,
+          "second_J": 0.9493805343086775,
+          "first_T_ms": 115.60753007990166,
+          "second_T_ms": 315.6362971783616,
+          "waveform_RMS_lower_bound_Hz": 17.34823672797634,
+          "normalization_RMS_Hz": 38.39793892668877,
+          "normalized_distance_lower_bound": 0.4518012480070466
+        },
+        {
+          "first_index": 582,
+          "second_index": 32,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0083_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0031_N512.npz",
+          "first_J": 0.9571376338920623,
+          "second_J": 0.9493596634331872,
+          "first_T_ms": 115.60753007990166,
+          "second_T_ms": 315.727161878698,
+          "waveform_RMS_lower_bound_Hz": 17.380956912102654,
+          "normalization_RMS_Hz": 38.444824051298774,
+          "normalized_distance_lower_bound": 0.45210135150860387
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "Bleading"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 1086,
+      "excluded_pairs": 1086,
+      "minimum_normalized_lower_bound": 1.0320754350542918,
+      "weakest_bounds": [
+        {
+          "first_index": 127,
+          "second_index": 153,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0014_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0007_N1024.npz",
+          "first_J": 0.9547340078239555,
+          "second_J": 0.9447360180686948,
+          "first_T_ms": 173.50087590755004,
+          "second_T_ms": 761.9820500090452,
+          "waveform_RMS_lower_bound_Hz": 38.92763486555344,
+          "normalization_RMS_Hz": 37.71781939903034,
+          "normalized_distance_lower_bound": 1.0320754350542918
+        },
+        {
+          "first_index": 127,
+          "second_index": 143,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0014_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0016_N512.npz",
+          "first_J": 0.9547340078239555,
+          "second_J": 0.9447374960718655,
+          "first_T_ms": 173.50087590755004,
+          "second_T_ms": 761.9892166833886,
+          "waveform_RMS_lower_bound_Hz": 38.92561735365863,
+          "normalization_RMS_Hz": 37.715681845724646,
+          "normalized_distance_lower_bound": 1.0320804357424374
+        },
+        {
+          "first_index": 127,
+          "second_index": 154,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0014_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0008_N1024.npz",
+          "first_J": 0.9547340078239555,
+          "second_J": 0.9447391657742431,
+          "first_T_ms": 173.50087590755004,
+          "second_T_ms": 761.9840633128264,
+          "waveform_RMS_lower_bound_Hz": 38.92388851939934,
+          "normalization_RMS_Hz": 37.71379755883585,
+          "normalized_distance_lower_bound": 1.0320861604741787
+        },
+        {
+          "first_index": 126,
+          "second_index": 140,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0013_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleUp_0013_N512.npz",
+          "first_J": 0.9542344607585376,
+          "second_J": 0.9447081554508355,
+          "first_T_ms": 173.57811996662375,
+          "second_T_ms": 761.9347685727522,
+          "waveform_RMS_lower_bound_Hz": 38.95605497250011,
+          "normalization_RMS_Hz": 37.74476972990992,
+          "normalized_distance_lower_bound": 1.0320914725737573
+        },
+        {
+          "first_index": 126,
+          "second_index": 146,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0013_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleRef_0000_N1024.npz",
+          "first_J": 0.9542344607585376,
+          "second_J": 0.9447123049059414,
+          "first_T_ms": 173.57811996662375,
+          "second_T_ms": 761.9252297693296,
+          "waveform_RMS_lower_bound_Hz": 38.953740101543815,
+          "normalization_RMS_Hz": 37.74249041627427,
+          "normalized_distance_lower_bound": 1.032092468512551
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 30629,
+      "excluded_pairs": 30629,
+      "minimum_normalized_lower_bound": 1.0254447513767004,
+      "weakest_bounds": [
+        {
+          "first_index": 115,
+          "second_index": 23,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0002_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+          "first_J": 0.9488665604816652,
+          "second_J": 0.9391251879758398,
+          "first_T_ms": 171.41383827686738,
+          "second_T_ms": 880.1490055280769,
+          "waveform_RMS_lower_bound_Hz": 34.755959409938754,
+          "normalization_RMS_Hz": 33.893546544830905,
+          "normalized_distance_lower_bound": 1.0254447513767004
+        },
+        {
+          "first_index": 115,
+          "second_index": 24,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0002_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0020_N512.npz",
+          "first_J": 0.9488665604816652,
+          "second_J": 0.9391336510694974,
+          "first_T_ms": 171.41383827686738,
+          "second_T_ms": 878.2729441431189,
+          "waveform_RMS_lower_bound_Hz": 34.89997706011144,
+          "normalization_RMS_Hz": 34.03281492009284,
+          "normalized_distance_lower_bound": 1.025480176766296
+        },
+        {
+          "first_index": 115,
+          "second_index": 22,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0002_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0022_N512.npz",
+          "first_J": 0.9488665604816652,
+          "second_J": 0.9391028594180373,
+          "first_T_ms": 171.41383827686738,
+          "second_T_ms": 881.8483843959472,
+          "waveform_RMS_lower_bound_Hz": 34.618121407477986,
+          "normalization_RMS_Hz": 33.757593633051975,
+          "normalized_distance_lower_bound": 1.025491383769235
+        },
+        {
+          "first_index": 115,
+          "second_index": 25,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0002_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0019_N512.npz",
+          "first_J": 0.9488665604816652,
+          "second_J": 0.9391431069574643,
+          "first_T_ms": 171.41383827686738,
+          "second_T_ms": 876.3206975330688,
+          "waveform_RMS_lower_bound_Hz": 35.02953614960848,
+          "normalization_RMS_Hz": 34.15778542336972,
+          "normalized_distance_lower_bound": 1.025521289376165
+        },
+        {
+          "first_index": 114,
+          "second_index": 23,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcA_0001_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+          "first_J": 0.9485302129426902,
+          "second_J": 0.9391251879758398,
+          "first_T_ms": 170.9723874157882,
+          "second_T_ms": 880.1490055280769,
+          "waveform_RMS_lower_bound_Hz": 34.75870721997092,
+          "normalization_RMS_Hz": 33.893546544830905,
+          "normalized_distance_lower_bound": 1.0255258231532565
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 21316,
+      "excluded_pairs": 21316,
+      "minimum_normalized_lower_bound": 0.44771817813928794,
+      "weakest_bounds": [
+        {
+          "first_index": 581,
+          "second_index": 249,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0053_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.9445161369364591,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 749.3602426185145,
+          "waveform_RMS_lower_bound_Hz": 16.42719644587911,
+          "normalization_RMS_Hz": 36.69093025025334,
+          "normalized_distance_lower_bound": 0.44771817813928794
+        },
+        {
+          "first_index": 580,
+          "second_index": 255,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0081_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0059_N1536.npz",
+          "first_J": 0.9519500699469765,
+          "second_J": 0.9444457411107372,
+          "first_T_ms": 115.70390080537224,
+          "second_T_ms": 745.6757096848903,
+          "waveform_RMS_lower_bound_Hz": 16.31549549806793,
+          "normalization_RMS_Hz": 36.42740678842168,
+          "normalized_distance_lower_bound": 0.4478906663005655
+        },
+        {
+          "first_index": 581,
+          "second_index": 248,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0052_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.944529617983915,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 749.9606375132852,
+          "waveform_RMS_lower_bound_Hz": 16.450762941929778,
+          "normalization_RMS_Hz": 36.728301097170316,
+          "normalized_distance_lower_bound": 0.4479042713793589
+        },
+        {
+          "first_index": 581,
+          "second_index": 247,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0051_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.9445438610691171,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 750.552092784244,
+          "waveform_RMS_lower_bound_Hz": 16.473087573319937,
+          "normalization_RMS_Hz": 36.76312420979874,
+          "normalized_distance_lower_bound": 0.4480872593774075
+        },
+        {
+          "first_index": 580,
+          "second_index": 254,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0081_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0058_N1536.npz",
+          "first_J": 0.9519500699469765,
+          "second_J": 0.9444566460639147,
+          "first_T_ms": 115.70390080537224,
+          "second_T_ms": 746.2934106857717,
+          "waveform_RMS_lower_bound_Hz": 16.34546738608183,
+          "normalization_RMS_Hz": 36.47466049646603,
+          "normalized_distance_lower_bound": 0.44813213237901184
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 7613,
+      "excluded_pairs": 7613,
+      "minimum_normalized_lower_bound": 0.44771817813928794,
+      "weakest_bounds": [
+        {
+          "first_index": 581,
+          "second_index": 249,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0053_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.9445161369364591,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 749.3602426185145,
+          "waveform_RMS_lower_bound_Hz": 16.42719644587911,
+          "normalization_RMS_Hz": 36.69093025025334,
+          "normalized_distance_lower_bound": 0.44771817813928794
+        },
+        {
+          "first_index": 580,
+          "second_index": 255,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0081_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0059_N1536.npz",
+          "first_J": 0.9519500699469765,
+          "second_J": 0.9444457411107372,
+          "first_T_ms": 115.70390080537224,
+          "second_T_ms": 745.6757096848903,
+          "waveform_RMS_lower_bound_Hz": 16.31549549806793,
+          "normalization_RMS_Hz": 36.42740678842168,
+          "normalized_distance_lower_bound": 0.4478906663005655
+        },
+        {
+          "first_index": 581,
+          "second_index": 248,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0052_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.944529617983915,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 749.9606375132852,
+          "waveform_RMS_lower_bound_Hz": 16.450762941929778,
+          "normalization_RMS_Hz": 36.728301097170316,
+          "normalized_distance_lower_bound": 0.4479042713793589
+        },
+        {
+          "first_index": 581,
+          "second_index": 247,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0082_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0051_N1536.npz",
+          "first_J": 0.9545139240285032,
+          "second_J": 0.9445438610691171,
+          "first_T_ms": 115.61868351207464,
+          "second_T_ms": 750.552092784244,
+          "waveform_RMS_lower_bound_Hz": 16.473087573319937,
+          "normalization_RMS_Hz": 36.76312420979874,
+          "normalized_distance_lower_bound": 0.4480872593774075
+        },
+        {
+          "first_index": 580,
+          "second_index": 254,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0081_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleFine_0058_N1536.npz",
+          "first_J": 0.9519500699469765,
+          "second_J": 0.9444566460639147,
+          "first_T_ms": 115.70390080537224,
+          "second_T_ms": 746.2934106857717,
+          "waveform_RMS_lower_bound_Hz": 16.34546738608183,
+          "normalization_RMS_Hz": 36.47466049646603,
+          "normalized_distance_lower_bound": 0.44813213237901184
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "A",
+        "double"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 159,
+      "excluded_pairs": 159,
+      "minimum_normalized_lower_bound": 0.45003440420571317,
+      "weakest_bounds": [
+        {
+          "first_index": 578,
+          "second_index": 39,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0005_N512.npz",
+          "first_J": 0.9471717294800808,
+          "second_J": 0.9381628955613394,
+          "first_T_ms": 116.23429421720408,
+          "second_T_ms": 856.1385525248754,
+          "waveform_RMS_lower_bound_Hz": 15.808791422690586,
+          "normalization_RMS_Hz": 35.12796194013714,
+          "normalized_distance_lower_bound": 0.45003440420571317
+        },
+        {
+          "first_index": 578,
+          "second_index": 40,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0004_N512.npz",
+          "first_J": 0.9471717294800808,
+          "second_J": 0.9381137980816947,
+          "first_T_ms": 116.23429421720408,
+          "second_T_ms": 854.1139645360176,
+          "waveform_RMS_lower_bound_Hz": 15.881307241913555,
+          "normalization_RMS_Hz": 35.27608343599896,
+          "normalized_distance_lower_bound": 0.45020041044882003
+        },
+        {
+          "first_index": 578,
+          "second_index": 38,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0006_N512.npz",
+          "first_J": 0.9471717294800808,
+          "second_J": 0.9383104366921274,
+          "first_T_ms": 116.23429421720408,
+          "second_T_ms": 856.716474692396,
+          "waveform_RMS_lower_bound_Hz": 15.809883982667028,
+          "normalization_RMS_Hz": 35.10553208788429,
+          "normalized_distance_lower_bound": 0.45035306524020396
+        },
+        {
+          "first_index": 578,
+          "second_index": 41,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0003_N512.npz",
+          "first_J": 0.9471717294800808,
+          "second_J": 0.9381133066584794,
+          "first_T_ms": 116.23429421720408,
+          "second_T_ms": 851.3748538897623,
+          "waveform_RMS_lower_bound_Hz": 15.998084005183033,
+          "normalization_RMS_Hz": 35.49620683993889,
+          "normalized_distance_lower_bound": 0.45069841060264043
+        },
+        {
+          "first_index": 578,
+          "second_index": 37,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAreturnStrong_0079_N512.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0007_N512.npz",
+          "first_J": 0.9471717294800808,
+          "second_J": 0.9384961340273116,
+          "first_T_ms": 116.23429421720408,
+          "second_T_ms": 856.715308107697,
+          "waveform_RMS_lower_bound_Hz": 15.823301634308462,
+          "normalization_RMS_Hz": 35.101361180208215,
+          "normalized_distance_lower_bound": 0.4507888327484684
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 3689,
+      "excluded_pairs": 3689,
+      "minimum_normalized_lower_bound": 0.8674546671177735,
+      "weakest_bounds": [
+        {
+          "first_index": 868,
+          "second_index": 76,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9575887984733535,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 293.99842850141806,
+          "waveform_RMS_lower_bound_Hz": 23.52266145351482,
+          "normalization_RMS_Hz": 27.116876933375437,
+          "normalized_distance_lower_bound": 0.8674546671177735
+        },
+        {
+          "first_index": 867,
+          "second_index": 76,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0021_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz",
+          "first_J": 0.948860338343096,
+          "second_J": 0.9575887984733535,
+          "first_T_ms": 322.32780607984245,
+          "second_T_ms": 293.99842850141806,
+          "waveform_RMS_lower_bound_Hz": 23.561814551308434,
+          "normalization_RMS_Hz": 27.116876933375437,
+          "normalized_distance_lower_bound": 0.868898531685578
+        },
+        {
+          "first_index": 866,
+          "second_index": 76,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0020_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz",
+          "first_J": 0.9487567904530928,
+          "second_J": 0.9575887984733535,
+          "first_T_ms": 322.6678751315415,
+          "second_T_ms": 293.99842850141806,
+          "waveform_RMS_lower_bound_Hz": 23.586041395864775,
+          "normalization_RMS_Hz": 27.116876933375437,
+          "normalized_distance_lower_bound": 0.8697919547967963
+        },
+        {
+          "first_index": 865,
+          "second_index": 76,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0019_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0039_N256.npz",
+          "first_J": 0.9485325080236364,
+          "second_J": 0.9575887984733535,
+          "first_T_ms": 323.26503075373853,
+          "second_T_ms": 293.99842850141806,
+          "waveform_RMS_lower_bound_Hz": 23.62550865205095,
+          "normalization_RMS_Hz": 27.116876933375437,
+          "normalized_distance_lower_bound": 0.8712474047102632
+        },
+        {
+          "first_index": 868,
+          "second_index": 77,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcSingleDown_0038_N256.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9570347582180119,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 296.1877811094478,
+          "waveform_RMS_lower_bound_Hz": 24.336980599885237,
+          "normalization_RMS_Hz": 27.90448289726312,
+          "normalized_distance_lower_bound": 0.8721530762454021
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "single"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 84690,
+      "excluded_pairs": 84690,
+      "minimum_normalized_lower_bound": 0.9062422038028134,
+      "weakest_bounds": [
+        {
+          "first_index": 868,
+          "second_index": 187,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0016_N1024.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9522864711861609,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 301.40459859501834,
+          "waveform_RMS_lower_bound_Hz": 30.442489696535254,
+          "normalization_RMS_Hz": 33.592001750515635,
+          "normalized_distance_lower_bound": 0.9062422038028134
+        },
+        {
+          "first_index": 868,
+          "second_index": 188,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0017_N1024.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9523958597897108,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 300.9026534237756,
+          "waveform_RMS_lower_bound_Hz": 30.424473289704274,
+          "normalization_RMS_Hz": 33.57197534407851,
+          "normalized_distance_lower_bound": 0.9062461466114058
+        },
+        {
+          "first_index": 868,
+          "second_index": 186,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0015_N1024.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9521761641455999,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 301.91627129419106,
+          "waveform_RMS_lower_bound_Hz": 30.46595918814486,
+          "normalization_RMS_Hz": 33.617276922669454,
+          "normalized_distance_lower_bound": 0.9062589827910917
+        },
+        {
+          "first_index": 868,
+          "second_index": 189,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0018_N1024.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.952504390150329,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 300.4101251720328,
+          "waveform_RMS_lower_bound_Hz": 30.41166134461889,
+          "normalization_RMS_Hz": 33.55694879736701,
+          "normalized_distance_lower_bound": 0.9062701596697339
+        },
+        {
+          "first_index": 868,
+          "second_index": 185,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBleadingBridge_0014_N1024.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9520651903765075,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 302.43651671382923,
+          "waveform_RMS_lower_bound_Hz": 30.49501840159421,
+          "normalization_RMS_Hz": 33.64793396820471,
+          "normalized_distance_lower_bound": 0.9062969046007455
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 1141,
+      "excluded_pairs": 1141,
+      "minimum_normalized_lower_bound": 1.0593711223612687,
+      "weakest_bounds": [
+        {
+          "first_index": 6,
+          "second_index": 69,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0068_N512.npz",
+          "first_J": 0.9467561120973694,
+          "second_J": 0.9488527026671582,
+          "first_T_ms": 174.48560776177203,
+          "second_T_ms": 317.8238120014567,
+          "waveform_RMS_lower_bound_Hz": 41.54405210419666,
+          "normalization_RMS_Hz": 39.21576794692845,
+          "normalized_distance_lower_bound": 1.0593711223612687
+        },
+        {
+          "first_index": 6,
+          "second_index": 70,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0069_N512.npz",
+          "first_J": 0.9467561120973694,
+          "second_J": 0.9488509536523604,
+          "first_T_ms": 174.48560776177203,
+          "second_T_ms": 317.8307619192694,
+          "waveform_RMS_lower_bound_Hz": 41.53984370513828,
+          "normalization_RMS_Hz": 39.21179026577219,
+          "normalized_distance_lower_bound": 1.059371261133115
+        },
+        {
+          "first_index": 6,
+          "second_index": 68,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0067_N512.npz",
+          "first_J": 0.9467561120973694,
+          "second_J": 0.948854981257046,
+          "first_T_ms": 174.48560776177203,
+          "second_T_ms": 317.81476155283593,
+          "waveform_RMS_lower_bound_Hz": 41.54755849885606,
+          "normalization_RMS_Hz": 39.21906276679726,
+          "normalized_distance_lower_bound": 1.0593715292459793
+        },
+        {
+          "first_index": 6,
+          "second_index": 71,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0070_N512.npz",
+          "first_J": 0.9467561120973694,
+          "second_J": 0.9488497025479843,
+          "first_T_ms": 174.48560776177203,
+          "second_T_ms": 317.8357382178816,
+          "waveform_RMS_lower_bound_Hz": 41.53499074469421,
+          "normalization_RMS_Hz": 39.20718520420165,
+          "normalized_distance_lower_bound": 1.0593719117648646
+        },
+        {
+          "first_index": 6,
+          "second_index": 67,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.00000_N32.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0066_N512.npz",
+          "first_J": 0.9467561120973694,
+          "second_J": 0.9488578203261848,
+          "first_T_ms": 174.48560776177203,
+          "second_T_ms": 317.80348609102,
+          "waveform_RMS_lower_bound_Hz": 41.55030146657981,
+          "normalization_RMS_Hz": 39.221615519355375,
+          "normalized_distance_lower_bound": 1.0593725147827033
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "Bleading"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 1,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 2,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 3,
+      "window_pairs": 10277,
+      "excluded_pairs": 10277,
+      "minimum_normalized_lower_bound": 0.864916429433402,
+      "weakest_bounds": [
+        {
+          "first_index": 868,
+          "second_index": 21,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0023_N512.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.939082198396272,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 883.1573393252211,
+          "waveform_RMS_lower_bound_Hz": 29.13808072746193,
+          "normalization_RMS_Hz": 33.688897257449476,
+          "normalized_distance_lower_bound": 0.864916429433402
+        },
+        {
+          "first_index": 868,
+          "second_index": 22,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0022_N512.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9391028594180373,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 881.8483843959472,
+          "waveform_RMS_lower_bound_Hz": 29.197843719021982,
+          "normalization_RMS_Hz": 33.757593633051975,
+          "normalized_distance_lower_bound": 0.8649266898702889
+        },
+        {
+          "first_index": 868,
+          "second_index": 20,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0024_N512.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9391032149792649,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 881.0475555690249,
+          "waveform_RMS_lower_bound_Hz": 29.21331499326931,
+          "normalization_RMS_Hz": 33.75433420630405,
+          "normalized_distance_lower_bound": 0.8654685592291538
+        },
+        {
+          "first_index": 868,
+          "second_index": 23,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9391251879758398,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 880.1490055280769,
+          "waveform_RMS_lower_bound_Hz": 29.334027556636745,
+          "normalization_RMS_Hz": 33.893546544830905,
+          "normalized_distance_lower_bound": 0.8654753056850131
+        },
+        {
+          "first_index": 868,
+          "second_index": 19,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcBconnectionStage4_20260920_0022_N2048.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0025_N512.npz",
+          "first_J": 0.9489303624254609,
+          "second_J": 0.9391275339118786,
+          "first_T_ms": 321.8723201541457,
+          "second_T_ms": 878.8179077034036,
+          "waveform_RMS_lower_bound_Hz": 29.257073702252278,
+          "normalization_RMS_Hz": 33.79131255392598,
+          "normalized_distance_lower_bound": 0.8658164330125466
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 4,
+      "window_pairs": 3361,
+      "excluded_pairs": 3361,
+      "minimum_normalized_lower_bound": 1.029455900132378,
+      "weakest_bounds": [
+        {
+          "first_index": 8,
+          "second_index": 99,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0025_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391249327706086,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 816.2863544092733,
+          "waveform_RMS_lower_bound_Hz": 39.88265012574747,
+          "normalization_RMS_Hz": 38.74148481796932,
+          "normalized_distance_lower_bound": 1.029455900132378
+        },
+        {
+          "first_index": 8,
+          "second_index": 100,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0024_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391762691730591,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 815.4423407413216,
+          "waveform_RMS_lower_bound_Hz": 39.96528984403751,
+          "normalization_RMS_Hz": 38.81682004498988,
+          "normalized_distance_lower_bound": 1.0295869109761313
+        },
+        {
+          "first_index": 9,
+          "second_index": 101,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0023_N512.npz",
+          "first_J": 0.9492133581086523,
+          "second_J": 0.9392288543854189,
+          "first_T_ms": 187.3261781858264,
+          "second_T_ms": 814.5951194274329,
+          "waveform_RMS_lower_bound_Hz": 40.04399714648648,
+          "normalization_RMS_Hz": 38.8895735703624,
+          "normalized_distance_lower_bound": 1.0296846550409045
+        },
+        {
+          "first_index": 8,
+          "second_index": 101,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0023_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9392288543854189,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 814.5951194274329,
+          "waveform_RMS_lower_bound_Hz": 40.045261908544816,
+          "normalization_RMS_Hz": 38.8895735703624,
+          "normalized_distance_lower_bound": 1.0297171769212496
+        },
+        {
+          "first_index": 9,
+          "second_index": 102,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcB_0000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleDown_0022_N512.npz",
+          "first_J": 0.9492133581086523,
+          "second_J": 0.9392823622607438,
+          "first_T_ms": 187.3261781858264,
+          "second_T_ms": 813.7479916497409,
+          "waveform_RMS_lower_bound_Hz": 40.120968983540486,
+          "normalization_RMS_Hz": 38.959469988985056,
+          "normalized_distance_lower_bound": 1.0298130081051877
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 5,
+      "window_pairs": 1484,
+      "excluded_pairs": 1484,
+      "minimum_normalized_lower_bound": 1.0259861672196078,
+      "weakest_bounds": [
+        {
+          "first_index": 8,
+          "second_index": 23,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0021_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391251879758398,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 880.1490055280769,
+          "waveform_RMS_lower_bound_Hz": 34.77430991301044,
+          "normalization_RMS_Hz": 33.893546544830905,
+          "normalized_distance_lower_bound": 1.0259861672196078
+        },
+        {
+          "first_index": 8,
+          "second_index": 24,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0020_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391336510694974,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 878.2729441431189,
+          "waveform_RMS_lower_bound_Hz": 34.91826962372089,
+          "normalization_RMS_Hz": 34.03281492009284,
+          "normalized_distance_lower_bound": 1.0260176745798737
+        },
+        {
+          "first_index": 8,
+          "second_index": 22,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0022_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391028594180373,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 881.8483843959472,
+          "waveform_RMS_lower_bound_Hz": 34.636534172233496,
+          "normalization_RMS_Hz": 33.757593633051975,
+          "normalized_distance_lower_bound": 1.0260368244471356
+        },
+        {
+          "first_index": 8,
+          "second_index": 25,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0019_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391431069574643,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 876.3206975330688,
+          "waveform_RMS_lower_bound_Hz": 35.047770778512366,
+          "normalization_RMS_Hz": 34.15778542336972,
+          "normalized_distance_lower_bound": 1.0260551245963898
+        },
+        {
+          "first_index": 8,
+          "second_index": 26,
+          "first_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/HB_a2.60000_N64.npz",
+          "second_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcDoubleLow_0018_N512.npz",
+          "first_J": 0.9490925450345514,
+          "second_J": 0.9391440688081465,
+          "first_T_ms": 186.98332186953962,
+          "second_T_ms": 874.4231081158262,
+          "waveform_RMS_lower_bound_Hz": 35.160022347632605,
+          "normalization_RMS_Hz": 34.26645372448244,
+          "normalized_distance_lower_bound": 1.0260770673946844
+        }
+      ],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 6,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 7,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    },
+    {
+      "families": [
+        "B",
+        "double"
+      ],
+      "period_multiple": 8,
+      "window_pairs": 0,
+      "excluded_pairs": 0,
+      "minimum_normalized_lower_bound": null,
+      "weakest_bounds": [],
+      "unexcluded_candidates": []
+    }
+  ],
+  "multiples": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "candidate_threshold": 0.05,
+  "controls": {
+    "continuous_norm_error": 1.1102230246251565e-16,
+    "equality_case_error": 0.0,
+    "nyquist_only_sigma": 0.7071067811865476,
+    "nonzero_Nyquist_correction": 0.01327038804572058
+  },
+  "formula": "D_phase_min >= sqrt(norm_weighted(mean_x-mean_y)^2 + (sigma_x-sigma_y)^2); divide by max(sigma_x,sigma_y).",
+  "norm": "Full 935 population, neuron-count weighted, continuous trigonometric profile L2 over normalized phase. Means are retained; a common phase shift and integer repetition do not change these moments.",
+  "target_profile_scope": "Moments of the frozen cached BVP profiles. This calculation does not validate their physical equations or positivity, transfer their stability, or correct them to identical J.",
+  "interval_completeness": false,
+  "scope": "Exclusion of close waveform identity for every catalog pair in the stated parameter/period windows, not exclusion of unsampled branch connections, intervening bifurcations, or other period ratios. Unexcluded bounds are candidates for phase-resolved comparison, not evidence of identity."
+}

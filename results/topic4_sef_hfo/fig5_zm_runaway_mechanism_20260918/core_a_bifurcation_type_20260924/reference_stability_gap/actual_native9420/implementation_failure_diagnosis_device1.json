@@ -1,0 +1,94 @@
+{
+  "status": "REPEATED_REPLAY_DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "repeat": 0,
+      "device_synchronize": false,
+      "finite": true,
+      "expected_emitted_bitwise": true,
+      "vs_device0_bitwise": true,
+      "max_difference_vs_device0": 0.0,
+      "vs_repeat0_bitwise": true,
+      "terminal_vs_repeat0": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      }
+    },
+    {
+      "repeat": 1,
+      "device_synchronize": false,
+      "finite": true,
+      "expected_emitted_bitwise": true,
+      "vs_device0_bitwise": true,
+      "max_difference_vs_device0": 0.0,
+      "vs_repeat0_bitwise": true,
+      "terminal_vs_repeat0": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      }
+    },
+    {
+      "repeat": 2,
+      "device_synchronize": true,
+      "finite": true,
+      "expected_emitted_bitwise": true,
+      "vs_device0_bitwise": true,
+      "max_difference_vs_device0": 0.0,
+      "vs_repeat0_bitwise": true,
+      "terminal_vs_repeat0": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      }
+    },
+    {
+      "repeat": 3,
+      "device_synchronize": true,
+      "finite": true,
+      "expected_emitted_bitwise": true,
+      "vs_device0_bitwise": true,
+      "max_difference_vs_device0": 0.0,
+      "vs_repeat0_bitwise": true,
+      "terminal_vs_repeat0": {
+        "syn": true,
+        "local": true,
+        "history": true,
+        "clock": true,
+        "rate": true,
+        "physical": true,
+        "emitted": true,
+        "accumulator": true,
+        "output": true,
+        "arrivals": true,
+        "parameters": true
+      }
+    }
+  ],
+  "initial_failed_check": "Preserved in native9420_entry_check.log; first failure had no recorded numerical differences, so a later pass alone does not identify its cause."
+}

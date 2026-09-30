@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "exit_z0.21_k9_actualfield_G_zero",
+      "entire_declared_initial_engine_bitwise": true,
+      "held_fields_match_baseline_bitwise": true,
+      "initial_R_Hz": 257.7565702377779,
+      "initial_G_raw": 0.0
+    },
+    {
+      "name": "exit_z0.21_k9_actualfield_G_carried16p7",
+      "entire_declared_initial_engine_bitwise": true,
+      "held_fields_match_baseline_bitwise": true,
+      "initial_R_Hz": 257.7565702377779,
+      "initial_G_raw": 11.495040572672318
+    }
+  ],
+  "baseline_reused": "exit_z0.21_k9_fields16p7_high",
+  "simulator_physics_unchanged": true,
+  "counts_as_autonomous_loop": false
+}

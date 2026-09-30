@@ -1,0 +1,43 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/equal_mean_Z_control.json",
+  "D": 0.1446362846679986,
+  "global_Z": 0.8553637153320014,
+  "windows": [
+    {
+      "condition": "affine_same_global_D",
+      "start_sample_index": 6021,
+      "stop_sample_index_exclusive": 6071,
+      "start_ms": 6022.0,
+      "last_sample_ms": 6071.0,
+      "global_rate_hz": 123.20371565767152
+    },
+    {
+      "condition": "affine_same_global_D",
+      "start_sample_index": 6121,
+      "stop_sample_index_exclusive": 6171,
+      "start_ms": 6122.0,
+      "last_sample_ms": 6171.0,
+      "global_rate_hz": 0.01637715729302431
+    },
+    {
+      "condition": "actual7770",
+      "start_sample_index": 6021,
+      "stop_sample_index_exclusive": 6071,
+      "start_ms": 6022.0,
+      "last_sample_ms": 6071.0,
+      "global_rate_hz": 80.86552403221167
+    },
+    {
+      "condition": "actual7770",
+      "start_sample_index": 6121,
+      "stop_sample_index_exclusive": 6171,
+      "start_ms": 6122.0,
+      "last_sample_ms": 6171.0,
+      "global_rate_hz": 101.11593673987716
+    }
+  ],
+  "selection": "First peak of affine-condition 50-ms global rate after continuation6s; exact same windows in both conditions",
+  "difference_field": "Recorded rate7770ms Z minus affine endpoint-slice Z at the identical global mean",
+  "scope": "Matched deterministic finite8s history; not a bifurcation type or global-saturation claim",
+  "human_visual_acceptance": "PENDING"
+}

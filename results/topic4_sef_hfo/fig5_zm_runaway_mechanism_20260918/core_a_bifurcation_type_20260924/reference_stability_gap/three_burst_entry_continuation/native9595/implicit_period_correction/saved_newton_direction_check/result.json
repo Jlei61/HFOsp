@@ -1,0 +1,62 @@
+{
+  "status": "DIRECTIONAL_TAYLOR_DIAGNOSTIC_COMPLETE",
+  "baseline": {
+    "period_ms": 791.5652250673575,
+    "section_speed": 1.0539000847250939,
+    "step_norm": 0.00720830617985897,
+    "section_derivative_norm": 0.0064891684948658,
+    "fixed_derivative_norm": 0.026045304438794593,
+    "predicted_period_change_ms": 0.02386418480404102,
+    "fixed_vs_section_parity": 1.6923546931818925e-15
+  },
+  "rows": [
+    {
+      "epsilon": 0.0001,
+      "period_ms": 791.5652274536095,
+      "section_speed": 1.0539000828656333,
+      "predicted_period_ms": 791.565227453776,
+      "section_Taylor_error": 0.00017943108966500852,
+      "fixed_time_Taylor_error": 8.123334452876228e-05,
+      "return_residual_ratio": 0.9999432802678636
+    },
+    {
+      "epsilon": 0.001,
+      "period_ms": 791.5652489141323,
+      "section_speed": 1.0539000661494817,
+      "predicted_period_ms": 791.5652489315422,
+      "section_Taylor_error": 0.0018226806719238854,
+      "fixed_time_Taylor_error": 0.0008423097183708506,
+      "return_residual_ratio": 0.999432874706269
+    },
+    {
+      "epsilon": 0.01,
+      "period_ms": 791.565460765364,
+      "section_speed": 1.0538999009239296,
+      "predicted_period_ms": 791.5654637092055,
+      "section_Taylor_error": 0.02255078167304414,
+      "fixed_time_Taylor_error": 0.013229600015061214,
+      "return_residual_ratio": 0.9943505805068265
+    },
+    {
+      "epsilon": 0.1,
+      "period_ms": 791.4446440011982,
+      "section_speed": 1.0539470435357499,
+      "predicted_period_ms": 791.5676114858379,
+      "section_Taylor_error": 4269.9721876169315,
+      "fixed_time_Taylor_error": 1106.0743030078452,
+      "return_residual_ratio": 145.8180788040636
+    },
+    {
+      "epsilon": 1.0,
+      "period_ms": 791.8666348391724,
+      "section_speed": 1.0505697860794956,
+      "predicted_period_ms": 791.5890892521616,
+      "section_Taylor_error": 161.90774909628533,
+      "fixed_time_Taylor_error": 41.787152979722016,
+      "return_residual_ratio": 55.43501823445744
+    }
+  ],
+  "seconds": 568.7670378684998,
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

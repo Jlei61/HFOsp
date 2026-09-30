@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "arm": "native_shape",
+      "spatial_error_hz": 4.814040494238725e-05,
+      "weighted_error_hz": 8.093117855878518e-07,
+      "D": 0.20000000000000062,
+      "counts_physical": true,
+      "state_and_discrete_event_readouts_reproduced": true,
+      "saved_precision_median_extent_difference_mm": 0.013237490384883088,
+      "stored_field_complete_events": {
+        "n": 13,
+        "median_duration_ms": 121.0,
+        "iqr_duration_ms": [
+          110.0,
+          140.0
+        ],
+        "median_gap_ms": 240.5,
+        "both_cores": 12,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6846874999999999,
+        "median_surround_cells": 258.0,
+        "forward": 2,
+        "reverse": 9,
+        "undirected": 2,
+        "median_extent_mm": 9.61569088059257
+      },
+      "runtime_float64_complete_events": {
+        "n": 13,
+        "median_duration_ms": 121.0,
+        "iqr_duration_ms": [
+          110.0,
+          140.0
+        ],
+        "median_gap_ms": 240.5,
+        "both_cores": 12,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6846874999999999,
+        "median_surround_cells": 258.0,
+        "forward": 2,
+        "reverse": 9,
+        "undirected": 2,
+        "median_extent_mm": 9.602453390207687
+      }
+    },
+    {
+      "arm": "free_rate_shape",
+      "spatial_error_hz": 5.061451975052478e-05,
+      "weighted_error_hz": 1.3236105758096528e-06,
+      "D": 0.19999999999999962,
+      "counts_physical": true,
+      "state_and_discrete_event_readouts_reproduced": true,
+      "saved_precision_median_extent_difference_mm": 0.0,
+      "stored_field_complete_events": {
+        "n": 0
+      },
+      "runtime_float64_complete_events": {
+        "n": 0
+      }
+    }
+  ],
+  "scope": "Finite-time spatial-field sensitivity at fixedmeanD, not a certified attractor, separatrix or bifurcation.",
+  "model_promoted": false
+}

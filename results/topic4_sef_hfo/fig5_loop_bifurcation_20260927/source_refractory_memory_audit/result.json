@@ -1,0 +1,326 @@
+{
+  "status": "COMPLETE_READONLY_REFRACTORY_MEMORY_AUDIT",
+  "native_minimum_ISI_steps": {
+    "E": 20,
+    "I": 13
+  },
+  "native_phase_residual_covariance": [
+    {
+      "population": "E",
+      "residual_variance": 0.01188348147647458,
+      "lags": [
+        {
+          "lag_steps": 0,
+          "lag_ms": 0.0,
+          "native_joint_probability": 0.0196521203125,
+          "phase_mean_product": 0.007768638836025429,
+          "residual_covariance": 0.01188348147647458,
+          "residual_correlation": 1.0
+        },
+        {
+          "lag_steps": 1,
+          "lag_ms": 0.1,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0006565248073072907,
+          "residual_covariance": -0.000656515383492838,
+          "residual_correlation": -0.055246047615972176
+        },
+        {
+          "lag_steps": 5,
+          "lag_ms": 0.5,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0005386699395896137,
+          "residual_covariance": -0.0005386700985061858,
+          "residual_correlation": -0.04532931696595623
+        },
+        {
+          "lag_steps": 10,
+          "lag_ms": 1.0,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0005544409983826713,
+          "residual_covariance": -0.0005544425032255266,
+          "residual_correlation": -0.04665657150416248
+        },
+        {
+          "lag_steps": 19,
+          "lag_ms": 1.9000000000000001,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0005648898181046996,
+          "residual_covariance": -0.0005648992325073548,
+          "residual_correlation": -0.04753650970262134
+        },
+        {
+          "lag_steps": 20,
+          "lag_ms": 2.0,
+          "native_joint_probability": 3.819444444444444e-06,
+          "phase_mean_product": 0.0006231092012706405,
+          "residual_covariance": -0.0006193195408146605,
+          "residual_correlation": -0.05211600169872031
+        },
+        {
+          "lag_steps": 22,
+          "lag_ms": 2.2,
+          "native_joint_probability": 0.008177736134748223,
+          "phase_mean_product": 0.007768638831839172,
+          "residual_covariance": 0.0004089132296662811,
+          "residual_correlation": 0.03441022148903047
+        },
+        {
+          "lag_steps": 44,
+          "lag_ms": 4.4,
+          "native_joint_probability": 0.008109908987271998,
+          "phase_mean_product": 0.007768638827643687,
+          "residual_covariance": 0.0003409077761041381,
+          "residual_correlation": 0.028687533765170112
+        }
+      ]
+    },
+    {
+      "population": "I",
+      "residual_variance": 0.023644676972544094,
+      "lags": [
+        {
+          "lag_steps": 0,
+          "lag_ms": 0.0,
+          "native_joint_probability": 0.0251225125,
+          "phase_mean_product": 0.0014778355274559052,
+          "residual_covariance": 0.023644676972544094,
+          "residual_correlation": 1.0
+        },
+        {
+          "lag_steps": 1,
+          "lag_ms": 0.1,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0014361915423017613,
+          "residual_covariance": -0.0014361869145286335,
+          "residual_correlation": -0.060740390583314624
+        },
+        {
+          "lag_steps": 5,
+          "lag_ms": 0.5,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.0014247781787183863,
+          "residual_covariance": -0.0014247789657554745,
+          "residual_correlation": -0.06025791629168418
+        },
+        {
+          "lag_steps": 10,
+          "lag_ms": 1.0,
+          "native_joint_probability": 0.0,
+          "phase_mean_product": 0.00142062636038177,
+          "residual_covariance": -0.0014206417321156795,
+          "residual_correlation": -0.06008294102580937
+        },
+        {
+          "lag_steps": 19,
+          "lag_ms": 1.9000000000000001,
+          "native_joint_probability": 0.0013762324207997599,
+          "phase_mean_product": 0.0014228462274368265,
+          "residual_covariance": -4.6598794554923934e-05,
+          "residual_correlation": -0.0019707942979738688
+        },
+        {
+          "lag_steps": 20,
+          "lag_ms": 2.0,
+          "native_joint_probability": 0.0006665540540540541,
+          "phase_mean_product": 0.0014390266817718785,
+          "residual_covariance": -0.0007724805096789322,
+          "residual_correlation": -0.03267037695528372
+        },
+        {
+          "lag_steps": 22,
+          "lag_ms": 2.2,
+          "native_joint_probability": 0.00038021198318149963,
+          "phase_mean_product": 0.0014778355262123914,
+          "residual_covariance": -0.0010976234627072016,
+          "residual_correlation": -0.04642158841847357
+        },
+        {
+          "lag_steps": 44,
+          "lag_ms": 4.4,
+          "native_joint_probability": 0.00044604379635197435,
+          "phase_mean_product": 0.0014778355249661364,
+          "residual_covariance": -0.0010317955478674331,
+          "residual_correlation": -0.043637540452150875
+        }
+      ]
+    }
+  ],
+  "model_required_covariances": [
+    {
+      "model": "dynamic_individual_source_pilot/individual_source",
+      "last_history_s": [
+        0.9641000000000001,
+        1.0
+      ],
+      "populations": [
+        {
+          "population": "E",
+          "same_bin_variance": 0.017204362725813077,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.0010030497332524986,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.058302056823502285
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0008010804343358272,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.04656263339146543
+            },
+            {
+              "lag_ms": 1.9000000000000001,
+              "required_residual_covariance": -0.0008589276482077206,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.04992499064897085
+            }
+          ]
+        },
+        {
+          "population": "I",
+          "same_bin_variance": 0.023724238658681885,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.0014184300939464036,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05978822394906777
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0014182650463729254,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05978126703146747
+            },
+            {
+              "lag_ms": 0.9,
+              "required_residual_covariance": -0.001417222900390625,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05973733955302259
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "model": "dynamic_bernoulli_source_pilot",
+      "last_history_s": [
+        0.9641000000000001,
+        1.0
+      ],
+      "populations": [
+        {
+          "population": "E",
+          "same_bin_variance": 0.0166661770111339,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.0010413830932958167,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.062484821360058576
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0007741021409546588,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.04644749305359694
+            },
+            {
+              "lag_ms": 1.9000000000000001,
+              "required_residual_covariance": -0.0008778649498434628,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05267344450121956
+            }
+          ]
+        },
+        {
+          "population": "I",
+          "same_bin_variance": 0.023738622893862072,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.001421379984424101,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05987626117906011
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0014212093892070534,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.059869074780008635
+            },
+            {
+              "lag_ms": 0.9,
+              "required_residual_covariance": -0.0014207325962611607,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05984898966605639
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "model": "dynamic_poisson_external_pilot",
+      "last_history_s": [
+        0.9641000000000001,
+        1.0
+      ],
+      "populations": [
+        {
+          "population": "E",
+          "same_bin_variance": 0.0166644255019164,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.0010425426973310929,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.06256097440690055
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0007734230386335297,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.04641162328365814
+            },
+            {
+              "lag_ms": 1.9000000000000001,
+              "required_residual_covariance": -0.0008786489374497358,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.052726026309679354
+            }
+          ]
+        },
+        {
+          "population": "I",
+          "same_bin_variance": 0.023741213317701078,
+          "forbidden_lag_identities": [
+            {
+              "lag_ms": 0.1,
+              "required_residual_covariance": -0.00142111231628077,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05985845362086911
+            },
+            {
+              "lag_ms": 0.5,
+              "required_residual_covariance": -0.0014208954202253267,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05984931777542849
+            },
+            {
+              "lag_ms": 0.9,
+              "required_residual_covariance": -0.001420174298967634,
+              "independent_time_assumption": 0.0,
+              "magnitude_over_same_bin_variance": 0.05981894353768239
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "conclusion": "Source refractory memory requires nonzero negative short-lag residual covariance. The present independent-time recurrent Gaussian approximation discards it even with exact same-bin Bernoulli variance. Native observed phase-residual correlations are diagnostic only; the magnitude and causal role of the resulting network error still require a targeted temporal-memory closure test.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "072d3bc901cb36a94ef071134ea64ce2a3d8737ea6a0533a854c666f5fbf2939",
+  "elapsed_s": 21.113004446029663
+}

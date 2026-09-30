@@ -1,0 +1,91 @@
+{
+  "created_epoch": 1790487341.61126,
+  "reason": "Observed high/quiet workers allocate approximately1.1GiB each and do not allocate growing device state after scatter setup; CUDA ordered-scatter holds fixed graph/ring/active arrays. CPU80logical, availablehost>180GiB. Original9.3GiB reservation was unnecessarily restrictive.",
+  "observed_gpu": "4153736, 1098\n4153738, 1098\n4153737, 1098\n4153739, 1098\n",
+  "before": {
+    "stage": "RUNNING",
+    "supervisor_pid": 4153644,
+    "updated_epoch": 1790487332.6631746,
+    "completed": [],
+    "pending": [
+      "return_z0.995_k0.03_recovery",
+      "return_z0.995_k0.03_interictal",
+      "entry_z0.65_k0.0002_high",
+      "entry_z0.65_k0.0002_interictal",
+      "exit_z0.21_k6_high",
+      "exit_z0.21_k6_recovery",
+      "return_z0.995_k0.003_recovery",
+      "return_z0.995_k0.003_interictal",
+      "entry_z0.85_k0.0002_high",
+      "entry_z0.85_k0.0002_interictal",
+      "exit_z0.21_k18_high",
+      "exit_z0.21_k18_recovery",
+      "return_z0.995_k0.3_recovery",
+      "return_z0.995_k0.3_interictal",
+      "entry_z0.7_k0.0002_high",
+      "entry_z0.7_k0.0002_interictal",
+      "exit_z0.21_k9_high",
+      "exit_z0.21_k9_recovery",
+      "return_z0.995_k0.01_recovery",
+      "return_z0.995_k0.01_interictal",
+      "entry_z0.78_k0.0002_high",
+      "entry_z0.78_k0.0002_interictal",
+      "exit_z0.21_k15_high",
+      "exit_z0.21_k15_recovery",
+      "return_z0.995_k0.1_recovery",
+      "return_z0.995_k0.1_interictal"
+    ],
+    "active": [
+      {
+        "name": "entry_z0.74_k0.0002_high",
+        "pid": 4153736,
+        "created_epoch": 1790486123.61,
+        "device": 0,
+        "time_s": 20.0,
+        "state": "RUNNING"
+      },
+      {
+        "name": "entry_z0.74_k0.0002_interictal",
+        "pid": 4153737,
+        "created_epoch": 1790486123.61,
+        "device": 1,
+        "time_s": 60.0,
+        "state": "RUNNING"
+      },
+      {
+        "name": "exit_z0.21_k12_high",
+        "pid": 4153738,
+        "created_epoch": 1790486123.61,
+        "device": 0,
+        "time_s": 22.0,
+        "state": "RUNNING"
+      },
+      {
+        "name": "exit_z0.21_k12_recovery",
+        "pid": 4153739,
+        "created_epoch": 1790486123.61,
+        "device": 1,
+        "time_s": 39.0,
+        "state": "RUNNING"
+      }
+    ],
+    "failed": [],
+    "total": 30,
+    "available_memory_GiB": 182.5420379638672,
+    "GPU_effective_free_GiB": {
+      "0": 4.957617187499999,
+      "1": 4.957617187499999
+    },
+    "max_workers": 4,
+    "max_workers_per_GPU": 2
+  },
+  "after_limits": {
+    "max_workers": 8,
+    "max_workers_per_GPU": 4,
+    "reserved_GiB_per_worker": 3.0,
+    "minimum_host_free_GiB": 70.0
+  },
+  "science": "Same30 frozen jobs, original orderedCUDA code, per-processRNG and accumulation order. QA unchanged. No parameter/observer/state/input/duration change.",
+  "authorization": "User activegoal; routine reversible execution choice. Originalexecution4worker bound superseded only in this resource record and runtime controller.",
+  "controller": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/supervise_native_v2.py"
+}

@@ -1,0 +1,2612 @@
+{
+  "dt_ms": 0.1,
+  "max_delay_steps": 358,
+  "grid": 80,
+  "threshold_groups": "empirical threshold bins within spatial cell and core/surround identity",
+  "graph_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "tau_r_ampa_ms": 0.7,
+  "tau_r_gaba_ms": 1.0,
+  "tau_d_ampa_ms": 3.5,
+  "tau_d_gaba_ms": 20.611550480127335,
+  "params": {
+    "V_th": 18.0,
+    "V_reset": 11.0,
+    "E_gaba": 11.0,
+    "V_L": 0.0,
+    "tau_m_E": 20.0,
+    "tau_m_I": 10.0,
+    "tau_ref_E": 2.0,
+    "tau_ref_I": 1.0,
+    "tau_r_AMPA": 0.7,
+    "tau_d_AMPA": 3.5,
+    "tau_r_GABA": 1.0,
+    "tau_d_GABA": 20.611550480127335,
+    "tau0": 0.1,
+    "v_axon": 0.3,
+    "g": 3.6,
+    "w_EE": 0.1575,
+    "w_IE": 0.2625,
+    "J_ext_E": 0.455,
+    "J_ext_I": 0.85,
+    "C_EE": 800,
+    "C_IE": 800,
+    "C_EI": 200,
+    "C_II": 200,
+    "l_EE": 0.38,
+    "l_IE": 0.25,
+    "l_EI": 0.25,
+    "l_II": 0.25,
+    "rho_EE": 0.6,
+    "rho_IE": 0.0,
+    "rho_EI": 0.0,
+    "rho_II": 0.0,
+    "sigma_n": 3.3,
+    "tau_n": 150.0,
+    "nu_ext_ratio": 0.6,
+    "rx": 0.13,
+    "Rr": 0.278,
+    "grid_spacing": 0.4,
+    "grid_margin": 0.2,
+    "L": 20.0,
+    "density": 100.0,
+    "f_E": 0.8,
+    "dt": 0.1,
+    "T": 20000.0,
+    "delay_dt": 0.1,
+    "seed": 6101
+  },
+  "nu_theta_per_ms": 2.1957723707770094,
+  "nu_ext_per_ms": 1.3174634224662056,
+  "spatial_ou": {
+    "ell_mm": 0.38,
+    "grid_spacing_mm": 0.4,
+    "mode": "local",
+    "role": "frozen accessibility process; not optimized",
+    "seed_offset": 500000,
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "update_interval_ms": 1.0
+  },
+  "seconds": 44.47050356864929,
+  "peak_rss_gib": 2.571819305419922,
+  "scope": "Unaccepted spatial population-density projection; no patient-fitting or bifurcation acceptance",
+  "empty_E_cells": 0,
+  "empty_I_cells": 6,
+  "groups": 11528,
+  "threshold_bin_width_mv": 0.25,
+  "population_projection": "average incoming target weights; source activity per neuron in each population",
+  "projection_checks": [
+    {
+      "kind": "ampa",
+      "delay": 1,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 2,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 3,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 4,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 5,
+      "group_incoming_sum_error": 1.1102230246251565e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 6,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 7,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 8,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 9,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 10,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 11,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 12,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 13,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 14,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 15,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 16,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 17,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 18,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 19,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 20,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 21,
+      "group_incoming_sum_error": 3.9968028886505635e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 22,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 23,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 24,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 25,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 26,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 27,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 28,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 29,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 30,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 31,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 32,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 33,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 34,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 35,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 36,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 37,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 38,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 39,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 40,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 41,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 42,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 43,
+      "group_incoming_sum_error": 1.0658141036401503e-14
+    },
+    {
+      "kind": "ampa",
+      "delay": 44,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 45,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 46,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 47,
+      "group_incoming_sum_error": 1.2434497875801753e-14
+    },
+    {
+      "kind": "ampa",
+      "delay": 48,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 49,
+      "group_incoming_sum_error": 1.2434497875801753e-14
+    },
+    {
+      "kind": "ampa",
+      "delay": 50,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 51,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 52,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 53,
+      "group_incoming_sum_error": 7.993605777301127e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 54,
+      "group_incoming_sum_error": 8.881784197001252e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 55,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 56,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 57,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 58,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 59,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 60,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 61,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 62,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 63,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 64,
+      "group_incoming_sum_error": 7.105427357601002e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 65,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 66,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 67,
+      "group_incoming_sum_error": 6.217248937900877e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 68,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 69,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 70,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 71,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 72,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 73,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 74,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 75,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 76,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 77,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 78,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 79,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 80,
+      "group_incoming_sum_error": 3.9968028886505635e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 81,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 82,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 83,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 84,
+      "group_incoming_sum_error": 3.9968028886505635e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 85,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 86,
+      "group_incoming_sum_error": 5.329070518200751e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 87,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 88,
+      "group_incoming_sum_error": 3.9968028886505635e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 89,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 90,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 91,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 92,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 93,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 94,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 95,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 96,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 97,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 98,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 99,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 100,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 101,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 102,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 103,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 104,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 105,
+      "group_incoming_sum_error": 1.1102230246251565e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 106,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 107,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 108,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 109,
+      "group_incoming_sum_error": 5.551115123125783e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 110,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "ampa",
+      "delay": 111,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 112,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 113,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 114,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 115,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 116,
+      "group_incoming_sum_error": 5.551115123125783e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 117,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 118,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 119,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 120,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 121,
+      "group_incoming_sum_error": 3.3306690738754696e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 122,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 123,
+      "group_incoming_sum_error": 3.3306690738754696e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 124,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 125,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 126,
+      "group_incoming_sum_error": 1.6653345369377348e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 127,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 128,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 129,
+      "group_incoming_sum_error": 3.3306690738754696e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 130,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 131,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 132,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 133,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 134,
+      "group_incoming_sum_error": 3.3306690738754696e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 135,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 136,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 137,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 138,
+      "group_incoming_sum_error": 8.326672684688674e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 139,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 140,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 141,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 142,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 143,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 144,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 145,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 146,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 147,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 148,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 149,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 150,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 151,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 152,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 153,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 154,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "ampa",
+      "delay": 155,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 156,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 157,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 158,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 159,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 160,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 161,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 162,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 163,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 164,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 165,
+      "group_incoming_sum_error": 4.163336342344337e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 166,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 167,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 168,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 169,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 170,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 171,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 172,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 173,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 174,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 175,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 176,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 177,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 178,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 179,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 180,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 181,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 182,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 183,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 184,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 185,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 186,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 187,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 188,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 189,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 190,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 191,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 192,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 193,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 194,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 195,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 196,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 197,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 198,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 199,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 200,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 201,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 202,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 203,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 204,
+      "group_incoming_sum_error": 1.3877787807814457e-17
+    },
+    {
+      "kind": "ampa",
+      "delay": 205,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 206,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 207,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 208,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 209,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 210,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 211,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 212,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 213,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 214,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 215,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 216,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 217,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 218,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 219,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 220,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 221,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 222,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 223,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 224,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 225,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 226,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 227,
+      "group_incoming_sum_error": 6.938893903907228e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 228,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 229,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 230,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 231,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 232,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 233,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 234,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 235,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 236,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 237,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 238,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 239,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 240,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 241,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 242,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 243,
+      "group_incoming_sum_error": 3.469446951953614e-18
+    },
+    {
+      "kind": "ampa",
+      "delay": 244,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 245,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 246,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 247,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 248,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 249,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 250,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 251,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 252,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 253,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 254,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 255,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 256,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 257,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 258,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 259,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 260,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 261,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 262,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 263,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 264,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 265,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 266,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 267,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 268,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 269,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 270,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 271,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 272,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 273,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 275,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 276,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 277,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 278,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 279,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 280,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 281,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 282,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 283,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 284,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 285,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 286,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 287,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 288,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 289,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 290,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 291,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 292,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 293,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 294,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 296,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 297,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 299,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 300,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 301,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 302,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 303,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 305,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 307,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 308,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 309,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 310,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 313,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 314,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 316,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 317,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 319,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 323,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 330,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 332,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 335,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "ampa",
+      "delay": 358,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 1,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 2,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 3,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 4,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 5,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 6,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 7,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 8,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 9,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 10,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 11,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 12,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 13,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 14,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 15,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 16,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 17,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 18,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 19,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 20,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 21,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 22,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 23,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 24,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 25,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 26,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 27,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 28,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 29,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 30,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 31,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 32,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 33,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 34,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 35,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 36,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 37,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 38,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 39,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 40,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 41,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 42,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 43,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 44,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 45,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 46,
+      "group_incoming_sum_error": 4.440892098500626e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 47,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 48,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 49,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 50,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 51,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 52,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 53,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 54,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 55,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 56,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 57,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 58,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 59,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 60,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 61,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 62,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 63,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 64,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 65,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 66,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 67,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 68,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 69,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 70,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 71,
+      "group_incoming_sum_error": 3.552713678800501e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 72,
+      "group_incoming_sum_error": 3.1086244689504383e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 73,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 74,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 75,
+      "group_incoming_sum_error": 2.6645352591003757e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 76,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 77,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 78,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 79,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 80,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 81,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 82,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 83,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 84,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 85,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 86,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 87,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 88,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 89,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 90,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 91,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 92,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 93,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 94,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 95,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 96,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 97,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 98,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 99,
+      "group_incoming_sum_error": 2.220446049250313e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 100,
+      "group_incoming_sum_error": 1.7763568394002505e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 101,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 102,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 103,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 104,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 105,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 106,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 107,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 108,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 109,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 110,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 111,
+      "group_incoming_sum_error": 1.3322676295501878e-15
+    },
+    {
+      "kind": "gaba",
+      "delay": 112,
+      "group_incoming_sum_error": 8.881784197001252e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 113,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 114,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 115,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 116,
+      "group_incoming_sum_error": 6.661338147750939e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 117,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 118,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 119,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 120,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 121,
+      "group_incoming_sum_error": 1.1102230246251565e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 122,
+      "group_incoming_sum_error": 4.440892098500626e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 123,
+      "group_incoming_sum_error": 2.220446049250313e-16
+    },
+    {
+      "kind": "gaba",
+      "delay": 124,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 125,
+      "group_incoming_sum_error": 2.7755575615628914e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 126,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 127,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 128,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 129,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 130,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 131,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 132,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 133,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 134,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 135,
+      "group_incoming_sum_error": 5.551115123125783e-17
+    },
+    {
+      "kind": "gaba",
+      "delay": 136,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 137,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 138,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 139,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 140,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 141,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 142,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 143,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 144,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 145,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 146,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 147,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 148,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 149,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 150,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 151,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 152,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 153,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 154,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 155,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 156,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 157,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 158,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 159,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 160,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 161,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 162,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 163,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 164,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 165,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 166,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 168,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 169,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 171,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 172,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 174,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 175,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 177,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 179,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 180,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 181,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 187,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 188,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 192,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 198,
+      "group_incoming_sum_error": 0.0
+    },
+    {
+      "kind": "gaba",
+      "delay": 199,
+      "group_incoming_sum_error": 0.0
+    }
+  ],
+  "operators": [
+    {
+      "kind": "ampa",
+      "terms": 17603198
+    },
+    {
+      "kind": "gaba",
+      "terms": 5773752
+    }
+  ],
+  "threshold_max_error_mv": 0.18602551161028913,
+  "threshold_rms_error_mv": 0.006496911932586995,
+  "preserved": [
+    "original topology and weight sums",
+    "each original delay",
+    "original contact kernels",
+    "2D coordinates",
+    "E/I physical parameters",
+    "core A/B/surround identity"
+  ],
+  "unvalidated": [
+    "finite-population and recurrent-current fluctuations",
+    "within-population incoming heterogeneity",
+    "autonomous event and propagation correspondence"
+  ],
+  "rate_groups": 935,
+  "rate_grid": 20,
+  "rate_theta_width_mv": 0.5,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_population_density_6101_20260916/operators/g80_theta0.25",
+  "projection_checks_new": [
+    {
+      "kind": "ampa",
+      "terms": 1788698,
+      "incoming_sum_error": 1.4210854715202004e-13
+    },
+    {
+      "kind": "gaba",
+      "terms": 905662,
+      "incoming_sum_error": 8.526512829121202e-14
+    }
+  ],
+  "definition": "Space x E/I x core membership x empirical threshold bins; each unit has continuous rate/filter states, no sampled members",
+  "mathematical_target": "Autonomous delay-rate vector field with analytic directional derivatives and equilibrium characteristic matrix"
+}

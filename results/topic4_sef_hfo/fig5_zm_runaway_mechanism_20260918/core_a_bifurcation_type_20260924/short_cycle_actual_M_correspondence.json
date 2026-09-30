@@ -1,0 +1,52 @@
+{
+  "status": "PASSIVE_SAME_FIELD_SECTION_M_COMPARISON",
+  "D_A": 0.3431576412548057,
+  "root": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/coarse_below_SN_positive_cubic",
+  "actual_sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block02.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/below/block03.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block02.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block03.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block04.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block05.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block06.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/sustained_A_long_window/below_extend_to60s/block07.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/actual_sustained_growth/coarse/block01.npz"
+  ],
+  "Core_A_rising_section_hz": 1.0770810658350274,
+  "root_M_A_mV_equiv": 0.057485296213670066,
+  "crossings_after2s": [
+    {
+      "crossing_time_ms": 64778.4786767913,
+      "actual_M_A_mV_equiv": 0.18466930901444664,
+      "root_M_A_mV_equiv": 0.057485296213670066,
+      "spatial_M_A_relative_rms": 2.2446397650080643
+    },
+    {
+      "crossing_time_ms": 64920.65653753784,
+      "actual_M_A_mV_equiv": 0.16272740701491017,
+      "root_M_A_mV_equiv": 0.057485296213670066,
+      "spatial_M_A_relative_rms": 1.8662865628401606
+    },
+    {
+      "crossing_time_ms": 65106.894657823206,
+      "actual_M_A_mV_equiv": 0.1409170492253351,
+      "root_M_A_mV_equiv": 0.057485296213670066,
+      "spatial_M_A_relative_rms": 1.4843849893047933
+    },
+    {
+      "crossing_time_ms": 65321.56797851758,
+      "actual_M_A_mV_equiv": 0.11991602689080334,
+      "root_M_A_mV_equiv": 0.057485296213670066,
+      "spatial_M_A_relative_rms": 1.117599121162081
+    }
+  ],
+  "definitions": "Numerical root uses instantaneous rate; actual crossings use original1ms rate bins, linearly interpolated only for comparison. Actual M is interpolated from original10ms records. Same complete Z field checked in each source. M_A is cell-count-weighted eta_M M in mV equivalent.",
+  "interpretation": "A substantial spatial M mismatch at comparable low-rate phases shows that these actual rare returns are not simply the already-found short cycle. It does not rule out mediation by a distant part of that cycle stable/unstable manifold, prove another attractor, or classify a crisis.",
+  "model_promoted": false
+}

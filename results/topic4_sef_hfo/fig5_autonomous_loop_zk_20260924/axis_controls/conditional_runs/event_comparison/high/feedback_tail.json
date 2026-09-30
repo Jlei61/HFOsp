@@ -1,0 +1,118 @@
+{
+  "status": "COMPLETE_THREE_MATCHED_GRAPHS",
+  "rows": [
+    {
+      "condition": "current",
+      "window_s": [
+        32.0,
+        42.0
+      ],
+      "G_raw": {
+        "n": 500,
+        "minimum": 4.131305017524082e-26,
+        "maximum": 1.9257731144044973e-17,
+        "mean": 9.82272667772564e-19
+      },
+      "G_applied_mean": {
+        "n": 500,
+        "minimum": 3.9247397666478776e-26,
+        "maximum": 1.829484458684272e-17,
+        "mean": 9.331590343839354e-19
+      },
+      "K_mean": {
+        "n": 500,
+        "minimum": 0.02,
+        "maximum": 0.02,
+        "mean": 0.02
+      },
+      "global_E_rate_Hz": {
+        "n": 10000,
+        "minimum": 0.011925230772089917,
+        "maximum": 44.85818713524192,
+        "mean": 1.130603080775821
+      },
+      "q": {
+        "n": 10000,
+        "minimum": 0.0,
+        "maximum": 0.0,
+        "mean": 0.0
+      }
+    },
+    {
+      "condition": "rotated",
+      "window_s": [
+        32.0,
+        42.0
+      ],
+      "G_raw": {
+        "n": 500,
+        "minimum": 4.131305017524082e-26,
+        "maximum": 1.9257731144044973e-17,
+        "mean": 9.82272667772564e-19
+      },
+      "G_applied_mean": {
+        "n": 500,
+        "minimum": 3.9247397666478776e-26,
+        "maximum": 1.829484458684272e-17,
+        "mean": 9.331590343839354e-19
+      },
+      "K_mean": {
+        "n": 500,
+        "minimum": 0.02,
+        "maximum": 0.02,
+        "mean": 0.02
+      },
+      "global_E_rate_Hz": {
+        "n": 10000,
+        "minimum": 11.530164011159046,
+        "maximum": 57.64660298767401,
+        "mean": 31.93525059121233
+      },
+      "q": {
+        "n": 10000,
+        "minimum": 0.0,
+        "maximum": 0.0,
+        "mean": 0.0
+      }
+    },
+    {
+      "condition": "isotropic",
+      "window_s": [
+        32.0,
+        42.0
+      ],
+      "G_raw": {
+        "n": 500,
+        "minimum": 4.131305017524082e-26,
+        "maximum": 1.9257731144044973e-17,
+        "mean": 9.82272667772564e-19
+      },
+      "G_applied_mean": {
+        "n": 500,
+        "minimum": 3.9247397666478776e-26,
+        "maximum": 1.829484458684272e-17,
+        "mean": 9.331590343839354e-19
+      },
+      "K_mean": {
+        "n": 500,
+        "minimum": 0.02,
+        "maximum": 0.02,
+        "mean": 0.02
+      },
+      "global_E_rate_Hz": {
+        "n": 10000,
+        "minimum": 0.00432775113666661,
+        "maximum": 98.27974512588978,
+        "mean": 1.9381928460913918
+      },
+      "q": {
+        "n": 10000,
+        "minimum": 0.0,
+        "maximum": 0.0,
+        "mean": 0.0
+      }
+    }
+  ],
+  "sampling": "G/K every20ms; causal R and q every1ms; fixed final10s, one carried history. No new thresholds or simulations.",
+  "producer_sha256": "1467e659fbdf3cf30a6586f9068511febb7e4a0a4062a8b068760e3d2b428619"
+}

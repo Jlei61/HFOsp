@@ -1,0 +1,105 @@
+{
+  "condition": "reference",
+  "status": "STATIC_CANDIDATE_PENDING_GEOMETRY_REVIEW",
+  "mechanism": "EE direction preference with exact per-target x source-region x delay first and second weight moments.",
+  "source_identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "requested_angle": -29.682336421368863,
+  "requested_aspect": 1.9359022695571184,
+  "topology_unchanged": true,
+  "delay_assignment_unchanged": true,
+  "source_region_incoming_degree_unchanged": true,
+  "inhibitory_and_E_to_I_unchanged": true,
+  "before": {
+    "total_weight": 133482992.3629761,
+    "total_squared_weight": 741218190.8895401,
+    "mean_offset_mm": [
+      0.00024693806804525713,
+      -0.0008018280766052514
+    ],
+    "whole": {
+      "angle_deg_mod180": 148.1589242463968,
+      "axis_ratio": 1.8533042875494021,
+      "second_moment": [
+        [
+          1.7414711304091925,
+          -0.6892302229872083
+        ],
+        [
+          -0.6892302229872082,
+          1.0596591612244117
+        ]
+      ]
+    },
+    "central_targets": {
+      "angle_deg_mod180": 148.4145559164006,
+      "axis_ratio": 1.935712656149318,
+      "second_moment": [
+        [
+          1.6953268150115852,
+          -0.6941518106615873
+        ],
+        [
+          -0.6941518106615873,
+          0.993158582855179
+        ]
+      ]
+    },
+    "weighted_mean_delay_steps": 50.240791751487166,
+    "weighted_mean_distance_mm": 1.4772229028623494
+  },
+  "after": {
+    "total_weight": 133482992.3629761,
+    "total_squared_weight": 741218190.8895401,
+    "mean_offset_mm": [
+      0.00024693806804525713,
+      -0.0008018280766052514
+    ],
+    "whole": {
+      "angle_deg_mod180": 148.1589242463968,
+      "axis_ratio": 1.8533042875494021,
+      "second_moment": [
+        [
+          1.7414711304091925,
+          -0.6892302229872083
+        ],
+        [
+          -0.6892302229872082,
+          1.0596591612244117
+        ]
+      ]
+    },
+    "central_targets": {
+      "angle_deg_mod180": 148.4145559164006,
+      "axis_ratio": 1.935712656149318,
+      "second_moment": [
+        [
+          1.6953268150115852,
+          -0.6941518106615873
+        ],
+        [
+          -0.6941518106615873,
+          0.993158582855179
+        ]
+      ]
+    },
+    "weighted_mean_delay_steps": 50.240791751487166,
+    "weighted_mean_distance_mm": 1.4772229028623494
+  },
+  "checks": [],
+  "source_groups": "Original A/B observer radius1.75mm and otherE; physicalthresholds unchanged.",
+  "length_scale_mm": 0.38,
+  "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+  "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+  "seconds": 89.60965037345886,
+  "not_assumed_successful_axis_manipulation": true,
+  "caveat": "Requested kernel parameter is not the achieved finite weighted tensor; inspect whole/central tensor before any dynamics or direction claim."
+}

@@ -1,0 +1,83 @@
+{
+  "status": "COMPLETE_DC_OPERATOR_AND_UNVALIDATED_STEP",
+  "summary": [
+    {
+      "population": "E",
+      "channel": "effective_mean",
+      "targets": 32000,
+      "estimable": 12624,
+      "amplitude_pass_among_estimable": 12517,
+      "amplitude_fail_among_estimable": 107,
+      "nonestimable": 19376
+    },
+    {
+      "population": "E",
+      "channel": "varianceE",
+      "targets": 32000,
+      "estimable": 10921,
+      "amplitude_pass_among_estimable": 10450,
+      "amplitude_fail_among_estimable": 471,
+      "nonestimable": 21079
+    },
+    {
+      "population": "E",
+      "channel": "varianceI",
+      "targets": 32000,
+      "estimable": 0,
+      "amplitude_pass_among_estimable": 0,
+      "amplitude_fail_among_estimable": 0,
+      "nonestimable": 32000
+    },
+    {
+      "population": "E",
+      "channel": "physicalG",
+      "targets": 32000,
+      "estimable": 12109,
+      "amplitude_pass_among_estimable": 11714,
+      "amplitude_fail_among_estimable": 395,
+      "nonestimable": 19891
+    },
+    {
+      "population": "I",
+      "channel": "effective_mean",
+      "targets": 8000,
+      "estimable": 4323,
+      "amplitude_pass_among_estimable": 4306,
+      "amplitude_fail_among_estimable": 17,
+      "nonestimable": 3677
+    },
+    {
+      "population": "I",
+      "channel": "varianceE",
+      "targets": 8000,
+      "estimable": 4596,
+      "amplitude_pass_among_estimable": 4499,
+      "amplitude_fail_among_estimable": 97,
+      "nonestimable": 3404
+    },
+    {
+      "population": "I",
+      "channel": "varianceI",
+      "targets": 8000,
+      "estimable": 4031,
+      "amplitude_pass_among_estimable": 3947,
+      "amplitude_fail_among_estimable": 84,
+      "nonestimable": 3969
+    }
+  ],
+  "minimum_adaptation_denominator": 1.0,
+  "maximum_fixedM_corrected_residual_Hz": 1.4249064127604356,
+  "E_weighted_residual_RMS_Hz": 0.016921343336979856,
+  "I_weighted_residual_RMS_Hz": 0.21393864139550636,
+  "gmres_info": 0,
+  "gmres_iterations": 60,
+  "maximum_proposed_group_change_Hz": 1.572890869010621,
+  "clipping_maximum_Hz": 5.68295410730002e-14,
+  "maximum_predicted_linear_residual_Hz": 1.8610337426672174e-07,
+  "maximum_matrix_action_MC_SEM_Hz": 0.009105025618190266,
+  "full_nonlinear_validation_required": true,
+  "dynamic_stability_established": false,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "One measured DC operator and one bounded proposal, not an accepted new root. All amplitude failures remain; eight-block sampling uncertainty is separate from approximation and native fluctuations.",
+  "producer_sha256": "d40c9efa3dcab7f7a70588e8024dff8e692956c37dad7aced306f3147a85a687"
+}

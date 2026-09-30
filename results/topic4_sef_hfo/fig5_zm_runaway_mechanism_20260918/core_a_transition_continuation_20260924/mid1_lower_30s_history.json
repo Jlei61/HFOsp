@@ -1,0 +1,410 @@
+{
+  "status": "AUDIT_PASS",
+  "side": "lower",
+  "total_same_field_ms": 30000,
+  "all_Z_fixed": true,
+  "all_M_dynamic": true,
+  "D_A": 0.3281215991278547,
+  "sources": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block00.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block01.npz",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_transition_continuation_20260924/mid1_from_lower_ext_long/block02.npz"
+  ],
+  "continuous_activity_definition": "Core A 10ms rate activity with peak>=20Hz/duration>=20ms, separated by >=20ms quiet<5Hz; short dips do not count as termination. Records at0/30000ms are censored.",
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        5000
+      ],
+      "mean_Core_A_hz": 233.1998611101616,
+      "min_Core_A_10ms_hz": 2.0562748490409695e-05,
+      "quiet_fraction": 0.3488,
+      "complete_quiet_intervals": 14,
+      "Core_A_above50_fraction": 0.6172
+    },
+    {
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "mean_Core_A_hz": 382.3650076980173,
+      "min_Core_A_10ms_hz": 152.98913792590565,
+      "quiet_fraction": 0.0,
+      "complete_quiet_intervals": 0,
+      "Core_A_above50_fraction": 1.0
+    },
+    {
+      "window_ms": [
+        10000,
+        15000
+      ],
+      "mean_Core_A_hz": 382.45679762151366,
+      "min_Core_A_10ms_hz": 80.2877014807824,
+      "quiet_fraction": 0.0,
+      "complete_quiet_intervals": 0,
+      "Core_A_above50_fraction": 1.0
+    },
+    {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_Core_A_hz": 333.5503899772142,
+      "min_Core_A_10ms_hz": 2.2488193054104355e-05,
+      "quiet_fraction": 0.1102,
+      "complete_quiet_intervals": 4,
+      "Core_A_above50_fraction": 0.8776
+    },
+    {
+      "window_ms": [
+        20000,
+        25000
+      ],
+      "mean_Core_A_hz": 287.3891672239575,
+      "min_Core_A_10ms_hz": 2.110467862830322e-05,
+      "quiet_fraction": 0.2132,
+      "complete_quiet_intervals": 6,
+      "Core_A_above50_fraction": 0.766
+    },
+    {
+      "window_ms": [
+        25000,
+        30000
+      ],
+      "mean_Core_A_hz": 345.36085208676576,
+      "min_Core_A_10ms_hz": 2.2923695867389726e-05,
+      "quiet_fraction": 0.08,
+      "complete_quiet_intervals": 3,
+      "Core_A_above50_fraction": 0.9104
+    }
+  ],
+  "activities": [
+    {
+      "start_ms": 41,
+      "end_ms": 151,
+      "duration_ms": 110,
+      "peak_hz": 476.922054308985,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 307,
+      "end_ms": 414,
+      "duration_ms": 107,
+      "peak_hz": 476.67778049944565,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 574,
+      "end_ms": 681,
+      "duration_ms": 107,
+      "peak_hz": 476.68485025663887,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 841,
+      "end_ms": 947,
+      "duration_ms": 106,
+      "peak_hz": 476.65879594716824,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 1107,
+      "end_ms": 1204,
+      "duration_ms": 97,
+      "peak_hz": 476.70103666674856,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 1385,
+      "end_ms": 1491,
+      "duration_ms": 106,
+      "peak_hz": 476.4645904055328,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 1652,
+      "end_ms": 1755,
+      "duration_ms": 103,
+      "peak_hz": 476.65752987646675,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 1915,
+      "end_ms": 2015,
+      "duration_ms": 100,
+      "peak_hz": 476.71386764485953,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 2200,
+      "end_ms": 2308,
+      "duration_ms": 108,
+      "peak_hz": 476.39976121816517,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 2469,
+      "end_ms": 2572,
+      "duration_ms": 103,
+      "peak_hz": 476.661620470447,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 2732,
+      "end_ms": 2832,
+      "duration_ms": 100,
+      "peak_hz": 476.69195784915354,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 2902,
+      "end_ms": 19108,
+      "duration_ms": 16206,
+      "peak_hz": 440.11395703222144,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 19273,
+      "end_ms": 19375,
+      "duration_ms": 102,
+      "peak_hz": 470.9750534624237,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 19540,
+      "end_ms": 19654,
+      "duration_ms": 114,
+      "peak_hz": 476.3467188139472,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 19816,
+      "end_ms": 19905,
+      "duration_ms": 89,
+      "peak_hz": 476.7508745228876,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 19964,
+      "end_ms": 23316,
+      "duration_ms": 3352,
+      "peak_hz": 444.5882915476568,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 23486,
+      "end_ms": 23551,
+      "duration_ms": 65,
+      "peak_hz": 474.2991358911314,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 23723,
+      "end_ms": 23826,
+      "duration_ms": 103,
+      "peak_hz": 476.09585986149915,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 23990,
+      "end_ms": 24117,
+      "duration_ms": 127,
+      "peak_hz": 476.49309359279675,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 24264,
+      "end_ms": 24375,
+      "duration_ms": 111,
+      "peak_hz": 476.480263715586,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 24537,
+      "end_ms": 24642,
+      "duration_ms": 105,
+      "peak_hz": 476.5706494035382,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 24804,
+      "end_ms": 24911,
+      "duration_ms": 107,
+      "peak_hz": 476.6872735101908,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 25072,
+      "end_ms": 25167,
+      "duration_ms": 95,
+      "peak_hz": 476.70448871885657,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 25232,
+      "end_ms": 25305,
+      "duration_ms": 73,
+      "peak_hz": 290.5055713852836,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 25399,
+      "end_ms": 25454,
+      "duration_ms": 55,
+      "peak_hz": 475.82915284336303,
+      "left_censored": false,
+      "right_censored": false
+    },
+    {
+      "start_ms": 25623,
+      "end_ms": 30000,
+      "duration_ms": 4377,
+      "peak_hz": 474.2691363873458,
+      "left_censored": false,
+      "right_censored": true
+    }
+  ],
+  "quiet_intervals_ms": [
+    [
+      0,
+      41
+    ],
+    [
+      151,
+      307
+    ],
+    [
+      414,
+      574
+    ],
+    [
+      681,
+      841
+    ],
+    [
+      947,
+      1107
+    ],
+    [
+      1204,
+      1275
+    ],
+    [
+      1280,
+      1385
+    ],
+    [
+      1491,
+      1652
+    ],
+    [
+      1755,
+      1915
+    ],
+    [
+      2015,
+      2090
+    ],
+    [
+      2096,
+      2200
+    ],
+    [
+      2308,
+      2469
+    ],
+    [
+      2572,
+      2732
+    ],
+    [
+      2832,
+      2902
+    ],
+    [
+      19108,
+      19273
+    ],
+    [
+      19375,
+      19540
+    ],
+    [
+      19654,
+      19816
+    ],
+    [
+      19905,
+      19964
+    ],
+    [
+      23316,
+      23486
+    ],
+    [
+      23551,
+      23723
+    ],
+    [
+      23826,
+      23990
+    ],
+    [
+      24117,
+      24264
+    ],
+    [
+      24375,
+      24537
+    ],
+    [
+      24642,
+      24804
+    ],
+    [
+      24911,
+      25072
+    ],
+    [
+      25167,
+      25232
+    ],
+    [
+      25305,
+      25399
+    ],
+    [
+      25454,
+      25623
+    ]
+  ],
+  "inference": "Longer same-field state history, not a proof of distinct attractors or any bifurcation type."
+}

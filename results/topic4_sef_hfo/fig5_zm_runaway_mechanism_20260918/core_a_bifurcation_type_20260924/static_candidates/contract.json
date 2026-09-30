@@ -1,0 +1,7 @@
+{
+  "question": "Does the observed locally high state have a stationary counterpart in the same full network, needed before testing an equilibrium SN/Hopf explanation?",
+  "equations": "Same physical-private-Q static interface, original graph and thresholds, only native CoreA10370 Z changed against native9s outside Z. Dynamic M stationary constraint m=.5*E*r. Locked transient correction and first derivative vanish at stationary histories.",
+  "solver": "Logit coordinates with L2 residual Armijo merit, exact sparse Jacobian, numerical step radius3. Damped LSMR descent only if Newton line search fails. At most70iterations per seed; stop on sustained residual stagnation. Accept only original rate residual<1e-11/ms.",
+  "seeds": "Observed last5s mean, final instantaneous group rate, and regional flattened mean (numerical guesses only). No claim that a trajectory mean is a root.",
+  "scope": "No root failure implies nonexistence, and no root existence implies the observed onset transition. Roots require separate actual-engine and temporal-stability checks."
+}

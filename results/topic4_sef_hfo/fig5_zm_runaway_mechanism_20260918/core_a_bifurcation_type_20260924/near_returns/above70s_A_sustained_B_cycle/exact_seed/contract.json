@@ -1,0 +1,36 @@
+{
+  "question": "Does the observed A-continuous/B-intermittent state admit a full periodic skeleton in the stronger local-resource field?",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/fold_attractor_contrast/above/final_state.npz",
+  "source_total_elapsed_ms": 20000,
+  "candidate": {
+    "time1_ms": 22135.0,
+    "time2_ms": 22672.0,
+    "period_ms": 537.0,
+    "score": 0.11345880648676647,
+    "rate_history_squared_error_over_variance": 0.08607817691260194,
+    "M_squared_error_over_variance": 0.02738062957416453,
+    "regional_rates_A_B_S_1": [
+      419.9069767959554,
+      0.0007662642812702935,
+      35.43192506899414
+    ],
+    "regional_rates_A_B_S_2": [
+      420.9661984633387,
+      0.0007409920627181655,
+      34.34029758285926
+    ]
+  },
+  "times_ms": [
+    22135.0,
+    22269.25,
+    22403.5,
+    22537.75,
+    22672.0
+  ],
+  "number_segments": 4,
+  "dt_ms": 0.05,
+  "selection": "Lowest all-group rate/history and dynamic-M recurrence score in audited20--70s, periods150--2000ms, A continuously>50Hz and both endpoints>200Hz. No imposed B waveform or source SNN future spikes.",
+  "equations": "Unchanged full3479-group spatial conditional rate drift, physical delays, all Z held and all M dynamic; only native Core-A Z pattern differs from native9s.",
+  "validation": "Every replayed1ms3479-group float32 rate must equal its source record bitwise. Save exact full-state quarter-period nodes, not interpolated states. This is a seed, not a closed orbit.",
+  "model_promoted": false
+}

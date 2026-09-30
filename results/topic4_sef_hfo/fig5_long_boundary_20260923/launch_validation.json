@@ -1,0 +1,56 @@
+{
+  "status": "PASS_LAUNCH_AND_FIRST_INTEGRATION",
+  "checked_at": 1790149241.4714355,
+  "jobs": 19,
+  "continuations": 8,
+  "fresh_parameter_points": 11,
+  "seed": 9108401,
+  "horizon_s": 3000,
+  "checkpoint_qa": "continuation_qa.json",
+  "source_hashes_checked": true,
+  "unequal_followup_checks": [
+    "Entry at1500s is censored at1000s and observed at3000s",
+    "A1000s censored record is not qualified as3000s non-entry",
+    "A single supported bracket cannot create an extrapolated boundary segment"
+  ],
+  "candidate_png_visual_check": "PASS_20260923",
+  "paper_ready_snapshot_preserved": true,
+  "first_verified_progress": [
+    {
+      "name": "eta0.056234133_tau1_s9108401",
+      "time_s": 1001.0,
+      "pid": 681896
+    },
+    {
+      "name": "eta0.04216965034_tau1_s9108401",
+      "time_s": 1.0,
+      "pid": 681897
+    },
+    {
+      "name": "eta0.031622777_tau1.7782794_s9108401",
+      "time_s": 1001.0,
+      "pid": 681898
+    },
+    {
+      "name": "eta0.031622777_tau3.1622777_s9108401",
+      "time_s": 1001.0,
+      "pid": 681900
+    },
+    {
+      "name": "eta0.0177827941_tau3.16227766_s9108401",
+      "time_s": 1.0,
+      "pid": 681901
+    },
+    {
+      "name": "eta0.0056234133_tau10_s9108401",
+      "time_s": 1001.0,
+      "pid": 681904
+    },
+    {
+      "name": "eta0.0031622777_tau100_s9108401",
+      "time_s": 1001.0,
+      "pid": 681906
+    }
+  ],
+  "verified_at": 1790149347.91376
+}

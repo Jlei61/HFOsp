@@ -1,0 +1,54 @@
+{
+  "status": "RECORDING_REPLAY_PASS",
+  "rows": [
+    {
+      "condition": "full",
+      "source_index": 6,
+      "voltage_min_mv": -73.81236259545089,
+      "nonrefractory_voltage_min_mv": -73.81236259545089,
+      "reset_mv": 11.0,
+      "threshold_mv": 18.0,
+      "max_refractory_fraction": 0.9086905195407489,
+      "max_below_reset_fraction": 1.0,
+      "under_reset_phase_fraction": 0.59374349857205,
+      "positive_rate_error_energy_under_reset": 0.7531800235507482,
+      "largest_rate_overprediction_hz": 173.00191328685875,
+      "largest_overprediction_phase_ms": 44.40471124261871,
+      "voltage_at_largest_overprediction_mv": -2.0241193169758263,
+      "refractory_at_largest_overprediction": 0.01020319104770518
+    },
+    {
+      "condition": "mean_only",
+      "source_index": 7,
+      "voltage_min_mv": -73.79786304590169,
+      "nonrefractory_voltage_min_mv": -73.79786304590169,
+      "reset_mv": 11.0,
+      "threshold_mv": 18.0,
+      "max_refractory_fraction": 0.9088354018127744,
+      "max_below_reset_fraction": 1.0,
+      "under_reset_phase_fraction": 0.7812494089610954,
+      "positive_rate_error_energy_under_reset": 0.9437192471468743,
+      "largest_rate_overprediction_hz": 213.1274683457317,
+      "largest_overprediction_phase_ms": 46.47004664925214,
+      "voltage_at_largest_overprediction_mv": 5.475010146442479,
+      "refractory_at_largest_overprediction": 0.007959754721632321
+    }
+  ],
+  "moment_names": [
+    "voltage_mv",
+    "voltage_squared_mv2",
+    "refractory_fraction",
+    "input_current_mv",
+    "refractory_current_mv",
+    "below_reset_fraction"
+  ],
+  "spike_counts_bitwise": true,
+  "original_counts": 5741423,
+  "replicates": 8192,
+  "steps": 52873,
+  "burn_steps": 13218,
+  "dt_ms": 0.1,
+  "scope": "Diagnostic of local imposed-input response. A membrane-state association does not establish a unique closure, causal sufficiency, or the native onset bifurcation.",
+  "model_promoted": false,
+  "onset_type": "NOT_ESTABLISHED"
+}

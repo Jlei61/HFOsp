@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512_accuracy_N2048.npz",
+  "before": {
+    "fast": {
+      "minimum_Hz": -2.0281140319673013e-09,
+      "phase_index": 3016,
+      "group": 435
+    },
+    "slow": {
+      "minimum_Hz": 3.265424707626279e-06,
+      "phase_index": 2904,
+      "group": 518
+    },
+    "positive": false,
+    "N": 2048,
+    "check_N": 8192
+  },
+  "refined_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512_accuracy_N2048_accuracy_N2048.npz",
+  "resolution": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512_accuracy_N2048.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_A_return_recruitment_N512_accuracy_N2048_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 0.9438163372922354,
+    "T_ms": 118.5333363322484,
+    "maximum_group_defect_Hz": 9.992007221626409e-13,
+    "regional_defect_Hz": [
+      2.155493945179198e-14,
+      3.9103351445498985e-15,
+      9.007642571920404e-15
+    ],
+    "minimum_rate_Hz": 2.3136846442007656e-06,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -6.106226635438361e-13,
+        "phase_index": 148,
+        "group": 795
+      },
+      "slow": {
+        "minimum_Hz": 3.265424707626173e-06,
+        "phase_index": 2904,
+        "group": 518
+      },
+      "positive": true,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "unchanged_J": true,
+  "unchanged_N": true,
+  "relative_period_change": 4.440892098500626e-15,
+  "relative_waveform_change": 3.001993263130113e-13,
+  "elapsed_seconds": 55.20994997024536,
+  "linear_solver": "Host Arnoldi, cached exact harmonic actions, nonlinear-target-aware forcing",
+  "scope": "Real underresolved-filter regression: tighten algebraic convergence at the same temporal mesh, without clipping or model changes. No critical-root or mode promotion.",
+  "superseded_internal_linear_solve": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/attempt_history/algebraic_precision_baseline_1789714527075849008/disposition.json"
+}

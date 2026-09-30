@@ -1,0 +1,38 @@
+{
+  "conditions": [
+    "z0.95_k0.02_high",
+    "z0.95_k0.02_interictal"
+  ],
+  "comparison": "Align by elapsed time since different carried-state starts; full30s vs prespecified last10s.",
+  "native_observable_checks": {
+    "spikes_1ms": {
+      "shape": [
+        30000,
+        2
+      ],
+      "whole_30s_bitwise_equal": false,
+      "tail10s_bitwise_equal": true,
+      "mismatched_values_in_full_run": 8178
+    },
+    "regions_1ms": {
+      "shape": [
+        30000,
+        6
+      ],
+      "whole_30s_bitwise_equal": false,
+      "tail10s_bitwise_equal": true,
+      "mismatched_values_in_full_run": 10692
+    },
+    "field_5ms": {
+      "shape": [
+        6000,
+        400
+      ],
+      "whole_30s_bitwise_equal": false,
+      "tail10s_bitwise_equal": true,
+      "mismatched_values_in_full_run": 13918
+    }
+  },
+  "conclusion": "Native E/I and regional counts and400bin5ms fields agree exactly in last10s despite earlier differences. This is same-noise trajectory correspondence, not independent replication or proof of complete engine-state convergence.",
+  "human_review": "PENDING"
+}

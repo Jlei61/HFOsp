@@ -1,0 +1,43 @@
+{
+  "created_local": "2026-09-20T06:22:40.498895+08:00",
+  "status": "REGISTERED_BEFORE_NETWORK_DIAGNOSTIC",
+  "question": "How do the remaining measured local-response errors affect autonomous interictal events,Z/M entry and2D recruitment in the fixed network?",
+  "reason": "Original goal concerns native spatial dynamics. Local correction improved23/24oldwaveforms but stillfails; bounded end-to-end diagnosis informs the next repair without promoting this model or certifying bifurcation.",
+  "fixed": "common.model(grid20),same graph,group sizes,thresholds,delays and external input definitions. No connectivity,resource,adaptation or fitted response change.",
+  "rate": "Frozen conditioned_refractory_rate weights.6raw currentcovariance+36inputhistory states and own-rate refractory integral. Synaptic means retain2rise-decay pairs. Z multiplies GABA mean and postfilter covariance; rawGABA variance drives Z target.",
+  "slow": "BothZandMdynamic inallruns; m=eta_M*M,dm/dt=(.5*E*r-m)/1000ms; Z follows unchanged Gaussian threshold target/5000ms; I Z=1.",
+  "clocks": "dt.05ms; delayed arrival uses newstep endpoint, recorded externaldrive is held on each1ms input interval. Exact linear synaptic,covariance,history updates and slow-target exponential steps; refractory implicit Euler.",
+  "noise": "Two contrasts inherit the old Poisson finite-group emission approximation and delay-aware stationary shared/private variance subtraction. Own refractory history and M use expected rate; synaptic arrivals use sampled counts. This is not an exact renewal-noise reduction and its limitations remain explicit.",
+  "initialization": "All synaptic/covariance/history states and past firing zero; Z1,M0. No SNN future activity or state transplant.",
+  "runs": [
+    {
+      "label": "mean_drive_expected",
+      "drive": "mean",
+      "noise": false,
+      "seed": 1
+    },
+    {
+      "label": "recorded_drive_expected",
+      "drive": "seed9108401",
+      "noise": false,
+      "seed": 1
+    },
+    {
+      "label": "recorded_drive_poisson_seed1",
+      "drive": "seed9108401",
+      "noise": true,
+      "seed": 1
+    },
+    {
+      "label": "recorded_drive_poisson_seed2",
+      "drive": "seed9108401",
+      "noise": true,
+      "seed": 2
+    }
+  ],
+  "duration_ms": 12500.0,
+  "dt_ms": 0.05,
+  "implementation_gate": "Local CUDA parity plus same delayed operators and independent one-step physical/slow-state checks before full runs.",
+  "readouts": "Original native event,quiet occupancy,duration,bothcore participation,forward/reverse propagation,spatial area,entry andsame-clockD definitions. Expected versus emitted rates stored separately; compare0.5-3,4-8,8-9.42,andfull12.5s.",
+  "boundaries": "Diagnostic only: local acceptance stillFAIL; no newbifurcation label,no formalmodelpromotion,no onsettimefitting or adaptiveparametersearch. If unstable/nonfinite, stop thatrun and report it; no hiddenclamp or parameterrepair."
+}

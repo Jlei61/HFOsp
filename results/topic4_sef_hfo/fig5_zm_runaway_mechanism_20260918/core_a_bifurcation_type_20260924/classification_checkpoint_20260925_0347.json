@@ -1,0 +1,79 @@
+{
+  "time": "2026-09-25T03:46:45.038636+08:00",
+  "target_entry_type": "NOT_ESTABLISHED",
+  "model": "Locked3479group0.5mm spatial delayed rate; only native CoreA Z varied, outsideA native9s; allZheld,allE Mdynamic",
+  "nine_burst": {
+    "numerical_root": true,
+    "period_ms": 2369.0337184833256,
+    "whole_closure": 7.11708803712732e-11,
+    "spectrum": [
+      {
+        "real": -1.1886199329585603,
+        "imag": 0.0,
+        "relative_residual": 1.5384915690574542e-13,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09615679237470662,
+        "imag": 0.0,
+        "relative_residual": 3.3279779081040284e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09276364257531816,
+        "imag": 0.0024324280621828274,
+        "relative_residual": 1.032464262599887e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      },
+      {
+        "real": 0.09078904179700947,
+        "imag": 0.0009757321347341491,
+        "relative_residual": 1.3528308810965213e-08,
+        "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+      }
+    ],
+    "phase": "Original Poincare shifted-phase gates failed, physical Floquet pending",
+    "fine_attempt": "Stopped before any Newton update; no valid fine period bracket; not orbit nonexistence"
+  },
+  "three_burst_midpoint": {
+    "numerical_root": true,
+    "period_ms": 790.2861378603747,
+    "whole_closure": 1.587209914489616e-11,
+    "spectrum": [
+      {
+        "real": -0.14838720794791896,
+        "imag": 0.0,
+        "relative_residual": 2.130393503395521e-06,
+        "status": "FAILED_FULL_RESIDUAL"
+      }
+    ],
+    "interpretation": "12D bounded spectrum found no unstable direction; no stable certificate. Mesh and phase pending."
+  },
+  "active": [
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9551/whole_cycle",
+      "pid": 2996368,
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 2996368,
+        "iteration": 2,
+        "stage": "WHOLE_CYCLE_MATCHING",
+        "last_residual": 7.555932566830254e-07
+      }
+    },
+    {
+      "path": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9507_fine/whole_cycle",
+      "pid": 3008722,
+      "jobs": {
+        "status": "RUNNING",
+        "pid": 3008722,
+        "iteration": 0,
+        "stage": "WHOLE_CYCLE_MATCHING",
+        "last_residual": 0.02943959584560604
+      }
+    }
+  ],
+  "mesh_counterexample": "Same midpoint Z_A=.7123513753: fine10s has complete1.679/1.719s long activities and last2.178s rightcensored. Coarse20s had onlyshort events. Old finitewindow contrast is not converged bifurcation bracket. Early200ms three-mesh errors reduce about2x.",
+  "early_M_equilibrium": "Bounded known-high-root homotopy stopped at auxiliary.458782 without target root; numerical stall is not a bifurcation. No fast-M type established.",
+  "scientific_status": "Investigation in progress; no type assigned to actual local onset"
+}

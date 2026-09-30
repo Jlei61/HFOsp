@@ -1,0 +1,89 @@
+{
+  "status": "REPLAY_OF_REFERENCE",
+  "identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py": "75804a78fd08daa88a3b1422931c490245666f377784ed4d1ad7d70d27e030cd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969",
+    "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+    "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+    "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+    "/home/honglab/leijiaxin/HFOsp/config/topic4_rate_model_dynamics_validation_v1.json": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+  },
+  "reference_protocol": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/protocol.json",
+  "reference_protocol_sha256": "47d9a0a03ece8f2e54424e81d00d5bd7c6e12b355e70c2342881de568748fda4",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weaker_M_onset_pilot.py",
+  "producer_sha256": "6406c36301e59e324d5344b1a8d56490833d9d98efc9c570a4aeb879426b3f07",
+  "wrapper": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fig5_half_m_first_entry.py",
+  "wrapper_sha256": "b19b2924a1b8f85cc8d7038cddf2f2dbedd16be6ac905cbdbe66759462ae2710",
+  "tracker": "verbatim copy of run_topic4_fig5_half_m_first_entry.first_only",
+  "replay_end_ms": 3000,
+  "extra_checkpoints_ms": [
+    3000,
+    3000
+  ],
+  "per_cell_record": "Z, M (float64) and raw I_E, I_I (float32) every 10 ms; every 5 ms in 8.8-10.4 s",
+  "input_record": "global OU xi every step; 20x20 cell mean/variance of the applied E external rate every 1 ms; I external rate every 1 ms",
+  "canary": false,
+  "resolved_modules": {
+    "run_topic4_m_parameter_modes": {
+      "file": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py",
+      "sha256": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc"
+    },
+    "run_topic4_weak_fast_recurrence": {
+      "file": "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py",
+      "sha256": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda"
+    },
+    "src.topic4_raster_protocol_engine": {
+      "file": "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py",
+      "sha256": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6"
+    },
+    "src.snn_engine.mz_slow_vars": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/mz_slow_vars.py",
+      "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3"
+    },
+    "src.topic4_cuda_ordered_scatter": {
+      "file": "/home/honglab/leijiaxin/HFOsp/src/topic4_cuda_ordered_scatter.py",
+      "sha256": "630260733fb93783f010a23c5e2ed5087b593552b76c7338d5c4572ee3250ec8"
+    },
+    "src.topic4_serial_spike_scatter": {
+      "file": "/home/honglab/leijiaxin/HFOsp/src/topic4_serial_spike_scatter.py",
+      "sha256": "1432c363a0dad77e2f9805b2389db7a9182a2226a0633adf05875d6962f969fa"
+    },
+    "checkpoint": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py",
+      "sha256": "fa08221ca9050657379b9aa77aa88cc1344a1f6711eec10665c25102f1f21538"
+    },
+    "params": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/params.py",
+      "sha256": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+    },
+    "model": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/model.py",
+      "sha256": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349"
+    },
+    "lfp": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/lfp.py",
+      "sha256": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+    },
+    "src.topic4_zm_ictal_transition": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_zm_ictal_transition.py",
+      "sha256": "1c72a016e6b5d42bf0018768e9f222c434221072f0fa68ee77e22e12f2bdda18"
+    },
+    "src.topic4_spatial_ou_drive": {
+      "file": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/topic4_spatial_ou_drive.py",
+      "sha256": "91b25ec3071549e882b0b54aae4858755212cc282dda7a50e6d84e845fae5f02"
+    }
+  }
+}

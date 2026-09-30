@@ -1,0 +1,80 @@
+{
+  "status": "REFINED_PARENT_AND_MODE_CHECKED",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024_accuracy_N2048.npz",
+  "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_mode_N1024.npz",
+  "N": 2048,
+  "J_EE_core": 1.0758067726710216,
+  "T_ms": 105.39979415446177,
+  "antiperiodic_relative_residual": 2.37805896870651e-10,
+  "continuous_orbit_check": {
+    "status": "RESOLUTION_CHECKED",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024.npz",
+    "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024_accuracy_N2048.npz",
+    "N": 2048,
+    "check_N": 8192,
+    "J_EE_core": 1.0758067726710216,
+    "T_ms": 105.39979415446177,
+    "maximum_group_defect_Hz": 7.771561172376096e-13,
+    "regional_defect_Hz": [
+      1.1926515078958492e-13,
+      6.162420309869296e-14,
+      9.732430288896156e-15
+    ],
+    "minimum_rate_Hz": 2.310230484154609e-08,
+    "filter_state_check": {
+      "fast": {
+        "minimum_Hz": -7.771561172376096e-13,
+        "phase_index": 831,
+        "group": 855
+      },
+      "slow": {
+        "minimum_Hz": 3.3984627640294075e-08,
+        "phase_index": 3917,
+        "group": 518
+      },
+      "positive": true,
+      "N": 2048,
+      "check_N": 8192
+    }
+  },
+  "direct_monodromy_checks": [
+    {
+      "J_EE_core": 1.0758067726710216,
+      "T_ms": 105.39979415446177,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024_accuracy_N2048.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_mode_N1024.npz",
+      "dt_ms": 0.049999902350313936,
+      "recovered_multiplier": -1.0000042960250584,
+      "minus_one_relative_defect": 4.9249520876973005e-05,
+      "rayleigh_eigen_residual": 4.906179241825324e-05,
+      "phase_relative_defect": 0.0012783714731579956,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 1.0758067726710216,
+      "T_ms": 105.39979415446177,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024_accuracy_N2048.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_mode_N1024.npz",
+      "dt_ms": 0.024999951175156968,
+      "recovered_multiplier": -1.0000010580545446,
+      "minus_one_relative_defect": 1.2474967921955432e-05,
+      "rayleigh_eigen_residual": 1.243001790979823e-05,
+      "phase_relative_defect": 0.0003305486717701453,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    },
+    {
+      "J_EE_core": 1.0758067726710216,
+      "T_ms": 105.39979415446177,
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_A_return_eval_J1.07580677267_N1024_accuracy_N2048.npz",
+      "mode": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_A_return_mode_N1024.npz",
+      "dt_ms": 0.012499975587578484,
+      "recovered_multiplier": -1.0000002608228746,
+      "minus_one_relative_defect": 3.145661434132988e-06,
+      "rayleigh_eigen_residual": 3.134829706296403e-06,
+      "phase_relative_defect": 8.411013614699215e-05,
+      "meaning": "Full nine-state plus delay-history variational propagation of the independently computed antiperiodic null mode; this is not a complete spectrum"
+    }
+  ],
+  "profile_refinement_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/filter_state_repair_small_chunked.json",
+  "scope": "Same PD3 location; positive finer parent and independent full-state/history minus-one propagation. Original two-mesh root and crossing evidence retained. No new critical point or whole child-branch acceptance."
+}

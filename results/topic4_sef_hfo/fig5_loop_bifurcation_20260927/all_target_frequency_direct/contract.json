@@ -1,0 +1,48 @@
+{
+  "status": "REGISTERED_BEFORE_FULL_SPATIAL_DYNAMIC_PROBE",
+  "created_epoch": 1790538461.25158,
+  "question": "How does the spatial feedback operator near the actual corresponding high state change when the measured cell response, original delays, synaptic filters and causalG/M dynamics are retained?",
+  "design": {
+    "frequencies_Hz": [
+      1.0,
+      5.0
+    ],
+    "partitions": [
+      [
+        0,
+        20000
+      ],
+      [
+        20000,
+        40000
+      ]
+    ],
+    "devices": [
+      0,
+      1
+    ],
+    "replicas": 256,
+    "record_ms": 4000,
+    "burn_ms": 1000,
+    "base_seeds": [
+      929011,
+      929021
+    ],
+    "target_batch": 128,
+    "channels": [
+      "effective_mean",
+      "varianceE",
+      "varianceI",
+      "physical_applied_G_E_only"
+    ],
+    "amplitudes": "Exactly the all-target DC amplitudes: mean .02*(theta-11), varianceE5%, varianceI10%, physicalG .002*(1+g), repeated at half amplitude"
+  },
+  "physics": "Exactly the all-target DC reference inputs and original density single-increment colored-current/membrane/reset/refractory ordering. Independent target/channel numerical noise; paired +/- and full/half paths. These are fixedinput local probes, not new native seeds.",
+  "method": "Existing independently checked one-frequency sinusoidal kernel; no new multisine shortcut. Store complex gain, paired amplitude error, raw outputs and eight independent replica-block gains.",
+  "assessment": "Retain every failed-amplitude and weak component. Per-component tolerance max(10%abs(DC),2pairedSEM,1e-7); individual DC estimability from original fullDC SNR>=10. Spatial operator/action uncertainty, exact update order and frequency coverage must be assessed separately before stability claims.",
+  "limits": "Only 1Hz and5Hz are initial dynamic probes. They do not cover the temporal spectrum or certify stable/unstable branches or Hopf. Inputs remain near the K9 corresponding state, not an exact selfconsistent root or every nearby branch point. The failed multisine pilot remains failed under its registered gate.",
+  "producer_sha256": "2b3f579baee58dc0c86b8db064a0e894b79a4f1d9e97e5b999571ca93527caf2",
+  "kernel_sha256": "e7b235951305a673580b71b7b4f5063ae170fa74b25dfdf298cbd915d39d119a",
+  "input_sha256": "c984e450ea2f6f81d521c92c43f33a24f0ba605c3709ea44c1d3460eece00e04",
+  "formal_bifurcation_allowed": false
+}

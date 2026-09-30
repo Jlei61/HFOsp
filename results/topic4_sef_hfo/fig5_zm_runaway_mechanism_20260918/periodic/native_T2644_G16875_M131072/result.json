@@ -1,0 +1,36 @@
+{
+  "status": "SEGMENT_COMPLETE",
+  "family": "native",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_T2644_G16875_M131072/point0000.npz",
+      "D": 0.21933559098386685,
+      "T_ms": 264.4,
+      "N": 16875,
+      "mean_hz": 31.321806378244162,
+      "min_hz": 0.015399215485193017,
+      "max_hz": 186.02307161888436,
+      "residual": 5.440092820663267e-12,
+      "iterations": [
+        3.785342540937986,
+        0.00015394742430840935,
+        2.952299515968093e-08,
+        5.717648576819556e-12
+      ],
+      "minimum_group_rate_hz": -0.0014556466529882588,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "native-checkpoint piecewise linear spatial Z path",
+      "nonlinear_samples": 131072,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "inner_linear_tolerance_floor": 0.0001,
+      "period_step_ms": 0.0,
+      "D_step": 4.5901171752404935e-10,
+      "predictor": "constant",
+      "period_constraint": "exact variable elimination"
+    }
+  ],
+  "bifurcation_type": "NOT_INFERRED_FROM_NUMERICAL_TURNS"
+}

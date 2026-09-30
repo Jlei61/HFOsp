@@ -1,0 +1,33 @@
+{
+  "status": "CONVERGED_SEED",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/actual_fine_Z_seed_G2049_M8192/seed.npz",
+      "D": 0.1428616806119679,
+      "T_ms": 263.5687043980689,
+      "N": 2049,
+      "mean_hz": 27.98760928397271,
+      "min_hz": 0.01365332897800075,
+      "max_hz": 155.0393902627902,
+      "residual": 4.107825191113079e-12,
+      "iterations": [
+        112.38429614108996,
+        19.994689056633373,
+        0.17441264762409203,
+        9.858792393568905e-07,
+        4.218847493575595e-12
+      ],
+      "minimum_group_rate_hz": -0.40203121600414876,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "actual-rate 7750,7760,7770,7780-ms piecewise spatial Z interpolation",
+      "nonlinear_samples": 8192,
+      "family": "fine"
+    }
+  ],
+  "bifurcation_type": "NOT_ESTABLISHED",
+  "scientific_resolution_status": "INSUFFICIENT_FOR_CONTINUATION",
+  "resolution_evidence": "seed_streamed_phase_quadrature.json",
+  "interpretation": "Converged coarse algebraic root; pointwise residual and phase derivative require refinement. Subsequent Newton failure does not establish a branch endpoint."
+}

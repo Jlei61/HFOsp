@@ -1,0 +1,9 @@
+{
+  "status": "REGISTERED_BEFORE_CURRENT_POINT_K_TANGENT",
+  "created_epoch": 1790546542.1679518,
+  "question": "At the relevant held K9.35 state, which population/feedback component responds to K, and how close is the local prediction to the R=200 feedback activation corner?",
+  "method": "Exact current point input derivatives, measured40000targetDC withimplicitM andstationaryG. Independent finite-difference check ofK reversalterm. One bounded linear solve; report residual, field/coreactions and8block matrixaction uncertainty.",
+  "limits": "Workingpoint is near-selfconsistent but independent nonlinear correction stillrunning. Tangent is a local static susceptibility, not a timeeigenvalue, stablebranch or bifurcation. Linear estimate of reaching the piecewiseGcorner is not a measured criticalK. Compare prior9.2→9.35finitechange descriptively only.",
+  "producer_sha256": "939a430d83191795d15ee1e5b28274997cd612bdb135ebfb0b4f9003864518e8",
+  "formal_bifurcation_allowed": false
+}

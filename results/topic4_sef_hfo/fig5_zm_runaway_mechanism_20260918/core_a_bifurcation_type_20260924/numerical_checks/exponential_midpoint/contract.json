@@ -1,0 +1,16 @@
+{
+  "created_local": "2026-09-25T07:47:34.043716+08:00",
+  "question": "Can a second-order positive deterministic integrator of the SAME locked spatial renewal-rate equations remove the demonstrated first-order timestep ambiguity near localA entry?",
+  "fixed_physics": "3479 groups, exact same spatial graph/thresholds/physicaldelay operators/privateQ/conditioned39+transient lockedhazard. Z held, allE M dynamic. Constant original input. No re-fit or scientificmodelpromotion.",
+  "design": "Exponentialmidpoint update of linear synaptic/covariance/input-memory/M filters using midpoint drives. Midpoint M predictor uses prior bin flux. Refractory occupancy is integrated exactly over each bin for the midpoint hazard and delayed release flux: rbar=(1-Rold)*(1-exp(-rho*h))/h + r_release*(1-(1-exp(-rho*h))/(rho*h)). This retains rate=rho*(1-integral_last_tau(rate)); history stores bin-average fluxes. No rate/occupancy clipping.",
+  "positivity": "For nonnegative release flux and legal oldoccupancy, newavailable=exp(-rho*h)*(1-Rold)+(1-exp(-rho*h))*release/rho>=0; newoccupancy remainsnonnegative because releasedbinmass iscontained inRold. Stationary flux isrho/(1+tau*rho) at everyh.",
+  "sequence": [
+    "Independent manufactured scalar renewal solutions: accuracyorder, equilibrium, nonnegativeflux and exactwindowmass.",
+    "Implement in parallel numericalmodule; originalengine/results unchanged.",
+    "Independent fullstep CPUoracle and original static-root invariance.",
+    "Short full spatial nestedmesh tests and common continuous-limit test before any long or critical continuation."
+  ],
+  "stop": "If any physicalidentity, positivity, stationary, or convergence checkfails, retainfailure and diagnose; no newonsettype or replacementfigure.",
+  "scope": "Numerical method investigation only. Source initialhistory interpretation and conservative regridding must be explicit. Existing nativecorrespondence/localresponse failures remain.",
+  "model_promoted": false
+}

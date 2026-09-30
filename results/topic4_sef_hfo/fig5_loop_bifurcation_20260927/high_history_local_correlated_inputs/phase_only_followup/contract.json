@@ -1,0 +1,15 @@
+{
+  "status": "REGISTERED_BEFORE_PHASE_ONLY_RESPONSE",
+  "created_epoch": 1790560374.0373673,
+  "question": "Does the remaining advantage of the native recurrent waveform depend on relationships between Fourier phases across frequencies, beyond random Gaussian amplitude variability?",
+  "motivation": "On20diagnosticerrorcells the completed fourresponse RMSerrors are21.12,6.72,6.71,0.517Hz. Restoring withinstreamcross terms helps; restoring E/I crossperiodogram has little added effect; fullwaveform remains better.",
+  "design": "Oneextra response on the SAME59targets and512replicas, unchangednativekernel, fixednu, means,ZK,G0,M andburn. Use unitmodulus randomphase separately at eachpositivefrequency, common between recurrentE/I. Thus eachreplica has EXACT original fullE/I power AND crossperiodogram; only crossfrequency phase relationships are scrambled relative to the shiftednativewaveform.",
+  "pairing": "Obtain phases by normalizing the exactGaussianFourier coefficient used by priorfulljointcondition (same randomdraworder), reuse sameexternalPoisson andburn. Compare with already completedfulljointGaussian andwaveform responses. No newnative source, parameterpoint or physicalmodel.",
+  "controls": "DCzero, Nyquistreal sign, generatedinput perreplica Parseval equal nativefullpowers. This distinguishes coefficientamplitude variability from phaseorganization at fixedsecondorder finite-record structure. Nonlinear dependence onhigherorder temporal statistics is not an autonomous closure.",
+  "reference": "Native72-74s pertarget rates are a development comparison under time-varying expected background. Fourlocalconditions alluse the samefixedmean. Changes betweenlocalconditions isolate represented inputstructure; closeness to that one nativewindow is not an independent network validation.",
+  "replicas": 512,
+  "producer_sha256": "18fdbeeab74605808e62d9f8435ba0a8b2992c730f8406f9dbdb9d39442a1207",
+  "sampler_sha256": "7de8f5cb04ac657aa40650426b60f4011b1212d1e2206d5401f1a7139a8ed3d2",
+  "formal_bifurcation_allowed": false,
+  "autonomous_closure": false
+}

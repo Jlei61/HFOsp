@@ -1,0 +1,22 @@
+{
+  "status": "RADIAL_MODE_IDENTITY_PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD4_physical_child_radial_index0_20260920_N2048.json",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.02000_N1024.npz",
+  "N": 2048,
+  "multiplier": 1.387734242462194,
+  "parent_antiperiodic_mode_cosine": 0.9755505940034069,
+  "odd_half_period_energy_fraction": 0.9523519512761425,
+  "tangent_comparisons": [
+    {
+      "earlier_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.04000_N1024.npz",
+      "phase_quotient_mode_tangent_cosine": 0.9744476302578903,
+      "parent_mode_tangent_cosine": 0.9999652949926796
+    },
+    {
+      "earlier_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_child_a0.08000_N1024.npz",
+      "phase_quotient_mode_tangent_cosine": 0.9736749449605795,
+      "parent_mode_tangent_cosine": 0.9999036011868883
+    }
+  ],
+  "scope": "Neuron-weighted waveform comparison after quotienting the common phase. Confirms local eigenmode identity only; not a replacement for variational residual, temporal refinement, or full delay-history propagation."
+}

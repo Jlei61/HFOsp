@@ -1,0 +1,52 @@
+{
+  "label": "PD_H2_after_LPC13",
+  "J_EE_core": 0.9463108827053242,
+  "T_ms": 296.8975940990832,
+  "parent_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_H2_after_LPC13_eval_J0.94631088270532_N512.npz",
+  "mode_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_H2_after_LPC13_mode_N512.npz",
+  "accepted_fine_parent": true,
+  "common_display_phase_shift_ms": 201.7975834892206,
+  "normalization": "Largest absolute E-group rate mode component = 1 Hz; all derivatives per this unit.",
+  "E_mode_energy_A_B_surround": [
+    1.6434182785466557e-05,
+    0.09975917001775478,
+    0.9002243957994599
+  ],
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mode_RMS_relative_to_network": [
+    0.026409694213580248,
+    2.0153019715035883,
+    0.9724906369331329
+  ],
+  "core_peak_derivatives": {
+    "A": [],
+    "B": []
+  },
+  "maximum_regional_mode_Hz": [
+    0.0007912668637922484,
+    0.09150240402306997,
+    0.013683252407007579
+  ],
+  "maximum_contact_mode_Hz": [
+    1.9890833650838398e-07,
+    2.7142427367260036e-06,
+    9.887799797110387e-07,
+    5.835173428991221e-06,
+    3.456464269228089e-06,
+    2.0978747698997553e-05,
+    0.00016538893905426386,
+    1.4665595695010678e-05,
+    0.0004871889048612731,
+    0.0038705550871024623,
+    0.02397825468252992,
+    0.07491489215937383,
+    0.17749580675365326,
+    0.13883158871473908,
+    0.10357622788399168
+  ],
+  "meaning": "The mode changes sign after one parent period, so adjacent parent-length windows receive opposite first-order changes. This does not establish child stability, a propagation-template switch, or irregular dynamics."
+}

@@ -1,0 +1,145 @@
+{
+  "status": "DESCRIPTIVE_CONTROL_LIMIT_AUDIT",
+  "rows": [
+    {
+      "condition": "reference",
+      "lowered_cells": 781,
+      "outdegree_quantiles": [
+        252.0,
+        635.0,
+        813.0,
+        914.0,
+        1176.0
+      ],
+      "lowered_source_fraction_of_all_EE_weight": 0.025833615513351955,
+      "groups": {
+        "AllE": {
+          "cells": 32000,
+          "mean_outgoing_strength": 4171.343511343002,
+          "mean_incoming_fraction_from_lowered_sources": 0.02583361551335196,
+          "incoming_weighted_mean_source_threshold_mV": 17.973362064561492
+        },
+        "lowered_E": {
+          "cells": 781,
+          "mean_outgoing_strength": 4415.29872250553,
+          "mean_incoming_fraction_from_lowered_sources": 0.3002097204845332,
+          "incoming_weighted_mean_source_threshold_mV": 17.690236142136325
+        },
+        "CoreA_observer": {
+          "cells": 754,
+          "mean_outgoing_strength": 4317.816417113684,
+          "mean_incoming_fraction_from_lowered_sources": 0.2741643203892934,
+          "incoming_weighted_mean_source_threshold_mV": 17.7141646922236
+        },
+        "CoreB_observer": {
+          "cells": 786,
+          "mean_outgoing_strength": 4562.697870368902,
+          "mean_incoming_fraction_from_lowered_sources": 0.27615901571434665,
+          "incoming_weighted_mean_source_threshold_mV": 17.717834399223886
+        },
+        "OtherE": {
+          "cells": 30460,
+          "mean_outgoing_strength": 4157.619115507629,
+          "mean_incoming_fraction_from_lowered_sources": 0.013227012885825964,
+          "incoming_weighted_mean_source_threshold_mV": 17.98637189922
+        }
+      }
+    },
+    {
+      "condition": "rotated",
+      "lowered_cells": 781,
+      "outdegree_quantiles": [
+        382.0,
+        658.0,
+        800.0,
+        931.0,
+        1572.0
+      ],
+      "lowered_source_fraction_of_all_EE_weight": 0.024403868429612063,
+      "groups": {
+        "AllE": {
+          "cells": 32000,
+          "mean_outgoing_strength": 4171.343511343002,
+          "mean_incoming_fraction_from_lowered_sources": 0.024403868429612056,
+          "incoming_weighted_mean_source_threshold_mV": 17.974851264443874
+        },
+        "lowered_E": {
+          "cells": 781,
+          "mean_outgoing_strength": 4170.936470188194,
+          "mean_incoming_fraction_from_lowered_sources": 0.29211445738330377,
+          "incoming_weighted_mean_source_threshold_mV": 17.699031713578087
+        },
+        "CoreA_observer": {
+          "cells": 754,
+          "mean_outgoing_strength": 4317.816417113684,
+          "mean_incoming_fraction_from_lowered_sources": 0.26644075837988207,
+          "incoming_weighted_mean_source_threshold_mV": 17.72121677559977
+        },
+        "CoreB_observer": {
+          "cells": 786,
+          "mean_outgoing_strength": 4562.697870368902,
+          "mean_incoming_fraction_from_lowered_sources": 0.26828377609693355,
+          "incoming_weighted_mean_source_threshold_mV": 17.726942805530708
+        },
+        "OtherE": {
+          "cells": 30460,
+          "mean_outgoing_strength": 4157.619115507629,
+          "mean_incoming_fraction_from_lowered_sources": 0.012119383122684346,
+          "incoming_weighted_mean_source_threshold_mV": 17.98752678818958
+        }
+      },
+      "outstrength_correlation_with_original": 0.5057874279526483,
+      "median_absolute_incoming_lowered_fraction_change": 0.0,
+      "maximum_absolute_incoming_lowered_fraction_change": 0.04921576115656834
+    },
+    {
+      "condition": "isotropic",
+      "lowered_cells": 781,
+      "outdegree_quantiles": [
+        380.0,
+        662.0,
+        800.0,
+        915.0,
+        1569.0
+      ],
+      "lowered_source_fraction_of_all_EE_weight": 0.022293079972773848,
+      "groups": {
+        "AllE": {
+          "cells": 32000,
+          "mean_outgoing_strength": 4171.343511343002,
+          "mean_incoming_fraction_from_lowered_sources": 0.022293079972773844,
+          "incoming_weighted_mean_source_threshold_mV": 17.977069719503
+        },
+        "lowered_E": {
+          "cells": 781,
+          "mean_outgoing_strength": 3810.1754465467175,
+          "mean_incoming_fraction_from_lowered_sources": 0.2783679283134012,
+          "incoming_weighted_mean_source_threshold_mV": 17.712670695433633
+        },
+        "CoreA_observer": {
+          "cells": 754,
+          "mean_outgoing_strength": 4317.816417113684,
+          "mean_incoming_fraction_from_lowered_sources": 0.25281809281054757,
+          "incoming_weighted_mean_source_threshold_mV": 17.736570793735208
+        },
+        "CoreB_observer": {
+          "cells": 786,
+          "mean_outgoing_strength": 4562.697870368902,
+          "mean_incoming_fraction_from_lowered_sources": 0.25388425755832783,
+          "incoming_weighted_mean_source_threshold_mV": 17.740345228564635
+        },
+        "OtherE": {
+          "cells": 30460,
+          "mean_outgoing_strength": 4157.619115507629,
+          "mean_incoming_fraction_from_lowered_sources": 0.010610659576781504,
+          "incoming_weighted_mean_source_threshold_mV": 17.989131493629937
+        }
+      },
+      "outstrength_correlation_with_original": 0.2734697666598194,
+      "median_absolute_incoming_lowered_fraction_change": 0.0,
+      "maximum_absolute_incoming_lowered_fraction_change": 0.06697433525415841
+    }
+  ],
+  "threshold_identity": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+  "scope": "Source outdegree and pathological-source allocation were not fixed by target/source-observer-region/delay incoming weight multisets. This audit does not prove the cause of a dynamic difference."
+}

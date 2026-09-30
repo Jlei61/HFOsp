@@ -1,0 +1,7 @@
+{
+  "created_local": "2026-09-20T13:28:08.611281+08:00",
+  "question": "Does the repaired private-variance analytic interface supply a baseline fixed point that the actual corresponding integration map preserves?",
+  "model": "Current conditioned39, g40, physical private-Q delay split, constant original mean drive; complete Z=1 held, M dynamic.",
+  "budget": "One baseline Newton solve, default uncoupled-response initial guess, at most40iterations; if converged verify direct residual and actualflow atdt.05/.025. No parameter sweep, onset label, modelpromotion, response fit or branch search.",
+  "rationale": "Earlier failed roots were a different full-Q object and a high-activity initial guess. This is a baseline identity test of the repaired conditional drift; it does not waive native or local validation failures."
+}

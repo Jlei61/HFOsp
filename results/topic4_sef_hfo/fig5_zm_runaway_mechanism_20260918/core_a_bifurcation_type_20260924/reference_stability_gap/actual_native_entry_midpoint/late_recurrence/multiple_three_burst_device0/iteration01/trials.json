@@ -1,0 +1,125 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 790.2865618168411,
+    "max_combined_relative_rms": 0.0011975363821135226,
+    "residual_ratio": 5.610724098823842,
+    "predicted_gain": -17.534940471339173,
+    "agreement": null,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.011533066113972666,
+        "projected_step_norm": 0.011533038163972,
+        "phase_error": -6.234854253011761e-15
+      },
+      {
+        "projected_negative_coordinates": 5939,
+        "negative_steps_at_exact_zero": 50,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 2075,
+        "negative_steps_at_exact_zero": 533,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 16,
+        "negative_steps_at_exact_zero": 10,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 0.6770524351923263,
+    "step_norm": 0.6770524351922373,
+    "lagrange_multiplier": 5.2691123484375005e-06,
+    "predicted_relative_residual": 0.031245693825129733
+  },
+  {
+    "status": "EVALUATED",
+    "period_ms": 790.2855403646186,
+    "max_combined_relative_rms": 0.0010204355886555708,
+    "residual_ratio": 1.7486813550955655,
+    "predicted_gain": 0.8409007166452991,
+    "agreement": -2.447240727619575,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.00768103347030102,
+        "projected_step_norm": 0.007670640649519292,
+        "phase_error": -3.1677586712646784e-15
+      },
+      {
+        "projected_negative_coordinates": 1079,
+        "negative_steps_at_exact_zero": 54,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 1121,
+        "negative_steps_at_exact_zero": 515,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 11,
+        "negative_steps_at_exact_zero": 9,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 0.33852621759616314,
+    "step_norm": 0.33852621759578233,
+    "lagrange_multiplier": 0.00038679927193130805,
+    "predicted_relative_residual": 0.33064516098192964
+  },
+  {
+    "status": "EVALUATED",
+    "period_ms": 790.2832007388788,
+    "max_combined_relative_rms": 0.0017686826192023358,
+    "residual_ratio": 0.9160817161014932,
+    "predicted_gain": 0.5333288504154343,
+    "agreement": 0.30149182685184395,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 0.0046444863357716915,
+        "projected_step_norm": 0.004590193594296515,
+        "phase_error": -1.4072699247521413e-14
+      },
+      {
+        "projected_negative_coordinates": 262,
+        "negative_steps_at_exact_zero": 52,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 653,
+        "negative_steps_at_exact_zero": 485,
+        "zero_boundary_projection": true
+      },
+      {
+        "unmodified_admissible_Newton_step": true
+      },
+      {
+        "projected_negative_coordinates": 9,
+        "negative_steps_at_exact_zero": 9,
+        "zero_boundary_projection": true
+      }
+    ],
+    "radius": 0.16926310879808157,
+    "step_norm": 0.1692631087980645,
+    "lagrange_multiplier": 0.0013895852960243674,
+    "predicted_relative_residual": 0.5646855213219861
+  }
+]

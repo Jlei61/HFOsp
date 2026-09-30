@@ -1,0 +1,18 @@
+{
+  "status": "REGISTERED_TWO_NATIVE_INTERNAL_CONDITIONS",
+  "created_epoch": 1790575963.5106077,
+  "question": "Do the native spatial network and the correspondence-validated copied model show the same activity and core-resource response at the upper active value and the prior exit value under exactly matched histories?",
+  "design": "Exactly two native10s continuations from the completed82s fixed-backgroundK9.35 native highstate, counterpart to the model100000clock state. Only heldK changes to9.4625or9.5; fullZfield, graph, percellthresholds, nu/Poissonlaw, fullphysicalhistory/M/G/pendingpulses andexternalRNG retained. Future native noise paired between these two interventions. Match the completedmodel9.4625 and one newmodel9.5 trajectory from exactly the samemodel100000clock highstate. The old9.5 comparison began10s earlier and is not substituted for this same-history check. No timealignment.",
+  "motivation": "The preceding four probes retain high activity through9.4625 and quiet history at9.35. The old9.5 model exited but used an earlier completehighstate; its apparent boundary must be checked with the same currenthighstate. Before interpreting the refined transition as a relevant branch candidate, independently test the two adjacent biological parameter conditions in the native graph. This does not create new autonomouscycles or independentseeds.",
+  "guards": "For each0-5s and5-10s: weightedspatialRMS<=10Hz, eachcoremeanrate difference<=10Hz, eachcorecounterfactualZdrift difference<=.01/s. Both native/model remainR<200 andGraw<.1 if candidate does; firstcontinuous100msR<=5 either absentinboth or onsetdifference<=.25s. These original correspondence tolerances are not relaxed for interiorpoints.",
+  "stop": "Exactly two10s native trajectories plus one10s R64 model9.5 counterpart. No automatic extension, extraKpoint, noise, root or label. If interiorcorrespondence fails, report its time/space/gate discrepancy before any formalbranch claim.",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/runs/high_history_constant_background/checkpoint.pkl",
+  "source_sha256": "7cec379c2f6b4e34c22ebaa8cfa83fcf2c05c567da227158f8618c8cb8f30e7b",
+  "nu_file": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/fixed_external_per_ms.npy",
+  "producer_sha256": "01fee5739a49f9920d25fde6ccb917196ad884bea5a898e3fd17d3239eaf022a",
+  "jobs": {
+    "high_K9p4625": 9.4625,
+    "high_K9p5": 9.5
+  },
+  "formal_bifurcation_allowed": false
+}

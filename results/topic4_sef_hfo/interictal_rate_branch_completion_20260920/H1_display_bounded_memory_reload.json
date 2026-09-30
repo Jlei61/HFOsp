@@ -1,0 +1,19 @@
+{
+  "status": "OLD_WAITING_WORKER_EXITED",
+  "pid": 487941,
+  "previous_state": {
+    "status": "WAITING_GPU_RESOURCE",
+    "pid": 487941,
+    "completed": 13,
+    "expected": 58,
+    "index": 98,
+    "free_mib": 1985.0
+  },
+  "wchan_before": "hrtimer_nanosleep",
+  "process_stopped_for_consistent_inspection": true,
+  "log_size": 40066,
+  "reason": "Reload already-verified exact blocked defect path; no active correction interrupted.",
+  "next_min_free_gib": 2.5,
+  "newton_N4096_min_free_gib": 6.0,
+  "timestamp": 1789867770.191748
+}

@@ -1,0 +1,21 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/above70s_A_sustained_B_cycle/exact_seed",
+  "dt_ms": 0.05,
+  "segments": 4,
+  "numerical_restart": null,
+  "cyclic_right_precondition": true,
+  "cyclic_M_precondition": true,
+  "cyclic_M_definition": "Exact inverse of deltaM[j+1]-exp(-T/(4tau_M))*deltaM[j] across all four nodes; rate feedback remains in the full actual derivative. Numerical right coordinates only.",
+  "orthogonal_phase_bound_projection": true,
+  "equations": "Unchanged3479-group spatial delayed rate model; entireZheld and allMdynamic. Exact observed recurrent trajectory supplies four initial nodes.",
+  "method": "Solve four full-state fixed-time matching equations Phi(T/4,X_j)-X_(j+1)=0 and one autonomous phase condition. Original actual-step cubic dense output and exact variational equations; host-stored float64 coefficients share one GPU cache. Krylov vectors solve the Newton equation in all four complete states, not a reduced physical model.",
+  "gates": "Independent cached-versus-original variational products at all four phases and a full bordered actual-flow finite difference. Original nonlinear matching residual and actual-step hookstep prediction gate every accepted update. Full closure combined<1e-7 and every physical block<1e-6 at every node, phase<1e-9. Independent phase/mesh and Floquet remain separate.",
+  "period_interval_ms": [
+    429.6,
+    644.4
+  ],
+  "maximum_iterations": 4,
+  "Krylov_per_iteration": 64,
+  "interpretation": "A periodic root is only a candidate invariant skeleton. Must preserve actual A-sustained/B-burst structure, continue a relevant critical crossing and check stability/nondegeneracy before naming the onset bifurcation.",
+  "model_promoted": false
+}

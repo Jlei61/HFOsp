@@ -1,0 +1,56 @@
+{
+  "status": "BOUNDED_NUMERICAL_SPECTRUM_COMPLETE",
+  "closure": {
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 13.011881278121194,
+        "difference_rms": 1.0059893573888563e-11,
+        "relative_rms": 7.731313680830883e-13
+      },
+      "GABA": {
+        "reference_rms": 0.6930393832077026,
+        "difference_rms": 2.014228324242824e-11,
+        "relative_rms": 2.9063692093803612e-11
+      },
+      "M": {
+        "reference_rms": 0.022165901820046897,
+        "difference_rms": 1.6018268322149695e-11,
+        "relative_rms": 7.226535808104471e-10
+      },
+      "covariance": {
+        "reference_rms": 36.868104513066186,
+        "difference_rms": 7.786948245672397e-12,
+        "relative_rms": 2.1121097350998e-13
+      },
+      "input_memory": {
+        "reference_rms": 0.10312582875288319,
+        "difference_rms": 5.123564006076634e-12,
+        "relative_rms": 4.9682645638213985e-11
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.00028224391918686866,
+        "difference_rms": 7.930717496058928e-15,
+        "relative_rms": 2.8098807297273042e-11
+      }
+    },
+    "combined_relative_rms": 2.9617884423875104e-10
+  },
+  "verified": [
+    {
+      "real": -0.3081970759757784,
+      "imag": 0.16152931336765458,
+      "relative_residual": 1.6085517625118113e-06,
+      "status": "FAILED_FULL_RESIDUAL"
+    },
+    {
+      "real": -30.885897135263352,
+      "imag": 0.0,
+      "relative_residual": 2.689659853613711e-14,
+      "status": "VERIFIED_NUMERICAL_EIGENPAIR"
+    }
+  ],
+  "seconds": 240.40130019187927,
+  "completeness": "NOT_ESTABLISHED",
+  "physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "model_promoted": false
+}

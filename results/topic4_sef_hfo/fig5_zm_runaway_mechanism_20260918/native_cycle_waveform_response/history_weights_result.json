@@ -1,0 +1,123 @@
+{
+  "status": "DIAGNOSTIC_COMPLETE",
+  "groups": [
+    {
+      "label": "Core A E",
+      "group": 279,
+      "base_parity": 1.7136597896272614e-08,
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.32850563190034127,
+          "relative_mean_error": 0.21492340219392791,
+          "mean_hz": 88.35578779135227,
+          "passed": false
+        },
+        {
+          "variant": "alpha_at_filtered_mean_only",
+          "relative_waveform_L2": 0.13310623934932508,
+          "relative_mean_error": 0.04892818753989995,
+          "mean_hz": 76.28371976314077,
+          "passed": true
+        },
+        {
+          "variant": "all_weights_at_filtered_mean_and_variance",
+          "relative_waveform_L2": 0.1299508840439463,
+          "relative_mean_error": 0.05079441079605673,
+          "mean_hz": 76.41944159193632,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "label": "Core B E",
+      "group": 141,
+      "base_parity": 1.0321803473535418e-08,
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.3632681214415469,
+          "relative_mean_error": 0.209878311427842,
+          "mean_hz": 65.55174413518249,
+          "passed": false
+        },
+        {
+          "variant": "alpha_at_filtered_mean_only",
+          "relative_waveform_L2": 0.117044640273619,
+          "relative_mean_error": 0.015032649744552812,
+          "mean_hz": 53.36596839169352,
+          "passed": true
+        },
+        {
+          "variant": "all_weights_at_filtered_mean_and_variance",
+          "relative_waveform_L2": 0.11382542925155917,
+          "relative_mean_error": 0.011917259926705294,
+          "mean_hz": 53.53476159535041,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "label": "Surround E",
+      "group": 39,
+      "base_parity": 4.495327994244396e-08,
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.3844098434523068,
+          "relative_mean_error": 0.2332017388791039,
+          "mean_hz": 79.39309814885432,
+          "passed": false
+        },
+        {
+          "variant": "alpha_at_filtered_mean_only",
+          "relative_waveform_L2": 0.2125936549559871,
+          "relative_mean_error": 0.06270904921068243,
+          "mean_hz": 68.41683820876504,
+          "passed": false
+        },
+        {
+          "variant": "all_weights_at_filtered_mean_and_variance",
+          "relative_waveform_L2": 0.21001586456011684,
+          "relative_mean_error": 0.06727332648410282,
+          "mean_hz": 68.71068478886849,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "label": "I",
+      "group": 594,
+      "base_parity": 2.2395637321131035e-09,
+      "rows": [
+        {
+          "variant": "frozen_response",
+          "relative_waveform_L2": 0.18221090460858722,
+          "relative_mean_error": 0.0771211707618016,
+          "mean_hz": 96.74602627905298,
+          "passed": false
+        },
+        {
+          "variant": "alpha_at_filtered_mean_only",
+          "relative_waveform_L2": 0.04581169716803274,
+          "relative_mean_error": 0.004616360650498254,
+          "mean_hz": 89.40443688627701,
+          "passed": true
+        },
+        {
+          "variant": "all_weights_at_filtered_mean_and_variance",
+          "relative_waveform_L2": 0.04217687557665185,
+          "relative_mean_error": 0.003360714194816552,
+          "mean_hz": 89.5172178883556,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "scope": "Zero-fit open-loop diagnostic using existing MC targets. No new coefficients, network integration, or deployment. Both variants retain the original steady response and first-order susceptibility because coefficient derivatives multiply zero differences at equilibrium; the existing65/146small-signal failures therefore remain. Passing selected waveforms would require independent new waveform validation and response repair before promotion.",
+  "variants_all_selected_groups_pass": {
+    "frozen_response": false,
+    "alpha_at_filtered_mean_only": false,
+    "all_weights_at_filtered_mean_and_variance": false
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "status": "COMPUTED",
+  "rows": [
+    {
+      "label": "LPC_B2",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_B2_N256.npz",
+      "N": 256,
+      "J_EE_core": 0.9463101206889282,
+      "full_cycle_E_shape_energy_fraction_A_B_surround": [
+        0.00020429917454770793,
+        0.07597030531828358,
+        0.9238253955071687
+      ],
+      "E_cell_fraction_A_B_surround": [
+        0.0235625,
+        0.0245625,
+        0.951875
+      ],
+      "per_E_cell_shape_RMS_relative_to_network": [
+        0.09311563776680962,
+        1.7586752511229322,
+        0.9851559574737099
+      ],
+      "removed_common_phase_coefficient": 0.0009566733737466725
+    },
+    {
+      "label": "LPC_Bleading_low",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_Bleading_low_N4096.npz",
+      "N": 4096,
+      "J_EE_core": 0.9488485317657749,
+      "full_cycle_E_shape_energy_fraction_A_B_surround": [
+        0.39970242574186055,
+        0.002753364438479283,
+        0.5975442098196603
+      ],
+      "E_cell_fraction_A_B_surround": [
+        0.0235625,
+        0.0245625,
+        0.951875
+      ],
+      "per_E_cell_shape_RMS_relative_to_network": [
+        4.1186767504528525,
+        0.33480779878369477,
+        0.7923098605402403
+      ],
+      "removed_common_phase_coefficient": 0.000508830257577217
+    },
+    {
+      "label": "LPC_burst_low",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/LPC_burst_low_N4096.npz",
+      "N": 4096,
+      "J_EE_core": 0.9568975728050448,
+      "full_cycle_E_shape_energy_fraction_A_B_surround": [
+        0.006782334226852073,
+        0.057771154215577825,
+        0.9354465115575702
+      ],
+      "E_cell_fraction_A_B_surround": [
+        0.0235625,
+        0.0245625,
+        0.951875
+      ],
+      "per_E_cell_shape_RMS_relative_to_network": [
+        0.5365113450997823,
+        1.5336252079621042,
+        0.9913328998112935
+      ],
+      "removed_common_phase_coefficient": 0.00018620777811140886
+    }
+  ],
+  "definition": "Derivative of the full 935-population rate profile at fixed normalized cycle phase, with one common phase direction removed using neuron-weighted E/I inner product. Energy and per-neuron RMS summaries shown here use E groups only.",
+  "scope": "Cycle-shape derivative at a generalized +1 fold; not a spontaneous wave, an independently growing Floquet eigenfunction, or causal influence."
+}

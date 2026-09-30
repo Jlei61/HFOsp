@@ -1,0 +1,140 @@
+{
+  "status": "PHASE_OR_MESH_CLOSURE_NOT_YET_PASSED",
+  "dt_ms": 0.025,
+  "rows": [
+    {
+      "phase": 0.0,
+      "actual_shift_ms": 0.0,
+      "period_ms": 232.35502716209163,
+      "fraction": 0.20108648366550136,
+      "section_residual": 2.0724210860172137e-16,
+      "section_speed": 7.285765669401622,
+      "initial_phase": 0.0,
+      "interpolation": "cubic_four_actual_steps",
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 21.31000939556838,
+          "difference_rms": 1.7219823139827837e-07,
+          "relative_rms": 8.080626723425502e-09
+        },
+        "GABA": {
+          "reference_rms": 24.31977829407478,
+          "difference_rms": 2.26821802682848e-07,
+          "relative_rms": 9.326639410117912e-09
+        },
+        "M": {
+          "reference_rms": 0.013962598946444423,
+          "difference_rms": 7.103116940732149e-11,
+          "relative_rms": 5.087245553623065e-09
+        },
+        "covariance": {
+          "reference_rms": 39.69051419799001,
+          "difference_rms": 7.852138875125373e-08,
+          "relative_rms": 1.9783414334105595e-09
+        },
+        "input_memory": {
+          "reference_rms": 0.0998582999448925,
+          "difference_rms": 7.359661108079073e-09,
+          "relative_rms": 7.370104550288311e-08
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00841712978915456,
+          "difference_rms": 1.1256155329515047e-10,
+          "relative_rms": 1.3372914059158932e-08
+        }
+      },
+      "combined_relative_rms": 3.1071840337437925e-08,
+      "period_difference_ms": 3.1317739512815024e-08
+    },
+    {
+      "phase": 0.25,
+      "actual_shift_ms": 58.1,
+      "period_ms": 232.35502716083943,
+      "fraction": 0.2010864335766763,
+      "section_residual": -2.761936212979858e-18,
+      "section_speed": 5.249565722667691,
+      "initial_phase": 0.0,
+      "interpolation": "cubic_four_actual_steps",
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 553.703509806304,
+          "difference_rms": 2.5027101574173137e-05,
+          "relative_rms": 4.5199463487107186e-08
+        },
+        "GABA": {
+          "reference_rms": 808.7176491003934,
+          "difference_rms": 2.4746575040170174e-05,
+          "relative_rms": 3.059977121520463e-08
+        },
+        "M": {
+          "reference_rms": 0.016028360258951057,
+          "difference_rms": 2.0684235181307007e-10,
+          "relative_rms": 1.2904773069195193e-08
+        },
+        "covariance": {
+          "reference_rms": 626.5753515879225,
+          "difference_rms": 1.6231348827275764e-05,
+          "relative_rms": 2.590486329559701e-08
+        },
+        "input_memory": {
+          "reference_rms": 0.4898186581695929,
+          "difference_rms": 2.1884056255862505e-08,
+          "relative_rms": 4.467787392509955e-08
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.23793302431391847,
+          "difference_rms": 6.681066948005858e-07,
+          "relative_rms": 2.807961176163234e-06
+        }
+      },
+      "combined_relative_rms": 1.1467678500802996e-06,
+      "period_difference_ms": 3.0065535838730284e-08
+    },
+    {
+      "phase": 0.5,
+      "actual_shift_ms": 116.17500000000001,
+      "period_ms": 232.35504418501554,
+      "fraction": 0.20176740062176593,
+      "section_residual": -6.038026123328956e-16,
+      "section_speed": 48.80872578401429,
+      "initial_phase": 0.0,
+      "interpolation": "cubic_four_actual_steps",
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.778365717358108,
+          "difference_rms": 2.362527727538857e-07,
+          "relative_rms": 1.8488496727947016e-08
+        },
+        "GABA": {
+          "reference_rms": 53.198573936514435,
+          "difference_rms": 4.1806615696408075e-05,
+          "relative_rms": 7.858597064330864e-07
+        },
+        "M": {
+          "reference_rms": 0.015670598856363446,
+          "difference_rms": 3.81922163108047e-10,
+          "relative_rms": 2.4371893289384903e-08
+        },
+        "covariance": {
+          "reference_rms": 36.76378188332596,
+          "difference_rms": 5.077950613611727e-07,
+          "relative_rms": 1.3812372812261754e-08
+        },
+        "input_memory": {
+          "reference_rms": 0.364465247674906,
+          "difference_rms": 1.0644010065091458e-07,
+          "relative_rms": 2.9204458128709304e-07
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.011348075371905795,
+          "difference_rms": 1.511285855070024e-07,
+          "relative_rms": 1.3317552144670139e-05
+        }
+      },
+      "combined_relative_rms": 5.44764761520969e-06,
+      "period_difference_ms": 1.7054241652658675e-05
+    }
+  ],
+  "scope": "Same numerical root at multiple phases; refinement begins with physical-lag-preserving history interpolation. An uncorrected refined residual alone is not absence of an orbit. No Floquet or bifurcation certificate.",
+  "model_promoted": false
+}

@@ -1,0 +1,127 @@
+{
+  "status": "DESCRIPTIVE_AND_ORIGINAL_CRITERIA_AUDIT_COMPLETE",
+  "same_clock_acceptance": {
+    "status": "PARTIAL",
+    "checks": {
+      "self_limited_events": true,
+      "two_core_participation": true,
+      "surround_recruitment": true,
+      "propagation": true,
+      "entry": true,
+      "D_track": false
+    },
+    "n_passed": 5,
+    "n_total": 6,
+    "contract": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/a4_contract.json",
+    "definitions": {
+      "self_limited_events": "stochastic arm: events in 1-9.42 s with median duration within 2x of native (50-200 ms) and inter-event quiet present (quiet fraction >= 0.15)",
+      "two_core_participation": "both-core fraction >= 0.5 of events",
+      "surround_recruitment": "median area within [0.3, 1.0] (native 0.68-0.75)",
+      "propagation": "both directions present; median extent within 2x of native (5-20 mm); direction sign not fixed",
+      "entry": "a transition to sustained >=200 Hz activity occurs between 7 and 13 s in the stochastic arm; deterministic arm reported (may not transition without noise)",
+      "D_track": "D at native onset time (9.87 s) within +/-0.05 of native (0.256)"
+    },
+    "complete_event_window": {
+      "n": 27,
+      "median_duration_ms": 104.0,
+      "iqr_duration_ms": [
+        90.5,
+        131.0
+      ],
+      "median_gap_ms": 257.0,
+      "both_cores": 24,
+      "coreA_only": 0,
+      "coreB_only": 1,
+      "median_area": 0.7799375,
+      "median_surround_cells": 298.0,
+      "forward": 13,
+      "reverse": 12,
+      "undirected": 2,
+      "median_extent_mm": 11.19471228212832
+    },
+    "quiet_fraction_whole_record": 0.35368,
+    "quiet_fraction_1_to_9p42_s": 0.460332541567696,
+    "D_native_9870": 0.2563444253447549,
+    "D_rate_9870": 0.3691641182177463
+  },
+  "native_reference_checkpoint": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401/checkpoints/t9870ms.npz",
+  "rate_entry_ms": 8931.0,
+  "resource_samples": [
+    {
+      "label": "native_near_entry",
+      "time_ms": 9870.0,
+      "global_Z": 0.7436555746552451,
+      "D": 0.2563444253447549,
+      "regions": [
+        {
+          "region": "Core A",
+          "Z": 0.6625268682481935,
+          "M_current_mV": 0.08403292159165004
+        },
+        {
+          "region": "Core B",
+          "Z": 0.6741173801287446,
+          "M_current_mV": 0.05706555343861007
+        },
+        {
+          "region": "Surround",
+          "Z": 0.7474582032018224,
+          "M_current_mV": 0.029960441783947033
+        }
+      ],
+      "group_Z_RMS_from_native_9870": 0.0
+    },
+    {
+      "label": "rate_entry_bracket",
+      "time_ms": 8930.0,
+      "global_Z": 0.7386954248491675,
+      "D": 0.2613045751508325,
+      "regions": [
+        {
+          "region": "Core A",
+          "Z": 0.6739195929914318,
+          "M_current_mV": 0.08004701824300485
+        },
+        {
+          "region": "Core B",
+          "Z": 0.6559893347076484,
+          "M_current_mV": 0.08125783284088127
+        },
+        {
+          "region": "Surround",
+          "Z": 0.7424330467819307,
+          "M_current_mV": 0.031228650821625417
+        }
+      ],
+      "group_Z_RMS_from_native_9870": 0.027189157833327152
+    },
+    {
+      "label": "rate_entry_bracket",
+      "time_ms": 8940.0,
+      "global_Z": 0.7378749694917351,
+      "D": 0.26212503050826486,
+      "regions": [
+        {
+          "region": "Core A",
+          "Z": 0.6725731041450399,
+          "M_current_mV": 0.08130648104221973
+        },
+        {
+          "region": "Core B",
+          "Z": 0.6546786649688207,
+          "M_current_mV": 0.08258027933139837
+        },
+        {
+          "region": "Surround",
+          "Z": 0.7416382623947692,
+          "M_current_mV": 0.03187093425371506
+        }
+      ],
+      "group_Z_RMS_from_native_9870": 0.02728467537556672
+    }
+  ],
+  "measurement": "Exact native9.870s checkpoint versus two recorded rate samples bracketing its own operational entry. No resource interpolation.",
+  "scope": "This event-aligned post-hoc description does not replace or relax the registered same-clock D criterion. One realization; resource proximity does not imply identical vector field, basin or bifurcation.",
+  "replacement_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,66 @@
+{
+  "status": "COMPLETE_LOCAL_INPUT_DIAGNOSTIC_REVIEW",
+  "labels": [
+    "Independent source spectra",
+    "Full marginal Gaussian",
+    "Joint E/I Gaussian",
+    "Fixed power, randomized phase",
+    "Full recurrent waveform",
+    "Phase mean + Gaussian residual"
+  ],
+  "selected20_rate_RMS_error_Hz": [
+    21.124723929232147,
+    6.722442364656641,
+    6.709952516401989,
+    1.8898940383635443,
+    0.5169498877375686,
+    0.28054585791551917
+  ],
+  "largest_positive_frequency_contributions": [
+    {
+      "frequency_Hz": 454.5,
+      "variance_mV2": 218.17538994089665
+    },
+    {
+      "frequency_Hz": 909.0,
+      "variance_mV2": 4.230665671542125
+    },
+    {
+      "frequency_Hz": 455.0,
+      "variance_mV2": 2.258843370138889
+    },
+    {
+      "frequency_Hz": 454.0,
+      "variance_mV2": 1.7997328686197105
+    },
+    {
+      "frequency_Hz": 455.5,
+      "variance_mV2": 0.6481325595208609
+    },
+    {
+      "frequency_Hz": 453.5,
+      "variance_mV2": 0.34639722127791384
+    },
+    {
+      "frequency_Hz": 1363.5,
+      "variance_mV2": 0.2265286682967763
+    },
+    {
+      "frequency_Hz": 453.0,
+      "variance_mV2": 0.21721582597653008
+    },
+    {
+      "frequency_Hz": 909.5,
+      "variance_mV2": 0.20978729643162355
+    },
+    {
+      "frequency_Hz": 456.5,
+      "variance_mV2": 0.18159114390328607
+    }
+  ],
+  "interpretation": "Source correlations explain a large local rate bias. Gaussian random Fourier amplitudes also matter; fixed-power random phases retain further error. Explicit phase mean plus Gaussian residual gives a useful local representation but is still native-data-conditioned.",
+  "unit": "20largest firstresponse E-rate-error cells, selected within59diagnostic targets from one conditional native2s developmentrecord.512 numericalreplicas per condition are not native seeds.",
+  "limits": "Localinputs are compared with a variable-background native record while the local external mean is fixed. Selectedcells are not an independent validation set; this figure certifies neither autonomous closure nor a bifurcation.",
+  "formal_bifurcation_allowed": false,
+  "producer_sha256": "8bd14251f6cb6cf330898bc2f8c028334cec1e2156aa0e7d80afd84f7d4c54bd"
+}

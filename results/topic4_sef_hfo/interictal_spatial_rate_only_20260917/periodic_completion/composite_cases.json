@@ -1,0 +1,71 @@
+{
+  "cases": [
+    {
+      "case": "a",
+      "J_EE_core": 0.934,
+      "orbit": null,
+      "title": "Resting equilibrium",
+      "T_ms": null,
+      "mean_rates_hz": [
+        0.7680487517278537,
+        0.7053837767515726,
+        0.07847394611769654
+      ]
+    },
+    {
+      "case": "b",
+      "J_EE_core": 0.942,
+      "orbit": "smallA_J0.942000000_N64",
+      "title": "Small oscillation",
+      "T_ms": 158.3799421253318,
+      "mean_rates_hz": [
+        0.8548479864331857,
+        0.7302471271702212,
+        0.0800128398258383
+      ]
+    },
+    {
+      "case": "c",
+      "J_EE_core": 0.942,
+      "orbit": "refined_J0.942000000_N1536",
+      "title": "Alternating lead order",
+      "T_ms": 784.9764952519823,
+      "mean_rates_hz": [
+        14.411506855430602,
+        13.718027069255193,
+        5.271955991837917
+      ]
+    },
+    {
+      "case": "d",
+      "J_EE_core": 0.95,
+      "orbit": "branch095_J0.950000000_N512",
+      "title": "B-leading burst",
+      "T_ms": 312.7455308246857,
+      "mean_rates_hz": [
+        19.400254856734204,
+        11.700466672333091,
+        5.374598942618065
+      ]
+    },
+    {
+      "case": "e",
+      "J_EE_core": 1.3,
+      "orbit": "branch_J1.300000000_N256",
+      "title": "A-leading burst",
+      "T_ms": 249.33163760519696,
+      "mean_rates_hz": [
+        42.862590416122984,
+        41.83379270939025,
+        7.317528079487414
+      ]
+    }
+  ],
+  "source": "All panels: same autonomous spatial rate DDE. Equilibrium / periodic BVP; no SNN trajectories or startup transients.",
+  "branch_lines": "Colored lines give converged periodic mean (thick) and min/max (thin); stability coverage is separate.",
+  "LPC_markers": "Open squares: BVP-located folds; filled squares: independent full-state mode checks accepted in cycle_fold_evidence_inventory.json. Neither symbol establishes adjacent orbit stability.",
+  "PD_markers": "Filled triangles: validated PD roots; open triangles with question marks: previously located roots requiring temporal-resolution repair. Withheld child geometry is not an accepted state example.",
+  "readout": "Contact-weighted firing-rate envelope, not electrical SEEG voltage.",
+  "field_scale": "Shared across all cases; low-rate fields appear dark.",
+  "case_resolution_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/composite_case_resolution.json"
+}

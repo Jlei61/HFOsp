@@ -1,0 +1,40 @@
+{
+  "status": "BATCH_FINISHED",
+  "rows": [
+    {
+      "case": "DL",
+      "label": "LPC_double_low",
+      "status": "VALIDATION_COMPUTATION_FAILED"
+    },
+    {
+      "case": "DH",
+      "label": "LPC_double_high",
+      "status": "VALIDATION_INCOMPLETE",
+      "validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_high_validation.json"
+    },
+    {
+      "case": "DS1",
+      "label": "LPC_double_secondary1",
+      "status": "VALIDATION_COMPUTATION_FAILED"
+    },
+    {
+      "case": "DS2",
+      "label": "LPC_double_secondary2",
+      "status": "REFINEMENT_FAILED",
+      "N": 4096
+    },
+    {
+      "case": "DS3",
+      "label": "LPC_double_secondary3",
+      "status": "VALIDATION_INCOMPLETE",
+      "validation": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/LPC_double_secondary3_validation.json"
+    },
+    {
+      "case": "DS4",
+      "label": "LPC_double_secondary4",
+      "status": "VALIDATION_COMPUTATION_FAILED"
+    }
+  ],
+  "pid": 603914,
+  "scope": "Batch completion is separate from the scientific status of each candidate."
+}

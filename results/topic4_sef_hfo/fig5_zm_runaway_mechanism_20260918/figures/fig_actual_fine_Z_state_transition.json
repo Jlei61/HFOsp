@@ -1,0 +1,80 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "actual_Z_time_ms": 7750,
+      "D": 0.14286168061196802,
+      "category": "SELF_LIMITED",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/actual_fine_Z_t7750_matched_history_dt005/trajectory.npz",
+      "selection": "Largest 50-ms global E rate in the last4s, excluding final300ms",
+      "windows": [
+        {
+          "window_ms": [
+            5229,
+            5279
+          ],
+          "global_mean_hz": 121.58760429309984
+        },
+        {
+          "window_ms": [
+            5329,
+            5379
+          ],
+          "global_mean_hz": 0.01644350036968581
+        }
+      ]
+    },
+    {
+      "actual_Z_time_ms": 7760,
+      "D": 0.1436290407516062,
+      "category": "SELF_LIMITED",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/actual_fine_Z_t7760_matched_history_dt005/trajectory.npz",
+      "selection": "Peak of first complete event lasting at least200ms",
+      "windows": [
+        {
+          "window_ms": [
+            4567,
+            4617
+          ],
+          "global_mean_hz": 104.47300835449622
+        },
+        {
+          "window_ms": [
+            4667,
+            4717
+          ],
+          "global_mean_hz": 79.69263861409264
+        }
+      ]
+    },
+    {
+      "actual_Z_time_ms": 7770,
+      "D": 0.1446362846679986,
+      "category": "PERSISTENT",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/actual_fine_Z_t7770_matched_history_dt005/trajectory.npz",
+      "selection": "Largest 50-ms global E rate in the first100--1000ms after Z transplant",
+      "windows": [
+        {
+          "window_ms": [
+            219,
+            269
+          ],
+          "global_mean_hz": 129.60220829756668
+        },
+        {
+          "window_ms": [
+            319,
+            369
+          ],
+          "global_mean_hz": 73.69789310610975
+        }
+      ]
+    }
+  ],
+  "shared_initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/rate_critical_near_restart_D0.1449700_dt0.05/trajectory.npz",
+  "Z": "Actual recorded spatial fields, held",
+  "M": "dynamic",
+  "scope": "Separate actual-field control; not points on the affine conditional bifurcation branch",
+  "time_labels": "Source time of the transplanted Z field; image windows are continuation times in metadata",
+  "human_visual_acceptance": "PENDING"
+}

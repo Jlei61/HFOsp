@@ -1,0 +1,116 @@
+{
+  "status": "BOTH_COMPLETE_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "mid2_from_lower",
+      "status": "FULL20S_LOCAL_RETURN_READOUT",
+      "source_audit": "AUDIT_PASS",
+      "observed_ms": 20000,
+      "D_A": 0.3356396201913302,
+      "Z_A": 0.6643603798086698,
+      "quiet_intervals_ms": [
+        [
+          0,
+          41
+        ],
+        [
+          147,
+          308
+        ],
+        [
+          406,
+          468
+        ],
+        [
+          4670,
+          4833
+        ],
+        [
+          8623,
+          8706
+        ],
+        [
+          8759,
+          8900
+        ],
+        [
+          8956,
+          9127
+        ],
+        [
+          9243,
+          9396
+        ],
+        [
+          9496,
+          9555
+        ],
+        [
+          9889,
+          10009
+        ],
+        [
+          10065,
+          10243
+        ],
+        [
+          10346,
+          10405
+        ],
+        [
+          11860,
+          12011
+        ]
+      ],
+      "all_M_dynamic": true,
+      "all_Z_held": true,
+      "scope": "Actual same-field return-to-quiet evidence. No named invariant-set bifurcation."
+    },
+    {
+      "label": "mid2_from_upper",
+      "status": "FULL20S_LOCAL_RETURN_READOUT",
+      "source_audit": "AUDIT_PASS",
+      "observed_ms": 20000,
+      "D_A": 0.3356396201913302,
+      "Z_A": 0.6643603798086698,
+      "quiet_intervals_ms": [
+        [
+          3240,
+          3393
+        ],
+        [
+          3476,
+          3641
+        ],
+        [
+          3744,
+          3804
+        ],
+        [
+          11430,
+          11467
+        ],
+        [
+          11509,
+          11572
+        ],
+        [
+          11623,
+          11753
+        ],
+        [
+          11809,
+          11871
+        ],
+        [
+          14566,
+          14731
+        ]
+      ],
+      "all_M_dynamic": true,
+      "all_Z_held": true,
+      "scope": "Actual same-field return-to-quiet evidence. No named invariant-set bifurcation."
+    }
+  ],
+  "interpretation": "Both20s histories contain qualifying A quiet intervals and long active intervals at the identical fullZfield; last5s alone would miss the observed returns. No certified bistability or invariant bifurcation."
+}

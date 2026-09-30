@@ -1,0 +1,135 @@
+{
+  "label": "H5_highorder_half",
+  "J_EE_core": 1.025109361818011,
+  "frequency_hz": 9.158984290125836,
+  "gain_derivative_order": 4,
+  "gain_derivative_step": 5e-05,
+  "core_B_rate_Hz": 6.853512811048415,
+  "rates_hz": [
+    1.5716000711996407,
+    6.853512811048416,
+    0.28483864288858185
+  ],
+  "lambda_per_ms": [
+    -6.30040255201374e-14,
+    0.05754759552040731
+  ],
+  "equilibrium_residual": 1.6653345369377348e-16,
+  "characteristic_residual": 1.1701866183912146e-15,
+  "E_rate_mode_energy_by_region": [
+    0.0026939917147797486,
+    0.018618643721198865,
+    0.9786873645640213
+  ],
+  "transversality": {
+    "coordinate": "Core-B neuron-weighted E equilibrium rate, Hz",
+    "real_exponent_derivative_per_ms_per_Hz": 0.027174475429375372,
+    "J_derivative_per_Hz": 0.006250877110369757,
+    "real_exponent_derivative_per_ms_per_J": 4.347305977955457,
+    "coordinate_step_Hz": 0.0001,
+    "real_exponents": [
+      -2.7174493469350525e-06,
+      2.7174457389400225e-06
+    ]
+  },
+  "source_mode": 11,
+  "source_branch_indices": [
+    254,
+    255
+  ],
+  "solver_evaluations": [
+    {
+      "core_B_rate_Hz": 6.374273823788309,
+      "J_EE_core": 1.0220036115219298,
+      "lambda_per_ms": [
+        -0.013092543128266824,
+        0.059200537912071464
+      ],
+      "equilibrium_residual_Hz": 9.020562075079397e-14,
+      "characteristic_residual": 1.0256607718577653e-15
+    },
+    {
+      "core_B_rate_Hz": 6.866282004205476,
+      "J_EE_core": 1.0251890955469838,
+      "lambda_per_ms": [
+        0.00034696905664126685,
+        0.057457430157513194
+      ],
+      "equilibrium_residual_Hz": 1.5959455978986625e-13,
+      "characteristic_residual": 1.2262351693897497e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853579786158393,
+      "J_EE_core": 1.0251097804688598,
+      "lambda_per_ms": [
+        1.8200130141032503e-06,
+        0.057547127043906264
+      ],
+      "equilibrium_residual_Hz": 2.498001805406602e-13,
+      "characteristic_residual": 1.215115522655373e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512815122741,
+      "J_EE_core": 1.0251093618434788,
+      "lambda_per_ms": [
+        1.1071773051005857e-10,
+        0.05754759549151137
+      ],
+      "equilibrium_residual_Hz": 2.3592239273284576e-13,
+      "characteristic_residual": 1.3392506316445597e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811048415,
+      "J_EE_core": 1.025109361818011,
+      "lambda_per_ms": [
+        -6.30040255201374e-14,
+        0.05754759552040731
+      ],
+      "equilibrium_residual_Hz": 1.6653345369377348e-13,
+      "characteristic_residual": 1.0084484147453249e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811098758,
+      "J_EE_core": 1.0251093618183251,
+      "lambda_per_ms": [
+        1.7649820573944401e-12,
+        0.057547595519729995
+      ],
+      "equilibrium_residual_Hz": 1.5612511283791264e-13,
+      "characteristic_residual": 1.1347673700276925e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853512811048415,
+      "J_EE_core": 1.025109361818011,
+      "lambda_per_ms": [
+        -6.30040255201374e-14,
+        0.05754759552040731
+      ],
+      "equilibrium_residual_Hz": 1.6653345369377348e-13,
+      "characteristic_residual": 1.0251546670350955e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853412811048416,
+      "J_EE_core": 1.0251087367251,
+      "lambda_per_ms": [
+        -2.7174493469350525e-06,
+        0.05754829491138078
+      ],
+      "equilibrium_residual_Hz": 1.3530843112619095e-13,
+      "characteristic_residual": 1.0519486295301214e-15
+    },
+    {
+      "core_B_rate_Hz": 6.853612811048415,
+      "J_EE_core": 1.025109986900522,
+      "lambda_per_ms": [
+        2.7174457389400225e-06,
+        0.057546896024516805
+      ],
+      "equilibrium_residual_Hz": 1.5092094240998222e-13,
+      "characteristic_residual": 1.3513106924774616e-15
+    }
+  ],
+  "status": "REFINED_HOPF_CANDIDATE",
+  "criticality": "NOT_COMPUTED",
+  "scope": "A new imaginary-axis crossing on an already unstable equilibrium branch; not the first resting instability. Derivative and independent full-state checks pending."
+}

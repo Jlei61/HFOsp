@@ -1,0 +1,185 @@
+{
+  "status": "COMPLETE_SAME_INPUT_DENSITY_HISTORY_COMPARISON",
+  "rows": [
+    {
+      "history": "native12s_evolving_history",
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_exit_bracket_protocol/exit_z0.21_k9.35_fields16p7_high",
+      "interval_s": [
+        5,
+        10
+      ],
+      "regional_rate_Hz": [
+        108.7701002463066,
+        393.5087824110237,
+        137.07244354770947,
+        100.99141974114904
+      ],
+      "mean_Graw": 2.7058779430724106e-05,
+      "counterfactual_dZ_per_s": [
+        0.07735954081407842,
+        -0.03483387689533537,
+        -0.01581820506880554,
+        0.0825411411166669
+      ],
+      "each1s_regional_rate_Hz": [
+        [
+          172.88076858366594,
+          464.81259360810265,
+          466.9555807571696,
+          158.06594919966074
+        ],
+        [
+          106.18339526645639,
+          413.8473455089944,
+          236.1161439965633,
+          95.21472294259763
+        ],
+        [
+          99.32435205300665,
+          391.9774640780507,
+          134.89128100601957,
+          91.16230173705289
+        ],
+        [
+          99.74903491270565,
+          392.2204908208619,
+          136.07562022079796,
+          91.57187884550571
+        ],
+        [
+          102.37069897618412,
+          393.0918953205467,
+          138.10471338323995,
+          94.2521593383773
+        ],
+        [
+          108.27590967268686,
+          393.8066562279371,
+          137.21150408615958,
+          100.46128196055133
+        ],
+        [
+          108.86655981788857,
+          393.36563338755644,
+          137.09868995530005,
+          101.09562233399052
+        ],
+        [
+          108.963727539071,
+          393.67278687651907,
+          137.14036653436835,
+          101.18902402657135
+        ],
+        [
+          108.94602246436335,
+          393.4956275653738,
+          137.46406846408655,
+          101.16645626600669
+        ],
+        [
+          108.79828173752321,
+          393.20320799773185,
+          136.44758869863284,
+          101.04471411862532
+        ]
+      ]
+    },
+    {
+      "history": "native42s_heldK9_history",
+      "source": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/density_K9p35_held_history/exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "interval_s": [
+        5,
+        10
+      ],
+      "regional_rate_Hz": [
+        200.45667580503834,
+        472.3094808612034,
+        474.9951363553617,
+        186.6430105061249
+      ],
+      "mean_Graw": 0.11277464490271313,
+      "counterfactual_dZ_per_s": [
+        0.03816512537349032,
+        -0.03483387689533537,
+        -0.03307375779645588,
+        0.041810398186434256
+      ],
+      "each1s_regional_rate_Hz": [
+        [
+          190.77258742225223,
+          442.03807842441705,
+          471.4312290174973,
+          177.31060867932723
+        ],
+        [
+          189.49343801459406,
+          467.75186526569036,
+          474.8122920776997,
+          175.24302851226548
+        ],
+        [
+          200.13677810653044,
+          472.3328396612093,
+          474.9967804409244,
+          186.3063187418862
+        ],
+        [
+          200.37904983056822,
+          472.26871296350896,
+          474.9935202394924,
+          186.56251077135443
+        ],
+        [
+          200.48029054798317,
+          472.3264673285847,
+          475.01129207011155,
+          186.66698179916617
+        ],
+        [
+          200.57903933280252,
+          472.3731765261693,
+          474.9962734113501,
+          186.7699544533036
+        ],
+        [
+          200.31440627180638,
+          472.2541447453824,
+          474.99578637899367,
+          186.4949010986834
+        ],
+        [
+          200.50675685922238,
+          472.32508932291984,
+          475.0140254682843,
+          186.69474977437832
+        ],
+        [
+          200.4648113001855,
+          472.3126866853848,
+          474.9904488614907,
+          186.6515989179259
+        ],
+        [
+          200.41836526117493,
+          472.28230702616077,
+          474.9791476566904,
+          186.60384828633332
+        ]
+      ]
+    }
+  ],
+  "field_difference_weighted_RMS_Hz": 207.15587355263574,
+  "QA": {
+    "held_Z_K_bitwise": true,
+    "physical_and_projection_kernels_identical": true,
+    "expected_external_drive_common": "exit_branch_density/drive_0p1ms.npy",
+    "paired_local_normal_stream_seed": 928751,
+    "full_final_RNG_arrays_bitwise": true,
+    "full_duration_steps": 100000
+  },
+  "interpretation": "Different complete endogenous native initial histories select different10s conditional density states under the SAME timevarying expectedexternaldrive and paired Gaussianstreams. This removes the previous constantmean/ramp confound within the density comparison. It does not prove distinct attractors, a basinboundary, nativehistory selection, or temporal stability.",
+  "statistical_unit": "Two initialhistory interventions of one conditional density system; no new independent native seed.",
+  "producer_sha256": "14e8e033a81992ac0de7918a6922c4c698b0aa866125aaca6807cf4a2962b498",
+  "formal_bifurcation_allowed": false,
+  "created_epoch": 1790549351.574843
+}

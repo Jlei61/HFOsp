@@ -1,0 +1,117 @@
+{
+  "status": "STORED_COUNTS_DIAGNOSTIC_COMPLETE",
+  "rows": [
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_expected",
+      "population": "E",
+      "window_ms": 2,
+      "group_windows": 6686965,
+      "violations": 0,
+      "fraction": 0.0,
+      "maximum_excess_spikes": -0.06594125366210934,
+      "cell_weighted_time_fraction": 0.0
+    },
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_expected",
+      "population": "I",
+      "window_ms": 1,
+      "group_windows": 5000000,
+      "violations": 0,
+      "fraction": 0.0,
+      "maximum_excess_spikes": -0.8874456787109377,
+      "cell_weighted_time_fraction": 0.0
+    },
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_poisson_seed1",
+      "population": "E",
+      "window_ms": 2,
+      "group_windows": 6686965,
+      "violations": 7480,
+      "fraction": 0.0011185941604300307,
+      "maximum_excess_spikes": 51.0,
+      "cell_weighted_time_fraction": 0.0003802979238339067
+    },
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_poisson_seed1",
+      "population": "I",
+      "window_ms": 1,
+      "group_windows": 5000000,
+      "violations": 2515,
+      "fraction": 0.000503,
+      "maximum_excess_spikes": 34.000002685546875,
+      "cell_weighted_time_fraction": 0.00047863
+    },
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_poisson_seed2",
+      "population": "E",
+      "window_ms": 2,
+      "group_windows": 6686965,
+      "violations": 14178,
+      "fraction": 0.0021202443859060127,
+      "maximum_excess_spikes": 62.00000024414061,
+      "cell_weighted_time_fraction": 0.000806829546363709
+    },
+    {
+      "folder": "conditioned_refractory_spatial_diagnostic",
+      "label": "recorded_drive_poisson_seed2",
+      "population": "I",
+      "window_ms": 1,
+      "group_windows": 5000000,
+      "violations": 5147,
+      "fraction": 0.0010294,
+      "maximum_excess_spikes": 38.00000244140625,
+      "cell_weighted_time_fraction": 0.00099446
+    },
+    {
+      "folder": "conditioned_refractory_external_filter_pair",
+      "label": "recorded_drive_expected",
+      "population": "E",
+      "window_ms": 2,
+      "group_windows": 6686965,
+      "violations": 0,
+      "fraction": 0.0,
+      "maximum_excess_spikes": -0.05311346435546871,
+      "cell_weighted_time_fraction": 0.0
+    },
+    {
+      "folder": "conditioned_refractory_external_filter_pair",
+      "label": "recorded_drive_expected",
+      "population": "I",
+      "window_ms": 1,
+      "group_windows": 5000000,
+      "violations": 0,
+      "fraction": 0.0,
+      "maximum_excess_spikes": -0.9286224365234368,
+      "cell_weighted_time_fraction": 0.0
+    },
+    {
+      "folder": "conditioned_refractory_external_filter_pair",
+      "label": "recorded_drive_poisson_seed1",
+      "population": "E",
+      "window_ms": 2,
+      "group_windows": 6686965,
+      "violations": 4906,
+      "fraction": 0.0007336661699291083,
+      "maximum_excess_spikes": 59.00000396728515,
+      "cell_weighted_time_fraction": 0.0002584431754540363
+    },
+    {
+      "folder": "conditioned_refractory_external_filter_pair",
+      "label": "recorded_drive_poisson_seed1",
+      "population": "I",
+      "window_ms": 1,
+      "group_windows": 5000000,
+      "violations": 2018,
+      "fraction": 0.0004036,
+      "maximum_excess_spikes": 30.000002441406252,
+      "cell_weighted_time_fraction": 0.00038543999999999997
+    }
+  ],
+  "definition": "Inanyhalf-open2msE/1msI interval, groupcount mustnotexceedoriginalneuronnumbers. Aligned1ms binsprovideasufficientviolationtest,notallpossiblewindows.1e-4spikefloat32tolerance.",
+  "model_changed": false
+}

@@ -1,0 +1,77 @@
+{
+  "label": "PD_double_low",
+  "J_EE_core": 0.9387254738385757,
+  "T_ms": 825.3653884974744,
+  "parent_orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PD_double_low_filter_parent_N8192.npz",
+  "mode_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/PD_double_low_filter_mode_N8192.npz",
+  "accepted_fine_parent": true,
+  "normalization": "Largest absolute E-group rate mode component = 1 Hz; all derivatives per this unit.",
+  "E_mode_energy_A_B_surround": [
+    0.05486604653996493,
+    0.04154563297858676,
+    0.9035883204814483
+  ],
+  "E_population_fraction_A_B_surround": [
+    0.0235625,
+    0.0245625,
+    0.951875
+  ],
+  "per_E_cell_mode_RMS_relative_to_network": [
+    1.5259529740951079,
+    1.3005480618626626,
+    0.9743059259161484
+  ],
+  "core_peak_derivatives": {
+    "A": [
+      {
+        "peak_ms": 6.82242936352236,
+        "peak_rate_Hz": 92.62494044851677,
+        "delta_peak_height_Hz_per_unit": -0.12837550066808343,
+        "delta_peak_time_ms_per_unit": 0.015392473128765877
+      },
+      {
+        "peak_ms": 469.2647219069895,
+        "peak_rate_Hz": 241.35109255613676,
+        "delta_peak_height_Hz_per_unit": 0.0008630827831649234,
+        "delta_peak_time_ms_per_unit": 0.013664345188270794
+      }
+    ],
+    "B": [
+      {
+        "peak_ms": 67.84758899617486,
+        "peak_rate_Hz": 244.7978844631585,
+        "delta_peak_height_Hz_per_unit": -0.02019785438808754,
+        "delta_peak_time_ms_per_unit": 0.010400811171593966
+      },
+      {
+        "peak_ms": 407.5193121919185,
+        "peak_rate_Hz": 123.20403632748003,
+        "delta_peak_height_Hz_per_unit": -0.005648187912604459,
+        "delta_peak_time_ms_per_unit": 0.013620387073386147
+      }
+    ]
+  },
+  "maximum_regional_mode_Hz": [
+    0.22016078092545313,
+    0.19562055831430586,
+    0.018624325924268187
+  ],
+  "maximum_contact_mode_Hz": [
+    0.42609403874347956,
+    0.02879366217198569,
+    0.3015449878426227,
+    0.06238955374714948,
+    0.28319686879090217,
+    0.10049521781704675,
+    0.18876039851658816,
+    0.13816076363639898,
+    0.23980240741103975,
+    0.2918395038704173,
+    0.4057081308171978,
+    0.3161828012293513,
+    0.3126709635744338,
+    0.4342967894663205,
+    0.2645469868725751
+  ],
+  "meaning": "The mode changes sign after one parent period, so adjacent parent-length windows receive opposite first-order changes. This does not establish child stability, a propagation-template switch, or irregular dynamics."
+}

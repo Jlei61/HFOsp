@@ -1,0 +1,90 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "mid2_from_lower",
+  "coordinates": {
+    "D_A": 0.3356396201913302,
+    "Z_A": 0.6643603798086698,
+    "D_global": 0.2183490870432122,
+    "native_time_ms": 9856.182439323811
+  },
+  "window_ms": [
+    15000.0,
+    20000.0
+  ],
+  "rows": [
+    {
+      "region": "Global E",
+      "mean_rate_hz": 54.67656173918087,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.6184,
+      "range_10ms_hz": [
+        9.365764511585017,
+        92.65908020597016
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core A",
+      "mean_rate_hz": 385.65134924078416,
+      "quiet_fraction": 0.0,
+      "duty_above50": 1.0,
+      "range_10ms_hz": [
+        133.13949292457363,
+        431.1675663368769
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    },
+    {
+      "region": "Core B",
+      "mean_rate_hz": 142.18872928633746,
+      "quiet_fraction": 0.3042,
+      "duty_above50": 0.602,
+      "range_10ms_hz": [
+        2.1313520319177593e-05,
+        440.53444745206855
+      ],
+      "complete_local_episodes": 22,
+      "episode_durations_ms": [
+        50,
+        42,
+        641,
+        47,
+        287,
+        44,
+        27,
+        48,
+        278,
+        44,
+        49,
+        48,
+        224,
+        56,
+        46,
+        380,
+        45,
+        23,
+        23,
+        355,
+        48,
+        537
+      ]
+    },
+    {
+      "region": "Surround",
+      "mean_rate_hz": 44.22549301074115,
+      "quiet_fraction": 0.0,
+      "duty_above50": 0.4148,
+      "range_10ms_hz": [
+        5.57418105178196,
+        77.72007485009763
+      ],
+      "complete_local_episodes": 0,
+      "episode_durations_ms": []
+    }
+  ],
+  "definition": "Local activity episodes apply the explicitly declared5Hz/20ms quiet rule to each regional10ms-smoothed rate; these are not reused global whole-field event counts.",
+  "scope": "Paired finite-time local state evidence only; no certified equilibrium, periodic stability, bistability or bifurcation.",
+  "model_promoted": false
+}

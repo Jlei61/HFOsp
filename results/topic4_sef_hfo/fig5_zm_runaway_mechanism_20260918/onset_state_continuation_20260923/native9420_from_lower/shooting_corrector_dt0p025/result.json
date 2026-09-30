@@ -1,0 +1,379 @@
+{
+  "status": "CORRECTOR_BUDGET_EXHAUSTED_NOT_A_BIFURCATION",
+  "iterations": [
+    {
+      "iteration": 1,
+      "period_ms": 572.1280560553332,
+      "fraction": 0.1222422133297797,
+      "section_residual": 5.73485333765926e-16,
+      "section_speed": 2.0912255944957683,
+      "initial_phase": 0.0,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.038412034449351,
+          "difference_rms": 0.03628989179206109,
+          "relative_rms": 0.0027833061032415604
+        },
+        "GABA": {
+          "reference_rms": 0.6185991602930799,
+          "difference_rms": 0.02238403621294286,
+          "relative_rms": 0.036185041380168946
+        },
+        "M": {
+          "reference_rms": 0.027976842347552267,
+          "difference_rms": 0.0002221377219780516,
+          "relative_rms": 0.007940056966346195
+        },
+        "covariance": {
+          "reference_rms": 36.8812730122394,
+          "difference_rms": 0.018369612545220567,
+          "relative_rms": 0.0004980742540834867
+        },
+        "input_memory": {
+          "reference_rms": 0.08725613677930089,
+          "difference_rms": 0.002665011791709659,
+          "relative_rms": 0.030542399538617433
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026973869952804513,
+          "difference_rms": 1.8072949802753966e-05,
+          "relative_rms": 0.06700169398894464
+        }
+      },
+      "combined_relative_rms": 0.03367110967903345,
+      "weighted_coordinate_relative": 0.0568226427675173,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 2,
+      "period_ms": 575.2592306810559,
+      "fraction": 0.3692272422336182,
+      "section_residual": -1.5961717931593275e-15,
+      "section_speed": 2.108151648818756,
+      "initial_phase": 5.73485333765926e-16,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.038692544743034,
+          "difference_rms": 0.09941981911277574,
+          "relative_rms": 0.007624983775912411
+        },
+        "GABA": {
+          "reference_rms": 0.6142366737151865,
+          "difference_rms": 0.43750316290576224,
+          "relative_rms": 0.7122713143445856
+        },
+        "M": {
+          "reference_rms": 0.028065612589238266,
+          "difference_rms": 0.0030683939502544793,
+          "relative_rms": 0.10932930612143674
+        },
+        "covariance": {
+          "reference_rms": 36.88143375793117,
+          "difference_rms": 0.10373760006061854,
+          "relative_rms": 0.002812732301609893
+        },
+        "input_memory": {
+          "reference_rms": 0.08666057982477181,
+          "difference_rms": 0.08041922736763743,
+          "relative_rms": 0.9279793365131594
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026962363272728715,
+          "difference_rms": 5.368965297656776e-05,
+          "relative_rms": 0.19912814182305957
+        }
+      },
+      "combined_relative_rms": 0.4865091708825658,
+      "weighted_coordinate_relative": 0.3380471116814582,
+      "next_method": "Anderson3",
+      "mixing_coefficients": [
+        0.9960140097345134,
+        0.0039859902654866075
+      ]
+    },
+    {
+      "iteration": 3,
+      "period_ms": 575.2637440147253,
+      "fraction": 0.5497605890106684,
+      "section_residual": 4.739441298576735e-18,
+      "section_speed": 2.107340640583689,
+      "initial_phase": -2.1431568952831542e-17,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.0384913983432,
+          "difference_rms": 0.09905440102979972,
+          "relative_rms": 0.007597075305996409
+        },
+        "GABA": {
+          "reference_rms": 0.6144559953744205,
+          "difference_rms": 0.4356688508353913,
+          "relative_rms": 0.7090318169487715
+        },
+        "M": {
+          "reference_rms": 0.028066632549792036,
+          "difference_rms": 0.0030663331737321125,
+          "relative_rms": 0.10925190858904207
+        },
+        "covariance": {
+          "reference_rms": 36.88134097600547,
+          "difference_rms": 0.10333512809480552,
+          "relative_rms": 0.0028018267600962246
+        },
+        "input_memory": {
+          "reference_rms": 0.08664281617281083,
+          "difference_rms": 0.08009467046099816,
+          "relative_rms": 0.9244236741018175
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026958804981795534,
+          "difference_rms": 5.348739447265298e-05,
+          "relative_rms": 0.19840417447572845
+        }
+      },
+      "combined_relative_rms": 0.484536033825439,
+      "weighted_coordinate_relative": 0.3368595902795062,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 4,
+      "period_ms": 575.9158401509578,
+      "fraction": 0.633606038311435,
+      "section_residual": -3.0290964618852455e-16,
+      "section_speed": 2.112214691604513,
+      "initial_phase": 4.739441298576735e-18,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.988489657408607,
+          "difference_rms": 0.029130950752783626,
+          "relative_rms": 0.0022428281902790287
+        },
+        "GABA": {
+          "reference_rms": 0.7971402448708204,
+          "difference_rms": 0.13914938504988023,
+          "relative_rms": 0.17456073250000056
+        },
+        "M": {
+          "reference_rms": 0.02848746712538515,
+          "difference_rms": 0.002026567815680469,
+          "relative_rms": 0.07113892599720094
+        },
+        "covariance": {
+          "reference_rms": 36.858284651936046,
+          "difference_rms": 0.04285390612767223,
+          "relative_rms": 0.0011626668612594064
+        },
+        "input_memory": {
+          "reference_rms": 0.11479704341657108,
+          "difference_rms": 0.015399779029901651,
+          "relative_rms": 0.13414787150936916
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026599710450372357,
+          "difference_rms": 1.5489887744702592e-05,
+          "relative_rms": 0.05823329458267
+        }
+      },
+      "combined_relative_rms": 0.09740409490360215,
+      "weighted_coordinate_relative": 0.08872299375250162,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 5,
+      "period_ms": 576.0127893304677,
+      "fraction": 0.5115732187088339,
+      "section_residual": -3.173499888141902e-16,
+      "section_speed": 2.114296448684823,
+      "initial_phase": -3.0290964618852455e-16,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.977343950780563,
+          "difference_rms": 0.008105722181898641,
+          "relative_rms": 0.0006246056367652255
+        },
+        "GABA": {
+          "reference_rms": 0.8814899304755286,
+          "difference_rms": 0.1733612497711079,
+          "relative_rms": 0.19666844030491243
+        },
+        "M": {
+          "reference_rms": 0.028960403789150626,
+          "difference_rms": 0.001186309499769468,
+          "relative_rms": 0.04096315467168633
+        },
+        "covariance": {
+          "reference_rms": 36.852958815023634,
+          "difference_rms": 0.016422812497752164,
+          "relative_rms": 0.0004456307722857024
+        },
+        "input_memory": {
+          "reference_rms": 0.11867534719338241,
+          "difference_rms": 0.009291208893098937,
+          "relative_rms": 0.07829097713073331
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0002656748281553869,
+          "difference_rms": 4.826978505734496e-06,
+          "relative_rms": 0.01816874612942748
+        }
+      },
+      "combined_relative_rms": 0.08833329365496971,
+      "weighted_coordinate_relative": 0.045860233891747405,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 6,
+      "period_ms": 576.050857220727,
+      "fraction": 0.03428882908003072,
+      "section_residual": -2.3836443881837085e-16,
+      "section_speed": 2.1173666306340833,
+      "initial_phase": -3.173499888141902e-16,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.972714326050973,
+          "difference_rms": 0.003654384440544319,
+          "relative_rms": 0.0002816977502700278
+        },
+        "GABA": {
+          "reference_rms": 1.0188209032765194,
+          "difference_rms": 0.07903820761334227,
+          "relative_rms": 0.077578117369948
+        },
+        "M": {
+          "reference_rms": 0.029290410453217706,
+          "difference_rms": 0.0007200965672674599,
+          "relative_rms": 0.02458472094194752
+        },
+        "covariance": {
+          "reference_rms": 36.85073061399378,
+          "difference_rms": 0.007209353227530409,
+          "relative_rms": 0.0001956366429487483
+        },
+        "input_memory": {
+          "reference_rms": 0.12273610459981645,
+          "difference_rms": 0.0041174346836931,
+          "relative_rms": 0.03354705363281717
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026553541130731157,
+          "difference_rms": 2.078022918004673e-06,
+          "relative_rms": 0.007825784545172089
+        }
+      },
+      "combined_relative_rms": 0.036077551046248504,
+      "weighted_coordinate_relative": 0.020222994371075845,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 7,
+      "period_ms": 576.0708507526695,
+      "fraction": 0.8340301067775986,
+      "section_residual": -7.47604873416304e-18,
+      "section_speed": 2.1142354974238984,
+      "initial_phase": -2.3836443881837085e-16,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.970740265772822,
+          "difference_rms": 0.0017162407098336098,
+          "relative_rms": 0.00013231632695339868
+        },
+        "GABA": {
+          "reference_rms": 1.0852876234177975,
+          "difference_rms": 0.0460618750829838,
+          "relative_rms": 0.04244209008661255
+        },
+        "M": {
+          "reference_rms": 0.029503634832106964,
+          "difference_rms": 0.0004361973374363412,
+          "relative_rms": 0.014784528751069509
+        },
+        "covariance": {
+          "reference_rms": 36.84979552436275,
+          "difference_rms": 0.003390254404341512,
+          "relative_rms": 9.200198687941405e-05
+        },
+        "input_memory": {
+          "reference_rms": 0.12457294906039448,
+          "difference_rms": 0.00222772790218348,
+          "relative_rms": 0.017882918554841712
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026550713146016405,
+          "difference_rms": 1.0424444536833544e-06,
+          "relative_rms": 0.003926238997613365
+        }
+      },
+      "combined_relative_rms": 0.019812257998491685,
+      "weighted_coordinate_relative": 0.011191631991855574,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    },
+    {
+      "iteration": 8,
+      "period_ms": 576.0873147719861,
+      "fraction": 0.49259087944626045,
+      "section_residual": 1.899019009266439e-16,
+      "section_speed": 2.1163082343504205,
+      "initial_phase": -7.47604873416304e-18,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.969806710280702,
+          "difference_rms": 0.0012627537270924764,
+          "relative_rms": 9.736102898831459e-05
+        },
+        "GABA": {
+          "reference_rms": 1.1248317284617302,
+          "difference_rms": 0.037231344191729306,
+          "relative_rms": 0.03309947901509254
+        },
+        "M": {
+          "reference_rms": 0.029635065170366078,
+          "difference_rms": 0.000268371449409748,
+          "relative_rms": 0.009055875121817148
+        },
+        "covariance": {
+          "reference_rms": 36.84934976873367,
+          "difference_rms": 0.0024400955794061335,
+          "relative_rms": 6.621814481721281e-05
+        },
+        "input_memory": {
+          "reference_rms": 0.1256317787271013,
+          "difference_rms": 0.0017383151143243604,
+          "relative_rms": 0.01383658762087853
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.0002655061769771506,
+          "difference_rms": 7.913294633001463e-07,
+          "relative_rms": 0.0029804559438488996
+        }
+      },
+      "combined_relative_rms": 0.015154386185351532,
+      "weighted_coordinate_relative": 0.00885972488529214,
+      "next_method": "Picard",
+      "mixing_coefficients": [
+        1.0
+      ]
+    }
+  ],
+  "dt_ms": 0.025,
+  "period_ms": 576.0873147719861,
+  "elapsed_seconds": 655.7465083599091,
+  "scope": "Interpolated discrete-step section-map root only. Same-branch mesh refinement, independent residual, fundamental-period and Floquet certification still required.",
+  "model_promoted": false
+}

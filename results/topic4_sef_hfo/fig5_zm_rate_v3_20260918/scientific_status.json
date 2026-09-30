@@ -1,0 +1,15 @@
+{
+  "updated": "2026-09-18 12:03",
+  "root_cause_of_v2_response_failure": "ESTABLISHED: small-tau_syn threshold-shift closure invalid for GABA (21.6 ms >= tau_m); depleted-workpoint rate -33 % (I), variance-gain sign inversion",
+  "static_transfer": "ACCEPTED: MC table + spline reproduces held-out colored-LIF rates to <=2.5 % everywhere (median 0.2 %)",
+  "static_gains": "ACCEPTED outside the quantised-ISI regime; NOT ASSESSABLE inside it (documented)",
+  "dynamic_response_mean_channel": "ACCEPTED (held-out normalised error median 0.04; 6/25 Hz at all v2 workpoints <= 0.083)",
+  "dynamic_response_variance_channels": "NOT ACCEPTED against the registered 0.10 tolerance (median 0.16 / 0.08); network-level weight of these channels 0.10-0.13 (interictal) and <0.005 (high state)",
+  "Z_population_closure": "ACCEPTED at the integrated level (<0.5 %); local transition-regime bias documented",
+  "native_dynamics_and_propagation": "PARTIAL: deterministic skeleton reproduces self-limited events, quiet, two-core participation, surround extent, D(t) to 8 s, and enters broad activity (8.5 s vs native 9.87 s); ignition side fixed (no noise); stochastic contrasts reproduce both directions; the recorded-drive stochastic arm depletes 2x faster (enters 6.4 s)",
+  "SNN_equivalence": "NOT CLAIMED; 'basically consistent' propagation standard met by the skeleton and the noise-only contrast; entry timing and post-entry depletion deviate",
+  "onset_mechanism": "NOT YET ESTABLISHED (stage B running)",
+  "bifurcation_completeness": "NOT YET (stage C running)",
+  "spatial_grid_convergence": "NOT YET (g40 running)",
+  "human_visual_acceptance": "PENDING"
+}

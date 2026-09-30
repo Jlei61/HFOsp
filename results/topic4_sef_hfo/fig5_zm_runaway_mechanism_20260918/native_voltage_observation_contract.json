@@ -1,0 +1,26 @@
+{
+  "created_local": "2026-09-20T01:31:36.804471+08:00",
+  "question": "Does the unchanged native pre-onset trajectory show hyperpolarized recovery in the previously selected surround subgroup and in regional summaries?",
+  "start_ms": 9000,
+  "stop_ms": 10370,
+  "sample_interval_ms": 1,
+  "selected_group": 39,
+  "populations": [
+    "Core A E",
+    "Core B E",
+    "Surround E",
+    "Selected surround E group39"
+  ],
+  "observables": [
+    "Pre-membrane-update V and V squared",
+    "Fraction V below reset",
+    "AMPA, raw GABA, Z times GABA, eta_M times M, net current",
+    "Z",
+    "Spikes each native step"
+  ],
+  "ordering": "Current observer sees this step currents and previous post-step V, with pre-slow-update Z/M. Spike observer sees this step spikes. Absolute clocks retained; no phase alignment or time shifting.",
+  "acceptance": "All original arrays in first two complete 500ms chunks and complete final engine state at10370ms bitwise equal to reference; physical initial state also equal.",
+  "statistical_unit": "One native history; neurons, time bins and successive events are descriptive repeated observations, not independent trajectories.",
+  "budget": "One1.37s observe-only native replay; no parameter change, fitting, new model or bifurcation scan.",
+  "scope": "Native membrane/input description. Does not validate a population closure or identify a bifurcation; no input waveform from a reduced model is supplied."
+}

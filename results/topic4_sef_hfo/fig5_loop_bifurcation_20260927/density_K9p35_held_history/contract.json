@@ -1,0 +1,23 @@
+{
+  "status": "REGISTERED_BEFORE_ONE_DENSITY_HISTORY_COUNTERPART",
+  "created_epoch": 1790548585.8079135,
+  "question": "Does the target-density closure reproduce the native carried-history check from its exact declared initial physical state?",
+  "design": "Exactly one10s40000targetx128particle run atK9.35. Source is the same completed nativeK9 endpoint atabsolute42s used by the new30s native history control. SameheldZ/Kfields, fullinitialV/synapses/pending/ref/M/R/G, same50-60s expectedexternaldrive, localGaussianseed928751. No constant-mean substitution andno newKpoint.",
+  "rationale": "Immediate12s-history density reproduced asymmetriccoreactivity but retained peripheralfield error~42HzRMS. The previous carried-density highstate used its own finalstate andconstantmean; this counterpart removes those protocol differences when evaluating the newnativehistory control.",
+  "stopping": "One10s run andcomplete-only comparison; no newK, fitting, horizon extension or automatic branch certification.",
+  "jobs": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_held_K9_history",
+      "job_sha256": "efb94b16f8de892c2253f13464b555282db369b78a147370e5dd9b39e40ea4eb"
+    }
+  ],
+  "producer_sha256": "b86fc090c24a85c38abd08944393cd275c0b24c998a0a0407aaf7f34cd3db31e",
+  "base_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "family_sha256": "eb6dc66d9b5e4a23d458561799aa8ea102e085539b8105d973e06580573fb476",
+  "physical_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "wrapper_sha256": "ce94aa595aafcbef6e97e00ef753c4fd1f40ed59d5c8c1101733ea4608fb9852",
+  "implementation": "/home/honglab/leijiaxin/HFOsp/scripts/topic4_loop_bifurcation/density_bracket_protocol.py",
+  "native_correspondence_certified": false,
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

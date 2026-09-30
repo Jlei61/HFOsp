@@ -1,0 +1,12 @@
+{
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish",
+  "mode_source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/reference_stability_gap/three_burst_entry_continuation/native9584/whole_cycle_finish/section_spectrum_segmented/mode01.npz",
+  "dt_ms": 0.05,
+  "question": "Construct a verified local scalar coordinate for the numerical negative return mode before nonlinear daughter-branch tests.",
+  "method": "Exact transpose of every cached full fixed-time segment, in reverse order, after the transpose implicit return-time projection. Full physical state retained. Two bilinear identities and unchanged nominal state precede bounded left power iteration.",
+  "maximum_iterations": 24,
+  "segments": 6,
+  "prior_physical_Floquet": "PENDING_PHASE_AND_MESH",
+  "scope": "Numerical Poincare map only. Prior phase/mesh failures retained. This is not a separatrix, physical Floquet certificate, bifurcation label or native onset attribution.",
+  "model_promoted": false
+}

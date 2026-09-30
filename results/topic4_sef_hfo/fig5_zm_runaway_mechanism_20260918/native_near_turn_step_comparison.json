@@ -1,0 +1,65 @@
+{
+  "status": "DESCRIPTIVE_STEP_COMPARISON_COMPLETE",
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "D": 0.21932,
+      "global_Z": 0.78068,
+      "category": "SELF_LIMITED",
+      "tail_mean_hz": 31.032815597679654,
+      "tail_quiet_fraction": 0.6475,
+      "complete_events": 113,
+      "max_event_ms": 100,
+      "best_recurrence_correlation": 0.9999558947281468,
+      "best_recurrence_lag_ms": 529,
+      "best_recurrence_return_error": 0.009392046832642035
+    },
+    {
+      "dt_ms": 0.05,
+      "D": 0.21934,
+      "global_Z": 0.78066,
+      "category": "UNRESOLVED",
+      "tail_mean_hz": 65.69307708521748,
+      "tail_quiet_fraction": 0.0775,
+      "complete_events": 17,
+      "max_event_ms": 5710,
+      "best_recurrence_correlation": 0.331699653372096,
+      "best_recurrence_lag_ms": 108,
+      "best_recurrence_return_error": 1.1561165582970248
+    },
+    {
+      "dt_ms": 0.025,
+      "D": 0.21932,
+      "global_Z": 0.78068,
+      "category": "SELF_LIMITED",
+      "tail_mean_hz": 31.03254380344166,
+      "tail_quiet_fraction": 0.6425,
+      "complete_events": 113,
+      "max_event_ms": 100,
+      "best_recurrence_correlation": 0.9999543586924358,
+      "best_recurrence_lag_ms": 529,
+      "best_recurrence_return_error": 0.009554193589212591
+    },
+    {
+      "dt_ms": 0.025,
+      "D": 0.21934,
+      "global_Z": 0.78066,
+      "category": "UNRESOLVED",
+      "tail_mean_hz": 60.44895476588861,
+      "tail_quiet_fraction": 0.1475,
+      "complete_events": 18,
+      "max_event_ms": 5120,
+      "best_recurrence_correlation": 0.26627166263269436,
+      "best_recurrence_lag_ms": 97,
+      "best_recurrence_return_error": 1.211392300675357
+    }
+  ],
+  "source_audits": [
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_near_turn_matched_audit_dt0.05.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_near_turn_matched_audit_dt0.025.json"
+  ],
+  "cross_step_categories_agree": true,
+  "original_low_selflimited_high_unresolved_pattern_replicated": true,
+  "scope": "Two matched finite30s conditional trajectories at each timestep. Full state and coincident physical delay-history samples checked. Categorical agreement is not quantitative event-distribution convergence or Floquet/bifurcation validation.",
+  "recurrence": "Peak over5-to1000ms lags can be a multiple of the fundamental period; do not interpret the best lag itself as the period."
+}

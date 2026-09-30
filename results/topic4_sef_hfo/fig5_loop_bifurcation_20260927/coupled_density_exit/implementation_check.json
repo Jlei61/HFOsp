@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "pending_and_native_local_CPU": [
+    {
+      "tick": 0,
+      "max_state_error": 5.684341886080802e-14,
+      "spikes_ref_exact": true
+    },
+    {
+      "tick": 17,
+      "max_state_error": 5.684341886080802e-14,
+      "spikes_ref_exact": true
+    },
+    {
+      "tick": 358,
+      "max_state_error": 5.684341886080802e-14,
+      "spikes_ref_exact": true
+    },
+    {
+      "tick": 359,
+      "max_state_error": 5.684341886080802e-14,
+      "spikes_ref_exact": true
+    }
+  ],
+  "after_queue_original_particle_bitwise": {
+    "state": true,
+    "ref": true,
+    "rng": true,
+    "spikes": true
+  },
+  "graph_capture_bitwise": {
+    "state": true,
+    "ref": true,
+    "rng": true,
+    "history": true,
+    "clock": true,
+    "global_state": true,
+    "output": true,
+    "global_output": true
+  },
+  "initial_empirical64_max_group_mean_error": [
+    3.2986847265484798,
+    9.070128517301555,
+    8.519782410231642,
+    9.501997814950073,
+    7.373891634087954,
+    0.9134757013775925,
+    0.0006199132343379654,
+    0.0030119379438577273
+  ],
+  "initial_R_G_restored": true,
+  "initial_pending_history_retained": true,
+  "scope": "Implementation only. Originalgroupthresholds/G/K/graph remain; Gaussian coupling andautonomous correspondence stillrequire measurements."
+}

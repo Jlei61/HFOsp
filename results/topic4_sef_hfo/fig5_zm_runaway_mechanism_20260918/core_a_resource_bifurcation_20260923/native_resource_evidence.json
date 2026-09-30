@@ -1,0 +1,38 @@
+{
+  "status": "DESCRIPTIVE_AUDIT_PASS",
+  "native_seed": 9108401,
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_rate_v3_20260918/native_reference/seed9108401_readouts.npz",
+  "resource_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/transient_native_Z_path_20260923/native_Z_path.npz",
+  "saved_float32_field_reconstruction_max_error_hz": 1.8939972505904734e-06,
+  "original_quiet_classification_identical": true,
+  "sample": "Complete global self-limited events within500–9420ms, one original native trajectory; not independent seeds.",
+  "event_definition": "Original10ms smoothed all-E rate, active>=5Hz for>=20ms, peak>=20Hz;20ms quiet on both sides.",
+  "resource_definition": "Cell-count-weighted regional mean Z at event endpoints; linear interpolation of original5/10ms samples. Positive Z_start-Z_end is NET depletion, not gross depletion without recovery.",
+  "n_complete_events": 35,
+  "regions": [
+    "Core A",
+    "Core B",
+    "Surround"
+  ],
+  "median_net_depletion": [
+    0.007812907702701488,
+    0.008581120119698915,
+    0.006142422347932053
+  ],
+  "range_net_depletion": [
+    [
+      -0.003223062439063118,
+      -0.002264119933804931,
+      -0.0002362198824648054
+    ],
+    [
+      0.01373708517724681,
+      0.01444556749418402,
+      0.010125624529980892
+    ]
+  ],
+  "events_A_net_depletion_greater_than_surround": 24,
+  "events_A_depletes_surround_net_recovers": 0,
+  "events_surround_net_depletes": 34,
+  "scope": "Descriptive native support for regional resource asymmetry. No isolated-Core-A causality or bifurcation type inferred."
+}

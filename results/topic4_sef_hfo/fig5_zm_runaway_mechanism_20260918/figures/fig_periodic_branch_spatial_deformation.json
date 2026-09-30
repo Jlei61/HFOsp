@@ -1,0 +1,65 @@
+{
+  "status": "DESCRIPTIVE_BRANCH_GEOMETRY",
+  "rows": [
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_000.npz",
+      "D": 0.14497251663785013,
+      "T_ms": 267.1999999999681,
+      "mode_kind": "phase-removed tangent to the periodic branch; not yet a converged Floquet mode",
+      "mean_hz": 28.054947077235013,
+      "max_hz": 185.17095757271943,
+      "min_hz": 0.014081360476419006,
+      "removed_phase_coefficient": -0.4204876517295507,
+      "mode_energy_A_B_surround": [
+        0.010776335165355228,
+        0.12252272620491403,
+        0.8667009386297307
+      ],
+      "E_population_fraction_A_B_surround": [
+        0.0235625,
+        0.0245625,
+        0.951875
+      ],
+      "per_neuron_energy_relative_to_global_A_B_surround": [
+        0.45735109455088496,
+        4.988202593584286,
+        0.9105196991513914
+      ],
+      "effective_E_groups": 62.94339540200181,
+      "largest_cell": 158,
+      "largest_cell_fraction": 0.048530035457101356
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_turn_G4097/eval_001.npz",
+      "D": 0.14497189098181285,
+      "T_ms": 267.35,
+      "mode_kind": "phase-removed tangent to the periodic branch; not yet a converged Floquet mode",
+      "mean_hz": 28.04649599999249,
+      "max_hz": 190.2024831725016,
+      "min_hz": 0.01426143809945148,
+      "removed_phase_coefficient": -0.8042300881275003,
+      "mode_energy_A_B_surround": [
+        0.012160260858474527,
+        0.13525566336990041,
+        0.8525840757716252
+      ],
+      "E_population_fraction_A_B_surround": [
+        0.0235625,
+        0.0245625,
+        0.951875
+      ],
+      "per_neuron_energy_relative_to_global_A_B_surround": [
+        0.51608534147372,
+        5.506591892922154,
+        0.8956891144022326
+      ],
+      "effective_E_groups": 93.19151563196105,
+      "largest_cell": 39,
+      "largest_cell_fraction": 0.025587556807516405
+    }
+  ],
+  "map_definition": "sqrt(cell E-neuron weighted tangent energy fraction / cell E-neuron fraction)",
+  "phase": "One overall phase shift removed before squaring; no independent shift of individual groups",
+  "claim": "Not a Floquet mode or proof of which region causes onset",
+  "human_visual_acceptance": "PENDING"
+}

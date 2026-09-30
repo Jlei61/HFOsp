@@ -1,0 +1,59 @@
+[
+  {
+    "status": "EVALUATED",
+    "period_ms": 168.00151444134,
+    "max_combined_relative_rms": 0.05303011547568748,
+    "residual_ratio": 0.8654497957696359,
+    "predicted_gain": 0.7336289018127007,
+    "agreement": 0.34213026556357834,
+    "diagnostics": [
+      {
+        "phase_method": "Exact Euclidean projection onto positivity and phase; numerical proposals only",
+        "original_step_norm": 2.8247724538721957,
+        "projected_step_norm": 2.674038707282632,
+        "phase_error": -2.81632356324747e-15
+      },
+      {
+        "projected_negative_coordinates": 26871,
+        "negative_steps_at_exact_zero": 5129,
+        "zero_boundary_projection": true
+      },
+      {
+        "projected_negative_coordinates": 46576,
+        "negative_steps_at_exact_zero": 12456,
+        "zero_boundary_projection": true,
+        "refractory_projection": {
+          "status": "PASS",
+          "cycles": 323,
+          "active_halfspaces": 31,
+          "maximum_occupancy": 1.0000000009833059,
+          "phase_error": 0.0,
+          "final_cycle_change": 5.448784550921157e-10,
+          "original_step_norm": 4.160477317317303,
+          "projected_step_norm": 4.104813501016817,
+          "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+        }
+      },
+      {
+        "projected_negative_coordinates": 40550,
+        "negative_steps_at_exact_zero": 9225,
+        "zero_boundary_projection": true,
+        "refractory_projection": {
+          "status": "PASS",
+          "cycles": 84,
+          "active_halfspaces": 13,
+          "maximum_occupancy": 1.0000000000000004,
+          "phase_error": 0.0,
+          "final_cycle_change": 0.0,
+          "original_step_norm": 3.90105882343882,
+          "projected_step_norm": 3.84276938880542,
+          "method": "Dykstra projection onto positivity/fixed-M/phase plus all sliding refractory halfspaces, active cuts added by full-history checks. Solver initial state only; physical flow unchanged."
+        }
+      }
+    ],
+    "radius": 7.241782969918616,
+    "step_norm": 7.241782969917646,
+    "lagrange_multiplier": 0.0731596125081221,
+    "predicted_relative_residual": 0.5106343324354562
+  }
+]

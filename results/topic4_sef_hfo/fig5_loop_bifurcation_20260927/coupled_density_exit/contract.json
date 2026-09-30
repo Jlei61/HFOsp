@@ -1,0 +1,16 @@
+{
+  "status": "REGISTERED_BEFORE_COUPLED_CONTINUATION",
+  "created_epoch": 1790526228.1417055,
+  "question": "After the actual native entry state, can the distribution-preserving spatial network itself buildG/K,terminate andbeginZrecovery withthe same externalforcing?",
+  "design": "Exactlytwo10s continuations fromnative10s completejointstate,3479g40groups,2048particles/group,seeds927671/72,dt.1ms. DynamicZ/M/K,R/Gand recurrentactivity;nofuture neuronspikesorR/Gprovided.",
+  "initial": "Balancedempiricalcopies ofcompleteoriginalcellstate/ref/pendingdelaypulses. Queuedpastinput isconsumedonce whiledelayednewrecurrentinputcomesfromthecandidate. Groupaveragethresholds retained.",
+  "forcing": "Exact0.1msfloat64expectedexternalrate, matchedoriginalglobalandspatialOUstates/RNG. RealizedexternalPoissoncounts notprovided.",
+  "diagnostic": "Nativeinitializationtests postentrymechanism transfer, not coldstartentry, acompleteautonomousloop,orindependentnative replication. Thesetwo numericalstreams do not establish numericalresolution convergence.",
+  "readouts": "Nativeabsoluteclock10-20s: allE/core/surround ratesand400-cellspatialfields; causalR,G,K,Z; onsetofjointquiet,R<=5andGraw<2.6694,resource driftsand sustainedcoreactivity. No phasealignment ornativeonsetfitting.",
+  "decision": "If noexitwithin10s while nativeexits, or core remainsactive despiteglobalquiet, rejectcoupling correspondence andlocalize it; no branchcertification. If comparableexitoccurs, inspect spatial/time residuals and numericalvariability; this remains a step toward fullnativevalidation, not a stability certificate.",
+  "resources": "One additionaldensityGPU process, two sequentialruns; fixedlist/noautomaticgrid,seedorhorizonexpansion.",
+  "engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "producer_sha256": "e2a50761462aa20ba645ca50c5f04eac91c8f6e2fea8814a73c8632bf557aed4",
+  "initial_sha256": "4866822869ffc7e779aba7b3bf40dd4e9a08b7b3403d3b4c47fb0dea4d9bde50",
+  "formal_bifurcation_allowed": false
+}

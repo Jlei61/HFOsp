@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "kind": "early",
+      "dt_ms": 0.1,
+      "groups": 10,
+      "steps": 30000,
+      "maximum_error_hz": 2.0088464225409552e-10,
+      "relative_L2": 3.245519789265388e-14
+    },
+    {
+      "kind": "early",
+      "dt_ms": 0.05,
+      "groups": 10,
+      "steps": 60000,
+      "maximum_error_hz": 2.4431301426375285e-10,
+      "relative_L2": 6.294247635458262e-14
+    },
+    {
+      "kind": "late",
+      "dt_ms": 0.1,
+      "groups": 4,
+      "steps": 23700,
+      "maximum_error_hz": 1.6939338820520788e-10,
+      "relative_L2": 4.098984899856193e-14
+    },
+    {
+      "kind": "late",
+      "dt_ms": 0.05,
+      "groups": 4,
+      "steps": 47400,
+      "maximum_error_hz": 3.2366642699344084e-10,
+      "relative_L2": 7.402903796117706e-14
+    }
+  ],
+  "scope": "Same nonlinearGPU localflow andindependentCPU features/renewal atbothsteps. Not a spatialmodel or bifurcation acceptance."
+}

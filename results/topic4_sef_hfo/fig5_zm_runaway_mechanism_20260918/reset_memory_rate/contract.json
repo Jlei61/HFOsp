@@ -1,0 +1,39 @@
+{
+  "created_local": "2026-09-20T08:21:53.469004+08:00",
+  "status": "REGISTERED_BEFORE_FIT",
+  "question": "Can an endogenous membrane-timescale reset-count trace repair local transient response missing from input-only history plus absolute refractoriness?",
+  "evidence": "Locked readout differs from independent local Gaussian LIF before native entry even with actual group mean current; most corresponding features are inside original calibration support.",
+  "interpretation": "q is a phenomenological reset-memory coordinate, not exact conditional membrane voltage. Success is empirical and must be checked autonomously.",
+  "equation": "q[k]=sum(j>=1,exp(-j*dt/tau_m)*fired[k-j]); q_next=exp(-dt/tau_m)*(q+fired); fired=available*sigmoid(ell+log(dt/0.1)); available from own past flux.",
+  "tau_ms": {
+    "E": 20.0,
+    "I": 10.0
+  },
+  "features": "Original39features plus log1p(q)/3. Original invertible39conditioning plus training-only scalar q centering/scaling. Same64/64tanh readout.",
+  "initialization": "Exact embedding of locked conditioned39feature network with zero coefficient for new q input. No validation checkpoint selection.",
+  "training": "Exact original480 training profiles and original static/linear calibration only. q label computed from past local-LIF counts; native trajectory, onset, spatial and validation labels excluded.",
+  "equilibrium": "Static residual enforced at original static targets. Linear calibration at baseline measured mean rate also enforces stationary residual. Final susceptibility is only evaluated at solved own equilibrium, never assumes target q is self-consistent.",
+  "training_budget": {
+    "steps_per_pop": 12000,
+    "threads": 2,
+    "seed": 920130,
+    "learning_rate": [
+      [
+        0,
+        0.001
+      ],
+      [
+        4000,
+        0.0003
+      ],
+      [
+        8000,
+        0.0001
+      ]
+    ],
+    "loss": "10*conditional-flux KL + static asinh residual + normalized complex linear gain error + linear-workpoint asinh equilibrium residual"
+  },
+  "validation": "Original24 strong waveforms and original broad validation sets at dt0.1/0.05; unchanged waveform/mean/step gates. Matched282 finite-amplitude gain assay required if waveform gates pass; independent fresh64 required before any spatial promotion.",
+  "stop": "One fixed fit, no schedule extension or architecture enlargement after scoring. Failure retained; do not launch network or bifurcation on local failure.",
+  "boundaries": "This is a rate-equation candidate with one extra fast state; no individual particles in model; graph,Z/M,weights,delays and physical neuron parameters unchanged."
+}

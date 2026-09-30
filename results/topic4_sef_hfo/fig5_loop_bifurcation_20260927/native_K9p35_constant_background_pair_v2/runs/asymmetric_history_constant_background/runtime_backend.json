@@ -1,0 +1,16 @@
+{
+  "actual_backend": "original_cuda_ordered_scatter",
+  "actual_device": 0,
+  "planned_job_backend": "cpu",
+  "planned_job_device": 0,
+  "execution_override_only": true,
+  "physics_and_job_unchanged": false,
+  "wrapper_sha256": "d57d04263dbb548ae5957beaa9ac2b275f38a75526b9f0c3a10c8068a91e6beb",
+  "backend_sha256": "630260733fb93783f010a23c5e2ed5087b593552b76c7338d5c4572ee3250ec8",
+  "neuronal_equations_unchanged": true,
+  "registered_external_expected_rate_override": {
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_loop_bifurcation_20260927/native_K9p35_constant_background_pair_v2/fixed_external_per_ms.npy",
+    "sha256": "b8f3bd06644ecc90a620e84af366d7c51726a5c69ccf1cdbae98c3f0a68c6d8e",
+    "applies": "Every external Poisson draw; registered input intervention"
+  }
+}

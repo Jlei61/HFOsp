@@ -1,0 +1,15 @@
+{
+  "created_local": "2026-09-19T19:24:55.592367",
+  "question": "The response tables were calibrated at theta18/reset11. Do the eta variance-to-mean coefficients obey voltage scaling at heterogeneous thresholds?",
+  "derived_correction": "eta(theta)=eta18*7/(theta-11), same multiplier for moment gradients; alpha/aE/aI unchanged.",
+  "verification": [
+    "CPU/CUDA parity at32points perpopulation",
+    "Moment-gradient finite differences",
+    "Frequencyresponse voltage equivariance at6/25/60Hz",
+    "Nonlinear coloredLIF same-path voltage equivariance atthreshold18and14.5",
+    "Reevaluate existing validation with original eligibility and tolerances"
+  ],
+  "replicates": 256,
+  "seed": 919784,
+  "scope": "New isolated response facade; frozen v3 is retained. Unit repair is not dynamic-closure validation. No model promotion based on correctness checks."
+}

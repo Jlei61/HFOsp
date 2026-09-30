@@ -1,0 +1,7 @@
+{
+  "question": "Can a trust region resolve the stalled stationary candidate at the same Core A endpoint?",
+  "unchanged": "Exact same static equations and Z/M constraints. Only numerical solver changes; no network parameter or target response fitting.",
+  "solver": "Logit-equation least_squares TRF with analytic sparse Jacobian, x_scale=jac, LSMR at most1000linear iterations, at most180function evaluations. Original rate residual<1e-11/ms required; nonzero minima remain failures.",
+  "initial": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/static_candidates/mean.npz",
+  "model_promoted": false
+}

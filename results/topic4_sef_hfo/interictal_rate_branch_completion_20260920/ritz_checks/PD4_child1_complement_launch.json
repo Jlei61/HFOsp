@@ -1,0 +1,24 @@
+{
+  "timestamp": 1789894504.735113,
+  "pid": 547431,
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-u",
+    "scripts/topic4_brunel_spatial_bifurcation/refine_rate_poincare_complement.py",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k10_20260920_dt0.025.json",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/PD4_child_index1_full_k10_20260920_dt0.0125.json",
+    "--device",
+    "1",
+    "--label",
+    "PD4_child1_complement",
+    "--min-free-gib",
+    "8",
+    "--after-pids",
+    "487162"
+  ],
+  "log": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/ritz_checks_PD4_child1_complement.log",
+  "source": "/data/hfosp/topic4_sef_hfo/interictal_rate_branch_completion_20260920/H2_local_PD/child_full_spectrum_1.json",
+  "reason": "Direct paired k10 spectrum has four reliable growing modes but unresolved total dimension; verify the remaining spectrum on the identical physical child.",
+  "min_free_gib": 8,
+  "wait_for_pid": 487162
+}

@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "complete": true,
+  "rows": [
+    {
+      "chunk": "0000090000_0000095000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000095000_0000100000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000100000_0000105000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000105000_0000110000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000110000_0000115000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000115000_0000120000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    },
+    {
+      "chunk": "0000120000_0000125000.npz",
+      "keys_checked": 16,
+      "mismatches": []
+    }
+  ],
+  "final_state_difference_keys": [],
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_current_network_z_state_v1/replay/runs/eta0.0005_s9108401",
+  "intervention_arm": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/runs/native_t9000_Zdynamic",
+  "scope": "Unchanged dynamic Z/M arm must reproduce original native trajectory, all common chunk arrays and complete final engine state"
+}

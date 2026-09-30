@@ -1,0 +1,28 @@
+{
+  "status": "STOPPED_FOR_DEALIASED_REFINEMENT",
+  "N": 2048,
+  "rows": [
+    {
+      "T_ms": 264.18052228455997,
+      "D": 0.21933579226080108,
+      "dD_dT": 1.065693942380418e-05,
+      "bvp_residual_hz": 8.548717289613705e-12,
+      "linear_residual": 2.5482845043489125e-12
+    },
+    {
+      "T_ms": 264.28605076103946,
+      "D": 0.21933592754364725,
+      "dD_dT": -4.070464213205973e-06,
+      "bvp_residual_hz": 8.548717289613705e-12,
+      "linear_residual": 2.5970613970516107e-12
+    },
+    {
+      "T_ms": 264.18052228455997,
+      "D": 0.21933579226080116,
+      "dD_dT": 1.0656939651920576e-05,
+      "bvp_residual_hz": 9.103828801926284e-12,
+      "linear_residual": 2.491103510898583e-12
+    }
+  ],
+  "reason": "Shift invariance audit shows temporal collocation aliasing. Continue N2049/M8192 Galerkin refinement; redirect GPU to the actual rate Z path supported by slow-drift alignment."
+}

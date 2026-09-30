@@ -1,0 +1,2751 @@
+{
+  "status": "DYNAMIC_POISSON_SPLIT_DIAGNOSTIC_COMPLETE",
+  "frequencies_Hz": [
+    0,
+    2,
+    3.782678578456493,
+    5,
+    10,
+    20,
+    40,
+    80
+  ],
+  "rows": [
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.485000861937914e-17,
+      "max_error_over_DC": 4.1291035028858255e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        2.0577283537947345e-16,
+        4.1291035028858255e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0960542294269506e-16,
+      "max_error_over_DC": 4.372556766330924e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.4575189221103064e-16,
+        1.4575189221103072e-16,
+        4.372556766330924e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.509652488428616e-17,
+      "max_error_over_DC": 4.114776650864673e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        2.0570497370668847e-16,
+        4.114776650864673e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 8.664772717956174e-17,
+      "max_error_over_DC": 4.1291035028858255e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        2.0621645685185817e-16,
+        4.1291035028858255e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999998
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.453947414623263e-17,
+      "max_error_over_DC": 4.122636409096502e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        2.057701720209272e-16,
+        4.122636409096502e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.683959884365748e-17,
+      "max_error_over_DC": 5.042456146325164e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        1.4462671987499202e-16,
+        5.042456146325164e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 9.973028273945712e-17,
+      "max_error_over_DC": 5.762668017890804e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        1.7235239854746306e-16,
+        5.762668017890804e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 6.92352340484154e-17,
+      "max_error_over_DC": 2.5561851853087793e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.149591994808577e-16,
+        1.2799493946502304e-16,
+        2.5561851853087793e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 6.426552792817783e-17,
+      "max_error_over_DC": 3.8190181669065886e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.183283631048556e-16,
+        1.2874233335500445e-16,
+        3.8190181669065886e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.735230110219915e-17,
+      "max_error_over_DC": 5.042456146325164e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        1.5250967658728337e-16,
+        5.042456146325164e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0018884803769230614,
+      "max_error_over_DC": 0.0028292836518210972,
+      "error_over_DC_quantiles": [
+        0.0011830794648410804,
+        0.0016826256877335443,
+        0.0017615604649658355,
+        0.0019265378141219026,
+        0.0028292836518210972
+      ],
+      "cell_weighted_total_response_over_DC": 0.9991804584660978
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.00234946991121627,
+      "max_error_over_DC": 0.003238755002789822,
+      "error_over_DC_quantiles": [
+        0.0019618721057384756,
+        0.0021950227929246743,
+        0.002246925830022829,
+        0.0024534205782110715,
+        0.003238755002789822
+      ],
+      "cell_weighted_total_response_over_DC": 0.9994606060879158
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.001621317366498892,
+      "max_error_over_DC": 0.001834686886237549,
+      "error_over_DC_quantiles": [
+        0.0011830794648410804,
+        0.0013737412998348396,
+        0.0015092937691323241,
+        0.0016068640868827965,
+        0.001834686886237549
+      ],
+      "cell_weighted_total_response_over_DC": 0.9991944165063673
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0016685573640139364,
+      "max_error_over_DC": 0.001879226408745805,
+      "error_over_DC_quantiles": [
+        0.0012131429111489455,
+        0.0014111289406640811,
+        0.001559955655846334,
+        0.0016831819989652627,
+        0.001879226408745805
+      ],
+      "cell_weighted_total_response_over_DC": 0.9992183533267271
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0019007686368707436,
+      "max_error_over_DC": 0.0028292836518210972,
+      "error_over_DC_quantiles": [
+        0.001470466519189744,
+        0.0017400631752989425,
+        0.0018105305332554809,
+        0.0019896191356343824,
+        0.0028292836518210972
+      ],
+      "cell_weighted_total_response_over_DC": 0.9991791351002796
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0016949240628937295,
+      "max_error_over_DC": 0.0028069079424386653,
+      "error_over_DC_quantiles": [
+        0.00019424962408004309,
+        0.0014856295007991836,
+        0.0017297835069083618,
+        0.0018660804628955396,
+        0.0028069079424386653
+      ],
+      "cell_weighted_total_response_over_DC": 0.999118479345954
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0021428945502787273,
+      "max_error_over_DC": 0.0032884791403459002,
+      "error_over_DC_quantiles": [
+        0.0004362540049545307,
+        0.002116135879423809,
+        0.0022367340563647998,
+        0.0023760795681865704,
+        0.0032884791403459002
+      ],
+      "cell_weighted_total_response_over_DC": 0.9994406573777455
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0016391385436641058,
+      "max_error_over_DC": 0.0018448514812570186,
+      "error_over_DC_quantiles": [
+        0.0011923231051671895,
+        0.0013820257683277036,
+        0.0015181017304623588,
+        0.0016315527653970694,
+        0.0018448514812570186
+      ],
+      "cell_weighted_total_response_over_DC": 0.9991935919510837
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0016876776427149484,
+      "max_error_over_DC": 0.0019071550199055722,
+      "error_over_DC_quantiles": [
+        0.001231392838483481,
+        0.0014210303044763007,
+        0.0015831511791260322,
+        0.0016981710837519009,
+        0.0019071550199055722
+      ],
+      "cell_weighted_total_response_over_DC": 0.9992235171529116
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0016964919541530748,
+      "max_error_over_DC": 0.0028069079424386653,
+      "error_over_DC_quantiles": [
+        0.00019424962408004309,
+        0.001639115220366757,
+        0.001784161343847188,
+        0.0019542322560432506,
+        0.0028069079424386653
+      ],
+      "cell_weighted_total_response_over_DC": 0.9991139095947873
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0035672133770595924,
+      "max_error_over_DC": 0.005343301520985805,
+      "error_over_DC_quantiles": [
+        0.00223508829088385,
+        0.003178675502623904,
+        0.003327641962677995,
+        0.0036394292459874644,
+        0.005343301520985805
+      ],
+      "cell_weighted_total_response_over_DC": 0.997072698161212
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004439266985241131,
+      "max_error_over_DC": 0.006115385900634637,
+      "error_over_DC_quantiles": [
+        0.0037070011136646685,
+        0.004147759391204102,
+        0.004245759366094963,
+        0.004635979433672622,
+        0.006115385900634637
+      ],
+      "cell_weighted_total_response_over_DC": 0.9980723940116745
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.003062657844157224,
+      "max_error_over_DC": 0.003465736970597059,
+      "error_over_DC_quantiles": [
+        0.00223508829088385,
+        0.002595216016563851,
+        0.002850803194926097,
+        0.003034889861420864,
+        0.003465736970597059
+      ],
+      "cell_weighted_total_response_over_DC": 0.9971224681127071
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0031519308980519373,
+      "max_error_over_DC": 0.0035498345965756855,
+      "error_over_DC_quantiles": [
+        0.0022916424479422627,
+        0.002665510525615537,
+        0.0029467291135275428,
+        0.0031796171773758393,
+        0.0035498345965756855
+      ],
+      "cell_weighted_total_response_over_DC": 0.9972078079335114
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0035904191190263813,
+      "max_error_over_DC": 0.005343301520985805,
+      "error_over_DC_quantiles": [
+        0.002777656694098327,
+        0.003287106084876894,
+        0.0034202469501015114,
+        0.0037575239786888956,
+        0.005343301520985805
+      ],
+      "cell_weighted_total_response_over_DC": 0.9970679797493783
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.003201624096689686,
+      "max_error_over_DC": 0.005301287273421776,
+      "error_over_DC_quantiles": [
+        0.00036667981263317995,
+        0.0028062874048884173,
+        0.0032675741756701526,
+        0.0035252173214081572,
+        0.005301287273421776
+      ],
+      "cell_weighted_total_response_over_DC": 0.9968517742309323
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004048955262257675,
+      "max_error_over_DC": 0.0062092576055793715,
+      "error_over_DC_quantiles": [
+        0.000824327293244964,
+        0.003998593320843949,
+        0.004226524025823504,
+        0.004489934417375737,
+        0.0062092576055793715
+      ],
+      "cell_weighted_total_response_over_DC": 0.9980012414335384
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0030963044464228143,
+      "max_error_over_DC": 0.0034849018697595043,
+      "error_over_DC_quantiles": [
+        0.0022520081379794636,
+        0.0026106607530475075,
+        0.002867866279378576,
+        0.0030818659214108773,
+        0.0034849018697595043
+      ],
+      "cell_weighted_total_response_over_DC": 0.9971194908140929
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0031880575997720413,
+      "max_error_over_DC": 0.0036026232690488757,
+      "error_over_DC_quantiles": [
+        0.002326113568552775,
+        0.0026840154852976177,
+        0.002990437233598581,
+        0.0032080040076579368,
+        0.0036026232690488757
+      ],
+      "cell_weighted_total_response_over_DC": 0.9972262056236949
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0032045812300737467,
+      "max_error_over_DC": 0.005301287273421776,
+      "error_over_DC_quantiles": [
+        0.00036667981263317995,
+        0.003096272483454882,
+        0.003370479601340042,
+        0.003691733194299387,
+        0.005301287273421776
+      ],
+      "cell_weighted_total_response_over_DC": 0.9968354852821993
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004708978143348544,
+      "max_error_over_DC": 0.007052136151583486,
+      "error_over_DC_quantiles": [
+        0.0029509289139539123,
+        0.00419649771039367,
+        0.004393032779092798,
+        0.004804752056779984,
+        0.007052136151583486
+      ],
+      "cell_weighted_total_response_over_DC": 0.9948932659992984
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005861897292993817,
+      "max_error_over_DC": 0.008069453293521576,
+      "error_over_DC_quantiles": [
+        0.0048950902314307135,
+        0.0054774051992082864,
+        0.005606715466787936,
+        0.0061220602784054865,
+        0.008069453293521576
+      ],
+      "cell_weighted_total_response_over_DC": 0.9966355248074639
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004043062038516059,
+      "max_error_over_DC": 0.004575208087245682,
+      "error_over_DC_quantiles": [
+        0.0029509289139539123,
+        0.00342629677115715,
+        0.003763057069588433,
+        0.004005766784672395,
+        0.004575208087245682
+      ],
+      "cell_weighted_total_response_over_DC": 0.994979934736422
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004160963444109494,
+      "max_error_over_DC": 0.0046861755180789035,
+      "error_over_DC_quantiles": [
+        0.003025265030930928,
+        0.003518640956595246,
+        0.0038899996818407647,
+        0.0041975953127889746,
+        0.0046861755180789035
+      ],
+      "cell_weighted_total_response_over_DC": 0.995128523366422
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004739603235162252,
+      "max_error_over_DC": 0.007052136151583486,
+      "error_over_DC_quantiles": [
+        0.003666766291685476,
+        0.004339566658850458,
+        0.004515349122119171,
+        0.004959197681322813,
+        0.007052136151583486
+      ],
+      "cell_weighted_total_response_over_DC": 0.9948850499612699
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004226409197195015,
+      "max_error_over_DC": 0.006997022063456545,
+      "error_over_DC_quantiles": [
+        0.00048370914165614306,
+        0.0037045455194923815,
+        0.0043136089392240735,
+        0.004653972669971389,
+        0.006997022063456545
+      ],
+      "cell_weighted_total_response_over_DC": 0.9945086877470937
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005346514497077496,
+      "max_error_over_DC": 0.008193296823491526,
+      "error_over_DC_quantiles": [
+        0.0010885445418701977,
+        0.0052803016915084315,
+        0.005581345657993211,
+        0.005929334735800498,
+        0.008193296823491526
+      ],
+      "cell_weighted_total_response_over_DC": 0.9965115819617679
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.0040874554965523915,
+      "max_error_over_DC": 0.0046004587505028794,
+      "error_over_DC_quantiles": [
+        0.0029725243823309332,
+        0.0034464053866201574,
+        0.0037861638956330815,
+        0.00406824531348687,
+        0.0046004587505028794
+      ],
+      "cell_weighted_total_response_over_DC": 0.9949746830403147
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004208666660882172,
+      "max_error_over_DC": 0.004755906072752426,
+      "error_over_DC_quantiles": [
+        0.003070766975671464,
+        0.003542797535675446,
+        0.003947551468838861,
+        0.00423524994147326,
+        0.004755906072752426
+      ],
+      "cell_weighted_total_response_over_DC": 0.9951605340102168
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.004230306660222803,
+      "max_error_over_DC": 0.006997022063456545,
+      "error_over_DC_quantiles": [
+        0.00048370914165614306,
+        0.004087429953551621,
+        0.0044497106603656935,
+        0.004873789540636206,
+        0.006997022063456545
+      ],
+      "cell_weighted_total_response_over_DC": 0.9944803321458493
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.009331424869589777,
+      "max_error_over_DC": 0.013955094357050848,
+      "error_over_DC_quantiles": [
+        0.005853891593543253,
+        0.008321359178099445,
+        0.008710620869011644,
+        0.009525679139441115,
+        0.013955094357050848
+      ],
+      "cell_weighted_total_response_over_DC": 0.9797903779789668
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.011640339066659887,
+      "max_error_over_DC": 0.015949320778606463,
+      "error_over_DC_quantiles": [
+        0.009722225874848103,
+        0.010882158471703597,
+        0.011138321895268151,
+        0.012162686720317142,
+        0.015949320778606463
+      ],
+      "cell_weighted_total_response_over_DC": 0.9866374721617568
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008013679683541747,
+      "max_error_over_DC": 0.009068931473510053,
+      "error_over_DC_quantiles": [
+        0.005853891593543253,
+        0.006795545013018968,
+        0.0074540695612659155,
+        0.007930852154551726,
+        0.009068931473510053
+      ],
+      "cell_weighted_total_response_over_DC": 0.9801290958303307
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008248074079292783,
+      "max_error_over_DC": 0.009288157652643722,
+      "error_over_DC_quantiles": [
+        0.0059967854875331945,
+        0.006972273548968618,
+        0.00770997956153747,
+        0.008321727076464542,
+        0.009288157652643722
+      ],
+      "cell_weighted_total_response_over_DC": 0.9807091671100066
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.009391999183163436,
+      "max_error_over_DC": 0.013955094357050848,
+      "error_over_DC_quantiles": [
+        0.007266986415013673,
+        0.008604988942790014,
+        0.008952961907016301,
+        0.009824312754102707,
+        0.013955094357050848
+      ],
+      "cell_weighted_total_response_over_DC": 0.9797582846921341
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008375645786633275,
+      "max_error_over_DC": 0.013850869388389132,
+      "error_over_DC_quantiles": [
+        0.0009539082269951549,
+        0.007341631083344372,
+        0.008550401287699282,
+        0.009228427112707771,
+        0.013850869388389132
+      ],
+      "cell_weighted_total_response_over_DC": 0.9782913327731186
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.010617053924547131,
+      "max_error_over_DC": 0.016189093187697963,
+      "error_over_DC_quantiles": [
+        0.0021622768474519128,
+        0.010490945850351003,
+        0.011088356821180291,
+        0.011781674798905309,
+        0.016189093187697963
+      ],
+      "cell_weighted_total_response_over_DC": 0.9861520945907558
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008101337987101618,
+      "max_error_over_DC": 0.009118296505312151,
+      "error_over_DC_quantiles": [
+        0.005886422950815052,
+        0.006831497683214353,
+        0.007507946684535019,
+        0.008061159682071963,
+        0.009118296505312151
+      ],
+      "cell_weighted_total_response_over_DC": 0.9801067448141748
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008342789543938996,
+      "max_error_over_DC": 0.009426972719787253,
+      "error_over_DC_quantiles": [
+        0.006086920590688009,
+        0.007016363237231666,
+        0.007821993425929173,
+        0.008399457080690247,
+        0.009426972719787253
+      ],
+      "cell_weighted_total_response_over_DC": 0.9808335370440245
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.008383283773750954,
+      "max_error_over_DC": 0.013850869388389132,
+      "error_over_DC_quantiles": [
+        0.0009539082269951549,
+        0.008101524151215999,
+        0.008823704324535997,
+        0.009664065717941393,
+        0.013850869388389132
+      ],
+      "cell_weighted_total_response_over_DC": 0.9781807945841531
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.01799393399317141,
+      "max_error_over_DC": 0.0267572485611404,
+      "error_over_DC_quantiles": [
+        0.01133579473301961,
+        0.016052814138909285,
+        0.016834820193312307,
+        0.01837545195585611,
+        0.0267572485611404
+      ],
+      "cell_weighted_total_response_over_DC": 0.9224779893903146
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.02263319423881604,
+      "max_error_over_DC": 0.03070963070557314,
+      "error_over_DC_quantiles": [
+        0.018917245246434233,
+        0.021200177951705444,
+        0.02169301064616884,
+        0.023693350478894645,
+        0.03070963070557314
+      ],
+      "cell_weighted_total_response_over_DC": 0.9480237706887354
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.015466997959252533,
+      "max_error_over_DC": 0.017507775272229235,
+      "error_over_DC_quantiles": [
+        0.01133579473301961,
+        0.013149699389812936,
+        0.014351389858129181,
+        0.015263741994039572,
+        0.017507775272229235
+      ],
+      "cell_weighted_total_response_over_DC": 0.9237154604604717
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.015924822394092212,
+      "max_error_over_DC": 0.01792503145507112,
+      "error_over_DC_quantiles": [
+        0.01157824922742863,
+        0.013441744914262732,
+        0.014878459030724805,
+        0.016055177341485753,
+        0.01792503145507112
+      ],
+      "cell_weighted_total_response_over_DC": 0.9258215913669832
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.018109877246173745,
+      "max_error_over_DC": 0.0267572485611404,
+      "error_over_DC_quantiles": [
+        0.014019580398610279,
+        0.01663335827589476,
+        0.017310095364204775,
+        0.018968144778731405,
+        0.0267572485611404
+      ],
+      "cell_weighted_total_response_over_DC": 0.9223610778886548
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.016154741977155742,
+      "max_error_over_DC": 0.026599974377954298,
+      "error_over_DC_quantiles": [
+        0.0018047738609506315,
+        0.014161628803563649,
+        0.016526513088358685,
+        0.017822746726334937,
+        0.026599974377954298
+      ],
+      "cell_weighted_total_response_over_DC": 0.9170737063112551
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.020644672575777748,
+      "max_error_over_DC": 0.030852260267136843,
+      "error_over_DC_quantiles": [
+        0.004209661902817156,
+        0.020448031845430717,
+        0.02157235896747966,
+        0.022955379937463143,
+        0.030852260267136843
+      ],
+      "cell_weighted_total_response_over_DC": 0.9462407096918588
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.0156336044440987,
+      "max_error_over_DC": 0.01759778952706504,
+      "error_over_DC_quantiles": [
+        0.011320147270514452,
+        0.013213912122819823,
+        0.014517440033043342,
+        0.015539115942004243,
+        0.01759778952706504
+      ],
+      "cell_weighted_total_response_over_DC": 0.9236079371126993
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.0161088861773587,
+      "max_error_over_DC": 0.01819760738563086,
+      "error_over_DC_quantiles": [
+        0.011751836729669014,
+        0.013533189830650376,
+        0.01508519641574972,
+        0.016247343881928816,
+        0.01819760738563086
+      ],
+      "cell_weighted_total_response_over_DC": 0.926265435215207
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.01616882537697732,
+      "max_error_over_DC": 0.026599974377954298,
+      "error_over_DC_quantiles": [
+        0.0018047738609506315,
+        0.015647199317123543,
+        0.01706153581465472,
+        0.018678123415268623,
+        0.026599974377954298
+      ],
+      "cell_weighted_total_response_over_DC": 0.9166747729907433
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.031288718842767335,
+      "max_error_over_DC": 0.0454221571354794,
+      "error_over_DC_quantiles": [
+        0.019632268480724004,
+        0.028093462424981494,
+        0.02955838258189928,
+        0.03173283459428732,
+        0.0454221571354794
+      ],
+      "cell_weighted_total_response_over_DC": 0.7343799589560809
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.04064882904345173,
+      "max_error_over_DC": 0.052990564487165465,
+      "error_over_DC_quantiles": [
+        0.03407471596760013,
+        0.0383615553166847,
+        0.03928079276476009,
+        0.04254343190745889,
+        0.052990564487165465
+      ],
+      "cell_weighted_total_response_over_DC": 0.812795002352536
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.02698752174074321,
+      "max_error_over_DC": 0.030582696703845946,
+      "error_over_DC_quantiles": [
+        0.019632268480724004,
+        0.02265578874498249,
+        0.02486328013131577,
+        0.026722306097726942,
+        0.030582696703845946
+      ],
+      "cell_weighted_total_response_over_DC": 0.7379263075672505
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.02782387617664604,
+      "max_error_over_DC": 0.0312618211966842,
+      "error_over_DC_quantiles": [
+        0.020242409552535406,
+        0.023397794808387357,
+        0.02602120837253205,
+        0.028059035730112244,
+        0.0312618211966842
+      ],
+      "cell_weighted_total_response_over_DC": 0.7437137948042316
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.03148459766583028,
+      "max_error_over_DC": 0.0454221571354794,
+      "error_over_DC_quantiles": [
+        0.0244256380949414,
+        0.0292203068885586,
+        0.030336098536787544,
+        0.032829434457727416,
+        0.0454221571354794
+      ],
+      "cell_weighted_total_response_over_DC": 0.7340513200253694
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.028118671855034503,
+      "max_error_over_DC": 0.045591456030956476,
+      "error_over_DC_quantiles": [
+        0.0029233222489461,
+        0.024582007416179823,
+        0.02897241150464509,
+        0.031294051623134034,
+        0.045591456030956476
+      ],
+      "cell_weighted_total_response_over_DC": 0.7202716032017089
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.03708610255329086,
+      "max_error_over_DC": 0.053189988854494046,
+      "error_over_DC_quantiles": [
+        0.007548642666310488,
+        0.03697957015854751,
+        0.039052020002106835,
+        0.041394657346786115,
+        0.053189988854494046
+      ],
+      "cell_weighted_total_response_over_DC": 0.80774277957785
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.027259998491921126,
+      "max_error_over_DC": 0.03070338141727453,
+      "error_over_DC_quantiles": [
+        0.019474162094068093,
+        0.023033832607250514,
+        0.025223883424655442,
+        0.02699602288369593,
+        0.03070338141727453
+      ],
+      "cell_weighted_total_response_over_DC": 0.7373625723890572
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.02815359813019461,
+      "max_error_over_DC": 0.031769796514566635,
+      "error_over_DC_quantiles": [
+        0.02046640295395827,
+        0.0235697231011404,
+        0.026310370984238236,
+        0.028413977383213912,
+        0.031769796514566635
+      ],
+      "cell_weighted_total_response_over_DC": 0.7448792856559461
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.0281390260133901,
+      "max_error_over_DC": 0.045591456030956476,
+      "error_over_DC_quantiles": [
+        0.0029233222489461,
+        0.02740275826931299,
+        0.02986242584793784,
+        0.032448764691751245,
+        0.045591456030956476
+      ],
+      "cell_weighted_total_response_over_DC": 0.7192135523423427
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.03836364939404165,
+      "max_error_over_DC": 0.05145792770806303,
+      "error_over_DC_quantiles": [
+        0.0230486585743141,
+        0.034858588422968614,
+        0.036985517583491286,
+        0.038818741506816246,
+        0.05145792770806303
+      ],
+      "cell_weighted_total_response_over_DC": 0.34121412602007445
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.055894052296452335,
+      "max_error_over_DC": 0.06911318636557852,
+      "error_over_DC_quantiles": [
+        0.03738522778366034,
+        0.054096560339976216,
+        0.05528347473711726,
+        0.05719711644042148,
+        0.06911318636557852
+      ],
+      "cell_weighted_total_response_over_DC": 0.4676446236619622
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.033419959717181855,
+      "max_error_over_DC": 0.038098168489295335,
+      "error_over_DC_quantiles": [
+        0.0230486585743141,
+        0.027637083374459796,
+        0.03084667920262854,
+        0.03272914730488277,
+        0.038098168489295335
+      ],
+      "cell_weighted_total_response_over_DC": 0.3459094278800411
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.03463170134874719,
+      "max_error_over_DC": 0.038786473972952804,
+      "error_over_DC_quantiles": [
+        0.023748650528141364,
+        0.028538067759371455,
+        0.03225239090455021,
+        0.035001502904340426,
+        0.038786473972952804
+      ],
+      "cell_weighted_total_response_over_DC": 0.3525919778905975
+    },
+    {
+      "synapse": "ampa",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.03858232481032379,
+      "max_error_over_DC": 0.05145792770806303,
+      "error_over_DC_quantiles": [
+        0.025402183905427037,
+        0.03644190904666859,
+        0.03782938302428236,
+        0.04007572745366895,
+        0.05145792770806303
+      ],
+      "cell_weighted_total_response_over_DC": 0.34080430168742026
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.034609724999357584,
+      "max_error_over_DC": 0.054185459500784204,
+      "error_over_DC_quantiles": [
+        0.0029539355749497835,
+        0.030356705130978948,
+        0.036309773749295865,
+        0.03884307419528044,
+        0.054185459500784204
+      ],
+      "cell_weighted_total_response_over_DC": 0.33332386781389745
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.05105505749692077,
+      "max_error_over_DC": 0.07007634498193793,
+      "error_over_DC_quantiles": [
+        0.009175773312269602,
+        0.051555443251506586,
+        0.05493238446940714,
+        0.057059824798559144,
+        0.07007634498193793
+      ],
+      "cell_weighted_total_response_over_DC": 0.4628779330880324
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.03366423268310381,
+      "max_error_over_DC": 0.03857669707258478,
+      "error_over_DC_quantiles": [
+        0.02293268637960796,
+        0.02779410427777162,
+        0.03091379784421677,
+        0.03302029263654368,
+        0.03857669707258478
+      ],
+      "cell_weighted_total_response_over_DC": 0.34446933274879554
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.035080587383048534,
+      "max_error_over_DC": 0.039375753524261224,
+      "error_over_DC_quantiles": [
+        0.024166078867961918,
+        0.028902638141809798,
+        0.032648929391004715,
+        0.03528469393851949,
+        0.039375753524261224
+      ],
+      "cell_weighted_total_response_over_DC": 0.3539685895828477
+    },
+    {
+      "synapse": "ampa",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.03462097921383145,
+      "max_error_over_DC": 0.054185459500784204,
+      "error_over_DC_quantiles": [
+        0.0029539355749497835,
+        0.03386480929089382,
+        0.037559852064922884,
+        0.04021172073700474,
+        0.054185459500784204
+      ],
+      "cell_weighted_total_response_over_DC": 0.3325152521910705
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0898089061346574e-16,
+      "max_error_over_DC": 4.95813729154671e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.6527124305155687e-16,
+        1.65271243051557e-16,
+        4.95813729154671e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.1082978514728665e-16,
+      "max_error_over_DC": 5.037717506694846e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.679239168898282e-16,
+        1.6792391688982828e-16,
+        5.037717506694846e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0915792976084265e-16,
+      "max_error_over_DC": 3.3054248610311404e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.6527124305155695e-16,
+        1.65271243051557e-16,
+        3.3054248610311404e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 7.927132141276969e-17,
+      "max_error_over_DC": 3.305424861031139e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        0.0,
+        1.6527124305155697e-16,
+        3.305424861031139e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0974314385951381e-16,
+      "max_error_over_DC": 4.95813729154671e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.6527124305155687e-16,
+        1.65271243051557e-16,
+        4.95813729154671e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0220547479394144e-16,
+      "max_error_over_DC": 4.956472533137731e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.2446355532115147e-16,
+        1.50327158582806e-16,
+        4.956472533137731e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0315920409851062e-16,
+      "max_error_over_DC": 4.839533380358397e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.2494569472127885e-16,
+        1.5575420814643295e-16,
+        4.839533380358397e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0471762557994681e-16,
+      "max_error_over_DC": 4.0837401829123694e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.33933214749351e-16,
+        1.4145099463719937e-16,
+        4.0837401829123694e-16
+      ],
+      "cell_weighted_total_response_over_DC": 1.0
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 8.281473716271745e-17,
+      "max_error_over_DC": 4.183485532550092e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.3585733947248668e-16,
+        1.3922739793848362e-16,
+        4.183485532550092e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 0,
+      "cell_weighted_mean_error_over_DC": 1.0264365463916448e-16,
+      "max_error_over_DC": 4.956472533137731e-16,
+      "error_over_DC_quantiles": [
+        0.0,
+        0.0,
+        1.2329674899096634e-16,
+        1.5637574090244346e-16,
+        4.956472533137731e-16
+      ],
+      "cell_weighted_total_response_over_DC": 0.9999999999999999
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0027282032854094368,
+      "max_error_over_DC": 0.003968166259713356,
+      "error_over_DC_quantiles": [
+        0.0016310273799218591,
+        0.0023924438925517766,
+        0.002566611859566275,
+        0.0027355476875369983,
+        0.003968166259713356
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913696589099992
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0027046605938263356,
+      "max_error_over_DC": 0.004084867815448323,
+      "error_over_DC_quantiles": [
+        0.002138474963729994,
+        0.0024972798759288197,
+        0.0026031963518498968,
+        0.0028329275557271282,
+        0.004084867815448323
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913702298257488
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0023632504680841187,
+      "max_error_over_DC": 0.00280694491840238,
+      "error_over_DC_quantiles": [
+        0.0016518637591664157,
+        0.0019650375840981086,
+        0.0022125877220100865,
+        0.00237442351634064,
+        0.00280694491840238
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913996795389627
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0023686980524701,
+      "max_error_over_DC": 0.002823582311598407,
+      "error_over_DC_quantiles": [
+        0.0016310273799218591,
+        0.002012163108159757,
+        0.002217402312218613,
+        0.0023643979649329394,
+        0.002823582311598407
+      ],
+      "cell_weighted_total_response_over_DC": 0.99139539417098
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0027465140384414,
+      "max_error_over_DC": 0.003968166259713356,
+      "error_over_DC_quantiles": [
+        0.0017694262386841852,
+        0.002521823048938789,
+        0.002611736579275812,
+        0.00283417505507391,
+        0.003968166259713356
+      ],
+      "cell_weighted_total_response_over_DC": 0.991368251704833
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0025295289560683834,
+      "max_error_over_DC": 0.003967381244499104,
+      "error_over_DC_quantiles": [
+        0.0007246367703974201,
+        0.002195427267372839,
+        0.002519125137940824,
+        0.002679431909733342,
+        0.003967381244499104
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913569279031107
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0025243902402037775,
+      "max_error_over_DC": 0.004084654807297866,
+      "error_over_DC_quantiles": [
+        0.0006953253804393026,
+        0.002377274581994649,
+        0.0025680848376321086,
+        0.002762974032454811,
+        0.004084654807297866
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913581727349139
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.002385741379425456,
+      "max_error_over_DC": 0.002837276780463477,
+      "error_over_DC_quantiles": [
+        0.0016670050524627265,
+        0.001974945569129842,
+        0.0022320743756604213,
+        0.00239560018681723,
+        0.002837276780463477
+      ],
+      "cell_weighted_total_response_over_DC": 0.9914024978236712
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0023822813338878167,
+      "max_error_over_DC": 0.002850252199078567,
+      "error_over_DC_quantiles": [
+        0.0016317680105171998,
+        0.00202879228191885,
+        0.0022260377426185276,
+        0.0023801166875590195,
+        0.002850252199078567
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913964639000938
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 2,
+      "cell_weighted_mean_error_over_DC": 0.0025368878682096403,
+      "max_error_over_DC": 0.003967381244499104,
+      "error_over_DC_quantiles": [
+        0.0007246367703974201,
+        0.0024112766915251474,
+        0.0025907979997064597,
+        0.002778476950885513,
+        0.003967381244499104
+      ],
+      "cell_weighted_total_response_over_DC": 0.9913547796754765
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.005051379524929849,
+      "max_error_over_DC": 0.00734223658412328,
+      "error_over_DC_quantiles": [
+        0.0030199001926307445,
+        0.0044298973499965755,
+        0.00475253024870162,
+        0.005065253751414608,
+        0.00734223658412328
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700676811807994
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.005007807895361784,
+      "max_error_over_DC": 0.007558294906512371,
+      "error_over_DC_quantiles": [
+        0.00395974083920949,
+        0.004624136686102203,
+        0.00482028288798866,
+        0.005245577342549133,
+        0.007558294906512371
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700696800258881
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0043759269750914135,
+      "max_error_over_DC": 0.005197459420355605,
+      "error_over_DC_quantiles": [
+        0.003058667571594552,
+        0.003638636094055354,
+        0.004096963769285716,
+        0.004396615694865172,
+        0.005197459420355605
+      ],
+      "cell_weighted_total_response_over_DC": 0.97017276746056
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0043860110086491625,
+      "max_error_over_DC": 0.0052284008616373815,
+      "error_over_DC_quantiles": [
+        0.0030199001926307445,
+        0.0037257129286566004,
+        0.004105600960364228,
+        0.004378081016051372,
+        0.0052284008616373815
+      ],
+      "cell_weighted_total_response_over_DC": 0.9701577701905109
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.005085268916800327,
+      "max_error_over_DC": 0.00734223658412328,
+      "error_over_DC_quantiles": [
+        0.003275978667993702,
+        0.004669479442806334,
+        0.004836151353870704,
+        0.005247893263819661,
+        0.00734223658412328
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700627552117721
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004683522111747237,
+      "max_error_over_DC": 0.007340783981195287,
+      "error_over_DC_quantiles": [
+        0.0013417138622899554,
+        0.004065283075645835,
+        0.0046646176566008364,
+        0.004961402830618184,
+        0.007340783981195287
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700231710865249
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004674023995950169,
+      "max_error_over_DC": 0.007557900572485922,
+      "error_over_DC_quantiles": [
+        0.001287294244453789,
+        0.00440186969333772,
+        0.004755087117483477,
+        0.0051159497197753295,
+        0.007557900572485922
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700275111859176
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004417580192086176,
+      "max_error_over_DC": 0.0052536336828995,
+      "error_over_DC_quantiles": [
+        0.0030866996547686152,
+        0.003656982360728391,
+        0.004133048851080281,
+        0.004435844882130411,
+        0.0052536336828995
+      ],
+      "cell_weighted_total_response_over_DC": 0.9701826305413678
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.004411165907089506,
+      "max_error_over_DC": 0.00527778953754114,
+      "error_over_DC_quantiles": [
+        0.0030212721692260743,
+        0.003756589297173509,
+        0.0041215972716854765,
+        0.004407189571541675,
+        0.00527778953754114
+      ],
+      "cell_weighted_total_response_over_DC": 0.9701615133928476
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 3.782678578456493,
+      "cell_weighted_mean_error_over_DC": 0.0046971331486574605,
+      "max_error_over_DC": 0.007340783981195287,
+      "error_over_DC_quantiles": [
+        0.0013417138622899554,
+        0.004464641012248452,
+        0.004797175408424947,
+        0.0051440711511081295,
+        0.007340783981195287
+      ],
+      "cell_weighted_total_response_over_DC": 0.9700156540319707
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.006537066171320181,
+      "max_error_over_DC": 0.009495010454321993,
+      "error_over_DC_quantiles": [
+        0.003908080248295797,
+        0.005733051780177841,
+        0.006150782359347854,
+        0.006555391137611551,
+        0.009495010454321993
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492916435441029
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.00648070446801652,
+      "max_error_over_DC": 0.009774588473206941,
+      "error_over_DC_quantiles": [
+        0.0051247189849867245,
+        0.005984596011094461,
+        0.006238482143983582,
+        0.006788778481893338,
+        0.009774588473206941
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492950619519621
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005663318571740134,
+      "max_error_over_DC": 0.006726494928635564,
+      "error_over_DC_quantiles": [
+        0.003958501959047398,
+        0.004709201547595226,
+        0.005302301350482506,
+        0.005690093981822794,
+        0.006726494928635564
+      ],
+      "cell_weighted_total_response_over_DC": 0.9494713263428266
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005676365258255062,
+      "max_error_over_DC": 0.006766720142109298,
+      "error_over_DC_quantiles": [
+        0.003908080248295797,
+        0.004821650065452461,
+        0.005313106730106706,
+        0.005666145584899394,
+        0.006766720142109298
+      ],
+      "cell_weighted_total_response_over_DC": 0.9494456893452434
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.006580904536643638,
+      "max_error_over_DC": 0.009495010454321993,
+      "error_over_DC_quantiles": [
+        0.00423924331092226,
+        0.006043140644981957,
+        0.0062590927992568265,
+        0.0067917838221966224,
+        0.009495010454321993
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492832206672173
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.00606101127994304,
+      "max_error_over_DC": 0.009493131807822748,
+      "error_over_DC_quantiles": [
+        0.0017363581489747001,
+        0.005261427209033437,
+        0.006037028087871355,
+        0.006421062858688769,
+        0.009493131807822748
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492156339428568
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.006048741673017308,
+      "max_error_over_DC": 0.009774078240571388,
+      "error_over_DC_quantiles": [
+        0.0016657335863631984,
+        0.0056968598945009085,
+        0.006153862438632305,
+        0.006620883413990987,
+        0.009774078240571388
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492230241400854
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005717236556033044,
+      "max_error_over_DC": 0.00679920911765839,
+      "error_over_DC_quantiles": [
+        0.003994775153199585,
+        0.00473294538165676,
+        0.005349005969835436,
+        0.005740887535828957,
+        0.00679920911765839
+      ],
+      "cell_weighted_total_response_over_DC": 0.949488186860537
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.005708925166282516,
+      "max_error_over_DC": 0.006830645896413344,
+      "error_over_DC_quantiles": [
+        0.003909856639933964,
+        0.004861724138315819,
+        0.005333817811931029,
+        0.005703821711377609,
+        0.006830645896413344
+      ],
+      "cell_weighted_total_response_over_DC": 0.9494520873014828
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 5,
+      "cell_weighted_mean_error_over_DC": 0.0060786063497777505,
+      "max_error_over_DC": 0.009493131807822748,
+      "error_over_DC_quantiles": [
+        0.0017363581489747001,
+        0.0057778448675977236,
+        0.006208375095938343,
+        0.006656493350546955,
+        0.009493131807822748
+      ],
+      "cell_weighted_total_response_over_DC": 0.9492027857078006
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.011497342858117616,
+      "max_error_over_DC": 0.016617346406057377,
+      "error_over_DC_quantiles": [
+        0.006873283497233879,
+        0.010086394860234365,
+        0.010823646767912714,
+        0.01153413917424512,
+        0.016617346406057377
+      ],
+      "cell_weighted_total_response_over_DC": 0.8320505210974396
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.011398522861266056,
+      "max_error_over_DC": 0.017108725672537677,
+      "error_over_DC_quantiles": [
+        0.009017747275306338,
+        0.010530984712469153,
+        0.0109781399378121,
+        0.01194496098668044,
+        0.017108725672537677
+      ],
+      "cell_weighted_total_response_over_DC": 0.8320625268315041
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.009965114896421842,
+      "max_error_over_DC": 0.011835251940989756,
+      "error_over_DC_quantiles": [
+        0.00696507584221567,
+        0.008287297150460764,
+        0.009330075247698221,
+        0.010012229514315947,
+        0.011835251940989756
+      ],
+      "cell_weighted_total_response_over_DC": 0.8326807086803978
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.009988021468345326,
+      "max_error_over_DC": 0.011908265428893103,
+      "error_over_DC_quantiles": [
+        0.006873283497233879,
+        0.008482121510691129,
+        0.009344484791339442,
+        0.009970572170967517,
+        0.011908265428893103
+      ],
+      "cell_weighted_total_response_over_DC": 0.832590944831897
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.011574218317588385,
+      "max_error_over_DC": 0.016617346406057377,
+      "error_over_DC_quantiles": [
+        0.007452857881409247,
+        0.010632298438034829,
+        0.011014624613083288,
+        0.011950351363764574,
+        0.016617346406057377
+      ],
+      "cell_weighted_total_response_over_DC": 0.8320209763012206
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.010659999121159466,
+      "max_error_over_DC": 0.0166192899681967,
+      "error_over_DC_quantiles": [
+        0.00305421968700316,
+        0.009259722684765265,
+        0.01062375647328763,
+        0.011298708085236683,
+        0.0166192899681967
+      ],
+      "cell_weighted_total_response_over_DC": 0.8317863053346092
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.010638691514206888,
+      "max_error_over_DC": 0.017107829350920086,
+      "error_over_DC_quantiles": [
+        0.002927538447241993,
+        0.010023718089078948,
+        0.010827888585909617,
+        0.011647917291187004,
+        0.017107829350920086
+      ],
+      "cell_weighted_total_response_over_DC": 0.8318114760022444
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.01006011734302488,
+      "max_error_over_DC": 0.011963366013784194,
+      "error_over_DC_quantiles": [
+        0.0070288288517621,
+        0.008329078314001898,
+        0.009412297560362597,
+        0.01010189180518369,
+        0.011963366013784194
+      ],
+      "cell_weighted_total_response_over_DC": 0.832739744716504
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.010045368717559653,
+      "max_error_over_DC": 0.012020834655167113,
+      "error_over_DC_quantiles": [
+        0.006876418775269516,
+        0.008552892807781274,
+        0.00938103496181714,
+        0.010036914421825055,
+        0.012020834655167113
+      ],
+      "cell_weighted_total_response_over_DC": 0.8326133251146679
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 10,
+      "cell_weighted_mean_error_over_DC": 0.010690708587933691,
+      "max_error_over_DC": 0.0166192899681967,
+      "error_over_DC_quantiles": [
+        0.00305421968700316,
+        0.010163086242701326,
+        0.010922675673394739,
+        0.011700886636552582,
+        0.0166192899681967
+      ],
+      "cell_weighted_total_response_over_DC": 0.8317413634159921
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.01652415377590661,
+      "max_error_over_DC": 0.023411803878327326,
+      "error_over_DC_quantiles": [
+        0.00987721058006296,
+        0.014521369258751898,
+        0.015588725524132863,
+        0.016603288987540207,
+        0.023411803878327326
+      ],
+      "cell_weighted_total_response_over_DC": 0.590101737690535
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.016383905099830617,
+      "max_error_over_DC": 0.02411566575840815,
+      "error_over_DC_quantiles": [
+        0.012985975504804799,
+        0.015171181488461442,
+        0.015812181608490277,
+        0.01716510996501853,
+        0.02411566575840815
+      ],
+      "cell_weighted_total_response_over_DC": 0.5901360487777172
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.014347975268333054,
+      "max_error_over_DC": 0.017037029407587268,
+      "error_over_DC_quantiles": [
+        0.010026984782642388,
+        0.01193823657031317,
+        0.013434744234456588,
+        0.014415809142755736,
+        0.017037029407587268
+      ],
+      "cell_weighted_total_response_over_DC": 0.5918920741046905
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.014380662686439082,
+      "max_error_over_DC": 0.017155054708832274,
+      "error_over_DC_quantiles": [
+        0.00987721058006296,
+        0.012201249812674213,
+        0.013437087155498108,
+        0.014364557423459939,
+        0.017155054708832274
+      ],
+      "cell_weighted_total_response_over_DC": 0.5916386516529748
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.016633333769046205,
+      "max_error_over_DC": 0.023411803878327326,
+      "error_over_DC_quantiles": [
+        0.010693387980068556,
+        0.0153027920314892,
+        0.015861098171143607,
+        0.017199815385584592,
+        0.023411803878327326
+      ],
+      "cell_weighted_total_response_over_DC": 0.5900177610644433
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.015320373424575802,
+      "max_error_over_DC": 0.02352793615873577,
+      "error_over_DC_quantiles": [
+        0.004391555003004468,
+        0.013337682187230016,
+        0.01530194283195519,
+        0.016265277827778285,
+        0.02352793615873577
+      ],
+      "cell_weighted_total_response_over_DC": 0.5893777357458916
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.015291315582874401,
+      "max_error_over_DC": 0.02411438556524324,
+      "error_over_DC_quantiles": [
+        0.004195097006339447,
+        0.014429966761610251,
+        0.015588635553231419,
+        0.016758687212700706,
+        0.02411438556524324
+      ],
+      "cell_weighted_total_response_over_DC": 0.5894411659593655
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.014485503238457063,
+      "max_error_over_DC": 0.017222448897357558,
+      "error_over_DC_quantiles": [
+        0.010118351938598693,
+        0.011998410825387726,
+        0.013532426101884416,
+        0.014546561397388308,
+        0.017222448897357558
+      ],
+      "cell_weighted_total_response_over_DC": 0.59205868696734
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.014463549269256354,
+      "max_error_over_DC": 0.0173176242317914,
+      "error_over_DC_quantiles": [
+        0.00988177765129087,
+        0.012303733651978427,
+        0.013487723449523429,
+        0.014448206872198032,
+        0.0173176242317914
+      ],
+      "cell_weighted_total_response_over_DC": 0.5917015722077039
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 20,
+      "cell_weighted_mean_error_over_DC": 0.015363149389986654,
+      "max_error_over_DC": 0.02352793615873577,
+      "error_over_DC_quantiles": [
+        0.004391555003004468,
+        0.014614461349950668,
+        0.015711000323947462,
+        0.016825417887615615,
+        0.02352793615873577
+      ],
+      "cell_weighted_total_response_over_DC": 0.5892514070302003
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.018476378144180884,
+      "max_error_over_DC": 0.024515381263373673,
+      "error_over_DC_quantiles": [
+        0.011040404064397148,
+        0.016386115094548983,
+        0.01754472534388889,
+        0.018660178331846272,
+        0.024515381263373673
+      ],
+      "cell_weighted_total_response_over_DC": 0.313251824492564
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.01832756160428004,
+      "max_error_over_DC": 0.02523550754660127,
+      "error_over_DC_quantiles": [
+        0.014635596516524468,
+        0.01709703491276974,
+        0.017810974727567406,
+        0.019235109078908158,
+        0.02523550754660127
+      ],
+      "cell_weighted_total_response_over_DC": 0.3133273050559862
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.016159542827991757,
+      "max_error_over_DC": 0.019170870281003914,
+      "error_over_DC_quantiles": [
+        0.011286993417132369,
+        0.01333677522714735,
+        0.015032926457831088,
+        0.016235795304054126,
+        0.019170870281003914
+      ],
+      "cell_weighted_total_response_over_DC": 0.31707732663288096
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.01619494239293302,
+      "max_error_over_DC": 0.01936254086860441,
+      "error_over_DC_quantiles": [
+        0.011040404064397148,
+        0.01369089089949648,
+        0.015071019232459168,
+        0.016153653765015437,
+        0.01936254086860441
+      ],
+      "cell_weighted_total_response_over_DC": 0.3165456570486654
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.01859259949443984,
+      "max_error_over_DC": 0.024515381263373673,
+      "error_over_DC_quantiles": [
+        0.011872638639956285,
+        0.017242186865525713,
+        0.017865236683929572,
+        0.01936425505349006,
+        0.024515381263373673
+      ],
+      "cell_weighted_total_response_over_DC": 0.3130721337176822
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.017129209557249687,
+      "max_error_over_DC": 0.024720767958429514,
+      "error_over_DC_quantiles": [
+        0.004814439678534186,
+        0.014995973685636564,
+        0.017245600529073906,
+        0.018301509917748898,
+        0.024720767958429514
+      ],
+      "cell_weighted_total_response_over_DC": 0.31192233422578236
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.01710374854151776,
+      "max_error_over_DC": 0.025468210005803738,
+      "error_over_DC_quantiles": [
+        0.004633507987179417,
+        0.01625318985838215,
+        0.01755477718461357,
+        0.018826431426342324,
+        0.025468210005803738
+      ],
+      "cell_weighted_total_response_over_DC": 0.3120035841183638
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.016317755483320227,
+      "max_error_over_DC": 0.019383957398717778,
+      "error_over_DC_quantiles": [
+        0.011387872121344376,
+        0.013541455971269304,
+        0.015147029305797659,
+        0.016390585732537117,
+        0.019383957398717778
+      ],
+      "cell_weighted_total_response_over_DC": 0.3174239867705988
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.016289703568425653,
+      "max_error_over_DC": 0.019547731903791055,
+      "error_over_DC_quantiles": [
+        0.011045745351356214,
+        0.013809100363515153,
+        0.015163319788078803,
+        0.016250267728598607,
+        0.019547731903791055
+      ],
+      "cell_weighted_total_response_over_DC": 0.31667467508279756
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 40,
+      "cell_weighted_mean_error_over_DC": 0.017170959001732895,
+      "max_error_over_DC": 0.024720767958429514,
+      "error_over_DC_quantiles": [
+        0.004814439678534186,
+        0.016468515594075778,
+        0.017697770069438033,
+        0.018882551267747683,
+        0.024720767958429514
+      ],
+      "cell_weighted_total_response_over_DC": 0.31166351656549324
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.0157268979233919,
+      "max_error_over_DC": 0.018988005370822323,
+      "error_over_DC_quantiles": [
+        0.00924230243247652,
+        0.014292753917176318,
+        0.015283744293005032,
+        0.016040828455898173,
+        0.018988005370822323
+      ],
+      "cell_weighted_total_response_over_DC": 0.10949507582992156
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "I",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.01562812754763114,
+      "max_error_over_DC": 0.01957618968000954,
+      "error_over_DC_quantiles": [
+        0.011924039196238695,
+        0.014873634167232613,
+        0.015517316089634824,
+        0.016230726287716525,
+        0.01957618968000954
+      ],
+      "cell_weighted_total_response_over_DC": 0.10962249718514545
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core A E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014154589576867988,
+      "max_error_over_DC": 0.016717787406710767,
+      "error_over_DC_quantiles": [
+        0.00924230243247652,
+        0.011554702769805643,
+        0.012997743001328813,
+        0.01425519057545172,
+        0.016717787406710767
+      ],
+      "cell_weighted_total_response_over_DC": 0.11501361970763449
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Core B E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014179003948717763,
+      "max_error_over_DC": 0.017100230461320694,
+      "error_over_DC_quantiles": [
+        0.00940960643357546,
+        0.011779499187846834,
+        0.01323587761233503,
+        0.014103211318038994,
+        0.017100230461320694
+      ],
+      "cell_weighted_total_response_over_DC": 0.11424284558824442
+    },
+    {
+      "synapse": "gaba",
+      "profile": "uniform_10Hz",
+      "target": "Surround E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.015805760863555163,
+      "max_error_over_DC": 0.018988005370822323,
+      "error_over_DC_quantiles": [
+        0.009760463686850256,
+        0.015018411981478673,
+        0.015576235229250125,
+        0.016389571698243524,
+        0.018988005370822323
+      ],
+      "cell_weighted_total_response_over_DC": 0.1092359579995264
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014580908176374559,
+      "max_error_over_DC": 0.019226265232400057,
+      "error_over_DC_quantiles": [
+        0.0036485231490768796,
+        0.012987318768716925,
+        0.015003907925290251,
+        0.015952321012803635,
+        0.019226265232400057
+      ],
+      "cell_weighted_total_response_over_DC": 0.10860960498054126
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "I",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014583499939217405,
+      "max_error_over_DC": 0.019987748677378275,
+      "error_over_DC_quantiles": [
+        0.003654383770629262,
+        0.01423002155784988,
+        0.015342150655295261,
+        0.016196087318461522,
+        0.019987748677378275
+      ],
+      "cell_weighted_total_response_over_DC": 0.10866918382332799
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core A E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.01430448640402297,
+      "max_error_over_DC": 0.0169185033182495,
+      "error_over_DC_quantiles": [
+        0.009244716400599956,
+        0.011679590517961448,
+        0.013125268221513733,
+        0.01440219688929945,
+        0.0169185033182495
+      ],
+      "cell_weighted_total_response_over_DC": 0.11546300032124852
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Core B E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014266661435634041,
+      "max_error_over_DC": 0.017268132109457733,
+      "error_over_DC_quantiles": [
+        0.009414393335645727,
+        0.011843469767918387,
+        0.013323037584949335,
+        0.014230620132575802,
+        0.017268132109457733
+      ],
+      "cell_weighted_total_response_over_DC": 0.11440108134234822
+    },
+    {
+      "synapse": "gaba",
+      "profile": "old_candidate_cycle_mean",
+      "target": "Surround E",
+      "frequency_Hz": 80,
+      "cell_weighted_mean_error_over_DC": 0.014595859586570727,
+      "max_error_over_DC": 0.019226265232400057,
+      "error_over_DC_quantiles": [
+        0.0036485231490768796,
+        0.014270558895623066,
+        0.015410305914404558,
+        0.016187946312346612,
+        0.019226265232400057
+      ],
+      "cell_weighted_total_response_over_DC": 0.10829051238345413
+    }
+  ],
+  "checks": [
+    {
+      "synapse": "ampa",
+      "DC_identity_error": 1.9549954404353815e-15,
+      "direct_pair_sum_error_max": 1.7767849717154226e-15,
+      "impulse_checks": [
+        {
+          "pair_index": 0,
+          "target_group": 0,
+          "source_group": 0,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 6.152129878291083e-09
+        },
+        {
+          "pair_index": 6853,
+          "target_group": 89,
+          "source_group": 150,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.324170662462609e-09
+        },
+        {
+          "pair_index": 13706,
+          "target_group": 155,
+          "source_group": 262,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.2850874753998364e-09
+        },
+        {
+          "pair_index": 20559,
+          "target_group": 219,
+          "source_group": 244,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 9.146148814161707e-10
+        },
+        {
+          "pair_index": 27412,
+          "target_group": 281,
+          "source_group": 330,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 1.7735648308199564e-07
+        },
+        {
+          "pair_index": 34266,
+          "target_group": 345,
+          "source_group": 266,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 8.133375512320901e-09
+        },
+        {
+          "pair_index": 41119,
+          "target_group": 425,
+          "source_group": 407,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.6109763513240153e-08
+        },
+        {
+          "pair_index": 47972,
+          "target_group": 530,
+          "source_group": 492,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 3.2731268693331607e-09
+        },
+        {
+          "pair_index": 54825,
+          "target_group": 659,
+          "source_group": 117,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 1.6321276749270957e-11
+        },
+        {
+          "pair_index": 61678,
+          "target_group": 766,
+          "source_group": 343,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 9.173549772652175e-09
+        },
+        {
+          "pair_index": 68532,
+          "target_group": 934,
+          "source_group": 534,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.427194941759535e-07
+        }
+      ]
+    },
+    {
+      "synapse": "gaba",
+      "DC_identity_error": 2.936374502991532e-15,
+      "direct_pair_sum_error_max": 2.6283743513190517e-15,
+      "impulse_checks": [
+        {
+          "pair_index": 0,
+          "target_group": 0,
+          "source_group": 535,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 7.802790603256443e-08
+        },
+        {
+          "pair_index": 3410,
+          "target_group": 99,
+          "source_group": 551,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.426378104370026e-10
+        },
+        {
+          "pair_index": 6820,
+          "target_group": 192,
+          "source_group": 742,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 7.871277966814746e-11
+        },
+        {
+          "pair_index": 10230,
+          "target_group": 284,
+          "source_group": 699,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.772740353886621e-07
+        },
+        {
+          "pair_index": 13640,
+          "target_group": 372,
+          "source_group": 810,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 1.2145289195856869e-08
+        },
+        {
+          "pair_index": 17050,
+          "target_group": 449,
+          "source_group": 830,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 1.2159067606132633e-09
+        },
+        {
+          "pair_index": 20460,
+          "target_group": 545,
+          "source_group": 583,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 1.0556353322782336e-07
+        },
+        {
+          "pair_index": 23870,
+          "target_group": 646,
+          "source_group": 705,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.4177694552649953e-10
+        },
+        {
+          "pair_index": 27280,
+          "target_group": 739,
+          "source_group": 740,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 5.030373099821444e-07
+        },
+        {
+          "pair_index": 30690,
+          "target_group": 830,
+          "source_group": 892,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.654843956954894e-10
+        },
+        {
+          "pair_index": 34101,
+          "target_group": 934,
+          "source_group": 934,
+          "exact_private_minimum_relative": 0.0,
+          "common_integral_error_over_total_DC": 2.73253368334557e-06
+        }
+      ]
+    }
+  ],
+  "exact_formula": "Total=sum_d Q_d exp(-lambda*d) Laplace[h^2]; common=sum_de A_d A_e Laplace[h(t-d)h(t-e)]/N; private=total-common.",
+  "compared_formula": "Constant corrected fraction f=common(0)/total(0): allocated=(1-f)*total(lambda)+common(lambda).",
+  "scope": "Analytical current-covariance diagnostic on the unchanged graph under independent Poisson source groups with a coherent small fractional rate modulation. Exact synaptic current-square kernels on both sides isolate allocation error. This does not alter the response fit, does not recover native cell correlations, and authorizes no new network run or model promotion.",
+  "model_modified": false,
+  "network_runs": 0,
+  "replacement_promoted": false
+}

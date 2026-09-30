@@ -1,0 +1,51 @@
+{
+  "status": "BOUNDED_NONLINEAR_RETURN_EXPERIMENT_COMPLETE",
+  "multiplier": -1.7689291883671379,
+  "checks": [
+    {
+      "amplitude": 0.0001,
+      "sign": -1,
+      "nonlinear_derivative_relative_error": 0.0044238108897424345,
+      "along_right_vector_ratio": -1.7748767051515926,
+      "period_ms": 232.5091437801496
+    },
+    {
+      "amplitude": 0.0001,
+      "sign": 1,
+      "nonlinear_derivative_relative_error": 0.004427441574019493,
+      "along_right_vector_ratio": -1.762972839183116,
+      "period_ms": 232.50938902497015
+    },
+    {
+      "amplitude": 5e-05,
+      "sign": -1,
+      "nonlinear_derivative_relative_error": 0.002212555151927927,
+      "along_right_vector_ratio": -1.7719055464246096,
+      "period_ms": 232.50920550827527
+    },
+    {
+      "amplitude": 5e-05,
+      "sign": 1,
+      "nonlinear_derivative_relative_error": 0.0022136436961017504,
+      "along_right_vector_ratio": -1.7659516258760606,
+      "period_ms": 232.50932813022783
+    }
+  ],
+  "branches": [
+    {
+      "sign": -1,
+      "status": "RETURN_BUDGET_COMPLETE",
+      "rows": []
+    },
+    {
+      "sign": 1,
+      "status": "RETURN_BUDGET_COMPLETE",
+      "rows": []
+    }
+  ],
+  "seconds": 207.1650321483612,
+  "nonlinear_daughter_root": "NOT_CERTIFIED",
+  "physical_bifurcation_type": "NOT_ESTABLISHED",
+  "onset_attribution": "NOT_ESTABLISHED",
+  "model_promoted": false
+}

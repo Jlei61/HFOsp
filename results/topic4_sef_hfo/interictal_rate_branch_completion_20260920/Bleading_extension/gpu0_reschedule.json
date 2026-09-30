@@ -1,0 +1,13 @@
+{
+  "timestamp": 1789855061.3660777,
+  "old_worker": {
+    "status": "WAITING_DEPENDENCIES",
+    "pid": 465634,
+    "label": "arcBleadingConnection_20260920",
+    "dependencies": [
+      458977
+    ]
+  },
+  "old_cmdline": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -u scripts/topic4_brunel_spatial_bifurcation/extend_rate_Bleading_connection.py --device 1 --after-pid 458977 ",
+  "reason": "An independent connection extension was waiting behind long GPU1 fold checks. Move this not-yet-started batch to free GPU0 capacity using verified exact streamed harmonic actions; preserve the same two seed profiles, continuation budget, model and acceptance criteria."
+}

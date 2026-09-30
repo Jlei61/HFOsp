@@ -1,0 +1,19 @@
+{
+  "question": "Does a physical periodic orbit near the recurrent burst exist when period, rather than D_A, parameterizes the branch?",
+  "source": "/data/hfosp/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/core_a_bifurcation_type_20260924/near_returns/mid_lower/periodic_newton/latest_state.npz",
+  "target_period_ms": 262.0,
+  "dt_ms": 0.05,
+  "equations": "Unchanged full3479-group spatial conditional drift; only native Core A Z family varies and outside-Core-A Z remains native9s. All Z fixed per orbit, all M dynamic.",
+  "method": "Bordered Newton: [I-DP,-P_D; T_X,T_D] with full actual return derivative and two-mesh finite-difference parameter derivative. Positive numerical retraction with exact Core-A-rate phase plane. No model-flow clipping or parameter refit.",
+  "limits": {
+    "iterations": 6,
+    "Krylov_per_step": 20,
+    "D_A_interval": [
+      0.26,
+      0.36
+    ],
+    "linesearch_returns": 4
+  },
+  "interpretation": "A closed periodic root is not a fold certificate. Need continuation both sides, unit Floquet crossing, nondegeneracy and time-step verification.",
+  "model_promoted": false
+}

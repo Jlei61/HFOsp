@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "all_saved_endpoint_arrays_cross_device_bitwise": {
+    "first": true,
+    "repeat": true,
+    "shared": true,
+    "coordinate_scale": true,
+    "coordinate_weight": true
+  },
+  "within_device_replay_bitwise": true,
+  "expected_previous_closure": 0.003845439670566655,
+  "replayed_closure": [
+    0.0038454396705628366,
+    0.0038454396705628366
+  ],
+  "shared_prefix_relative_errors": [
+    0.0,
+    0.0
+  ],
+  "scope": "At this saved nonconverged iterate, three original flow readouts and both devices agree. This rules out a replay mismatch at this point, not every possible numerical error; large rejected Newton proposals still do not prove a bifurcation.",
+  "model_promoted": false
+}

@@ -1,0 +1,21 @@
+{
+  "status": "COMPLETE_MANUAL_POSTPROCESSING",
+  "worker_pid": 531843,
+  "worker_create_time": 1789883269.51,
+  "collector_pid": 532724,
+  "actions": [],
+  "created_local": "2026-09-20T13:57:02.442926+08:00",
+  "scope": "One native replay followedby fixedinput analysis,numericalauditandfigure. No replayrestart, responsefit,whole-networklaunch orbranch. Scientificreview remainsrootagent responsibility.",
+  "recovery": "audit_efficiency_recovery.json",
+  "completed_local": "2026-09-20T14:24:34.893259+08:00",
+  "manual_actions": [
+    "audit-only replay recovery PASS",
+    "fixed-input response COMPLETE",
+    "independent response audit PASS",
+    "conditional LIF two steps COMPLETE",
+    "independent LIF audit PASS",
+    "figure final PNG and same PDF Agent PASS"
+  ],
+  "worker_processes_alive": false,
+  "manual_recovery_preserved": true
+}

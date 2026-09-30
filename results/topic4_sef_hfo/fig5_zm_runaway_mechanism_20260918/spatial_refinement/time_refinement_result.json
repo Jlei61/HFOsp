@@ -1,0 +1,857 @@
+{
+  "status": "STEP_SENSITIVITY_UNRESOLVED",
+  "rows": [
+    {
+      "dt_ms": 0.05,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.05/trajectory.npz",
+      "canonical_native": {
+        "label": "native_g40_liftedZ_D0.2190000_dt0.05",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 62.219852132890054,
+          "max_rate_hz": 76.32504076339404,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.16671875,
+            "20Hz_duty90": 0.13603125,
+            "50Hz_duty80": 0.15075,
+            "50Hz_duty90": 0.1230625,
+            "100Hz_duty80": 0.13678125,
+            "100Hz_duty90": 0.10978125
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.2005796875
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 63.28227127567741,
+            "max_rate_hz": 75.5888370505337,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.17134375,
+              "20Hz_duty90": 0.1454375,
+              "50Hz_duty80": 0.1610625,
+              "50Hz_duty90": 0.13325,
+              "100Hz_duty80": 0.14340625,
+              "100Hz_duty90": 0.1204375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.20348812500000002
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 62.13632239646291,
+            "max_rate_hz": 73.68132099264089,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.1685,
+              "20Hz_duty90": 0.1426875,
+              "50Hz_duty80": 0.15459375,
+              "50Hz_duty90": 0.13328125,
+              "100Hz_duty80": 0.137875,
+              "100Hz_duty90": 0.11340625
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.20064593749999993
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 62.79362705488347,
+            "max_rate_hz": 76.32504076339404,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.16584375,
+              "20Hz_duty90": 0.135125,
+              "50Hz_duty80": 0.15196875,
+              "50Hz_duty90": 0.12415625,
+              "100Hz_duty80": 0.13534375,
+              "100Hz_duty90": 0.11296875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.20170499999999997
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 60.667187804536425,
+            "max_rate_hz": 75.54754717734981,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.1538125,
+              "20Hz_duty90": 0.12690625,
+              "50Hz_duty80": 0.1366875,
+              "50Hz_duty90": 0.1155,
+              "100Hz_duty80": 0.12565625,
+              "100Hz_duty90": 0.10534375
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.19647968749999997
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 158,
+            "end_bin": 170,
+            "duration_ms": 120,
+            "peak_hz": 183.9641061395258,
+            "qualifies": true,
+            "start_ms": 1580.0,
+            "end_ms": 1700.0
+          },
+          {
+            "start_bin": 188,
+            "end_bin": 280,
+            "duration_ms": 920,
+            "peak_hz": 173.59794810280306,
+            "qualifies": true,
+            "start_ms": 1880.0,
+            "end_ms": 2800.0
+          },
+          {
+            "start_bin": 299,
+            "end_bin": 311,
+            "duration_ms": 120,
+            "peak_hz": 179.9101512041213,
+            "qualifies": true,
+            "start_ms": 2990.0,
+            "end_ms": 3110.0
+          },
+          {
+            "start_bin": 329,
+            "end_bin": 340,
+            "duration_ms": 110,
+            "peak_hz": 177.9658923653389,
+            "qualifies": true,
+            "start_ms": 3290.0,
+            "end_ms": 3400.0
+          },
+          {
+            "start_bin": 358,
+            "end_bin": 417,
+            "duration_ms": 590,
+            "peak_hz": 177.10448809107316,
+            "qualifies": true,
+            "start_ms": 3580.0,
+            "end_ms": 4170.0
+          },
+          {
+            "start_bin": 435,
+            "end_bin": 448,
+            "duration_ms": 130,
+            "peak_hz": 184.56793371355118,
+            "qualifies": true,
+            "start_ms": 4350.0,
+            "end_ms": 4480.0
+          },
+          {
+            "start_bin": 465,
+            "end_bin": 477,
+            "duration_ms": 120,
+            "peak_hz": 181.54736059968866,
+            "qualifies": true,
+            "start_ms": 4650.0,
+            "end_ms": 4770.0
+          },
+          {
+            "start_bin": 495,
+            "end_bin": 507,
+            "duration_ms": 120,
+            "peak_hz": 175.4961765521843,
+            "qualifies": true,
+            "start_ms": 4950.0,
+            "end_ms": 5070.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "canonical_common400": {
+        "label": "native_g40_liftedZ_D0.2190000_dt0.05_common400",
+        "category": "PERSISTENT",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0,
+          "longest_quiet_ms": 0,
+          "quiet_runs_ge20ms": 0,
+          "n_events": 0,
+          "event_durations_ms": [],
+          "event_peaks_hz": [],
+          "inter_onset_ms": [],
+          "activity_duty": 1.0,
+          "mean_rate_hz": 62.21985211435927,
+          "max_rate_hz": 76.32504085631562,
+          "trailing_activity_ms": 4000,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.19571875,
+            "20Hz_duty90": 0.158875,
+            "50Hz_duty80": 0.16615625,
+            "50Hz_duty90": 0.1381875,
+            "100Hz_duty80": 0.1303125,
+            "100Hz_duty90": 0.10565625
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.21601187500000002
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 63.282271238179575,
+            "max_rate_hz": 75.58883698271613,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.19815625,
+              "20Hz_duty90": 0.17203125,
+              "50Hz_duty80": 0.1740625,
+              "50Hz_duty90": 0.14375,
+              "100Hz_duty80": 0.14540625,
+              "100Hz_duty90": 0.115125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.21915312499999998
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 62.13632240720467,
+            "max_rate_hz": 73.68132131513345,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.19815625,
+              "20Hz_duty90": 0.16925,
+              "50Hz_duty80": 0.16615625,
+              "50Hz_duty90": 0.14859375,
+              "100Hz_duty80": 0.1378125,
+              "100Hz_duty90": 0.11471875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.21584125
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 62.793627048793866,
+            "max_rate_hz": 76.32504085631562,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.195,
+              "20Hz_duty90": 0.15921875,
+              "50Hz_duty80": 0.16378125,
+              "50Hz_duty90": 0.13596875,
+              "100Hz_duty80": 0.1351875,
+              "100Hz_duty90": 0.1076875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.21691656249999997
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 60.66718776325898,
+            "max_rate_hz": 75.54754719833593,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.17434375,
+              "20Hz_duty90": 0.14678125,
+              "50Hz_duty80": 0.15134375,
+              "50Hz_duty90": 0.1304375,
+              "100Hz_duty80": 0.12246875,
+              "100Hz_duty90": 0.09796875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2121365625
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 158,
+            "end_bin": 170,
+            "duration_ms": 120,
+            "peak_hz": 183.9641063988914,
+            "qualifies": true,
+            "start_ms": 1580.0,
+            "end_ms": 1700.0
+          },
+          {
+            "start_bin": 188,
+            "end_bin": 280,
+            "duration_ms": 920,
+            "peak_hz": 173.5979482232727,
+            "qualifies": true,
+            "start_ms": 1880.0,
+            "end_ms": 2800.0
+          },
+          {
+            "start_bin": 299,
+            "end_bin": 311,
+            "duration_ms": 120,
+            "peak_hz": 179.91015122799183,
+            "qualifies": true,
+            "start_ms": 2990.0,
+            "end_ms": 3110.0
+          },
+          {
+            "start_bin": 329,
+            "end_bin": 340,
+            "duration_ms": 110,
+            "peak_hz": 177.965892142539,
+            "qualifies": true,
+            "start_ms": 3290.0,
+            "end_ms": 3400.0
+          },
+          {
+            "start_bin": 358,
+            "end_bin": 417,
+            "duration_ms": 590,
+            "peak_hz": 177.10448786902347,
+            "qualifies": true,
+            "start_ms": 3580.0,
+            "end_ms": 4170.0
+          },
+          {
+            "start_bin": 435,
+            "end_bin": 448,
+            "duration_ms": 130,
+            "peak_hz": 184.56793398452274,
+            "qualifies": true,
+            "start_ms": 4350.0,
+            "end_ms": 4480.0
+          },
+          {
+            "start_bin": 465,
+            "end_bin": 477,
+            "duration_ms": 120,
+            "peak_hz": 181.54735956700128,
+            "qualifies": true,
+            "start_ms": 4650.0,
+            "end_ms": 4770.0
+          },
+          {
+            "start_bin": 495,
+            "end_bin": 507,
+            "duration_ms": 120,
+            "peak_hz": 175.4961765885546,
+            "qualifies": true,
+            "start_ms": 4950.0,
+            "end_ms": 5070.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 0,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 4000,
+          "quiet_fraction_tail": 0.0,
+          "tail_has_no_quiet_run": true,
+          "every_subwindow_persistent": true,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "PERSISTENT",
+          "20Hz_duty90": "PERSISTENT",
+          "50Hz_duty80": "PERSISTENT",
+          "50Hz_duty90": "PERSISTENT",
+          "100Hz_duty80": "PERSISTENT",
+          "100Hz_duty90": "PERSISTENT"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "broad_native_start_ms": null,
+      "broad_common400_start_ms": null
+    },
+    {
+      "dt_ms": 0.025,
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/runs/native_g40_liftedZ_D0.2190000_dt0.025/trajectory.npz",
+      "canonical_native": {
+        "label": "native_g40_liftedZ_D0.2190000_dt0.025",
+        "category": "UNRESOLVED",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0875,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 1,
+          "event_durations_ms": [
+            110
+          ],
+          "event_peaks_hz": [
+            182.58454201174948
+          ],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9125,
+          "mean_rate_hz": 69.23680682824546,
+          "max_rate_hz": 182.58454201174948,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0699375,
+            "20Hz_duty90": 0.03165625,
+            "50Hz_duty80": 0.0671875,
+            "50Hz_duty90": 0.026125,
+            "100Hz_duty80": 0.05934375,
+            "100Hz_duty90": 0.0198125
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.23272273437500002
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 78.59010844681276,
+            "max_rate_hz": 105.71661835772244,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.10284375,
+              "20Hz_duty90": 0.0671875,
+              "50Hz_duty80": 0.087375,
+              "50Hz_duty90": 0.06053125,
+              "100Hz_duty80": 0.07453125,
+              "100Hz_duty90": 0.0551875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.26546718750000003
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 75.45904808130602,
+            "max_rate_hz": 116.49632915578476,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.09003125,
+              "20Hz_duty90": 0.07025,
+              "50Hz_duty80": 0.0805625,
+              "50Hz_duty90": 0.066875,
+              "100Hz_duty80": 0.06971875,
+              "100Hz_duty90": 0.059875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.25343374999999996
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 75.57781591151975,
+            "max_rate_hz": 107.49666257135851,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.12209375,
+              "20Hz_duty90": 0.07646875,
+              "50Hz_duty80": 0.1015,
+              "50Hz_duty90": 0.07040625,
+              "100Hz_duty80": 0.0814375,
+              "100Hz_duty90": 0.0661875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2531684375
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.35,
+            "longest_quiet_ms": 190,
+            "quiet_runs_ge20ms": 2,
+            "n_events": 1,
+            "event_durations_ms": [
+              110
+            ],
+            "event_peaks_hz": [
+              182.58454201174948
+            ],
+            "inter_onset_ms": [],
+            "activity_duty": 0.65,
+            "mean_rate_hz": 47.32025487334327,
+            "max_rate_hz": 182.58454201174948,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.1588215625
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 598,
+            "end_bin": 1154,
+            "duration_ms": 5560,
+            "peak_hz": 178.54833744116362,
+            "qualifies": true,
+            "start_ms": 5980.0,
+            "end_ms": 11540.0
+          },
+          {
+            "start_bin": 1173,
+            "end_bin": 1184,
+            "duration_ms": 110,
+            "peak_hz": 182.58454201174948,
+            "qualifies": true,
+            "start_ms": 11730.0,
+            "end_ms": 11840.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 1,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.0875,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "UNRESOLVED",
+          "20Hz_duty90": "UNRESOLVED",
+          "50Hz_duty80": "UNRESOLVED",
+          "50Hz_duty90": "UNRESOLVED",
+          "100Hz_duty80": "UNRESOLVED",
+          "100Hz_duty90": "UNRESOLVED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "canonical_common400": {
+        "label": "native_g40_liftedZ_D0.2190000_dt0.025_common400",
+        "category": "UNRESOLVED",
+        "tail": {
+          "lo_bin": 800,
+          "hi_bin": 1200,
+          "n_bins": 400,
+          "quiet_fraction": 0.0875,
+          "longest_quiet_ms": 190,
+          "quiet_runs_ge20ms": 2,
+          "n_events": 1,
+          "event_durations_ms": [
+            110
+          ],
+          "event_peaks_hz": [
+            182.5845423534829
+          ],
+          "inter_onset_ms": [],
+          "activity_duty": 0.9125,
+          "mean_rate_hz": 69.2368067808079,
+          "max_rate_hz": 182.5845423534829,
+          "trailing_activity_ms": 0,
+          "persistent_fraction": {
+            "20Hz_duty80": 0.0885625,
+            "20Hz_duty90": 0.03246875,
+            "50Hz_duty80": 0.07115625,
+            "50Hz_duty90": 0.024875,
+            "100Hz_duty80": 0.06046875,
+            "100Hz_duty90": 0.01934375
+          },
+          "high_confirmed_inside": false,
+          "mean_instantaneous_fraction_50Hz": 0.24308140625
+        },
+        "subwindows": [
+          {
+            "lo_bin": 800,
+            "hi_bin": 900,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 78.59010834342872,
+            "max_rate_hz": 105.71661823271799,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.12540625,
+              "20Hz_duty90": 0.08609375,
+              "50Hz_duty80": 0.10515625,
+              "50Hz_duty90": 0.06046875,
+              "100Hz_duty80": 0.0713125,
+              "100Hz_duty90": 0.0553125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.27659218750000003
+          },
+          {
+            "lo_bin": 900,
+            "hi_bin": 1000,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 75.45904801830726,
+            "max_rate_hz": 116.49632934395129,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.1110625,
+              "20Hz_duty90": 0.0885625,
+              "50Hz_duty80": 0.09171875,
+              "50Hz_duty90": 0.07115625,
+              "100Hz_duty80": 0.0710625,
+              "100Hz_duty90": 0.060875
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2654759375
+          },
+          {
+            "lo_bin": 1000,
+            "hi_bin": 1100,
+            "n_bins": 100,
+            "quiet_fraction": 0.0,
+            "longest_quiet_ms": 0,
+            "quiet_runs_ge20ms": 0,
+            "n_events": 0,
+            "event_durations_ms": [],
+            "event_peaks_hz": [],
+            "inter_onset_ms": [],
+            "activity_duty": 1.0,
+            "mean_rate_hz": 75.577815906633,
+            "max_rate_hz": 107.49666261567435,
+            "trailing_activity_ms": 1000,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.14846875,
+              "20Hz_duty90": 0.09328125,
+              "50Hz_duty80": 0.12246875,
+              "50Hz_duty90": 0.0765625,
+              "100Hz_duty80": 0.07903125,
+              "100Hz_duty90": 0.06853125
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.2653228125
+          },
+          {
+            "lo_bin": 1100,
+            "hi_bin": 1200,
+            "n_bins": 100,
+            "quiet_fraction": 0.35,
+            "longest_quiet_ms": 190,
+            "quiet_runs_ge20ms": 2,
+            "n_events": 1,
+            "event_durations_ms": [
+              110
+            ],
+            "event_peaks_hz": [
+              182.5845423534829
+            ],
+            "inter_onset_ms": [],
+            "activity_duty": 0.65,
+            "mean_rate_hz": 47.32025485486256,
+            "max_rate_hz": 182.5845423534829,
+            "trailing_activity_ms": 0,
+            "persistent_fraction": {
+              "20Hz_duty80": 0.0,
+              "20Hz_duty90": 0.0,
+              "50Hz_duty80": 0.0,
+              "50Hz_duty90": 0.0,
+              "100Hz_duty80": 0.0,
+              "100Hz_duty90": 0.0
+            },
+            "high_confirmed_inside": false,
+            "mean_instantaneous_fraction_50Hz": 0.16493468749999998
+          }
+        ],
+        "events": [
+          {
+            "start_bin": 598,
+            "end_bin": 1154,
+            "duration_ms": 5560,
+            "peak_hz": 178.54833791550143,
+            "qualifies": true,
+            "start_ms": 5980.0,
+            "end_ms": 11540.0
+          },
+          {
+            "start_bin": 1173,
+            "end_bin": 1184,
+            "duration_ms": 110,
+            "peak_hz": 182.5845423534829,
+            "qualifies": true,
+            "start_ms": 11730.0,
+            "end_ms": 11840.0
+          }
+        ],
+        "reasons": {
+          "n_events_tail": 1,
+          "every_subwindow_has_quiet": false,
+          "trailing_activity_ms": 0,
+          "quiet_fraction_tail": 0.0875,
+          "tail_has_no_quiet_run": false,
+          "every_subwindow_persistent": false,
+          "high_rate_endpoint_reached": false
+        },
+        "sensitivity": {
+          "20Hz_duty80": "UNRESOLVED",
+          "20Hz_duty90": "UNRESOLVED",
+          "50Hz_duty80": "UNRESOLVED",
+          "50Hz_duty90": "UNRESOLVED",
+          "100Hz_duty80": "UNRESOLVED",
+          "100Hz_duty90": "UNRESOLVED"
+        },
+        "high_rate": null,
+        "start_ms": 0.0,
+        "duration_ms": 12000,
+        "temporal_unit": "10-ms non-overlapping bins",
+        "claim": "Finite-time category, not asymptotic attractor classification"
+      },
+      "broad_native_start_ms": null,
+      "broad_common400_start_ms": null
+    }
+  ],
+  "same_tail_category": false,
+  "both_no_original_high_entry": true,
+  "tail_mean_difference_hz": 7.016954695355409,
+  "scope": "Same finite-window category only; no trajectory, distribution, spatial-grid, asymptotic or bifurcation convergence claim."
+}

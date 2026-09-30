@@ -1,0 +1,173 @@
+{
+  "status": "READOUT_COMPLETE",
+  "rows": [
+    {
+      "total_time_ms": 64000,
+      "M_global_A_B_surround": [
+        0.029122449179691964,
+        0.19517621931502252,
+        0.08328007901796924,
+        0.02361448989752109
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        70.89501946793685,
+        398.66604785063976,
+        302.23689838692417,
+        56.81182602634517
+      ]
+    },
+    {
+      "total_time_ms": 64500,
+      "M_global_A_B_surround": [
+        0.02887228304132231,
+        0.19673815323811208,
+        0.07483307411153303,
+        0.023530981402794224
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        71.32240734382049,
+        403.93287049634984,
+        296.1385961027115,
+        57.28781070621393
+      ]
+    },
+    {
+      "total_time_ms": 64650,
+      "M_global_A_B_surround": [
+        0.02906180127445011,
+        0.19539714998858354,
+        0.08456369597094421,
+        0.02351218400058599
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        45.45008100289194,
+        315.08024045262744,
+        256.3867842682274,
+        33.33263553369775
+      ]
+    },
+    {
+      "total_time_ms": 64700,
+      "M_global_A_B_surround": [
+        0.02891781072444322,
+        0.19371082180924057,
+        0.08694780589233538,
+        0.023341136182095858
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        56.0392227549384,
+        356.5964111241366,
+        273.2564121062128,
+        42.99415279891484
+      ]
+    },
+    {
+      "total_time_ms": 64750,
+      "M_global_A_B_surround": [
+        0.028555848331390177,
+        0.1898537521470447,
+        0.08900291760568893,
+        0.02300331990307098
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        33.575580709743186,
+        59.65766089979511,
+        254.8808481309586,
+        27.219315816231223
+      ]
+    },
+    {
+      "total_time_ms": 64800,
+      "M_global_A_B_surround": [
+        0.028009540327970418,
+        0.18185052197701654,
+        0.09158346951483906,
+        0.022560912340305963
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        31.00341959731572,
+        111.85704880835021,
+        272.24070038448616,
+        22.77701975739991
+      ]
+    },
+    {
+      "total_time_ms": 64830,
+      "M_global_A_B_surround": [
+        0.02757700643574631,
+        0.178132171599942,
+        0.09235540377519386,
+        0.022178634313533258
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        18.48382245674869,
+        44.64556281708886,
+        132.76131301339248,
+        14.887366126833438
+      ]
+    },
+    {
+      "total_time_ms": 64880,
+      "M_global_A_B_surround": [
+        0.026417130787430902,
+        0.1694447059832716,
+        0.08996821987411921,
+        0.0212367648084486
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        5.80335787940582,
+        3.508334305438353e-05,
+        79.22073949525603,
+        4.05252542497946
+      ]
+    },
+    {
+      "total_time_ms": 64900,
+      "M_global_A_B_surround": [
+        0.025961961107952933,
+        0.1660894763169903,
+        0.08861649192064686,
+        0.020876517651406912
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        14.602367795170922,
+        2.8635498437406297,
+        34.65743770420163,
+        14.375440145363964
+      ]
+    },
+    {
+      "total_time_ms": 65000,
+      "M_global_A_B_surround": [
+        0.025182118829908874,
+        0.15679344437155598,
+        0.08018358830444725,
+        0.020504965367486385
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        4.091430671366916,
+        0.0002689978311875543,
+        0.054594864239515116,
+        4.296870226398038
+      ]
+    },
+    {
+      "total_time_ms": 65350,
+      "M_global_A_B_surround": [
+        0.02129109823635111,
+        0.1181436746038145,
+        0.0700597608581168,
+        0.017635188472668418
+      ],
+      "mean_50ms_rate_global_A_B_surround_hz": [
+        79.38085153383383,
+        296.53710881339975,
+        310.75947440494144,
+        68.03484314363413
+      ]
+    }
+  ],
+  "units": "M is eta_M*M in mV-equivalent, not raw unscaled adaptation; regional rate is E Hz/neuron.",
+  "observation": "Core-A adaptation current decreases before and throughout the late termination; Core-B current rises over the pretermination interval. The observed A termination does not coincide with an upward crossing of an A-M threshold.",
+  "scope": "Passive temporal context. This does not isolate M causally, exclude prior M effects, or identify a bifurcation."
+}

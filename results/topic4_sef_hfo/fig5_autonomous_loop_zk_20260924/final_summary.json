@@ -1,0 +1,85 @@
+{
+  "status": "COMPLETE_BOUNDED_CAMPAIGN_CANDIDATES_PENDING_HUMAN_REVIEW",
+  "updated_utc": "2026-09-24T23:49:02.291412+00:00",
+  "authorized_scope": "Bounded native autonomous-return, Z/K conditional, conductance-response gate and structural-control campaign; candidate Figure 5 delivery.",
+  "completed_runs": {
+    "original_graph_conditionals": 18,
+    "new_structure_conditionals": 16,
+    "conditional_duration_s": 30,
+    "new_autonomous_structure_runs": 2,
+    "autonomous_structure_duration_s": 120,
+    "structural_comparison_rows": 24,
+    "structural_rows_reused_from_primary": 8
+  },
+  "successful_source": {
+    "path": "/data/hfosp/topic4_sef_hfo/fig5_global_feedback_response_20260923/runs/G30_response0.5_s9108405",
+    "reused": true,
+    "duration_s": 240,
+    "complete_returns": 4,
+    "independent_trajectories": 1,
+    "first_entry_s": 9.94,
+    "first_exit_observer_s": 16.7,
+    "first_joint_low_s": 16.83,
+    "first_both_core_Z_reference_s": 23.9,
+    "first_complete_brief_s": 49.31,
+    "next_entry_s": 59.74,
+    "manual_quiet_timer": false,
+    "Z_or_M_reset": false
+  },
+  "mechanism": {
+    "actual_Z_gain_loss_balance": "Verified from native integration-step accumulators",
+    "Z_net_recovery_observed": true,
+    "Z_reference_is_bifurcation_threshold": false,
+    "interpretation": "Global-response dynamics and K suppression create low activity. Raw G must also decline because it contributes to Z resource load. Z then recovers while K decays; short-event return follows later. K alone does not determine a stochastic first-event time."
+  },
+  "native_structure_common120s": {
+    "current": {
+      "entries": 4,
+      "confirmed_exits": 3,
+      "qualified_returns": 2
+    },
+    "rotated": {
+      "entries": 1,
+      "confirmed_exits": 1,
+      "qualified_returns": 0,
+      "post_recovery_complete_brief": 1,
+      "subsequent_activity_right_censored": true,
+      "own_initial_brief_baseline": "NOT_ESTIMABLE"
+    },
+    "isotropic": {
+      "entries": 0,
+      "confirmed_exits": 0,
+      "qualified_returns": 0,
+      "complete_activity_episodes": 314,
+      "retained_short_events": true
+    }
+  },
+  "conditional_interpretation": "Finite 30 s responses, final 10 s readouts; Z/K held spatial fields, dynamic G/M. These are not autonomous loops or certified attractors.",
+  "structural_interpretation": "At high Z and low K, current/isotropic graphs permit separated brief events with positive unclamped-law Z drift; rotated graph has persistent propagation and negative Z drift. Outdegree, low-threshold source output and anisotropy magnitude are not all matched, so pure orientation causality is not established.",
+  "formal_bifurcation": "NOT_ESTABLISHED",
+  "conductance_rate_gate": "REJECTED_FOR_BIFURCATION_THIS_ROUND",
+  "transient_and_full_spatial_rate_validation": "NOT_RUN_AFTER_STATIC_GATE_FAILURE",
+  "complete_transition_boundary": "NOT_ESTABLISHED",
+  "human_review": "PENDING",
+  "agent_visual_review": "All 34 conditional cases, new native cases, main candidates and final comparison maps reviewed; main figures/maps include same-state PDF review.",
+  "canonical_figure_replaced": false,
+  "candidate_directory": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5/candidates/autonomous_loop_20260924",
+  "scientific_review": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/final_scientific_review.md",
+  "delivery_index": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/delivery_index.md",
+  "final_snapshot": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/reproducibility/final_20260925_v2",
+  "completion_audit": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/completion_audit.json",
+  "limits": [
+    "One paired future noise realization for new structural controls; four source returns are not four seeds.",
+    "Grid does not enclose actual first entry/exit; no interpolated complete boundaries.",
+    "Projection return is not a certified limit cycle.",
+    "Strong core recruitment does not prove every event initiates in a core.",
+    "Contact-current proxy and old patient panel do not validate new clinical spectral correspondence."
+  ],
+  "next_batch_launched": false,
+  "technical_audit": "PASS_BOUNDED_DELIVERY_FORMAL_BIFURCATION_NOT_ESTABLISHED",
+  "completion_audit_sha256": "580cde14d5ccca16bb241688060a037175ec6e1ffadf593cde8aec39e8421f5d",
+  "final_snapshot_files": 185,
+  "final_process_check": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/final_process_check.json",
+  "goal_requirements_audit": "/data/hfosp/topic4_sef_hfo/fig5_autonomous_loop_zk_20260924/goal_requirements_audit.json",
+  "required_work_remaining": []
+}

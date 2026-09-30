@@ -1,0 +1,82 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/PDupperchild_a10.00000_N4096.npz",
+  "J_EE_core": 0.9447287467299924,
+  "T_ms": 1523.9231758668059,
+  "dt_ms": 0.04999911991426247,
+  "history_dimension": 679745,
+  "multipliers": [
+    [
+      1.0012007072402602,
+      0.0
+    ],
+    [
+      0.7260892014689608,
+      0.0
+    ],
+    [
+      0.2067994271826469,
+      0.0
+    ],
+    [
+      0.052483387344064145,
+      0.0
+    ]
+  ],
+  "residuals": [
+    7.838237533157733e-15,
+    1.224621011359247e-14,
+    6.258559829759517e-13,
+    9.634900231730188e-15
+  ],
+  "phase_multiplier_error": 0.0012007072402602237,
+  "phase_tangent_relative_defect": 0.000844453309370918,
+  "raw_multipliers_above_1p001": 1,
+  "requested_multipliers": 4,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 937.4858407974243,
+  "polynomial_filter_rho": 0.21785552268772834,
+  "transformed_eigenvalues": [
+    [
+      0.784285752787288,
+      0.0
+    ],
+    [
+      0.36902298598587085,
+      0.0
+    ],
+    [
+      -0.008679289835159852,
+      0.0
+    ],
+    [
+      -0.002286394217091534,
+      0.0
+    ]
+  ],
+  "filter_coverage_threshold": 0.7821444773122717,
+  "smallest_returned_transformed_modulus": 0.002286394217091534,
+  "filter_note": "K=M(M-rho I). Every |mu|>=1 has |mu(mu-rho)|>=1-rho. Recover mu using M and verify residuals; coverage requires reaching below this transformed threshold.",
+  "phase_eigenvector_overlaps": [
+    0.9999999724746921,
+    0.9681644350337543,
+    0.9881542930034143,
+    0.9261859243412166
+  ],
+  "identified_neutral_index": 0,
+  "nontrivial_multipliers": [
+    [
+      0.7260892014689608,
+      0.0
+    ],
+    [
+      0.2067994271826469,
+      0.0
+    ],
+    [
+      0.052483387344064145,
+      0.0
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 0.7260892014689608,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

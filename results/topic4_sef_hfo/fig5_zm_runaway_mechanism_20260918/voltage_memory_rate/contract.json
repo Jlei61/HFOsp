@@ -1,0 +1,47 @@
+{
+  "created_local": "2026-09-20T10:47:18.712209+08:00",
+  "status": "REGISTERED_BEFORE_PREPARATION_AND_FIT",
+  "question": "Does input-weighted refractory clamping memory, missing from the failed count-only reset trace, repair strong-input recovery without changing graph or Z/M?",
+  "evidence": "Exact local LIF membrane accounting found large accumulated refractory-clamp contributions. Count-only reset trace failed. This candidate specifically adds the previously omitted input times refractory-occupancy contribution.",
+  "equation": "available=1-sum previous nref-1 fired; Vpre=a*Vpost+(1-a)*(Vr+(mu-Vr)*available); own fired=available*sigmoid(ell+log(dt/0.1)); Vpost=Vpre-(theta-Vr)*fired.",
+  "continuous_limit": "tau_m*dV/dt=-V+mu-(mu-Vr)*P_ref-tau_m*(theta-Vr)*r; P_ref=integral over the absolute refractory interval of own r.",
+  "approximation": "Factorizes refractory current with occupied fraction, and replaces reset charge by threshold-minus-reset times flux. Prior diagnostics quantify both missing conditional-current covariance and finite-step overshoot; coordinate is not claimed to be exact mean voltage.",
+  "physical": {
+    "tau_m_ms": {
+      "E": 20.0,
+      "I": 10.0
+    },
+    "reset_mV": 11.0,
+    "ref_ms": {
+      "E": 2.0,
+      "I": 1.0
+    }
+  },
+  "features": "Original39 input features plus asinh((Vpre-Vr)/(theta-Vr))/3. Original39 conditioning plus training-only scalar centering/scaling; same64/64tanh network.",
+  "initialization": "Exact embedding of frozen conditioned39 network with zero voltage coefficient.",
+  "training": "Same480 original local-LIF training profiles and original static/linear calibration. Voltage-memory features from strictly past observed training counts and current prescribed mean. No native firing, onset, spatial targets or validation targets in training.",
+  "budget": {
+    "steps_per_pop": 12000,
+    "threads": 2,
+    "seed": 920150,
+    "schedule": [
+      [
+        0,
+        0.001
+      ],
+      [
+        4000,
+        0.0003
+      ],
+      [
+        8000,
+        0.0001
+      ]
+    ],
+    "loss": "10*conditional-flux KL + static asinh residual + normalized complex gain residual + linear-workpoint equilibrium residual"
+  },
+  "checks": "Parent embedding, causal voltage recurrence, static formula and nonzero closed voltage-feedback susceptibility against independent direct integration before training.",
+  "validation": "Original24 plus three reused64 sets, dt0.1/0.05, original wave/mean/step gates; all predictions autonomous in own flux and V. If passed, fresh validation and matched DC/AC required before spatial use.",
+  "stop": "One fixed fit; no architecture/loss/schedule changes after validation. No new spatial run or bifurcation on local failure.",
+  "scope": "Local rate-response repair only. Same continuous-rate objective; no membrane particles, physical parameter tuning or model promotion. Existing registered spatial pair proceeds unchanged."
+}

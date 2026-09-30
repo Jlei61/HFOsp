@@ -1,0 +1,66 @@
+{
+  "status": "SEGMENT_STOPPED_FOR_PREDICTOR_DERIVATIVE_CORRECTION",
+  "family": "rate",
+  "rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0000.npz",
+      "D": 0.14496810035503113,
+      "T_ms": 266.75,
+      "N": 4097,
+      "mean_hz": 28.2235397722019,
+      "min_hz": 0.013661950701552007,
+      "max_hz": 176.49622684640883,
+      "residual": 6.772360450213455e-12,
+      "iterations": [
+        480.52814633406587,
+        305.6807551789993,
+        7.645750584757721,
+        0.016316742379840488,
+        5.6528587366599936e-08,
+        7.16093850883226e-12
+      ],
+      "minimum_group_rate_hz": -0.10323062483209833,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.20000000000010232,
+      "D_step": 2.6354080385204703e-06,
+      "predictor": "secant"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_compact_period_G4097/point0001.npz",
+      "D": 0.14497095858975378,
+      "T_ms": 267.00000000000006,
+      "N": 4097,
+      "mean_hz": 28.12646819170613,
+      "min_hz": 0.013796979177335805,
+      "max_hz": 180.66985112656405,
+      "residual": 7.105427357601002e-12,
+      "iterations": [
+        528.2612344162467,
+        461.22242212253474,
+        155.22700243074055,
+        4.858514337809427,
+        0.0026341155235642955,
+        2.983324698391243e-08,
+        6.716849298982197e-12
+      ],
+      "minimum_group_rate_hz": -0.1368661670191263,
+      "stability": "NOT_ESTABLISHED",
+      "Z": "held",
+      "M": "dynamic",
+      "Z_path": "local autonomous-rate 7700--7800 ms spatial Z interpolation",
+      "nonlinear_samples": 16384,
+      "parameter_columns": "analytic",
+      "method": "dealiased Fourier-Galerkin; prescribed period corrector",
+      "period_step_ms": 0.25000000000005684,
+      "D_step": 2.858234722652453e-06,
+      "predictor": "secant"
+    }
+  ],
+  "reason": "Off-physical Newton predictors contained negative instantaneous variances, where response-weight gradients through sqrt(max(v,0)) must vanish. All accepted points retain positive input variance and remain unchanged. Restart from accepted point0001 with the corrected derivative and smaller period steps."
+}

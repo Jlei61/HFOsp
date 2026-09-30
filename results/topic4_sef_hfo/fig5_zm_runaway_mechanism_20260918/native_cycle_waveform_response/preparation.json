@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/native_turn_center_fine_tangent_refined/point_with_tangent.npz",
+  "N": 16875,
+  "wave_samples": 32768,
+  "groups": [
+    {
+      "label": "Core A E",
+      "group": 279,
+      "pop": "E",
+      "theta_mv": 17.955848651430077,
+      "original_cells": 35,
+      "Z": 0.7252671867701831,
+      "family_energy": 8732439344.988241,
+      "minimum_variance_intensity": 9.470278824921007e-05
+    },
+    {
+      "label": "Core B E",
+      "group": 141,
+      "pop": "E",
+      "theta_mv": 17.931614720234382,
+      "original_cells": 51,
+      "Z": 0.7387469279490255,
+      "family_energy": 1734203291.5851443,
+      "minimum_variance_intensity": 8.866629732979668e-05
+    },
+    {
+      "label": "Surround E",
+      "group": 39,
+      "pop": "E",
+      "theta_mv": 18.0,
+      "original_cells": 102,
+      "Z": 0.721422677423414,
+      "family_energy": 36930179892.7441,
+      "minimum_variance_intensity": 8.127150966061486e-05
+    },
+    {
+      "label": "I",
+      "group": 594,
+      "pop": "I",
+      "theta_mv": 18.0,
+      "original_cells": 23,
+      "Z": 1.0,
+      "family_energy": 6335731368.685321,
+      "minimum_variance_intensity": 0.00015863538340285971
+    }
+  ],
+  "phase_projection_removed": -0.07406805210326751,
+  "drive": "Raw delayed variance drive; already-filtered mean current including imposed cycle M",
+  "scope": "Selected groups of the1mm conditional cycle, not whole-network validation."
+}

@@ -1,0 +1,63 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_same_history_feedback/result.json",
+  "windows": [
+    {
+      "condition": "held",
+      "absolute_window_ms": [
+        9395,
+        9445
+      ],
+      "global_E_Hz": 5.1687500847340555
+    },
+    {
+      "condition": "held",
+      "absolute_window_ms": [
+        9845,
+        9895
+      ],
+      "global_E_Hz": 48.03187484550243
+    },
+    {
+      "condition": "held",
+      "absolute_window_ms": [
+        10045,
+        10095
+      ],
+      "global_E_Hz": 55.588748678283764
+    },
+    {
+      "condition": "dynamic",
+      "absolute_window_ms": [
+        9395,
+        9445
+      ],
+      "global_E_Hz": 14.573124887624754
+    },
+    {
+      "condition": "dynamic",
+      "absolute_window_ms": [
+        9845,
+        9895
+      ],
+      "global_E_Hz": 220.1112492829571
+    },
+    {
+      "condition": "dynamic",
+      "absolute_window_ms": [
+        10045,
+        10095
+      ],
+      "global_E_Hz": 233.34625292993243
+    }
+  ],
+  "same_complete_initial_state_s": 9.0,
+  "M": "dynamic in both arms",
+  "selection": "Original Fig.5 preentry, first high entry, and entry confirmation clocks; identical50ms windows in both conditions",
+  "human_visual_acceptance": "PENDING",
+  "agent_visual_review": {
+    "PNG": "CHECKED",
+    "PDF": "CHECKED_SAME_STATE",
+    "at": "2026-09-19T13:33:10.688586",
+    "issues": []
+  }
+}

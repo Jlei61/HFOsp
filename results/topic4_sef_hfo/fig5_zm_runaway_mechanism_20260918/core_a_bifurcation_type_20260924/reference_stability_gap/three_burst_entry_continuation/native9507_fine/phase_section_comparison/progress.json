@@ -1,0 +1,50 @@
+[
+  {
+    "section": "flow",
+    "status": "RETURN_MEASURED_NOT_ROOT",
+    "period_ms": 794.7491614873172,
+    "fraction": 0.9664594926875986,
+    "section_residual": -5.759281940243e-16,
+    "section_speed": 7.307056134015654,
+    "initial_phase": 0.0,
+    "interpolation": "cubic_four_actual_steps",
+    "blocks": {
+      "AMPA": {
+        "reference_rms": 15.880961685332565,
+        "difference_rms": 0.15074176284886762,
+        "relative_rms": 0.009491979505755662
+      },
+      "GABA": {
+        "reference_rms": 8.250473506025179,
+        "difference_rms": 0.09301837976345238,
+        "relative_rms": 0.011274308037656586
+      },
+      "M": {
+        "reference_rms": 0.020883507971387064,
+        "difference_rms": 0.00018960384666338788,
+        "relative_rms": 0.009079118648225581
+      },
+      "covariance": {
+        "reference_rms": 37.55738104057128,
+        "difference_rms": 0.06240876892398863,
+        "relative_rms": 0.0016616911827949795
+      },
+      "input_memory": {
+        "reference_rms": 0.08870430000311705,
+        "difference_rms": 0.001992521362711872,
+        "relative_rms": 0.02246251154275334
+      },
+      "delay_refractory_history": {
+        "reference_rms": 0.004686434376200482,
+        "difference_rms": 9.62462204300886e-05,
+        "relative_rms": 0.020537195809006516
+      }
+    },
+    "combined_relative_rms": 0.01431048651739341
+  },
+  {
+    "section": "CoreA_dynamic_M",
+    "status": "LOCAL_SECTION_WINDOW_MISS",
+    "error": "No positively oriented section return in declared window"
+  }
+]

@@ -1,0 +1,158 @@
+{
+  "status": "SAME_PHASE_ROOT_VERIFIED",
+  "dt_ms": 0.05,
+  "period_ms": 568.7858641682556,
+  "returns": [
+    {
+      "phase_shift_ms": 0,
+      "period_fraction": 1,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.038412034449351,
+          "difference_rms": 8.506975967822043e-09,
+          "relative_rms": 6.524549113301063e-10
+        },
+        "GABA": {
+          "reference_rms": 0.6185991602930799,
+          "difference_rms": 6.727372683636582e-09,
+          "relative_rms": 1.087517267312372e-08
+        },
+        "M": {
+          "reference_rms": 0.027976842347552267,
+          "difference_rms": 6.101878098099172e-09,
+          "relative_rms": 2.1810460316773505e-07
+        },
+        "covariance": {
+          "reference_rms": 36.8812730122394,
+          "difference_rms": 4.899350887406899e-09,
+          "relative_rms": 1.3284115452796337e-10
+        },
+        "input_memory": {
+          "reference_rms": 0.08725613677930089,
+          "difference_rms": 1.1799318457391032e-09,
+          "relative_rms": 1.3522623041672519e-08
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026985422449285246,
+          "difference_rms": 4.703384403132402e-12,
+          "relative_rms": 1.742935250308442e-08
+        }
+      },
+      "combined_relative_rms": 8.96055934920853e-08
+    },
+    {
+      "phase_shift_ms": 0,
+      "period_fraction": 0.5,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 13.038412034449351,
+          "difference_rms": 0.19883138228490482,
+          "relative_rms": 0.015249662440453933
+        },
+        "GABA": {
+          "reference_rms": 0.6185991602930799,
+          "difference_rms": 0.1291161513922912,
+          "relative_rms": 0.2087234507901992
+        },
+        "M": {
+          "reference_rms": 0.027976842347552267,
+          "difference_rms": 0.0007656402355711034,
+          "relative_rms": 0.027366928192240764
+        },
+        "covariance": {
+          "reference_rms": 36.8812730122394,
+          "difference_rms": 0.10129468458772756,
+          "relative_rms": 0.0027465072735995844
+        },
+        "input_memory": {
+          "reference_rms": 0.08725613677930089,
+          "difference_rms": 0.03236870103904324,
+          "relative_rms": 0.370961885705692
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.00026985422449285246,
+          "difference_rms": 0.0001003011168136653,
+          "relative_rms": 0.37168629471028325
+        }
+      },
+      "combined_relative_rms": 0.23105480789089203
+    },
+    {
+      "phase_shift_ms": 100,
+      "period_fraction": 1,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 549.6718229448613,
+          "difference_rms": 0.001474604313661961,
+          "relative_rms": 2.682699480140319e-06
+        },
+        "GABA": {
+          "reference_rms": 654.7001227156948,
+          "difference_rms": 0.002294591737450521,
+          "relative_rms": 3.504798086691292e-06
+        },
+        "M": {
+          "reference_rms": 0.03271931833437795,
+          "difference_rms": 7.4083060542685655e-09,
+          "relative_rms": 2.2641993878230377e-07
+        },
+        "covariance": {
+          "reference_rms": 426.44496551270385,
+          "difference_rms": 0.0019770343912133654,
+          "relative_rms": 4.636083319301067e-06
+        },
+        "input_memory": {
+          "reference_rms": 0.5689336949892579,
+          "difference_rms": 3.305371562813177e-06,
+          "relative_rms": 5.8097658688954715e-06
+        },
+        "delay_refractory_history": {
+          "reference_rms": 0.25913268154233027,
+          "difference_rms": 2.6771967139166436e-05,
+          "relative_rms": 0.00010331374251917019
+        }
+      },
+      "combined_relative_rms": 4.232514578323028e-05
+    },
+    {
+      "phase_shift_ms": 200,
+      "period_fraction": 1,
+      "blocks": {
+        "AMPA": {
+          "reference_rms": 12.747450338819307,
+          "difference_rms": 3.400588980350598e-08,
+          "relative_rms": 2.6676620735637763e-09
+        },
+        "GABA": {
+          "reference_rms": 10.096008944850935,
+          "difference_rms": 2.949046800221212e-05,
+          "relative_rms": 2.921002562824843e-06
+        },
+        "M": {
+          "reference_rms": 0.030458215381900963,
+          "difference_rms": 4.01137875408586e-09,
+          "relative_rms": 1.317010436688133e-07
+        },
+        "covariance": {
+          "reference_rms": 36.751457652205445,
+          "difference_rms": 1.0389887699317551e-07,
+          "relative_rms": 2.8270681934962805e-09
+        },
+        "input_memory": {
+          "reference_rms": 0.25675271756021517,
+          "difference_rms": 2.7050818309792535e-07,
+          "relative_rms": 1.053574761227149e-06
+        },
+        "delay_refractory_history": {
+          "reference_rms": 4.644285595307439e-05,
+          "difference_rms": 2.3890803040226145e-11,
+          "relative_rms": 5.144128747027375e-07
+        }
+      },
+      "combined_relative_rms": 1.2860959417829245e-06
+    }
+  ],
+  "seconds": 127.20241618156433,
+  "scope": "Shiftedphase andhalfperiod are diagnostics. No samebranch meshconvergence, Floquet orcriticalpoint certificate.",
+  "model_promoted": false
+}

@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "delay_checks": [
+    {
+      "stage": 0.0,
+      "cubic_delay_relative_error": 1.4221747046791623e-15
+    },
+    {
+      "stage": 0.5,
+      "cubic_delay_relative_error": 1.4455466788598217e-15
+    },
+    {
+      "stage": 1.0,
+      "cubic_delay_relative_error": 1.3432602792423693e-15
+    }
+  ],
+  "flows": [
+    {
+      "method": "rk4",
+      "dt_ms": 0.049999455080414985,
+      "seconds": 32.045854330062866
+    },
+    {
+      "method": "rk4",
+      "dt_ms": 0.024999727540207493,
+      "seconds": 84.82360672950745
+    },
+    {
+      "method": "heun",
+      "dt_ms": 0.012499863770103746,
+      "seconds": 50.82198524475098
+    }
+  ],
+  "coarse_vs_fine_heun_relative_error": 0.0009576499808281843,
+  "fine_vs_fine_heun_relative_error": 0.0003891085507001487,
+  "model_change": false,
+  "claim": "Cubic delay polynomial identity and coupled-flow convergence; orbit phase gates remain mandatory"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "REGISTERED_BEFORE_TARGET_TEST",
+  "created_epoch": 1790530851.7650585,
+  "question": "Does preserving target-cell fan-in heterogeneity recover the active edge group missed by group-mean input?",
+  "motivation": "Existing geometric group531 has55.54Hz native but zero grouped local density; replacing group current means did not repair it. Most other selectedE groups are near refractory saturation, so aggregateagreement hides this failure.",
+  "design": "Same210originalcells and42-44s observed sourcegroupcounts/R/G. Threearms: group mean/variance; individual target means with group variance; individual target means and variance. Two numerical streams,1024replicas per physical target. Original percell jointstate/pendingZ/K retained. Groupmeanthresholds/externaldrive identical in all arms to isolate target-input projection.",
+  "evaluation": "Fixed42.5-44s tail, all16groups retained including edge531; compare native counts and current group means/spread. The selected failure is a development diagnostic, not independent validation.",
+  "bounds": "Six local conditions only. No new native trajectory, parameter scan, noise fitting, or acceptance threshold.",
+  "physical_engine_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "local_kernel_sha256": "ac807923d740f80703e4c70e803b454dddb1ec7ee3891f052e33fbb35ea7e7a4",
+  "producer_sha256": "8c880946e5e39758a99fb636d25ae41badccee6a3f62a2f57ad9d4a76d21ad82",
+  "formal_bifurcation_allowed": false
+}

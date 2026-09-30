@@ -1,0 +1,230 @@
+{
+  "status": "COMPLETE_TWO_TEN_SECOND_HISTORY_COMPARISONS",
+  "rows": [
+    {
+      "case": "high",
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "model_rate_Hz": [
+            196.49255906663532,
+            472.40282375605807,
+            474.1136028776939,
+            182.49891231642852
+          ],
+          "native_rate_Hz": [
+            196.5181499999999,
+            472.3981432360744,
+            474.1292620865113,
+            182.52550886408395
+          ],
+          "rate_difference_Hz": [
+            -0.02559093336458318,
+            0.004680519983651266,
+            -0.015659208817396575,
+            -0.02659654765542996
+          ],
+          "weighted_field_RMS_Hz": 0.11655115474792824,
+          "model_Zdot": [
+            0.04025052502499405,
+            -0.03483387712853466,
+            -0.03307375768365634,
+            0.044001231703680206
+          ],
+          "native_Zdot": [
+            0.040240407750000005,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.04399060292249528
+          ],
+          "Zdot_difference": [
+            1.0117274994045355e-05,
+            9.245723631146063e-11,
+            7.02600616575566e-11,
+            1.0628781184927882e-05
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "model_rate_Hz": [
+            196.49006601944066,
+            472.49709188099587,
+            474.1077941404203,
+            182.49410962408004
+          ],
+          "native_rate_Hz": [
+            196.50336874999977,
+            472.3554376657831,
+            474.1435114503794,
+            182.51066973079435
+          ],
+          "rate_difference_Hz": [
+            -0.013302730559104248,
+            0.14165421521278176,
+            -0.03571730995906819,
+            -0.01656010671430863
+          ],
+          "weighted_field_RMS_Hz": 0.08605053383594685,
+          "model_Zdot": [
+            0.040250817525402445,
+            -0.03483387712853466,
+            -0.03307375768365634,
+            0.044001538992356384
+          ],
+          "native_Zdot": [
+            0.040243542999999986,
+            -0.0348338772209919,
+            -0.033073757753916404,
+            0.043993896684806515
+          ],
+          "Zdot_difference": [
+            7.274525402459209e-06,
+            9.245723631146063e-11,
+            7.02600616575566e-11,
+            7.642307549869665e-06
+          ]
+        }
+      ],
+      "guards": {
+        "both_windows_spatial": true,
+        "both_windows_core_rate": true,
+        "both_windows_core_drift": true,
+        "whole_R_below200": true,
+        "whole_Graw_below_point1": true
+      },
+      "retained": true,
+      "R_range": [
+        196.9726686184444,
+        197.42500977672063
+      ],
+      "G_range": [
+        1.0675339949115638e-34,
+        5.168955137392397e-26
+      ]
+    },
+    {
+      "case": "asymmetric",
+      "windows": [
+        {
+          "interval_s": [
+            0,
+            5
+          ],
+          "model_rate_Hz": [
+            98.47903914623205,
+            392.6048329041406,
+            132.526805039472,
+            90.31973538767829
+          ],
+          "native_rate_Hz": [
+            98.48857500000004,
+            392.602917771884,
+            132.51374045801347,
+            90.33013788575185
+          ],
+          "rate_difference_Hz": [
+            -0.009535853767985714,
+            0.0019151322566131057,
+            0.013064581458536395,
+            -0.010402498073560196
+          ],
+          "weighted_field_RMS_Hz": 0.06390719660270905,
+          "model_Zdot": [
+            0.08059491622719023,
+            -0.03483387712853466,
+            -0.015281187731864916,
+            0.08592623362384116
+          ],
+          "native_Zdot": [
+            0.08060195450000004,
+            -0.0348338772209919,
+            -0.015243533835341274,
+            0.08593265610699963
+          ],
+          "Zdot_difference": [
+            -7.038272809817281e-06,
+            9.245723631146063e-11,
+            -3.765389652364212e-05,
+            -6.42248315846361e-06
+          ]
+        },
+        {
+          "interval_s": [
+            5,
+            10
+          ],
+          "model_rate_Hz": [
+            98.47878327970172,
+            392.5991465363965,
+            132.53438692125889,
+            90.31941169868311
+          ],
+          "native_rate_Hz": [
+            98.49589375000009,
+            392.62068965517227,
+            132.6246819338404,
+            90.3345239658569
+          ],
+          "rate_difference_Hz": [
+            -0.017110470298376868,
+            -0.0215431187757531,
+            -0.09029501258152095,
+            -0.015112267173790883
+          ],
+          "weighted_field_RMS_Hz": 0.06382882045156803,
+          "model_Zdot": [
+            0.08059378747697489,
+            -0.03483387712853466,
+            -0.015287803507931252,
+            0.08592521852184232
+          ],
+          "native_Zdot": [
+            0.08059335075,
+            -0.0348338772209919,
+            -0.015361579636867989,
+            0.08592666346090638
+          ],
+          "Zdot_difference": [
+            4.3672697488950085e-07,
+            9.245723631146063e-11,
+            7.377612893673738e-05,
+            -1.4449390640658422e-06
+          ]
+        }
+      ],
+      "guards": {
+        "both_windows_spatial": true,
+        "both_windows_core_rate": true,
+        "both_windows_core_drift": true,
+        "whole_R_below200": true,
+        "whole_Graw_below_point1": true
+      },
+      "retained": true,
+      "R_range": [
+        98.584015012603,
+        99.05162888003076
+      ],
+      "G_range": [
+        1.0684994201912168e-34,
+        5.173629686383584e-26
+      ]
+    }
+  ],
+  "paired_numerical_rng": {
+    "rng": true,
+    "external_rng": true
+  },
+  "both_histories_retained": true,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "Same graph/held ZK/input law; different complete endogenous histories. These test conditional finite-time correspondence and history retention, not stability, infinite-time attractors, noise convergence or an autonomous cycle.",
+  "agent_visual": "PASS_V2",
+  "human_visual": "PENDING",
+  "producer_sha256": "b2d0676144c6b10e233ea572d12c11ceed314ff6c483a4928bb1072ec901faad",
+  "agent_visual_note": "Actually inspected dynamic_mean_history_pair_v2.png: common20ms core bins, meaningfulGscale, sharedspace/colorbar, readablelegend. Original readouts and scientific metrics retained."
+}

@@ -1,0 +1,237 @@
+{
+  "status": "READOUT_AUDIT_PASS",
+  "rows": [
+    {
+      "label": "native",
+      "window_ms": [
+        500,
+        3000
+      ],
+      "original_active_episodes": {
+        "n": 12,
+        "median_duration_ms": 95.5,
+        "iqr_duration_ms": [
+          84.75,
+          97.75
+        ],
+        "median_gap_ms": 258.0,
+        "both_cores": 9,
+        "coreA_only": 1,
+        "coreB_only": 1,
+        "median_area": 0.714984375,
+        "median_surround_cells": 271.0,
+        "forward": 1,
+        "reverse": 10,
+        "undirected": 1,
+        "median_extent_mm": 12.378712968854764
+      },
+      "strict_complete_events": {
+        "n": 10,
+        "median_duration_ms": 96.0,
+        "iqr_duration_ms": [
+          91.0,
+          99.25
+        ],
+        "median_gap_ms": 251.0,
+        "both_cores": 8,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.714984375,
+        "median_surround_cells": 271.0,
+        "forward": 1,
+        "reverse": 8,
+        "undirected": 1,
+        "median_extent_mm": 12.77652060667611
+      },
+      "quiet_fraction": 0.552,
+      "high_entry_ms": null,
+      "regional": [
+        {
+          "region": "All E",
+          "mean_rate_hz": 17.608975,
+          "Z3000": 0.8994578486208946,
+          "M3000_mv": 0.008499001090590673
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 25.270026525198944,
+          "Z3000": 0.8705236792638122,
+          "M3000_mv": 0.011968444431888126
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 27.310432569974562,
+          "Z3000": 0.8732272840876588,
+          "M3000_mv": 0.014578165883454099
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 17.16899540380828,
+          "Z3000": 0.9008509407882739,
+          "M3000_mv": 0.008256250473173445
+        },
+        {
+          "region": "I",
+          "mean_rate_hz": 42.30575,
+          "Z3000": 1.0000000000000004,
+          "M3000_mv": 0.0
+        }
+      ],
+      "D3000": 0.10054215137910538,
+      "primary_tail_persistent_fraction": 0.0
+    },
+    {
+      "label": "parent",
+      "window_ms": [
+        500,
+        3000
+      ],
+      "original_active_episodes": {
+        "n": 0
+      },
+      "strict_complete_events": {
+        "n": 0
+      },
+      "quiet_fraction": 0.898,
+      "high_entry_ms": null,
+      "regional": [
+        {
+          "region": "All E",
+          "mean_rate_hz": 1.5787875049084903,
+          "Z3000": 0.9794054386168721,
+          "M3000_mv": 0.0008760701018062777
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 4.078514619253548,
+          "Z3000": 0.9508684084649426,
+          "M3000_mv": 0.002139941056229487
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 6.179643824667117,
+          "Z3000": 0.9201130289157837,
+          "M3000_mv": 0.00310312249977971
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 1.3981877901499067,
+          "Z3000": 0.9816418389701094,
+          "M3000_mv": 0.0007873169210957647
+        },
+        {
+          "region": "I",
+          "mean_rate_hz": 4.948650057856751,
+          "Z3000": 1.0000000000000004,
+          "M3000_mv": 0.0
+        }
+      ],
+      "D3000": 0.020594561383127874,
+      "primary_tail_persistent_fraction": 0.0
+    },
+    {
+      "label": "bias_counterfactual",
+      "window_ms": [
+        500,
+        3000
+      ],
+      "original_active_episodes": {
+        "n": 15,
+        "median_duration_ms": 85.0,
+        "iqr_duration_ms": [
+          58.0,
+          118.0
+        ],
+        "median_gap_ms": 184.5,
+        "both_cores": 12,
+        "coreA_only": 1,
+        "coreB_only": 1,
+        "median_area": 0.5661562499999999,
+        "median_surround_cells": 218.0,
+        "forward": 11,
+        "reverse": 2,
+        "undirected": 2,
+        "median_extent_mm": 10.31870627869689
+      },
+      "strict_complete_events": {
+        "n": 14,
+        "median_duration_ms": 92.5,
+        "iqr_duration_ms": [
+          66.0,
+          123.5
+        ],
+        "median_gap_ms": 185.0,
+        "both_cores": 12,
+        "coreA_only": 1,
+        "coreB_only": 0,
+        "median_area": 0.582859375,
+        "median_surround_cells": 222.5,
+        "forward": 10,
+        "reverse": 2,
+        "undirected": 2,
+        "median_extent_mm": 9.537732948200905
+      },
+      "quiet_fraction": 0.4592,
+      "high_entry_ms": null,
+      "regional": [
+        {
+          "region": "All E",
+          "mean_rate_hz": 13.302275023133493,
+          "Z3000": 0.8965427622962743,
+          "M3000_mv": 0.00702197490835988
+        },
+        {
+          "region": "Core A",
+          "mean_rate_hz": 23.25198948848937,
+          "Z3000": 0.8515451191591015,
+          "M3000_mv": 0.012900387343953039
+        },
+        {
+          "region": "Core B",
+          "mean_rate_hz": 24.718066306819384,
+          "Z3000": 0.8516188483050153,
+          "M3000_mv": 0.012226478685447165
+        },
+        {
+          "region": "Surround",
+          "mean_rate_hz": 12.76140513948755,
+          "Z3000": 0.8988158555110659,
+          "M3000_mv": 0.006742163255529023
+        },
+        {
+          "region": "I",
+          "mean_rate_hz": 35.152550208364104,
+          "Z3000": 1.0000000000000004,
+          "M3000_mv": 0.0
+        }
+      ],
+      "D3000": 0.10345723770372572,
+      "primary_tail_persistent_fraction": 0.0
+    }
+  ],
+  "numerical_checks": [
+    {
+      "label": "parent",
+      "spatial_error_hz": 3.0966366125539935e-05,
+      "global_error_hz": 1.6227364341148132e-07,
+      "D_error": 5.186252538535996e-10,
+      "count_integer_error": 8.544921890063506e-07,
+      "physical_bounds": true
+    },
+    {
+      "label": "bias_counterfactual",
+      "spatial_error_hz": 4.646994852919306e-05,
+      "global_error_hz": 4.2936206767762997e-07,
+      "D_error": 2.1112445125481827e-11,
+      "count_integer_error": 9.76562500198952e-07,
+      "physical_bounds": true
+    }
+  ],
+  "original_readout_definitions_preserved": true,
+  "statistical_unit": "One native trajectory and one paired seed1 rate counterfactual. No independent-event population inference.",
+  "local_transfer": "FAIL remains. Network run is separately registered causal sensitivity, not a passed model-validation branch.",
+  "clock": "Native original1ms bin centers0.5,1.5,...; rate originalbin endpoints1,2,... retained inprimaryreadouts. Same rawtime intervals; no eventalignment or silentclocktranslation.",
+  "source_parameter_target": "Only earlyconditionalLIF responses; no native onset/rate outputs used for fitting.",
+  "model_promoted": false,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}

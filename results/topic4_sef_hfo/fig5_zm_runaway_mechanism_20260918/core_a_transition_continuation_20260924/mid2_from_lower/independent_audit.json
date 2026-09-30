@@ -1,0 +1,239 @@
+{
+  "status": "AUDIT_PASS",
+  "label": "mid2_from_lower",
+  "D": 0.2183490870432122,
+  "observed_ms": 20000.0,
+  "spatial_reconstruction_errors_hz": [
+    3.0110677130323893e-05,
+    3.0517578125e-05,
+    2.919072699114622e-05,
+    3.0517578125e-05
+  ],
+  "windows": [
+    {
+      "window_ms": [
+        0,
+        5000
+      ],
+      "mean_rates_global_A_B_surround": [
+        51.82664196447863,
+        347.7669312949509,
+        136.86808074689097,
+        42.306564845694936
+      ],
+      "smoothed_global_range_hz": [
+        0.011758581791743914,
+        179.49555578226392
+      ],
+      "quiet_fraction": 0.0724,
+      "longest_quiet_ms": 172,
+      "complete_events": {
+        "n": 3,
+        "median_duration_ms": 3934.0,
+        "iqr_duration_ms": [
+          2024.5,
+          4148.5
+        ],
+        "median_gap_ms": 2395.5,
+        "both_cores": 3,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.66253125,
+        "median_surround_cells": 251.0,
+        "forward": 0,
+        "reverse": 3,
+        "undirected": 0,
+        "median_extent_mm": 8.904051862921404
+      },
+      "persistent_spatial_fraction": 0.01,
+      "group_rate_relative_variation": 0.6629300188448779,
+      "M_mean_global_A_B_surround": [
+        0.02504889421987878,
+        0.163038662656917,
+        0.06470528603701348,
+        0.020609819716602515
+      ]
+    },
+    {
+      "window_ms": [
+        5000,
+        10000
+      ],
+      "mean_rates_global_A_B_surround": [
+        48.03204768521705,
+        325.3511125743359,
+        112.87273045924678,
+        39.49418322077904
+      ],
+      "smoothed_global_range_hz": [
+        0.011993303809295185,
+        166.48700718597433
+      ],
+      "quiet_fraction": 0.096,
+      "longest_quiet_ms": 166,
+      "complete_events": {
+        "n": 4,
+        "median_duration_ms": 109.5,
+        "iqr_duration_ms": [
+          104.5,
+          210.0
+        ],
+        "median_gap_ms": 271.0,
+        "both_cores": 4,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6286093749999999,
+        "median_surround_cells": 237.0,
+        "forward": 0,
+        "reverse": 4,
+        "undirected": 0,
+        "median_extent_mm": 14.977732213048789
+      },
+      "persistent_spatial_fraction": 0.0,
+      "group_rate_relative_variation": 0.7185338672610317,
+      "M_mean_global_A_B_surround": [
+        0.02475234295533286,
+        0.17254092428107862,
+        0.05769764430328925,
+        0.020243886055165188
+      ]
+    },
+    {
+      "window_ms": [
+        10000,
+        15000
+      ],
+      "mean_rates_global_A_B_surround": [
+        48.54508372584299,
+        352.9833768315845,
+        109.29170533457193,
+        39.44156049583018
+      ],
+      "smoothed_global_range_hz": [
+        0.012595296535737132,
+        166.15502825770142
+      ],
+      "quiet_fraction": 0.0678,
+      "longest_quiet_ms": 171,
+      "complete_events": {
+        "n": 1,
+        "median_duration_ms": 1608.0,
+        "iqr_duration_ms": [
+          1608.0,
+          1608.0
+        ],
+        "median_gap_ms": null,
+        "both_cores": 1,
+        "coreA_only": 0,
+        "coreB_only": 0,
+        "median_area": 0.6598124999999999,
+        "median_surround_cells": 250.0,
+        "forward": 0,
+        "reverse": 1,
+        "undirected": 0,
+        "median_extent_mm": 9.660359393832
+      },
+      "persistent_spatial_fraction": 0.0124375,
+      "group_rate_relative_variation": 0.6845214408880005,
+      "M_mean_global_A_B_surround": [
+        0.02351203266248119,
+        0.16100392443835357,
+        0.05572097179279399,
+        0.019277459039518823
+      ]
+    },
+    {
+      "window_ms": [
+        15000,
+        20000
+      ],
+      "mean_rates_global_A_B_surround": [
+        54.67656173918102,
+        385.6513492407851,
+        142.1887292863374,
+        44.225493010741346
+      ],
+      "smoothed_global_range_hz": [
+        9.36576452132285,
+        92.65908026792177
+      ],
+      "quiet_fraction": 0.0,
+      "longest_quiet_ms": 0,
+      "complete_events": {
+        "n": 0
+      },
+      "persistent_spatial_fraction": 0.0671875,
+      "group_rate_relative_variation": 0.590511172411356,
+      "M_mean_global_A_B_surround": [
+        0.026723322269529542,
+        0.19258693549219502,
+        0.06651259090170512,
+        0.021590836074034468
+      ]
+    }
+  ],
+  "original_high_onset_elapsed_ms": null,
+  "complete_events_all": {
+    "n": 8,
+    "median_duration_ms": 306.5,
+    "iqr_duration_ms": [
+      111.75,
+      2189.5
+    ],
+    "median_gap_ms": 271.0,
+    "both_cores": 8,
+    "coreA_only": 0,
+    "coreB_only": 0,
+    "median_area": 0.6455312499999999,
+    "median_surround_cells": 244.5,
+    "forward": 0,
+    "reverse": 8,
+    "undirected": 0,
+    "median_extent_mm": 10.93251810620352
+  },
+  "recurrence": {
+    "status": "RATE_RECURRENCE_ONLY",
+    "best_local_minima": [
+      {
+        "lag_ms": 35,
+        "relative_MSE": 1.1544921731006612
+      },
+      {
+        "lag_ms": 69,
+        "relative_MSE": 1.4110982546270479
+      },
+      {
+        "lag_ms": 678,
+        "relative_MSE": 1.5659518854632517
+      },
+      {
+        "lag_ms": 102,
+        "relative_MSE": 1.5937329783994247
+      },
+      {
+        "lag_ms": 644,
+        "relative_MSE": 1.6248087804023426
+      },
+      {
+        "lag_ms": 1354,
+        "relative_MSE": 1.6512786300596776
+      },
+      {
+        "lag_ms": 708,
+        "relative_MSE": 1.6688102070955333
+      },
+      {
+        "lag_ms": 609,
+        "relative_MSE": 1.6742941966770535
+      }
+    ],
+    "direct_formula_errors": [
+      7.105427357601002e-15,
+      2.886579864025407e-15,
+      8.881784197001252e-16
+    ],
+    "definition": "E/I original-cell-count weighted squared rate-field recurrence, divided by temporal rate variance;1ms averaged rates. Full delayed-state closure and stability not implied."
+  },
+  "scope": "Longer finite-time state/recurrence readout; no certified attractor, periodic stability, separatrix or bifurcation.",
+  "model_promoted": false
+}

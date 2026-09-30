@@ -1,0 +1,56 @@
+{
+  "status": "UNSTABLE",
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/resonanceA_0063_N64.npz",
+  "checks": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0063_N64_nearunit_dt0.05.json",
+      "dt_ms": 0.04998636703859092,
+      "mu": [
+        1.0003527489432835,
+        0.005581642171430708
+      ],
+      "modulus": 1.0003683206937903,
+      "eigen_residual": 1.751300014503555e-14,
+      "phase_defect": 1.4632883998234551e-06,
+      "neutral_index": 2
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0063_N64_nearunit_dt0.025.json",
+      "dt_ms": 0.024996954936757253,
+      "mu": [
+        1.0003582571042282,
+        0.00557852155127386
+      ],
+      "modulus": 1.0003738113621863,
+      "eigen_residual": 3.559476606314588e-14,
+      "phase_defect": 3.573748594724288e-07,
+      "neutral_index": 2
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/floquet/resonanceA_0063_N64_nearunit_dt0.0125.json",
+      "dt_ms": 0.012499420536172211,
+      "mu": [
+        1.0003596320667207,
+        0.005577743633913756
+      ],
+      "modulus": 1.0003751819656017,
+      "eigen_residual": 7.414021259755701e-14,
+      "phase_defect": 8.770777565481148e-08,
+      "neutral_index": 2
+    }
+  ],
+  "successive_complex_multiplier_changes": [
+    6.33072722172772e-06,
+    1.5797712730049426e-06
+  ],
+  "refinement_ratio": 4.00736950336222,
+  "measured_margin": 6.3190850920197705e-06,
+  "criteria": {
+    "minimum_refinement_ratio": 2.8,
+    "drift_safety_factor": 4,
+    "phase_safety_factor": 8,
+    "eigen_residual_safety_factor": 8,
+    "note": "Classification compares distance outside the unit circle with the measured step/phase/residual margin; no absolute multiplier-drift target is used."
+  },
+  "scope": "A conjugate pair outside the unit circle after three time steps establishes instability at this sampled orbit. No new bifurcation or full unstable dimension is inferred."
+}

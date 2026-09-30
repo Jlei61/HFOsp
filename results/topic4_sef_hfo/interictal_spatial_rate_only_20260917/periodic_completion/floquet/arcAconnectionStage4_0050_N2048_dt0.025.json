@@ -1,0 +1,64 @@
+{
+  "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arcAconnectionStage4_0050_N2048.npz",
+  "J_EE_core": 1.1992901876417212,
+  "T_ms": 106.81913899920703,
+  "dt_ms": 0.02499862836396139,
+  "history_dimension": 1349205,
+  "multipliers": [
+    [
+      796.9728177915891,
+      0.0
+    ],
+    [
+      76.04576632954979,
+      0.0
+    ],
+    [
+      -0.3566418646893599,
+      2.9460537368855597
+    ],
+    [
+      -0.3566418646893599,
+      -2.9460537368855597
+    ]
+  ],
+  "residuals": [
+    4.663151824044912e-11,
+    1.4181370896379223e-11,
+    1.037774281750124e-11,
+    1.037774281750124e-11
+  ],
+  "phase_multiplier_error": 3.243410206810911,
+  "phase_tangent_relative_defect": 2.5622644395234736e-05,
+  "raw_multipliers_above_1p001": 4,
+  "requested_multipliers": 4,
+  "method": "Full variational DDE monodromy, Arnoldi largest modulus",
+  "seconds": 237.22429180145264,
+  "phase_eigenvector_overlaps": [
+    0.27331880977616546,
+    0.48244188695124485,
+    0.4458871581810758,
+    0.4458871581810758
+  ],
+  "identified_neutral_index": null,
+  "nontrivial_multipliers": [
+    [
+      796.9728177915891,
+      0.0
+    ],
+    [
+      76.04576632954979,
+      0.0
+    ],
+    [
+      -0.3566418646893599,
+      2.9460537368855597
+    ],
+    [
+      -0.3566418646893599,
+      -2.9460537368855597
+    ]
+  ],
+  "largest_computed_nontrivial_modulus": 796.9728177915891,
+  "stability_note": "Exclude the autonomous phase multiplier; compare phase error under time-step refinement before interpreting crossings near +1."
+}

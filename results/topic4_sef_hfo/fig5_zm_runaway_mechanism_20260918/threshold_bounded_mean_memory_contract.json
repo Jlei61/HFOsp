@@ -1,0 +1,25 @@
+{
+  "created_local": "2026-09-20T01:55:41.379689+08:00",
+  "question": "Can preventing accumulation of arbitrarily high supra-threshold mean-input memory improve strong-input recovery, while retaining negative-current history and the original DC/local response?",
+  "rationale": "Exact membrane-balance replay shows large accumulated refractory-clamp and reset corrections. Earlier rate-coordinate memory also compressed the negative-input tail; this coordinate remains asymptotically linear there.",
+  "candidate_count": 1,
+  "datasets": [
+    "in_domain_waveform",
+    "factorial_waveform"
+  ],
+  "equations": "gap=theta-reset; x=(mu-theta)/gap; y=(sqrt(x*x+4)-x)/2; psi=theta-gap*y. tau_s h_dot=psi(mu)-h; decoded_mu_s=theta+gap*(1/yh-yh), yh=(theta-h)/gap. Substitute decoded_mu_s for old mu_s in the unchanged history-conditioned response.",
+  "parameters": "Native theta and reset define upper asymptote and scale; no new fitted constants. Existing poles, variance filters, voltage-unit correction and static LIF transfer unchanged.",
+  "identity": "Exact DC and first-order response unchanged by inverse-coordinate cancellation; therefore existing linear-response failures are NOT repaired by this diagnostic.",
+  "checks": [
+    "inverse/DC",
+    "small-perturbation all-channel identity at one E and I point",
+    "reproduce prior history-prediction arrays",
+    "same15percent waveform/10percent mean gates on24already-observed conditions"
+  ],
+  "acceptance": {
+    "normalized_waveform_RMSE_max": 0.15,
+    "relative_cycle_mean_error_max": 0.1
+  },
+  "stop": "One fixed coordinate only. Do not tune cap/width to diagnostics or launch a network if local gates fail. Even waveform pass requires an independently accepted linear response before model promotion.",
+  "scope": "One nonlinear response-coordinate diagnostic, not a voltage-conservation closure, new blind test, accepted rate field or onset result. No particle network."
+}

@@ -1,0 +1,32 @@
+{
+  "status": "DIRECT_NEWTON_STEP_REDUCES_RESIDUAL",
+  "rows": [
+    {
+      "population": "E",
+      "old_weighted_RMS_Hz": 0.034043635057405305,
+      "new_weighted_RMS_Hz": 0.006972115686310096,
+      "weighted_MC_SEM_RMS_Hz": 0.004780749368159043,
+      "new_maximum_residual_Hz": 0.09650266647435046,
+      "groups_outside_3MC_SEM": 34,
+      "groups": 1885
+    },
+    {
+      "population": "I",
+      "old_weighted_RMS_Hz": 0.20264470511192964,
+      "new_weighted_RMS_Hz": 0.1419641019847046,
+      "weighted_MC_SEM_RMS_Hz": 0.10072457739723285,
+      "new_maximum_residual_Hz": 1.3586712579333948,
+      "groups_outside_3MC_SEM": 66,
+      "groups": 1594
+    }
+  ],
+  "proposed_Graw": 4.491652867679528,
+  "measured_E_rate_Hz": 244.10212370300292,
+  "maximum_target_residual_Hz": 1.9234391408528495,
+  "local_target_residual_RMS_Hz": 0.1443003593203932,
+  "root_certified": false,
+  "dynamic_stability_established": false,
+  "formal_bifurcation_allowed": false,
+  "interpretation": "Fresh nonlinear local response to the proposed source/M coordinates. Report finite residual and MC uncertainty. No next step or bifurcation label is automatic.",
+  "producer_sha256": "4cb41f3a47114eee43756d7ddc5f500ae2fd6cfd8b3dcdd822feecd67d975e4f"
+}

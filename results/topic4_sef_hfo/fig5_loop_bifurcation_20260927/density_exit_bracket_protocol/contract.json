@@ -1,0 +1,25 @@
+{
+  "status": "REGISTERED_BEFORE_SAMPLING",
+  "created_epoch": 1790547636.995398,
+  "question": "Does the native K9.35 reduced-recruitment state appear when the density uses the same immediate clamp and original12s initial history, rather than its previous carried K9 ramp?",
+  "selection": "Adaptive follow-up after completed native0-20s atK9.35 gives allE~98/coreA~392/coreB~132Hz, unlike carried-density~200/472/475. NativeK9.5 completed30s quiet. Full nativeK9.35 is still running; no final-prefix claim.",
+  "design": "Exactly two10s40000targetx128particle runs at heldK9.35and9.5. Same original12s initial V/synapse/M/refractory/pending/R/G and actual16.7s Z/K fields as native jobs; same50-60s external expected-rate drive as previously validatedK9field checks; local Gaussian numericalseed928751. Only K differs between the two candidates. Compare0-5and5-10s, rates/core/400cell field/G/counterfactualZdrift.",
+  "interpretation": "A match would support the relevance of approach history/input protocol, not prove history alone because the old density ramp also used constant expectedexternalmean. A mismatch retains a closure/finite-network-noise question. Same expecteddrive is not the same localPoisson orGaussian realization. No automatic newK, roots, or threshold changes.",
+  "stop": "Exactly two10s runs; preserve all mismatch evidence. No extension or new parameter follows automatically.",
+  "jobs": [
+    {
+      "name": "exit_z0.21_k9.35_fields16p7_high",
+      "job_sha256": "3a73b58a538a08f51ee2ae0988eafb563b31915083d6b44ccd4cc5581f96e6ce"
+    },
+    {
+      "name": "exit_z0.21_k9.5_fields16p7_high",
+      "job_sha256": "279bb88108b5d4c0c4ac6b31d1f69dbd141ac879771529344c9f38f6920eed79"
+    }
+  ],
+  "producer_sha256": "b86fc090c24a85c38abd08944393cd275c0b24c998a0a0407aaf7f34cd3db31e",
+  "base_sha256": "d10b6f271d1cb75691a7b2fdf3d1e998c80d7893d7fdf50ed42740d421e972bd",
+  "family_sha256": "eb6dc66d9b5e4a23d458561799aa8ea102e085539b8105d973e06580573fb476",
+  "physical_sha256": "59107e011242061bebd174ba80b7dc15acb87073fef1591111c8877e4247ae6f",
+  "formal_bifurcation_allowed": false,
+  "counts_as_autonomous_loop": false
+}

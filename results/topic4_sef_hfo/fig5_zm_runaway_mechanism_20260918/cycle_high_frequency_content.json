@@ -1,0 +1,55 @@
+{
+  "status": "COMPLETE",
+  "rows": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G8193_M65536/point0000.npz",
+      "N": 8193,
+      "T_ms": 267.3506606391777,
+      "weighted_ac_rms_hz": 90.2488088236113,
+      "above_frequency_hz": {
+        "500": {
+          "oscillatory_rate_energy_fraction": 3.4098668763669915e-05,
+          "rate_derivative_energy_fraction": 0.06552066117969335
+        },
+        "1000": {
+          "oscillatory_rate_energy_fraction": 1.7523667119982472e-06,
+          "rate_derivative_energy_fraction": 0.026065825068667007
+        },
+        "5000": {
+          "oscillatory_rate_energy_fraction": 4.4641663089614874e-08,
+          "rate_derivative_energy_fraction": 0.0071489907903369496
+        },
+        "10000": {
+          "oscillatory_rate_energy_fraction": 2.5103773483025656e-09,
+          "rate_derivative_energy_fraction": 0.0011082335336459383
+        }
+      }
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/periodic/rate_upper_G16385_M65536/point0000.npz",
+      "N": 16385,
+      "T_ms": 267.35066063917935,
+      "weighted_ac_rms_hz": 90.24880883464444,
+      "above_frequency_hz": {
+        "500": {
+          "oscillatory_rate_energy_fraction": 3.409891334004117e-05,
+          "rate_derivative_energy_fraction": 0.0657886008562232
+        },
+        "1000": {
+          "oscillatory_rate_energy_fraction": 1.7526112966535878e-06,
+          "rate_derivative_energy_fraction": 0.026345077479662308
+        },
+        "5000": {
+          "oscillatory_rate_energy_fraction": 4.488624820429391e-08,
+          "rate_derivative_energy_fraction": 0.007433667150584691
+        },
+        "10000": {
+          "oscillatory_rate_energy_fraction": 2.7549625354058065e-09,
+          "rate_derivative_energy_fraction": 0.001394641946379984
+        }
+      }
+    }
+  ],
+  "observable": "Original E-neuron-count weighted per-group oscillatory rate power, DC removed; derivative power separate",
+  "scope": "Waveform resolution diagnostic, not a Floquet mode or a direct SNN correspondence test"
+}

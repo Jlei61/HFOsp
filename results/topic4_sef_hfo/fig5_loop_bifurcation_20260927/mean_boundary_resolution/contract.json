@@ -1,0 +1,14 @@
+{
+  "status": "REGISTERED_ONE_NUMERICAL_RESOLUTION_CHECK",
+  "created_epoch": 1790573475.9091823,
+  "question": "Does increasing the numerical replica count from64to256 materially shift the K9.5 high-state exit or its spatial collapse?",
+  "design": "Exactly one4s R256 trajectory from the identical complete72s highstate, sameK9.5 heldfield/heldZ, originalgraph/delays/thresholds andfixedPoissonexternal. G/M and recurrentmean remain free. Compare alreadycompletedR64 first4s. No newnativebiologicalparameter or seed.",
+  "motivation": "R64 falls below5Hz by2.031s and is quiet throughout3-4s. This bounded numerical-resolution test covers the transient and onequietsecond. R64 goodmean agreement atK9.35 does not establish numerical convergence of the nearby exit.",
+  "rng": "Same original percell/replica stream key (cell<<32)+replica, seeds unchanged. Externalnu/countgeneration independent ofnetworkstate. More numericalcopies are not more native biologicalsamples; no claim of savedendpointRNG equality between differentdurations.",
+  "guards": "First100ms-continuousR<=5 onset shift<=.1s; tail3-4s quiet allE/A/B<5Hz; tailweightedfieldRMS<=5Hz; corecounterfactualZdrift difference<=.005/s. Additionally report unaligned100ms spatialerror acrosswhole4s. Passing is resolution evidence at thispoint, not R-infinity proof or stability.",
+  "stop": "One4s only, no automatic replica/order/time/parameter expansion.",
+  "producer_sha256": "4156a8bb16aac6e12ea26a5f2b8a40122e4156d395b20284775ce98cfc1083bc",
+  "history_sha256": "26d3da49c34293adcbda3d30ed43cf2f50f1d0660c22eda068a92c3d78049bb8",
+  "fields_sha256": "fca3b94c5ec40194680e8f43de53388d07b115c8cdc3049be9d709654d138e76",
+  "formal_bifurcation_allowed": false
+}

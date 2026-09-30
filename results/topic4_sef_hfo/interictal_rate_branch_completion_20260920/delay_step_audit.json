@@ -1,0 +1,177 @@
+{
+  "status": "INVALID_STEPS_IDENTIFIED_AND_REJECTED",
+  "minimum_occupied_delay_ms": 0.1,
+  "affected_multiplier_files": [
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/refined_J0.942000000_N1536_accuracy_N3072_accuracy_N6144_dt0.2.json",
+      "orbit": "results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/refined_J0.942000000_N1536_accuracy_N3072_accuracy_N6144.npz",
+      "dt_ms": 0.1999940115291689
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_085_k2_branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096_dt0.2.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/branch095_J0.950000000_N512_accuracy_N1024_accuracy_N2048_accuracy_N4096.npz",
+      "dt_ms": 0.1999651731615714
+    },
+    {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/poincare_floquet/coverage20260920_091_k2_arc095Down_0071_N512_accuracy_N1024_accuracy_N4096_dt0.2.json",
+      "orbit": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/interictal_spatial_rate_only_20260917/periodic_completion/orbits/arc095Down_0071_N512_accuracy_N1024_accuracy_N4096.npz",
+      "dt_ms": 0.199898660765253
+    }
+  ],
+  "controls": [
+    {
+      "stem": "smallA_J0.942000000_N64",
+      "classification": {
+        "status": "NUMERICALLY_STABLE",
+        "multipliers": [
+          [
+            0.8869532082685956,
+            -0.1803130966503163
+          ],
+          [
+            0.8869532082685956,
+            0.1803130966503163
+          ],
+          [
+            0.8124700929542609,
+            0.0
+          ],
+          [
+            0.008855154964249566,
+            -0.008722043925971479
+          ],
+          [
+            0.008855154964249566,
+            0.008722043925971479
+          ],
+          [
+            0.0030433840421599826,
+            -0.009283199761009348
+          ]
+        ],
+        "per_mode_margin": [
+          0.00012992918468119336,
+          0.00012992918468119336,
+          0.00011302055176681168,
+          0.00011302055176681168,
+          0.00011302055176681168,
+          0.00011302055176681168
+        ],
+        "paired_absolute_changes": [
+          2.1654864113532227e-05,
+          2.1654864113532227e-05,
+          2.9213748384826488e-06,
+          4.83767272406846e-07,
+          4.83767272406846e-07,
+          4.263309194473379e-07
+        ],
+        "reliable_outside_count": 0,
+        "numerical_unstable_dimension": 0,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 0.9050960205865348,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "connection_J0942_H1_middle_N128",
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            701.3831914794465,
+            0.0
+          ],
+          [
+            0.5466013492947054,
+            0.7358664049549818
+          ],
+          [
+            0.5466013492947054,
+            -0.7358664049549818
+          ],
+          [
+            0.33052030470924815,
+            0.0
+          ],
+          [
+            -0.07956176379844453,
+            0.0
+          ],
+          [
+            0.01909673552191417,
+            -0.006445741406019072
+          ]
+        ],
+        "per_mode_margin": [
+          0.5067301352764844,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934,
+          0.05112237785725934
+        ],
+        "paired_absolute_changes": [
+          0.08445502254608073,
+          1.974293755433685e-05,
+          1.974293755433685e-05,
+          5.663162632840724e-06,
+          2.7316900004237255e-06,
+          9.401880792551896e-07
+        ],
+        "reliable_outside_count": 1,
+        "numerical_unstable_dimension": 1,
+        "filter_coverage": true,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 701.3831914794465,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "connection_J0942_H1_return_N512",
+      "classification": {
+        "status": "UNSTABLE",
+        "multipliers": [
+          [
+            2507.748315271168,
+            0.0
+          ],
+          [
+            -22.618578841135314,
+            594.7042822986895
+          ],
+          [
+            -22.618578841135314,
+            -594.7042822986895
+          ]
+        ],
+        "per_mode_margin": [
+          2.5618837690199143,
+          0.5830249668486527,
+          0.5830249668486527
+        ],
+        "paired_absolute_changes": [
+          0.4269806281699857,
+          0.09717082780810878,
+          0.09717082780810878
+        ],
+        "reliable_outside_count": 3,
+        "numerical_unstable_dimension": null,
+        "filter_coverage": false,
+        "section_projection_checked": true,
+        "maximum_returned_modulus": 2507.748315271168,
+        "scope": "Paired-step numerical full-history Poincare spectrum at one cycle; not a rigorous enclosure or interval-wide completeness proof."
+      }
+    },
+    {
+      "stem": "refined_J0.942000000_N1536_accuracy_N3072_accuracy_N6144",
+      "status": "INVALID_COARSE_STEP_REJECTED"
+    },
+    {
+      "status": "MONODROMY_GUARD_PASS",
+      "error": "Heun history step 0.199975 ms exceeds occupied minimum delay 0.1 ms"
+    }
+  ],
+  "scope": "Affects Heun full-delay time stepping; Fourier periodic BVP continuation is independent. Old arrays retained; no unstable/stable verdict from an invalid pair is reused.",
+  "nonlinear_integrator_check": "RateIntegrator already requires dt to divide 0.1 ms; previously reported basin and saddle-departure runs used 0.1/0.05 ms and are not affected by the 0.2 ms Floquet issue."
+}

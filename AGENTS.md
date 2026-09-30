@@ -1,3 +1,5 @@
+> **2026-09-30 模型/结果路由**：分岔分析先读 `docs/topic4_model_versions.md` 和 `config/topic4_model_versions.json`。默认是20×20格、935群体的空间rate版；三区域六E/I群体版另存，不能混用。Figure 5当前入口为 `docs/current_figure5.md`。工作区清理状态见 `docs/workspace_status.md`。
+
 # Agent Guide
 
 This repo is rebuilding the legacy Yuquan HFO pipeline into a maintainable codebase. Do not guess where figures or artifacts come from.

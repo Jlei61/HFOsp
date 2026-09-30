@@ -1,0 +1,75 @@
+{
+  "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_zm_runaway_mechanism_20260918/native_regional_Z_feedback/result.json",
+  "panels": [
+    {
+      "arm": "all_dynamic",
+      "window_ms": [
+        10365,
+        10415
+      ],
+      "global_E_Hz": 300.04125303731206
+    },
+    {
+      "arm": "all_held",
+      "window_ms": [
+        10365,
+        10415
+      ],
+      "global_E_Hz": 31.8981253139833
+    },
+    {
+      "arm": "cores_dynamic",
+      "window_ms": [
+        10365,
+        10415
+      ],
+      "global_E_Hz": 50.7993753714771
+    },
+    {
+      "arm": "surround_dynamic",
+      "window_ms": [
+        10365,
+        10415
+      ],
+      "global_E_Hz": 275.2618767016786
+    },
+    {
+      "arm": "all_dynamic",
+      "window_ms": [
+        11975,
+        12025
+      ],
+      "global_E_Hz": 449.11000041100385
+    },
+    {
+      "arm": "all_held",
+      "window_ms": [
+        11975,
+        12025
+      ],
+      "global_E_Hz": 0.05249999978439882
+    },
+    {
+      "arm": "cores_dynamic",
+      "window_ms": [
+        11975,
+        12025
+      ],
+      "global_E_Hz": 65.78125086028409
+    },
+    {
+      "arm": "surround_dynamic",
+      "window_ms": [
+        11975,
+        12025
+      ],
+      "global_E_Hz": 437.9987518160343
+    }
+  ],
+  "M": "Dynamic in all arms",
+  "circles": "Original native core membership radius1.75mm, not the smaller1.5mm legacy readout circles.",
+  "common_clock_selection": "Predeclared original broad-entry10.39s and12s, centered50ms windows.",
+  "human_visual_acceptance": "PENDING",
+  "scope": "One native history with paired counterfactuals. This tests finite-window spatial feedback, not a universal resource threshold, autonomous attractor or bifurcation type. No additional parameter selection or expansion in this batch.",
+  "agent_PNG_PDF_check": "PASS: updated PNG and same PDF render inspected; colorbar label no longer clipped, common axes/scales, original1.75mm membership circles."
+}

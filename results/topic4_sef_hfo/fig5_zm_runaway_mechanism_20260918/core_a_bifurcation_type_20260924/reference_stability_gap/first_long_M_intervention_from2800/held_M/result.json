@@ -1,0 +1,42 @@
+{
+  "label": "held_M",
+  "status": "COMPLETE",
+  "quiet_intervals": [
+    {
+      "start_ms": 2800,
+      "end_ms": 2853,
+      "duration_ms": 53,
+      "left_censored": true,
+      "right_censored": false
+    },
+    {
+      "start_ms": 7676,
+      "end_ms": 7800,
+      "duration_ms": 124,
+      "left_censored": false,
+      "right_censored": true
+    }
+  ],
+  "mean_rates_global_A_B_surround_hz": [
+    46.160501864518444,
+    328.87566897702703,
+    120.95031262080381,
+    37.23233288036654
+  ],
+  "M_initial_global_A_B_surround": [
+    0.019831202363988897,
+    0.06128392929944654,
+    0.05060037611607485,
+    0.018011112847295695
+  ],
+  "M_final_global_A_B_surround": [
+    0.019831202363988897,
+    0.06128392929944654,
+    0.05060037611607485,
+    0.018011112847295695
+  ],
+  "original_replay_comparison": null,
+  "M_held_bitwise": true,
+  "original_Z_held_bitwise": true,
+  "bifurcation_type": "NOT_ESTABLISHED"
+}
