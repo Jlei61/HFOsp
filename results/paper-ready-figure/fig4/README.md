@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v2：[预览](candidates/a_circuit_sampling_sequence_20261009/figures/fig4-complete-layout-preview.png)。恢复原左侧两组件，第三图合并物理椭圆连接与局部采样并去掉公式，右侧显示F同一事件的五触点真实波峰序列。前两组件和B–I逐像素保持，候选待作者目视检查。
+A机制重绘候选v3：[预览](candidates/a_sampling_zoom_modes_20261009/figures/fig4-complete-layout-preview.png)。保留原左侧回路和远离电极的旧放大框；新增电极附近绿色虚线框，连接到含五个倾斜椭圆回路的采样放大图。采样下方并列MTA/MTB两种短包络序列，与F的长振荡波形区分。左侧回路和B–I逐像素保持，候选待作者目视检查。

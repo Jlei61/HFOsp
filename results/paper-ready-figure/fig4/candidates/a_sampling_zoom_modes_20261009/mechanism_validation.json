@@ -1,0 +1,163 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "original_left_circuit_restored": true,
+  "overview_background_restored": true,
+  "original_left_title_and_internal_labels_preserved": true,
+  "combined_third_component": true,
+  "formulas_and_lower_explanations_removed": true,
+  "zoom_center_mm": [
+    -8.5,
+    0.0
+  ],
+  "zoom_field_of_view_mm": [
+    1.6754742547425474,
+    1.3143631436314362
+  ],
+  "left_zoom_connector_minimum_contact_distance_mm": 3.0416473583089783,
+  "left_zoom_connectors_clear_of_electrode_footprints": true,
+  "actual_workpoint_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  },
+  "kernel_centres_E_coordinates_mm": [
+    [
+      15.43184757232666,
+      4.280831336975098
+    ],
+    [
+      16.419328689575195,
+      4.333014488220215
+    ],
+    [
+      17.44021224975586,
+      4.26674747467041
+    ],
+    [
+      15.663163185119629,
+      3.3274717330932617
+    ],
+    [
+      16.872591018676758,
+      3.3678483963012695
+    ]
+  ],
+  "enlarged_sampling_contact": "ICL2",
+  "local_circuit_count": 5,
+  "sampling_zoom_center_overview_mm": [
+    6.537611389323725,
+    -6.164611432369993
+  ],
+  "sampling_zoom_field_of_view_mm": [
+    3.8,
+    1.9
+  ],
+  "sampling_frame_is_a_coordinate_exact_enlargement": true,
+  "two_distinct_zoom_roles": true,
+  "mode_readouts_below_sampling": true,
+  "physical_xy_equal_scale": true,
+  "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+  "readout": {
+    "type": "normalized Gaussian average of smoothed E spike density",
+    "sigma_mm": 0.25,
+    "bin_ms": 2.0,
+    "smooth_ms": 5.0,
+    "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+    "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+    "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+    "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale."
+  },
+  "mode_showcases": {
+    "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+    "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "events": [
+      {
+        "mode": "MTA",
+        "event_index": 10,
+        "frozen_mode_label": 1,
+        "window_absolute_ms": [
+          4340,
+          4400
+        ],
+        "peak_absolute_ms": [
+          4360.0,
+          4368.0,
+          4378.0
+        ],
+        "peak_relative_ms": [
+          20.0,
+          28.0,
+          38.0
+        ],
+        "contact_order": [
+          "ICL8",
+          "ICL6",
+          "ICL4"
+        ]
+      },
+      {
+        "mode": "MTB",
+        "event_index": 8,
+        "frozen_mode_label": 0,
+        "window_absolute_ms": [
+          3740,
+          3800
+        ],
+        "peak_absolute_ms": [
+          3786.0,
+          3770.0,
+          3756.0
+        ],
+        "peak_relative_ms": [
+          46.0,
+          30.0,
+          16.0
+        ],
+        "contact_order": [
+          "ICL8",
+          "ICL6",
+          "ICL4"
+        ]
+      }
+    ],
+    "observable": "Unfiltered normalized-Gaussian contact firing-density envelopes, after the original 2 ms binning and 5 ms smoothing.",
+    "distinction_from_F": "A shows two short three-contact propagation sequences of envelopes; F retains the 15-contact continuous 30-80 Hz waveform result.",
+    "selection": "Reuse both F demonstration events, fixed channel order ICL8/ICL6/ICL4 across the two modes; no temporal shifting or per-contact amplitude scaling.",
+    "snapshot": "mode_readout_arrays.npz",
+    "snapshot_sha256": "ac361a8e7cb653e1279aa6a7ceca7e4de03a31fc0d97498523dc2b71125ac8f0",
+    "exact_native_trajectory_crops_and_event_labels_verified": true
+  },
+  "readout_peak_times_relative_ms": [
+    [
+      20.0,
+      28.0,
+      38.0
+    ],
+    [
+      46.0,
+      30.0,
+      16.0
+    ]
+  ],
+  "two_opposite_peak_sequences": true,
+  "data_lineage": "Overview and local sampling zoom share the same frozen illustrative neuron population. Two short contact-envelope examples reuse F events 10 and 8; no exact graph-recovery claim.",
+  "original_left_circuit_pixel_identical": true,
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "canonical_output_hashes_unchanged": true
+}
