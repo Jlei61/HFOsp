@@ -199,6 +199,8 @@ Legend 位置同时锁定：时程/散点 panel 优先放在 axes 上方的预�
 
 ## Topic 4 · 机制模型（SEF-HFO / cm-SNN）
 
+- **当前 Fig4 优先合同（作者草图，2026-10-09）**：[当前A–I版本](current_figure4.md)及`fig4/current_version.json`优先。producer为`build_fig4_compact_ai.py`；首行A扩大并预留机制图，中排B–E、底排F–I按行列对齐，旧E/F传播showcase移出。B紫色、第6–16阶段194点，无旧E/F标记；I为25患者红蓝相似度，Subject/Median图例位于右上。A小框位于(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白收紧到约3.87／5.20 mm，D/H与E/I逐列对齐，B/C整体与F/G组合对齐；B去掉类别外横轴留白、色条间距1.5 mm，紧凑行距保持。方向椭圆与右侧机制图待补充。下方历史图号不作为重建入口。
+
 - **示范图**：[`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png`](../results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png)
 - **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。
 - **回答**：同一个 SNN 基底里，机制变量在哪里、两种特异性组合如何产生相反传播、同一虚拟 SEEG montage 是否能在电极 readout 中读出正/反事件。

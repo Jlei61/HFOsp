@@ -1,0 +1,1197 @@
+{
+  "schema_version": "paper_figure4_reserved_b_a_g_v14",
+  "status": "LAYOUT_INCOMPLETE_RESERVED_PANEL_B",
+  "producer": "scripts/paper_figures/build_main_figure_4.py",
+  "simulation_rerun": false,
+  "plotting_recomputed_from_frozen_arrays": true,
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true,
+  "individual_panel_png_dpi": 600,
+  "complete_layout_dpi": 600,
+  "panels": {
+    "a": [
+      "results/paper-ready-figure/fig4/figures/fig4-panela.png",
+      "results/paper-ready-figure/fig4/figures/fig4-panela.pdf"
+    ],
+    "b": [],
+    "c": [
+      "results/paper-ready-figure/fig4/figures/fig4-panelc.png",
+      "results/paper-ready-figure/fig4/figures/fig4-panelc.pdf"
+    ],
+    "d": [
+      "results/paper-ready-figure/fig4/figures/fig4-paneld.png",
+      "results/paper-ready-figure/fig4/figures/fig4-paneld.pdf"
+    ],
+    "e": [
+      "results/paper-ready-figure/fig4/figures/fig4-panele.png",
+      "results/paper-ready-figure/fig4/figures/fig4-panele.pdf"
+    ],
+    "f": [
+      "results/paper-ready-figure/fig4/figures/fig4-panelf.png",
+      "results/paper-ready-figure/fig4/figures/fig4-panelf.pdf"
+    ],
+    "g": [
+      "results/paper-ready-figure/fig4/figures/fig4-panelg.png",
+      "results/paper-ready-figure/fig4/figures/fig4-panelg.pdf"
+    ]
+  },
+  "panel_details": {
+    "a": {
+      "status": "AUTHOR_ACCEPTED_CANONICAL",
+      "producer": "scripts/paper_figures/build_fig4_panel_a_combined.py",
+      "composition_only": false,
+      "simulation_rerun": false,
+      "scientific_values_recomputed": false,
+      "panel_a_redrawn": false,
+      "right_substrate_rendering": "same frozen figdata with redundant display layers suppressed",
+      "sources": {
+        "local_circuit": {
+          "path": "results/paper-ready-figure/archive/2026-09-03_pre_combined_fig4_ab/fig4/figures/fig4-panela.png",
+          "sha256": "830ff538160851c8f4c6f3533c567b97cd2277aa048481dbd6638843371f5880"
+        },
+        "patient_substrate": {
+          "path": "results/paper-ready-figure/archive/2026-09-03_pre_combined_fig4_ab/fig4/figures/fig4-panelb.png",
+          "sha256": "46535ddd902819f05ba2d1be3983fa454cc8a00e156123ba9debc3e7f27211bb",
+          "role": "accepted visual lineage; clean right panel uses the same frozen figdata"
+        },
+        "clean_patient_substrate": {
+          "figdata_path": "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz",
+          "figdata_sha256": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
+          "removed_display_layers": [
+            "anisotropic E-to-E corridor and label",
+            "possible data driven core contours and label",
+            "historical discrete core outlines, labels, and connecting line"
+          ],
+          "preserved_information": [
+            "frozen E-neuron positions",
+            "deterministically reconstructed I-neuron positions",
+            "patient contact geometry",
+            "E/I neuron legend"
+          ],
+          "seeg_sampling_overlay": {
+            "readout": "virtual-contact firing-density envelope used by Figure 4F",
+            "kernel": "normalized isotropic Gaussian without hard cutoff",
+            "sigma_mm": 0.25,
+            "displayed_radius": "theoretical 95% mass radius",
+            "displayed_radius_mm": 0.6119367076702041,
+            "contact_span_xy_mm": [
+              16.0,
+              12.394053650997996
+            ],
+            "color": "#245C3F",
+            "alpha": 0.12,
+            "not_the_current_lfp_cutoff": "LFPRecorder Rr=0.278 mm is a separate path"
+          }
+        }
+      },
+      "layout": {
+        "canvas_px": [
+          6000,
+          3000
+        ],
+        "local_circuit_role": "smaller left-side conceptual detail",
+        "patient_substrate_role": "larger right-side main panel",
+        "a_crop_px": [
+          187,
+          0,
+          2773,
+          2218
+        ],
+        "a_placed_box_px": [
+          183,
+          470,
+          2596,
+          2540
+        ],
+        "a_dashed_inset_box_px": [
+          153,
+          630,
+          2626,
+          2570
+        ],
+        "a_title": {
+          "text": "Local E/I circuit",
+          "position": "centered above dashed inset box",
+          "font_px_at_600_dpi": 112
+        },
+        "a_scale_bar": {
+          "label_mm": 0.5,
+          "length_px": 738,
+          "calibration": "outer A ellipse is assigned to the e^-1 contour of the frozen elliptical-exponential E-to-E kernel; its full long-axis diameter is 2*l_par",
+          "l_EE_mm": 0.38,
+          "AR": 2.0,
+          "l_par_mm": 0.5374011537017762,
+          "outer_ellipse_diameter_mm": 1.0748023074035524
+        },
+        "b_placed_box_px": [
+          3260,
+          90,
+          5840,
+          2670
+        ],
+        "b_xy_frame": {
+          "style": "solid",
+          "xlim_mm": [
+            -10.0,
+            10.0
+          ],
+          "ylim_mm": [
+            -10.0,
+            10.0
+          ],
+          "ticks_mm": [
+            -10,
+            0,
+            10
+          ],
+          "labels": [
+            "x (mm)",
+            "y (mm)"
+          ]
+        },
+        "zoom_center": {
+          "contact": "SCL9",
+          "xy_mm": [
+            -4.502,
+            6.197
+          ]
+        },
+        "zoom_field_of_view_mm": [
+          1.6754742547425474,
+          1.3143631436314362
+        ],
+        "zoom_data_box_mm": [
+          -5.339737127371274,
+          5.539818428184282,
+          -3.664262872628726,
+          6.854181571815718
+        ],
+        "representative_callout_canvas_box_px": [
+          3861,
+          496,
+          4077,
+          665
+        ],
+        "connector_style": "dashed"
+      },
+      "semantic_boundary": "The callout indicates a representative local E/I neighbourhood. Panel A is a conceptual mechanism schematic, not a coordinate-exact crop of panel B and not a recovered anatomical core. The right panel retains only E/I positions and patient contact geometry.",
+      "outputs": [
+        "results/paper-ready-figure/fig4/figures/fig4-panela.png",
+        "results/paper-ready-figure/fig4/figures/fig4-panela.pdf"
+      ]
+    },
+    "b": {
+      "status": "AUTHOR_RESERVED_EMPTY",
+      "intended_content": "effects of data-driven parameter variation on reproducing patient interictal events",
+      "complete_layout_region": "top-right",
+      "standalone_output": false,
+      "placeholder_text_drawn": false
+    },
+    "c": {
+      "mode_counts": {
+        "MTA": 444,
+        "MTB": 185
+      },
+      "pooled_networks": 12,
+      "gray_status_subtitle_removed": true,
+      "data_driven_landscape_retained": true,
+      "field_colorbar_uses_dedicated_grid_column": true,
+      "field_colorbar_ticks_on_left_and_title_on_top": true,
+      "mode_axis_labels": {
+        "x": "x (mm)",
+        "y": "y (mm)"
+      },
+      "mode_axes_scale_relative_to_grid_cell": 0.74,
+      "geometry_context": {
+        "coord_space": "mni152_1mm",
+        "n_context_contacts": 20,
+        "n_selected_contacts": 15,
+        "registration_max_abs_error_mm": 1.3322676295501878e-14
+      }
+    },
+    "d": {
+      "model_lines": [
+        "MTA",
+        "MTB"
+      ],
+      "patient_lines": [
+        "TA",
+        "TB"
+      ],
+      "patient_template_source": {
+        "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1146.json",
+        "sha256": "b5b0d65823f13caed389c890295887bcea5ca3f79fbfd27c4814962a2f962c1b"
+      },
+      "label_change": {
+        "n_training_events": 30049,
+        "n_changed": 1861,
+        "fraction_changed": 0.061932177443508936,
+        "old_counts_raw_mode_0_1": [
+          9275,
+          20774
+        ],
+        "new_counts_raw_mode_0_1": [
+          9196,
+          20853
+        ]
+      },
+      "model_events_and_kmeans_frozen": true
+    },
+    "e": {
+      "matrix": [
+        [
+          0.7752976190476192,
+          -0.5858134920634922
+        ],
+        [
+          -0.6140873015873016,
+          0.6785714285714288
+        ]
+      ],
+      "contract": "12-network equal-weight contact-split cross-fit Spearman",
+      "separate_similarity_tests": {
+        "MTA_vs_TA": {
+          "n_networks": 12,
+          "n_draws": 1000,
+          "observed_equal_network_mean": 0.7752976190476192,
+          "null_q05": 0.10664682539682539,
+          "null_median": 0.23115079365079366,
+          "null_q95": 0.3343253968253968,
+          "observed_minus_null_median": 0.5441468253968256,
+          "one_sided_p": 0.000999000999000999,
+          "observed_above_null_q95": true,
+          "stars": "***",
+          "alternative": "observed similarity exceeds permuted similarity",
+          "null": "within-shaft model-contact permutation"
+        },
+        "MTB_vs_TB": {
+          "n_networks": 12,
+          "n_draws": 1000,
+          "observed_equal_network_mean": 0.6785714285714288,
+          "null_q05": -0.14146825396825397,
+          "null_median": 0.0027281746031746004,
+          "null_q95": 0.15828373015873012,
+          "observed_minus_null_median": 0.6758432539682542,
+          "one_sided_p": 0.000999000999000999,
+          "observed_above_null_q95": true,
+          "stars": "***",
+          "alternative": "observed similarity exceeds permuted similarity",
+          "null": "within-shaft model-contact permutation"
+        }
+      },
+      "statistics_source": "results/paper-ready-figure/fig4/fig4_panele_pairwise_similarity_statistics.json",
+      "unified_diagonal_margin_test_displayed": false,
+      "square_matrix": true
+    },
+    "f": {
+      "same_network_pair": true,
+      "seed": 1569,
+      "MTA_global_index": 824,
+      "MTB_global_index": 829,
+      "pair_contract": "highest shared contact support among temporally separated clean MTA/MTB pairs from one same-network run",
+      "signal_contract": "30-80 Hz bandpass of virtual-contact firing-density envelope",
+      "not_current_lfp_or_clinical_seeg": true,
+      "band_hz": [
+        30.0,
+        80.0
+      ],
+      "common_scale_au": 0.0991788692289316,
+      "display_shading_contract": "recruitment_onset_span",
+      "display_shading_pad_ms": 12.0,
+      "onset_markers_displayed": false,
+      "scale_bar_displayed": false,
+      "displayed_contact_count": 15,
+      "contact_order": [
+        "SCL9",
+        "ICL11",
+        "SCL7",
+        "ICL10",
+        "SCL8",
+        "SCL6",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL1",
+        "ICL3",
+        "ICL2"
+      ],
+      "display_window_ms": [
+        1065.0,
+        1900.5
+      ]
+    },
+    "g": {
+      "schema_version": "fig4e_data_driven_snn_cohort_v1",
+      "source": {
+        "path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/cohort_result.json",
+        "sha256": "16a3c5ca119fa3879e784bd4d38cd840eb797efc5e3733338ca8e246baec4da0"
+      },
+      "display_contract": {
+        "left": "nested cohort counts: eligible, model loss below matched null, and the subset also recovering both patient modes in one network",
+        "right": "paired canonical-layout held-out weakest-mode loss for the data-driven model and each subject's within-shaft contact-identity permutation null median; unlabeled points and lines are subjects",
+        "right_p": "pre-registered two-sided subject-level Wilcoxon signed-rank test",
+        "significance_symbols": "ns: P>=0.05; *: P<0.05; **: P<0.01; ***: P<0.001"
+      },
+      "summary": {
+        "group_counts": {
+          "both": 11,
+          "kmeans_only": 4,
+          "heldout_only": 12,
+          "neither": 7
+        },
+        "n_subjects": 34,
+        "n_heldout_pass": 23,
+        "n_kmeans_pass": 15,
+        "n_both": 11,
+        "n_real_geometry": 28,
+        "n_real_geometry_pass": 13,
+        "real_geometry_sign_agreement": 14,
+        "n_both_with_real_geometry": 10,
+        "n_both_with_positive_real_geometry": 6,
+        "confirmation_seeds": [
+          1681,
+          1682,
+          1683,
+          1684
+        ],
+        "status": "SAME_NETWORK_K2_INSUFFICIENT",
+        "failed_gates": [
+          "SAME_NETWORK_K2_INSUFFICIENT",
+          "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED"
+        ]
+      },
+      "subject_order": [
+        {
+          "subject_id": "epilepsiae_139",
+          "short_id": "E139",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0474054115456546,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.04131190472205204
+        },
+        {
+          "subject_id": "epilepsiae_1150",
+          "short_id": "E1150",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.01708984068702815,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": -0.026844721776002542
+        },
+        {
+          "subject_id": "epilepsiae_442",
+          "short_id": "E442",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.010284394948237893,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.0015478861374841613
+        },
+        {
+          "subject_id": "yuquan_zhaochenxi",
+          "short_id": "Y16",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.007547644223479269,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": -0.010277814087857759
+        },
+        {
+          "subject_id": "epilepsiae_1096",
+          "short_id": "E1096",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0029002950221506257,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.0025950752225496337
+        },
+        {
+          "subject_id": "epilepsiae_620",
+          "short_id": "E620",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0500149199251752,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.04157890027390708
+        },
+        {
+          "subject_id": "epilepsiae_1125",
+          "short_id": "E1125",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.044535440249661065,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": -0.049831466014846046
+        },
+        {
+          "subject_id": "yuquan_chengshuai",
+          "short_id": "Y1",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.02912003667258535,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.02801717663298882
+        },
+        {
+          "subject_id": "yuquan_zhangjiaqi",
+          "short_id": "Y14",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.01944601055882529,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.04996248243163155
+        },
+        {
+          "subject_id": "yuquan_gaolan",
+          "short_id": "Y3",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.00461766538636435,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "epilepsiae_253",
+          "short_id": "E253",
+          "group": "both",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0020663000422722205,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": -0.011960515110482753
+        },
+        {
+          "subject_id": "epilepsiae_635",
+          "short_id": "E635",
+          "group": "kmeans_only",
+          "heldout_pass": false,
+          "canonical_advantage": -0.003136996311684015,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.03643784092900934
+        },
+        {
+          "subject_id": "yuquan_xuxinyi",
+          "short_id": "Y12",
+          "group": "kmeans_only",
+          "heldout_pass": false,
+          "canonical_advantage": -0.006494458306179146,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": -0.022761974191209386
+        },
+        {
+          "subject_id": "epilepsiae_1077",
+          "short_id": "E1077",
+          "group": "kmeans_only",
+          "heldout_pass": false,
+          "canonical_advantage": -0.018339965637929084,
+          "kmeans_positive_networks": 4,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": 0.004460130520798702
+        },
+        {
+          "subject_id": "yuquan_hanyuxuan",
+          "short_id": "Y4",
+          "group": "kmeans_only",
+          "heldout_pass": false,
+          "canonical_advantage": -0.008323397771226565,
+          "kmeans_positive_networks": 3,
+          "kmeans_subject_pass": true,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "epilepsiae_1146",
+          "short_id": "E1146",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.031015175710697007,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.012672154717632958
+        },
+        {
+          "subject_id": "yuquan_sunyuanxin",
+          "short_id": "Y10",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.016214210619999586,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "epilepsiae_384",
+          "short_id": "E384",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.011375884102897901,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.006113474056750501
+        },
+        {
+          "subject_id": "yuquan_wangyiyang",
+          "short_id": "Y11",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.010340374138372688,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "yuquan_liyouran",
+          "short_id": "Y7",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.00899797414917626,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.013386962614715905
+        },
+        {
+          "subject_id": "yuquan_litengsheng",
+          "short_id": "Y6",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.00845677880643493,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.009677119559356781
+        },
+        {
+          "subject_id": "yuquan_chenziyang",
+          "short_id": "Y2",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.005073338371728825,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "epilepsiae_958",
+          "short_id": "E958",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0037206340612727096,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.01865783184781393
+        },
+        {
+          "subject_id": "yuquan_zhangbichen",
+          "short_id": "Y13",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.002054834237884093,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.001304972700496329
+        },
+        {
+          "subject_id": "epilepsiae_922",
+          "short_id": "E922",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.010906451099337577,
+          "kmeans_positive_networks": 1,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.0
+        },
+        {
+          "subject_id": "epilepsiae_590",
+          "short_id": "E590",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.0075403539900752575,
+          "kmeans_positive_networks": 1,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.002985322510621391
+        },
+        {
+          "subject_id": "yuquan_pengzihang",
+          "short_id": "Y8",
+          "group": "heldout_only",
+          "heldout_pass": true,
+          "canonical_advantage": 0.03608128271674928,
+          "kmeans_positive_networks": 0,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.03481491675002181
+        },
+        {
+          "subject_id": "epilepsiae_1084",
+          "short_id": "E1084",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.010851232862170337,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.02057281097832303
+        },
+        {
+          "subject_id": "yuquan_zhangkexuan",
+          "short_id": "Y15",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.015732890992379192,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.0010360753961400349
+        },
+        {
+          "subject_id": "yuquan_huanghanwen",
+          "short_id": "Y5",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.017584816967039507,
+          "kmeans_positive_networks": 2,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.014123710957645766
+        },
+        {
+          "subject_id": "epilepsiae_548",
+          "short_id": "E548",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.017712428374846184,
+          "kmeans_positive_networks": 1,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": 0.00841401073701338
+        },
+        {
+          "subject_id": "yuquan_songzishuo",
+          "short_id": "Y9",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.006908580376542725,
+          "kmeans_positive_networks": 0,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.004864881410204483
+        },
+        {
+          "subject_id": "epilepsiae_1073",
+          "short_id": "E1073",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.0072886651437278765,
+          "kmeans_positive_networks": 0,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": null
+        },
+        {
+          "subject_id": "epilepsiae_583",
+          "short_id": "E583",
+          "group": "neither",
+          "heldout_pass": false,
+          "canonical_advantage": -0.00962330045934652,
+          "kmeans_positive_networks": 0,
+          "kmeans_subject_pass": false,
+          "real_geometry_advantage": -0.02043062890631432
+        }
+      ],
+      "scientific_boundary": "The 11/34 joint count is descriptive: no joint KMeans-plus-loss null was pre-registered. P=0.043 applies only to the continuous canonical paired model-versus-null loss comparison. The real-geometry sensitivity is not displayed (P=0.98); the same-network KMeans fraction and observation-layout sensitivity gates were not met.",
+      "files": {
+        "png": "results/paper-ready-figure/fig4/figures/fig4-panelg.png",
+        "png_sha256": "363961c023f1cb26965a6f12c6cf417cac26b144acd955ce83872ff63901ca96",
+        "pdf": "results/paper-ready-figure/fig4/figures/fig4-panelg.pdf",
+        "pdf_sha256": "82f6a6aa25c54e739cdfe276ef949366a39e97ac6dba3354dff2c5ba1348cc84"
+      }
+    }
+  },
+  "complete_layout": [
+    "results/paper-ready-figure/fig4/figures/fig4-complete-layout.png",
+    "results/paper-ready-figure/fig4/figures/fig4-complete-layout.pdf"
+  ],
+  "superseded_package_archive": "results/paper-ready-figure/archive/2026-08-19_rejected_a_g_fig4/fig4",
+  "pre_revision_package_archive": "results/paper-ready-figure/archive/2026-08-19_pre_a_g_fig4/fig4",
+  "pre_a_e_reorder_package_archive": "results/paper-ready-figure/archive/2026-09-03_pre_fig4_a_e_reorder/fig4",
+  "pre_reserved_b_package_archive": "results/paper-ready-figure/archive/2026-09-03_pre_fig4_reserved_panel_b/fig4",
+  "author_revision_contract": {
+    "locked_on": "2026-09-03",
+    "final_panel_letters": "A-G",
+    "former_a_and_b_combined_as_panel_a": true,
+    "panel_a_is_author_accepted": true,
+    "panel_a_slow_variable_z_visual_center_restored": true,
+    "panel_a_right_side_preserves_e_i_substrate_and_contact_geometry": true,
+    "panel_a_right_side_discrete_core_markers_removed": true,
+    "panel_a_right_side_anisotropic_corridor_removed": true,
+    "panel_a_right_side_possible_core_overlay_removed": true,
+    "panel_a_seeg_sampling_footprints_are_low_alpha_dark_green": true,
+    "panel_b_reserved_empty": true,
+    "panel_b_intended_for_parameter_sensitivity": true,
+    "panel_b_placeholder_text_drawn": false,
+    "old_d_gray_subtitle_removed": true,
+    "panel_c_colorbar_separated_and_axis_labels_simplified": true,
+    "panel_c_model_maps_reduced_to_74_percent": true,
+    "panel_d_profile_redrawn_without_uncertainty_bands": true,
+    "panel_d_legend_does_not_reduce_axes_height": true,
+    "panel_d_all_event_timing_plus_space_patient_templates": true,
+    "panel_e_crossfit_restored_to_main_figure": true,
+    "panel_f_shading_uses_recruitment_onset_span": true,
+    "panel_f_scale_bar_and_onset_dots_removed": true,
+    "kmeans_heatmap_moved_to_supplementary_figure7_e": true,
+    "reserved_panel_b_uses_existing_top_right_whitespace": true,
+    "panel_c_scale_in_complete_layout_unchanged": true,
+    "large_type_contract": "13 pt minimum for data/tick text; 15-20 pt labels and titles"
+  },
+  "sources": {
+    "nlc_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    },
+    "nlc_output": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation",
+    "direct_metadata": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/figures/fig4a_nlc_direct_readout_metadata.json",
+      "sha256": "f7255b57db9425425b1935b449ca93e63be881c4d47b87bb5ca73eee5f5e5529"
+    },
+    "kmeans_metadata": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/figures/fig4b_nlc_kmeans_consistency_metadata.json",
+      "sha256": "1f77b2f529a0aa312c5bb0da19d2e3fac25b0c4944b5cac13e852b997c77ae65"
+    },
+    "cohort": {
+      "path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/cohort_result.json",
+      "sha256": "16a3c5ca119fa3879e784bd4d38cd840eb797efc5e3733338ca8e246baec4da0"
+    },
+    "panel_d_source_metadata": {
+      "path": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig4gh_all_event_timing_plus_space/figures/fig4gh-all-event-space-metadata.json",
+      "sha256": "bdeea234d215ab3447705a6d8e76a1e9a6cc105796017e3ed3f1ea17808dbef1"
+    },
+    "panel_e_pairwise_statistics": {
+      "path": "results/paper-ready-figure/fig4/fig4_panele_pairwise_similarity_statistics.json",
+      "sha256": "c975a17e1f7ff173262d7ee6337249c1066ffc5664f13de9fcc8fdd6fb98e495"
+    }
+  },
+  "panel_contract": {
+    "a": "combined local E/I circuit and patient substrate with scale-matched inset",
+    "b": "reserved for data-driven parameter sensitivity; intentionally empty",
+    "c": "data-driven Node field with separated colorbar and pooled Model TA/MTB modes",
+    "d": "frozen model and all-event Timing+Space patient mean-rank profiles",
+    "e": "all-event Timing+Space equal-network contact-split model-patient matrix",
+    "f": "same-network 30-80 Hz virtual-contact activity without scale bar or onset dots",
+    "g": "34-patient cohort gates and paired matched-null loss"
+  },
+  "scientific_claim_boundary": "returned detector events only; development-only confirmation-network visualization; no patient-blind generalization, causal core, or ictal lifecycle claim",
+  "nlc_source_status": "REV11NLC_FROZEN_CONFIRMATION_RETURNED_ONLY_COMPLETE",
+  "kmeans_event_subset": "formal clean events with at least three participating contacts; clean events below that support are outside the KMeans input, so Fig4B event totals are smaller than the Fig4A mode counts",
+  "kmeans_display_counts_MTA_MTB": [
+    437,
+    190
+  ],
+  "kmeans_panel_destination": "Supplementary Fig. 7E",
+  "displayed_crossfit_matrix": [
+    [
+      0.7752976190476192,
+      -0.5858134920634922
+    ],
+    [
+      -0.6140873015873016,
+      0.6785714285714288
+    ]
+  ],
+  "cohort_panel_g": {
+    "schema_version": "fig4e_data_driven_snn_cohort_v1",
+    "source": {
+      "path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/cohort_result.json",
+      "sha256": "16a3c5ca119fa3879e784bd4d38cd840eb797efc5e3733338ca8e246baec4da0"
+    },
+    "display_contract": {
+      "left": "nested cohort counts: eligible, model loss below matched null, and the subset also recovering both patient modes in one network",
+      "right": "paired canonical-layout held-out weakest-mode loss for the data-driven model and each subject's within-shaft contact-identity permutation null median; unlabeled points and lines are subjects",
+      "right_p": "pre-registered two-sided subject-level Wilcoxon signed-rank test",
+      "significance_symbols": "ns: P>=0.05; *: P<0.05; **: P<0.01; ***: P<0.001"
+    },
+    "summary": {
+      "group_counts": {
+        "both": 11,
+        "kmeans_only": 4,
+        "heldout_only": 12,
+        "neither": 7
+      },
+      "n_subjects": 34,
+      "n_heldout_pass": 23,
+      "n_kmeans_pass": 15,
+      "n_both": 11,
+      "n_real_geometry": 28,
+      "n_real_geometry_pass": 13,
+      "real_geometry_sign_agreement": 14,
+      "n_both_with_real_geometry": 10,
+      "n_both_with_positive_real_geometry": 6,
+      "confirmation_seeds": [
+        1681,
+        1682,
+        1683,
+        1684
+      ],
+      "status": "SAME_NETWORK_K2_INSUFFICIENT",
+      "failed_gates": [
+        "SAME_NETWORK_K2_INSUFFICIENT",
+        "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED"
+      ]
+    },
+    "subject_order": [
+      {
+        "subject_id": "epilepsiae_139",
+        "short_id": "E139",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0474054115456546,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.04131190472205204
+      },
+      {
+        "subject_id": "epilepsiae_1150",
+        "short_id": "E1150",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.01708984068702815,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": -0.026844721776002542
+      },
+      {
+        "subject_id": "epilepsiae_442",
+        "short_id": "E442",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.010284394948237893,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.0015478861374841613
+      },
+      {
+        "subject_id": "yuquan_zhaochenxi",
+        "short_id": "Y16",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.007547644223479269,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": -0.010277814087857759
+      },
+      {
+        "subject_id": "epilepsiae_1096",
+        "short_id": "E1096",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0029002950221506257,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.0025950752225496337
+      },
+      {
+        "subject_id": "epilepsiae_620",
+        "short_id": "E620",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0500149199251752,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.04157890027390708
+      },
+      {
+        "subject_id": "epilepsiae_1125",
+        "short_id": "E1125",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.044535440249661065,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": -0.049831466014846046
+      },
+      {
+        "subject_id": "yuquan_chengshuai",
+        "short_id": "Y1",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.02912003667258535,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.02801717663298882
+      },
+      {
+        "subject_id": "yuquan_zhangjiaqi",
+        "short_id": "Y14",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.01944601055882529,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.04996248243163155
+      },
+      {
+        "subject_id": "yuquan_gaolan",
+        "short_id": "Y3",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.00461766538636435,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "epilepsiae_253",
+        "short_id": "E253",
+        "group": "both",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0020663000422722205,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": -0.011960515110482753
+      },
+      {
+        "subject_id": "epilepsiae_635",
+        "short_id": "E635",
+        "group": "kmeans_only",
+        "heldout_pass": false,
+        "canonical_advantage": -0.003136996311684015,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.03643784092900934
+      },
+      {
+        "subject_id": "yuquan_xuxinyi",
+        "short_id": "Y12",
+        "group": "kmeans_only",
+        "heldout_pass": false,
+        "canonical_advantage": -0.006494458306179146,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": -0.022761974191209386
+      },
+      {
+        "subject_id": "epilepsiae_1077",
+        "short_id": "E1077",
+        "group": "kmeans_only",
+        "heldout_pass": false,
+        "canonical_advantage": -0.018339965637929084,
+        "kmeans_positive_networks": 4,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": 0.004460130520798702
+      },
+      {
+        "subject_id": "yuquan_hanyuxuan",
+        "short_id": "Y4",
+        "group": "kmeans_only",
+        "heldout_pass": false,
+        "canonical_advantage": -0.008323397771226565,
+        "kmeans_positive_networks": 3,
+        "kmeans_subject_pass": true,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "epilepsiae_1146",
+        "short_id": "E1146",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.031015175710697007,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.012672154717632958
+      },
+      {
+        "subject_id": "yuquan_sunyuanxin",
+        "short_id": "Y10",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.016214210619999586,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "epilepsiae_384",
+        "short_id": "E384",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.011375884102897901,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.006113474056750501
+      },
+      {
+        "subject_id": "yuquan_wangyiyang",
+        "short_id": "Y11",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.010340374138372688,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "yuquan_liyouran",
+        "short_id": "Y7",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.00899797414917626,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.013386962614715905
+      },
+      {
+        "subject_id": "yuquan_litengsheng",
+        "short_id": "Y6",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.00845677880643493,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.009677119559356781
+      },
+      {
+        "subject_id": "yuquan_chenziyang",
+        "short_id": "Y2",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.005073338371728825,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "epilepsiae_958",
+        "short_id": "E958",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0037206340612727096,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.01865783184781393
+      },
+      {
+        "subject_id": "yuquan_zhangbichen",
+        "short_id": "Y13",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.002054834237884093,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.001304972700496329
+      },
+      {
+        "subject_id": "epilepsiae_922",
+        "short_id": "E922",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.010906451099337577,
+        "kmeans_positive_networks": 1,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.0
+      },
+      {
+        "subject_id": "epilepsiae_590",
+        "short_id": "E590",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.0075403539900752575,
+        "kmeans_positive_networks": 1,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.002985322510621391
+      },
+      {
+        "subject_id": "yuquan_pengzihang",
+        "short_id": "Y8",
+        "group": "heldout_only",
+        "heldout_pass": true,
+        "canonical_advantage": 0.03608128271674928,
+        "kmeans_positive_networks": 0,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.03481491675002181
+      },
+      {
+        "subject_id": "epilepsiae_1084",
+        "short_id": "E1084",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.010851232862170337,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.02057281097832303
+      },
+      {
+        "subject_id": "yuquan_zhangkexuan",
+        "short_id": "Y15",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.015732890992379192,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.0010360753961400349
+      },
+      {
+        "subject_id": "yuquan_huanghanwen",
+        "short_id": "Y5",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.017584816967039507,
+        "kmeans_positive_networks": 2,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.014123710957645766
+      },
+      {
+        "subject_id": "epilepsiae_548",
+        "short_id": "E548",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.017712428374846184,
+        "kmeans_positive_networks": 1,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": 0.00841401073701338
+      },
+      {
+        "subject_id": "yuquan_songzishuo",
+        "short_id": "Y9",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.006908580376542725,
+        "kmeans_positive_networks": 0,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.004864881410204483
+      },
+      {
+        "subject_id": "epilepsiae_1073",
+        "short_id": "E1073",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.0072886651437278765,
+        "kmeans_positive_networks": 0,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": null
+      },
+      {
+        "subject_id": "epilepsiae_583",
+        "short_id": "E583",
+        "group": "neither",
+        "heldout_pass": false,
+        "canonical_advantage": -0.00962330045934652,
+        "kmeans_positive_networks": 0,
+        "kmeans_subject_pass": false,
+        "real_geometry_advantage": -0.02043062890631432
+      }
+    ],
+    "scientific_boundary": "The 11/34 joint count is descriptive: no joint KMeans-plus-loss null was pre-registered. P=0.043 applies only to the continuous canonical paired model-versus-null loss comparison. The real-geometry sensitivity is not displayed (P=0.98); the same-network KMeans fraction and observation-layout sensitivity gates were not met.",
+    "files": {
+      "png": "results/paper-ready-figure/fig4/figures/fig4-panelg.png",
+      "png_sha256": "363961c023f1cb26965a6f12c6cf417cac26b144acd955ce83872ff63901ca96",
+      "pdf": "results/paper-ready-figure/fig4/figures/fig4-panelg.pdf",
+      "pdf_sha256": "82f6a6aa25c54e739cdfe276ef949366a39e97ac6dba3354dff2c5ba1348cc84"
+    }
+  }
+}

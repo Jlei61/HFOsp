@@ -1,5 +1,7 @@
 # Paper-ready figure outputs
 
+当前 Figure 4 为三行 A–I 紧凑版（2026-10-09）；入口为 [版本说明](../../docs/current_figure4.md) 与 [机器指针](fig4/current_version.json)。旧 A–G 不再是当前布局；A 的机制重绘单独迭代。
+
 这里的顶层只保存当前主图组装包 `fig1/`–`fig5/`、正式补图包 `supp_fig1_*`–`supp_fig7_*`，
 以及投稿级补充视频文件。source、候选、诊断和历史模型包放入 `archive/`，不与正式稿件入口并列。
 
@@ -23,7 +25,7 @@
 | Fig1-B–F | `interictal_hfo_temporal_scaffold` | `LOCKED` | `fig1/figures/` |
 | Fig2-A–F | `interictal_spatial_scaffold` | `CANDIDATE` | `fig2/figures/` |
 | Fig3-A–F | `ictal_field_scaffold` | `LOCKED` | `fig3/figures/` |
-| Fig4-A–G | `data_driven_interictal_snn_fig4` | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `fig4/figures/` |
+| Fig4-A–I | `patient_geometry_prior_snn_compact_a_i` | `CURRENT_AUTHOR_DESIGNATED` | `fig4/figures/` |
 | Fig5-A–D | `data_driven_zm_transition_fig5` | `CANDIDATE` | `fig5/figures/` |
 Fig1-A 是从登记的 legacy supplementary TIFF 固定裁剪得到的代表性植入脑图；裁剪后的 source asset 随 producer 入库，不重新绘制科学内容。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
 `fig1-complete-layout`、`fig2-complete-layout` 和 `fig3-complete-layout`，仅完整排版带 panel 字母。

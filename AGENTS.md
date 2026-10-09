@@ -1,5 +1,11 @@
 > **2026-09-30 模型/结果路由**：分岔分析先读 `docs/topic4_model_versions.md` 和 `config/topic4_model_versions.json`。默认是20×20格、935群体的空间rate版；三区域六E/I群体版另存，不能混用。Figure 5当前入口为 `docs/current_figure5.md`。工作区清理状态见 `docs/workspace_status.md`。
 
+## 当前 Figure 4 入口
+
+- **当前 Fig4（用户草图重排，2026-10-09）**：先读[当前版本说明](docs/current_figure4.md)、`results/paper-ready-figure/fig4/current_version.json`及正式registry。当前为三行A–I，producer为`scripts/paper_figures/build_fig4_compact_ai.py`；A的zoom-in小框位于(-8.5,0) mm，虚线避开电极并连接两框；B/C/D/E/H/I坐标轴统一50×50 mm，相邻横向留白按含标签和色条的实际边界收紧，C/D约3.87 mm、G/H约5.20 mm，D/H与E/I逐列对齐，B/C整体边界与F/G组合对齐。B两端无横轴空白延伸，色条间距1.5 mm；紧凑行距保留，画布300×232 mm。A右侧机制图仍待补充。中排B/C/角度响应D/位置密度E，底排旧G/H/I/J改为F/G/H/I；旧E/F传播showcase移出。B保留原第6–16阶段194点并去除E/F标记；I保留红蓝25患者散点及右上Subject/Median图例。旧A–J整包归档于`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/`，不得用旧producer覆盖新版；本轮拼版待作者目视检查。
+- **Fig4当前数据版本**：C保留E1146一至四core、每组4次重复、共同前31个epoch的均值±样本标准差。新D为`angle_three_error_response_v1`，沿用旧D的13点方向响应；新E为`completed_position_density_standalone_v1`，保留83/413低J_joint前20%配置的位置密度。旧D版本`three_error_responses_density_v1`只作为归档来源；旧向外EE/核内EE扫描及showcase引用随本次草图简化移出，不能自动恢复。
+- **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panel_b/c/d/e/i`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
+
 # Agent Guide
 
 This repo is rebuilding the legacy Yuquan HFO pipeline into a maintainable codebase. Do not guess where figures or artifacts come from.

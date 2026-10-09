@@ -15,8 +15,16 @@
       "template_model": "Timing+Space with masked spatial views for direction-unavailable events",
       "fig2": {
         "canonical_root": "results/paper-ready-figure/fig2",
-        "updated_panels": ["b", "e", "f"],
-        "preserved_panels": ["a", "c", "d"],
+        "updated_panels": [
+          "b",
+          "e",
+          "f"
+        ],
+        "preserved_panels": [
+          "a",
+          "c",
+          "d"
+        ],
         "b": {
           "producer": "scripts/paper_figures/plot_interictal_spatial_information_gain.py",
           "analysis_root": "results/interictal_propagation_masked/spatial_information_gain_all_events",
@@ -75,8 +83,16 @@
       },
       "fig3": {
         "canonical_root": "results/paper-ready-figure/fig3",
-        "updated_panels": ["c", "d", "e", "f"],
-        "preserved_panels": ["a", "b"],
+        "updated_panels": [
+          "c",
+          "d",
+          "e",
+          "f"
+        ],
+        "preserved_panels": [
+          "a",
+          "b"
+        ],
         "c": {
           "producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
           "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
@@ -121,6 +137,16 @@
     "timing_only_template_fields": {
       "status": "historical",
       "allowed_as_default": false
+    }
+  },
+  "current_figures": {
+    "fig4": {
+      "pointer": "results/paper-ready-figure/fig4/current_version.json",
+      "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
+      "documentation": "docs/current_figure4.md",
+      "layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+      "producer": "scripts/paper_figures/build_fig4_compact_ai.py",
+      "fallback_to_historical_layout": false
     }
   }
 }
