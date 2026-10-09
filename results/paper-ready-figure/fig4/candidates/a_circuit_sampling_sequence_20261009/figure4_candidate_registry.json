@@ -1,8 +1,8 @@
 {
-  "status": "CURRENT_AUTHOR_DESIGNATED",
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
   "human_visual_acceptance": "PENDING",
-  "producer": "scripts/paper_figures/build_fig4_compact_ai.py",
-  "layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
+  "layout_version": "compact_ai_v4_a_circuit_sampling_sequence_v2",
   "updated_on": "2026-10-09",
   "panel_letters": [
     "A",
@@ -16,7 +16,7 @@
     "I"
   ],
   "titles": {
-    "A": "局部 E/I 回路与患者空间基底；右侧预留机制连接图",
+    "A": "原局部回路和空间网络、物理连接与采样合图、五触点传播序列",
     "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
     "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
     "D": "E→E角度的Mean rank／Order／Participation误差响应",
@@ -31,7 +31,7 @@
     232.0
   ],
   "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-  "base_published_complete_sha256": "703ea0ca497d98a893d8b82badd0329603dd220a311fbbf0aa061bd55c47d1df",
+  "base_published_complete_sha256": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
   "panel_mapping": {
     "A": "A",
     "B": "B",
@@ -50,8 +50,12 @@
     "D within-core EE response"
   ],
   "panel_a": {
-    "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
-    "artwork_scale": 1.23,
+    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+    "original_left_circuit_restored": true,
+    "first_two_components_restored": true,
+    "original_left_title_and_internal_labels_preserved": true,
+    "combined_third_component": true,
+    "formulas_and_lower_explanations_removed": true,
     "zoom_center_mm": [
       -8.5,
       0.0
@@ -60,24 +64,86 @@
       1.6754742547425474,
       1.3143631436314362
     ],
-    "nearest_contact_to_box_mm": 3.5203799692651128,
-    "old_contact_callout_removed": true,
-    "frozen_spatial_geometry_verified": true,
-    "zoom_metadata": "source/A_zoom_in.json",
-    "reserved_right_region_mm": [
-      180,
-      155,
-      100,
-      70
-    ],
-    "next_redraw": [
-      "show physical anisotropy direction",
-      "show possible core locations",
-      "add right-side physical connectivity mechanism"
-    ],
     "connector_minimum_contact_distance_mm": 3.0416473583089783,
     "connectors_clear_of_electrode_footprints": true,
-    "connectors_attached_to_both_frames": true
+    "actual_workpoint_kernel": {
+      "l_par": 0.5374011537017762,
+      "l_perp": 0.40305086527633205,
+      "theta_deg": -22.80538396505847,
+      "theta_rad": -0.3980290373717898,
+      "reference_theta_deg": -22.80538396505847,
+      "reference_ar": 2.0,
+      "perp_scale": 1.5,
+      "parallel_scale": 1.0,
+      "angle_offset_deg": 0.0,
+      "is_reference": false
+    },
+    "kernel_centres_E_coordinates_mm": [
+      [
+        14.616632461547852,
+        4.694113731384277
+      ]
+    ],
+    "enlarged_sampling_contact": "ICL3",
+    "physical_xy_equal_scale": true,
+    "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+    "readout": {
+      "type": "normalized Gaussian average of smoothed E spike density",
+      "sigma_mm": 0.25,
+      "bin_ms": 2.0,
+      "smooth_ms": 5.0,
+      "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+      "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+      "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+      "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale."
+    },
+    "sequence": {
+      "event": 10,
+      "same_event_as_F_MTA": true,
+      "workpoint": "xy_left_20",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "names": [
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "selection": "Use the already displayed F-panel MTA event 10 and contiguous ICL5 through ICL1 contacts; no new event search or fit.",
+      "absolute_window_ms": [
+        4342,
+        4422
+      ],
+      "peak_absolute_ms": [
+        4372.0,
+        4378.0,
+        4386.0,
+        4392.0,
+        4398.0
+      ],
+      "recruitment_absolute_ms": [
+        4361.0,
+        4367.0,
+        4373.0,
+        4379.0,
+        4385.0
+      ],
+      "no_artificial_time_shift": true,
+      "no_per_contact_amplitude_scaling": true,
+      "source_trajectory": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+      "exact_segment_of_F_arrays_verified": true
+    },
+    "readout_peak_times_relative_ms": [
+      30.0,
+      36.0,
+      44.0,
+      50.0,
+      56.0
+    ],
+    "readout_peaks_strictly_ordered": true,
+    "data_lineage": "First two components retain the accepted illustrative substrate. Third and fourth use the actual F-event workpoint geometry, kernel and traces."
   },
   "panel_b": {
     "version": "post_prior_stages_6_16_v1",
@@ -311,20 +377,13 @@
     "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
   },
   "checks": {
-    "A_local_circuit_source_pixels_unchanged": true,
-    "A_local_circuit_mm_per_source_pixel": 0.021,
-    "A_external_typography_pt": {
-      "title": 11,
-      "labels": 10,
-      "ticks": 9,
-      "legend": 8.8
-    },
-    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
-    "A_circuit_frame_vector_stroke_pt": 0.65,
-    "A_circuit_frame_source_crop_padding_px": 12,
     "A_revision": {
-      "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
-      "artwork_scale": 1.23,
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+      "original_left_circuit_restored": true,
+      "first_two_components_restored": true,
+      "original_left_title_and_internal_labels_preserved": true,
+      "combined_third_component": true,
+      "formulas_and_lower_explanations_removed": true,
       "zoom_center_mm": [
         -8.5,
         0.0
@@ -333,24 +392,86 @@
         1.6754742547425474,
         1.3143631436314362
       ],
-      "nearest_contact_to_box_mm": 3.5203799692651128,
-      "old_contact_callout_removed": true,
-      "frozen_spatial_geometry_verified": true,
-      "zoom_metadata": "source/A_zoom_in.json",
-      "reserved_right_region_mm": [
-        180,
-        155,
-        100,
-        70
-      ],
-      "next_redraw": [
-        "show physical anisotropy direction",
-        "show possible core locations",
-        "add right-side physical connectivity mechanism"
-      ],
       "connector_minimum_contact_distance_mm": 3.0416473583089783,
       "connectors_clear_of_electrode_footprints": true,
-      "connectors_attached_to_both_frames": true
+      "actual_workpoint_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -22.80538396505847,
+        "theta_rad": -0.3980290373717898,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 0.0,
+        "is_reference": false
+      },
+      "kernel_centres_E_coordinates_mm": [
+        [
+          14.616632461547852,
+          4.694113731384277
+        ]
+      ],
+      "enlarged_sampling_contact": "ICL3",
+      "physical_xy_equal_scale": true,
+      "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+      "readout": {
+        "type": "normalized Gaussian average of smoothed E spike density",
+        "sigma_mm": 0.25,
+        "bin_ms": 2.0,
+        "smooth_ms": 5.0,
+        "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+        "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+        "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+        "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale."
+      },
+      "sequence": {
+        "event": 10,
+        "same_event_as_F_MTA": true,
+        "workpoint": "xy_left_20",
+        "topology_seed": 2511,
+        "dynamics_seed": 847401,
+        "names": [
+          "ICL5",
+          "ICL4",
+          "ICL3",
+          "ICL2",
+          "ICL1"
+        ],
+        "selection": "Use the already displayed F-panel MTA event 10 and contiguous ICL5 through ICL1 contacts; no new event search or fit.",
+        "absolute_window_ms": [
+          4342,
+          4422
+        ],
+        "peak_absolute_ms": [
+          4372.0,
+          4378.0,
+          4386.0,
+          4392.0,
+          4398.0
+        ],
+        "recruitment_absolute_ms": [
+          4361.0,
+          4367.0,
+          4373.0,
+          4379.0,
+          4385.0
+        ],
+        "no_artificial_time_shift": true,
+        "no_per_contact_amplitude_scaling": true,
+        "source_trajectory": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+        "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+        "exact_segment_of_F_arrays_verified": true
+      },
+      "readout_peak_times_relative_ms": [
+        30.0,
+        36.0,
+        44.0,
+        50.0,
+        56.0
+      ],
+      "readout_peaks_strictly_ordered": true,
+      "data_lineage": "First two components retain the accepted illustrative substrate. Third and fourth use the actual F-event workpoint geometry, kernel and traces."
     },
     "B_workpoints": 194,
     "B_stages": [
@@ -586,7 +707,7 @@
         "A": [
           7.000000000000008,
           149.44890444444442,
-          156.22923249999997,
+          293.7859375,
           226.55898499999998
         ],
         "B": [
@@ -683,13 +804,12 @@
         0.03935016218537157,
         1.4210854715202004e-14
       ],
-      "compact_row_gaps_preserved": true
+      "compact_row_gaps_preserved": true,
+      "approved_v4_B_through_I_bounds_preserved": true,
+      "A_uses_previously_reserved_mechanism_space": true
     }
   },
   "source_files": {
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
-    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
     "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
     "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
     "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
@@ -707,52 +827,49 @@
   "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
   "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
   "outputs": {
-    "figures/fig4-panela.pdf": "a3fc6626612c1d1d719e84112e2a1b2e14ccfc8a22c0638b79be8d2b6f821e34",
-    "figures/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
-    "figures/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
-    "figures/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
-    "figures/fig4-complete-layout.svg": "91242091fe311198a0ff904d2bee4afbf88a0dc70a56dce06a68a20fa277197c",
-    "figures/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
-    "figures/fig4-complete-layout.png": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
+    "figures/fig4-panela.pdf": "7f06209413ec4de6f2af508a4267fe5830672fb544e6e1528240e3f482d03186",
+    "figures/fig4-panelf.svg": "3f40c79eed648e7b6e517d3ed4f7251a358cf80512a11c6ed26ad5cf0b42771b",
+    "figures/fig4-panelh.pdf": "e18aad23d3e4e3404e8336c68943600af665a359c9ccc8b800405b920440a1e2",
+    "figures/fig4-panelf.pdf": "797b64dc9087023272efc16ec57926c3239822b3867215e3be87e6c256529a29",
+    "figures/fig4-complete-layout.svg": "503d4c04f44b61c394a5812a9b680661f25d680ffb9d380ad0fb7c1f4dc11ec7",
+    "figures/fig4-panelg.pdf": "d0024718f4472341d12e4a73205cfd57ffebc05df053c6a6b642872f79ff114a",
+    "figures/fig4-complete-layout.png": "889e78be6148fcbf036f864c8f35c435e2c3563df50f945ee8e0798e8a59bab8",
     "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
     "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
-    "figures/fig4-panela.svg": "e3690b29f6dff6a3838a4e2ec91ca69f22f395a96f4e7ad129241478474dd191",
-    "figures/fig4-paneld.pdf": "e4bc79df071408c80096a81d972c84392bbecebb34fe81fc2af31d960b202595",
-    "figures/fig4-panelb.pdf": "82d11b25fe64eb6293832fd13ee11f946bf5f6e32726f2da0cea8079eae7fc57",
-    "figures/fig4-paneld.svg": "29d9f2c1a5ccbc792e9a6b6c3ee781db94718e2556625d29a8c67358f430a6b5",
-    "figures/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
-    "figures/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
-    "figures/fig4-panelb.svg": "aa78bb6195f3fd65e3cb8992d4e9ca9ef9a13b6310c6a432848423df5f1a78d4",
-    "figures/fig4-complete-layout-preview.png": "e91ef0a323453f9eaf9488477c256cce6474aa87c884cdbf97658b60f091c6c9",
-    "figures/fig4-complete-layout.pdf": "b1a6574c08ba5a7c863f951e0afd8a9ddd9f535b12f33e21d4a3d650fe69d223",
-    "figures/fig4-panelc.pdf": "b2aa7a9daabec70b0ba8a4060c3e7dc0dab1eef3006f3b09559dda8e7c85b178",
+    "figures/fig4-panela.svg": "471c63f9d4780764837a2934bda2bf6cdb46471f3009d95d24c6a11078cb2c51",
+    "figures/fig4-paneld.pdf": "586658ab5bd6bba6f228430a48089a5447433f14f87f9fc143f755f67a149438",
+    "figures/fig4-panelb.pdf": "9610147905fdc4d9837357416c7c75de267e722b0ac555be8f726c904498842e",
+    "figures/fig4-paneld.svg": "54c9d329ba2910a973989e2060fb5128b09654e5ccb4e93841d5f98ac78d2580",
+    "figures/fig4-panelh.svg": "1c0c64ba5f03059de6550a141980900e18d6291b1d3c3f2d8611807a1d16b22a",
+    "figures/fig4-panelg.svg": "bf78459b23bd4ac79bbed0dd1718aa83a5e880d1a952bbd88390c45a8f0dd139",
+    "figures/fig4-panelb.svg": "87e75b13a40cd2b25f9e09f64f661c1a2412c00520af3bb6efb3707928e97303",
+    "figures/fig4-complete-layout-preview.png": "8f331c468dd9c84a837875de06001c31eb4c260ee04d9371f32d4cc7fa8062f0",
+    "figures/fig4-complete-layout.pdf": "4f9a6c6b8428d7db75938671a8eced35c174bb162233d6db3fdb092f41ce84bc",
+    "figures/fig4-panelc.pdf": "d5739b04e036dc0655b7ca3900b0a41321d095325f568ae3c478873217f62a73",
     "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
-    "figures/fig4-panela.png": "5b14154d55fc73dc8e7d1d915357b49071c3003b7c4e30e3ac03c99b82a89d21",
+    "figures/fig4-panela.png": "cb3ead3ebde2d823779be35a5e364b1b38c58143fe8d4e9e8cd554b9f7b51b06",
     "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
-    "figures/fig4-panelc.svg": "747021382dda973c73840c9d0ad37dddc200e729cef89109dca37a2e3b1c8cf0",
+    "figures/fig4-panelc.svg": "cd5c7d8e624c5ef8237e7e36da47d90391dcb111fa9d58594e423c54c502f750",
     "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
-    "figures/fig4-panele.svg": "509295de8e35a4a6b9971abb065fd53a60ec4f0b7812a476f2f0399ac73bf498",
+    "figures/fig4-panele.svg": "f5f5fbd38c6c7826804f8d829718d4d69fadb5948fab2a3de47b8204fd17e73a",
     "figures/fig4-panelb.png": "d01f589b1718c232aecf194233f7c122efbe243a7a23e56babda45089f34a312",
     "figures/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
-    "figures/fig4-panele.pdf": "4f99e2bc211cd7445fee58dacac1391cc77a6ab4f29eba71b6f02756b7aec4e8",
-    "figures/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
-    "figures/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
+    "figures/fig4-panele.pdf": "35a735197ec0ddaf1353b8c1c1339fbdeb8dd46add15be79c6f7e55fc12a2879",
+    "figures/fig4-paneli.svg": "5a313a5af2dc319e4f5f029c0aca473b27250ab173c61f1ac1ceb0cee9630c14",
+    "figures/fig4-paneli.pdf": "1c6200b8c52c138d82445ff5e8f14efd0577d7575b2cb69db4a5b41548fe6172",
     "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
   },
-  "published_from": "results/paper-ready-figure/fig4/candidates/compact_ai_tighter_columns_20261009",
-  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4",
-  "pending_panel_a_revision": {
-    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_circuit_sampling_sequence_v2",
-    "package": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009",
-    "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-    "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009/figure4_candidate_registry.json",
-    "canonical_figure_replaced": false,
-    "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "first_two_A_components": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "third_component": "Physical E/I circuit and local sampling in a single enlarged plane; no formula or explanatory footer.",
-    "readout": "Five adjacent contacts of the same MTA event 10 already shown in F; actual peak sequence without temporal shifts."
-  }
+  "base_layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "canonical_figure_replaced": false,
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "original_first_two_components_pixel_identical": true
 }

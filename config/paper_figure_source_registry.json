@@ -149,13 +149,17 @@
       "fallback_to_historical_layout": false,
       "pending_panel_a_revision": {
         "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-        "package": "results/paper-ready-figure/fig4/candidates/a_spatial_readout_20261009",
+        "version": "a_circuit_sampling_sequence_v2",
+        "package": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009",
         "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
         "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-        "preview": "results/paper-ready-figure/fig4/candidates/a_spatial_readout_20261009/figures/fig4-complete-layout-preview.png",
-        "registry": "results/paper-ready-figure/fig4/candidates/a_spatial_readout_20261009/figure4_candidate_registry.json",
+        "preview": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009/figures/fig4-complete-layout-preview.png",
+        "registry": "results/paper-ready-figure/fig4/candidates/a_circuit_sampling_sequence_20261009/figure4_candidate_registry.json",
         "canonical_figure_replaced": false,
-        "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4"
+        "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
+        "first_two_A_components": "PIXEL_IDENTICAL_TO_CURRENT_V4",
+        "third_component": "Physical E/I circuit and local sampling in a single enlarged plane; no formula or explanatory footer.",
+        "readout": "Five adjacent contacts of the same MTA event 10 already shown in F; actual peak sequence without temporal shifts."
       }
     }
   }

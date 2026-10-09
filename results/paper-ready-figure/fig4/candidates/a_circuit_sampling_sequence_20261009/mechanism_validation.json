@@ -1,0 +1,107 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "original_left_circuit_restored": true,
+  "first_two_components_restored": true,
+  "original_left_title_and_internal_labels_preserved": true,
+  "combined_third_component": true,
+  "formulas_and_lower_explanations_removed": true,
+  "zoom_center_mm": [
+    -8.5,
+    0.0
+  ],
+  "zoom_field_of_view_mm": [
+    1.6754742547425474,
+    1.3143631436314362
+  ],
+  "connector_minimum_contact_distance_mm": 3.0416473583089783,
+  "connectors_clear_of_electrode_footprints": true,
+  "actual_workpoint_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  },
+  "kernel_centres_E_coordinates_mm": [
+    [
+      14.616632461547852,
+      4.694113731384277
+    ]
+  ],
+  "enlarged_sampling_contact": "ICL3",
+  "physical_xy_equal_scale": true,
+  "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+  "readout": {
+    "type": "normalized Gaussian average of smoothed E spike density",
+    "sigma_mm": 0.25,
+    "bin_ms": 2.0,
+    "smooth_ms": 5.0,
+    "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+    "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+    "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+    "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale."
+  },
+  "sequence": {
+    "event": 10,
+    "same_event_as_F_MTA": true,
+    "workpoint": "xy_left_20",
+    "topology_seed": 2511,
+    "dynamics_seed": 847401,
+    "names": [
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "selection": "Use the already displayed F-panel MTA event 10 and contiguous ICL5 through ICL1 contacts; no new event search or fit.",
+    "absolute_window_ms": [
+      4342,
+      4422
+    ],
+    "peak_absolute_ms": [
+      4372.0,
+      4378.0,
+      4386.0,
+      4392.0,
+      4398.0
+    ],
+    "recruitment_absolute_ms": [
+      4361.0,
+      4367.0,
+      4373.0,
+      4379.0,
+      4385.0
+    ],
+    "no_artificial_time_shift": true,
+    "no_per_contact_amplitude_scaling": true,
+    "source_trajectory": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+    "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "exact_segment_of_F_arrays_verified": true
+  },
+  "readout_peak_times_relative_ms": [
+    30.0,
+    36.0,
+    44.0,
+    50.0,
+    56.0
+  ],
+  "readout_peaks_strictly_ordered": true,
+  "data_lineage": "First two components retain the accepted illustrative substrate. Third and fourth use the actual F-event workpoint geometry, kernel and traces.",
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "canonical_output_hashes_unchanged": true
+}
