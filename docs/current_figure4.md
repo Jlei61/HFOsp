@@ -32,3 +32,6 @@ A小框中心为(-8.5,0) mm，保持原1.675×1.314 mm视野；小框至最近�
 上一版完整A–J包及来源保留在[归档](../results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/README.md)，旧版说明见[历史文本](../results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/current_figure4_before_relayout.md)。早期单面板修改历史均不覆盖本次A–I编号与producer。
 
 本次前一版A–I整包保留在[横向间距收紧前归档](../results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4/README.md)；旧局部回路图及B–I科学数值保持。
+
+
+**2026-10-09 A机制重绘候选**：已生成[独立A](../results/paper-ready-figure/fig4/candidates/a_spatial_readout_20261009/figures/fig4-panela.png)和[完整拼版](../results/paper-ready-figure/fig4/candidates/a_spatial_readout_20261009/figures/fig4-complete-layout-preview.png)。局部与二维空间中的椭圆长轴采用相同物理角度；右侧显示邻近E活动的高斯加权采样与复用F的三通道读出。B–I独立PNG与当前版逐像素一致；该A候选尚未替换正式图，待作者目视检查。当前模型输出是发放密度代理，未计算电磁场或电位前向模型。候选producer为`build_fig4_a_mechanism_candidate.py`；独立A可用`draw_fig4_a_spatial_readout.py`及包内冻结数组重画。
