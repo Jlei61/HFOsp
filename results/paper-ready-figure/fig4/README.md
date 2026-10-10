@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v7（2026-10-10）：[预览](candidates/a_matched_contacts_20261010/figures/fig4-complete-layout-preview.png)。Local sampling标出ICL8、ICL6、ICL4，与下方MTA/MTB三行波形一一对应；绿色框和右侧视野同步扩至以ICL6为中心的8×4 mm，保留实际直杆间距及中间触点。移除通向SEEG readout的小绿色箭头，中央sheet保持v6中心、宽高各放大6%至70.64 mm。左侧回路和两组120 ms burst保持v6，B–I逐像素一致；新A待作者目视检查，正式布局仍为v4。
+A机制重绘候选v8（2026-10-10）：[预览](candidates/a_consecutive_contacts_20261010/figures/fig4-complete-layout-preview.png)。Local sampling恢复3.8×1.9 mm小视野，框内只画三个连续触点，上下统一标SL3、SL4、SL5（显示标签分别对应源通道ICL3、ICL4、ICL5）。移除绿色采样范围圈及光晕，局部circuits和神经元恢复原显示大小；小绿色箭头继续移除。左侧回路与B–I保持；新A待作者目视检查，正式布局仍为v4。
