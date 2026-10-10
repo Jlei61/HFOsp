@@ -1,0 +1,22 @@
+{
+  "A": {
+    "producer": "build_fig1a_recording_chain.py + build_fig1_y1_local_rank.py + revise_fig1_a_left_label_clear_lead.py",
+    "data": "data/a",
+    "meaning": "Y1 brain projection, 12 A-shaft bipolar waveforms, A7/A9 colors; 80–250 Hz; 3 x 0.16 s"
+  },
+  "B": {
+    "producer": "restore_fig1_legacy_spectrum.py + revise_fig1_b_compact_third_event.py + revise_fig1_b_visual_alignment.py",
+    "data": "data/b",
+    "meaning": "178 real HFO snippets; original full-window S^3 centroids for FA134AX6/1559,1562 and FA134AXF/1494; +/-150 ms display"
+  },
+  "C/E": {
+    "producer": "build_fig1_y1_local_rank.py",
+    "data": "data/ce",
+    "meaning": "18 display channels, 18,190 events; frozen TA=13,160 and TB=5,030; display ranks 1–18, nonparticipants blank; original 26-channel arrays retained"
+  },
+  "D/F": {
+    "producer": "plot_fig1_interictal_hfo_temporal_scaffold.py + build_fig1_readability_review.py",
+    "data": "data/df",
+    "meaning": "20 Yuquan + 20 Epilepsiae; masked MI vs null and overall/within-template paired statistics unchanged"
+  }
+}

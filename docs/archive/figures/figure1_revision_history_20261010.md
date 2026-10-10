@@ -1,0 +1,28 @@
+# Figure 1 定稿前修订登记
+
+旧路径对应 results/paper-ready-figure/archive/2026-10-10_fig1_finalization/fig1/ 中同层级文件。
+
+> **当前Fig1：收紧C/D与E/F行距（2026-10-10）。** [完整图和独立面板](../results/paper-ready-figure/fig1/revisions/y1_tighter_lower_row_20261010/figures/README.md)由`revise_fig1_lower_row_gap.py`生成，入口为`fig1/current_revision.json`。E/F及其面板字母整体上移6.35 mm，画布等量缩短至495.3×397.51 mm，保留底部留白；图内尺寸、字号、色条和横向对齐均不变。PNG中E/F平移前后逐像素一致，固定内容逐像素一致，A–F独立PNG/PDF逐字节保持；PNG及PDF已目视自查，无文字或图例交叠，新行距待作者目视检查。
+
+> **Fig1上一版：A的Y1左对齐并避让引线（2026-10-10）。** [完整图和独立面板](../results/paper-ready-figure/fig1/revisions/y1_a_left_label_clear_lead_20261010/figures/README.md)由`revise_fig1_a_left_label_clear_lead.py`生成，入口为`fig1/current_revision.json`。A的Y1贴齐波形轴左边界，保留既有基线和25 pt粗体；电极帽子上方的示意引线收短，末端与标题横向相隔15.87 pt，连接端及原切线保留。脑模型、电极杆、帽子、触点和真实波形逐像素保持，80–250 Hz仍右对齐；B–F独立PNG/PDF逐字节一致。完整PNG与PDF已目视自查，A的新标签及引线待作者目视检查。
+
+> **Fig1上一版：右侧Y1左对齐、图例及标题间距修订（2026-10-10）。** [完整图和独立面板](../results/paper-ready-figure/fig1/revisions/y1_legend_label_spacing_20261010/figures/README.md)由`revise_fig1_legend_and_label_spacing.py`生成，入口为`fig1/current_revision.json`。B右侧Y1贴齐第一列谱图左边界，保持已认可的低位基线；C的Day/Night标记改为24×5 pt扁长矩形，删除rank分布上方Peak-scaled标题，保留原分布数值及缩放定义。D的Orig Pats和Mean Pat各外移6 pt，文字间隔增加至17.72 pt；原数字、箭头及40人统计保持。A/E/F独立文件逐字节一致，整图标注区域外逐像素保持；PNG/PDF已目视自查，新标注待作者目视检查。关于D的来源，[追溯说明](../results/paper-ready-figure/fig1/revisions/y1_legend_label_spacing_20261010/D_heading_history.md)确认先前放大字号时曾将原TIFF示意重排为矢量图，标题留白不足由该次重排引入。
+
+> **Fig1已认可的上一版：顶部标注下移并右对齐（2026-10-10）。** [完整图和独立面板](../results/paper-ready-figure/fig1/revisions/y1_lower_header_row_20261010/figures/README.md)由`revise_fig1_lower_header_row.py`生成，现由上方局部标注修订接续。A/B的Y1标题下移至既有1e-4的15.1417英寸基线；HFO n=178与1e-4同为17.5 pt，在波形轴右端对齐，两者文字间保留6.53 pt间距。80–250 Hz移至A波形轴右上方、同基线右对齐。仅改顶部文字，绘图区、波形、谱图及全部统计保持；C/D/E/F独立PNG/PDF逐字节一致。作者已认可该标注行，原版保留。
+
+> **Fig1上一版：作者认可布局后的患者标题缩写（2026-10-10）。** [完整图和各面板](../results/paper-ready-figure/fig1/revisions/y1_final_short_labels_20261010/figures/README.md)由`revise_fig1_short_patient_labels.py`生成，现由上方顶部标注调整接续。作者已认可下方B视觉对齐版，本次仅将A/B/C及完整窗口核对图中的患者身份从Yuquan Y1缩写为Y1，C保留n=18,190；D/F的Yuquan队列名称保留。标题区域外逐像素保持，D/E/F独立文件逐字节一致；全部旧版本保留。
+
+> **Fig1已获作者认可的视觉对齐布局（2026-10-10，标题由上方最终版接续）：** [完整图及独立面板](../results/paper-ready-figure/fig1/candidates/y1_b_visual_alignment_20261010/figures/README.md)由`revise_fig1_b_visual_alignment.py`生成，接续下方第三例修订版。B左右标题共基线，两个Time (s)在导出PNG中实际文字占用行完全相同；左侧三轴总高度与右侧三列TFR等高。B三列总横轴与D/F主轴共左右边界及3.94英寸宽度，色条单独留位；F主轴上下边界与E热图一致。保留当前FA134AX6/1559、1562和FA134AXF/1494三个事件及完整事件S³方法；A/C/E独立文件逐字节保持，B左侧及整图修改区外逐像素保持，D/F统计不变。PNG与PDF均已目视自查，作者已于本轮认可布局；最后仅缩写患者标题，见上方当前版。
+
+> **Fig1B布局与第三例修订候选（2026-10-10）：** [独立B及完整拼版](../results/paper-ready-figure/fig1/candidates/y1_b_compact_third_event_20261010/figures/README.md)由`revise_fig1_b_compact_third_event.py`生成，现由上方视觉对齐候选接续。沿用最新18通道整图，B右侧左移0.44英寸、三个事件轴各由1.28加宽至1.44英寸，标题基线及统一±150 ms时间轴保留。前两例仍为FA134AX6/1559、1562；第三例由双峰的FA134AX6/1574换为同患者同A3–A9杆的FA134AXF/1494，完整事件S³质心跨度41.03 ms。原算法不变，与原lagPatRaw对齐；A/C/D/E/F及B左侧保持，完整PNG/PDF修改仅限B右侧。此版按可恢复的紧凑布局要求及更清楚的第三例制作，仍待作者核对其具体布局要求，未替换已验收状态。
+
+> **Fig1谱图方法修复来源（2026-10-10）：已恢复论文Methods的完整事件S³质心。** 该方法修复的producer为`restore_fig1_legacy_spectrum.py`，最新显示版本见上方[current_revision.json](../results/paper-ready-figure/fig1/current_revision.json)；[26通道当前布局](../results/paper-ready-figure/fig1/revisions/y1_legacy_spectrum_restored_20261010/figures/README.md)和[18通道最新布局](../results/paper-ready-figure/fig1/revisions/y1_legacy_spectrum_restored_20261010/latest_layout/figures/README.md)均已接入同一修复。B右侧按原200 s段处理EDF，800 Hz、50 ms Hamming/40 ms重叠、先Gaussian σ=1.5平滑完整谱再取50<f<300 Hz；完整打包事件按S³/ΣS³求时频质心，显示S/max(S)。撤回70%峰团/连通区、边缘排除及短窗独立重算；当前消费入口已改用恢复数据，缺合同不回退旧算法。Y1同一A杆A3–A9选用FA134AX6的1559/1562/1574事件，恢复时间差与原lagPatRaw最大偏差3.6e-12 ms。三窗统一以原packed-window中心为0、显示±150 ms，另附完整500 ms核对图。B左侧178段HFO谱与其老脚本数值完全一致；两种归一化各守原定义。A采用作者已接受A7/A9 v9；各布局A/C/D/E/F独立文件逐字节保持，完整PNG/PDF仅B右侧改变。26通道原rank与18通道派生显示rank身份不合并，18,190事件及13,160/5,030分组、40人统计不变。方法审计见[核对说明](../results/paper-ready-figure/fig1/revisions/y1_legacy_spectrum_restored_20261010/method_consistency_audit.md)：Methods将滤波统称FIR的一句仍需区分检测与实际IIR质心支路；本次未擅改正文。A验收状态保留，完整新版待作者目视检查。
+
+> **Fig1最新18通道布局的来源（2026-10-10，谱图修复版见上方）：** [C/E同步重排的1–18名与放大分布](../results/paper-ready-figure/fig1/candidates/y1_local_rank_peak_profiles_20261010/figures/README.md)由`build_fig1_y1_local_rank.py`生成。按作者新反馈，C/E不再沿用完整26通道的0–25显示标度：在既定18个通道中，逐事件仅对参与通道按原先后关系重排，显示为1至该事件的参与通道数（实际5–18），未参与单元保持空白。此派生操作使用`mask_phantom_ranks(..., normalize=False)+1`，只用于显示；全部18,190事件、冻结TA/TB标签、原始lagPat及D/F队列统计不变。C/E热图、色条、C分布及E的均值±总体标准差共用这一套显示rank。C分布不平滑，各行仅在绘图时按自身最大频数缩放至80%行高，深色点标出全部最大频数bin；峰高不可跨通道比较。A/B/D/F独立PNG逐像素保持上一版，18通道顺序、热图宽高比及标题基线保留；正式指针未替换。
+
+> **Fig1 上一轮宽高比候选（2026-10-10，保留供追溯）：** [加长压扁的C/E与统一A/B副标题](../results/paper-ready-figure/fig1/candidates/y1_wide_heatmaps_aligned_titles_20261010/figures/README.md)由`build_fig1_y1_wide_heatmaps.py`生成。该版仅减显示行，保留原0–25 rank，现由上方派生显示rank修订接续。C/E高度从3.70降至3.30英寸，热图向右占用原留白，含色条的右界从10.50移至11.30英寸；rank轴及B左列数据轴位置和宽度保留。通道字号仍为15 pt。A的Yuquan Y1、B的HFO n = 178和Yuquan Y1共用15.52英寸文字基线，80–250 Hz移至A通道标签上方并避开电极弯线。D/F原位置与独立PNG像素保持。
+
+> **Fig1 上一轮18通道候选（2026-10-10，保留供追溯）：** [18通道显示与放大字号版](../results/paper-ready-figure/fig1/candidates/y1_display18_large_type_20261010/figures/README.md)由`build_fig1_y1_display_subset.py`生成。C/E仅在可视化中隐藏8个通道：整体参与率低于65%，或参与率低于75%且TA/TB的参与事件平均rank均超过原标度60%。保留18行、全部18,190事件、冻结TA/TB标签及原0–25 rank数值；未改写原始lagPat、重新聚类或在18通道内重新排名。B左侧三个HFO数据轴与C/E rank数据轴严格同左边界、同宽；统一放大字、刻度和图例，收紧A/C/E行距。A保留已接受脑朝向、电极和引线及原波形样本，D/F保留原40人统计。该版基础上继续上述宽高比与副标题调整。
+
+> **Fig1 上一轮三列版与全患者图册（2026-10-10，保留供追溯）：** [整图与全20位Yuquan患者C/E图册](../results/paper-ready-figure/fig1/candidates/three_column_yuquan_review_20261010/figures/README.md)由`build_fig1_three_column_review.py`生成。包含全部20位Yuquan患者，包括K>2病例；原数据及图册保留。作者比较后决定继续使用Y1，上述新候选接续版式修订，不再重新选择患者。
+

@@ -1,0 +1,28 @@
+{
+  "status": "CANDIDATE_FOR_AUTHOR_SELECTION",
+  "human_visual_acceptance": "PENDING",
+  "formal_current_figure_replaced": false,
+  "n_patients": 20,
+  "all_events": true,
+  "all_channels": true,
+  "refit_clusters": false,
+  "mean_rank_bands": "population SD, not SEM",
+  "original_outputs_unchanged": true,
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_yuquan_patient_review.py",
+  "producer_sha256": "c20a5bc31ff66398318dc187cc03bee2062d09d0f57e00e629effd45000f1918",
+  "shared_renderer_sha256": "26eb493b0fbaedaea97f31571506db8cbba26303c32b8ee63c16790417794cf0",
+  "review_priority": [
+    "Y16",
+    "Y2",
+    "Y1",
+    "Y18",
+    "Y12"
+  ],
+  "statistical_contract": {
+    "overall_tau": "existing mean pairwise Kendall rank concordance across valid events within a patient",
+    "within_tau": "same readout within each frozen cluster; event pairs, not independent patients",
+    "channel_sd": "per-channel population SD over participating events, divided by n_channels-1; median across channels",
+    "comparison": "descriptive patient-exemplar comparison only; no cohort inference",
+    "caution": "rank ranges, participation and mode mixtures differ among patients"
+  }
+}

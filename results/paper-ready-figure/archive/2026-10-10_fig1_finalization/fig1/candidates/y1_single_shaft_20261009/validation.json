@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "patient": "Y1",
+  "n_channels": 26,
+  "n_events": 18190,
+  "cluster_counts": [
+    13160,
+    5030
+  ],
+  "same_events_and_channel_order": true,
+  "channel_labels_do_not_overlap": true,
+  "label_checks": {
+    "c": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "e": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "complete": {
+      "heatmaps_checked": 2,
+      "minimum_label_gap_px": 1.9230769230769056
+    }
+  },
+  "row_alignment": {
+    "CD": {
+      "baseline_difference_mm": 0.0,
+      "group_top_difference_mm": 3.8915537459160985e-14,
+      "group_height_mm": 78.73999999999997,
+      "mi_axis_size_inches": [
+        3.3,
+        2.16
+      ],
+      "meaning": "Permutation schematic plus MI chart share the height of the C heatmap"
+    },
+    "EF": {
+      "baseline_difference_mm": 0.0,
+      "height_difference_mm": 0.0,
+      "data_axis_height_mm": 78.73999999999998
+    }
+  },
+  "latest_panel_a_exact_copy": true,
+  "panel_b_labels_restored": true,
+  "all_exemplar_panels_use_y1": true,
+  "panel_b_all_displayed_channels_participate": true,
+  "panel_b_all_markers_within_zoom": true,
+  "cohort_statistics_unchanged": true,
+  "old_canonical_assets_preserved": true,
+  "human_visual_acceptance": "PENDING",
+  "cross_revision_checks": {
+    "c": true,
+    "d": true,
+    "e": true,
+    "f": true,
+    "C_F_complete_figure_pixel_identical": true,
+    "B1_complete_figure_pixel_identical": true,
+    "A_exact_latest_Y1": true,
+    "same_Y1_A_shaft": true,
+    "centroids_valid": true,
+    "centroid_count": 21,
+    "minimum_centroid_spectrum_support": 0.8735325043340021,
+    "no_per_channel_time_shifts": true,
+    "C_E_events": 18190,
+    "C_E_cluster_counts": [
+      13160,
+      5030
+    ]
+  },
+  "PNG_and_PDF_visual_review": "Both inspected by agent; awaiting author review"
+}

@@ -1,0 +1,849 @@
+{
+  "status": "AUTHOR_SELECTED_Y1_SINGLE_SHAFT_PENDING_VISUAL_REVIEW",
+  "selection_date": "2026-10-09",
+  "patient_selection": "Y1 explicitly selected by author for A, B, C and E; D/F remain cohort statistics",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_y1_selection.py",
+  "source_record": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangkexuan.json",
+  "input_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_y1_selection.py": "5a0a73bed818538d7ad281f3567de9e023952b5e1efeaeeeae554e688ce4d83a",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_readability_review.py": "26eb493b0fbaedaea97f31571506db8cbba26303c32b8ee63c16790417794cf0",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangkexuan.json": "423ea1fa43f0c15c17cd87e5fa58c198c8cc87d897a5067475b765d63f1051af",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/readability_review_20261009/metadata.json": "f1625999f319b7184798e9c6b4a30f2c8f3f58ef32c12bfd1efa06924a43d6ce",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/panel_a_snapshot/figures/fig1-panela.png": "8a6100cda3438944134e75ab5592ec97027fd59f471258979cbdaf8e0cc12beb",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/panel_a_snapshot/metadata.json": "28b736a49163726b37f56f3e625de9baca92e04c7b4500e8f2534a996afb2ebb",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/selected_signals.npz": "6f4e323e20323a76a5d464d523457c586d29292a9ceef15f139cc4380f7343b6",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/selection.json": "9bbce438d84fc308d7529d8f5cf6a1473c115013a57a3351945348db81501734",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/select_fig1_y1_shaft_events.py": "3a7bf00d5766d7f6068766a0d5fab68d6e809a621d5a64e63bbf5047f6e44143",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/fig1_spectrogram_utils.py": "406de38185531bb36ac3f3f5bf8a370ef6b8fb62175c9aae0c87d5c5b4d90122",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb1_metadata.json": "f25788d2b5e4c74e2e66ebe8ecadae3d7beb694cf8966a693692ae472470c681"
+  },
+  "patient": "Y1",
+  "n_channels": 26,
+  "n_events": 18190,
+  "cluster_counts": [
+    13160,
+    5030
+  ],
+  "panels": {
+    "c": {
+      "patient": "Yuquan Y1",
+      "n_events": 18190,
+      "all_valid_events_displayed": true,
+      "channel_order": [
+        "E1",
+        "E2",
+        "F1",
+        "F2",
+        "F3",
+        "E4",
+        "C1",
+        "A2",
+        "D14",
+        "A3",
+        "A4",
+        "A5",
+        "B10",
+        "B2",
+        "A11",
+        "B11",
+        "B12",
+        "A9",
+        "A8",
+        "B1",
+        "A10",
+        "A7",
+        "A6",
+        "B9",
+        "B7",
+        "B6"
+      ],
+      "masked": true,
+      "cluster_counts": [
+        13160,
+        5030
+      ],
+      "profile_band": "mean +/- population SD of participating-event ranks"
+    },
+    "e": {
+      "patient": "Yuquan Y1",
+      "n_events": 18190,
+      "all_valid_events_displayed": true,
+      "channel_order": [
+        "E1",
+        "E2",
+        "F1",
+        "F2",
+        "F3",
+        "E4",
+        "C1",
+        "A2",
+        "D14",
+        "A3",
+        "A4",
+        "A5",
+        "B10",
+        "B2",
+        "A11",
+        "B11",
+        "B12",
+        "A9",
+        "A8",
+        "B1",
+        "A10",
+        "A7",
+        "A6",
+        "B9",
+        "B7",
+        "B6"
+      ],
+      "masked": true,
+      "cluster_counts": [
+        13160,
+        5030
+      ],
+      "profile_band": "mean +/- population SD of participating-event ranks"
+    }
+  },
+  "panel_d": {
+    "statistics": {
+      "yuquan": {
+        "n": 20,
+        "n_significant": 20,
+        "data_median": 0.18301425643076696,
+        "null_median": 5.5666442230071815e-05,
+        "p_value_mannwhitney_greater": 3.397807564086679e-08,
+        "all_mi_records_masked": true
+      },
+      "epilepsiae": {
+        "n": 20,
+        "n_significant": 20,
+        "data_median": 0.26201202560976666,
+        "null_median": 5.904675455609148e-05,
+        "p_value_mannwhitney_greater": 3.397807564086679e-08,
+        "all_mi_records_masked": true
+      }
+    },
+    "null_min": -0.000650968782522525,
+    "null_max": 0.000993703266430539,
+    "null_points": 40,
+    "null_points_shifted": false,
+    "null_glyphs_clipped": false,
+    "null_color": "#343434",
+    "zero_origin_preserved": true
+  },
+  "panel_f": {
+    "n": 40,
+    "median_uplift": 0.1977050153113532,
+    "median_matching_index_uplift": 0.1977050153113532,
+    "n_above_diagonal": 40,
+    "display_labels": [
+      "Overall MI",
+      "Within-template MI"
+    ],
+    "underlying_fields": [
+      "adaptive_cluster.overall_tau",
+      "adaptive_cluster.within_cluster_tau_mean"
+    ],
+    "gray_below_diagonal_region": true,
+    "gray_summary_text_removed": true,
+    "paired_distribution_inset": {
+      "n_paired": 40,
+      "single_template_mean": 0.11371868185318075,
+      "single_template_median": 0.08445096354736137,
+      "multi_cluster_mean": 0.34683028284360334,
+      "multi_cluster_median": 0.2913253661099341,
+      "mean_delta": 0.23311160099042255,
+      "median_delta": 0.1977050153113532,
+      "n_improved": 40,
+      "wilcoxon_two_sided_statistic": 0.0,
+      "wilcoxon_two_sided_p": 1.8189894035458565e-12,
+      "significance_label": "***",
+      "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+      "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+      "layout_bounds_axes_fraction": [
+        0.68,
+        0.13,
+        0.28,
+        0.36
+      ],
+      "layout_aspect": "narrow portrait inset, not square",
+      "ylabel_fontsize_points": 9.0,
+      "tick_label_fontsize_points": 8.0,
+      "x_tick_labels": [
+        "Single",
+        "Multi"
+      ],
+      "x_tick_label_meanings": {
+        "Single": "single-template MI",
+        "Multi": "multi-cluster MI"
+      },
+      "x_tick_labels_single_line": true
+    },
+    "axis_limits_start_at_zero": true,
+    "dataset_legend": true,
+    "dataset_legend_frame": {
+      "visible": true,
+      "facecolor": "white",
+      "edgecolor": "0.55",
+      "linewidth": 0.8,
+      "producer_fontsize_points": 7.5,
+      "rendered_fontsize_points": 7.5,
+      "marker_size_points": 5.0
+    }
+  },
+  "all_events_preserved": true,
+  "frozen_labels_preserved": true,
+  "template_uncertainty": "mean +/- population SD; unchanged",
+  "channel_label_checks": {
+    "c": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "e": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "complete": {
+      "heatmaps_checked": 2,
+      "minimum_label_gap_px": 1.9230769230769056
+    }
+  },
+  "figure_size_inches": [
+    16,
+    13.8
+  ],
+  "row_alignment": {
+    "CD": {
+      "baseline_difference_mm": 0.0,
+      "group_top_difference_mm": 3.8915537459160985e-14,
+      "group_height_mm": 78.73999999999997,
+      "mi_axis_size_inches": [
+        3.3,
+        2.16
+      ],
+      "meaning": "Permutation schematic plus MI chart share the height of the C heatmap"
+    },
+    "EF": {
+      "baseline_difference_mm": 0.0,
+      "height_difference_mm": 0.0,
+      "data_axis_height_mm": 78.73999999999998
+    }
+  },
+  "panel_a": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/panel_a_snapshot/figures/fig1-panela",
+    "version": "fig1a_y1_recording_chain_v6",
+    "copied_without_changes": true
+  },
+  "panel_b": {
+    "selection": {
+      "patient": "Y1",
+      "subject": "zhangkexuan",
+      "shaft": "A",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "bipolar_channels": [
+        "A3-A4",
+        "A4-A5",
+        "A5-A6",
+        "A6-A7",
+        "A7-A8",
+        "A8-A9",
+        "A9-A10"
+      ],
+      "events": [
+        {
+          "record": "FA134AX6",
+          "event_index": 1562,
+          "shaft": "A",
+          "channels": [
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7",
+            "A8",
+            "A9"
+          ],
+          "span_ms": 60.60191756110589,
+          "rho": 1.0,
+          "window": [
+            5434.615,
+            5435.115
+          ],
+          "score": 424.21342292774125,
+          "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_lagPat.npz",
+          "crop_center_sec": 5434.860254107996,
+          "crop_sample_bounds": [
+            10869401,
+            10870041
+          ],
+          "sample_rate_in": 2000.0000000000002,
+          "display_centroid_ms": [
+            -27.38142151413381,
+            -19.870305616777745,
+            -3.394251163517242,
+            10.389577204911598,
+            17.08734433661818,
+            20.29029241923755,
+            28.664316103009234
+          ],
+          "display_span_ms": 56.04573761714305,
+          "display_rho": 1.0,
+          "min_peak_to_median_abs": 12.283593511494576,
+          "centroid_audit_pass": true,
+          "eligible_for_display": true,
+          "display_score": 56.04573761714305,
+          "cache_key": "FA134AX6_1562_A3"
+        },
+        {
+          "record": "FA134AXF",
+          "event_index": 1475,
+          "shaft": "A",
+          "channels": [
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7",
+            "A8",
+            "A9"
+          ],
+          "span_ms": 66.91732722750609,
+          "rho": 0.9642857142857143,
+          "window": [
+            5405.199,
+            5405.699
+          ],
+          "score": 451.6919587856662,
+          "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXF_lagPat.npz",
+          "crop_center_sec": 5405.434077667993,
+          "crop_sample_bounds": [
+            10810548,
+            10811188
+          ],
+          "sample_rate_in": 2000.0000000000002,
+          "display_centroid_ms": [
+            -26.52656318492566,
+            -5.032975329463368,
+            1.1830733880779654,
+            15.027408129366398,
+            18.104472035294584,
+            28.13126168965116,
+            26.932071446720023
+          ],
+          "display_span_ms": 54.65782487457682,
+          "display_rho": 0.9642857142857145,
+          "min_peak_to_median_abs": 13.202315388952863,
+          "centroid_audit_pass": true,
+          "eligible_for_display": true,
+          "display_score": 52.705759700484805,
+          "cache_key": "FA134AXF_1475_A3"
+        },
+        {
+          "record": "FA134AXJ",
+          "event_index": 292,
+          "shaft": "A",
+          "channels": [
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7",
+            "A8",
+            "A9"
+          ],
+          "span_ms": 73.30874441488433,
+          "rho": 0.9642857142857143,
+          "window": [
+            1762.8629999999998,
+            1763.3629999999998
+          ],
+          "score": 494.83402480046925,
+          "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXJ_lagPat.npz",
+          "crop_center_sec": 1763.1018156788512,
+          "crop_sample_bounds": [
+            3525884,
+            3526524
+          ],
+          "sample_rate_in": 2000.0000000000002,
+          "display_centroid_ms": [
+            -12.053724340267385,
+            -25.18456906753824,
+            -8.281066691825407,
+            21.373379831876427,
+            22.0079066795186,
+            27.045286524021744,
+            25.225655937669316
+          ],
+          "display_span_ms": 52.22985559155999,
+          "display_rho": 0.9285714285714288,
+          "min_peak_to_median_abs": 8.328696154730764,
+          "centroid_audit_pass": true,
+          "eligible_for_display": true,
+          "display_score": 48.49915162073429,
+          "cache_key": "FA134AXJ_292_A3"
+        }
+      ],
+      "method": "Participation-masked contiguous montage; real-EDF spectrogram screening; common event recentering only",
+      "spectrum_rule": "Unchanged spectrum kernel applied independently to each discontinuous excerpt; no synthetic-join power in normalization",
+      "selection_scope": "Three frozen illustrative examples reproduced after the exploratory screen",
+      "evaluated_candidates": 3,
+      "eligible_candidates": 3,
+      "centroid_audit": {
+        "n_centroids": 21,
+        "minimum_display_weight_at_nearest_cell": 0.8735325043340021,
+        "median_display_weight_at_nearest_cell": 1.0,
+        "acceptance_threshold": 0.7,
+        "all_centroids_pass": true,
+        "centroids": [
+          {
+            "channel_index": 0,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.1326185784858662,
+            "frequency_hz": 90.52019481204078,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 0,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.13347343681507434,
+            "frequency_hz": 111.24438403146847,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 0,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.14794627565973262,
+            "frequency_hz": 100.70209758815325,
+            "display_weight_at_nearest_cell": 0.9790940765349749
+          },
+          {
+            "channel_index": 1,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.14012969438322226,
+            "frequency_hz": 92.80543179167366,
+            "display_weight_at_nearest_cell": 0.8735325043340021
+          },
+          {
+            "channel_index": 1,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.15496702467053663,
+            "frequency_hz": 109.61763407238874,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 1,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.13481543093246173,
+            "frequency_hz": 92.51768436626287,
+            "display_weight_at_nearest_cell": 0.9966842144023935
+          },
+          {
+            "channel_index": 2,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.15660574883648276,
+            "frequency_hz": 118.66720866620003,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 2,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.16118307338807797,
+            "frequency_hz": 107.4215098370374,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 2,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.15171893330817465,
+            "frequency_hz": 95.75164758832142,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 3,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.1703895772049116,
+            "frequency_hz": 110.45869641965142,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 3,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.1750274081293664,
+            "frequency_hz": 119.84221880866282,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 3,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.1813733798318764,
+            "frequency_hz": 95.8780169371075,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 4,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.17708734433661819,
+            "frequency_hz": 119.99237825931306,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 4,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.17810447203529461,
+            "frequency_hz": 124.94106341448006,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 4,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.1820079066795186,
+            "frequency_hz": 104.7254942566856,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 5,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.18029029241923755,
+            "frequency_hz": 109.78134226018798,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 5,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.18813126168965116,
+            "frequency_hz": 124.85675519762168,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 5,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.18704528652402175,
+            "frequency_hz": 119.5428380057838,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 6,
+            "event_index_within_panel": 0,
+            "time_within_event_sec": 0.18866431610300924,
+            "frequency_hz": 117.81490900367342,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 6,
+            "event_index_within_panel": 1,
+            "time_within_event_sec": 0.18693207144672003,
+            "frequency_hz": 119.5251212187357,
+            "display_weight_at_nearest_cell": 1.0
+          },
+          {
+            "channel_index": 6,
+            "event_index_within_panel": 2,
+            "time_within_event_sec": 0.18522565593766938,
+            "frequency_hz": 119.66673070737403,
+            "display_weight_at_nearest_cell": 1.0
+          }
+        ]
+      },
+      "concatenated_centroid_offsets_ms": [
+        [
+          -27.38142151413381,
+          -26.526563184925635,
+          -12.053724340267413
+        ],
+        [
+          -19.870305616777745,
+          -5.032975329463341,
+          -25.1845690675383
+        ],
+        [
+          -3.394251163517242,
+          1.1830733880779931,
+          -8.281066691825378
+        ],
+        [
+          10.389577204911598,
+          15.027408129366426,
+          21.37337983187637
+        ],
+        [
+          17.08734433661818,
+          18.104472035294638,
+          22.007906679518573
+        ],
+        [
+          20.29029241923755,
+          28.13126168965119,
+          27.045286524021716
+        ],
+        [
+          28.664316103009234,
+          26.93207144672005,
+          25.225655937669345
+        ]
+      ],
+      "purpose": "Illustration only; no cohort inference or C-F event changes",
+      "selected_channels": [
+        "A3-A4",
+        "A4-A5",
+        "A5-A6",
+        "A6-A7",
+        "A7-A8",
+        "A8-A9",
+        "A9-A10"
+      ],
+      "display_label": "Yuquan Y1"
+    },
+    "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/selected_signals.npz",
+    "source_sha256": "6f4e323e20323a76a5d464d523457c586d29292a9ceef15f139cc4380f7343b6",
+    "centroid_audit": {
+      "n_centroids": 21,
+      "minimum_display_weight_at_nearest_cell": 0.8735325043340021,
+      "median_display_weight_at_nearest_cell": 1.0,
+      "acceptance_threshold": 0.7,
+      "all_centroids_pass": true,
+      "centroids": [
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1326185784858662,
+          "frequency_hz": 90.52019481204078,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.13347343681507434,
+          "frequency_hz": 111.24438403146847,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.14794627565973262,
+          "frequency_hz": 100.70209758815325,
+          "display_weight_at_nearest_cell": 0.9790940765349749
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.14012969438322226,
+          "frequency_hz": 92.80543179167366,
+          "display_weight_at_nearest_cell": 0.8735325043340021
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15496702467053663,
+          "frequency_hz": 109.61763407238874,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.13481543093246173,
+          "frequency_hz": 92.51768436626287,
+          "display_weight_at_nearest_cell": 0.9966842144023935
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15660574883648276,
+          "frequency_hz": 118.66720866620003,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16118307338807797,
+          "frequency_hz": 107.4215098370374,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15171893330817465,
+          "frequency_hz": 95.75164758832142,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1703895772049116,
+          "frequency_hz": 110.45869641965142,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.1750274081293664,
+          "frequency_hz": 119.84221880866282,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1813733798318764,
+          "frequency_hz": 95.8780169371075,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.17708734433661819,
+          "frequency_hz": 119.99237825931306,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.17810447203529461,
+          "frequency_hz": 124.94106341448006,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1820079066795186,
+          "frequency_hz": 104.7254942566856,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.18029029241923755,
+          "frequency_hz": 109.78134226018798,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.18813126168965116,
+          "frequency_hz": 124.85675519762168,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.18704528652402175,
+          "frequency_hz": 119.5428380057838,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.18866431610300924,
+          "frequency_hz": 117.81490900367342,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.18693207144672003,
+          "frequency_hz": 119.5251212187357,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.18522565593766938,
+          "frequency_hz": 119.66673070737403,
+          "display_weight_at_nearest_cell": 1.0
+        }
+      ]
+    },
+    "display": {
+      "title": "Yuquan Y1",
+      "ylabel": "",
+      "display_labels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "label_rule": "left contact alias of each adjacent bipolar pair",
+      "xlabel": "Time (s)",
+      "time_reference": "center of each displayed excerpt is zero; one common recentering across its channels",
+      "displayed_time_windows_sec": [
+        [
+          -0.04,
+          0.04
+        ],
+        [
+          -0.04,
+          0.04
+        ],
+        [
+          -0.04,
+          0.04
+        ]
+      ],
+      "x_ticks_sec": [
+        -0.04,
+        0,
+        0.04
+      ],
+      "title_alignment": "left edge of first spectrogram, baseline shared with HFO n = 178",
+      "title_baseline_from_panel_bottom_inches": 4.141275167785235,
+      "centroid_line_color": "#151515",
+      "centroid_line_halo": "white",
+      "centroid_marker": "white-filled dark-edge circle",
+      "spectrum_and_centroids_computed_from_displayed_y1_signals": true
+    },
+    "A_source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_single_shaft_20261009/source/panel_a_snapshot/figures/fig1-panela.png",
+    "showcase_patient": "Y1",
+    "showcase_n": 178,
+    "showcase_source": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+    "A_B_link": "Same Y1 A shaft; latest A waveform examples retained; B uses three separately selected illustrative events on a contiguous subset of that shaft",
+    "selection_claim_boundary": "Illustrative clear timing examples, not an unbiased estimate of prevalence or cohort propagation strength"
+  },
+  "mechanism": {
+    "source": "/home/honglab/leijiaxin/HFOsp/ReplayIED/tiffs/fig2_prop_hist_9p_画板 1_画板 1.tif",
+    "sha256": "3623293d0ddfa2553fe87531ce71ae9acc746a04eb409d635f5f160f12ed2724",
+    "original_size": [
+      3759,
+      2920
+    ],
+    "crop_pixels": [
+      317,
+      1370,
+      1810,
+      1705
+    ],
+    "cropped_size": [
+      1493,
+      335
+    ],
+    "asset": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/readability_review_20261009/source/mi_mechanism_original_tiff.png",
+    "vector_ai_found": false,
+    "resampling": "none"
+  },
+  "old_canonical_assets_preserved": true,
+  "human_visual_acceptance": "PENDING",
+  "outputs": {
+    "figures/fig1-panelc.png": "aefc6402ef1933aaed580a639bcbc86896df6a81fe4c65b8b6322265a2de1124",
+    "figures/fig1-panele.pdf": "932ecd5e3a4adc9ae5552fb960fcd54b7f21076fec6af088a82b67efc7532f0d",
+    "figures/fig1-panele.png": "d57f8cfdd5b2a69e98d93a5f977dcd7eaa283f91a79214db0acf51d6f73a7b46",
+    "figures/fig1-paneld.pdf": "2ee8787b981f3273cd15f36b0fe50a03d09cb6ff32297d5eb488e2e1cee95b41",
+    "figures/fig1-panelf.png": "ae235a39ce8150097f3c3bc5755da8f6995e159d5afac13352511594c2b45a58",
+    "figures/fig1-panela.png": "8a6100cda3438944134e75ab5592ec97027fd59f471258979cbdaf8e0cc12beb",
+    "figures/fig1-paneld.png": "1be6efc56aecfc3530078a4ab5f26f5ed2e220dfb07ea357e33da44fc9387b39",
+    "figures/fig1-complete-layout.pdf": "2c443e35addbc6220bad7a0965d1916335928c022dc86e914e31e5683bf2d8fb",
+    "figures/fig1-panelb.png": "dff695a94785c6ae3d2a2d05c3751001b119c54c29ee4fd9e4fefd6c3fb82972",
+    "figures/fig1-panela.pdf": "0aaa8d466634dc831bd2efa5c8b57f0ab736560c09591dc280d4abc2544de212",
+    "figures/fig1-panelc.pdf": "40c2908ab29e20df0fb8d6a61314a12db51b49dc1d47b0495978ca285978fc74",
+    "figures/fig1-complete-layout.png": "29f15f0cc553f45d1a8d20f214485498b6c088a36adf00af0d01afa3dff527ed",
+    "figures/fig1-panelf.pdf": "c0d0cfa35cd243ab7a16e72955a88ac7ec2412722a8d53e220a5ecb6344a1488",
+    "figures/fig1-panelb.pdf": "4bc224260ec72f1c39afef4ad5507c48b511bf1bbfc9fec4a61edbeb936175bc"
+  }
+}

@@ -1,0 +1,409 @@
+{
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_three_column_review.py",
+  "source_revision": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/revisions/y1_a7_zoom_final_20261009",
+  "patient": "Y1",
+  "patient_reselection": "OPEN; no replacement made",
+  "n_patients_reviewed": 20,
+  "all_patients_and_frozen_clusters_retained": true,
+  "brain_camera_and_waveform_samples_unchanged": true,
+  "panel_a_uniform_enlargement": true,
+  "panel_a_source_crop_pixels": [
+    331,
+    50,
+    4368,
+    2022
+  ],
+  "panel_a_scale_from_native_render": 0.884320039633391,
+  "panel_a_enlargement_vs_previous": 1.3011832980414304,
+  "patient_title_points_A_and_B": 15.033440673767647,
+  "figure_size_inches": [
+    18,
+    16
+  ],
+  "visible_bounds_inches": {
+    "A": [
+      0.300000000000001,
+      10.458744116918504,
+      10.499999999999998,
+      15.441255883081494
+    ],
+    "B_hfo": [
+      11.051491499029476,
+      10.750000077710537,
+      12.800000000000002,
+      15.149999962191972
+    ],
+    "B_tfr": [
+      13.402339708272661,
+      10.74976189670389,
+      17.698531139077637,
+      15.150104981245068
+    ],
+    "C_heat": [
+      0.3003099194783187,
+      5.751349924103803,
+      10.499689288978807,
+      10.14771972279763
+    ],
+    "C_rank": [
+      11.050431678107566,
+      5.742496819539492,
+      12.799136643784873,
+      9.800497500575409
+    ],
+    "E_heat": [
+      0.3000215087245893,
+      0.7505512077615215,
+      10.49997843634154,
+      5.149557760139987
+    ],
+    "E_rank": [
+      11.050431678107566,
+      0.7783289855392994,
+      12.799136643784873,
+      4.802335537917765
+    ],
+    "D": [
+      13.400726789598178,
+      5.750003668561826,
+      17.697381225204506,
+      10.15
+    ],
+    "F": [
+      13.400892292797502,
+      0.7509543158726268,
+      17.7,
+      5.15
+    ]
+  },
+  "left_column_widths_inches": [
+    10.199999999999998,
+    10.19937936950049,
+    10.19995692761695
+  ],
+  "middle_column_widths_inches": [
+    1.7485085009705266,
+    1.748704965677307,
+    1.748704965677307
+  ],
+  "right_column_sizes_inches": [
+    [
+      4.296191430804976,
+      4.400343084541179
+    ],
+    [
+      4.296654435606328,
+      4.3999963314381745
+    ],
+    [
+      4.299107707202497,
+      4.3990456841273735
+    ]
+  ],
+  "alignment_includes": "ticks, labels, titles, colorbars, legends and F inset",
+  "no_anisotropic_image_stretch": true,
+  "statistics_unchanged": true,
+  "summaries": {
+    "B": {
+      "title": "Yuquan Y1",
+      "ylabel": "",
+      "display_labels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "label_rule": "left contact alias of each adjacent bipolar pair",
+      "xlabel": "Time (s)",
+      "time_reference": "center of each displayed excerpt is zero; one common recentering across its channels",
+      "displayed_time_windows_sec": [
+        [
+          -0.04,
+          0.04
+        ],
+        [
+          -0.04,
+          0.04
+        ],
+        [
+          -0.04,
+          0.04
+        ]
+      ],
+      "x_ticks_sec": [
+        -0.04,
+        0,
+        0.04
+      ],
+      "title_alignment": "left edge of first spectrogram, baseline shared with HFO n = 178",
+      "title_baseline_from_panel_bottom_inches": 4.141275167785235,
+      "centroid_line_color": "#151515",
+      "centroid_line_halo": "white",
+      "centroid_marker": "white-filled dark-edge circle",
+      "spectrum_and_centroids_computed_from_displayed_y1_signals": true
+    },
+    "C": {
+      "patient": "Yuquan Y1",
+      "n_events": 18190,
+      "all_valid_events_displayed": true,
+      "channel_order": [
+        "E1",
+        "E2",
+        "F1",
+        "F2",
+        "F3",
+        "E4",
+        "C1",
+        "A2",
+        "D14",
+        "A3",
+        "A4",
+        "A5",
+        "B10",
+        "B2",
+        "A11",
+        "B11",
+        "B12",
+        "A9",
+        "A8",
+        "B1",
+        "A10",
+        "A7",
+        "A6",
+        "B9",
+        "B7",
+        "B6"
+      ],
+      "masked": true,
+      "cluster_counts": [
+        13160,
+        5030
+      ],
+      "profile_band": "mean +/- population SD of participating-event ranks",
+      "rank_data_height_matches_heatmap": true
+    },
+    "E": {
+      "patient": "Yuquan Y1",
+      "n_events": 18190,
+      "all_valid_events_displayed": true,
+      "channel_order": [
+        "E1",
+        "E2",
+        "F1",
+        "F2",
+        "F3",
+        "E4",
+        "C1",
+        "A2",
+        "D14",
+        "A3",
+        "A4",
+        "A5",
+        "B10",
+        "B2",
+        "A11",
+        "B11",
+        "B12",
+        "A9",
+        "A8",
+        "B1",
+        "A10",
+        "A7",
+        "A6",
+        "B9",
+        "B7",
+        "B6"
+      ],
+      "masked": true,
+      "cluster_counts": [
+        13160,
+        5030
+      ],
+      "profile_band": "mean +/- population SD of participating-event ranks",
+      "rank_data_height_matches_heatmap": true
+    },
+    "D": {
+      "statistics": {
+        "yuquan": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.18301425643076696,
+          "null_median": 5.5666442230071815e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        },
+        "epilepsiae": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.26201202560976666,
+          "null_median": 5.904675455609148e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        }
+      },
+      "null_min": -0.000650968782522525,
+      "null_max": 0.000993703266430539,
+      "null_points": 40,
+      "null_points_shifted": false,
+      "null_glyphs_clipped": false,
+      "null_color": "#343434",
+      "zero_origin_preserved": true
+    },
+    "F": {
+      "n": 40,
+      "median_uplift": 0.1977050153113532,
+      "median_matching_index_uplift": 0.1977050153113532,
+      "n_above_diagonal": 40,
+      "display_labels": [
+        "Overall MI",
+        "Within-template MI"
+      ],
+      "underlying_fields": [
+        "adaptive_cluster.overall_tau",
+        "adaptive_cluster.within_cluster_tau_mean"
+      ],
+      "gray_below_diagonal_region": true,
+      "gray_summary_text_removed": true,
+      "paired_distribution_inset": {
+        "n_paired": 40,
+        "single_template_mean": 0.11371868185318075,
+        "single_template_median": 0.08445096354736137,
+        "multi_cluster_mean": 0.34683028284360334,
+        "multi_cluster_median": 0.2913253661099341,
+        "mean_delta": 0.23311160099042255,
+        "median_delta": 0.1977050153113532,
+        "n_improved": 40,
+        "wilcoxon_two_sided_statistic": 0.0,
+        "wilcoxon_two_sided_p": 1.8189894035458565e-12,
+        "significance_label": "***",
+        "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+        "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+        "layout_bounds_axes_fraction": [
+          0.68,
+          0.13,
+          0.28,
+          0.36
+        ],
+        "layout_aspect": "narrow portrait inset, not square",
+        "ylabel_fontsize_points": 9.0,
+        "tick_label_fontsize_points": 8.0,
+        "x_tick_labels": [
+          "Single",
+          "Multi"
+        ],
+        "x_tick_label_meanings": {
+          "Single": "single-template MI",
+          "Multi": "multi-cluster MI"
+        },
+        "x_tick_labels_single_line": true
+      },
+      "axis_limits_start_at_zero": true,
+      "dataset_legend": true,
+      "dataset_legend_frame": {
+        "visible": true,
+        "facecolor": "white",
+        "edgecolor": "0.55",
+        "linewidth": 0.8,
+        "producer_fontsize_points": 7.5,
+        "rendered_fontsize_points": 7.5,
+        "marker_size_points": 5.0
+      }
+    }
+  },
+  "hfo_source": {
+    "figure_panel": "Fig1-a1",
+    "legacy_code_reference": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/p16_mechan_events_specComp.py",
+    "source_paths": {
+      "snippets_npz": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+      "annotations_pickle": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_annot_v4.pik"
+    },
+    "annotation_label": 1,
+    "n_hfo_snippets": 178,
+    "snippet_samples": 600,
+    "duration_sec": 0.6,
+    "fs_hz": 1000.0,
+    "spectrogram": {
+      "algorithm_id": "fig1_gaussian_smoothed_magnitude_v1",
+      "window": "hann",
+      "nperseg_sec": 0.18,
+      "noverlap_sec": 0.16,
+      "freq_range_hz": [
+        0,
+        240
+      ],
+      "gaussian_sigma": 1.5,
+      "raw": "log(mean smoothed magnitude spectrogram)",
+      "normalized": "mean_spec / mean(baseline bins t<=0.15 s) - 1",
+      "x_cell_edges_sec": [
+        0.0,
+        0.6
+      ],
+      "edge_policy": "extend first/last spectrogram cells to snippet bounds; no x-axis white strips"
+    },
+    "outputs": [
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb1.png",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb1.pdf"
+    ]
+  },
+  "label_checks": {
+    "heatmaps_checked": 2,
+    "minimum_label_gap_px": 0.9192559706863221
+  },
+  "original_revision_retained": true,
+  "human_visual_acceptance": "PENDING",
+  "input_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_three_column_review.py": "48511422dd0af0c5467f819694c165f65f1869afafd25156c4371b88654c4303",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/revisions/y1_a7_zoom_final_20261009/metadata.json": "26537410bc8fd7097c7b7a811f3f8688cdb8d8151b4a87f6ca86c31342d8e2a6",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/revisions/y1_a7_zoom_final_20261009/figures/fig1-panela.png": "8ab7e16d885434fed91bf34429c321ca1eafc5e54ca71d2f6f01dfb23887fea5",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_y1_selection.py": "032a0540bcfa3677aaf6f4fa02492c3e6f67e0b4b4b4f3c1ae3530647d83e851",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_readability_review.py": "26eb493b0fbaedaea97f31571506db8cbba26303c32b8ee63c16790417794cf0",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig1_single_hfo_schematic.py": "4a6ab0d71853a3e7161af224f992ebb93f300ff26437fa0d0fe3bcdefb3a059f",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangkexuan.json": "423ea1fa43f0c15c17cd87e5fa58c198c8cc87d897a5067475b765d63f1051af",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_pengzihang.json": "81a03b67f893f89669b53c6b7dde6d89116199905c5b432c4f136a41f5d16c4d",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_chengshuai.json": "10686e1a4ea2c47430937f34b4133fee11da65f2df9bf571ade5ae0da81c6d91",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_huangwanling.json": "0617f52aa89da0352dbea4c1cd0da02ddd44d3b2a8e0b4426118f6fbf0822708",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_liyouran.json": "cdcf2b2bf7ae8ce1097f70d04183edd83481e34698e84f817192750b5e3b5a66",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_songzishuo.json": "8f8a1c2b2a7822416b507f8e34190d689997d492c4a5b4f9a62d0672c86505a2",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangbichen.json": "e70fd45ed55c5cec1d4144e0e11b60e1c27300ed3a130e1f406d4e3e5fde2baf",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangjiaqi.json": "e06827ac5fd8ccd3f1ff515dfc3ef89e47c60a531411e7d85019ee47df7b78ef",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhaochenxi.json": "a45a5f32c68201437b30f5f620e19824dacf6b798be83e8e044c24ee5309c25e",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhaojinrui.json": "dd6fdeb60b965618f7f4b8b66bf08ba1f5f7410c6c490a9c33351d057c74c665",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhourongxuan.json": "d4c301f8c852260e3ae3e9dd4bf7e5a02baa55898b49607015276f9b75a5708e",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_chenziyang.json": "951312cfe4fcefa0adadef934a82ba141f24ee47c2aaada2090208a678cd07df",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_hanyuxuan.json": "0752e4f5bfca5d69ce7b5483269eb8f4148d5964f8a12fa7d1944b67d5d98f6d",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_huanghanwen.json": "f988eab1abbf8f7020dadd41cb61fa4225c192ab8e3b21fbbb29c2897c8b4893",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_litengsheng.json": "0f0d6d061c7a1cc70e3e78580cfcfc7ade3eca63caff6b4f41bd0b99d392a15c",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_xuxinyi.json": "67d6a26851a88f4149b70be4016afa02d9ceccfd132fe73f5908c6a405e6a158",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangjinhan.json": "48df0b956f34b7a52ae4382de1076a2fdd4cf3baa1d0c0d8c65f11be421218ee",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_sunyuanxin.json": "6aca175ffd2b6660554d5947e157ee8ab244fe59f154b3611044600c8c880bbf",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_gaolan.json": "4bf38be451e01a7f263a14e04f26e129e27249cec6b33269d695700db62cb56f",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_wangyiyang.json": "4ef1fc62bf3c1f9432dc2a469dafb4c39efaa36a828872e9acca2506693009c6"
+  },
+  "output_hashes": {
+    "fig1-panelc.png": "7b87c370103470eeb09f5d5b5d2b42cfafc2c1e91c12e7c4224eb42a135e181a",
+    "yuquan_CE_Y17_Y20.png": "8b55f9fb6209a20fef2946648e0618251e3117b23a75db52bef7d42263cc5b20",
+    "fig1-panele.pdf": "9a620e85429ae440cacc87977d1a2b9f85bdcc03085c69ac2cbd210f071da7d3",
+    "fig1-panele.png": "c5a30b3d7c0924664ccfac658edc1abc63f31c7173a044d7df1c4ec2ee755765",
+    "yuquan_CE_Y1_Y4.png": "779153f1eef189b726c6534a0a2820db58aa22fc123724a99177b4582ab41885",
+    "yuquan_CE_Y5_Y8.png": "d1ac9ad41f7b5a1659104524ba107b26ab35401db0b5b278dfa7001c0ed57aac",
+    "fig1-paneld.pdf": "6f5f877a9d97d2284bc6d72fb5c24ca3cc119f6188034eb89c5b683493bc7aea",
+    "fig1-panelf.png": "99eb37279e082b6624466a9f3e3a34be0b8f03ab66c2b90ae3d5d7f4df1dabbe",
+    "fig1-panela.png": "ead384df24f52dcc676daf51d4f2c7ededc8c3335e0616337081dfcb5c2de82b",
+    "fig1-paneld.png": "7eba6d28b14a5d80ec2df225002bba6f1733a290c6918892d3411dc2885d3a53",
+    "fig1-complete-layout.pdf": "2b5f853639337592bcbed3953ccfb188b29af7781d82346bd22d429e8aa364a3",
+    "fig1-panelb.png": "9610d2bf97931ee1c899d6f17ab2671f1abe083addd03cb68fb677d871ec7a34",
+    "yuquan_CE_Y9_Y12.png": "4a34c0740aa50981b1eab324c90c2ae75f120c666a04f059811e6cd8ac093f93",
+    "yuquan_comparison_Y1_Y12_Y8_Y3_Y2_Y16.pdf": "ce6c2d35dbc9ca4e71a77d2c0af860f9d2debc353b66d9d8cae2705ba24130e3",
+    "fig1-panela.pdf": "fd41fa141df5b06a6e3b1e931d005268d0f2934a1f1cbf32549b15eb73da39bf",
+    "yuquan_CE_Y13_Y16.png": "ce3090a71911da25edc239b995a22f479745700636e03a6760ef05a4eeb29dd1",
+    "fig1-panelc.pdf": "9386d5a40769493b9211939e68e0108de78402e76b69bfbf7c19169092aff3c2",
+    "fig1-complete-layout.png": "bde0ecfc42a432cf43f8897527961196233e181d440005608d1f245af1e04da9",
+    "yuquan_all20_CE.pdf": "bfccdcd26c85fdb1ea47e6879b9c0985406ab76539d5d4949bd9b5ac26fbc3ac",
+    "fig1-panelf.pdf": "61b74775dfc4fc6a9233d2aad8e95848dff02737a67594e5fdf95869a61ff941",
+    "fig1-panelb.pdf": "b505323fae5a4cb71e1910583cf827532cc1ae567fb9f2a1b1978ef129be0843"
+  }
+}

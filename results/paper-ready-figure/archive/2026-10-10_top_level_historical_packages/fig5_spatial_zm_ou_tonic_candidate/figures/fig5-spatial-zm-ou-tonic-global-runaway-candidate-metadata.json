@@ -1,0 +1,277 @@
+{
+  "status": "FIG5_TONIC_GLOBAL_RUNAWAY_CANDIDATE_RENDERED",
+  "registry_status": "CANDIDATE_PENDING_AUTHOR_VISUAL_ACCEPTANCE",
+  "scientific_claim": "On one frozen patient-derived spatial scaffold, Z/q and M/gK dynamics under stationary spatial OU input enter a persistent near-saturated globally recruited tonic state.",
+  "claim_boundary": "This is a synthetic model-state morphology. It is not a clinical seizure waveform fit, a recoverable seizure cycle, or patient-mechanism identification.",
+  "core_contract": {
+    "field": "continuous data-driven h_E",
+    "operational_threshold": 0.5,
+    "connected_components_on_64x64_display_grid": 1,
+    "neurons_at_or_above_threshold": 629,
+    "h_weighted_centroid_mm": [
+      2.50936977416726,
+      17.487521605614095
+    ],
+    "interpretation": "one suprathreshold high-h component; subthreshold field bumps and the two electrode shafts are not additional cores"
+  },
+  "model_contract": {
+    "slow_variables": "Z/q inhibition resource plus M/gK adaptation",
+    "use_SG": false,
+    "spatial_ou": {
+      "mode": "local",
+      "sigma_rate_per_ms": 0.1,
+      "tau_ms": 20.0,
+      "ell_mm": 0.38,
+      "update_interval_ms": 1.0,
+      "grid_spacing_mm": 0.4,
+      "seed_offset": 500000,
+      "role": "frozen accessibility process; not optimized"
+    },
+    "edges": {
+      "E_to_E_dose": 1.0,
+      "E_to_I_dose": 1.0,
+      "learned_edges_modified": false
+    },
+    "no_timed_stimulus": true
+  },
+  "confirmation_family": {
+    "parameter_set_id": "tonic_b0_v2",
+    "n_unique_seeds": 3,
+    "seeds": [
+      1841,
+      1842,
+      1843
+    ],
+    "n_passed_seeds": 3,
+    "passed_seeds": [
+      1841,
+      1842,
+      1843
+    ],
+    "minimum_confirmation_seeds": 3,
+    "single_frozen_config": true,
+    "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+    "eligible_multi_seed_family": true,
+    "records": [
+      {
+        "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1841.json",
+        "seed": 1841,
+        "mode": "hybrid",
+        "run_role": "confirmation",
+        "parameter_set_id": "tonic_b0_v2",
+        "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+        "scientific_onset_ms": 500.0,
+        "trajectory_duration_ms": 2222.2000000000003,
+        "morphology_pass": true,
+        "all_checks_pass": true,
+        "morphology_status": "TONIC_GLOBAL_RUNAWAY",
+        "failed_morphology_checks": [],
+        "failed_execution_checks": [],
+        "median_rate_pre_hz": 55.31640625,
+        "q95_rate_pre_hz": 102.50734375,
+        "median_rate_post_hz": 394.42578125,
+        "q05_rate_post_hz": 349.143671875,
+        "median_rate_ratio_post_over_pre": 7.130358025563166,
+        "median_active_neuron_fraction_20ms": 1.0,
+        "median_recruited_spatial_fraction_1mm": 1.0,
+        "joint_global_recruitment_duty": 1.0,
+        "observed_post_transition_ms": 1722.2000000000003,
+        "n_contacts": 15,
+        "n_contacts_recruited": 15,
+        "contact_fraction_recruited": 1.0,
+        "all_15_virtual_contacts_recruited": true,
+        "definition": "local post rate >=120 Hz and post/pre rate ratio >=2",
+        "k_q_per_ms": 0.001,
+        "q_min": 0.775,
+        "q_a50": 0.004,
+        "q_hill_n": 8.0,
+        "tau_m_ms": 12.5,
+        "eta_m": 0.02,
+        "m_spatial_mix": 0.0,
+        "OU_called_every_membrane_step": true,
+        "OU_sd_ratio_after_over_before": 1.0038042172079855,
+        "numerically_stable": true
+      },
+      {
+        "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+        "seed": 1842,
+        "mode": "hybrid",
+        "run_role": "confirmation",
+        "parameter_set_id": "tonic_b0_v2",
+        "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+        "scientific_onset_ms": 480.0,
+        "trajectory_duration_ms": 2197.2000000000003,
+        "morphology_pass": true,
+        "all_checks_pass": true,
+        "morphology_status": "TONIC_GLOBAL_RUNAWAY",
+        "failed_morphology_checks": [],
+        "failed_execution_checks": [],
+        "median_rate_pre_hz": 55.11640625,
+        "q95_rate_pre_hz": 92.467421875,
+        "median_rate_post_hz": 393.8671875,
+        "q05_rate_post_hz": 392.5453125,
+        "median_rate_ratio_post_over_pre": 7.1460970389374765,
+        "median_active_neuron_fraction_20ms": 1.0,
+        "median_recruited_spatial_fraction_1mm": 1.0,
+        "joint_global_recruitment_duty": 1.0,
+        "observed_post_transition_ms": 1717.2000000000003,
+        "n_contacts": 15,
+        "n_contacts_recruited": 15,
+        "contact_fraction_recruited": 1.0,
+        "all_15_virtual_contacts_recruited": true,
+        "definition": "local post rate >=120 Hz and post/pre rate ratio >=2",
+        "k_q_per_ms": 0.001,
+        "q_min": 0.775,
+        "q_a50": 0.004,
+        "q_hill_n": 8.0,
+        "tau_m_ms": 12.5,
+        "eta_m": 0.02,
+        "m_spatial_mix": 0.0,
+        "OU_called_every_membrane_step": true,
+        "OU_sd_ratio_after_over_before": 0.9933637146878517,
+        "numerically_stable": true
+      },
+      {
+        "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1843.json",
+        "seed": 1843,
+        "mode": "hybrid",
+        "run_role": "confirmation",
+        "parameter_set_id": "tonic_b0_v2",
+        "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+        "scientific_onset_ms": 420.0,
+        "trajectory_duration_ms": 2133.5,
+        "morphology_pass": true,
+        "all_checks_pass": true,
+        "morphology_status": "TONIC_GLOBAL_RUNAWAY",
+        "failed_morphology_checks": [],
+        "failed_execution_checks": [],
+        "median_rate_pre_hz": 58.33125,
+        "q95_rate_pre_hz": 108.89718749999994,
+        "median_rate_post_hz": 340.07890625000005,
+        "q05_rate_post_hz": 207.835859375,
+        "median_rate_ratio_post_over_pre": 5.830132326154507,
+        "median_active_neuron_fraction_20ms": 0.8855,
+        "median_recruited_spatial_fraction_1mm": 0.8887499999999999,
+        "joint_global_recruitment_duty": 0.965,
+        "observed_post_transition_ms": 1713.5,
+        "n_contacts": 15,
+        "n_contacts_recruited": 15,
+        "contact_fraction_recruited": 1.0,
+        "all_15_virtual_contacts_recruited": true,
+        "definition": "local post rate >=120 Hz and post/pre rate ratio >=2",
+        "k_q_per_ms": 0.001,
+        "q_min": 0.775,
+        "q_a50": 0.004,
+        "q_hill_n": 8.0,
+        "tau_m_ms": 12.5,
+        "eta_m": 0.02,
+        "m_spatial_mix": 0.0,
+        "OU_called_every_membrane_step": true,
+        "OU_sd_ratio_after_over_before": 0.9973604067326989,
+        "numerically_stable": true
+      }
+    ]
+  },
+  "representative": {
+    "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+    "seed": 1842,
+    "mode": "hybrid",
+    "run_role": "confirmation",
+    "parameter_set_id": "tonic_b0_v2",
+    "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15",
+    "scientific_onset_ms": 480.0,
+    "trajectory_duration_ms": 2197.2000000000003,
+    "morphology_pass": true,
+    "all_checks_pass": true,
+    "morphology_status": "TONIC_GLOBAL_RUNAWAY",
+    "failed_morphology_checks": [],
+    "failed_execution_checks": [],
+    "median_rate_pre_hz": 55.11640625,
+    "q95_rate_pre_hz": 92.467421875,
+    "median_rate_post_hz": 393.8671875,
+    "q05_rate_post_hz": 392.5453125,
+    "median_rate_ratio_post_over_pre": 7.1460970389374765,
+    "median_active_neuron_fraction_20ms": 1.0,
+    "median_recruited_spatial_fraction_1mm": 1.0,
+    "joint_global_recruitment_duty": 1.0,
+    "observed_post_transition_ms": 1717.2000000000003,
+    "n_contacts": 15,
+    "n_contacts_recruited": 15,
+    "contact_fraction_recruited": 1.0,
+    "all_15_virtual_contacts_recruited": true,
+    "definition": "local post rate >=120 Hz and post/pre rate ratio >=2",
+    "k_q_per_ms": 0.001,
+    "q_min": 0.775,
+    "q_a50": 0.004,
+    "q_hill_n": 8.0,
+    "tau_m_ms": 12.5,
+    "eta_m": 0.02,
+    "m_spatial_mix": 0.0,
+    "OU_called_every_membrane_step": true,
+    "OU_sd_ratio_after_over_before": 0.9933637146878517,
+    "numerically_stable": true
+  },
+  "panel_contract": {
+    "A": "continuous h field, h>=0.5 contour, and frozen contact geometry",
+    "B": {
+      "measure": "fraction of E neurons firing at least once in the preceding 10 ms in each frozen 64x64 spatial bin",
+      "fixed_scale": [
+        0.0,
+        1.0
+      ],
+      "preselected_times_ms": [
+        100.0,
+        480.0,
+        900.0
+      ],
+      "frame_selection": "fixed low/onset/post times; no image-pixel selection"
+    },
+    "C": {
+      "population_rate": "20-ms uniform smoothing of archived raw E rate",
+      "recruitment": "archived 20-ms-window neuron and 1-mm sheet metrics",
+      "virtual_contacts": "5-ms smoothing; pre-onset median mapped to 0 and onset+300..1300-ms median mapped to 1; no detrending or band-pass"
+    },
+    "D": "all three seeds from one frozen all-pass confirmation family"
+  },
+  "source_files": {
+    "aggregate": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_runaway_aggregate.json",
+      "sha256": "46c64d49fa0f9dbcb64b00d3d15e844e291b3face5c79e73c5c0699562ed3f7d"
+    },
+    "candidate_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+      "sha256": "80ef269f4f7d5ad2ac4910dc2b64727fe0c2c1004fd46407176deb029ac699f0"
+    },
+    "candidate_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.npz",
+      "sha256": "283ee32711a2c5388f065d9e2faa9a54390f788bb3c7496c7e8cd4ea993a7248"
+    },
+    "capture_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/snn_gif_capture/tonic_b0_v2_s1842_snn_frames.npz",
+      "sha256": "e88c5aabf9d8db1483dea93b5d063650d97508d0284b5f77175c8c058baa4665"
+    },
+    "capture_metadata": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/snn_gif_capture/tonic_b0_v2_s1842_snn_frames_metadata.json",
+      "sha256": "7038f4505782443303f7b0edfaeed39fcbd68c5ddecdefcf3d9bd007c6723594"
+    },
+    "producer": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fig5a-snn-gif/scripts/paper_figures/plot_fig5_spatial_zm_ou_tonic_candidate.py",
+      "sha256": "350bb619dfc030988acdb1320068258be5da5dab10059c350ab89ac8fa5c63d1"
+    }
+  },
+  "outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic_candidate/figures/fig5-spatial-zm-ou-tonic-global-runaway-candidate.png",
+      "sha256": "5ef0c8d59f280f4db25426b70980980ae56af3cfdec23ed998ee021df42cd8d0"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic_candidate/figures/fig5-spatial-zm-ou-tonic-global-runaway-candidate.pdf",
+      "sha256": "52e641eb41e1e4384c04bae92cba75e77f1e892f72490f05248155a4a0c2d879"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic_candidate/figures/fig5-spatial-zm-ou-tonic-global-runaway-candidate.svg",
+      "sha256": "da87e54c2ab0b4df940b275494c7eb60413e24ad3970b1e6c2c8df8e2319ab50"
+    }
+  },
+  "git_head": "1292e064d5092ca72a9711a8c3dfc37b78558c1b"
+}

@@ -1,0 +1,68 @@
+{
+  "status": "PASS",
+  "row_shift_up_mm": 6.35,
+  "row_shift_up_px": 75,
+  "canvas_size_px": [
+    5850,
+    4695
+  ],
+  "canvas_size_pt": [
+    1404.0,
+    1126.8
+  ],
+  "source_row_regions_pixels": [
+    [
+      0,
+      3310,
+      5850,
+      4770
+    ],
+    [
+      0,
+      3140,
+      134,
+      3270
+    ],
+    [
+      4241,
+      3140,
+      4371,
+      3270
+    ]
+  ],
+  "source_row_regions_pt": [
+    [
+      0.0,
+      0.0,
+      1404.0,
+      350.4
+    ],
+    [
+      0.0,
+      360.0,
+      32.16,
+      391.19999999999993
+    ],
+    [
+      1017.84,
+      360.0,
+      1049.04,
+      391.19999999999993
+    ]
+  ],
+  "E_F_rigid_translation_pixel_exact": true,
+  "stationary_content_pixel_exact": true,
+  "overlap_with_stationary_content_pixels": 0,
+  "standalone_A_to_F_byte_identical": true,
+  "scientific_data_and_all_panel_sizes_preserved": true,
+  "previous_outputs_unchanged": true,
+  "human_visual_acceptance": "PENDING",
+  "PNG_PDF_visual_self_review": {
+    "status": "PASS",
+    "checked": [
+      "complete PNG",
+      "complete PDF rendered by pdftoppm"
+    ],
+    "result": "Reduced row spacing; no overlapping titles, ticks or legends; E/F axes remain aligned."
+  }
+}

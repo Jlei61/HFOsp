@@ -1,0 +1,84 @@
+{
+  "source_paths": {
+    "edf": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX4.edf",
+    "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX4_packedTimes.npy",
+    "participation_artifact": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX4_lagPat.npz",
+    "accepted_subject_record": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangkexuan.json"
+  },
+  "selection": {
+    "display_label": "Yuquan Y1",
+    "selected_channels": [
+      "A1-A2",
+      "A2-A3",
+      "A3-A4",
+      "A4-A5",
+      "A5-A6",
+      "A6-A7",
+      "A7-A8",
+      "A8-A9",
+      "A9-A10",
+      "A10-A11",
+      "A11-A12",
+      "A12-A13"
+    ],
+    "display_labels": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8",
+      "A9",
+      "A10",
+      "A11",
+      "A12"
+    ],
+    "reference_mode": "adjacent_bipolar",
+    "event_indices": [
+      0,
+      641,
+      1282
+    ],
+    "event_windows_sec": [
+      [
+        11.585,
+        12.085
+      ],
+      [
+        1605.6999999999998,
+        1606.1999999999998
+      ],
+      [
+        4424.384,
+        4424.884
+      ]
+    ],
+    "event_active_A_channel_counts": [
+      8,
+      8,
+      9
+    ],
+    "selection_rule": "first chronological C/E source block; divide its event list into thirds; first event in each third with >=8 participating A-shaft channels and participating A5/A9; use eventsBool, never finite lagPatRank",
+    "shaft_selection": "A is a real 14-contact Y1 shaft with ten participating channels in accepted C/E; display A1-A12 from physical A1-A13",
+    "claim_boundary": "three illustrative examples, not prevalence, clinical localization or a new statistical result"
+  },
+  "plot": {
+    "window_sec": 0.32,
+    "fs_out": 1000.0,
+    "band_hz": [
+      80,
+      250
+    ],
+    "brain_image": "y1_brain.png",
+    "channel_colors": {
+      "A5-A6": "#8b70ba",
+      "A9-A10": "#24a9ce"
+    },
+    "brain_electrode_gap_reduction_mm": 12.0,
+    "amplitude_scale": "single common gain for all Y1 channels and excerpts; spacing=8*SD of all displayed samples, same rule as the original waveform producer",
+    "trace_spacing_V": 5.095441723206459e-05,
+    "zoom_anchor_mode": "physical_ends"
+  }
+}

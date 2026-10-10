@@ -1,5 +1,8 @@
 # results/ 图总索引（FIGURE INDEX）
 
+> **2026-10-10 Figure 1定稿：** [完整图、单面板和PPTX](paper-ready-figure/fig1/figures/README.md)；代码、数据与归档见[当前版本](../docs/current_figure1.md)。
+
+
 > 解决"重要的图埋太深、容易错过"的问题。本文件是 `results/` 下所有**结论级图**的导航入口。
 > 每个目录里仍有自己的中文 `figures/README.md`（逐图说明），本文件只负责"按 topic 快速定位 + 指路"。
 >

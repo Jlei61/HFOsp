@@ -1,0 +1,364 @@
+{
+  "legacy_code_reference": [
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/for523_p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool.py",
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py"
+  ],
+  "source_paths": {
+    "edf": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
+    "gpu_npz": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
+    "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy"
+  },
+  "selection": {
+    "figure_label": "Fig1-B2",
+    "display_label": "Yuquan Y3",
+    "candidate_channels": [
+      "K3-K4",
+      "K4-K5",
+      "K5-K6",
+      "K6-K7",
+      "K7-K8",
+      "K8-K9",
+      "K9-K10",
+      "K11-K12",
+      "K12-K13",
+      "K13-K14",
+      "E8-E9",
+      "E10-E11",
+      "E11-E12",
+      "E12-E13",
+      "E13-E14"
+    ],
+    "selected_channels": [
+      "E12-E13",
+      "K5-K6",
+      "K9-K10",
+      "K6-K7",
+      "K7-K8",
+      "K8-K9",
+      "K4-K5",
+      "K11-K12",
+      "E11-E12",
+      "K12-K13"
+    ],
+    "display_labels": [
+      "E12",
+      "K5",
+      "K9",
+      "K6",
+      "K7",
+      "K8",
+      "K4",
+      "K11",
+      "E11",
+      "K12"
+    ],
+    "event_indices": [
+      22,
+      237,
+      1458
+    ],
+    "event_indices_mode": "fixed_clean_examples",
+    "event_windows_sec": [
+      [
+        49.733000000000004,
+        50.233000000000004
+      ],
+      [
+        582.1379999999999,
+        582.6379999999999
+      ],
+      [
+        3715.402,
+        3715.902
+      ]
+    ],
+    "event_active_channel_counts_in_candidate_set": [
+      7,
+      8,
+      9
+    ],
+    "event_selection_rule": "fixed clean examples selected after visual screening",
+    "channel_selection_rule": "top participating candidate channels, sorted by median detection center over selected events"
+  },
+  "plot": {
+    "window_sec": 0.32,
+    "fs_out": 1000.0,
+    "band_hz": [
+      80,
+      250
+    ],
+    "spectrogram": {
+      "algorithm_id": "fig1_gaussian_smoothed_magnitude_v1",
+      "window": "hamming",
+      "nperseg_sec": 0.05,
+      "noverlap_sec": 0.04,
+      "freq_range_hz": [
+        50,
+        300
+      ],
+      "gaussian_sigma": 1.5,
+      "display_quantity": "Gaussian-smoothed magnitude, normalized per channel per event window max",
+      "centroid_weight": "the same Gaussian-smoothed magnitude shown in the panel",
+      "centroid_support": "weighted centroid of the connected component containing the within-event maximum at >=70% of that maximum",
+      "centroid_edge_guard_sec": 0.05,
+      "coordinate_registration": "pcolormesh on real STFT time-cell edges; centroid frequency index plotted at row center (+0.5)",
+      "x_cell_edges_sec": [
+        0.0,
+        0.96
+      ],
+      "edge_policy": "extend first/last STFT cells to the event-stack bounds; draw separators only at internal event borders"
+    },
+    "centroid_alignment_audit": {
+      "n_centroids": 30,
+      "minimum_display_weight_at_nearest_cell": 0.828625844029819,
+      "median_display_weight_at_nearest_cell": 1.0,
+      "acceptance_threshold": 0.7,
+      "all_centroids_pass": true,
+      "centroids": [
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1503924624561017,
+          "frequency_hz": 84.82056895816848,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.14971712109662239,
+          "frequency_hz": 86.77300081305805,
+          "display_weight_at_nearest_cell": 0.98289082133891
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.16250573913698896,
+          "frequency_hz": 101.10261561861856,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15728980078087113,
+          "frequency_hz": 106.57174780138959,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.1678405513915604,
+          "frequency_hz": 87.7011632599751,
+          "display_weight_at_nearest_cell": 0.9752850095832959
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1564283522237041,
+          "frequency_hz": 91.20037932017132,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1601568223049591,
+          "frequency_hz": 100.40770151632309,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15736066539499755,
+          "frequency_hz": 113.62020183715546,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15971611355862525,
+          "frequency_hz": 84.34152644940094,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15095824813850145,
+          "frequency_hz": 88.3642813378103,
+          "display_weight_at_nearest_cell": 0.9802043558272504
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15878972769410382,
+          "frequency_hz": 88.03873015619784,
+          "display_weight_at_nearest_cell": 0.9819490615507591
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1501174693302576,
+          "frequency_hz": 79.38667287879174,
+          "display_weight_at_nearest_cell": 0.9955247346562045
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15610739343132174,
+          "frequency_hz": 87.98336417767159,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16117122107099485,
+          "frequency_hz": 104.18535833497975,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1536473494316104,
+          "frequency_hz": 90.3361573439661,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15175983080083624,
+          "frequency_hz": 96.51322297343305,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15951185221774072,
+          "frequency_hz": 93.42616011942911,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15738245759268643,
+          "frequency_hz": 94.09045788380413,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15488258645005326,
+          "frequency_hz": 117.19323329609647,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.1656208498053398,
+          "frequency_hz": 94.354161774609,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1611718848375483,
+          "frequency_hz": 92.68765499271609,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.14987515286632672,
+          "frequency_hz": 89.95218586656662,
+          "display_weight_at_nearest_cell": 0.8939279598420217
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16460262654306662,
+          "frequency_hz": 84.0408717274996,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15985867544882904,
+          "frequency_hz": 88.94961186521266,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.150364728325526,
+          "frequency_hz": 84.75489374942049,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.17399934422639612,
+          "frequency_hz": 92.23744054576221,
+          "display_weight_at_nearest_cell": 0.9350161412901923
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1616596679310005,
+          "frequency_hz": 91.0382095100392,
+          "display_weight_at_nearest_cell": 0.9975100678199219
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.16311839264781414,
+          "frequency_hz": 105.56506868631756,
+          "display_weight_at_nearest_cell": 0.828625844029819
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16279767985075583,
+          "frequency_hz": 91.5171244520962,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.17407883276407554,
+          "frequency_hz": 88.00122452949618,
+          "display_weight_at_nearest_cell": 1.0
+        }
+      ]
+    },
+    "outputs": [
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb2.png",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb2.pdf"
+    ],
+    "layout": {
+      "figure_size_in": [
+        6.5,
+        4.25
+      ],
+      "grid_width_ratios": [
+        1.0,
+        1.0,
+        0.035
+      ],
+      "data_axis_widths_in": {
+        "stacked_traces": 2.3207156019656017,
+        "normalized_spectrogram": 2.320715601965602
+      },
+      "data_axis_width_delta_in": 4.440892098500626e-16,
+      "data_axes_equal_width": true,
+      "colorbar_column": "dedicated",
+      "x_extent_sec": [
+        0.0,
+        0.96
+      ],
+      "shared_xticks_sec": [
+        0.0,
+        0.2,
+        0.4,
+        0.6000000000000001,
+        0.8
+      ]
+    }
+  }
+}

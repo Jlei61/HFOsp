@@ -1,5 +1,8 @@
 # Paper-ready figure outputs
 
+> **Figure 1当前为作者定稿（2026-10-10）。** [完整图、A–F和PPTX](fig1/figures/README.md)，[代码与数据说明](../../docs/current_figure1.md)。当前指针为`fig1/current_revision.json`，旧版移至`archive/2026-10-10_fig1_finalization/fig1/`。
+
+
 这里的顶层只保存当前主图组装包 `fig1/`–`fig5/`、正式补图包 `supp_fig1_*`–`supp_fig7_*`，
 以及投稿级补充视频文件。source、候选、诊断和历史模型包放入 `archive/`，不与正式稿件入口并列。
 

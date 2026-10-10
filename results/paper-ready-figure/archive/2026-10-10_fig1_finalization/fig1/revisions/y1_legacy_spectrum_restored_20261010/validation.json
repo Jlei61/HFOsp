@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "spectrum_original_functions_exact": true,
+  "spectrum_analysis_implementation_agrees": true,
+  "stored_lagpat_max_difference_ms": 3.552713678800501e-12,
+  "hfo_showcase": {
+    "n": 178,
+    "legacy_source": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/p16_mechan_events_specComp.py",
+    "raw_max_abs_difference": 0.0,
+    "normalized_max_abs_difference": 0.0,
+    "normalization": "mean spectrum / pre-event baseline mean - 1; distinct from per-event max normalization"
+  },
+  "human_visual_acceptance": "PENDING",
+  "current_layout": {
+    "source_layout": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/revisions/y1_a7_zoom_final_20261009",
+    "unchanged_A_C_D_E_F": true,
+    "changed_full_figure_pixels": 1131409,
+    "changes_restricted_to_right_spectrum": true,
+    "replacement_bounds_inches": [
+      11.19,
+      9.04,
+      15.85,
+      13.4
+    ],
+    "display_time_limits_sec": [
+      -0.15,
+      0.15
+    ],
+    "title_baseline_inches": 13.161275
+  },
+  "latest_layout": {
+    "source_layout": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/y1_local_rank_peak_profiles_20261010",
+    "unchanged_A_C_D_E_F": true,
+    "changed_full_figure_pixels": 1561557,
+    "changes_restricted_to_right_spectrum": true,
+    "replacement_bounds_inches": [
+      14.28,
+      10.48,
+      19.28,
+      15.87
+    ],
+    "display_time_limits_sec": [
+      -0.15,
+      0.15
+    ],
+    "title_baseline_inches": 15.52
+  },
+  "final_preservation_checks": {
+    "current_PDF_changed_pixels_outside_spectrum": 0,
+    "latest_PDF_changed_pixels_outside_spectrum": 0,
+    "legacy_consumer_entry_uses_restored_method": true,
+    "all_other_independent_panels_byte_identical": true
+  },
+  "agent_PNG_PDF_visual_check": "PASS; pending author review"
+}

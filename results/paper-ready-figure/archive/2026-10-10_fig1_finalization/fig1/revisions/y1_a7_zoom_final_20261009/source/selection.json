@@ -1,0 +1,356 @@
+{
+  "patient": "Y1",
+  "subject": "zhangkexuan",
+  "shaft": "A",
+  "channels": [
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9"
+  ],
+  "bipolar_channels": [
+    "A3-A4",
+    "A4-A5",
+    "A5-A6",
+    "A6-A7",
+    "A7-A8",
+    "A8-A9",
+    "A9-A10"
+  ],
+  "events": [
+    {
+      "record": "FA134AX6",
+      "event_index": 1562,
+      "shaft": "A",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "span_ms": 60.60191756110589,
+      "rho": 1.0,
+      "window": [
+        5434.615,
+        5435.115
+      ],
+      "score": 424.21342292774125,
+      "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_lagPat.npz",
+      "crop_center_sec": 5434.860254107996,
+      "crop_sample_bounds": [
+        10869401,
+        10870041
+      ],
+      "sample_rate_in": 2000.0000000000002,
+      "display_centroid_ms": [
+        -27.38142151413381,
+        -19.870305616777745,
+        -3.394251163517242,
+        10.389577204911598,
+        17.08734433661818,
+        20.29029241923755,
+        28.664316103009234
+      ],
+      "display_span_ms": 56.04573761714305,
+      "display_rho": 1.0,
+      "min_peak_to_median_abs": 12.283593511494576,
+      "centroid_audit_pass": true,
+      "eligible_for_display": true,
+      "display_score": 56.04573761714305,
+      "cache_key": "FA134AX6_1562_A3"
+    },
+    {
+      "record": "FA134AXF",
+      "event_index": 1475,
+      "shaft": "A",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "span_ms": 66.91732722750609,
+      "rho": 0.9642857142857143,
+      "window": [
+        5405.199,
+        5405.699
+      ],
+      "score": 451.6919587856662,
+      "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXF_lagPat.npz",
+      "crop_center_sec": 5405.434077667993,
+      "crop_sample_bounds": [
+        10810548,
+        10811188
+      ],
+      "sample_rate_in": 2000.0000000000002,
+      "display_centroid_ms": [
+        -26.52656318492566,
+        -5.032975329463368,
+        1.1830733880779654,
+        15.027408129366398,
+        18.104472035294584,
+        28.13126168965116,
+        26.932071446720023
+      ],
+      "display_span_ms": 54.65782487457682,
+      "display_rho": 0.9642857142857145,
+      "min_peak_to_median_abs": 13.202315388952863,
+      "centroid_audit_pass": true,
+      "eligible_for_display": true,
+      "display_score": 52.705759700484805,
+      "cache_key": "FA134AXF_1475_A3"
+    },
+    {
+      "record": "FA134AXJ",
+      "event_index": 292,
+      "shaft": "A",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "span_ms": 73.30874441488433,
+      "rho": 0.9642857142857143,
+      "window": [
+        1762.8629999999998,
+        1763.3629999999998
+      ],
+      "score": 494.83402480046925,
+      "source": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXJ_lagPat.npz",
+      "crop_center_sec": 1763.1018156788512,
+      "crop_sample_bounds": [
+        3525884,
+        3526524
+      ],
+      "sample_rate_in": 2000.0000000000002,
+      "display_centroid_ms": [
+        -12.053724340267385,
+        -25.18456906753824,
+        -8.281066691825407,
+        21.373379831876427,
+        22.0079066795186,
+        27.045286524021744,
+        25.225655937669316
+      ],
+      "display_span_ms": 52.22985559155999,
+      "display_rho": 0.9285714285714288,
+      "min_peak_to_median_abs": 8.328696154730764,
+      "centroid_audit_pass": true,
+      "eligible_for_display": true,
+      "display_score": 48.49915162073429,
+      "cache_key": "FA134AXJ_292_A3"
+    }
+  ],
+  "method": "Participation-masked contiguous montage; real-EDF spectrogram screening; common event recentering only",
+  "spectrum_rule": "Unchanged spectrum kernel applied independently to each discontinuous excerpt; no synthetic-join power in normalization",
+  "selection_scope": "Three frozen illustrative examples reproduced after the exploratory screen",
+  "evaluated_candidates": 3,
+  "eligible_candidates": 3,
+  "centroid_audit": {
+    "n_centroids": 21,
+    "minimum_display_weight_at_nearest_cell": 0.8735325043340021,
+    "median_display_weight_at_nearest_cell": 1.0,
+    "acceptance_threshold": 0.7,
+    "all_centroids_pass": true,
+    "centroids": [
+      {
+        "channel_index": 0,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.1326185784858662,
+        "frequency_hz": 90.52019481204078,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 0,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.13347343681507434,
+        "frequency_hz": 111.24438403146847,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 0,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.14794627565973262,
+        "frequency_hz": 100.70209758815325,
+        "display_weight_at_nearest_cell": 0.9790940765349749
+      },
+      {
+        "channel_index": 1,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.14012969438322226,
+        "frequency_hz": 92.80543179167366,
+        "display_weight_at_nearest_cell": 0.8735325043340021
+      },
+      {
+        "channel_index": 1,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.15496702467053663,
+        "frequency_hz": 109.61763407238874,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 1,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.13481543093246173,
+        "frequency_hz": 92.51768436626287,
+        "display_weight_at_nearest_cell": 0.9966842144023935
+      },
+      {
+        "channel_index": 2,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.15660574883648276,
+        "frequency_hz": 118.66720866620003,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 2,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.16118307338807797,
+        "frequency_hz": 107.4215098370374,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 2,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.15171893330817465,
+        "frequency_hz": 95.75164758832142,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 3,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.1703895772049116,
+        "frequency_hz": 110.45869641965142,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 3,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.1750274081293664,
+        "frequency_hz": 119.84221880866282,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 3,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.1813733798318764,
+        "frequency_hz": 95.8780169371075,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 4,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.17708734433661819,
+        "frequency_hz": 119.99237825931306,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 4,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.17810447203529461,
+        "frequency_hz": 124.94106341448006,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 4,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.1820079066795186,
+        "frequency_hz": 104.7254942566856,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 5,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.18029029241923755,
+        "frequency_hz": 109.78134226018798,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 5,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.18813126168965116,
+        "frequency_hz": 124.85675519762168,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 5,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.18704528652402175,
+        "frequency_hz": 119.5428380057838,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 6,
+        "event_index_within_panel": 0,
+        "time_within_event_sec": 0.18866431610300924,
+        "frequency_hz": 117.81490900367342,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 6,
+        "event_index_within_panel": 1,
+        "time_within_event_sec": 0.18693207144672003,
+        "frequency_hz": 119.5251212187357,
+        "display_weight_at_nearest_cell": 1.0
+      },
+      {
+        "channel_index": 6,
+        "event_index_within_panel": 2,
+        "time_within_event_sec": 0.18522565593766938,
+        "frequency_hz": 119.66673070737403,
+        "display_weight_at_nearest_cell": 1.0
+      }
+    ]
+  },
+  "concatenated_centroid_offsets_ms": [
+    [
+      -27.38142151413381,
+      -26.526563184925635,
+      -12.053724340267413
+    ],
+    [
+      -19.870305616777745,
+      -5.032975329463341,
+      -25.1845690675383
+    ],
+    [
+      -3.394251163517242,
+      1.1830733880779931,
+      -8.281066691825378
+    ],
+    [
+      10.389577204911598,
+      15.027408129366426,
+      21.37337983187637
+    ],
+    [
+      17.08734433661818,
+      18.104472035294638,
+      22.007906679518573
+    ],
+    [
+      20.29029241923755,
+      28.13126168965119,
+      27.045286524021716
+    ],
+    [
+      28.664316103009234,
+      26.93207144672005,
+      25.225655937669345
+    ]
+  ],
+  "purpose": "Illustration only; no cohort inference or C-F event changes"
+}

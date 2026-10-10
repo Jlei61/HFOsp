@@ -1,0 +1,60 @@
+{
+  "status": "FIG5A_TONIC_SNN_GIF_RENDERED_FROM_BIT_IDENTICAL_REPLAY",
+  "representative_seed": 1842,
+  "scientific_onset_ms": 480.0,
+  "trajectory_duration_ms": 2197.2000000000003,
+  "n_biological_frames": 111,
+  "n_appended_frames": 123,
+  "n_encoded_frames": 111,
+  "frame_dt_ms": 20.0,
+  "frame_duration_ms": 90,
+  "encoded_total_duration_ms": 11070,
+  "loop": 0,
+  "activity_window_ms": 10.0,
+  "display_contract": {
+    "SNN_activity": "fraction of E neurons that fired at least once in the previous 10 ms, binned on the frozen 64x64 sheet; fixed 0..1 scale; no frame-wise normalization",
+    "Z_q": "captured q grid shown as 1-q; fixed 0..0.225 scale",
+    "M": "mean per-neuron M state in each spatial bin; one fixed movie-wide scale",
+    "population_rate": "20-ms uniform smoothing of archived raw E rate",
+    "virtual_contacts": "archived current proxy with 5-ms smoothing; each contact maps pre-onset median to 0 and onset+300..1300-ms median to 1; no detrending or band-pass filtering",
+    "future_context": "future traces are light grey; elapsed traces are coloured"
+  },
+  "scientific_boundary": "model-state morphology screen under a stationary random environment; not a clinical seizure, not a patient-mechanism identification",
+  "full_edge_contract": {
+    "E_to_E_dose": 1.0,
+    "E_to_I_dose": 1.0,
+    "learned_edges_modified": false
+  },
+  "applied_spatial_ou": {
+    "mode": "local",
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "ell_mm": 0.38,
+    "update_interval_ms": 1.0,
+    "grid_spacing_mm": 0.4,
+    "seed_offset": 500000,
+    "role": "frozen accessibility process; not optimized"
+  },
+  "source_files": {
+    "candidate_json": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+    "candidate_json_sha256": "80ef269f4f7d5ad2ac4910dc2b64727fe0c2c1004fd46407176deb029ac699f0",
+    "candidate_npz": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.npz",
+    "candidate_npz_sha256": "283ee32711a2c5388f065d9e2faa9a54390f788bb3c7496c7e8cd4ea993a7248",
+    "SNN_capture_npz": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/snn_gif_capture/tonic_b0_v2_s1842_snn_frames.npz",
+    "SNN_capture_npz_sha256": "e88c5aabf9d8db1483dea93b5d063650d97508d0284b5f77175c8c058baa4665",
+    "SNN_capture_metadata": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/snn_gif_capture/tonic_b0_v2_s1842_snn_frames_metadata.json",
+    "SNN_capture_metadata_sha256": "7038f4505782443303f7b0edfaeed39fcbd68c5ddecdefcf3d9bd007c6723594",
+    "producer": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fig5a-snn-gif/scripts/paper_figures/plot_fig5a_spatial_zm_ou_tonic_snn_gif.py",
+    "producer_sha256": "293267213248c4536d4a25172b2addb6a8217d9e75b651dd2c95f38bfaff15e2"
+  },
+  "outputs": {
+    "gif": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5a_spatial_zm_ou_tonic/figures/fig5a-spatial-zm-ou-tonic-snn-activity.gif",
+      "sha256": "ee09cc646cd65d4d17a0900f63987811b9c7fa344d83ceee09d8ff62a89bef48"
+    },
+    "final_png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5a_spatial_zm_ou_tonic/figures/fig5a-spatial-zm-ou-tonic-snn-activity-final.png",
+      "sha256": "b98f7ceebb2f9a587cb6ce0fd06e8586444428fd68e0c2e2ea0f741977242c6f"
+    }
+  }
+}

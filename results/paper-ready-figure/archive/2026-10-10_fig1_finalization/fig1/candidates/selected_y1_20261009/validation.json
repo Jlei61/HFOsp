@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "patient": "Y1",
+  "n_channels": 26,
+  "n_events": 18190,
+  "cluster_counts": [
+    13160,
+    5030
+  ],
+  "same_events_and_channel_order": true,
+  "channel_labels_do_not_overlap": true,
+  "label_checks": {
+    "c": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 0.6461538461537657
+    },
+    "e": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 0.6461538461537657
+    },
+    "complete": {
+      "heatmaps_checked": 2,
+      "minimum_label_gap_px": 0.6461538461537657
+    }
+  },
+  "cohort_statistics_unchanged": true,
+  "old_canonical_assets_preserved": true,
+  "human_visual_acceptance": "PENDING",
+  "png_pdf_visual_check": "PASS",
+  "all_26_channel_labels_present_in_both_panels": true,
+  "output_hashes_verified": true
+}

@@ -1,0 +1,58 @@
+{
+  "record": "FA134AX6",
+  "event_index": 1562,
+  "event_index_in_segment": 7,
+  "patient": "Y1",
+  "channels": [
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9"
+  ],
+  "bipolar_channels": [
+    "A3-A4",
+    "A4-A5",
+    "A5-A6",
+    "A6-A7",
+    "A7-A8",
+    "A8-A9",
+    "A9-A10"
+  ],
+  "edf": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6.edf",
+  "edf_sample_bounds": [
+    10800000,
+    11200000
+  ],
+  "fs_native": 2000.0000000000002,
+  "fs_processed": 800,
+  "segment_sec": [
+    5400.0,
+    5600.0
+  ],
+  "event_window_sec": [
+    5434.615,
+    5435.115
+  ],
+  "original_event_center_sec": 5434.865,
+  "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_packedTimes.npy",
+  "artifact": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_lagPat.npz",
+  "artifact_sha256": "b44bdb451361bdf1d113689ab16970151a69d2e59b04b454cf26789f35e5ce0b",
+  "segment_event_count": 24,
+  "all_displayed_channels_participate": true,
+  "original_function_max_abs_difference_sec": 0.0,
+  "stored_lagpat_relative_difference_ms": [
+    4.440892098500626e-13,
+    4.440892098500626e-13,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -4.440892098500626e-13
+  ],
+  "stored_lagpat_max_abs_relative_difference_ms": 4.440892098500626e-13,
+  "saved_centroid_span_ms": 60.60191756110589,
+  "restored_centroid_span_ms": 60.601917561105
+}

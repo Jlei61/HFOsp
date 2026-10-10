@@ -1,0 +1,17 @@
+{
+  "reviewer": "agent",
+  "png_and_pdf_visually_inspected": true,
+  "human_visual_acceptance": "PENDING",
+  "checks": [
+    "C/E heatmaps and profiles all use display ranks 1\u201318",
+    "colorbars fully cover 1\u201318 without a zero-based white segment",
+    "unsmoothed peak-scaled ridges stay inside each corresponding row",
+    "all discrete modal bins marked",
+    "template mean and SD recomputed from the same derived ranks",
+    "A/B/D/F unchanged"
+  ],
+  "artifacts": {
+    "png": "6623ca842b28abc898e8bf787e28dcfebaa858b30484de6ae245c3ed1f8cb04b",
+    "pdf": "fc27a9322d1f9bc2ecef28d05190851dd10cb96f8a5df892abd51a7836792b19"
+  }
+}

@@ -184,6 +184,15 @@ def _build_figure1a_from_legacy_tiff(figures: Path) -> dict:
 
 
 def build_figure1() -> dict:
+    # Author-accepted Figure 1 has its own frozen release producer. Reusing the
+    # combined legacy command must not silently overwrite it with old panels.
+    pointer = FIG1_ROOT / "current_revision.json"
+    if pointer.is_file() and json.loads(pointer.read_text()).get("status") == "AUTHOR_ACCEPTED_FINAL":
+        from scripts.paper_figures.build_fig1_current import verify
+        verify(FIG1_ROOT)
+        registry = json.loads((FIG1_ROOT / "figure1_panel_registry.json").read_text())
+        return {"outputs": registry["panels"], "complete_layout": registry["complete"],
+                "status": "AUTHOR_ACCEPTED_FINAL_REUSED"}
     from scripts.paper_figures import plot_fig1_interictal_hfo_temporal_scaffold as fig1
 
     figures = FIG1_ROOT / "figures"

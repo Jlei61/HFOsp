@@ -1,0 +1,37 @@
+{
+  "display_only": true,
+  "rank_range": [
+    1,
+    18
+  ],
+  "definition": "Within each event, retain the existing 18 display channels, exclude nonparticipants, preserve their original order and rank them 1..n_participating. Nonparticipants remain NaN.",
+  "unchanged_channel_order": [
+    "E1",
+    "E2",
+    "F1",
+    "F2",
+    "C1",
+    "A3",
+    "A4",
+    "A5",
+    "B10",
+    "B2",
+    "A11",
+    "B11",
+    "B12",
+    "A9",
+    "A8",
+    "A10",
+    "A7",
+    "B9"
+  ],
+  "n_events": 18190,
+  "participant_count_min": 5,
+  "participant_count_max": 18,
+  "events_without_retained_participants": 0,
+  "original_pairwise_order_preserved": true,
+  "original_data_modified": false,
+  "labels_refit": false,
+  "display_rank_sha256": "c8bba39afb3ec893b864a378998dbb494b841881e2abca2c671671d91819f1e5",
+  "ridge_definition": "Exact discrete conditional rank frequencies; each channel is divided by its own maximum only for ridge height. No smoothing. Peak heights are not comparable across channels."
+}

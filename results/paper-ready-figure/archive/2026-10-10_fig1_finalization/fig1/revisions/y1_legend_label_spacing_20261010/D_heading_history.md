@@ -1,0 +1,3 @@
+# D标题排版来源核对
+
+y1_a7_zoom_final_20261009的D上方直接使用原始TIFF示意裁图，Orig Pats与Mean Pat单行显示且有明显留白。y1_display18_large_type_20261010首次由enlarge_mi_diagram按原示意数字重排为矢量图，标题变为两行15 pt，间距不足；local_rank版沿用同一D PNG。b_visual_alignment版仅收窄D横向轴框，这处拥挤继续保留；之后两轮标题调整的D独立文件逐字节保持。本次仅将这两组标题各外移6 pt；原示意数字及D的40人统计一直保持。

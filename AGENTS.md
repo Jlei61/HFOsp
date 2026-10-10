@@ -1,3 +1,7 @@
+<!-- CURRENT_FIGURE1_20261010 -->
+> **Figure 1已定稿（2026-10-10）：** 开始任何Fig1任务先读 `/home/honglab/leijiaxin/HFOsp/docs/current_figure1.md` 与主目录 `results/paper-ready-figure/fig1/current_revision.json`；离开共享机器时读本checkout的同名文件。当前是`y1_final_20261010`、`AUTHOR_ACCEPTED_FINAL`，正式完整图/A–F/PPTX统一在`fig1/figures/`，producer为`build_fig1_current.py`；冻结代码、必要输入在`fig1/source/`及`fig1/data/`。旧候选和修订均在`archive/2026-10-10_fig1_finalization/fig1/`，不得用旧工作树或旧producer覆盖当前包。后续改动在独立候选目录完成。
+<!-- /CURRENT_FIGURE1_20261010 -->
+
 > **2026-09-30 模型/结果路由**：分岔分析先读 `docs/topic4_model_versions.md` 和 `config/topic4_model_versions.json`。默认是20×20格、935群体的空间rate版；三区域六E/I群体版另存，不能混用。Figure 5当前入口为 `docs/current_figure5.md`。工作区清理状态见 `docs/workspace_status.md`。
 
 # Agent Guide

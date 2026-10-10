@@ -1,0 +1,287 @@
+{
+  "patient": "Y1",
+  "shaft": "A",
+  "channels": [
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9"
+  ],
+  "examples": [
+    {
+      "record": "FA134AX6",
+      "event_index": 1562,
+      "event_index_in_segment": 7,
+      "patient": "Y1",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "bipolar_channels": [
+        "A3-A4",
+        "A4-A5",
+        "A5-A6",
+        "A6-A7",
+        "A7-A8",
+        "A8-A9",
+        "A9-A10"
+      ],
+      "edf": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6.edf",
+      "edf_sample_bounds": [
+        10800000,
+        11200000
+      ],
+      "fs_native": 2000.0000000000002,
+      "fs_processed": 800,
+      "segment_sec": [
+        5400.0,
+        5600.0
+      ],
+      "event_window_sec": [
+        5434.615,
+        5435.115
+      ],
+      "original_event_center_sec": 5434.865,
+      "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_packedTimes.npy",
+      "artifact": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AX6_lagPat.npz",
+      "artifact_sha256": "b44bdb451361bdf1d113689ab16970151a69d2e59b04b454cf26789f35e5ce0b",
+      "segment_event_count": 24,
+      "all_displayed_channels_participate": true,
+      "original_function_max_abs_difference_sec": 0.0,
+      "stored_lagpat_relative_difference_ms": [
+        4.440892098500626e-13,
+        4.440892098500626e-13,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -4.440892098500626e-13
+      ],
+      "stored_lagpat_max_abs_relative_difference_ms": 4.440892098500626e-13,
+      "saved_centroid_span_ms": 60.60191756110589,
+      "restored_centroid_span_ms": 60.601917561105
+    },
+    {
+      "record": "FA134AXF",
+      "event_index": 1475,
+      "event_index_in_segment": 1,
+      "patient": "Y1",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "bipolar_channels": [
+        "A3-A4",
+        "A4-A5",
+        "A5-A6",
+        "A6-A7",
+        "A7-A8",
+        "A8-A9",
+        "A9-A10"
+      ],
+      "edf": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXF.edf",
+      "edf_sample_bounds": [
+        10800000,
+        11200000
+      ],
+      "fs_native": 2000.0000000000002,
+      "fs_processed": 800,
+      "segment_sec": [
+        5400.0,
+        5600.0
+      ],
+      "event_window_sec": [
+        5405.199,
+        5405.699
+      ],
+      "original_event_center_sec": 5405.449,
+      "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXF_packedTimes.npy",
+      "artifact": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXF_lagPat.npz",
+      "artifact_sha256": "129e8e8f0dd6d86a7118e1e72c7adecb24b35a1e4ec9b2dcd930adb2ed855b48",
+      "segment_event_count": 42,
+      "all_displayed_channels_participate": true,
+      "original_function_max_abs_difference_sec": 0.0,
+      "stored_lagpat_relative_difference_ms": [
+        0.0,
+        -1.1102230246251565e-13,
+        2.220446049250313e-13,
+        0.0,
+        0.0,
+        -2.220446049250313e-13,
+        0.0
+      ],
+      "stored_lagpat_max_abs_relative_difference_ms": 2.220446049250313e-13,
+      "saved_centroid_span_ms": 66.91732722750609,
+      "restored_centroid_span_ms": 66.91732722750588
+    },
+    {
+      "record": "FA134AXJ",
+      "event_index": 292,
+      "event_index_in_segment": 40,
+      "patient": "Y1",
+      "channels": [
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9"
+      ],
+      "bipolar_channels": [
+        "A3-A4",
+        "A4-A5",
+        "A5-A6",
+        "A6-A7",
+        "A7-A8",
+        "A8-A9",
+        "A9-A10"
+      ],
+      "edf": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXJ.edf",
+      "edf_sample_bounds": [
+        3200000,
+        3600000
+      ],
+      "fs_native": 2000.0000000000002,
+      "fs_processed": 800,
+      "segment_sec": [
+        1600.0,
+        1800.0
+      ],
+      "event_window_sec": [
+        1762.8629999999998,
+        1763.3629999999998
+      ],
+      "original_event_center_sec": 1763.1129999999998,
+      "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXJ_packedTimes.npy",
+      "artifact": "/mnt/yuquan_data/yuquan_24h_edf/zhangkexuan/FA134AXJ_lagPat.npz",
+      "artifact_sha256": "95ea2be70e2f6452b65ab89fbf87b126a00941c2ca43651b22619ff0b8ae3edb",
+      "segment_event_count": 51,
+      "all_displayed_channels_participate": true,
+      "original_function_max_abs_difference_sec": 0.0,
+      "stored_lagpat_relative_difference_ms": [
+        0.0,
+        3.552713678800501e-12,
+        -3.552713678800501e-12,
+        3.552713678800501e-12,
+        0.0,
+        3.552713678800501e-12,
+        0.0
+      ],
+      "stored_lagpat_max_abs_relative_difference_ms": 3.552713678800501e-12,
+      "saved_centroid_span_ms": 73.30874441488433,
+      "restored_centroid_span_ms": 73.30874441488788
+    }
+  ],
+  "method": "original segment preprocessing and stitched spectrum; full-window S**3 mass centroid",
+  "legacy_source": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/for523_p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool.py",
+  "legacy_source_sha256": "d2079fb815c0e02815f611ed77e8a53d2988a377f008c6ff800a93d6f7d3d52a",
+  "methods": "/home/honglab/leijiaxin/HFOsp/docs/paper-draft/methods_revised_draft.md",
+  "fs_hz": 800,
+  "band_hz": [
+    80,
+    250
+  ],
+  "spec_window": "hamming",
+  "spec_window_sec": 0.05,
+  "overlap_sec": 0.04,
+  "gaussian_sigma": 1.5,
+  "smooth_before_frequency_crop": true,
+  "frequency_mask": "50 < f < 300 Hz",
+  "centroid_power": 3,
+  "centroid_support": "all frequency/time cells within the complete original packed window",
+  "normalization": "each channel/event spectrum divided by its maximum for display only",
+  "no_peak_component_mask": true,
+  "no_edge_guard": true,
+  "no_channel_time_shifts": true,
+  "event_center": "original packed event window midpoint; no peak-based recentering",
+  "display_events": [
+    {
+      "record": "FA134AX6",
+      "event_index": 1559,
+      "original_window_sec": [
+        5430.636,
+        5431.136
+      ],
+      "event_center_sec": 5430.886,
+      "relative_lagpat_max_difference_ms": 5.065392549852277e-13,
+      "centroid_span_ms": 56.70979802879916,
+      "halfmax_time_bounds_sec": [
+        -0.05475000000176822,
+        0.04524999999823187
+      ],
+      "all_channels_participate": true
+    },
+    {
+      "record": "FA134AX6",
+      "event_index": 1562,
+      "original_window_sec": [
+        5434.615,
+        5435.115
+      ],
+      "event_center_sec": 5434.865,
+      "relative_lagpat_max_difference_ms": 5.724587470723463e-13,
+      "centroid_span_ms": 60.601917561105,
+      "halfmax_time_bounds_sec": [
+        -0.06375000000065478,
+        0.04624999999934509
+      ],
+      "all_channels_participate": true
+    },
+    {
+      "record": "FA134AXF",
+      "event_index": 1494,
+      "original_window_sec": [
+        5505.859,
+        5506.359
+      ],
+      "event_center_sec": 5506.109,
+      "relative_lagpat_max_difference_ms": 3.0461744238152733e-12,
+      "centroid_span_ms": 41.0299769669642,
+      "halfmax_time_bounds_sec": [
+        -0.05400000000161498,
+        0.045999999998384666
+      ],
+      "all_channels_participate": true
+    }
+  ],
+  "display_window_sec": [
+    -0.15,
+    0.15
+  ],
+  "full_window_review_sec": [
+    -0.25,
+    0.25
+  ],
+  "illustration_selection": "Same Y1 A3-A9 shaft; FA134AX6/1559, FA134AX6/1562, FA134AXF/1494. Chosen after restoring the S**3 rule and inspecting complete 0.5 s windows; all half-maximum components fit the shared +/-150 ms display. Other sources from the prior figure were also audited, not used for inference.",
+  "previous_third_event": {
+    "record": "FA134AX6",
+    "event_index": 1574,
+    "original_window_sec": [
+      5490.62,
+      5491.12
+    ],
+    "event_center_sec": 5490.87,
+    "relative_lagpat_max_difference_ms": 3.552713678800501e-12,
+    "centroid_span_ms": 40.29146149741791,
+    "halfmax_time_bounds_sec": [
+      -0.10375000000065526,
+      0.036249999999345306
+    ],
+    "all_channels_participate": true
+  },
+  "illustration_change_reason": "Replace the double-peaked A3 example by a cleaner existing event on the same Y1 A3-A9 shaft; the first two events and all spectrum/centroid definitions remain unchanged."
+}

@@ -1,0 +1,833 @@
+{
+  "figure": "fig5-spatial-zm-ou-tonic-main-v2",
+  "status": "FIG5_SPATIAL_ZM_OU_TONIC_PAPER_READY_CANDIDATE",
+  "registry_status": "CANDIDATE_PENDING_AUTHOR_VISUAL_ACCEPTANCE",
+  "layout_contract": "author-supplied paper-ready Fig5 A-D transition layout",
+  "panel_semantics": {
+    "A": {
+      "question": "Does one continuous trajectory enter a sustained globally recruited state that is visible at all virtual contacts?",
+      "measure": "20-ms active-E fraction and fraction of 1-mm sheet bins with >=50% local recruitment",
+      "readout": "current-based LFPRecorder proxy; 5-ms smoothing; each contact mapped so pre-onset median=0 and onset+300..1300-ms median=1; no detrending or band-pass filtering",
+      "sample_event_window_ms": [
+        309.6,
+        409.6
+      ]
+    },
+    "B": {
+      "question": "Does the spatial q_core/q_mean-M-rE trajectory cross the patient-matched reduced fold and approach its high-rate skeleton?",
+      "seed": 1842,
+      "trajectory_stop_ms": 1279.0999755859375,
+      "scientific_onset_ms": 480.0,
+      "q_coordinates": [
+        "q_core",
+        "q_mean"
+      ],
+      "rate_encoding": "20-ms-smoothed SNN E rate on q_mean path",
+      "fold": {
+        "q": 0.890825926128,
+        "D": 0.10917407387199995,
+        "mean_rate_e_hz": 127.398521192896,
+        "A": 0.031849630298224
+      },
+      "high_branch_stability": "delay-unstable in the audited closure",
+      "standalone_panel": {
+        "seed": 1842,
+        "trajectory_stop_ms": 1279.0999755859375,
+        "scientific_onset_ms": 480.0,
+        "q_coordinates": [
+          "q_core",
+          "q_mean"
+        ],
+        "rate_encoding": "20-ms-smoothed SNN E rate on q_mean path",
+        "fold": {
+          "q": 0.890825926128,
+          "D": 0.10917407387199995,
+          "mean_rate_e_hz": 127.398521192896,
+          "A": 0.031849630298224
+        },
+        "high_branch_stability": "delay-unstable in the audited closure"
+      },
+      "interpretation_boundary": "the plotted 1-mm fold is a deterministic frozen-uniform-q organizer; the high branch is delay-unstable and is not a stable fixed-point or exact finite-SNN onset threshold"
+    },
+    "C_left": {
+      "question": "What is the spatial first-spike order of one rule-selected low-state event?",
+      "measure": "exact per-neuron first-spike time in the fixed event window",
+      "event_window_ms": [
+        309.6,
+        409.6
+      ],
+      "contact_measure": "median first-spike time among local E neurons",
+      "spatial_smoothing": "none"
+    },
+    "C_right": {
+      "question": "Where is SNN firing energy expressed in the fixed first 100 ms of runaway?",
+      "measure": "square of per-neuron firing rate, displayed in 1e3 Hz^2",
+      "window_ms": [
+        480.0,
+        580.0
+      ],
+      "selection": "frozen onset-aligned 100-ms window; image pixels unused"
+    },
+    "D": {
+      "question": "How does the same weak perturbation propagate from the low and early-runaway states?",
+      "state_times_ms": {
+        "low_activity": 200.0,
+        "early_runaway": 600.0
+      },
+      "site_contract": {
+        "kind": "one uniform random point per square stratum",
+        "n_side": 4,
+        "n_total": 16,
+        "seed": 20260820,
+        "sheet_extent_mm": [
+          0.0,
+          20.0
+        ],
+        "edge_margin_mm": 1.2
+      },
+      "dose_cells": 16,
+      "dose_origin": "frozen 16-cell weak dose inherited from the accepted Fig5 low-state assay; not selected from these response maps",
+      "response": "paired probe-minus-sham descendant spikes, 0-50 ms",
+      "aggregation": "equal-weight mean over 16 paired stratified-random sites",
+      "low_n_e1_evaluable": 16,
+      "early_runaway_n_e1_evaluable": 0,
+      "low_n_probe_attributable_event": 0,
+      "early_runaway_n_probe_attributable_event": 0,
+      "low_rows": [
+        {
+          "site_index": 0,
+          "site_xy_mm": [
+            2.6640257271802166,
+            1.62463568275651
+          ],
+          "dose_cells": 16,
+          "susceptibility": -2.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": -2.0,
+          "r90_mm": 2.406968008245168,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 1,
+          "site_xy_mm": [
+            7.312058097005604,
+            4.363568606485793
+          ],
+          "dose_cells": 16,
+          "susceptibility": 11.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": 11.0,
+          "r90_mm": 5.415589762828058,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 2,
+          "site_xy_mm": [
+            10.425725822320615,
+            2.3517024621266875
+          ],
+          "dose_cells": 16,
+          "susceptibility": 22.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": 22.0,
+          "r90_mm": 5.6890027366340234,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 3,
+          "site_xy_mm": [
+            17.451940491717988,
+            1.3402168123284341
+          ],
+          "dose_cells": 16,
+          "susceptibility": 95.0,
+          "excess_spikes_early": 1.0,
+          "excess_spikes_late": 94.0,
+          "r90_mm": 22.225533611278365,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 4,
+          "site_xy_mm": [
+            1.7748515352010708,
+            5.974034316137928
+          ],
+          "dose_cells": 16,
+          "susceptibility": 2.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": 2.0,
+          "r90_mm": 18.046606987535736,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 5,
+          "site_xy_mm": [
+            8.340248715976644,
+            6.83351288057203
+          ],
+          "dose_cells": 16,
+          "susceptibility": -12.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": -12.0,
+          "r90_mm": 11.037993501700763,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 6,
+          "site_xy_mm": [
+            12.636882535320465,
+            7.490986381599549
+          ],
+          "dose_cells": 16,
+          "susceptibility": -30.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": -30.0,
+          "r90_mm": 13.824840793173856,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 7,
+          "site_xy_mm": [
+            18.53097386740913,
+            6.641298371678204
+          ],
+          "dose_cells": 16,
+          "susceptibility": 286.0,
+          "excess_spikes_early": 9.0,
+          "excess_spikes_late": 277.0,
+          "r90_mm": 16.457840635462812,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 8,
+          "site_xy_mm": [
+            5.586413286407191,
+            14.353471393158223
+          ],
+          "dose_cells": 16,
+          "susceptibility": -896.0,
+          "excess_spikes_early": -2.0,
+          "excess_spikes_late": -894.0,
+          "r90_mm": 11.070689293647106,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 9,
+          "site_xy_mm": [
+            6.966229973840451,
+            14.045886064105197
+          ],
+          "dose_cells": 16,
+          "susceptibility": -447.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": -447.0,
+          "r90_mm": 11.623027993138447,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 10,
+          "site_xy_mm": [
+            10.398426339851113,
+            11.614546003068558
+          ],
+          "dose_cells": 16,
+          "susceptibility": -291.0,
+          "excess_spikes_early": 0.0,
+          "excess_spikes_late": -291.0,
+          "r90_mm": 10.929253166883406,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 11,
+          "site_xy_mm": [
+            16.76410580773128,
+            13.195331484204809
+          ],
+          "dose_cells": 16,
+          "susceptibility": -246.0,
+          "excess_spikes_early": 9.0,
+          "excess_spikes_late": -255.0,
+          "r90_mm": 16.324170395099646,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 12,
+          "site_xy_mm": [
+            5.143213193139123,
+            18.785125428332073
+          ],
+          "dose_cells": 16,
+          "susceptibility": -3481.0,
+          "excess_spikes_early": -55.0,
+          "excess_spikes_late": -3426.0,
+          "r90_mm": 16.458674931582433,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 13,
+          "site_xy_mm": [
+            6.472040376593252,
+            17.069952190194698
+          ],
+          "dose_cells": 16,
+          "susceptibility": -4037.0,
+          "excess_spikes_early": 106.0,
+          "excess_spikes_late": -4143.0,
+          "r90_mm": 14.298012989095822,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 14,
+          "site_xy_mm": [
+            13.774080882500474,
+            15.544283960655353
+          ],
+          "dose_cells": 16,
+          "susceptibility": 23.0,
+          "excess_spikes_early": 212.0,
+          "excess_spikes_late": -189.0,
+          "r90_mm": 12.831481274502574,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 15,
+          "site_xy_mm": [
+            15.667346798530058,
+            18.04033824778952
+          ],
+          "dose_cells": 16,
+          "susceptibility": -150.0,
+          "excess_spikes_early": 11.0,
+          "excess_spikes_late": -161.0,
+          "r90_mm": 16.33548007492318,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": false,
+          "e1_evaluable": true,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        }
+      ],
+      "early_runaway_rows": [
+        {
+          "site_index": 0,
+          "site_xy_mm": [
+            2.6640257271802166,
+            1.62463568275651
+          ],
+          "dose_cells": 16,
+          "susceptibility": 47.0,
+          "excess_spikes_early": 93.0,
+          "excess_spikes_late": -46.0,
+          "r90_mm": 16.590732790496965,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 1,
+          "site_xy_mm": [
+            7.312058097005604,
+            4.363568606485793
+          ],
+          "dose_cells": 16,
+          "susceptibility": -2.0,
+          "excess_spikes_early": -5.0,
+          "excess_spikes_late": 3.0,
+          "r90_mm": 13.862912332694977,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 2,
+          "site_xy_mm": [
+            10.425725822320615,
+            2.3517024621266875
+          ],
+          "dose_cells": 16,
+          "susceptibility": -42.0,
+          "excess_spikes_early": 9.0,
+          "excess_spikes_late": -51.0,
+          "r90_mm": 15.590372576714637,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 3,
+          "site_xy_mm": [
+            17.451940491717988,
+            1.3402168123284341
+          ],
+          "dose_cells": 16,
+          "susceptibility": 139.0,
+          "excess_spikes_early": -7.0,
+          "excess_spikes_late": 146.0,
+          "r90_mm": 17.266197342474186,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 4,
+          "site_xy_mm": [
+            1.7748515352010708,
+            5.974034316137928
+          ],
+          "dose_cells": 16,
+          "susceptibility": 106.0,
+          "excess_spikes_early": 9.0,
+          "excess_spikes_late": 97.0,
+          "r90_mm": 16.428756381044742,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 5,
+          "site_xy_mm": [
+            8.340248715976644,
+            6.83351288057203
+          ],
+          "dose_cells": 16,
+          "susceptibility": 165.0,
+          "excess_spikes_early": -16.0,
+          "excess_spikes_late": 181.0,
+          "r90_mm": 11.722826354257995,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 6,
+          "site_xy_mm": [
+            12.636882535320465,
+            7.490986381599549
+          ],
+          "dose_cells": 16,
+          "susceptibility": 81.0,
+          "excess_spikes_early": 13.0,
+          "excess_spikes_late": 68.0,
+          "r90_mm": 12.545717308682061,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 7,
+          "site_xy_mm": [
+            18.53097386740913,
+            6.641298371678204
+          ],
+          "dose_cells": 16,
+          "susceptibility": 56.0,
+          "excess_spikes_early": -1.0,
+          "excess_spikes_late": 57.0,
+          "r90_mm": 15.512929035884733,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 8,
+          "site_xy_mm": [
+            5.586413286407191,
+            14.353471393158223
+          ],
+          "dose_cells": 16,
+          "susceptibility": 159.0,
+          "excess_spikes_early": -18.0,
+          "excess_spikes_late": 177.0,
+          "r90_mm": 13.51248001907575,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 9,
+          "site_xy_mm": [
+            6.966229973840451,
+            14.045886064105197
+          ],
+          "dose_cells": 16,
+          "susceptibility": 166.0,
+          "excess_spikes_early": -11.0,
+          "excess_spikes_late": 177.0,
+          "r90_mm": 12.886811759891948,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 10,
+          "site_xy_mm": [
+            10.398426339851113,
+            11.614546003068558
+          ],
+          "dose_cells": 16,
+          "susceptibility": 166.0,
+          "excess_spikes_early": 34.0,
+          "excess_spikes_late": 132.0,
+          "r90_mm": 10.45438489170217,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 11,
+          "site_xy_mm": [
+            16.76410580773128,
+            13.195331484204809
+          ],
+          "dose_cells": 16,
+          "susceptibility": 18.0,
+          "excess_spikes_early": -14.0,
+          "excess_spikes_late": 32.0,
+          "r90_mm": 14.969073931064255,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 12,
+          "site_xy_mm": [
+            5.143213193139123,
+            18.785125428332073
+          ],
+          "dose_cells": 16,
+          "susceptibility": -162.0,
+          "excess_spikes_early": -13.0,
+          "excess_spikes_late": -149.0,
+          "r90_mm": 16.748520370220614,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 13,
+          "site_xy_mm": [
+            6.472040376593252,
+            17.069952190194698
+          ],
+          "dose_cells": 16,
+          "susceptibility": -279.0,
+          "excess_spikes_early": -22.0,
+          "excess_spikes_late": -257.0,
+          "r90_mm": 14.751154737986562,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 14,
+          "site_xy_mm": [
+            13.774080882500474,
+            15.544283960655353
+          ],
+          "dose_cells": 16,
+          "susceptibility": 72.0,
+          "excess_spikes_early": -33.0,
+          "excess_spikes_late": 105.0,
+          "r90_mm": 13.121295727929166,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        },
+        {
+          "site_index": 15,
+          "site_xy_mm": [
+            15.667346798530058,
+            18.04033824778952
+          ],
+          "dose_cells": 16,
+          "susceptibility": 95.0,
+          "excess_spikes_early": -37.0,
+          "excess_spikes_late": 132.0,
+          "r90_mm": 14.523567284259181,
+          "probe_attributable_event_200ms": false,
+          "n_probe_events": 1,
+          "n_sham_events": 1,
+          "brief_threshold_excursion": false,
+          "reached_model_ictal_200ms": true,
+          "e1_evaluable": false,
+          "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"
+        }
+      ],
+      "chunks": {
+        "low": [
+          "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/probe_chunks/low_00_07.npz",
+          "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/probe_chunks/low_08_15.npz"
+        ],
+        "early_runaway": [
+          "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/probe_chunks/high_00_07.npz",
+          "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/probe_chunks/high_08_15.npz"
+        ]
+      },
+      "rendering": "response only; one shared signed scale; no slow-state or substrate overlay",
+      "interpretation_boundary": "the early-runaway state may be non-evaluable as susceptibility because the sham is already tonic; the signed probe-minus-sham field remains a descriptive saturation response"
+    }
+  },
+  "representative_seed": 1842,
+  "representative_selection": "seed nearest the median onset in the frozen all-pass confirmation family",
+  "confirmation_family": {
+    "parameter_set_id": "tonic_b0_v2",
+    "seeds": [
+      1841,
+      1842,
+      1843
+    ],
+    "n_passed": 3,
+    "n_total": 3,
+    "single_frozen_config": true,
+    "parameter_contract_sha256": "2d630cab9f558ed0f0f1095df7821d3a4c2cee0cef586669d68051171205ac15"
+  },
+  "coordinate_contract": "raw 0-20 mm sheet x/y; no rotation, reflection, or similarity transform",
+  "model_contract": {
+    "slow_variables": "spatial Z/q inhibition resource and per-neuron M/gK adaptation",
+    "use_SG": false,
+    "stationary_spatial_ou": {
+      "mode": "local",
+      "sigma_rate_per_ms": 0.1,
+      "tau_ms": 20.0,
+      "ell_mm": 0.38,
+      "update_interval_ms": 1.0,
+      "grid_spacing_mm": 0.4,
+      "seed_offset": 500000,
+      "role": "frozen accessibility process; not optimized"
+    },
+    "full_edges": {
+      "E_to_E_dose": 1.0,
+      "E_to_I_dose": 1.0,
+      "learned_edges_modified": false
+    },
+    "timed_pulse_train": false
+  },
+  "source_files": {
+    "trajectory_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.npz",
+      "sha256": "283ee32711a2c5388f065d9e2faa9a54390f788bb3c7496c7e8cd4ea993a7248"
+    },
+    "trajectory_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_confirmation_v2/tonic_b0_v2_s1842.json",
+      "sha256": "80ef269f4f7d5ad2ac4910dc2b64727fe0c2c1004fd46407176deb029ac699f0"
+    },
+    "aggregate_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/tonic_runaway_aggregate.json",
+      "sha256": "46c64d49fa0f9dbcb64b00d3d15e844e291b3face5c79e73c5c0699562ed3f7d"
+    },
+    "static_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/seed1842_static_panels.npz",
+      "sha256": "5b9db75b2f9e122af008852b3e8a522a69a04092e72bf3d999d5a573feaba8fa"
+    },
+    "static_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_node_local_connectivity_plus_zm/spatial_zm_ou/paper_ready_fig5_static/seed1842_static_panels.json",
+      "sha256": "f91fc4bd900ecaad849984d87785ecd0eecc216985db4e42d053ac1e866f6078"
+    },
+    "dynamic_projection_json": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/dynamic_projection/patient_zm_snn_manifold_projection.json",
+      "sha256": "81a2958bea684dd11a474809819d68c0e1829637998c39ff75e34115585ce44f"
+    },
+    "dynamic_projection_npz": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/dynamic_projection/patient_zm_snn_manifold_projection.npz",
+      "sha256": "29b2b738e1d3ad7870be8b8efcdef177cb4ec481cf501b48549341d49e953318"
+    },
+    "delay_stability_audit": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/deterministic_meanfield/patient_zm_delay_stability_audit.json",
+      "sha256": "f4d77a97760849ebf0f3fa558982f480f660009a8673dc13519fa68cd3f6a6ef"
+    },
+    "grid_convergence_audit": {
+      "path": "/data/hfosp_topic4_fig45_artifacts/fig5/data_driven_zm_phase_diagram/deterministic_meanfield/patient_zm_grid_convergence.json",
+      "sha256": "105dc446067a2d3b75ea0965a6097adc1e9917d8c90bb7e47b98fd01a5bf3c10"
+    },
+    "producer": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-zm-phase-diagram/scripts/paper_figures/plot_fig5_spatial_zm_ou_tonic_paper_ready.py",
+      "sha256": "bfa30f3cd89e111d513a2db8ebd95e1007d95959aed405904b5e47fff6d48616"
+    },
+    "critical_manifold_renderer": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-zm-phase-diagram/src/topic4_patient_zm_figure.py",
+      "sha256": "1f366607b79910faa137c6792813a0a05bc822f484ba3cd3cf88370414f4a387"
+    }
+  },
+  "outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-spatial-zm-ou-tonic-main-v2.png",
+      "sha256": "f65747a63d4e9e73b479e458b6e4fb4ed546f1638565ce6ee2bbaad54124edc7"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-spatial-zm-ou-tonic-main-v2.pdf",
+      "sha256": "df24a18f3f6a18443c9ed840294387c193c51efa0c16a5b469036f3ae1d2b8e9"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-spatial-zm-ou-tonic-main-v2.svg",
+      "sha256": "6d50eac701940f7d58a6787e115509231d45c120f2a6e25dea91bc213649e668"
+    }
+  },
+  "panel_b_outputs": {
+    "png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-panel-b-zm-critical-manifold.png",
+      "sha256": "1b8948b8f6cc4fb5a2186c862d5a6b4f91695ace2fcb34de6539748680d3b0c0"
+    },
+    "pdf": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-panel-b-zm-critical-manifold.pdf",
+      "sha256": "96badb6f202145403f5acf32321fd6de20a95627de06c756bd6628f3950a693f"
+    },
+    "svg": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig5_spatial_zm_ou_tonic/figures/fig5-panel-b-zm-critical-manifold.svg",
+      "sha256": "d753ff7208558e8265a08f0ac5398f1d15c767b56bc4927eb52b3879696e4514"
+    }
+  },
+  "claim_boundary": "synthetic tonic model-state transition on one frozen patient-derived scaffold; not clinical seizure reproduction, a recoverable seizure cycle, waveform fitting, or patient-mechanism identification",
+  "git_head": "d0e3e0139f278470092916804d7fcdb7df208dc4"
+}

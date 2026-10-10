@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "reference_producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
+  "reference_functions": [
+    "_bandpass",
+    "_load_bipolar_event_snippets",
+    "_notch",
+    "_standard_channel_name"
+  ],
+  "waveform_bitwise_equal_to_original_B2_helper": true,
+  "waveform_max_abs_difference_V": 0.0,
+  "n_signal_samples": 9600,
+  "shape": [
+    10,
+    960
+  ],
+  "n_contacts": 140,
+  "all_signal_endpoints_present": true,
+  "maximum_intercontact_projection_relative_error": 5.410836169628119e-05,
+  "canonical_panel_files_unchanged": true,
+  "human_visual_acceptance": "PENDING",
+  "C_to_F_complete_layout_pixel_identical": true,
+  "event_windows_match_source_artifact": true,
+  "agent_png_pdf_visual_check": "PASS",
+  "final_files": {
+    "fig1-panela.png": {
+      "bytes": 3187595,
+      "sha256": "8af2d969201534ec6d8f6ccac1ec43a41a49e607031ca1d8b70940d81a59f9e9"
+    },
+    "fig1-complete-layout.pdf": {
+      "bytes": 2610829,
+      "sha256": "804f52186807e22f2c2c4d0e975c126e91352aa709e0b76c63b03b834a03601d"
+    },
+    "fig1-panela.pdf": {
+      "bytes": 2082975,
+      "sha256": "5bd3beaf996f3901d685134eb806286b781edbc946a3805afa5a5b4b12853650"
+    },
+    "fig1-complete-layout.png": {
+      "bytes": 4657929,
+      "sha256": "7cbe05e12176c832c07ccff3fb8a9f35ffffbde097403c3061d1af48e7ef8e40"
+    },
+    "fig1-panela.svg": {
+      "bytes": 3149978,
+      "sha256": "05875e5e2b22a29da30a85c99ddf7b3434809b7ab6be68cce4fabbe523deebdd"
+    }
+  }
+}

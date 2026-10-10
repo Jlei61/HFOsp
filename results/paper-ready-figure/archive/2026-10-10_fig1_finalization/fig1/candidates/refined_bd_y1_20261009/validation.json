@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "patient": "Y1",
+  "n_channels": 26,
+  "n_events": 18190,
+  "cluster_counts": [
+    13160,
+    5030
+  ],
+  "same_events_and_channel_order": true,
+  "channel_labels_do_not_overlap": true,
+  "label_checks": {
+    "c": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "e": {
+      "heatmaps_checked": 1,
+      "minimum_label_gap_px": 1.9230769230769056
+    },
+    "complete": {
+      "heatmaps_checked": 2,
+      "minimum_label_gap_px": 1.9230769230769056
+    }
+  },
+  "row_alignment": {
+    "CD": {
+      "baseline_difference_mm": 0.0,
+      "group_top_difference_mm": 3.8915537459160985e-14,
+      "group_height_mm": 78.73999999999997,
+      "mi_axis_size_inches": [
+        3.3,
+        2.16
+      ],
+      "meaning": "Permutation schematic plus MI chart share the height of the C heatmap"
+    },
+    "EF": {
+      "baseline_difference_mm": 0.0,
+      "height_difference_mm": 0.0,
+      "data_axis_height_mm": 78.73999999999998
+    }
+  },
+  "latest_panel_a_exact_copy": true,
+  "panel_b_labels_restored": true,
+  "cohort_statistics_unchanged": true,
+  "old_canonical_assets_preserved": true,
+  "human_visual_acceptance": "PENDING",
+  "png_pdf_visual_check": "PASS",
+  "source_and_output_hashes_verified": true,
+  "unchanged_complete_figure_regions": [
+    "A",
+    "C",
+    "E",
+    "F",
+    "B1"
+  ],
+  "panel_b_pdf_relative_time_axis_check": "PASS",
+  "spectrum_and_centroid_coordinates_unchanged": true,
+  "panel_b_title_baseline": "Matched to original HFO raster title baseline; patient label left-aligned"
+}

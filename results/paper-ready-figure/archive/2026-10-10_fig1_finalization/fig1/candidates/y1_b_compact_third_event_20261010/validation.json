@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "first_two_events_numerically_identical": true,
+  "third_event_replaced": {
+    "record": "FA134AXF",
+    "event_index": 1494,
+    "original_window_sec": [
+      5505.859,
+      5506.359
+    ],
+    "event_center_sec": 5506.109,
+    "relative_lagpat_max_difference_ms": 3.0461744238152733e-12,
+    "centroid_span_ms": 41.0299769669642,
+    "halfmax_time_bounds_sec": [
+      -0.05400000000161498,
+      0.045999999998384666
+    ],
+    "all_channels_participate": true
+  },
+  "original_spectrum_functions_exact": true,
+  "full_window_S3_centroid_unchanged": true,
+  "stored_lagpat_max_difference_ms": 3.0461744238152733e-12,
+  "preservation": {
+    "source_layout": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/revisions/y1_legacy_spectrum_restored_20261010/latest_layout",
+    "unchanged_A_C_D_E_F": true,
+    "changed_full_figure_pixels": 1537465,
+    "changes_restricted_to_right_spectrum": true,
+    "replacement_bounds_inches": [
+      13.91,
+      10.48,
+      19.28,
+      15.87
+    ],
+    "display_time_limits_sec": [
+      -0.15,
+      0.15
+    ],
+    "title_baseline_inches": 15.52
+  },
+  "other_standalone_panels_byte_identical": true,
+  "human_visual_acceptance": "PENDING",
+  "PDF_changed_pixels_outside_B": 0,
+  "agent_PNG_PDF_visual_check": "PASS; pending author layout and event review"
+}

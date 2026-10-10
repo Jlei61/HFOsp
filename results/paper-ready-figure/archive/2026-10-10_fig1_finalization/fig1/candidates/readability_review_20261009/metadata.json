@@ -1,0 +1,619 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_SELECTION_AND_VISUAL_REVIEW",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_readability_review.py",
+  "formal_current_figure_replaced": false,
+  "canonical_assets_unchanged": true,
+  "n_patients": 40,
+  "shortlist": [
+    "Y12",
+    "E9",
+    "E18",
+    "E4",
+    "E7"
+  ],
+  "input_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_readability_review.py": "26eb493b0fbaedaea97f31571506db8cbba26303c32b8ee63c16790417794cf0",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py": "e6fb80aea61be963fb0d506bb13329d0111ea9afbc22e2b80c5ba7ae0a32a578",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figure1_panel_metadata.json": "441050dda6969d7b27937a0e8041617012f855aeb919fe9af888a32792e18ebe",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/recording_chain_20261009/figures/fig1-panela.png": "8af2d969201534ec6d8f6ccac1ec43a41a49e607031ca1d8b70940d81a59f9e9"
+  },
+  "selection_purpose": "Illustration clarity only; cohort estimates unchanged; no inferential selection claim",
+  "spectrum": {
+    "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/recording_chain_20261009/source/recording_and_geometry.npz",
+    "source_sha256": "1d32c9f7b02cec48be93b94849f6230c4372c7d624c2f2e03cf645fc23b2b54c",
+    "events": [
+      22,
+      237,
+      1458
+    ],
+    "channels": [
+      "E12-E13",
+      "K5-K6",
+      "K9-K10",
+      "K6-K7",
+      "K7-K8",
+      "K8-K9",
+      "K4-K5",
+      "K11-K12",
+      "E11-E12",
+      "K12-K13"
+    ],
+    "xlim_ms": [
+      -40,
+      40
+    ],
+    "original_window_ms": 320,
+    "magnification": 4,
+    "same_spectrogram_and_centroids_verified": true,
+    "centroid_audit": {
+      "n_centroids": 30,
+      "minimum_display_weight_at_nearest_cell": 0.828625844029819,
+      "median_display_weight_at_nearest_cell": 1.0,
+      "acceptance_threshold": 0.7,
+      "all_centroids_pass": true,
+      "centroids": [
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1503924624561017,
+          "frequency_hz": 84.82056895816848,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.14971712109662239,
+          "frequency_hz": 86.77300081305805,
+          "display_weight_at_nearest_cell": 0.98289082133891
+        },
+        {
+          "channel_index": 0,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.16250573913698896,
+          "frequency_hz": 101.10261561861856,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15728980078087113,
+          "frequency_hz": 106.57174780138959,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.1678405513915604,
+          "frequency_hz": 87.7011632599751,
+          "display_weight_at_nearest_cell": 0.9752850095832959
+        },
+        {
+          "channel_index": 1,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1564283522237041,
+          "frequency_hz": 91.20037932017132,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.1601568223049591,
+          "frequency_hz": 100.40770151632309,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15736066539499755,
+          "frequency_hz": 113.62020183715546,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 2,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15971611355862525,
+          "frequency_hz": 84.34152644940094,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15095824813850145,
+          "frequency_hz": 88.3642813378103,
+          "display_weight_at_nearest_cell": 0.9802043558272504
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15878972769410382,
+          "frequency_hz": 88.03873015619784,
+          "display_weight_at_nearest_cell": 0.9819490615507591
+        },
+        {
+          "channel_index": 3,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1501174693302576,
+          "frequency_hz": 79.38667287879174,
+          "display_weight_at_nearest_cell": 0.9955247346562045
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15610739343132174,
+          "frequency_hz": 87.98336417767159,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16117122107099485,
+          "frequency_hz": 104.18535833497975,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 4,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1536473494316104,
+          "frequency_hz": 90.3361573439661,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15175983080083624,
+          "frequency_hz": 96.51322297343305,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.15951185221774072,
+          "frequency_hz": 93.42616011942911,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 5,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15738245759268643,
+          "frequency_hz": 94.09045788380413,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.15488258645005326,
+          "frequency_hz": 117.19323329609647,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.1656208498053398,
+          "frequency_hz": 94.354161774609,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 6,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1611718848375483,
+          "frequency_hz": 92.68765499271609,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.14987515286632672,
+          "frequency_hz": 89.95218586656662,
+          "display_weight_at_nearest_cell": 0.8939279598420217
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16460262654306662,
+          "frequency_hz": 84.0408717274996,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 7,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.15985867544882904,
+          "frequency_hz": 88.94961186521266,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.150364728325526,
+          "frequency_hz": 84.75489374942049,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.17399934422639612,
+          "frequency_hz": 92.23744054576221,
+          "display_weight_at_nearest_cell": 0.9350161412901923
+        },
+        {
+          "channel_index": 8,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.1616596679310005,
+          "frequency_hz": 91.0382095100392,
+          "display_weight_at_nearest_cell": 0.9975100678199219
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 0,
+          "time_within_event_sec": 0.16311839264781414,
+          "frequency_hz": 105.56506868631756,
+          "display_weight_at_nearest_cell": 0.828625844029819
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 1,
+          "time_within_event_sec": 0.16279767985075583,
+          "frequency_hz": 91.5171244520962,
+          "display_weight_at_nearest_cell": 1.0
+        },
+        {
+          "channel_index": 9,
+          "event_index_within_panel": 2,
+          "time_within_event_sec": 0.17407883276407554,
+          "frequency_hz": 88.00122452949618,
+          "display_weight_at_nearest_cell": 1.0
+        }
+      ]
+    },
+    "centroid_span_ms": [
+      13.24323978148742,
+      24.28222312977374,
+      23.96136343381794
+    ],
+    "time_reference": "center of each original 320 ms window; three separate events, not continuous time",
+    "A_source": "existing recording_chain_20261009 candidate; independently produced, not modified"
+  },
+  "mechanism": {
+    "source": "/home/honglab/leijiaxin/HFOsp/ReplayIED/tiffs/fig2_prop_hist_9p_画板 1_画板 1.tif",
+    "sha256": "3623293d0ddfa2553fe87531ce71ae9acc746a04eb409d635f5f160f12ed2724",
+    "original_size": [
+      3759,
+      2920
+    ],
+    "crop_pixels": [
+      317,
+      1370,
+      1810,
+      1705
+    ],
+    "cropped_size": [
+      1493,
+      335
+    ],
+    "asset": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/readability_review_20261009/source/mi_mechanism_original_tiff.png",
+    "vector_ai_found": false,
+    "resampling": "none"
+  },
+  "panel_d": {
+    "statistics": {
+      "yuquan": {
+        "n": 20,
+        "n_significant": 20,
+        "data_median": 0.18301425643076696,
+        "null_median": 5.5666442230071815e-05,
+        "p_value_mannwhitney_greater": 3.397807564086679e-08,
+        "all_mi_records_masked": true
+      },
+      "epilepsiae": {
+        "n": 20,
+        "n_significant": 20,
+        "data_median": 0.26201202560976666,
+        "null_median": 5.904675455609148e-05,
+        "p_value_mannwhitney_greater": 3.397807564086679e-08,
+        "all_mi_records_masked": true
+      }
+    },
+    "null_min": -0.000650968782522525,
+    "null_max": 0.000993703266430539,
+    "null_points": 40,
+    "null_points_shifted": false,
+    "null_glyphs_clipped": false,
+    "null_color": "#343434",
+    "zero_origin_preserved": true
+  },
+  "panel_f": {
+    "n": 40,
+    "median_uplift": 0.1977050153113532,
+    "median_matching_index_uplift": 0.1977050153113532,
+    "n_above_diagonal": 40,
+    "display_labels": [
+      "Overall MI",
+      "Within-template MI"
+    ],
+    "underlying_fields": [
+      "adaptive_cluster.overall_tau",
+      "adaptive_cluster.within_cluster_tau_mean"
+    ],
+    "gray_below_diagonal_region": true,
+    "gray_summary_text_removed": true,
+    "paired_distribution_inset": {
+      "n_paired": 40,
+      "single_template_mean": 0.11371868185318075,
+      "single_template_median": 0.08445096354736137,
+      "multi_cluster_mean": 0.34683028284360334,
+      "multi_cluster_median": 0.2913253661099341,
+      "mean_delta": 0.23311160099042255,
+      "median_delta": 0.1977050153113532,
+      "n_improved": 40,
+      "wilcoxon_two_sided_statistic": 0.0,
+      "wilcoxon_two_sided_p": 1.8189894035458565e-12,
+      "significance_label": "***",
+      "display": "paired subject points and lines, mean bars, and paired Wilcoxon bracket",
+      "reference_grammar": "Supplementary Fig. 2 raw-vs-synchronized HFO AUC",
+      "layout_bounds_axes_fraction": [
+        0.68,
+        0.13,
+        0.28,
+        0.36
+      ],
+      "layout_aspect": "narrow portrait inset, not square",
+      "ylabel_fontsize_points": 9.0,
+      "tick_label_fontsize_points": 8.0,
+      "x_tick_labels": [
+        "Single",
+        "Multi"
+      ],
+      "x_tick_label_meanings": {
+        "Single": "single-template MI",
+        "Multi": "multi-cluster MI"
+      },
+      "x_tick_labels_single_line": true
+    },
+    "axis_limits_start_at_zero": true,
+    "dataset_legend": true,
+    "dataset_legend_frame": {
+      "visible": true,
+      "facecolor": "white",
+      "edgecolor": "0.55",
+      "linewidth": 0.8,
+      "producer_fontsize_points": 7.5,
+      "rendered_fontsize_points": 7.5,
+      "marker_size_points": 5.0
+    }
+  },
+  "patients": {
+    "Y12": {
+      "c": {
+        "patient": "Yuquan Y12",
+        "n_events": 9609,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "G6",
+          "G7",
+          "G4",
+          "G5",
+          "G1",
+          "G2",
+          "E2",
+          "E3",
+          "E4",
+          "D13"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          4895,
+          4714
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      },
+      "e": {
+        "patient": "Yuquan Y12",
+        "n_events": 9609,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "G6",
+          "G7",
+          "G4",
+          "G5",
+          "G1",
+          "G2",
+          "E2",
+          "E3",
+          "E4",
+          "D13"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          4895,
+          4714
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      }
+    },
+    "E9": {
+      "c": {
+        "patient": "Epilepsiae E9",
+        "n_events": 75053,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "HRA2",
+          "HRA3",
+          "HRB1",
+          "HLC1",
+          "HRB2",
+          "HRB3",
+          "HRC2",
+          "HRC1"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          45710,
+          29343
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      },
+      "e": {
+        "patient": "Epilepsiae E9",
+        "n_events": 75053,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "HRA2",
+          "HRA3",
+          "HRB1",
+          "HLC1",
+          "HRB2",
+          "HRB3",
+          "HRC2",
+          "HRC1"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          45710,
+          29343
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      }
+    },
+    "E18": {
+      "c": {
+        "patient": "Epilepsiae E18",
+        "n_events": 54432,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "AMR1",
+          "HAR1",
+          "HAR2",
+          "HPR1",
+          "HPR2",
+          "HPR3"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          37970,
+          16462
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      },
+      "e": {
+        "patient": "Epilepsiae E18",
+        "n_events": 54432,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "AMR1",
+          "HAR1",
+          "HAR2",
+          "HPR1",
+          "HPR2",
+          "HPR3"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          37970,
+          16462
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      }
+    },
+    "E4": {
+      "c": {
+        "patient": "Epilepsiae E4",
+        "n_events": 243990,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "GC2",
+          "GC1",
+          "GC3",
+          "GB3",
+          "GB1",
+          "GB4",
+          "GB2",
+          "GA3"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          173590,
+          70400
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      },
+      "e": {
+        "patient": "Epilepsiae E4",
+        "n_events": 243990,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "GC2",
+          "GC1",
+          "GC3",
+          "GB3",
+          "GB1",
+          "GB4",
+          "GB2",
+          "GA3"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          173590,
+          70400
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      }
+    },
+    "E7": {
+      "c": {
+        "patient": "Epilepsiae E7",
+        "n_events": 6556,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "TBA2",
+          "TBA1",
+          "TBA3",
+          "FRA1",
+          "FRA2",
+          "HRA3",
+          "HRA2",
+          "HRA4",
+          "HRA5",
+          "TBA4",
+          "FRA6",
+          "TBB2",
+          "FRA5",
+          "HRA8",
+          "TBC4"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          4621,
+          1935
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      },
+      "e": {
+        "patient": "Epilepsiae E7",
+        "n_events": 6556,
+        "all_valid_events_displayed": true,
+        "channel_order": [
+          "TBA2",
+          "TBA1",
+          "TBA3",
+          "FRA1",
+          "FRA2",
+          "HRA3",
+          "HRA2",
+          "HRA4",
+          "HRA5",
+          "TBA4",
+          "FRA6",
+          "TBB2",
+          "FRA5",
+          "HRA8",
+          "TBC4"
+        ],
+        "masked": true,
+        "cluster_counts": [
+          4621,
+          1935
+        ],
+        "profile_band": "mean +/- population SD of participating-event ranks"
+      }
+    }
+  }
+}

@@ -1,5 +1,8 @@
 > **2026-09-30 Figure 5整合入口**：[当前A–F版](current_figure5.md)，已纳入70点及19条长随访。下面任何旧seed1801 v5入口仅为历史。空间与六群体分岔分别见[模型版本表](topic4_model_versions.md)。其他图的路由不受本次整合影响。
 
+> **Figure 1已定稿（2026-10-10，`y1_final_20261010`）。** [当前版本](current_figure1.md)和`fig1/current_revision.json`为唯一入口；完整图、A–F独立PNG/PDF及7页PPTX位于`fig1/figures/`。当前producer为`build_fig1_current.py`；冻结代码、约13 MB必要科学输入及原始来源随包保存。旧正式图、候选及修订全部归档至`archive/2026-10-10_fig1_finalization/fig1/`。定稿完整PNG/PDF已逐字节复现。
+
+
 # Paper-ready figure 唯一登记表
 
 > 状态：v9，2026-08-31。本文是 `results/paper-ready-figure/` 的唯一指代入口。
@@ -30,7 +33,7 @@
 
 | asset_id | paper_slot | status | canonical_path | producer / 说明 |
 |---|---|---|---|---|
-| `interictal_hfo_temporal_scaffold` | Fig1-B–F | `LOCKED` | `results/paper-ready-figure/fig1/figures/` | 无角标的 B1/B2、C、D、E、F 独立输出 + 带 B–F 角标的 `fig1-complete-layout`；Fig1-A 为作者手绘。Fig1-F 自 2026-09-02 锁定为 v5：主散点右下必须是 single-template vs multi-cluster MI 配对 inset（患者连线、均值柱、paired Wilcoxon 括号），不得退回灰色 median ΔMI 小字 |
+| `interictal_hfo_temporal_scaffold` | Fig1-A–F | `AUTHOR_ACCEPTED_FINAL` | `results/paper-ready-figure/fig1/figures/` | Y1完整定稿，2026-10-10作者接受；代码、数据部分备份及旧版归档见`docs/current_figure1.md`。 |
 | `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | 无角标 A–F 独立输出 + 带 A–F 角标的 `fig2-complete-layout`。2026-09-02 保持原拼板位置，仅收紧 A 的 2×2 内部留白、放大 B 主体文字、将 C 行标题改为 `TA samples` / `TB samples`；D 保持左侧 `TA field` / `TB field`。B/E/F 仍使用 all-event Timing+Space 合同 |
 | `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | 无角标 A–F 独立 PNG/PDF + 带 A–F 角标的 `fig3-complete-layout`。A 内含 E10/SZ8/SCL9 broadband-type 与 E20/SZ8/HRB1 gamma-type 两个断轴 raw+TFR 示例；标题先写 E/SZ 编号再写表型，A 只显示 20 s baseline `[-110,-90] s`。B 用完整 `[-120,+20] s` 时间轴比较二者四频带轨迹，颜色编码表型。两例不是患者内对照。C–F 保持 all-event Timing+Space 合同，D 为 n=17/16/11，F 为 17-subject A/B heatmap |
 | `data_driven_interictal_snn_fig4` | Fig4-A–G | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `results/paper-ready-figure/fig4/figures/` | 无角标 A、C–G 独立 PNG/PDF + 带 A–G 角标的 `fig4-complete-layout`；B 使用右上现有留白并明确预留，当前无独立文件，后续用于 data-driven 参数对患者间期事件复现的影响。A 为已确认的 local E/I circuit + patient-specific substrate；C 为 Node field + Model TA/MTB；D 为模型/患者 rank profile；E 为 cross-fit matrix；F 为 recruitment-onset-span readout；G 为 34 人 formal cohort。原 KMeans heatmap/rank distribution 保留在 FigS7-E。科学口径不扩大 |

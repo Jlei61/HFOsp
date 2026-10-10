@@ -1,0 +1,35 @@
+{
+  "figure_panel": "Fig1-a1",
+  "legacy_code_reference": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/p16_mechan_events_specComp.py",
+  "source_paths": {
+    "snippets_npz": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+    "annotations_pickle": "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_annot_v4.pik"
+  },
+  "annotation_label": 1,
+  "n_hfo_snippets": 178,
+  "snippet_samples": 600,
+  "duration_sec": 0.6,
+  "fs_hz": 1000.0,
+  "spectrogram": {
+    "algorithm_id": "fig1_gaussian_smoothed_magnitude_v1",
+    "window": "hann",
+    "nperseg_sec": 0.18,
+    "noverlap_sec": 0.16,
+    "freq_range_hz": [
+      0,
+      240
+    ],
+    "gaussian_sigma": 1.5,
+    "raw": "log(mean smoothed magnitude spectrogram)",
+    "normalized": "mean_spec / mean(baseline bins t<=0.15 s) - 1",
+    "x_cell_edges_sec": [
+      0.0,
+      0.6
+    ],
+    "edge_policy": "extend first/last spectrogram cells to snippet bounds; no x-axis white strips"
+  },
+  "outputs": [
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb1.png",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/figures/fig1-panelb1.pdf"
+  ]
+}
