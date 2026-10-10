@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v9（2026-10-10）：[预览](candidates/a_local_sampling_sigma_20261010/figures/fig4-complete-layout-preview.png)。仅在右侧Local sampling恢复绿色高斯采样权重，按实际σ=0.25 mm绘制，随距离淡出、不画硬边界圈。中央sheet不画采样范围、光晕或绿色填充，只用无填充灰色虚线框定位放大视野。下方两组真实120 ms波形和标签逐像素保持v8，左侧回路与B–I保持；新A待作者目视检查，正式布局仍为v4。
+A机制重绘候选v10（2026-10-10）：[预览](candidates/a_left_circuit_spacing_20261010/figures/fig4-complete-layout-preview.png)。只调整左侧中央E/I连线及z↓节点：红色下行箭头和蓝色抑制竖线各向外移0.07示意单位，间距由0.08增至0.22单位（当前版面约0.66→1.80 mm）；z↓边框原生线宽由1.60减至0.60 pt，改为1.5/1.5细密虚线。原始回路按冻结绘图代码重建后与v9逐像素一致；修改后的完整拼版只有该细节足迹内的像素变化，中央、右侧、两组波形及B–I均保持v9。新A待作者目视检查，正式布局仍为v4。

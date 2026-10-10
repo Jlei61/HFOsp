@@ -2,7 +2,7 @@
 
 > **当前 Fig4（作者草图，2026-10-09）：三行A–I，`CURRENT_AUTHOR_DESIGNATED`。** 见[版本说明](current_figure4.md)及[机器入口](../results/paper-ready-figure/fig4/current_version.json)，producer为`build_fig4_compact_ai.py`。A小框移至(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白约3.87／5.20 mm，D/H与E/I逐列对齐、B/C整体与F/G组合对齐，B两端无空白延伸且色条间距1.5 mm，紧凑行距保持；右侧机制图待补充；中排B/C/角度响应D/位置密度E，底排沿用旧G–J改为F–I；旧E/F传播showcase移出。B为第6–16阶段194点、C为四core均值±样本标准差、E为83/413低损失配置密度、I为25患者红蓝相似度，均保留最新冻结数据。当前拼版待作者目视检查；下方历史A–J说明不覆盖当前入口。
 
-> A机制重绘候选v9（2026-10-10）登记于`fig4/current_version.json.pending_panel_a_revision`；见[当前说明](current_figure4.md)。仅在右侧Local sampling恢复绿色高斯采样权重，按实际σ=0.25 mm绘制，随距离淡出、不画硬边界圈。中央sheet不画采样范围、光晕或绿色填充，只用无填充灰色虚线框定位放大视野。保留3.8×1.9 mm小视野、三个连续触点SL3/SL4/SL5及五个错落局部circuits的坐标和大小；权重尾部按视野裁切，不扩大视野或缩小circuits。理论95%质量半径约0.612 mm只写入元数据，图内不加公式或长说明。下方两组真实120 ms波形和标签逐像素保持v8，左侧回路与B–I保持；新A待作者目视检查，正式布局仍为v4。
+> A机制重绘候选v10（2026-10-10）登记于`fig4/current_version.json.pending_panel_a_revision`；见[当前说明](current_figure4.md)。只调整左侧中央E/I连线及z↓节点：红色下行箭头和蓝色抑制竖线各向外移0.07示意单位，间距由0.08增至0.22单位（当前版面约0.66→1.80 mm）；z↓边框原生线宽由1.60减至0.60 pt，改为1.5/1.5细密虚线。原始回路按冻结绘图代码重建后与v9逐像素一致；修改后的完整拼版只有该细节足迹内的像素变化，中央、右侧、两组波形及B–I均保持v9。新A待作者目视检查，正式布局仍为v4。
 
 # Paper-ready figure 唯一登记表
 

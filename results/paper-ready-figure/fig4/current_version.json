@@ -327,17 +327,17 @@
   },
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_local_sampling_sigma_v9",
+    "version": "a_left_circuit_spacing_v10",
     "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010",
+    "package": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
     "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
     "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
     "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "original_left_circuit": "Original artwork uniformly enlarged 1.20x to 77.40x60.88 mm; left edge and vertical center preserved, title recentered, dashed connectors reattached.",
-    "layout": "All panel axes, sheet size/center, three contacts and local circuit geometry preserved from A v8. The right local field of view remains 3.8x1.9 mm.",
+    "original_left_circuit": "Original circuit structure and neuron positions retained at 1.20x scale. Central red E-to-I path and blue I-to-E shaft/T-bar each move 0.07 schematic units outward; z-down border becomes thin and dense.",
+    "layout": "All axes and placements retain v9. Only the left central reciprocal E/I connection spacing and z-down border change; all full-figure pixels outside that detail footprint are identical to v9.",
     "zoom_roles": "Central sheet has no green sampling fill, halos or footprint rings; only an unfilled neutral gray dashed frame locates the zoom. Gaussian sampling weights are shown only in the right Local sampling view.",
     "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
     "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, restored to the v6 displayed scale; each contains 6-7 hollow E triangles and 1-2 internal I circles. Exactly three consecutive contacts, with no intervening or additional contacts in the small box.",
@@ -363,6 +363,24 @@
       "display": "Green smoothly fading Gaussian alpha; no hard boundary ring. Tails are clipped by the unchanged zoom view.",
       "theoretical_95_percent_mass_radius_mm": 0.6119367076702041,
       "quantity": "Spatial weighting of the existing virtual-contact firing-density readout, not a computed electric potential."
+    },
+    "left_detail_producer": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+    "left_detail": {
+      "native_producer": "local_circuit_native_source.py",
+      "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+      "central_offset_schematic_units": 0.11,
+      "previous_central_offset_schematic_units": 0.04,
+      "z_border_linewidth_pt": 0.6,
+      "previous_z_border_linewidth_pt": 1.6,
+      "z_border_dash_pattern": [
+        1.5,
+        1.5
+      ],
+      "previous_z_border_dash_pattern": [
+        2.0,
+        1.7
+      ],
+      "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
     }
   }
 }
