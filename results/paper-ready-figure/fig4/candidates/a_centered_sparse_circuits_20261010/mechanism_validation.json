@@ -1,0 +1,459 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "original_left_circuit_restored": true,
+  "overview_neuron_samples_preserved": true,
+  "electrode_shafts_are_straight": true,
+  "shaft_collinearity_residual_mm": {
+    "SCL": 4.440892098500626e-16,
+    "ICL": 1.2212453270876722e-15
+  },
+  "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+  "electrode_display": {
+    "source": "D_position_straight_electrodes.json",
+    "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "geometry_snapshot": "rigid_contact_geometry.npz",
+    "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+    "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+    "maximum_display_displacement_mm": 0.20730072911893763,
+    "overview_and_sampling_use_identical_contacts": true
+  },
+  "original_left_title_and_internal_labels_preserved": true,
+  "combined_third_component": true,
+  "formulas_and_lower_explanations_removed": true,
+  "zoom_center_mm": [
+    -8.5,
+    0.0
+  ],
+  "zoom_field_of_view_mm": [
+    1.6754742547425474,
+    1.3143631436314362
+  ],
+  "left_zoom_connector_minimum_contact_distance_mm": 3.635981224397264,
+  "left_zoom_connectors_clear_of_electrode_footprints": true,
+  "actual_workpoint_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  },
+  "kernel_centres_E_coordinates_mm": [
+    [
+      15.46719741821289,
+      4.465065956115723
+    ],
+    [
+      17.22799301147461,
+      4.458004951477051
+    ],
+    [
+      15.137011528015137,
+      3.536482334136963
+    ],
+    [
+      16.23338508605957,
+      3.3483119010925293
+    ],
+    [
+      17.36134147644043,
+      3.5074949264526367
+    ]
+  ],
+  "layout_refinement": {
+    "sheet_shift_x_mm": 24.0,
+    "sampling_axes_mm": [
+      218.5,
+      190.0,
+      60.0,
+      30.0
+    ],
+    "previous_sampling_axes_mm": [
+      203.0,
+      190.0,
+      68.0,
+      34.0
+    ],
+    "readout_axes_mm": [
+      [
+        207.0,
+        155.0,
+        34.0,
+        22.0
+      ],
+      [
+        256.0,
+        155.0,
+        34.0,
+        22.0
+      ]
+    ],
+    "previous_readout_axes_mm": [
+      [
+        179.0,
+        155.0,
+        47.0,
+        22.0
+      ],
+      [
+        245.0,
+        155.0,
+        47.0,
+        22.0
+      ]
+    ]
+  },
+  "local_population_coordinates_mm": [
+    {
+      "E": [
+        [
+          15.46719741821289,
+          4.465065956115723
+        ],
+        [
+          15.511902809143066,
+          4.234208106994629
+        ],
+        [
+          15.564034461975098,
+          4.60468864440918
+        ],
+        [
+          15.473402976989746,
+          4.6688337326049805
+        ],
+        [
+          15.458516120910645,
+          4.358381271362305
+        ],
+        [
+          15.359607696533203,
+          4.492131233215332
+        ]
+      ],
+      "I": [
+        [
+          15.657299385988189,
+          4.329662269289194
+        ],
+        [
+          15.207038151140539,
+          4.507522354360434
+        ]
+      ]
+    },
+    {
+      "E": [
+        [
+          17.22799301147461,
+          4.458004951477051
+        ],
+        [
+          17.32621955871582,
+          4.591989040374756
+        ],
+        [
+          16.982297897338867,
+          4.492570400238037
+        ],
+        [
+          17.077537536621094,
+          4.675305366516113
+        ],
+        [
+          17.32968521118164,
+          4.256894588470459
+        ],
+        [
+          17.44021224975586,
+          4.26674747467041
+        ],
+        [
+          17.491050720214844,
+          4.5234270095825195
+        ]
+      ],
+      "I": [
+        [
+          17.16814870572682,
+          4.325762010857757
+        ],
+        [
+          17.40813575211822,
+          4.424367160753144
+        ]
+      ]
+    },
+    {
+      "E": [
+        [
+          15.137011528015137,
+          3.536482334136963
+        ],
+        [
+          15.376914978027344,
+          3.6244945526123047
+        ],
+        [
+          15.000165939331055,
+          3.587000846862793
+        ],
+        [
+          15.157015800476074,
+          3.3656740188598633
+        ],
+        [
+          15.107926368713379,
+          3.782268524169922
+        ],
+        [
+          15.382033348083496,
+          3.4712586402893066
+        ]
+      ],
+      "I": [
+        [
+          15.190472384875553,
+          3.64637491575571
+        ],
+        [
+          14.906936197198771,
+          3.511989152163797
+        ]
+      ]
+    },
+    {
+      "E": [
+        [
+          16.23338508605957,
+          3.3483119010925293
+        ],
+        [
+          16.109224319458008,
+          3.346040725708008
+        ],
+        [
+          16.410242080688477,
+          3.445794105529785
+        ],
+        [
+          15.982858657836914,
+          3.387146472930908
+        ],
+        [
+          16.065738677978516,
+          3.511918067932129
+        ],
+        [
+          16.307687759399414,
+          3.420956611633301
+        ]
+      ],
+      "I": [
+        [
+          16.416785225636303,
+          3.1729594722286585
+        ],
+        [
+          16.26849188165774,
+          3.2379873948686066
+        ]
+      ]
+    },
+    {
+      "E": [
+        [
+          17.36134147644043,
+          3.5074949264526367
+        ],
+        [
+          17.257049560546875,
+          3.5580501556396484
+        ],
+        [
+          17.613426208496094,
+          3.3696365356445312
+        ],
+        [
+          17.485502243041992,
+          3.3880629539489746
+        ],
+        [
+          17.215280532836914,
+          3.46121883392334
+        ],
+        [
+          17.103858947753906,
+          3.423598289489746
+        ]
+      ],
+      "I": [
+        [
+          17.550412189063238,
+          3.547529850260929
+        ]
+      ]
+    }
+  ],
+  "local_population_counts": [
+    {
+      "E": 6,
+      "I": 2
+    },
+    {
+      "E": 7,
+      "I": 2
+    },
+    {
+      "E": 6,
+      "I": 2
+    },
+    {
+      "E": 6,
+      "I": 2
+    },
+    {
+      "E": 6,
+      "I": 1
+    }
+  ],
+  "all_local_E_markers_hollow": true,
+  "all_ellipses_contain_fewer_I_than_E": true,
+  "local_synaptic_arrowheads_removed": true,
+  "ellipse_rows": [
+    2,
+    3
+  ],
+  "enlarged_sampling_contact": "ICL2",
+  "local_circuit_count": 5,
+  "sampling_zoom_center_overview_mm": [
+    6.554300916462296,
+    -6.043206695859643
+  ],
+  "sampling_zoom_field_of_view_mm": [
+    3.8,
+    1.9
+  ],
+  "sampling_frame_is_a_coordinate_exact_enlargement": true,
+  "two_distinct_zoom_roles": true,
+  "mode_readouts_below_sampling": true,
+  "physical_xy_equal_scale": true,
+  "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
+  "readout": {
+    "type": "normalized Gaussian average of smoothed E spike density",
+    "sigma_mm": 0.25,
+    "bin_ms": 2.0,
+    "smooth_ms": 5.0,
+    "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+    "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+    "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+    "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+    "display_title": "SEEG readout",
+    "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+  },
+  "mode_showcases": {
+    "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+    "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "events": [
+      {
+        "mode": "MTA",
+        "event_index": 10,
+        "frozen_mode_label": 1,
+        "window_absolute_ms": [
+          4310,
+          4430
+        ],
+        "peak_absolute_ms": [
+          4360.0,
+          4368.0,
+          4378.0
+        ],
+        "peak_relative_ms": [
+          50.0,
+          58.0,
+          68.0
+        ],
+        "contact_order": [
+          "ICL8",
+          "ICL6",
+          "ICL4"
+        ]
+      },
+      {
+        "mode": "MTB",
+        "event_index": 8,
+        "frozen_mode_label": 0,
+        "window_absolute_ms": [
+          3710,
+          3830
+        ],
+        "peak_absolute_ms": [
+          3786.0,
+          3770.0,
+          3756.0
+        ],
+        "peak_relative_ms": [
+          76.0,
+          60.0,
+          46.0
+        ],
+        "contact_order": [
+          "ICL8",
+          "ICL6",
+          "ICL4"
+        ]
+      }
+    ],
+    "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+    "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+    "selection": "Reuse both F demonstration events, fixed channel order ICL8/ICL6/ICL4 across the two modes; no temporal shifting or per-contact amplitude scaling.",
+    "snapshot": "burst_readout_arrays.npz",
+    "snapshot_sha256": "878e8723351a20bc328012bf753aec085ff0e1427ed873c842884f32a70ba158",
+    "waveform_source": "waveform_arrays.npz",
+    "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "exact_frozen_F_waveform_crops_verified": true,
+    "no_artificial_peak_sharpening_or_time_warping": true,
+    "peak_relative_ms": [
+      [
+        50.0,
+        58.0,
+        68.0
+      ],
+      [
+        76.0,
+        60.0,
+        46.0
+      ]
+    ]
+  },
+  "readout_peak_times_relative_ms": [
+    [
+      50.0,
+      58.0,
+      68.0
+    ],
+    [
+      76.0,
+      60.0,
+      46.0
+    ]
+  ],
+  "two_opposite_peak_sequences": true,
+  "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
+  "original_left_circuit_interior_pixel_identical": true,
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "canonical_output_hashes_unchanged": true
+}

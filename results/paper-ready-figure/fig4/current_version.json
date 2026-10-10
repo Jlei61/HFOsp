@@ -327,19 +327,20 @@
   },
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_rigid_seeg_bursts_v4",
+    "version": "a_centered_sparse_circuits_v5",
     "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010",
+    "package": "results/paper-ready-figure/fig4/candidates/a_centered_sparse_circuits_20261010",
     "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
     "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_centered_sparse_circuits_20261010/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_centered_sparse_circuits_20261010/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
     "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "original_left_circuit": "PIXEL_IDENTICAL_TO_CURRENT_V4",
+    "original_left_circuit": "Preserved; interior and title pixel-identical, connecting dashed lines follow the moved sheet.",
+    "layout": "2D sheet moved 24 mm right; sampling axes 60x30 mm; each SEEG burst axis 34x22 mm. Right block narrower; time scale unchanged.",
     "zoom_roles": "Original off-electrode circuit box at (-8.5,0) mm retained; stronger green ICL2 box enlarges electrode sampling.",
-    "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; all contacts on each shaft are collinear. Display only; simulation coordinates unchanged.",
-    "third_component": "Five tilted elliptical circuits and stronger green Gaussian sampling footprint; coordinate-exact enlargement in the shared display geometry.",
-    "readout": "SEEG readout: two real 120-ms three-contact burst crops of F events 10/8, showing opposite arrival order. Virtual contact readout of SNN activity; no artificial sharpening, temporal shifts, time compression or clinical-voltage claim."
+    "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
+    "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows. Each contains 6-7 hollow red E triangles and 1-2 blue I circles sampled from frozen coordinates. All peripheral E are hollow; local synaptic arrowheads removed.",
+    "readout": "SEEG readout retains identical two 120-ms three-contact crops of F events 10/8, with opposite peak order; only plotting width changed."
   }
 }
