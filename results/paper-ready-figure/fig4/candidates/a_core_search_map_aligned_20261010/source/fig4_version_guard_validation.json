@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "current_d_version": "three_error_responses_density_v1",
+  "current_pointer_and_registry_match": true,
+  "actual_previous_D_rejected": true,
+  "old_record": "results/paper-ready-figure/archive/2026-10-08_pre_latest_d_fig4/fig4/figure4_panel_registry.json",
+  "rejection": "Fig4D version is missing or obsolete. Read docs/current_figure4.md and restore panel_d from the current registry; never fall back to D_candidate_right_axis.",
+  "published_figures_unchanged": 34,
+  "active_producer": "scripts/paper_figures/build_fig4_current_aj.py",
+  "active_producer_sha256": "b70e2dbf0de7dee6950ebc882275eae5cd01d02724fb74d6e9ef6ce68cfbecfc",
+  "tests": "tests/test_fig4_current_version.py",
+  "unit_tests_passed": 7,
+  "note": "Rendering and data were unchanged; this records new entry and publication guards separately from the original render provenance."
+}

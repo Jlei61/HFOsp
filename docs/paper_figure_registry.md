@@ -1,6 +1,6 @@
 > **2026-09-30 Figure 5整合入口**：[当前A–F版](current_figure5.md)，已纳入70点及19条长随访。下面任何旧seed1801 v5入口仅为历史。空间与六群体分岔分别见[模型版本表](topic4_model_versions.md)。其他图的路由不受本次整合影响。
 
-> A候选v12（2026-10-10）：三个透明底问号候选区域、两个紫色core及两条短虚线方向提示；不逐一配对，原神经元点置于新增示意的上层。替代作者否决的v11，正式v10输出保持；当前候选见`fig4/current_version.json.pending_panel_a_revision`及[版本说明](current_figure4.md)，待作者目视检查。
+> A候选v13（2026-10-10）：三个问号区域增加淡紫色底纹，神经元点保留在上层；两个紫色core按E图的物理平面密度峰对齐，单条虚线箭头标注`OPTM`。替代v12，正式v10输出保持；当前候选见`fig4/current_version.json.pending_panel_a_revision`及[版本说明](current_figure4.md)，待作者目视检查。
 
 > **当前 Fig4（A机制图整合，2026-10-10）：三行A–I，`CURRENT_AUTHOR_DESIGNATED`。** 见[版本说明](current_figure4.md)及[机器入口](../results/paper-ready-figure/fig4/current_version.json)，producer为`build_fig4_a_mechanism_candidate.py`。A小框移至(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白约3.87／5.20 mm，D/H与E/I逐列对齐、B/C整体与F/G组合对齐，B两端无空白延伸且色条间距1.5 mm，紧凑行距保持；右侧Local sampling及两组SEEG readout已并入；中排B/C/角度响应D/位置密度E，底排沿用旧G–J改为F–I；旧E/F传播showcase移出。B为第6–16阶段194点、C为四core均值±样本标准差、E为83/413低损失配置密度、I为25患者红蓝相似度，均保留最新冻结数据。当前拼版待作者目视检查；下方历史A–J说明不覆盖当前入口。
 
