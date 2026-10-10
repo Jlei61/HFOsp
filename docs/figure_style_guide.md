@@ -199,7 +199,7 @@ Legend 位置同时锁定：时程/散点 panel 优先放在 axes 上方的预�
 
 ## Topic 4 · 机制模型（SEF-HFO / cm-SNN）
 
-- **当前 Fig4 优先合同（作者草图，2026-10-09）**：[当前A–I版本](current_figure4.md)及`fig4/current_version.json`优先。producer为`build_fig4_compact_ai.py`；首行A扩大并预留机制图，中排B–E、底排F–I按行列对齐，旧E/F传播showcase移出。B紫色、第6–16阶段194点，无旧E/F标记；I为25患者红蓝相似度，Subject/Median图例位于右上。A小框位于(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白收紧到约3.87／5.20 mm，D/H与E/I逐列对齐，B/C整体与F/G组合对齐；B去掉类别外横轴留白、色条间距1.5 mm，紧凑行距保持。正式A右侧机制图待补充；最新A候选以`pending_panel_a_revision`为准：左侧回路等比例放大20%，中央sheet居中、右侧收窄；五个椭圆上二下三错落放置，内含空心红E三角及更少的蓝I圆，去掉混淆的突触箭头。刚性直杆、两种放大用途及SEEG双burst保持。下方历史图号不作为重建入口。
+- **当前 Fig4 优先合同（作者草图，2026-10-09）**：[当前A–I版本](current_figure4.md)及`fig4/current_version.json`优先。producer为`build_fig4_compact_ai.py`；首行A扩大并预留机制图，中排B–E、底排F–I按行列对齐，旧E/F传播showcase移出。B紫色、第6–16阶段194点，无旧E/F标记；I为25患者红蓝相似度，Subject/Median图例位于右上。A小框位于(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白收紧到约3.87／5.20 mm，D/H与E/I逐列对齐，B/C整体与F/G组合对齐；B去掉类别外横轴留白、色条间距1.5 mm，紧凑行距保持。正式A右侧机制图待补充；最新A候选以`pending_panel_a_revision`为准：左侧原回路维持放大20%，中央sheet围绕v6中心再放大6%，右侧收窄布局保持。Local sampling与MTA/MTB统一标注ICL8/ICL6/ICL4，绿色框同步覆盖三者真实坐标；移除通向SEEG readout的小箭头。五个错落椭圆、空心E及更少的蓝I圆、刚性直杆、两种放大用途和冻结双burst保持。下方历史图号不作为重建入口。
 
 - **示范图**：[`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png`](../results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png)
 - **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。

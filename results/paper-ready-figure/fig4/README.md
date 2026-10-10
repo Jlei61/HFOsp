@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v6（2026-10-10）：[预览](candidates/a_larger_left_circuit_20261010/figures/fig4-complete-layout-preview.png)。本次仅将左侧回路等比例放大20%；保留中央sheet居中、右侧采样与SEEG读出收窄；五个椭圆上二下三错落分布，内部有空心E三角和更少的蓝色I圆，去掉混淆的突触箭头。刚性直杆及两个120 ms burst保持，B–I逐像素一致；候选待作者目视检查。
+A机制重绘候选v7（2026-10-10）：[预览](candidates/a_matched_contacts_20261010/figures/fig4-complete-layout-preview.png)。Local sampling标出ICL8、ICL6、ICL4，与下方MTA/MTB三行波形一一对应；绿色框和右侧视野同步扩至以ICL6为中心的8×4 mm，保留实际直杆间距及中间触点。移除通向SEEG readout的小绿色箭头，中央sheet保持v6中心、宽高各放大6%至70.64 mm。左侧回路和两组120 ms burst保持v6，B–I逐像素一致；新A待作者目视检查，正式布局仍为v4。

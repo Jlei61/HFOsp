@@ -149,21 +149,27 @@
       "fallback_to_historical_layout": false,
       "pending_panel_a_revision": {
         "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-        "version": "a_larger_left_circuit_v6",
+        "version": "a_matched_contacts_v7",
         "updated_on": "2026-10-10",
-        "package": "results/paper-ready-figure/fig4/candidates/a_larger_left_circuit_20261010",
+        "package": "results/paper-ready-figure/fig4/candidates/a_matched_contacts_20261010",
         "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
         "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-        "preview": "results/paper-ready-figure/fig4/candidates/a_larger_left_circuit_20261010/figures/fig4-complete-layout-preview.png",
-        "registry": "results/paper-ready-figure/fig4/candidates/a_larger_left_circuit_20261010/figure4_candidate_registry.json",
+        "preview": "results/paper-ready-figure/fig4/candidates/a_matched_contacts_20261010/figures/fig4-complete-layout-preview.png",
+        "registry": "results/paper-ready-figure/fig4/candidates/a_matched_contacts_20261010/figure4_candidate_registry.json",
         "canonical_figure_replaced": false,
         "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
         "original_left_circuit": "Original artwork uniformly enlarged 1.20x to 77.40x60.88 mm; left edge and vertical center preserved, title recentered, dashed connectors reattached.",
-        "layout": "Only left circuit enlarged 20 percent from A v5. Centered 2D sheet, narrow sampling and both SEEG burst axes retain v5 positions and dimensions.",
-        "zoom_roles": "Original off-electrode circuit box at (-8.5,0) mm retained; stronger green ICL2 box enlarges electrode sampling.",
+        "layout": "Central sheet enlarged uniformly by 6 percent about its v6 center to 70.64 mm square. Left circuit and both burst axes preserved; sampling axes remain 60x30 mm.",
+        "zoom_roles": "Original off-electrode circuit box at (-8.5,0) mm retained. Green sampling box is now an 8x4 mm view centered on ICL6, containing the true ICL8/ICL6/ICL4 coordinates and sampling footprints.",
         "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
-        "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows. Each contains 6-7 hollow red E triangles and 1-2 blue I circles sampled from frozen coordinates. All peripheral E are hollow; local synaptic arrowheads removed.",
-        "readout": "SEEG readout retains identical two 120-ms three-contact crops of F events 10/8, with opposite peak order; only plotting width changed."
+        "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, same physical kernel size and direction. Each contains 6-7 hollow red E triangles and 1-2 blue I circles sampled from frozen coordinates in the expanded view; glyphs reduced to retain spacing.",
+        "readout": "Local sampling and both MTA/MTB readouts label the same ICL8/ICL6/ICL4 contacts. Burst axes and two 120-ms crops of F events 10/8 remain pixel-identical to A v6.",
+        "sampling_contact_labels": [
+          "ICL8",
+          "ICL6",
+          "ICL4"
+        ],
+        "tiny_readout_arrow_removed": true
       }
     }
   }
