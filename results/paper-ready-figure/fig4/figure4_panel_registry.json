@@ -743,21 +743,21 @@
   "previous_version_archive": "results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4",
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_consecutive_contacts_v8",
+    "version": "a_local_sampling_sigma_v9",
     "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_consecutive_contacts_20261010",
+    "package": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010",
     "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
     "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_consecutive_contacts_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_consecutive_contacts_20261010/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_local_sampling_sigma_20261010/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
     "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
     "original_left_circuit": "Original artwork uniformly enlarged 1.20x to 77.40x60.88 mm; left edge and vertical center preserved, title recentered, dashed connectors reattached.",
-    "layout": "Retain v7 sheet size/center, v6 left-circuit size, 60x30 mm sampling axes and two 34x22 mm readout axes. Restore the 3.8x1.9 mm local field of view and full-size neuron symbols.",
-    "zoom_roles": "Original off-electrode gray box at (-8.5,0) mm retained. Green sampling box contains exactly the three consecutive ICL3/ICL4/ICL5 contacts. No green footprint rings or Gaussian halos; no readout arrow.",
+    "layout": "All panel axes, sheet size/center, three contacts and local circuit geometry preserved from A v8. The right local field of view remains 3.8x1.9 mm.",
+    "zoom_roles": "Central sheet has no green sampling fill, halos or footprint rings; only an unfilled neutral gray dashed frame locates the zoom. Gaussian sampling weights are shown only in the right Local sampling view.",
     "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
     "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, restored to the v6 displayed scale; each contains 6-7 hollow E triangles and 1-2 internal I circles. Exactly three consecutive contacts, with no intervening or additional contacts in the small box.",
-    "readout": "Actual frozen ICL3/ICL4/ICL5 waveform crops from the same F events 10/8 and 120-ms windows, labeled SL3/SL4/SL5 by author request. Shared amplitude scale; no temporal shifting or per-contact gain. MTB SL3/SL4 peak times tie at 2-ms sampling resolution.",
+    "readout": "The exact v8 SL3/SL4/SL5 waveform crops, axes and labels are preserved pixel-for-pixel; actual frozen ICL3/ICL4/ICL5 source data and both event windows unchanged.",
     "sampling_contact_labels": [
       "SL3",
       "SL4",
@@ -773,6 +773,12 @@
       "SL3": "ICL3",
       "SL4": "ICL4",
       "SL5": "ICL5"
+    },
+    "right_sampling_weights": {
+      "sigma_mm": 0.25,
+      "display": "Green smoothly fading Gaussian alpha; no hard boundary ring. Tails are clipped by the unchanged zoom view.",
+      "theoretical_95_percent_mass_radius_mm": 0.6119367076702041,
+      "quantity": "Spatial weighting of the existing virtual-contact firing-density readout, not a computed electric potential."
     }
   }
 }

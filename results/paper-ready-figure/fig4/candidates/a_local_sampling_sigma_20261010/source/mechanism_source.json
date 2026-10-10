@@ -1,0 +1,296 @@
+{
+  "source_figdata": "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz",
+  "source_figdata_sha256": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
+  "geometry_role": "Frozen schematic substrate used by accepted panel A; not a new fitted network or a map of the F event.",
+  "EE_kernel": {
+    "type": "elliptical-exponential partner-sampling kernel",
+    "l_parallel_mm": 0.5374011537017762,
+    "l_perpendicular_mm": 0.26870057685088805,
+    "theta_deg": -22.80538396505847,
+    "role": "Reference kernel; fitted length scales and angle may vary."
+  },
+  "readout": {
+    "type": "normalized Gaussian average of smoothed E spike density",
+    "sigma_mm": 0.25,
+    "bin_ms": 2.0,
+    "smooth_ms": 5.0,
+    "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+    "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+    "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+    "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+    "display_title": "SEEG readout",
+    "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+  },
+  "display_contract": {
+    "zoom_center_mm": [
+      -8.5,
+      0.0
+    ],
+    "zoom_fov_mm": [
+      1.6754742547425474,
+      1.3143631436314362
+    ],
+    "schematic_neurons": "Actual coordinates from the frozen panel A substrate, with sparse deterministic display subsampling.",
+    "kernel_is_not_core_boundary": true,
+    "no_ephaptic_coupling_claim": true
+  },
+  "combined_physical_kernel": {
+    "l_par": 0.5374011537017762,
+    "l_perp": 0.40305086527633205,
+    "theta_deg": -22.80538396505847,
+    "theta_rad": -0.3980290373717898,
+    "reference_theta_deg": -22.80538396505847,
+    "reference_ar": 2.0,
+    "perp_scale": 1.5,
+    "parallel_scale": 1.0,
+    "angle_offset_deg": 0.0,
+    "is_reference": false
+  },
+  "revised_display": "Show Gaussian sampling weights only inside the right Local sampling zoom at the actual sigma=0.25 mm. Central sheet has no sampling fill, halo or footprint ring; neutral unfilled dashed callouts identify the enlarged window. Preserve all three consecutive contacts, local circuits, and frozen readout traces.",
+  "mode_showcases": {
+    "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+    "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "events": [
+      {
+        "mode": "MTA",
+        "event_index": 10,
+        "frozen_mode_label": 1,
+        "window_absolute_ms": [
+          4310,
+          4430
+        ],
+        "peak_absolute_ms": [
+          4386.0,
+          4378.0,
+          4372.0
+        ],
+        "peak_relative_ms": [
+          76.0,
+          68.0,
+          62.0
+        ],
+        "contact_order": [
+          "ICL3",
+          "ICL4",
+          "ICL5"
+        ],
+        "display_labels": [
+          "SL3",
+          "SL4",
+          "SL5"
+        ]
+      },
+      {
+        "mode": "MTB",
+        "event_index": 8,
+        "frozen_mode_label": 0,
+        "window_absolute_ms": [
+          3710,
+          3830
+        ],
+        "peak_absolute_ms": [
+          3756.0,
+          3756.0,
+          3762.0
+        ],
+        "peak_relative_ms": [
+          46.0,
+          46.0,
+          52.0
+        ],
+        "contact_order": [
+          "ICL3",
+          "ICL4",
+          "ICL5"
+        ],
+        "display_labels": [
+          "SL3",
+          "SL4",
+          "SL5"
+        ]
+      }
+    ],
+    "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+    "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+    "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
+    "snapshot": "burst_readout_arrays.npz",
+    "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
+    "waveform_source": "waveform_arrays.npz",
+    "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "exact_frozen_F_waveform_crops_verified": true,
+    "no_artificial_peak_sharpening_or_time_warping": true,
+    "peak_relative_ms": [
+      [
+        76.0,
+        68.0,
+        62.0
+      ],
+      [
+        46.0,
+        46.0,
+        52.0
+      ]
+    ],
+    "display_label_to_source_contact": {
+      "SL3": "ICL3",
+      "SL4": "ICL4",
+      "SL5": "ICL5"
+    }
+  },
+  "sampling_zoom": {
+    "world_offset_to_overview_mm": [
+      -10,
+      -10
+    ],
+    "field_of_view_mm": [
+      3.8,
+      1.9
+    ],
+    "ellipse_contour_level": 0.7,
+    "representative_local_circuit_center_mm": [
+      -8.5,
+      0
+    ],
+    "two_zoom_roles": "Left zoom is representative circuit away from electrodes; new right zoom is explicitly local electrode sampling.",
+    "geometry": "Same frozen neuron population and same display-only rigid contacts as overview; both use the E-panel rod projection. Local kernels are illustrative operators, not reconstructed graph edges.",
+    "population_snapshot": "spatial_reference.npz",
+    "population_snapshot_sha256": "6698c2bf581a8b151cde4278d5aca4f74de7715991519a12f1d2bfc5e337eee5",
+    "labeled_contacts": [
+      "ICL3",
+      "ICL4",
+      "ICL5"
+    ],
+    "contact_label_rule": "Exactly three consecutive real contacts, with display aliases SL3/SL4/SL5 shared by sampling and readouts.",
+    "display_labels": [
+      "SL3",
+      "SL4",
+      "SL5"
+    ],
+    "center_rule": "Midpoint of the two end contacts ICL3 and ICL5.",
+    "show_sampling_footprints": true,
+    "footprint_display": {
+      "location": "Right Local sampling only",
+      "sigma_mm": 0.25,
+      "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
+      "maximum_alpha": 0.67,
+      "render_extent_sigma": 4.0,
+      "clipped_at_zoom_boundary": true,
+      "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+    }
+  },
+  "electrode_display": {
+    "source": "D_position_straight_electrodes.json",
+    "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "geometry_snapshot": "rigid_contact_geometry.npz",
+    "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+    "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+    "maximum_display_displacement_mm": 0.20730072911893763,
+    "overview_and_sampling_use_identical_contacts": true
+  },
+  "overview_neuron_samples": {
+    "snapshot": "overview_neuron_samples.npz",
+    "E": 933,
+    "I": 269,
+    "sampling": "Exact old overview scatter coordinates retained; raster replaced with vector scatter for straight rod drawing."
+  },
+  "layout_refinement": {
+    "sheet_shift_x_mm": 24.0,
+    "sampling_axes_mm": [
+      218.5,
+      190.0,
+      60.0,
+      30.0
+    ],
+    "previous_sampling_axes_mm": [
+      203.0,
+      190.0,
+      68.0,
+      34.0
+    ],
+    "readout_axes_mm": [
+      [
+        207.0,
+        155.0,
+        34.0,
+        22.0
+      ],
+      [
+        256.0,
+        155.0,
+        34.0,
+        22.0
+      ]
+    ],
+    "previous_readout_axes_mm": [
+      [
+        179.0,
+        155.0,
+        47.0,
+        22.0
+      ],
+      [
+        245.0,
+        155.0,
+        47.0,
+        22.0
+      ]
+    ],
+    "left_circuit_scale": 1.2,
+    "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
+    "sheet_scale": 1.06,
+    "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
+  },
+  "local_population_display": {
+    "purpose": "Schematic local connection neighbourhoods; ellipse contours are not fitted core boundaries.",
+    "ellipse_offsets_mm": [
+      [
+        -1.0556900257197057,
+        0.5487604085720799
+      ],
+      [
+        0.7026689296635951,
+        0.5617465917385838
+      ],
+      [
+        -1.419650291832987,
+        -0.42792749960052756
+      ],
+      [
+        -0.17489550057322134,
+        -0.5112404878817776
+      ],
+      [
+        0.8380067592534388,
+        -0.4340210016452053
+      ]
+    ],
+    "rows": [
+      2,
+      3
+    ],
+    "E_counts": [
+      6,
+      7,
+      6,
+      6,
+      6
+    ],
+    "I_counts": [
+      2,
+      2,
+      2,
+      2,
+      1
+    ],
+    "sampling": "Deterministic subsampling of the frozen E/I coordinates inside each ellipse; retain physical orientation and scale.",
+    "E_markers": "Uniform hollow red triangles, including peripheral neurons.",
+    "I_markers": "Blue circular neurons in every ellipse, fewer than E neurons.",
+    "synaptic_arrows": false,
+    "minimum_symbol_separation_mm": 0.1,
+    "normalized_ellipse_limits": {
+      "E": 0.84,
+      "I": 0.76
+    },
+    "symbol_scale": 1.0
+  }
+}

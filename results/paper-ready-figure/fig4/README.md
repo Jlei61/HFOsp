@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v8（2026-10-10）：[预览](candidates/a_consecutive_contacts_20261010/figures/fig4-complete-layout-preview.png)。Local sampling恢复3.8×1.9 mm小视野，框内只画三个连续触点，上下统一标SL3、SL4、SL5（显示标签分别对应源通道ICL3、ICL4、ICL5）。移除绿色采样范围圈及光晕，局部circuits和神经元恢复原显示大小；小绿色箭头继续移除。左侧回路与B–I保持；新A待作者目视检查，正式布局仍为v4。
+A机制重绘候选v9（2026-10-10）：[预览](candidates/a_local_sampling_sigma_20261010/figures/fig4-complete-layout-preview.png)。仅在右侧Local sampling恢复绿色高斯采样权重，按实际σ=0.25 mm绘制，随距离淡出、不画硬边界圈。中央sheet不画采样范围、光晕或绿色填充，只用无填充灰色虚线框定位放大视野。下方两组真实120 ms波形和标签逐像素保持v8，左侧回路与B–I保持；新A待作者目视检查，正式布局仍为v4。
