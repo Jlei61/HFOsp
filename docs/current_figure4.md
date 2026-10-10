@@ -36,3 +36,5 @@ A包含放大的原局部E/I回路、中央二维sheet，以及右侧Local sampl
 本次前一版A–I整包保留在[横向间距收紧前归档](../results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4/README.md)；旧局部回路图及B–I科学数值保持。
 
 **2026-10-10正式整合A v10**：左侧细节、中央sheet与右侧采样读出均采用作者刚确认的版本。正式入口已移除`pending_panel_a_revision`并登记`accepted_panel_a_revision`；A及完整PNG/PDF/SVG与v10审阅包一致。此前右侧留白的正式v4整包保存在[机制图整合前归档](../results/paper-ready-figure/archive/2026-10-10_pre_mechanism_fig4/fig4/README.md)。
+
+**2026-10-10 A候选v11：多core位置优化示意。** 按作者要求在中央二维sheet中加入四组浅紫色初始core（中心问号），各用单条虚线箭头指向深紫色更新core；不增加公式或复杂流程。位置与四core组合均为示意，具体1–4 core结果仍见C；已有两组波形沿用原冻结工作点，不表示由本次四core示意重新仿真得到。完整拼版中央sheet之外像素完全一致，B–I逐像素保持正式v10。候选登记于`current_version.json.pending_panel_a_revision`，正式v10输出保留，待作者目视检查。[独立A](../results/paper-ready-figure/fig4/candidates/a_multicore_optimization_20261010/figures/fig4-panela.png) · [完整预览](../results/paper-ready-figure/fig4/candidates/a_multicore_optimization_20261010/figures/fig4-complete-layout-preview.png)。

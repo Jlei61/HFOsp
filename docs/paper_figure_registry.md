@@ -1,5 +1,7 @@
 > **2026-09-30 Figure 5整合入口**：[当前A–F版](current_figure5.md)，已纳入70点及19条长随访。下面任何旧seed1801 v5入口仅为历史。空间与六群体分岔分别见[模型版本表](topic4_model_versions.md)。其他图的路由不受本次整合影响。
 
+> A候选v11（2026-10-10）：中央新增四组浅紫色问号core、深紫色更新core及虚线箭头，均为二维位置优化示意。正式v10输出保持；当前候选见`fig4/current_version.json.pending_panel_a_revision`及[版本说明](current_figure4.md)，待作者目视检查。
+
 > **当前 Fig4（A机制图整合，2026-10-10）：三行A–I，`CURRENT_AUTHOR_DESIGNATED`。** 见[版本说明](current_figure4.md)及[机器入口](../results/paper-ready-figure/fig4/current_version.json)，producer为`build_fig4_a_mechanism_candidate.py`。A小框移至(-8.5,0) mm且虚线避开电极；B/C/D/E/H/I扩大到50×50 mm，C/D与G/H横向留白约3.87／5.20 mm，D/H与E/I逐列对齐、B/C整体与F/G组合对齐，B两端无空白延伸且色条间距1.5 mm，紧凑行距保持；右侧Local sampling及两组SEEG readout已并入；中排B/C/角度响应D/位置密度E，底排沿用旧G–J改为F–I；旧E/F传播showcase移出。B为第6–16阶段194点、C为四core均值±样本标准差、E为83/413低损失配置密度、I为25患者红蓝相似度，均保留最新冻结数据。当前拼版待作者目视检查；下方历史A–J说明不覆盖当前入口。
 
 > A机制图v10（2026-10-10）已按作者要求并入当前正式包，登记于`fig4/current_version.json.accepted_panel_a_revision`；见[当前说明](current_figure4.md)。A包含放大的原局部E/I回路、中央二维sheet，以及右侧Local sampling和下方两组SEEG readout。左侧中央红色下行箭头与蓝色抑制竖线间距为0.22示意单位，z↓边框为0.60 pt、1.5/1.5细密虚线。中央(-8.5,0) mm小框表示通用局部回路；电极附近仅有无填充灰色放大定位框。右侧在3.8×1.9 mm视野内显示五个错落的椭圆连接核和三个连续触点SL3/SL4/SL5，绿色高斯采样权重σ=0.25 mm仅在右侧显示。下方两组120 ms冻结burst与这些触点对应，源通道为ICL3/ICL4/ICL5。椭圆为局部连接核示意，读出是SNN发放密度代理，不是新增电位前向模型或实测SEEG电压。B–I的24个PNG/PDF/SVG文件保持不变，完整拼版待作者目视检查。
