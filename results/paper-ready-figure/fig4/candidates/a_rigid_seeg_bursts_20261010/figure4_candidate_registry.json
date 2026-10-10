@@ -1,8 +1,8 @@
 {
-  "status": "CURRENT_AUTHOR_DESIGNATED",
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
   "human_visual_acceptance": "PENDING",
-  "producer": "scripts/paper_figures/build_fig4_compact_ai.py",
-  "layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
+  "layout_version": "compact_ai_v4_a_rigid_seeg_bursts_v4",
   "updated_on": "2026-10-09",
   "panel_letters": [
     "A",
@@ -16,7 +16,7 @@
     "I"
   ],
   "titles": {
-    "A": "局部 E/I 回路与患者空间基底；右侧预留机制连接图",
+    "A": "原局部回路、直电极杆与多椭圆回路采样、下方两种SEEG burst读出",
     "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
     "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
     "D": "E→E角度的Mean rank／Order／Participation误差响应",
@@ -31,7 +31,7 @@
     232.0
   ],
   "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-  "base_published_complete_sha256": "703ea0ca497d98a893d8b82badd0329603dd220a311fbbf0aa061bd55c47d1df",
+  "base_published_complete_sha256": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
   "panel_mapping": {
     "A": "A",
     "B": "B",
@@ -50,8 +50,27 @@
     "D within-core EE response"
   ],
   "panel_a": {
-    "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
-    "artwork_scale": 1.23,
+    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+    "original_left_circuit_restored": true,
+    "overview_neuron_samples_preserved": true,
+    "electrode_shafts_are_straight": true,
+    "shaft_collinearity_residual_mm": {
+      "SCL": 4.440892098500626e-16,
+      "ICL": 1.2212453270876722e-15
+    },
+    "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+    "electrode_display": {
+      "source": "D_position_straight_electrodes.json",
+      "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+      "geometry_snapshot": "rigid_contact_geometry.npz",
+      "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+      "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+      "maximum_display_displacement_mm": 0.20730072911893763,
+      "overview_and_sampling_use_identical_contacts": true
+    },
+    "original_left_title_and_internal_labels_preserved": true,
+    "combined_third_component": true,
+    "formulas_and_lower_explanations_removed": true,
     "zoom_center_mm": [
       -8.5,
       0.0
@@ -60,24 +79,159 @@
       1.6754742547425474,
       1.3143631436314362
     ],
-    "nearest_contact_to_box_mm": 3.5203799692651128,
-    "old_contact_callout_removed": true,
-    "frozen_spatial_geometry_verified": true,
-    "zoom_metadata": "source/A_zoom_in.json",
-    "reserved_right_region_mm": [
-      180,
-      155,
-      100,
-      70
+    "left_zoom_connector_minimum_contact_distance_mm": 3.022561213821491,
+    "left_zoom_connectors_clear_of_electrode_footprints": true,
+    "actual_workpoint_kernel": {
+      "l_par": 0.5374011537017762,
+      "l_perp": 0.40305086527633205,
+      "theta_deg": -22.80538396505847,
+      "theta_rad": -0.3980290373717898,
+      "reference_theta_deg": -22.80538396505847,
+      "reference_ar": 2.0,
+      "perp_scale": 1.5,
+      "parallel_scale": 1.0,
+      "angle_offset_deg": 0.0,
+      "is_reference": false
+    },
+    "kernel_centres_E_coordinates_mm": [
+      [
+        15.425198554992676,
+        4.4775567054748535
+      ],
+      [
+        16.49538803100586,
+        4.423861026763916
+      ],
+      [
+        17.465980529785156,
+        4.434181213378906
+      ],
+      [
+        15.684471130371094,
+        3.49216890335083
+      ],
+      [
+        16.780916213989258,
+        3.442249298095703
+      ]
     ],
-    "next_redraw": [
-      "show physical anisotropy direction",
-      "show possible core locations",
-      "add right-side physical connectivity mechanism"
+    "enlarged_sampling_contact": "ICL2",
+    "local_circuit_count": 5,
+    "sampling_zoom_center_overview_mm": [
+      6.554300916462296,
+      -6.043206695859643
     ],
-    "connector_minimum_contact_distance_mm": 3.0416473583089783,
-    "connectors_clear_of_electrode_footprints": true,
-    "connectors_attached_to_both_frames": true
+    "sampling_zoom_field_of_view_mm": [
+      3.8,
+      1.9
+    ],
+    "sampling_frame_is_a_coordinate_exact_enlargement": true,
+    "two_distinct_zoom_roles": true,
+    "mode_readouts_below_sampling": true,
+    "physical_xy_equal_scale": true,
+    "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+    "readout": {
+      "type": "normalized Gaussian average of smoothed E spike density",
+      "sigma_mm": 0.25,
+      "bin_ms": 2.0,
+      "smooth_ms": 5.0,
+      "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+      "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+      "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+      "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+      "display_title": "SEEG readout",
+      "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+    },
+    "mode_showcases": {
+      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+      "events": [
+        {
+          "mode": "MTA",
+          "event_index": 10,
+          "frozen_mode_label": 1,
+          "window_absolute_ms": [
+            4310,
+            4430
+          ],
+          "peak_absolute_ms": [
+            4360.0,
+            4368.0,
+            4378.0
+          ],
+          "peak_relative_ms": [
+            50.0,
+            58.0,
+            68.0
+          ],
+          "contact_order": [
+            "ICL8",
+            "ICL6",
+            "ICL4"
+          ]
+        },
+        {
+          "mode": "MTB",
+          "event_index": 8,
+          "frozen_mode_label": 0,
+          "window_absolute_ms": [
+            3710,
+            3830
+          ],
+          "peak_absolute_ms": [
+            3786.0,
+            3770.0,
+            3756.0
+          ],
+          "peak_relative_ms": [
+            76.0,
+            60.0,
+            46.0
+          ],
+          "contact_order": [
+            "ICL8",
+            "ICL6",
+            "ICL4"
+          ]
+        }
+      ],
+      "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+      "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+      "selection": "Reuse both F demonstration events, fixed channel order ICL8/ICL6/ICL4 across the two modes; no temporal shifting or per-contact amplitude scaling.",
+      "snapshot": "burst_readout_arrays.npz",
+      "snapshot_sha256": "878e8723351a20bc328012bf753aec085ff0e1427ed873c842884f32a70ba158",
+      "waveform_source": "waveform_arrays.npz",
+      "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+      "exact_frozen_F_waveform_crops_verified": true,
+      "no_artificial_peak_sharpening_or_time_warping": true,
+      "peak_relative_ms": [
+        [
+          50.0,
+          58.0,
+          68.0
+        ],
+        [
+          76.0,
+          60.0,
+          46.0
+        ]
+      ]
+    },
+    "readout_peak_times_relative_ms": [
+      [
+        50.0,
+        58.0,
+        68.0
+      ],
+      [
+        76.0,
+        60.0,
+        46.0
+      ]
+    ],
+    "two_opposite_peak_sequences": true,
+    "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
+    "original_left_circuit_pixel_identical": true
   },
   "panel_b": {
     "version": "post_prior_stages_6_16_v1",
@@ -311,20 +465,28 @@
     "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
   },
   "checks": {
-    "A_local_circuit_source_pixels_unchanged": true,
-    "A_local_circuit_mm_per_source_pixel": 0.021,
-    "A_external_typography_pt": {
-      "title": 11,
-      "labels": 10,
-      "ticks": 9,
-      "legend": 8.8
-    },
-    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
-    "A_circuit_frame_vector_stroke_pt": 0.65,
-    "A_circuit_frame_source_crop_padding_px": 12,
     "A_revision": {
-      "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
-      "artwork_scale": 1.23,
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+      "original_left_circuit_restored": true,
+      "overview_neuron_samples_preserved": true,
+      "electrode_shafts_are_straight": true,
+      "shaft_collinearity_residual_mm": {
+        "SCL": 4.440892098500626e-16,
+        "ICL": 1.2212453270876722e-15
+      },
+      "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+      "electrode_display": {
+        "source": "D_position_straight_electrodes.json",
+        "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+        "geometry_snapshot": "rigid_contact_geometry.npz",
+        "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+        "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+        "maximum_display_displacement_mm": 0.20730072911893763,
+        "overview_and_sampling_use_identical_contacts": true
+      },
+      "original_left_title_and_internal_labels_preserved": true,
+      "combined_third_component": true,
+      "formulas_and_lower_explanations_removed": true,
       "zoom_center_mm": [
         -8.5,
         0.0
@@ -333,24 +495,158 @@
         1.6754742547425474,
         1.3143631436314362
       ],
-      "nearest_contact_to_box_mm": 3.5203799692651128,
-      "old_contact_callout_removed": true,
-      "frozen_spatial_geometry_verified": true,
-      "zoom_metadata": "source/A_zoom_in.json",
-      "reserved_right_region_mm": [
-        180,
-        155,
-        100,
-        70
+      "left_zoom_connector_minimum_contact_distance_mm": 3.022561213821491,
+      "left_zoom_connectors_clear_of_electrode_footprints": true,
+      "actual_workpoint_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -22.80538396505847,
+        "theta_rad": -0.3980290373717898,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 0.0,
+        "is_reference": false
+      },
+      "kernel_centres_E_coordinates_mm": [
+        [
+          15.425198554992676,
+          4.4775567054748535
+        ],
+        [
+          16.49538803100586,
+          4.423861026763916
+        ],
+        [
+          17.465980529785156,
+          4.434181213378906
+        ],
+        [
+          15.684471130371094,
+          3.49216890335083
+        ],
+        [
+          16.780916213989258,
+          3.442249298095703
+        ]
       ],
-      "next_redraw": [
-        "show physical anisotropy direction",
-        "show possible core locations",
-        "add right-side physical connectivity mechanism"
+      "enlarged_sampling_contact": "ICL2",
+      "local_circuit_count": 5,
+      "sampling_zoom_center_overview_mm": [
+        6.554300916462296,
+        -6.043206695859643
       ],
-      "connector_minimum_contact_distance_mm": 3.0416473583089783,
-      "connectors_clear_of_electrode_footprints": true,
-      "connectors_attached_to_both_frames": true
+      "sampling_zoom_field_of_view_mm": [
+        3.8,
+        1.9
+      ],
+      "sampling_frame_is_a_coordinate_exact_enlargement": true,
+      "two_distinct_zoom_roles": true,
+      "mode_readouts_below_sampling": true,
+      "physical_xy_equal_scale": true,
+      "kernel_arrows": "Schematic partner-sampling arrows, not a graph-edge reconstruction.",
+      "readout": {
+        "type": "normalized Gaussian average of smoothed E spike density",
+        "sigma_mm": 0.25,
+        "bin_ms": 2.0,
+        "smooth_ms": 5.0,
+        "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+        "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+        "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+        "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+        "display_title": "SEEG readout",
+        "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+      },
+      "mode_showcases": {
+        "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+        "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+        "events": [
+          {
+            "mode": "MTA",
+            "event_index": 10,
+            "frozen_mode_label": 1,
+            "window_absolute_ms": [
+              4310,
+              4430
+            ],
+            "peak_absolute_ms": [
+              4360.0,
+              4368.0,
+              4378.0
+            ],
+            "peak_relative_ms": [
+              50.0,
+              58.0,
+              68.0
+            ],
+            "contact_order": [
+              "ICL8",
+              "ICL6",
+              "ICL4"
+            ]
+          },
+          {
+            "mode": "MTB",
+            "event_index": 8,
+            "frozen_mode_label": 0,
+            "window_absolute_ms": [
+              3710,
+              3830
+            ],
+            "peak_absolute_ms": [
+              3786.0,
+              3770.0,
+              3756.0
+            ],
+            "peak_relative_ms": [
+              76.0,
+              60.0,
+              46.0
+            ],
+            "contact_order": [
+              "ICL8",
+              "ICL6",
+              "ICL4"
+            ]
+          }
+        ],
+        "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+        "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+        "selection": "Reuse both F demonstration events, fixed channel order ICL8/ICL6/ICL4 across the two modes; no temporal shifting or per-contact amplitude scaling.",
+        "snapshot": "burst_readout_arrays.npz",
+        "snapshot_sha256": "878e8723351a20bc328012bf753aec085ff0e1427ed873c842884f32a70ba158",
+        "waveform_source": "waveform_arrays.npz",
+        "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+        "exact_frozen_F_waveform_crops_verified": true,
+        "no_artificial_peak_sharpening_or_time_warping": true,
+        "peak_relative_ms": [
+          [
+            50.0,
+            58.0,
+            68.0
+          ],
+          [
+            76.0,
+            60.0,
+            46.0
+          ]
+        ]
+      },
+      "readout_peak_times_relative_ms": [
+        [
+          50.0,
+          58.0,
+          68.0
+        ],
+        [
+          76.0,
+          60.0,
+          46.0
+        ]
+      ],
+      "two_opposite_peak_sequences": true,
+      "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery."
     },
     "B_workpoints": 194,
     "B_stages": [
@@ -585,9 +881,9 @@
       "visible_bounds_mm": {
         "A": [
           7.000000000000008,
-          149.44890444444442,
-          156.22923249999997,
-          226.55898499999998
+          145.99999999999997,
+          294.67890625,
+          230.80999999999995
         ],
         "B": [
           6.697881944444444,
@@ -672,7 +968,7 @@
       "BC_outer_edges_match_FG": true,
       "DH_and_EI_both_edges_aligned": true,
       "row_gaps_mm": [
-        9.651781066298383,
+        6.202876621853932,
         7.394999999999996
       ],
       "previous_row_gaps_mm": [
@@ -683,13 +979,12 @@
         0.03935016218537157,
         1.4210854715202004e-14
       ],
-      "compact_row_gaps_preserved": true
+      "compact_row_gaps_preserved": true,
+      "approved_v4_B_through_I_bounds_preserved": true,
+      "A_uses_previously_reserved_mechanism_space": true
     }
   },
   "source_files": {
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
-    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
     "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
     "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
     "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
@@ -707,55 +1002,49 @@
   "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
   "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
   "outputs": {
-    "figures/fig4-panela.pdf": "a3fc6626612c1d1d719e84112e2a1b2e14ccfc8a22c0638b79be8d2b6f821e34",
-    "figures/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
-    "figures/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
-    "figures/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
-    "figures/fig4-complete-layout.svg": "91242091fe311198a0ff904d2bee4afbf88a0dc70a56dce06a68a20fa277197c",
-    "figures/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
-    "figures/fig4-complete-layout.png": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
+    "figures/fig4-panela.pdf": "3733e3c1a7937fa843d489661207040b4bb4825233911c11af026e76738f5064",
+    "figures/fig4-panelf.svg": "6a6263868db6472cd797c86efa39cbab9144732dd100ff9b5ae822718358b710",
+    "figures/fig4-panelh.pdf": "4104a1cc265ca8c88a9322b0c5dabb696f1e32111c217c67e2e60c872878df57",
+    "figures/fig4-panelf.pdf": "2f423484acc7139b907a6601716fd2eb163088aae39a8c2546c126c56b571d3b",
+    "figures/fig4-complete-layout.svg": "9ec0ea79245a487c832e350b649bead25c4cd692e9e23e5b37902ae56edcdf13",
+    "figures/fig4-panelg.pdf": "b441fed424b6f645b2a3e219574fb0c9df65c2a91ea239dd8c4f3b438ec95e2a",
+    "figures/fig4-complete-layout.png": "2c8b7a3454462e794338a6e65cb086c43bd02ccc2c1a05c569049e8d01bcd824",
     "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
     "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
-    "figures/fig4-panela.svg": "e3690b29f6dff6a3838a4e2ec91ca69f22f395a96f4e7ad129241478474dd191",
-    "figures/fig4-paneld.pdf": "e4bc79df071408c80096a81d972c84392bbecebb34fe81fc2af31d960b202595",
-    "figures/fig4-panelb.pdf": "82d11b25fe64eb6293832fd13ee11f946bf5f6e32726f2da0cea8079eae7fc57",
-    "figures/fig4-paneld.svg": "29d9f2c1a5ccbc792e9a6b6c3ee781db94718e2556625d29a8c67358f430a6b5",
-    "figures/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
-    "figures/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
-    "figures/fig4-panelb.svg": "aa78bb6195f3fd65e3cb8992d4e9ca9ef9a13b6310c6a432848423df5f1a78d4",
-    "figures/fig4-complete-layout-preview.png": "e91ef0a323453f9eaf9488477c256cce6474aa87c884cdbf97658b60f091c6c9",
-    "figures/fig4-complete-layout.pdf": "b1a6574c08ba5a7c863f951e0afd8a9ddd9f535b12f33e21d4a3d650fe69d223",
-    "figures/fig4-panelc.pdf": "b2aa7a9daabec70b0ba8a4060c3e7dc0dab1eef3006f3b09559dda8e7c85b178",
+    "figures/fig4-panela.svg": "ca34864ef29e0c9c36c0a74984b7c4be3a08f1651d09376803ec4e291e02e628",
+    "figures/fig4-paneld.pdf": "72cdb353da3f68834d4c753521d3f6479643f82dedf53630c04724888d576857",
+    "figures/fig4-panelb.pdf": "fe99251afce9372c565ec0cfae23f0ce57c9cd01341adc2ed0adff8c4d57861d",
+    "figures/fig4-paneld.svg": "93f46d9c0d61ca6fb687376c7926a5123e7cfbd688cc433322eb12d77c5009ac",
+    "figures/fig4-panelh.svg": "dd590af233fb0d298015b13b97eff9a7ddffbb09a2885a58b92ceaca6d57ed18",
+    "figures/fig4-panelg.svg": "5705c8704023b1f9cddd73cbe56d8987ff39d42ab70c1989ca46c25f42e0507c",
+    "figures/fig4-panelb.svg": "b92088633e82a3b88a0e391142e5ef504721cfc2bcccb1d5963b52eb8ad8cb56",
+    "figures/fig4-complete-layout-preview.png": "44a4dbcb87e4c6bacc6894f53a347276a2b4ab69ba344a78ee1d85edd106c79a",
+    "figures/fig4-complete-layout.pdf": "5d1d1b4b5062be2343b980bef667a085208b2bf48cb9c87d907c5a038b71642d",
+    "figures/fig4-panelc.pdf": "b43651bd3018f16528d44a65e217493bda71a86e149581a2e90b54a4506315a7",
     "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
-    "figures/fig4-panela.png": "5b14154d55fc73dc8e7d1d915357b49071c3003b7c4e30e3ac03c99b82a89d21",
+    "figures/fig4-panela.png": "34cf49067ec02b03d055bf0174a15d9a1a03295c405da1de7acbffbd8f1e4b52",
     "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
-    "figures/fig4-panelc.svg": "747021382dda973c73840c9d0ad37dddc200e729cef89109dca37a2e3b1c8cf0",
+    "figures/fig4-panelc.svg": "2b2f86e57cd98641111574953e44bb83a144a9a334c94ae96fa35ff8a8ba1f13",
     "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
-    "figures/fig4-panele.svg": "509295de8e35a4a6b9971abb065fd53a60ec4f0b7812a476f2f0399ac73bf498",
+    "figures/fig4-panele.svg": "f6487dfb35c13b2f3f6d4a4063394156ac8a89ed29df215be8413c9d1c711caa",
     "figures/fig4-panelb.png": "d01f589b1718c232aecf194233f7c122efbe243a7a23e56babda45089f34a312",
     "figures/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
-    "figures/fig4-panele.pdf": "4f99e2bc211cd7445fee58dacac1391cc77a6ab4f29eba71b6f02756b7aec4e8",
-    "figures/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
-    "figures/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
+    "figures/fig4-panele.pdf": "5b49a1ccf9e83a582fc9c498a45497fdd81cd41878b628e43c56aed07ccc9557",
+    "figures/fig4-paneli.svg": "8bf4e0ef3eb94cd101aff2e7ae892e966acbca8b6bf6fff27cbd61bc1bab3653",
+    "figures/fig4-paneli.pdf": "b85bf9b242e4e8ddf3ae9189e7975d6d6e10a115fdd5e4ac445d31bf6e040fb6",
     "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
   },
-  "published_from": "results/paper-ready-figure/fig4/candidates/compact_ai_tighter_columns_20261009",
-  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4",
-  "pending_panel_a_revision": {
-    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_rigid_seeg_bursts_v4",
-    "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010",
-    "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-    "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figure4_candidate_registry.json",
-    "canonical_figure_replaced": false,
-    "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "original_left_circuit": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "zoom_roles": "Original off-electrode circuit box at (-8.5,0) mm retained; stronger green ICL2 box enlarges electrode sampling.",
-    "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; all contacts on each shaft are collinear. Display only; simulation coordinates unchanged.",
-    "third_component": "Five tilted elliptical circuits and stronger green Gaussian sampling footprint; coordinate-exact enlargement in the shared display geometry.",
-    "readout": "SEEG readout: two real 120-ms three-contact burst crops of F events 10/8, showing opposite arrival order. Virtual contact readout of SNN activity; no artificial sharpening, temporal shifts, time compression or clinical-voltage claim."
-  }
+  "base_layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "canonical_figure_replaced": false,
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "original_left_circuit_pixel_identical": true
 }

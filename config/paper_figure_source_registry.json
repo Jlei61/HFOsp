@@ -149,18 +149,20 @@
       "fallback_to_historical_layout": false,
       "pending_panel_a_revision": {
         "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-        "version": "a_sampling_zoom_modes_v3",
-        "package": "results/paper-ready-figure/fig4/candidates/a_sampling_zoom_modes_20261009",
+        "version": "a_rigid_seeg_bursts_v4",
+        "updated_on": "2026-10-10",
+        "package": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010",
         "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
         "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-        "preview": "results/paper-ready-figure/fig4/candidates/a_sampling_zoom_modes_20261009/figures/fig4-complete-layout-preview.png",
-        "registry": "results/paper-ready-figure/fig4/candidates/a_sampling_zoom_modes_20261009/figure4_candidate_registry.json",
+        "preview": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figures/fig4-complete-layout-preview.png",
+        "registry": "results/paper-ready-figure/fig4/candidates/a_rigid_seeg_bursts_20261010/figure4_candidate_registry.json",
         "canonical_figure_replaced": false,
         "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
         "original_left_circuit": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-        "zoom_roles": "Original left circuit callout remains at (-8.5,0) mm away from electrodes. New green box near ICL2 enlarges electrode sampling.",
-        "third_component": "Five tilted elliptical local circuits with Gaussian sampling; coordinate-exact enlargement of frozen overview population; no formula or explanatory footer.",
-        "readout": "Below sampling: MTA and MTB envelope sequences from F events 10 and 8, using the same ICL8/ICL6/ICL4 order. No temporal shifts; distinct from F continuous 30-80 Hz traces."
+        "zoom_roles": "Original off-electrode circuit box at (-8.5,0) mm retained; stronger green ICL2 box enlarges electrode sampling.",
+        "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; all contacts on each shaft are collinear. Display only; simulation coordinates unchanged.",
+        "third_component": "Five tilted elliptical circuits and stronger green Gaussian sampling footprint; coordinate-exact enlargement in the shared display geometry.",
+        "readout": "SEEG readout: two real 120-ms three-contact burst crops of F events 10/8, showing opposite arrival order. Virtual contact readout of SNN activity; no artificial sharpening, temporal shifts, time compression or clinical-voltage claim."
       }
     }
   }

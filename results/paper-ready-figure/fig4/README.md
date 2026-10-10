@@ -6,4 +6,4 @@
 
 重建：`python scripts/paper_figures/build_fig4_compact_ai.py`；本次前一版保存在`results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4`，旧A–J数据包保存在`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4`。
 
-A机制重绘候选v3：[预览](candidates/a_sampling_zoom_modes_20261009/figures/fig4-complete-layout-preview.png)。保留原左侧回路和远离电极的旧放大框；新增电极附近绿色虚线框，连接到含五个倾斜椭圆回路的采样放大图。采样下方并列MTA/MTB两种短包络序列，与F的长振荡波形区分。左侧回路和B–I逐像素保持，候选待作者目视检查。
+A机制重绘候选v4（2026-10-10）：[预览](candidates/a_rigid_seeg_bursts_20261010/figures/fig4-complete-layout-preview.png)。中间与采样放大图电极统一为刚性直杆，绿色采样框及范围加深；下方改为SEEG readout，用两个120 ms真实burst展示SNN在虚拟触点上的相反到达顺序。左侧回路及B–I逐像素保持，候选待作者目视检查。
