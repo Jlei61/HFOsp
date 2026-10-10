@@ -1,5 +1,7 @@
 # 主图计划
 
+> **当前Figure 3已定稿（2026-10-10）：** 以[当前版本说明](current_figure3.md)及`fig3/current_revision.json`为准，正式A–E为E10/SZ3 broadband、Y1/SZ6 gamma两行病例及底排三张统计图。下方旧Fig3-A–F段落保留历史分析合同；原D→当前C、原E右半→当前D、原F→当前E，旧病例与排版不能覆盖当前图。
+
 本文主图围绕两个核心论点组织：
 
 1. 间期 HFO 群体事件是癫痫病理网络的指示器。

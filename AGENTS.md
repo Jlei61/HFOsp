@@ -1,3 +1,7 @@
+<!-- CURRENT_FIGURE3_20261010 -->
+> **Figure 3已定稿（2026-10-10）：** 先读`docs/current_figure3.md`与`results/paper-ready-figure/fig3/current_revision.json`；共享机器上的旧worktree也以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`，正式完整图和A–E单panel统一在`fig3/figures/`。A是E10/SZ3 broadband，B是Y1/SZ6固定0–10 s、30–80 Hz gamma及自身TA平面（非shared axis）；C/D/E为原D、原E右半、原F。列宽包含色条与标签，三行可见间距4.064 mm。正式入口`build_fig3_current.py`可验证并从冻结原生图层重建；旧`build_main_figure_3.py`已转到同一入口。旧A–F及旧代码在`archive/2026-10-10_pre_current_fig3_ae/`，不得从旧producer或候选目录覆盖正式图；后续修改先输出独立修订。
+<!-- /CURRENT_FIGURE3_20261010 -->
+
 <!-- CURRENT_FIGURE1_20261010 -->
 > **Figure 1已定稿（2026-10-10）：** 开始任何Fig1任务先读 `/home/honglab/leijiaxin/HFOsp/docs/current_figure1.md` 与主目录 `results/paper-ready-figure/fig1/current_revision.json`；离开共享机器时读本checkout的同名文件。当前是`y1_final_20261010`、`AUTHOR_ACCEPTED_FINAL`，正式完整图/A–F/PPTX统一在`fig1/figures/`，producer为`build_fig1_current.py`；冻结代码、必要输入在`fig1/source/`及`fig1/data/`。旧候选和修订均在`archive/2026-10-10_fig1_finalization/fig1/`，不得用旧工作树或旧producer覆盖当前包。后续改动在独立候选目录完成。
 <!-- /CURRENT_FIGURE1_20261010 -->

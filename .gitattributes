@@ -2,3 +2,7 @@
 # Scientific figure files retain their native binary bytes.
 results/paper-ready-figure/**/*.pdf binary
 results/paper-ready-figure/**/*.pptx binary
+
+# Preserve accepted generated Figure 3 SVG bytes; do not line-merge vector output.
+results/paper-ready-figure/fig3/figures/*.svg binary
+results/paper-ready-figure/fig3/source/native_panels/*.svg binary

@@ -1,5 +1,7 @@
 # Paper-ready figure outputs
 
+> **当前Fig3已定稿（2026-10-10）：** 正式[完整图和A–E单panel](fig3/figures/README.md)为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`。统一入口：[版本说明](../../docs/current_figure3.md)、[机器指针](fig3/current_revision.json)；`build_fig3_current.py`可在远端从随包原生图层重建。旧A–F及旧代码已归档。
+
 > **Figure 1当前为作者定稿（2026-10-10）。** [完整图、A–F和PPTX](fig1/figures/README.md)，[代码与数据说明](../../docs/current_figure1.md)。当前指针为`fig1/current_revision.json`，旧版移至`archive/2026-10-10_fig1_finalization/fig1/`。
 
 
@@ -11,7 +13,7 @@
 ## 使用规则
 
 1. 引用格式统一为 `asset_id (paper_slot)`，例如
-   `ictal_field_scaffold (Fig3-A–F)`。
+   `ictal_phenotype_to_field_layout (Fig3-A–E)`。
 2. 只有登记为 `LOCKED` 的资产可直接进入当前稿件；`CANDIDATE` 仍需总拼版或作者锁图。
 3. `SOURCE` 只提供正式 panel 的素材或 renderer，不能作为独立结论引用。
 4. 正式 supplementary 保留在顶层；source、诊断和模型谱系只从 `archive/` 查找。
@@ -25,7 +27,7 @@
 |---|---|---|---|
 | Fig1-B–F | `interictal_hfo_temporal_scaffold` | `LOCKED` | `fig1/figures/` |
 | Fig2-A–F | `interictal_spatial_scaffold` | `CANDIDATE` | `fig2/figures/` |
-| Fig3-A–F | `ictal_field_scaffold` | `LOCKED` | `fig3/figures/` |
+| Fig3-A–E | `ictal_phenotype_to_field_layout` | `AUTHOR_ACCEPTED_FINAL` | `fig3/figures/` |
 | Fig4-A–G | `data_driven_interictal_snn_fig4` | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `fig4/figures/` |
 | Fig5-A–D | `data_driven_zm_transition_fig5` | `CANDIDATE` | `fig5/figures/` |
 Fig1-A 是从登记的 legacy supplementary TIFF 固定裁剪得到的代表性植入脑图；裁剪后的 source asset 随 producer 入库，不重新绘制科学内容。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
@@ -56,7 +58,7 @@ traveling-wave 或机制证据。完整合同和 SHA-256 见 `supplementary-vide
 
 Supplementary Video 2 的正式投稿入口为 `supplementary-video-2.gif`，生成与海报 sidecar 位于
 `supplementary-video-2-fig3c-peri-onset-field/figures/`。该视频把主图
-Fig3C 的 E10 | SZ3 右侧发作场扩展到临床起始前 120 s 至起始后 20 s。动画固定 shared TA plane、
+E10 | SZ3 的发作场（旧Fig3C，现Fig3A场部分）扩展到临床起始前 120 s 至起始后 20 s。动画固定 shared TA plane、
 15 个触点、support、6 mm 显示核和 power-z 色标，仅更新 10 s 滑窗内的 1–150 Hz robust-z 场；
 下方幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 用红蓝点标出当时由 TA/TB 主导，并以游标同步当前帧。该视频是单病例动态
 配套，不是 onset-emergent alignment、template-free replay 或 cohort 证据。完整合同和 SHA-256 见

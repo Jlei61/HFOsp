@@ -5,6 +5,8 @@
 
 # Paper-ready figure 唯一登记表
 
+> **当前Fig3：作者已确认的A–E正式版（2026-10-10）。** [完整图及独立面板](../results/paper-ready-figure/fig3/figures/README.md)为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`；[当前说明](current_figure3.md)与[机器入口](../results/paper-ready-figure/fig3/current_revision.json)为统一入口。A为E10/SZ3，B为Y1/SZ6固定0–10 s、30–80 Hz；C/D/E承接原D、原E右半、原F。完整可见列宽包含色条及标签，两处行距均4.064 mm，画布308.11×254.24 mm。正式代码`build_fig3_current.py`从随包冻结原生图层重建，无需原始数据盘；旧A–F及原组装代码已归档，不能覆盖本版。
+
 > 状态：v9，2026-08-31。本文是 `results/paper-ready-figure/` 的唯一指代入口。
 > 论文 panel 编号、资产语义、物理路径和科学状态必须分开记录；不能再仅凭目录名里的
 > `fig2` / `fig3b` / `fig6` 判断它现在属于哪张论文图。
@@ -18,8 +20,9 @@
 3. `status`：科学和出版状态。
 4. `canonical_path`：当前唯一可消费路径。
 
-状态只允许以下五类：
+状态按以下类别记录：
 
+- `AUTHOR_ACCEPTED_FINAL`：作者明确确认并指定为当前正式版本。
 - `LOCKED`：科学合同和可视版本均已锁定，可进入当前稿件。
 - `CANDIDATE`：可作为候选，但总拼版或 panel 位置尚未最终锁定。
 - `SUPPLEMENT`：只进入补图或补充计算材料。
@@ -27,7 +30,7 @@
 - `HISTORICAL`：已撤回、被替代或仅保留模型谱系；只能从 `archive/` 引用。
 
 引用时优先写 `asset_id (paper_slot)`，例如
-`ictal_field_scaffold (Fig3-A–F)`，不要只写“fig3 图”或直接沿用脚本内部的 `fig3c_*` 名称。
+`ictal_phenotype_to_field_layout (Fig3-A–E)`，不要只写“fig3 图”或直接沿用脚本内部的 `fig3c_*` 名称。
 
 ## 2. 当前主文资产映射
 
@@ -35,7 +38,8 @@
 |---|---|---|---|---|
 | `interictal_hfo_temporal_scaffold` | Fig1-A–F | `AUTHOR_ACCEPTED_FINAL` | `results/paper-ready-figure/fig1/figures/` | Y1完整定稿，2026-10-10作者接受；代码、数据部分备份及旧版归档见`docs/current_figure1.md`。 |
 | `interictal_spatial_scaffold` | Fig2-A–F | `CANDIDATE` | `results/paper-ready-figure/fig2/figures/` | 无角标 A–F 独立输出 + 带 A–F 角标的 `fig2-complete-layout`。2026-09-02 保持原拼板位置，仅收紧 A 的 2×2 内部留白、放大 B 主体文字、将 C 行标题改为 `TA samples` / `TB samples`；D 保持左侧 `TA field` / `TB field`。B/E/F 仍使用 all-event Timing+Space 合同 |
-| `ictal_field_scaffold` | Fig3-A–F | `LOCKED` | `results/paper-ready-figure/fig3/figures/` | 无角标 A–F 独立 PNG/PDF + 带 A–F 角标的 `fig3-complete-layout`。A 内含 E10/SZ8/SCL9 broadband-type 与 E20/SZ8/HRB1 gamma-type 两个断轴 raw+TFR 示例；标题先写 E/SZ 编号再写表型，A 只显示 20 s baseline `[-110,-90] s`。B 用完整 `[-120,+20] s` 时间轴比较二者四频带轨迹，颜色编码表型。两例不是患者内对照。C–F 保持 all-event Timing+Space 合同，D 为 n=17/16/11，F 为 17-subject A/B heatmap |
+| `ictal_phenotype_to_field_layout` | Fig3-A–E | `AUTHOR_ACCEPTED_FINAL` | `results/paper-ready-figure/fig3/figures/` | 2026-10-10作者正式接受；E10/SZ3 broadband与Y1/SZ6 gamma两行均为raw/TFR、早期能量场、间期TA场。Y1固定0–10 s、30–80 Hz、自身TA平面、Y=−20～20 mm；C/D/E为原D、原E右半、原F。含色条的完整列宽对齐，行距4.064 mm。代码、来源与远端重建见`docs/current_figure3.md`。 |
+| `ictal_field_scaffold` | 历史Fig3-A–F | `HISTORICAL` | `results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/fig3/figures/` | 2026-10-10被当前A–E正式版替代；旧独立面板、整图、metadata和组装代码保留供追溯。旧图号不是当前panel身份。 |
 | `data_driven_interictal_snn_fig4` | Fig4-A–G | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `results/paper-ready-figure/fig4/figures/` | 无角标 A、C–G 独立 PNG/PDF + 带 A–G 角标的 `fig4-complete-layout`；B 使用右上现有留白并明确预留，当前无独立文件，后续用于 data-driven 参数对患者间期事件复现的影响。A 为已确认的 local E/I circuit + patient-specific substrate；C 为 Node field + Model TA/MTB；D 为模型/患者 rank profile；E 为 cross-fit matrix；F 为 recruitment-onset-span readout；G 为 34 人 formal cohort。原 KMeans heatmap/rank distribution 保留在 FigS7-E。科学口径不扩大 |
 | `data_driven_snn_dual_mode_validation` | Fig4-C historical candidate | `DIAGNOSTIC_ONLY` | `results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/figures/` | 连续场 + MTA/MTB same-network readout 和 KMeans 核验图；natural KMeans 未复现患者 TA/TB（direction purity `0.674` < patient-matched q05 `0.884`，pooled MTB↔TB `−0.60`），已被独立冻结终点的 NLC pathway panel 替代，不得再作为当前 Fig.4C source |
 | `data_driven_snn_d6_3_replication_diagnostic` | Fig4-C source（诊断，不可替换主文） | `DIAGNOSTIC_ONLY` | `results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/figures/` | 同规格第二套图，冻结连续场候选 `d62_a0p5_b0p5` 在 12 张全新网络上的复制臂；verdict `REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED`（patient cross-fit paired delta `−0.107`、K=2 支持仅 `4/12`）。图为 pooled 展示，不覆盖网络级复制失败，**不得替换主文 Fig.4** |
@@ -47,7 +51,7 @@
 | asset_id | paper_slot | status | canonical_path | 说明 |
 |---|---|---|---|---|
 | `interictal_single_event_propagation_video` | Supplementary Video 1 | `SUPPLEMENT` | `results/paper-ready-figure/supplementary-video-1.gif` | 2026-08-19 作者锁定，2026-08-30 v2 将最右 template-rank colorbar 统一为各模板内归一化 `0–1`。E10 单次 TA/TB 代表事件，30 帧、2 ms biological step、12.5 fps（80 ms/frame）；soft teal-to-navy HFO amplitude envelope + 冻结 template-rank field。只支持 frozen-axis 上的 representative raw-envelope timing cross-check，不支持 template-free、cohort、continuous-tissue traveling wave 或机制结论 |
-| `fig3c_peri_onset_field_evolution_video` | Supplementary Video 2 | `SUPPLEMENT` | `results/paper-ready-figure/supplementary-video-2.gif` | 2026-09-03 作者锁定。E10/SZ3 的 Figure 3C 动态配套：固定 TA 间期场，右侧显示同一 shared plane 上从 −120 s 至 +20 s 的 1–150 Hz baseline-robust-z 发作场；下方为幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 与当前窗游标，红蓝点表示 TA/TB 主导。66 帧、10 s 滑窗、2 s 步长、固定 power-z 色标；0–10 s 帧通过静态 Fig3C 数值一致性检查。只作代表病例动态可视化，不承担独立 cohort 或机制结论 |
+| `fig3c_peri_onset_field_evolution_video` | Supplementary Video 2 | `SUPPLEMENT` | `results/paper-ready-figure/supplementary-video-2.gif` | 2026-09-03 作者锁定。E10/SZ3 的场动态配套（旧Figure 3C，现Figure 3A场部分）：固定 TA 间期场，右侧显示同一 shared plane 上从 −120 s 至 +20 s 的 1–150 Hz baseline-robust-z 发作场；下方为幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 与当前窗游标，红蓝点表示 TA/TB 主导。66 帧、10 s 滑窗、2 s 步长、固定 power-z 色标；0–10 s 帧通过静态旧Fig3C（现A场部分）数值一致性检查。只作代表病例动态可视化，不承担独立 cohort 或机制结论 |
 | `interictal_event_phenotypes` | FigS1 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig1_interictal_event_phenotypes/figures/` | legacy 人工标注事件验证集；作者已锁定为正式补图入口 |
 | `soz_auc` | FigS2 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig2_soz_auc/figures/` | raw vs synchronized SOZ AUC；作者已锁定为正式补图入口 |
 | `k_scan_templates` | FigS3 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig3_k_scan_templates/figures/` | masked K=2–10 扫描与高阶示例；作者已锁定为正式补图入口 |

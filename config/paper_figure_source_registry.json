@@ -82,50 +82,28 @@
         }
       },
       "fig3": {
+        "figure": "Figure 3",
+        "version": "visual_alignment_compact_rows_20261010",
+        "status": "AUTHOR_ACCEPTED_FINAL",
+        "package": "results/paper-ready-figure/fig3",
+        "pointer": "results/paper-ready-figure/fig3/current_revision.json",
+        "producer": "scripts/paper_figures/build_fig3_current.py",
+        "documentation": "docs/current_figure3.md",
+        "archive": "results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae",
+        "shared_workspace": "/home/honglab/leijiaxin/HFOsp",
+        "layout": "A–E",
+        "panel_registry": "results/paper-ready-figure/fig3/figure3_panel_registry.json",
+        "release_manifest": "results/paper-ready-figure/fig3/release_manifest.json",
+        "legacy_af_contract": "results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/legacy_global_fig3_contract.json",
         "canonical_root": "results/paper-ready-figure/fig3",
         "updated_panels": [
+          "a",
+          "b",
           "c",
           "d",
-          "e",
-          "f"
+          "e"
         ],
-        "preserved_panels": [
-          "a",
-          "b"
-        ],
-        "c": {
-          "producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
-          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
-          "source_sha256": "cfe3ab7f4968d2f8646694630a05c587c7ef26e1b449232e57a9c3cd3c354add",
-          "template_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
-          "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panelc.png",
-          "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panelc.pdf"
-        },
-        "d": {
-          "producer": "scripts/paper_figures/plot_fig3_clinical_onset_gradient_field_cohort.py",
-          "analysis_producer": "scripts/run_topic5_clinical_onset_gradient_field_cohort_stat.py",
-          "analysis_root": "results/topic5_ictal_recruitment/clinical_onset_gradient_field_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3d/figures/clinical_onset_gradient_field_cohort_stat.pdf",
-          "source_sha256": "609605880afe56afc667a32a03ac51aea13b1a80157a482b1bcec8b46f755f73",
-          "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-paneld.png",
-          "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-paneld.pdf"
-        },
-        "e": {
-          "producer": "scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py",
-          "analysis_root": "results/topic5_ictal_recruitment/field_dynamics_signed_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3e/figures/epilepsiae_1146_peri_onset_template_expression_paper_ready_journal_clean.pdf",
-          "source_sha256": "55b79e2dfb94946b03f74f7ea0571e0f382b5e27e4cfcd2747c7598f726f1e3d",
-          "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panele.png",
-          "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panele.pdf"
-        },
-        "f": {
-          "producer": "scripts/paper_figures/plot_fig3f_ab_dominance_cohort.py",
-          "analysis_root": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3f_ab_dominance_cohort_all_events_timing_plus_space",
-          "source_pdf": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3f/figures/fig3f_ab_dominance_heatmap.pdf",
-          "source_sha256": "c3d4715a8c8cbb89c23f47ea30e15d73b74933050073a8e8df70efd07173f7fe",
-          "canonical_png": "results/paper-ready-figure/fig3/figures/fig3-panelf.png",
-          "canonical_pdf": "results/paper-ready-figure/fig3/figures/fig3-panelf.pdf"
-        }
+        "preserved_panels": []
       }
     }
   },
@@ -149,5 +127,20 @@
     "documentation": "docs/current_figure1.md",
     "archive": "results/paper-ready-figure/archive/2026-10-10_fig1_finalization/fig1",
     "shared_workspace": "/home/honglab/leijiaxin/HFOsp"
+  },
+  "current_figure3": {
+    "figure": "Figure 3",
+    "version": "visual_alignment_compact_rows_20261010",
+    "status": "AUTHOR_ACCEPTED_FINAL",
+    "package": "results/paper-ready-figure/fig3",
+    "pointer": "results/paper-ready-figure/fig3/current_revision.json",
+    "producer": "scripts/paper_figures/build_fig3_current.py",
+    "documentation": "docs/current_figure3.md",
+    "archive": "results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae",
+    "shared_workspace": "/home/honglab/leijiaxin/HFOsp",
+    "layout": "A–E",
+    "panel_registry": "results/paper-ready-figure/fig3/figure3_panel_registry.json",
+    "release_manifest": "results/paper-ready-figure/fig3/release_manifest.json",
+    "legacy_af_contract": "results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/legacy_global_fig3_contract.json"
   }
 }

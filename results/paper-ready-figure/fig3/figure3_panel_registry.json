@@ -1,76 +1,642 @@
 {
-  "schema_version": "paper_figure3_panels_and_complete_layout_v12",
-  "producer": "scripts/paper_figures/build_main_figure_3.py",
-  "panel_letters_in_individual_files": false,
-  "panel_letters_in_complete_layout": true,
-  "individual_panel_png_dpi": 600,
-  "complete_layout_dpi": 600,
+  "schema": "paper_figure3_current_ae_release_v1",
+  "version": "visual_alignment_compact_rows_20261010",
+  "status": "AUTHOR_ACCEPTED_FINAL",
+  "accepted_on": "2026-10-10",
+  "layout": "A–E",
+  "producer": "scripts/paper_figures/build_fig3_current.py",
+  "historical_entry_redirect": "scripts/paper_figures/build_main_figure_3.py",
+  "scientific_layout_producer": "scripts/paper_figures/revise_fig3_visual_alignment.py",
+  "source_revision": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010",
   "panels": {
-    "a": [
-      "results/paper-ready-figure/fig3/figures/fig3-panela.png",
-      "results/paper-ready-figure/fig3/figures/fig3-panela.pdf"
-    ],
-    "b": [
-      "results/paper-ready-figure/fig3/figures/fig3-panelb.png",
-      "results/paper-ready-figure/fig3/figures/fig3-panelb.pdf"
-    ],
-    "c": [
-      "results/paper-ready-figure/fig3/figures/fig3-panelc.png",
-      "results/paper-ready-figure/fig3/figures/fig3-panelc.pdf"
-    ],
-    "d": [
-      "results/paper-ready-figure/fig3/figures/fig3-paneld.png",
-      "results/paper-ready-figure/fig3/figures/fig3-paneld.pdf"
-    ],
-    "e": [
-      "results/paper-ready-figure/fig3/figures/fig3-panele.png",
-      "results/paper-ready-figure/fig3/figures/fig3-panele.pdf"
-    ],
-    "f": [
-      "results/paper-ready-figure/fig3/figures/fig3-panelf.png",
-      "results/paper-ready-figure/fig3/figures/fig3-panelf.pdf"
-    ]
-  },
-  "panel_metadata": {
-    "c": "results/paper-ready-figure/fig3/fig3_panelc_metadata.json"
-  },
-  "complete_layout": [
-    "results/paper-ready-figure/fig3/figures/fig3-complete-layout.png",
-    "results/paper-ready-figure/fig3/figures/fig3-complete-layout.pdf"
-  ],
-  "sources": {
-    "a_b": "results/paper-ready-figure/fig3/figures/epilepsiae_1146_seizure_07_raw_spectral_context_summary.json",
-    "c": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3c/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.pdf",
-    "d": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3d/figures/clinical_onset_gradient_field_cohort_stat.pdf",
-    "e": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3e/figures/epilepsiae_1146_peri_onset_template_expression_paper_ready_journal_clean.pdf",
-    "f": "results/paper-ready-figure/archive/2026-09-02_noncanonical_staging_qa_cleanup/fig3_all_events_timing_plus_space_sources/fig3f/figures/fig3f_ab_dominance_heatmap.pdf"
-  },
-  "panel_contract": {
-    "a": "two compact broken-axis raw SEEG plus TFR examples: E10 SZ8 SCL9 broadband-type and E20 SZ8 HRB1 gamma-type",
-    "b": "continuous representative E10 SZ8 SCL9 versus E20 SZ8 HRB1 band-power trajectories with 0-s onset markers, dB y labels, and unobstructed Broadband/Gamma legend",
-    "c": "title-free all-event Timing+Space interictal TA field with Fig2-matched normalized ranks versus E10 | SZ3 early ictal field; power colorbar shown as z",
-    "d": "all-event Timing+Space clinical-onset gradient-field cohort, n=17/16/11",
-    "e": "E10 all-event Timing+Space amplitude-aware template expression trajectories with per-axis upper-right framed stacked legends",
-    "f": "17-subject all-event Timing+Space signed A/B contrast heatmap"
-  },
-  "final_typography_contract": {
-    "principle": "normalize visible type after each panel is scaled into the locked complete layout",
-    "standard_axis_label_target_pt": [
-      9.0,
-      10.5
-    ],
-    "standard_tick_target_pt": [
-      7.5,
-      8.5
-    ],
-    "dense_tick_target_pt": [
-      6.5,
-      7.5
-    ],
-    "exceptions": {
-      "a_raw_channel_names": "dense tick tier",
-      "f_subject_labels": "dense tick tier"
+    "a": {
+      "identity": "E10 | SZ3",
+      "band_hz": [
+        1.0,
+        150.0
+      ],
+      "template": "A",
+      "spectral_channel": "SCL9",
+      "contact_order": [
+        "SCL6",
+        "SCL7",
+        "SCL8",
+        "SCL9",
+        "ICL1",
+        "ICL2",
+        "ICL3",
+        "ICL4",
+        "ICL5",
+        "ICL6",
+        "ICL7",
+        "ICL8",
+        "ICL9",
+        "ICL10",
+        "ICL11"
+      ],
+      "raw_contact_order": [
+        "SCL6",
+        "SCL7",
+        "SCL8",
+        "SCL9",
+        "ICL1",
+        "ICL2",
+        "ICL3",
+        "ICL4",
+        "ICL5",
+        "ICL6",
+        "ICL7",
+        "ICL8",
+        "ICL9",
+        "ICL10",
+        "ICL11"
+      ],
+      "display": {
+        "canvas_inches": [
+          12.130277777777778,
+          3.65
+        ],
+        "axes_bounds_inches": [
+          [
+            0.7897222222222223,
+            1.9,
+            2.65,
+            1.2499999999999998
+          ],
+          [
+            0.7897222222222223,
+            0.49999999999999994,
+            2.65,
+            0.8199999999999998
+          ],
+          [
+            3.569722222222222,
+            0.49999999999999994,
+            0.06999999999999987,
+            0.8199999999999998
+          ],
+          [
+            4.618055555555558,
+            0.5000000000000001,
+            2.65,
+            2.649999999999999
+          ],
+          [
+            7.398055555555556,
+            0.49999999999999994,
+            0.1000000000000002,
+            2.65
+          ],
+          [
+            8.578888888888889,
+            0.49999999999999994,
+            2.65,
+            2.65
+          ],
+          [
+            11.35888888888889,
+            0.49999999999999994,
+            0.1000000000000002,
+            2.65
+          ]
+        ],
+        "data_and_font_signature": "23f33c13cd5a290cd35e808a2e0c6efe53d80acb2ee1fb31a6b9c0f0e238bfa1"
+      },
+      "claim_scope": "selected descriptive example; template association does not establish a phenotype-specific cohort mapping",
+      "outputs": {
+        "png": "results/paper-ready-figure/fig3/figures/fig3-panela.png",
+        "pdf": "results/paper-ready-figure/fig3/figures/fig3-panela.pdf",
+        "svg": "results/paper-ready-figure/fig3/figures/fig3-panela.svg"
+      },
+      "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_a_metadata.json"
+    },
+    "b": {
+      "identity": "Y1 | SZ6",
+      "band_hz": [
+        30,
+        80
+      ],
+      "template": "A",
+      "spectral_channel": "F2–F3",
+      "time_window_sec": [
+        0,
+        10
+      ],
+      "baseline_sec": [
+        -120,
+        -90
+      ],
+      "time_reference": "EEG marker",
+      "xlim_mm": [
+        -27.141312529970072,
+        17.42585436481373
+      ],
+      "ylim_mm": [
+        -20,
+        20
+      ],
+      "crop_only": true,
+      "contacts_outside_view": [
+        "B1",
+        "B2"
+      ],
+      "visible_contacts": 24,
+      "field_and_primary_score_contacts": 26,
+      "original_interpolation_grid_retained": true,
+      "signed_TA_r_all_contacts": 0.9337961178894133,
+      "signed_TA_r_visible_evaluation_points_only": 0.9318943198130022,
+      "direct_contact_r_all_contacts": 0.6834324674738895,
+      "notch_r_all_contacts": 0.9369664257708028,
+      "color_scale": "linear min-max relative power for this fixed 0-10 s window",
+      "power_robust_z": [
+        0.9588536039779061,
+        2.6632433235645294,
+        1.9346591610657542,
+        1.7255553001167228,
+        1.2569173778358258,
+        1.6183547552086806,
+        1.2646385018566721,
+        0.6515856744035294,
+        0.673532630660032,
+        0.8842797768547347,
+        1.0404323331619565,
+        1.2285545546757548,
+        1.1790976861589832,
+        1.6657628303295688,
+        1.4327581054285954,
+        0.9761234023853352,
+        0.6697972782544399,
+        1.0584156454393738,
+        1.5350631487212683,
+        1.2778353181324507,
+        1.3428245802458965,
+        1.8136984800037586,
+        3.294285385232223,
+        3.061670306481813,
+        3.5961393682580245,
+        3.1385490564923537
+      ],
+      "shared_axis": false,
+      "contact_order": [
+        "A10",
+        "A11",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9",
+        "B1",
+        "B10",
+        "B11",
+        "B12",
+        "B2",
+        "B6",
+        "B7",
+        "B9",
+        "C1",
+        "D14",
+        "E1",
+        "E2",
+        "E4",
+        "F1",
+        "F2",
+        "F3"
+      ],
+      "raw_contact_order": [
+        "A2",
+        "A6",
+        "A11",
+        "B6",
+        "B9",
+        "B12",
+        "C1",
+        "D14",
+        "E1",
+        "E2",
+        "E4",
+        "F1",
+        "F2",
+        "F3"
+      ],
+      "display": {
+        "canvas_inches": [
+          12.130277777777778,
+          3.65
+        ],
+        "axes_bounds_inches": [
+          [
+            0.7897222222222223,
+            1.9,
+            2.65,
+            1.2499999999999998
+          ],
+          [
+            0.7897222222222223,
+            0.49999999999999994,
+            2.65,
+            0.8199999999999998
+          ],
+          [
+            3.569722222222222,
+            0.49999999999999994,
+            0.06999999999999987,
+            0.8199999999999998
+          ],
+          [
+            4.618055555555556,
+            0.49999999999999994,
+            2.65,
+            2.65
+          ],
+          [
+            7.398055555555556,
+            0.49999999999999994,
+            0.1000000000000002,
+            2.65
+          ],
+          [
+            8.578888888888889,
+            0.49999999999999994,
+            2.65,
+            2.65
+          ],
+          [
+            11.35888888888889,
+            0.49999999999999994,
+            0.1000000000000002,
+            2.65
+          ]
+        ],
+        "data_and_font_signature": "b9ea8e874562c4cb753bb03d0d085b64012945d1aba9f62a56f7ad64cf550033"
+      },
+      "claim_scope": "descriptive author-selected gamma example; no cohort reclassification or gamma-to-TA mapping",
+      "outputs": {
+        "png": "results/paper-ready-figure/fig3/figures/fig3-panelb.png",
+        "pdf": "results/paper-ready-figure/fig3/figures/fig3-panelb.pdf",
+        "svg": "results/paper-ready-figure/fig3/figures/fig3-panelb.svg"
+      },
+      "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_b_metadata.json"
+    },
+    "c": {
+      "display": {
+        "canvas_inches": [
+          3.8572222222222226,
+          2.85
+        ],
+        "axes_bounds_inches": [
+          [
+            0.592777777777778,
+            0.55,
+            3.1844444444444444,
+            1.9500000000000002
+          ]
+        ],
+        "data_and_font_signature": "4151b917eae856319f1baa6c83271cdd46f322f15b99a183d83efcff48d1d845"
+      },
+      "old_panel": "D",
+      "groups": [
+        {
+          "name": "Pooled\n$n=17$",
+          "n": 17,
+          "p": 0.0023193359375
+        },
+        {
+          "name": "Broadband\n$n=16$",
+          "n": 16,
+          "p": 0.0003814697265625
+        },
+        {
+          "name": "Gamma\n$n=11$",
+          "n": 11,
+          "p": 0.28857421875
+        }
+      ],
+      "outputs": {
+        "png": "results/paper-ready-figure/fig3/figures/fig3-panelc.png",
+        "pdf": "results/paper-ready-figure/fig3/figures/fig3-panelc.pdf",
+        "svg": "results/paper-ready-figure/fig3/figures/fig3-panelc.svg"
+      },
+      "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_c_metadata.json"
+    },
+    "d": {
+      "display": {
+        "canvas_inches": [
+          4.000833333333334,
+          2.85
+        ],
+        "axes_bounds_inches": [
+          [
+            0.8687222222222223,
+            0.55,
+            2.9721111111111127,
+            1.9500000000000002
+          ]
+        ],
+        "data_and_font_signature": "5a503bb9fb260f20c215bb7b51355818f4367b226fbb9b2bb15e79fc9e427cc7"
+      },
+      "old_panel": "E right",
+      "n_seizures": 24,
+      "individual_values_outside_zoom": 33,
+      "total_individual_values": 3168,
+      "all_medians_and_iqr_inside_zoom": true,
+      "outputs": {
+        "png": "results/paper-ready-figure/fig3/figures/fig3-paneld.png",
+        "pdf": "results/paper-ready-figure/fig3/figures/fig3-paneld.pdf",
+        "svg": "results/paper-ready-figure/fig3/figures/fig3-paneld.svg"
+      },
+      "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_d_metadata.json"
+    },
+    "e": {
+      "display": {
+        "canvas_inches": [
+          4.152222222222223,
+          2.85
+        ],
+        "axes_bounds_inches": [
+          [
+            0.2752777777777777,
+            0.55,
+            2.758472222222222,
+            1.9500000000000002
+          ],
+          [
+            3.14375,
+            0.55,
+            0.10000000000000026,
+            1.9500000000000002
+          ]
+        ],
+        "data_and_font_signature": "a0f089da55e7482ad2a5c043ed609879949588fa78a6cd8658c2daa808909529"
+      },
+      "old_panel": "F",
+      "n_subjects": 17,
+      "group_gap_rows": 1.05,
+      "row_order": [
+        "Y1",
+        "E18",
+        "E12",
+        "E10",
+        "E6",
+        "E2",
+        "E7",
+        "E4",
+        "E17",
+        "E1",
+        "E9",
+        "E15",
+        "E20",
+        "E13",
+        "E3",
+        "E5",
+        "E14"
+      ],
+      "row_groups": [
+        "red_type",
+        "red_type",
+        "red_type",
+        "red_type",
+        "red_type",
+        "red_type",
+        "red_type",
+        "red_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type",
+        "blue_type"
+      ],
+      "group_sort_window_sec": [
+        -30.0,
+        20.0
+      ],
+      "values_and_order_unchanged": true,
+      "outputs": {
+        "png": "results/paper-ready-figure/fig3/figures/fig3-panele.png",
+        "pdf": "results/paper-ready-figure/fig3/figures/fig3-panele.pdf",
+        "svg": "results/paper-ready-figure/fig3/figures/fig3-panele.svg"
+      },
+      "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_e_metadata.json"
     }
   },
-  "layout_changed": "A/B placement unchanged; C and E share one left-block width, D and F share one compact right-block width, and rendered E/F heights are matched"
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true,
+  "canvas_inches": [
+    12.130277777777778,
+    10.00938888888889
+  ],
+  "placements_points": {
+    "a": {
+      "clip_points": [
+        0.0,
+        6.112000000000009,
+        873.38,
+        258.46
+      ],
+      "destination_points": [
+        0.0,
+        8.64,
+        873.38,
+        260.988
+      ],
+      "scale": 1.0,
+      "letter_inches": [
+        0.035,
+        0.33999999999999997
+      ]
+    },
+    "b": {
+      "clip_points": [
+        0.0,
+        6.112000000000009,
+        873.38,
+        258.46
+      ],
+      "destination_points": [
+        0.0,
+        272.508,
+        873.38,
+        524.856
+      ],
+      "scale": 1.0,
+      "letter_inches": [
+        0.035,
+        4.004833333333333
+      ]
+    },
+    "c": {
+      "clip_points": [
+        4.32,
+        21.599999999999955,
+        273.40000000000003,
+        197.26000000000002
+      ],
+      "destination_points": [
+        15.84,
+        536.376,
+        284.92,
+        712.0360000000001
+      ],
+      "scale": 1.0,
+      "letter_inches": [
+        0.035,
+        7.669666666666666
+      ]
+    },
+    "d": {
+      "clip_points": [
+        4.32,
+        21.599999999999955,
+        283.74000000000007,
+        197.26000000000002
+      ],
+      "destination_points": [
+        290.68000000000006,
+        536.376,
+        570.1,
+        712.0360000000001
+      ],
+      "scale": 1.0,
+      "letter_inches": [
+        3.852222222222222,
+        7.669666666666666
+      ]
+    },
+    "e": {
+      "clip_points": [
+        4.32,
+        21.599999999999955,
+        294.64,
+        197.26000000000002
+      ],
+      "destination_points": [
+        575.86,
+        536.376,
+        866.1800000000001,
+        712.0360000000001
+      ],
+      "scale": 1.0,
+      "letter_inches": [
+        7.813055555555556,
+        7.669666666666666
+      ]
+    }
+  },
+  "visual_alignment": {
+    "status": "PASS",
+    "source_reproduction_changed_pixels": {
+      "a": 0,
+      "b": 0,
+      "c": 0,
+      "d": 0,
+      "e": 0
+    },
+    "data_limits_colors_text_fonts_unchanged": true,
+    "upper_plot_sizes_unchanged": true,
+    "source_files_unchanged": true,
+    "full_composite_scale": 1.0,
+    "alignment_includes_colorbars_ticks_titles_and_axis_labels": true,
+    "template_field_ylabel_padding_matched_AB": true,
+    "bottom_visible_widths_match_upper_column_union": true,
+    "row_gap_mm": 4.064,
+    "previous_row_gaps_mm": [
+      8.767233333333342,
+      19.311055555555527
+    ],
+    "column_gap_mm": 3.0479999999999996,
+    "canvas_inches": [
+      12.130277777777778,
+      10.00938888888889
+    ],
+    "previous_canvas_inches": [
+      11.85,
+      10.75
+    ],
+    "columns": [
+      {
+        "left_inches": 0.24,
+        "right_inches": 3.937222222222222,
+        "width_inches": 3.6972222222222224,
+        "upper_A_bbox_inches": [
+          0.24000000000000005,
+          0.060277777777777784,
+          3.9372222222222217,
+          3.464444444444444
+        ],
+        "upper_B_bbox_inches": [
+          0.24000000000000005,
+          0.060277777777777784,
+          3.9372222222222217,
+          3.464444444444444
+        ],
+        "bottom_local_bbox_inches": [
+          0.08000000000000011,
+          0.16583333333333344,
+          3.777222222222223,
+          2.5347390858318954
+        ]
+      },
+      {
+        "left_inches": 4.057222222222222,
+        "right_inches": 7.8980555555555565,
+        "width_inches": 3.840833333333334,
+        "upper_A_bbox_inches": [
+          4.057222222222225,
+          0.07416666666666671,
+          7.774444444444446,
+          3.565111111111111
+        ],
+        "upper_B_bbox_inches": [
+          4.057222222222223,
+          0.07416666666666671,
+          7.8980555555555565,
+          3.565111111111111
+        ],
+        "bottom_local_bbox_inches": [
+          0.08000000000000014,
+          0.1102777777777778,
+          3.9208333333333347,
+          2.5500000000000007
+        ]
+      },
+      {
+        "left_inches": 8.018055555555556,
+        "right_inches": 12.010277777777778,
+        "width_inches": 3.992222222222223,
+        "upper_A_bbox_inches": [
+          8.018055555555556,
+          0.07416666666666671,
+          12.01027777777778,
+          3.5551111111111107
+        ],
+        "upper_B_bbox_inches": [
+          8.018055555555556,
+          0.07416666666666671,
+          12.01027777777778,
+          3.5551111111111107
+        ],
+        "bottom_local_bbox_inches": [
+          0.07999999999999993,
+          0.11722222222222228,
+          4.072222222222222,
+          2.54
+        ]
+      }
+    ],
+    "bottom_data_axis_widths_inches": {
+      "c": 3.1844444444444444,
+      "d": 2.9721111111111127,
+      "e": 2.758472222222222
+    },
+    "pdf_text_inside_canvas": true,
+    "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
+    "accepted_on": "2026-10-10"
+  },
+  "source_reanalysis_scope": "Scientific extraction and original raw-data analysis use the workstation data mounts. The public release rebuilds figures from the accepted native vector panels without raw recordings."
 }

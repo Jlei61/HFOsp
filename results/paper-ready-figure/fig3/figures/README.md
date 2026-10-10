@@ -1,47 +1,31 @@
-# Figure 3 panel 与完整排版输出
+# Figure 3：色条纳入视觉列宽，收紧三行留白
 
-独立 panel 文件不写左上角 A–F；字母只出现在 `fig3-complete-layout`。所有独立 PNG 均由矢量 PDF 或原始 producer 以 600 dpi 生成。
+沿用作者已认可的 E10/SZ3 broadband 与 Y1/SZ6 gamma 三列结构；本次只改排版，作者已于2026-10-10确认其为正式Paper Ready Figure 3。重新运行原 producer 后，A–E 原位 PDF 渲染与上一版逐像素一致，随后才调整位置和下排数据轴宽度。
 
-本版按各 panel 进入拼板后的实际缩放比例分别校准坐标字体，而不是把同一个 producer 字号硬套到所有 panel。A/B 的既定排版不变；C/E 与 D/F 分别补偿左、右列的实际缩放，C 与 E 共用左侧列宽，D 与 F 共用更紧凑的右侧列宽，且 E/F 的最终显示高度匹配。
+### fig3-panela.png / .pdf / .svg
+E10/SZ3 原始波形/TFR、早期发作场及间期 TA 场保持原图内容。三列整体平移，列宽计算同时包含坐标标签、标题、色条及其刻度。
+**关注点**：场、触点、空间坐标、色阶和字体均保持；不再仅以数据轴框作为列宽。
 
-### fig3-panela.png / .pdf
+### fig3-panelb.png / .pdf / .svg
+Y1/SZ6 仍为左列原始波形/TFR、中列固定 0–10 s 的 30–80 Hz 相对能量场、右列 Y1 TA rank 场。B 与 A 的同列元素执行相同水平平移，原 X 范围、Y 轴 −20～20 mm、EEG marker 和 TA 自身投影保持。
+**关注点**：没有重新选窗口、通道、模板或颜色；TA 相关仍为 +0.933796。
 
-两个代表性发作模式的并列 signal context：左为 E10 | SZ8 broadband-type 的 raw SEEG 与 SCL9 baseline-normalized TFR，右为 supplementary 已接受的 E20 | SZ8 gamma-type raw SEEG 与 HRB1 TFR。两例都只显示 20 s baseline 邻域 −110 至 −90 s 和 clinical onset 邻域 −10 至 +20 s；中间 −90 至 −10 s 用成对斜线断轴明确标为未显示。
+### fig3-panelc.png / .pdf / .svg
+原三组配对统计完整保留，数据轴横向拓宽，使包含纵轴标签的整个 C 与上方波形/TFR及色条组合的视觉列宽对应。小提琴、箱线、配对点、显著性括号和原字体保持。
+**关注点**：变化是版面宽度，统计量与 n=17/16/11 未变。
 
-**关注点**：每个内部示例的两段式 raw SEEG 与 TFR 必须严格共轴，横轴统一写作 `Time (s)`；`BASELINE` 在 20 s baseline 段居中；病例/类型标题必须显著大于 `BASELINE` / `CLINICAL ONSET` 区间标注；E20/SZ8/HRB1 应清楚显示 gamma-dominant 快活动增强。淡灰省略带、居中省略号和断轴斜线共同表示删去的显示区间，不表示数据缺失或时间连续。A 的两个示例使用与 C、E 相同的左右列槽。
+### fig3-paneld.png / .pdf / .svg
+E10 signed q 时程与原中位数、IQR、单次轨迹保持。按上方能量场连同色条的完整宽度调整 D 的横轴长度，纵轴 −1～1 及右上纵向图例保持。
+**关注点**：D 的完整可见左右边界与该列的共同边界对齐。
 
-### fig3-panelb.png / .pdf
+### fig3-panele.png / .pdf / .svg
+17 人热图、原排序、灰色分隔带与色条不变。热图的数据轴宽度与色条位置一起调整，整个 E 的可见宽度对应上方 TA 场及其色条；底排三个数据轴上下边界保持一致。
+**关注点**：完整可见边界包含色条标签，不以热图轴框单独定宽。
 
-两个代表性发作的 low bands、gamma、high-gamma 与 broadband 能量轨迹：E10/SZ8 的代表通道 SCL9 为 broadband-type，E20/SZ8 的代表通道 HRB1 为 gamma-type。
+### fig3-complete-layout.png / .pdf / .svg
+三列用 A/B 对应组的可见边界并集确定；C/D/E 的完整可见左右边界分别对齐这些列。三行之间的可见留白统一为 4.06 mm，画布随之缩短，面板字母同步移动。
+**关注点**：新间距及视觉对齐已获作者确认；数据、色阶、字体和统计语法检查通过。
 
-**关注点**：B 连续显示 −120 至 +20 s，不使用 A 的断轴；四图在 0 s 统一画黑色竖直虚线，左列 ylabel 简写为 `dB`。颜色只编码发作表型，不编码频带；legend 在 low-bands 图左上角的无曲线区纵向排列，只写 `Broadband` / `Gamma`，避免覆盖 onset 附近的核心变化。患者/SZ/通道身份由 A 标题给出。两例来自不同患者，只是代表性形态对照，不是患者内或 cohort 统计。
-
-### fig3-panelc.png / .pdf
-
-all-event Timing+Space 冻结间期 TA timing field 与固定 SZ3 的 early-ictal broadband power field。C 不使用总标题；右图以 `E10 | SZ3` / `Early ictal field` 两行子图标题标识病例与语义。左色条与 Fig2 统一为 `0 early / 0.5 / 1 late` normalized ranks，右色条标题简写为 `power` / `z`，空间 y label 为 `Y (mm)`。
-
-**关注点**：右图色条中的 `z` 指 baseline-normalized robust z power，不是传播 rank；两条 colorbar 均与各自的正方形 field 绘图区等高，并留有一致的小间隙。左侧 field 组向内收紧，且两图都显示 `Y (mm)`；完整拼板以右列为锚，使 C/E 两列中心对齐。该病例经过形态选择，只作空间读出桥。
-
-### fig3-paneld.png / .pdf
-
-all-event Timing+Space 场下 clinical onset 后 0–10 s 的 gradient-field cohort Data–Null 比较：Pooled n=17、Broadband n=16、Gamma n=11。
-
-**关注点**：Pooled/Broadband 显著、Gamma 为 n.s.；不得替换成旧 endpoint n=20 三组全显著版本。
-
-### fig3-panele.png / .pdf
-
-E10 peri-onset amplitude-aware template expression：左为 `max(|q_A|, |q_B|)`，右为 signed TA/TB projection；两图各自把 legend 纵向放在右上角，并使用白底细框。
-
-**关注点**：两个时程 panel 的内部间距随 C 同步收紧；legend、axis label 与 ticks 均按 E 进入左栏后的实际缩放补偿，legend 仍位于每图右上角的白底细框内。这是单病例描述性轨迹，不支持 onset-emergent alignment 或机制结论。
-
-### fig3-panelf.png / .pdf
-
-17 名可评估患者在 −120 至 +20 s 的 all-event Timing+Space signed A/B contrast heatmap。
-
-**关注点**：虚线为 clinical onset；主图使用 heatmap，paired inferential companion 留作补充材料。F 与 D 共用右侧列宽，最终显示高度与 E 匹配。
-
-### fig3-complete-layout.png / .pdf
-
-将 A–F 六个无角标独立 panel 组装为带统一 A–F 字母的完整 Figure 3。
-
-**关注点**：完整排版只负责版面与字母，不改变各 panel 的数据、统计或坐标合同。
+### fig3-complete-layout-preview.png
+完整版的 130 dpi 预览，与 PDF 内容相同。高分辨率 PNG 为 600 dpi。
+**关注点**：用于检查三行留白、完整列宽和标签间距。

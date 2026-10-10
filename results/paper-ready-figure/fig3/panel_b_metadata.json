@@ -1,0 +1,170 @@
+{
+  "identity": "Y1 | SZ6",
+  "band_hz": [
+    30,
+    80
+  ],
+  "template": "A",
+  "spectral_channel": "F2–F3",
+  "time_window_sec": [
+    0,
+    10
+  ],
+  "baseline_sec": [
+    -120,
+    -90
+  ],
+  "time_reference": "EEG marker",
+  "xlim_mm": [
+    -27.141312529970072,
+    17.42585436481373
+  ],
+  "ylim_mm": [
+    -20,
+    20
+  ],
+  "crop_only": true,
+  "contacts_outside_view": [
+    "B1",
+    "B2"
+  ],
+  "visible_contacts": 24,
+  "field_and_primary_score_contacts": 26,
+  "original_interpolation_grid_retained": true,
+  "signed_TA_r_all_contacts": 0.9337961178894133,
+  "signed_TA_r_visible_evaluation_points_only": 0.9318943198130022,
+  "direct_contact_r_all_contacts": 0.6834324674738895,
+  "notch_r_all_contacts": 0.9369664257708028,
+  "color_scale": "linear min-max relative power for this fixed 0-10 s window",
+  "power_robust_z": [
+    0.9588536039779061,
+    2.6632433235645294,
+    1.9346591610657542,
+    1.7255553001167228,
+    1.2569173778358258,
+    1.6183547552086806,
+    1.2646385018566721,
+    0.6515856744035294,
+    0.673532630660032,
+    0.8842797768547347,
+    1.0404323331619565,
+    1.2285545546757548,
+    1.1790976861589832,
+    1.6657628303295688,
+    1.4327581054285954,
+    0.9761234023853352,
+    0.6697972782544399,
+    1.0584156454393738,
+    1.5350631487212683,
+    1.2778353181324507,
+    1.3428245802458965,
+    1.8136984800037586,
+    3.294285385232223,
+    3.061670306481813,
+    3.5961393682580245,
+    3.1385490564923537
+  ],
+  "shared_axis": false,
+  "contact_order": [
+    "A10",
+    "A11",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9",
+    "B1",
+    "B10",
+    "B11",
+    "B12",
+    "B2",
+    "B6",
+    "B7",
+    "B9",
+    "C1",
+    "D14",
+    "E1",
+    "E2",
+    "E4",
+    "F1",
+    "F2",
+    "F3"
+  ],
+  "raw_contact_order": [
+    "A2",
+    "A6",
+    "A11",
+    "B6",
+    "B9",
+    "B12",
+    "C1",
+    "D14",
+    "E1",
+    "E2",
+    "E4",
+    "F1",
+    "F2",
+    "F3"
+  ],
+  "display": {
+    "canvas_inches": [
+      12.130277777777778,
+      3.65
+    ],
+    "axes_bounds_inches": [
+      [
+        0.7897222222222223,
+        1.9,
+        2.65,
+        1.2499999999999998
+      ],
+      [
+        0.7897222222222223,
+        0.49999999999999994,
+        2.65,
+        0.8199999999999998
+      ],
+      [
+        3.569722222222222,
+        0.49999999999999994,
+        0.06999999999999987,
+        0.8199999999999998
+      ],
+      [
+        4.618055555555556,
+        0.49999999999999994,
+        2.65,
+        2.65
+      ],
+      [
+        7.398055555555556,
+        0.49999999999999994,
+        0.1000000000000002,
+        2.65
+      ],
+      [
+        8.578888888888889,
+        0.49999999999999994,
+        2.65,
+        2.65
+      ],
+      [
+        11.35888888888889,
+        0.49999999999999994,
+        0.1000000000000002,
+        2.65
+      ]
+    ],
+    "data_and_font_signature": "b9ea8e874562c4cb753bb03d0d085b64012945d1aba9f62a56f7ad64cf550033"
+  },
+  "claim_scope": "descriptive author-selected gamma example; no cohort reclassification or gamma-to-TA mapping",
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3/figures/fig3-panelb.png",
+    "pdf": "results/paper-ready-figure/fig3/figures/fig3-panelb.pdf",
+    "svg": "results/paper-ready-figure/fig3/figures/fig3-panelb.svg"
+  },
+  "scientific_metadata_source": "results/paper-ready-figure/fig3/revisions/visual_alignment_compact_rows_20261010/panel_b_metadata.json"
+}

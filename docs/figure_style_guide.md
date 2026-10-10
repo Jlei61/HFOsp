@@ -238,17 +238,17 @@ Legend 位置同时锁定：时程/散点 panel 优先放在 axes 上方的预�
 
 ## Topic 5 · ictal field readout / peri-onset trajectory
 
+**当前 Fig3 正式合同（2026-10-10，AUTHOR_ACCEPTED_FINAL）：** 入口为[当前版本说明](current_figure3.md)和`results/paper-ready-figure/fig3/current_revision.json`，正式A–E输出在`fig3/figures/`，默认代码为`build_fig3_current.py`（旧`build_main_figure_3.py`转到同一入口）。A/B均为波形及TFR、发作能量场、间期TA场三列；列宽包括坐标标签、标题、色条和色条刻度，底排C/D/E按完整可见边界对齐。三行可见留白4.064 mm，列间3.048 mm，画布308.11×254.24 mm。A为E10/SZ3，B为Y1/SZ6固定0–10 s、30–80 Hz、自身TA平面（非shared axis），Y=−20～20 mm；TA使用语义红色且场标题标明患者。C保留n=17/16/11配对统计；D为原E右半、Y=−1～1、右上纵排图例；E保留17人排序及灰色组间间隔。单panel不带角标；完整图带A–E。作者已接受本版，后续修改先生成独立修订。
+
 Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field readout 图型先锁定。其它候选见
 `results/FIGURE_INDEX.md` 的 Topic 5 段，暂按个案处理，不强制统一布局。
 
-Figure 3 的唯一 paper-facing 输出根为 `results/paper-ready-figure/fig3/figures/`：独立
-`fig3-panel{a..f}.{png,pdf}` 不写左上角字母，`fig3-complete-layout.{png,pdf}` 才写 A–F。
-统一组装入口为 `scripts/paper_figures/build_main_figure_3.py`，下述旧目录只保留 producer/source 合同。
+以下5a–5e保留**历史A–F科学算法合同**；旧字母不代表当前panel身份。旧正式资产与旧组装代码已移至`results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/`，当前图只使用上方A–E入口。
 
 ### 5a. Fig3-A/B：断轴 signal context / 代表性频谱表型对照（UPDATED 2026-09-03）
 
-- **正式图**：[`fig3-panela.png`](../results/paper-ready-figure/fig3/figures/fig3-panela.png) 含 broadband-type 与 gamma-type 两个代表性发作的 raw SEEG + TFR；[`fig3-panelb.png`](../results/paper-ready-figure/fig3/figures/fig3-panelb.png) 为二者未经断轴的连续四频带轨迹对照。
-- **复现入口**：`python scripts/paper_figures/build_main_figure_3.py`；底层 producer 使用 `plot_fig3_raw_spectral_context.py --compact-main --independent-only`，并显式传入对照发作。
+- **正式图**：[`fig3-panela.png`](../results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/fig3/figures/fig3-panela.png) 含 broadband-type 与 gamma-type 两个代表性发作的 raw SEEG + TFR；[`fig3-panelb.png`](../results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/fig3/figures/fig3-panelb.png) 为二者未经断轴的连续四频带轨迹对照。
+- **复现入口**：`results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/build_main_figure_3_legacy_af.py`（历史代码，只读追溯）；底层 producer 使用 `plot_fig3_raw_spectral_context.py --compact-main --independent-only`，并显式传入对照发作。
 - **回答**：A 并列展示两种发作模式的直接波形/TFR 证据；B 说明二者在完整 peri-onset 时间上的频谱增强差异。两者都是 reader-facing descriptive context，不是患者内或 cohort statistic，也不证明 replay、传播机制或发作类型因果机制。
 - **冻结案例 / 输入**：`E10 | SZ8` 为 `broadband_1_150`，固定代表通道 `SCL9`；`E20 | SZ8`（source `epilepsiae_635`, zero-based seizure index 7）为主图 Fig3 已接受的 `gamma_nonbroadband` 示例，固定代表通道 `HRB1`。二者均为 CAR；表型来自 `per_seizure_spectral_overlap_state.csv`。HRB1 的 clinical 0–10 s 均值为 gamma `+12.55 dB`、high-gamma `+9.15 dB`，low bands `−1.50 dB`、broadband `−1.14 dB`，用作典型 gamma-dominant 快活动示例。两例患者与通道均不同，必须在图上明示，不得声称患者内或通道匹配。
 - **布局（拆成两个独立 panel）**：
@@ -266,7 +266,7 @@ Figure 3 的唯一 paper-facing 输出根为 `results/paper-ready-figure/fig3/fi
 ### 5b. Fig3-C：间期 TA 时序场 vs 发作早期能量场
 
 - **唯一规范**：[`docs/fig3b_interictal_ictal_shared_field_spec.md`](fig3b_interictal_ictal_shared_field_spec.md)。
-- **正式示范图**：[`fig3-panelc.png`](../results/paper-ready-figure/fig3/figures/fig3-panelc.png)；source 从 seizure 2 / 10 / 23 / 1 morphology-aware positive-power 候选中目视锁定 seizure 2。
+- **正式示范图**：[`fig3-panelc.png`](../results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/fig3/figures/fig3-panelc.png)；source 从 seizure 2 / 10 / 23 / 1 morphology-aware positive-power 候选中目视锁定 seizure 2。
 - **正式复现入口**：`scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`，默认即 seizure 2；候选审计由 `scripts/paper_figures/plot_fig3b_positive_ta_candidates.py` 复现。
 - **视觉硬锁**：单行两个等大 field，不写整体标题；左 `viridis` 表示冻结 TA timing 的 early→late，标题 `TA fields` 固定红色 `#B2182B`；右 `Blues` 表示 clinical `[0,10] s`、`1–150 Hz` baseline-normalized broadband power，标题按 `E10 | SZ3` / `Early ictal field` 两行排列。左右共用 shared TA plane / transverse sign / extent / TA support / 6 mm display sigma，两个 panel 分别写 `shared TA axis (mm)`；空间 y label 统一为 `Y (mm)`，右图不重复 shared y ticks。
 - **colorbar**：左色条与 Fig2 共用 normalized-rank `viridis` 语法，标题 `ranks`，ticks 固定为 `0 early / 0.5 / 1 late`；原始 propagation rank 范围保留在 metadata。右色条显示真实 baseline-normalized log-band-power robust z，但可见标题简写为两行 `power` / `z`。左右统一为深色代表“最早传播 / 最高 power”。
@@ -275,7 +275,7 @@ Figure 3 的唯一 paper-facing 输出根为 `results/paper-ready-figure/fig3/fi
 
 ### 5c. Fig3-D：clinical-onset gradient-field cohort
 
-- **正式图**：[`fig3-paneld.png`](../results/paper-ready-figure/fig3/figures/fig3-paneld.png)。
+- **正式图**：[`fig3-paneld.png`](../results/paper-ready-figure/archive/2026-10-10_pre_current_fig3_ae/fig3/figures/fig3-paneld.png)。
 - **数据/视觉合同**：Pooled `n=17`、Broadband `n=16`、Gamma `n=11`；Pooled/Broadband 显著，Gamma 为 `n.s.`。source 为 `fig3-sup-tspectral-field-concordance/figures/clinical_onset_gradient_field_cohort_stat.pdf`。
 - **禁止**：不得换成旧 endpoint `n=20` 三组全显著版本；不得把 pooled/broadband concordance 写成 gamma-specific、逐触点 replay 或机制证明。
 
