@@ -1935,16 +1935,18 @@
   },
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_multicore_optimization_v11",
+    "version": "a_core_search_simplified_v12",
     "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_multicore_optimization_20261010",
+    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010",
     "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_multicore_optimization_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_multicore_optimization_20261010/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
-    "core_count_shown": 4,
-    "representation": "Four pairs of light-purple initial cores with centered question marks and dark-purple updated cores, connected by single dashed arrows in the central 2D sheet.",
-    "geometry": "Illustrative locations only, not measured lesions, an actual optimization trajectory, or signal propagation paths.",
-    "preservation": "All full-figure pixels outside the central sheet identical to formal v10; B-I pixel-identical; canonical output hashes unchanged."
+    "candidate_region_count": 3,
+    "updated_core_count": 2,
+    "representation": "Three unfilled pale-purple dashed candidate regions with question marks and two purple updated cores; only two short dashed search-direction cues, no exhaustive one-to-one pairing.",
+    "geometry": "Illustrative regions only, not actual optimization trajectories, measured lesions, propagation paths, or evidence of a three-to-two core-count optimization.",
+    "preservation": "Every pixel outside the central sheet matches formal v10. Candidate regions, question marks and cores are below the original neuron scatter; no solid fill in question-mark regions.",
+    "supersedes": "a_multicore_optimization_v11"
   }
 }

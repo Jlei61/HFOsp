@@ -1,0 +1,36 @@
+{
+  "native_baseline_pixel_identical_to_v9": true,
+  "changed_pixels": 33230,
+  "changed_bounds_pixels": [
+    1141,
+    1007,
+    1398,
+    1499
+  ],
+  "allowed_change_bounds_pixels": [
+    1050,
+    800,
+    1500,
+    1520
+  ],
+  "unchanged_pixels_outside_requested_detail_region": true,
+  "previous_shaft_separation_schematic_units": 0.08,
+  "new_shaft_separation_schematic_units": 0.22,
+  "parameters": {
+    "native_producer": "local_circuit_native_source.py",
+    "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+    "central_offset_schematic_units": 0.11,
+    "previous_central_offset_schematic_units": 0.04,
+    "z_border_linewidth_pt": 0.6,
+    "previous_z_border_linewidth_pt": 1.6,
+    "z_border_dash_pattern": [
+      1.5,
+      1.5
+    ],
+    "previous_z_border_dash_pattern": [
+      2.0,
+      1.7
+    ],
+    "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+  }
+}

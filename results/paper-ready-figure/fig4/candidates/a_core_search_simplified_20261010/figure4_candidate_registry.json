@@ -1,8 +1,8 @@
 {
-  "status": "CURRENT_AUTHOR_DESIGNATED",
-  "human_visual_acceptance": "PENDING_COMPOSITE_VISUAL_REVIEW",
-  "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-  "layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "human_visual_acceptance": "PENDING",
+  "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
+  "layout_version": "compact_ai_v4_a_core_search_simplified_v12",
   "updated_on": "2026-10-10",
   "panel_letters": [
     "A",
@@ -16,7 +16,7 @@
     "I"
   ],
   "titles": {
-    "A": "局部E/I回路、二维空间基底、局部椭圆连接与SEEG采样读出",
+    "A": "局部回路、多个core位置优化示意与SEEG采样读出",
     "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
     "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
     "D": "E→E角度的Mean rank／Order／Participation误差响应",
@@ -31,7 +31,7 @@
     232.0
   ],
   "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-  "base_published_complete_sha256": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
+  "base_published_complete_sha256": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
   "panel_mapping": {
     "A": "A",
     "B": "B",
@@ -50,7 +50,7 @@
     "D within-core EE response"
   ],
   "panel_a": {
-    "status": "AUTHOR_DESIGNATED_CURRENT",
+    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
     "original_left_circuit_structure_preserved": true,
     "overview_neuron_samples_preserved": true,
     "left_circuit_detail_revision": {
@@ -596,54 +596,75 @@
     ],
     "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
     "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-    "left_detail_validation": {
-      "native_baseline_pixel_identical_to_v9": true,
-      "changed_pixels": 33230,
-      "changed_bounds_pixels": [
-        1141,
-        1007,
-        1398,
-        1499
-      ],
-      "allowed_change_bounds_pixels": [
-        1050,
-        800,
-        1500,
-        1520
-      ],
-      "unchanged_pixels_outside_requested_detail_region": true,
-      "previous_shaft_separation_schematic_units": 0.08,
-      "new_shaft_separation_schematic_units": 0.22,
-      "parameters": {
-        "native_producer": "local_circuit_native_source.py",
-        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-        "central_offset_schematic_units": 0.11,
-        "previous_central_offset_schematic_units": 0.04,
-        "z_border_linewidth_pt": 0.6,
-        "previous_z_border_linewidth_pt": 1.6,
-        "z_border_dash_pattern": [
-          1.5,
-          1.5
+    "schematic_core_optimization": {
+      "interpretation": "Author-requested schematic parameter updates, not measured core locations or a fitted optimization trajectory.",
+      "candidate_region_count": 3,
+      "updated_core_count": 2,
+      "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+      "candidate_centres_mm": [
+        [
+          -6.4,
+          7.0
         ],
-        "previous_z_border_dash_pattern": [
-          2.0,
-          1.7
+        [
+          6.65,
+          3.6
         ],
-        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-      }
-    },
-    "left_detail_allowed_bounds_mm": [
-      42.62436399999998,
-      169.48219999999998,
-      51.19033599999997,
-      185.33223199999998
-    ],
-    "all_pixels_outside_left_detail_identical_to_v9": true,
-    "burst_axes_and_labels_pixel_identical_to_v9": true,
-    "sampling_geometry_and_circuits_preserved_from_v9": true,
-    "consecutive_contact_crops_verified_against_frozen_F": true,
-    "frozen_geometry_and_full_F_waveform_snapshot_unchanged": true,
-    "author_designated_on": "2026-10-10"
+        [
+          -3.85,
+          -7.2
+        ]
+      ],
+      "updated_centres_mm": [
+        [
+          -3.1,
+          2.2
+        ],
+        [
+          4.3,
+          -1.4
+        ]
+      ],
+      "candidate_radius_mm": 1.15,
+      "updated_radius_mm": 1.05,
+      "candidate_fill": "none",
+      "candidate_edge": "#B8A3CF",
+      "updated_fill": "#805AA6",
+      "updated_edge": "#76519D",
+      "arrow_color": "#9479B2",
+      "arrow_dash_pattern": [
+        3.0,
+        2.5
+      ],
+      "search_direction_arrows_mm": [
+        [
+          [
+            -5.8,
+            4.4
+          ],
+          [
+            -3.9,
+            3.2
+          ]
+        ],
+        [
+          [
+            5.8,
+            2.5
+          ],
+          [
+            4.7,
+            -0.15
+          ]
+        ]
+      ],
+      "arrows": "Two short direction cues, with no one-to-one connection from every candidate region to a final core.",
+      "question_mark_in_each_candidate_region": true,
+      "candidate_regions_unfilled": true,
+      "regions_and_question_marks_below_neuron_markers": true,
+      "update_arrows_are_not_propagation_paths": true,
+      "simulations_and_readout_unchanged": true
+    }
   },
   "panel_b": {
     "version": "post_prior_stages_6_16_v1",
@@ -878,7 +899,7 @@
   },
   "checks": {
     "A_revision": {
-      "status": "AUTHOR_DESIGNATED_CURRENT",
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
       "original_left_circuit_structure_preserved": true,
       "overview_neuron_samples_preserved": true,
       "left_circuit_detail_revision": {
@@ -1424,54 +1445,75 @@
       ],
       "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
       "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-      "left_detail_validation": {
-        "native_baseline_pixel_identical_to_v9": true,
-        "changed_pixels": 33230,
-        "changed_bounds_pixels": [
-          1141,
-          1007,
-          1398,
-          1499
-        ],
-        "allowed_change_bounds_pixels": [
-          1050,
-          800,
-          1500,
-          1520
-        ],
-        "unchanged_pixels_outside_requested_detail_region": true,
-        "previous_shaft_separation_schematic_units": 0.08,
-        "new_shaft_separation_schematic_units": 0.22,
-        "parameters": {
-          "native_producer": "local_circuit_native_source.py",
-          "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-          "central_offset_schematic_units": 0.11,
-          "previous_central_offset_schematic_units": 0.04,
-          "z_border_linewidth_pt": 0.6,
-          "previous_z_border_linewidth_pt": 1.6,
-          "z_border_dash_pattern": [
-            1.5,
-            1.5
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested schematic parameter updates, not measured core locations or a fitted optimization trajectory.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
           ],
-          "previous_z_border_dash_pattern": [
-            2.0,
-            1.7
+          [
+            6.65,
+            3.6
           ],
-          "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-        }
-      },
-      "left_detail_allowed_bounds_mm": [
-        42.62436399999998,
-        169.48219999999998,
-        51.19033599999997,
-        185.33223199999998
-      ],
-      "all_pixels_outside_left_detail_identical_to_v9": true,
-      "burst_axes_and_labels_pixel_identical_to_v9": true,
-      "sampling_geometry_and_circuits_preserved_from_v9": true,
-      "consecutive_contact_crops_verified_against_frozen_F": true,
-      "frozen_geometry_and_full_F_waveform_snapshot_unchanged": true,
-      "author_designated_on": "2026-10-10"
+          [
+            -3.85,
+            -7.2
+          ]
+        ],
+        "updated_centres_mm": [
+          [
+            -3.1,
+            2.2
+          ],
+          [
+            4.3,
+            -1.4
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "none",
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -5.8,
+              4.4
+            ],
+            [
+              -3.9,
+              3.2
+            ]
+          ],
+          [
+            [
+              5.8,
+              2.5
+            ],
+            [
+              4.7,
+              -0.15
+            ]
+          ]
+        ],
+        "arrows": "Two short direction cues, with no one-to-one connection from every candidate region to a final core.",
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_unfilled": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true
+      }
     },
     "B_workpoints": 194,
     "B_stages": [
@@ -1807,6 +1849,93 @@
       "compact_row_gaps_preserved": true,
       "approved_v4_B_through_I_bounds_preserved": true,
       "A_uses_previously_reserved_mechanism_space": true
+    },
+    "core_optimization_revision": {
+      "status": "PASS",
+      "unchanged_panels": {
+        "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
+      },
+      "all_pixels_outside_central_sheet_identical_to_v10": true,
+      "changed_pixels_in_central_sheet": 19680,
+      "canonical_output_hashes_unchanged": true,
+      "source_coordinates_are_illustrative": true,
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested schematic parameter updates, not measured core locations or a fitted optimization trajectory.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
+          ],
+          [
+            6.65,
+            3.6
+          ],
+          [
+            -3.85,
+            -7.2
+          ]
+        ],
+        "updated_centres_mm": [
+          [
+            -3.1,
+            2.2
+          ],
+          [
+            4.3,
+            -1.4
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "none",
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -5.8,
+              4.4
+            ],
+            [
+              -3.9,
+              3.2
+            ]
+          ],
+          [
+            [
+              5.8,
+              2.5
+            ],
+            [
+              4.7,
+              -0.15
+            ]
+          ]
+        ],
+        "arrows": "Two short direction cues, with no one-to-one connection from every candidate region to a final core.",
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_unfilled": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true
+      },
+      "human_visual_acceptance": "PENDING"
     }
   },
   "source_files": {
@@ -1827,126 +1956,48 @@
   "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
   "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
   "outputs": {
-    "figures/fig4-panela.pdf": "dd8500e036a50340b0b7c4fbbc91076caf9a5c39bb6473c55927990a924b46d0",
-    "figures/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
-    "figures/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
-    "figures/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
-    "figures/fig4-complete-layout.svg": "0a4b8cccfe7f93741ecb8c6e4210b7f8778430af398c5cb3095fd8e51cd4016d",
-    "figures/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
-    "figures/fig4-complete-layout.png": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
+    "figures/fig4-panela.pdf": "b9012b1de04cc25143d65859e138800973b83a8e0815de8699d97f86f5fc134e",
+    "figures/fig4-panelf.svg": "aaced3c02f842c96ec180414f55298ad98fcb55bad6b91ad856049a397c9ccad",
+    "figures/fig4-panelh.pdf": "cdcd9d4091f3eba203b8101b0c9fd137ce1350109fbf419f42c20e936820353b",
+    "figures/fig4-panelf.pdf": "a495fc19227bbb9819573b0e430df648f42803de2c63aa3c17bc16ab16f2e2fc",
+    "figures/fig4-complete-layout.svg": "c6481cb247615195ae06c03ba5bf3ce09b8ea0a032622703ec68b88c62853121",
+    "figures/fig4-panelg.pdf": "335f70a70bab94bcd346961247b9000651041b8168840c5c97cbee1f47f35e12",
+    "figures/fig4-complete-layout.png": "e95fb51288e1699b5f417755ba1077b0981b4daa0db55cb40a9f8a652b11472a",
     "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
     "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
-    "figures/fig4-panela.svg": "437104facf72d9b37998458a12baddeab9f1dc26943698baf8a8beeae90eb975",
-    "figures/fig4-paneld.pdf": "e4bc79df071408c80096a81d972c84392bbecebb34fe81fc2af31d960b202595",
-    "figures/fig4-panelb.pdf": "82d11b25fe64eb6293832fd13ee11f946bf5f6e32726f2da0cea8079eae7fc57",
-    "figures/fig4-paneld.svg": "29d9f2c1a5ccbc792e9a6b6c3ee781db94718e2556625d29a8c67358f430a6b5",
-    "figures/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
-    "figures/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
-    "figures/fig4-panelb.svg": "aa78bb6195f3fd65e3cb8992d4e9ca9ef9a13b6310c6a432848423df5f1a78d4",
-    "figures/fig4-complete-layout-preview.png": "6426f47a4b799fb31793ed7c2128252d76a7ff7b7d82f9af8b64dbef3402c719",
-    "figures/fig4-complete-layout.pdf": "97bb07af601240c4f6b7a4938cc2a6c93e3b3f634adf60adb0271018b0912e8a",
-    "figures/fig4-panelc.pdf": "b2aa7a9daabec70b0ba8a4060c3e7dc0dab1eef3006f3b09559dda8e7c85b178",
+    "figures/fig4-panela.svg": "7656d477786185eb3077874a28baf0f8a5cb8bae941e5849948430ec908252ce",
+    "figures/fig4-paneld.pdf": "dba11990ad1429f6c15cc00a584c62f3c400eb9b294d7ef27abf73f8924efaad",
+    "figures/fig4-panelb.pdf": "24067427697d0c5dd892d0f0d959718488263ebacf526a41f5d70edf3a486999",
+    "figures/fig4-paneld.svg": "9dac160405ec0a1c3deb977407846e771dc6acf0718119bc54e863f107225cfd",
+    "figures/fig4-panelh.svg": "a931f35e7a3c12d600562dfd243ae029df35dfb7b210f6cef8f340299d372800",
+    "figures/fig4-panelg.svg": "0fd3189ab132c743971041bf00709a9350fb9eeff4f9d2d009f134fc3a36582d",
+    "figures/fig4-panelb.svg": "752fc7a0dad2a2cbf37cc70898c4f206fe2b5e0b349dbd414e85b3b6e6386cd8",
+    "figures/fig4-complete-layout-preview.png": "0fba8251e925b84c13776ec7fde1a01e93855ccabe483da26cc2626e908e6bd4",
+    "figures/fig4-complete-layout.pdf": "87bf3714023f0600fc232fa72084df51941ae9ca881f7b621cd389d6fc24319c",
+    "figures/fig4-panelc.pdf": "4c5cfa5b6e9c52a9b99f7e8d8d74e762c1169843209ed43cf9bf1da2925cddf6",
     "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
-    "figures/fig4-panela.png": "0ef3b55779f7b12c995ab27a205ba9bd061387189dc4250638cf96d480749f72",
+    "figures/fig4-panela.png": "94a710927cdf8f6808795b16acdd0fec3a699910d62e2abecd6c5c097588a3ac",
     "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
-    "figures/fig4-panelc.svg": "747021382dda973c73840c9d0ad37dddc200e729cef89109dca37a2e3b1c8cf0",
+    "figures/fig4-panelc.svg": "6712217912a2be041a4e50558ec2e50f0830252f7b27aea48e8259a3bed539e8",
     "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
-    "figures/fig4-panele.svg": "509295de8e35a4a6b9971abb065fd53a60ec4f0b7812a476f2f0399ac73bf498",
+    "figures/fig4-panele.svg": "8b24a983eec7908ae8163bd2f057f7cc07d51f63f08296380a17f490913ad08b",
     "figures/fig4-panelb.png": "d01f589b1718c232aecf194233f7c122efbe243a7a23e56babda45089f34a312",
     "figures/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
-    "figures/fig4-panele.pdf": "4f99e2bc211cd7445fee58dacac1391cc77a6ab4f29eba71b6f02756b7aec4e8",
-    "figures/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
-    "figures/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
+    "figures/fig4-panele.pdf": "39fab31bae2a798f77dd88088529c88b22dca37e66be3f11e71d282c05650683",
+    "figures/fig4-paneli.svg": "f31010cdbb2b3065d3f58c827974d1a724b1eb2acc5392e0d9a1f66661dc8c15",
+    "figures/fig4-paneli.pdf": "abaae8334adb392c3e621c981330067f621651c552f9ceab2037078ffcca9276",
     "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
   },
-  "base_layout_version": "compact_ai_tighter_columns_larger_squares_v4",
-  "canonical_figure_replaced": true,
+  "base_layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
+  "canonical_figure_replaced": false,
   "unchanged_panels": {
-    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
-  },
-  "original_left_circuit_artwork_preserved_except_requested_details": true,
-  "published_from": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
-  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-10_pre_mechanism_fig4/fig4",
-  "accepted_panel_a_revision": {
-    "status": "AUTHOR_DESIGNATED_CURRENT",
-    "version": "a_left_circuit_spacing_v10",
-    "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
-    "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-    "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figure4_candidate_registry.json",
-    "canonical_figure_replaced": true,
-    "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "original_left_circuit": "Original circuit structure and neuron positions retained at 1.20x scale. Central red E-to-I path and blue I-to-E shaft/T-bar each move 0.07 schematic units outward; z-down border becomes thin and dense.",
-    "layout": "All axes and placements retain v9. Only the left central reciprocal E/I connection spacing and z-down border change; all full-figure pixels outside that detail footprint are identical to v9.",
-    "zoom_roles": "Central sheet has no green sampling fill, halos or footprint rings; only an unfilled neutral gray dashed frame locates the zoom. Gaussian sampling weights are shown only in the right Local sampling view.",
-    "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
-    "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, restored to the v6 displayed scale; each contains 6-7 hollow E triangles and 1-2 internal I circles. Exactly three consecutive contacts, with no intervening or additional contacts in the small box.",
-    "readout": "The exact v8 SL3/SL4/SL5 waveform crops, axes and labels are preserved pixel-for-pixel; actual frozen ICL3/ICL4/ICL5 source data and both event windows unchanged.",
-    "sampling_contact_labels": [
-      "SL3",
-      "SL4",
-      "SL5"
-    ],
-    "tiny_readout_arrow_removed": true,
-    "sampling_source_contacts": [
-      "ICL3",
-      "ICL4",
-      "ICL5"
-    ],
-    "display_label_to_source_contact": {
-      "SL3": "ICL3",
-      "SL4": "ICL4",
-      "SL5": "ICL5"
-    },
-    "right_sampling_weights": {
-      "sigma_mm": 0.25,
-      "display": "Green smoothly fading Gaussian alpha; no hard boundary ring. Tails are clipped by the unchanged zoom view.",
-      "theoretical_95_percent_mass_radius_mm": 0.6119367076702041,
-      "quantity": "Spatial weighting of the existing virtual-contact firing-density readout, not a computed electric potential."
-    },
-    "left_detail_producer": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-    "left_detail": {
-      "native_producer": "local_circuit_native_source.py",
-      "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-      "central_offset_schematic_units": 0.11,
-      "previous_central_offset_schematic_units": 0.04,
-      "z_border_linewidth_pt": 0.6,
-      "previous_z_border_linewidth_pt": 1.6,
-      "z_border_dash_pattern": [
-        1.5,
-        1.5
-      ],
-      "previous_z_border_dash_pattern": [
-        2.0,
-        1.7
-      ],
-      "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-    },
-    "author_designated_on": "2026-10-10"
-  },
-  "pending_panel_a_revision": {
-    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_core_search_simplified_v12",
-    "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010",
-    "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_simplified_20261010/figure4_candidate_registry.json",
-    "canonical_figure_replaced": false,
-    "candidate_region_count": 3,
-    "updated_core_count": 2,
-    "representation": "Three unfilled pale-purple dashed candidate regions with question marks and two purple updated cores; only two short dashed search-direction cues, no exhaustive one-to-one pairing.",
-    "geometry": "Illustrative regions only, not actual optimization trajectories, measured lesions, propagation paths, or evidence of a three-to-two core-count optimization.",
-    "preservation": "Every pixel outside the central sheet matches formal v10. Candidate regions, question marks and cores are below the original neuron scatter; no solid fill in question-mark regions.",
-    "supersedes": "a_multicore_optimization_v11"
+    "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
   }
 }
