@@ -952,16 +952,16 @@
   },
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_core_search_sampling_links_v14",
+    "version": "a_core_search_central_shading_v15",
     "updated_on": "2026-10-11",
-    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011",
+    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011",
     "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
     "candidate_region_count": 3,
     "updated_core_count": 2,
-    "representation": "Three OPTM arrows, with the last two converging on Core B; matching light-green backgrounds in the central source frame and right Local sampling frame.",
+    "representation": "Two upper OPTM arrows point to the two cores. The bottom question region has no arrow or label. Light-green frame shading appears only in the central source frame; the right inset retains its original background and local Gaussian sampling weights.",
     "core_position_source": {
       "panel": "E",
       "snapshot": "source/D_position_density.npz",
@@ -995,20 +995,18 @@
     ],
     "arrow_target_core_indices": [
       0,
-      1,
       1
     ],
     "sampling_frame_shading": {
       "color": "#93C4A7",
       "alpha": 0.22,
       "locations": [
-        "Central zoom-location frame",
-        "Right Local sampling frame"
+        "Central zoom-location frame"
       ],
-      "interpretation": "Matching zoom-frame background only, not a new sampling kernel or electric-potential field."
+      "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
     },
-    "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; green frame shading is only a zoom correspondence cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
-    "preservation": "All pixels outside the central sheet and the sampling frame including its 0.15 mm antialias fringe match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
-    "supersedes": "a_core_search_map_aligned_v13"
+    "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; central green frame shading is only a zoom-location cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
+    "preservation": "All pixels outside the central sheet, including the right Local sampling inset, match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
+    "supersedes": "a_core_search_sampling_links_v14"
   }
 }
