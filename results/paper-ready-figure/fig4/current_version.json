@@ -952,16 +952,16 @@
   },
   "pending_panel_a_revision": {
     "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
-    "version": "a_core_search_map_aligned_v13",
-    "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_map_aligned_20261010",
+    "version": "a_core_search_sampling_links_v14",
+    "updated_on": "2026-10-11",
+    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011",
     "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_map_aligned_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_map_aligned_20261010/figure4_candidate_registry.json",
+    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_sampling_links_20261011/figure4_candidate_registry.json",
     "canonical_figure_replaced": false,
     "candidate_region_count": 3,
     "updated_core_count": 2,
-    "representation": "Three question-mark regions with light purple shading underneath the neuron scatter, two purple cores aligned to E, and a single dashed OPTM arrow.",
+    "representation": "Three OPTM arrows, with the last two converging on Core B; matching light-green backgrounds in the central source frame and right Local sampling frame.",
     "core_position_source": {
       "panel": "E",
       "snapshot": "source/D_position_density.npz",
@@ -993,8 +993,22 @@
         -4.5625
       ]
     ],
-    "geometry": "Candidate regions and update direction are illustrative; the final locations are the two marginal density modes in E, not a selected joint fit.",
-    "preservation": "All full-figure pixels outside the central sheet identical to formal v10; B-I pixel-identical; canonical output hashes unchanged.",
-    "supersedes": "a_core_search_simplified_v12"
+    "arrow_target_core_indices": [
+      0,
+      1,
+      1
+    ],
+    "sampling_frame_shading": {
+      "color": "#93C4A7",
+      "alpha": 0.22,
+      "locations": [
+        "Central zoom-location frame",
+        "Right Local sampling frame"
+      ],
+      "interpretation": "Matching zoom-frame background only, not a new sampling kernel or electric-potential field."
+    },
+    "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; green frame shading is only a zoom correspondence cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
+    "preservation": "All pixels outside the central sheet and the sampling frame including its 0.15 mm antialias fringe match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
+    "supersedes": "a_core_search_map_aligned_v13"
   }
 }
