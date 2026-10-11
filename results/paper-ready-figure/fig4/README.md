@@ -1,11 +1,9 @@
-# 当前 Figure 4：三行A–I与机制图v10
+# Figure 4 正式定稿
 
-[完整预览](figures/fig4-complete-layout-preview.png) · [PDF](figures/fig4-complete-layout.pdf) · [编号说明](panel_map.md)
+2026-10-11作者确认的Paper Ready Figure 4，状态为AUTHOR_ACCEPTED_FINAL，版本为core_search_final_20261011。三行A–I，画布300×232 mm；B/C/D/E/H/I数据轴为50×50 mm。A采用v15：三个淡紫色问号区域、两个与E图密度峰对齐的core、上方两条OPTM箭头，下方不加箭头或文字；浅绿底纹仅在中央取样框，右侧保留局部高斯采样权重。
 
-2026-10-10按作者要求将确认后的A v10放入完整Figure 4。A包含放大的原局部E/I回路、中央二维sheet，以及右侧Local sampling和下方两组SEEG readout。左侧中央红色下行箭头与蓝色抑制竖线间距为0.22示意单位，z↓边框为0.60 pt、1.5/1.5细密虚线。B–I的24个PNG/PDF/SVG文件逐字节保持上一正式v4，数据和统计口径不变。完整拼版待作者目视检查。
+[完整预览](figures/fig4-complete-layout-preview.png) · [PDF](figures/fig4-complete-layout.pdf) · [A–I单图](figures/README.md) · [历史版本登记](historical_versions.json)
 
-中央(-8.5,0) mm小框表示通用局部回路；电极附近仅有无填充灰色放大定位框。右侧在3.8×1.9 mm视野内显示五个错落的椭圆连接核和三个连续触点SL3/SL4/SL5，绿色高斯采样权重σ=0.25 mm仅在右侧显示。下方两组120 ms冻结burst与这些触点对应，源通道为ICL3/ICL4/ICL5。椭圆为局部连接核示意，读出是SNN发放密度代理，不是新增电位前向模型或实测SEEG电压。
+正式入口：`python scripts/paper_figures/build_fig4_current.py`。添加`--output-dir /tmp/fig4-export`可从随包冻结导出恢复31个PNG/PDF/SVG文件，逐字节一致；这是图文件恢复，不是参数重绘或重跑SNN。原绘图代码、数值输入及原生导出保存在source，来源解释见source/README.md。
 
-画布300×232 mm；B/C/D/E/H/I为50×50 mm，D/H和E/I对齐，B/C与F/G组合边界对应，两处行间可见留白约6.20与7.40 mm。
-
-当前producer：`scripts/paper_figures/build_fig4_a_mechanism_candidate.py`，默认重建审阅包；本次正式替换脚本为`publish_fig4_a_mechanism.py`。替换前的正式v4整包位于`results/paper-ready-figure/archive/2026-10-10_pre_mechanism_fig4/fig4`。
+旧正式v10、58个候选包、旧动画及重复图均已迁入`../archive/2026-10-11_fig4_finalization/`；此前更早归档仍原地保留。后续修改先输出独立修订，不能用旧工作树或旧producer覆盖正式图。

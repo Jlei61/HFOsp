@@ -1,0 +1,76 @@
+{
+  "minimum_font_pt": 8.0,
+  "text_outside_canvas": [],
+  "decoded": true,
+  "detail": {
+    "minimum_font_pt": 8.0,
+    "text_outside_canvas": [],
+    "decoded": true
+  },
+  "profiles": 226,
+  "spatial_maps": 2,
+  "grids_per_map": 2,
+  "grid_cells_per_map": 50,
+  "total_displayed_metric_values": 100,
+  "source_metric_values_retained": 150,
+  "actual_geometry_verified": true,
+  "paired_fixed_background_verified": true,
+  "interpolation": false,
+  "candidate_and_event_selection_unchanged": true,
+  "panel_order": {
+    "C": "lf_bo04_07",
+    "D": "xy_left_20"
+  },
+  "B_labels_match_display_panels": true,
+  "shared_color_limits": [
+    0,
+    0.3
+  ],
+  "colormaps_by_metric": {
+    "rank_error": "Blues",
+    "within_rod_order_error": "Oranges",
+    "participation_error": "Blues"
+  },
+  "colorbar_axis_height_checks": "PASS",
+  "layout_mm": {
+    "width": 238,
+    "height": 190,
+    "B_profile_height": 45,
+    "B_colorbar_height": 45,
+    "CD_readout_height": 36,
+    "field_side": 17.5,
+    "envelope_colorbar_height": 36,
+    "native_colorbar_height": 17.5
+  },
+  "C_individual_colorbars": {
+    "envelopes": 2,
+    "native_rows": 2,
+    "envelope_limits": [
+      0,
+      1
+    ],
+    "native_limits": [
+      0,
+      75
+    ]
+  },
+  "D_native_row_colorbars": 2,
+  "B_uniform_profile_linewidth": 0.5,
+  "B_selected_stars": false,
+  "A_column_left_mm": [
+    14,
+    62
+  ],
+  "agent_visual_review": "PASS: A column alignment, chronology scale separation, equal B mark styling and two native row bars per C/D checked in rendered PNG",
+  "human_visual_review": "PENDING",
+  "B_adjacent_tick_collision": false,
+  "B_colorbar_overlaps_3D": false,
+  "source_preflight_override": {
+    "PDF_and_TIFF": "Not required in user requested PNG and editable SVG delivery",
+    "dpi": 400,
+    "canvas_mm": [
+      238,
+      190
+    ]
+  }
+}

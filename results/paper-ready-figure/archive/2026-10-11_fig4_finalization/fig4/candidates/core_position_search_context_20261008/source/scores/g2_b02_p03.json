@@ -1,0 +1,64 @@
+{
+  "candidate": "g2_b02_p03",
+  "J": 1.9715320594632046,
+  "N": 161,
+  "groups": {
+    "rank_pattern": {
+      "N": 161,
+      "A": 0.07655808210238901,
+      "B": 0.0012054294320398133,
+      "D_off": 0.0753526526703492,
+      "D16": 0.08748228633024982,
+      "scaled": 1.6797790586468808
+    },
+    "participation": {
+      "N": 161,
+      "A": 0.07527052163178347,
+      "B": 0.0006682815931614127,
+      "D_off": 0.07460224003862205,
+      "D16": 0.08132682356980878,
+      "scaled": 1.6362859369462393
+    },
+    "local_and_interrod_timing": {
+      "N": 161,
+      "A": 0.11439635586373328,
+      "B": 0.0023262005697095127,
+      "D_off": 0.11207015529402377,
+      "D16": 0.13547754852672575,
+      "scaled": 2.598531182796493
+    }
+  },
+  "components": [
+    1.6797790586468808,
+    2.598531182796493,
+    1.6362859369462393
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/adaptive/units/g2_b02_p03/2511_847401/workers/trajectory.json",
+  "source_sha256": "06ebaff31b1e6d2287eb8938bb154e4d0ab05c2e99df9792fa8fb2b20256e008",
+  "reused": true,
+  "vector": [
+    3.2960301500966027,
+    10.900936968778318,
+    15.036139929421196,
+    3.7963632641502016,
+    1.376034876331687,
+    13.163674511015415
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 1.7432398695753202,
+  "joint": {
+    "N": 161,
+    "A": 0.09534374363974804,
+    "B": 0.002197358378152639,
+    "D_off": 0.0931463852615954,
+    "scaled": 1.7432398695753202
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g2_b02_p03.json",
+  "historical_score_sha256": "5f4251213bd6c7f21a95d36dca99bf73c064300d1f9f7910f96249bb7306d2b3"
+}

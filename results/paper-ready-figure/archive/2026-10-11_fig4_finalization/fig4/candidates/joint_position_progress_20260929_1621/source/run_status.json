@@ -1,0 +1,93 @@
+{
+  "status": "RUNNING",
+  "controller_pid": 1068599,
+  "updated_unix": 1790670275.5590234,
+  "deadline_unix": 1791815380.5417693,
+  "new_complete": 32,
+  "new_scorable": 31,
+  "planned_new": 256,
+  "historical_reused": 226,
+  "proposed_new": 64,
+  "queued_workers": 32,
+  "active": [
+    {
+      "task": [
+        "worker",
+        "wide_initial_33"
+      ],
+      "pid": 1473162,
+      "created": 1790656570.13,
+      "rss_gib": 2.1457672119140625
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_34"
+      ],
+      "pid": 1473483,
+      "created": 1790657714.91,
+      "rss_gib": 2.1400680541992188
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_35"
+      ],
+      "pid": 1473816,
+      "created": 1790659574.44,
+      "rss_gib": 2.129627227783203
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_36"
+      ],
+      "pid": 1474075,
+      "created": 1790660688.85,
+      "rss_gib": 2.2373809814453125
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_37"
+      ],
+      "pid": 1476352,
+      "created": 1790664074.51,
+      "rss_gib": 2.1171493530273438
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_38"
+      ],
+      "pid": 1476937,
+      "created": 1790664811.56,
+      "rss_gib": 2.1249427795410156
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_39"
+      ],
+      "pid": 1477045,
+      "created": 1790665019.73,
+      "rss_gib": 2.219837188720703
+    },
+    {
+      "task": [
+        "worker",
+        "wide_initial_40"
+      ],
+      "pid": 1477712,
+      "created": 1790668034.34,
+      "rss_gib": 1.9873924255371094
+    }
+  ],
+  "available_gib": 137.99206924438477,
+  "free_disk_gib": 1641.588150024414,
+  "cpu_percent": 66.9,
+  "max_workers": 8,
+  "failures": [],
+  "best_joint": 1.0601303963391657,
+  "blocked_tasks": []
+}

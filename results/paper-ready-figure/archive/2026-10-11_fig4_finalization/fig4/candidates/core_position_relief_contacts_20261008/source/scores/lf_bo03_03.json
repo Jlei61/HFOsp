@@ -1,0 +1,65 @@
+{
+  "N": 149,
+  "status": "SCORABLE",
+  "J": 1.7519029607917715,
+  "groups": {
+    "rank_pattern": {
+      "N": 149,
+      "A": 0.07357564055792554,
+      "B": 0.0016938073939327752,
+      "D_off": 0.07188183316399276,
+      "D16": 0.08765541451999173,
+      "scaled": 1.602406733765015
+    },
+    "participation": {
+      "N": 149,
+      "A": 0.08040414694023672,
+      "B": 0.0011541991363816625,
+      "D_off": 0.07924994780385505,
+      "D16": 0.08999842726140929,
+      "scaled": 1.7382262922405234
+    },
+    "local_and_interrod_timing": {
+      "N": 149,
+      "A": 0.08524275120937957,
+      "B": 0.002648841987084563,
+      "D_off": 0.08259390922229501,
+      "D16": 0.10726125022702,
+      "scaled": 1.9150758563697765
+    }
+  },
+  "candidate": "lf_bo03_03",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_03/2511_847401/workers/trajectory.json",
+  "source_sha256": "95b79cbff5124dbf94e4e153f33c35df780901c6b5ce83c1117ee261cd7a5fe4",
+  "vector": [
+    3.424541022925298,
+    12.321925104844361,
+    15.776078040000002,
+    4.76238653,
+    1.263581911338834,
+    5.31677422708432
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.602406733765015,
+    1.9150758563697765,
+    1.7382262922405234
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789517138.3833592,
+  "J_joint": 1.6068369078423312,
+  "joint": {
+    "N": 149,
+    "A": 0.08852523188131475,
+    "B": 0.0026672542830312737,
+    "D_off": 0.08585797759828348,
+    "scaled": 1.6068369078423312
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/lf_bo03_03.json",
+  "historical_score_sha256": "d3729733b1af97f86def6285f78507d7c6bca63a1fdb1f53372aebc310b6ff7f"
+}

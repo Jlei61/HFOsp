@@ -1,0 +1,46 @@
+{
+  "data_time": "2026-10-01T13:33:33+08:00",
+  "subject": "E1146",
+  "completed": 249,
+  "planned_training": 1536,
+  "completed_by_core": {
+    "1": 77,
+    "2": 77,
+    "3": 77,
+    "4": 18
+  },
+  "score_status_counts": {
+    "SCORABLE": 237,
+    "INSUFFICIENT_EVENTS": 12
+  },
+  "feedback_completed_by_core": {
+    "1": 17,
+    "2": 17,
+    "3": 17,
+    "4": 0
+  },
+  "common_epoch_123": 19,
+  "common_epoch_1234": 4,
+  "median_best_loss_123_at_epoch19": {
+    "1": 3.724302299666501,
+    "2": 1.7197412332076394,
+    "3": 1.269782681179796
+  },
+  "median_best_loss_1234_at_epoch4": {
+    "1": 5.068021698285241,
+    "2": 2.9369020962266355,
+    "3": 1.7406410039704818,
+    "4": 1.6338427067180752
+  },
+  "single_to_dual_reduction_at_epoch19": 53.82380121609257,
+  "core4_canary": "PASS",
+  "confirmation_complete": 0,
+  "confirmation_planned": 32,
+  "current_workers": 20,
+  "current_workers_by_core": {
+    "4": 20
+  },
+  "native_physics": "NO_RUNAWAY_IN_ALL_249_COMPLETED_RESULTS",
+  "execution_failures": 0,
+  "interpretation": "Running best training loss; four optimizer restarts within E1146. The 1/2/3 curves have common prefix 19, the four-arm comparison only 4. Different terminal evaluation budgets are not directly compared. Final training and fresh-noise confirmation incomplete."
+}

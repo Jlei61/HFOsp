@@ -1,0 +1,26 @@
+{
+  "status": "AGENT_CHECKS_PASSED_AUTHOR_VISUAL_REVIEW_PENDING",
+  "rank_selection_verified": true,
+  "position_based_selection": false,
+  "pool_scorable": 257,
+  "main_n": 26,
+  "main_historical_n": 26,
+  "main_new_n": 0,
+  "all_main_positions_verified_against_applied_physics": true,
+  "sigma_mm": 0.35,
+  "threshold_sensitivity_reviewed": [
+    0.05,
+    0.1,
+    0.2
+  ],
+  "pngs_reviewed": [
+    "core-position-top05-sensitivity",
+    "core-position-best-joint",
+    "core-position-top20-sensitivity"
+  ],
+  "main_same_state_pdf_reviewed": true,
+  "xy_aligned": true,
+  "labels_clear": true,
+  "output_hashes_verified": true,
+  "scientific_limit": "Constrained historical low-loss candidate regions; no unique-location or completed expanded-search stability claim."
+}

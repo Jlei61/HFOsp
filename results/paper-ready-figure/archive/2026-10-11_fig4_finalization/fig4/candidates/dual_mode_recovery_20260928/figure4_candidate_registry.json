@@ -1,0 +1,391 @@
+{
+  "status": "INTERIM_CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "producer": "scripts/paper_figures/build_fig4_dual_mode_recovery.py",
+  "source": "/data/hfosp/topic4_sef_hfo/cohort_dual_mode_recovery_20260928/summary.json",
+  "source_sha256": "4938ba3acc148d50159ef2896e1acc5aa9ab4ead236a4fc30078c625df4d7bf9",
+  "objective": "Each subject own frozen J; same point for both modes; no recovery-based selection",
+  "conditions_in_snapshot": 417,
+  "palette": {
+    "Subject": "#D7B08A",
+    "Median": "#8C4B20"
+  },
+  "checks": {
+    "layout": {
+      "A_local_circuit_source_pixels_unchanged": true,
+      "A_local_circuit_mm_per_source_pixel": 0.021,
+      "A_external_typography_pt": {
+        "title": 11,
+        "labels": 10,
+        "ticks": 9,
+        "legend": 8.8
+      },
+      "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+      "A_circuit_frame_vector_stroke_pt": 0.65,
+      "A_circuit_frame_source_crop_padding_px": 12,
+      "B_error_label_colors": {
+        "rank_error": "#3D5C6F",
+        "within_rod_order_error": "#E47159",
+        "participation_error": "#6B7546"
+      },
+      "B_profile_and_3D_label_colors_match": true,
+      "B_3D_error_axis_labels_bold": true,
+      "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+      "B_profile_scatter_colorbar_palette_match": true,
+      "BC_rank_error_name": "Mean rank error",
+      "B_error_symbols": {
+        "rank": "epsilon_r",
+        "within_rod_order": "epsilon_o",
+        "participation": "epsilon_p"
+      },
+      "B_restored_source_axis_sizes_mm": {
+        "profile": [
+          42,
+          45
+        ],
+        "trajectory": [
+          51,
+          51
+        ]
+      },
+      "B_workpoints": 226,
+      "B_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "B_axis_corner_gap_px": 0.0,
+      "B_category_labels_do_not_overlap": true,
+      "B_profile_ylabel": "Error",
+      "B_mean_rank_error_native_axis_label": true,
+      "B_order_error_native_axis_label": true,
+      "B_order_error_label_rotation_deg": 31.113561108745245,
+      "C_axis_label_font_pt": 12.0,
+      "C_position_conditions": 83,
+      "C_palette": {
+        "rank_error": "#3D5C6F",
+        "within_rod_order_error": "#E47159",
+        "order_text": "#E47159",
+        "map_limits": [
+          0.0,
+          0.3
+        ],
+        "map_gradient": "light to the corresponding curve color"
+      },
+      "DE_native_colorbar_quantity": {
+        "observable": "E neurons firing at least once within each spatial/time bin",
+        "spatial_bin_mm2": 1.0,
+        "time_bin_ms": 2.0,
+        "display_range": [
+          0,
+          75
+        ]
+      },
+      "DE_frozen_event_ids": [
+        [
+          114,
+          14
+        ],
+        [
+          39,
+          151
+        ]
+      ],
+      "DE_frozen_events_and_scales_match": true,
+      "DE_axis_label_font_pt": 12.0,
+      "DE_channel_tick_font_pt": 8.5,
+      "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+      "G_legend_upward_shift_mm": 3.0,
+      "G_legend_font_pt": 7.0,
+      "H_patient_template_labels_bold": true,
+      "H_model_template_labels_bold": true,
+      "F_additional_event_shading": [
+        {
+          "event": 9,
+          "mode": "MTB",
+          "center_relative_ms": 396.0,
+          "shaded_span_relative_ms": [
+            336.0,
+            426.0
+          ],
+          "color": "#287FA1",
+          "alpha": 0.14
+        }
+      ],
+      "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+      "F_legend_font_pt": 8.0,
+      "F_extra_legend_headroom_fraction": 0.0,
+      "F_waveform_exact_array_parity": true,
+      "GH_frozen_matrix": [
+        [
+          0.517857142857143,
+          -0.8392857142857144
+        ],
+        [
+          -0.5535714285714286,
+          0.8750000000000001
+        ]
+      ],
+      "FGHI_axis_bounds_mm": {
+        "F": [
+          14.999999999999998,
+          17.999999999999996,
+          114.99999999999997,
+          57.99999999999999
+        ],
+        "G": [
+          130.99999999999997,
+          17.999999999999996,
+          166.0,
+          57.99999999999999
+        ],
+        "H": [
+          178.99999999999997,
+          17.999999999999996,
+          218.99999999999997,
+          57.99999999999999
+        ],
+        "I": [
+          241.99999999999997,
+          17.999999999999996,
+          274.0,
+          57.99999999999999
+        ]
+      },
+      "FGHI_equal_height_and_edges": true,
+      "E_native_shared_xlabel_center_mm": 241.24999999999991,
+      "E_native_xlabel_centered_across_three_columns": true,
+      "CDE_axis_bounds_mm": {
+        "D": {
+          "C_axes": [
+            [
+              12.999999999999998,
+              143.49999999999997,
+              52.99999999999999,
+              183.5
+            ],
+            [
+              67.0,
+              143.49999999999997,
+              107.0,
+              183.5
+            ]
+          ],
+          "envelopes": [
+            [
+              130.0,
+              143.49999999999997,
+              154.0,
+              183.5
+            ],
+            [
+              166.0,
+              143.49999999999997,
+              190.0,
+              183.5
+            ]
+          ],
+          "native_two_row_bounds_mm": [
+            210.99999999999997,
+            143.49999999999997,
+            271.5,
+            183.5
+          ]
+        },
+        "E": {
+          "C_axes": [
+            [
+              12.999999999999998,
+              84.5,
+              52.99999999999999,
+              124.5
+            ],
+            [
+              66.99999999999999,
+              84.5,
+              106.99999999999999,
+              124.5
+            ]
+          ],
+          "envelopes": [
+            [
+              130.0,
+              84.5,
+              154.0,
+              124.5
+            ],
+            [
+              166.0,
+              84.5,
+              190.0,
+              124.5
+            ]
+          ],
+          "native_two_row_bounds_mm": [
+            210.99999999999997,
+            84.5,
+            271.5,
+            124.49999999999997
+          ]
+        }
+      },
+      "CDE_equal_row_height_and_edges": true,
+      "common_axis_height_mm": 40.0,
+      "F_legend_inside_axes_verified": true,
+      "G_legend_straddles_axes_upper_edge": true,
+      "I_legend_inside_axes_verified": true,
+      "I_legend_labels": [
+        "Subject",
+        "Median"
+      ],
+      "C_four_yaxis_tick_labels": [
+        [
+          "0.0",
+          "0.2",
+          "0.4"
+        ],
+        [
+          "0.0",
+          "0.2",
+          "0.4"
+        ],
+        [
+          "0.0",
+          "0.2",
+          "0.4"
+        ],
+        [
+          "0.0",
+          "0.2",
+          "0.4"
+        ]
+      ],
+      "visible_row_gaps_mm": {
+        "AB_to_CDE": 6.651944444444411,
+        "CDE_to_FGHI": 6.745694444444435
+      },
+      "FGHI_downward_shift_mm": 6.5,
+      "H_leftward_shift_mm": 5.0,
+      "I_leftward_shift_mm": 9.0,
+      "I_axes_right_margin_mm": 11.0,
+      "GH_visible_horizontal_gap_mm": 2.364143359969527,
+      "HI_visible_horizontal_gap_mm": 1.1646527777777476
+    },
+    "panel_i": {
+      "n_points": 24,
+      "n_not_estimable": 1,
+      "q25_q50_q75": [
+        0.0580357142857143,
+        0.31707875457875456,
+        0.5348214285714286
+      ],
+      "point_subjects": [
+        "epilepsiae_1084",
+        "epilepsiae_1096",
+        "epilepsiae_1125",
+        "epilepsiae_1146",
+        "epilepsiae_1150",
+        "epilepsiae_253",
+        "epilepsiae_384",
+        "epilepsiae_442",
+        "epilepsiae_548",
+        "epilepsiae_583",
+        "epilepsiae_590",
+        "epilepsiae_620",
+        "epilepsiae_635",
+        "epilepsiae_922",
+        "epilepsiae_958",
+        "yuquan_chengshuai",
+        "yuquan_huanghanwen",
+        "yuquan_litengsheng",
+        "yuquan_liyouran",
+        "yuquan_pengzihang",
+        "yuquan_xuxinyi",
+        "yuquan_zhangbichen",
+        "yuquan_zhangkexuan",
+        "yuquan_zhaochenxi"
+      ],
+      "point_y": [
+        -0.8285714285714285,
+        -0.5,
+        0.65,
+        0.5297619047619048,
+        0.5,
+        0.1,
+        -0.44999999999999996,
+        0.6011904761904762,
+        -0.021428571428571408,
+        0.55,
+        0.7261904761904762,
+        0.15000000000000002,
+        -0.45,
+        0.4,
+        0.03571428571428571,
+        0.6,
+        0.1,
+        0.5104895104895105,
+        0.0654761904761905,
+        0.5714285714285714,
+        0.31547619047619047,
+        0.3647863247863248,
+        0.31868131868131866,
+        0.29395604395604397
+      ],
+      "summary_interval": "interquartile range; not a confidence interval",
+      "zero_line": "zero correlation, not a calibrated chance threshold"
+    },
+    "text_outside_canvas": [],
+    "source_files": {
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/all_workpoints_source.csv": "ee5bd0559803bab393b8f995727282b61cafaf4196d7725f42a57d2977b00748",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/selected_workpoints.json": "47c7d5499864ce84db906d7bc9dc65774cf7bd08a49026eb2c14458a8d2e55ce",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/connection_response_source.csv": "20de4e62e29e900b954fc55ca4316149276887f12d75f49a95583c8893261263",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_expanded_response_20260920/source/position_map_source.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
+      "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+      "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+      "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+      "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
+    },
+    "outside_panel_i_changed_pixels": 0
+  },
+  "statistical_unit": "subject",
+  "eligible": 25,
+  "estimable": 24,
+  "unavailable": 9,
+  "median": 0.31707875457875456,
+  "q25_q75": [
+    0.0580357142857143,
+    0.5348214285714286
+  ],
+  "new_simulations": 0,
+  "canonical_assets_overwritten": false,
+  "outputs": {
+    "fig4-complete-layout.svg": "81c25562843de3c1f7be44bf2a4e79973b8f847c16c0d21ceab80c188827463b",
+    "fig4-complete-layout.png": "9c656a84683ef12d9662f97a6c878f77f3cf802dd026171982bee6c17d72cc5e",
+    "cohort_matched_similarity.pdf": "4a23c76a35b2e3c283967eedf137a4d031db4c13e8f3ce67edb04ede9fb560b9",
+    "cohort_matched_similarity.png": "7ba2b7fafef34cb7ba224bf17884dacb7a3590f8aa4f1fa68597087461589c3e",
+    "fig4-complete-layout-preview.png": "12f520df1fa37d186baa2ec172313ee4a9ead88204b70bf1b392a5be8da666f6",
+    "fig4-complete-layout.pdf": "1a03d4c571b078143564b28cbc34817d2daafc25c61c4b44b8453613694faf65",
+    "fig4-paneli.png": "461119eaec22c0050268db8a7aea1ca46b91bd5f373ad8858d4cde0b1d0b2eee",
+    "cohort_matched_similarity.svg": "78bf98bf996c679ff5bb319ad9ef6cc32db10138e7948faf96ac49b6e3e4c5fe",
+    "fig4-paneli.svg": "9bb40302fdf4f49a885d98209d831040af10af52b8bce7a758db7f6347c21151",
+    "fig4-paneli.pdf": "542b2b37a9cef0f034d68ef39bb05f5d2e283bcd5900c2f4614792efcd925f39"
+  }
+}

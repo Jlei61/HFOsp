@@ -1,0 +1,355 @@
+{
+  "status": "RUNNING",
+  "controller_pid": 1741682,
+  "train_complete": 301,
+  "train_planned": 1536,
+  "confirmation_complete": 0,
+  "confirmation_planned": 32,
+  "canary_pass": true,
+  "validated_core_counts": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "pending_canary_core_counts": [],
+  "dispatch_policy_path": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/dispatch_policy.json",
+  "dispatch_tiers": [
+    [
+      1,
+      2
+    ],
+    [
+      3,
+      4
+    ]
+  ],
+  "dispatch_phase_index": 0,
+  "dispatch_core_counts": [
+    1,
+    2
+  ],
+  "completed_core_counts": [],
+  "deferred_core_counts": [
+    3,
+    4
+  ],
+  "pending_dispatch_phase": 23,
+  "pending_deferred_phases": 58,
+  "streams": [
+    {
+      "core_count": 1,
+      "restart": 0,
+      "completed": 23,
+      "scorable": 22,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 2,
+      "restart": 0,
+      "completed": 21,
+      "scorable": 20,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 3,
+      "restart": 0,
+      "completed": 20,
+      "scorable": 20,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 4,
+      "restart": 0,
+      "completed": 12,
+      "scorable": 12,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 1,
+      "restart": 1,
+      "completed": 23,
+      "scorable": 21,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 2,
+      "restart": 1,
+      "completed": 22,
+      "scorable": 20,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 3,
+      "restart": 1,
+      "completed": 19,
+      "scorable": 18,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 4,
+      "restart": 1,
+      "completed": 13,
+      "scorable": 13,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 1,
+      "restart": 2,
+      "completed": 23,
+      "scorable": 19,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 2,
+      "restart": 2,
+      "completed": 21,
+      "scorable": 21,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 3,
+      "restart": 2,
+      "completed": 19,
+      "scorable": 18,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 4,
+      "restart": 2,
+      "completed": 12,
+      "scorable": 12,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 1,
+      "restart": 3,
+      "completed": 21,
+      "scorable": 18,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 2,
+      "restart": 3,
+      "completed": 21,
+      "scorable": 19,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 3,
+      "restart": 3,
+      "completed": 19,
+      "scorable": 19,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    },
+    {
+      "core_count": 4,
+      "restart": 3,
+      "completed": 12,
+      "scorable": 12,
+      "confirmation_completed": 0,
+      "confirmation_required": 2,
+      "optimization_and_confirmation_complete": false
+    }
+  ],
+  "active": [
+    {
+      "task": [
+        "train",
+        2,
+        0,
+        "bo01_06"
+      ],
+      "pid": 1760780,
+      "rss_gib": 2.1012725830078125,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8987274169921875
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        2,
+        "bo01_06"
+      ],
+      "pid": 1766695,
+      "rss_gib": 2.09228515625,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.90771484375
+      }
+    },
+    {
+      "task": [
+        "train",
+        1,
+        3,
+        "bo01_06"
+      ],
+      "pid": 1767240,
+      "rss_gib": 2.168437957763672,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8315620422363281
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        3,
+        "bo01_06"
+      ],
+      "pid": 1767942,
+      "rss_gib": 2.1287803649902344,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8712196350097656
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        0,
+        "bo01_07"
+      ],
+      "pid": 1769012,
+      "rss_gib": 2.07958984375,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.92041015625
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        1,
+        "bo01_07"
+      ],
+      "pid": 1769781,
+      "rss_gib": 2.1266098022460938,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8733901977539062
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        2,
+        "bo01_07"
+      ],
+      "pid": 1786616,
+      "rss_gib": 2.0903549194335938,
+      "memory_forecast": {
+        "stage": "BUILDING_OR_UNVERIFIED",
+        "projected_gib": 6.5,
+        "growth_gib": 4.409645080566406
+      }
+    },
+    {
+      "task": [
+        "train",
+        1,
+        3,
+        "bo01_07"
+      ],
+      "pid": 1786731,
+      "rss_gib": 2.091144561767578,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9088554382324219
+      }
+    },
+    {
+      "task": [
+        "train",
+        2,
+        3,
+        "bo01_07"
+      ],
+      "pid": 1786812,
+      "rss_gib": 2.0910263061523438,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9089736938476562
+      }
+    },
+    {
+      "task": [
+        "train",
+        1,
+        0,
+        "bo02_00"
+      ],
+      "pid": 1790370,
+      "rss_gib": 1.9796829223632812,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 2.0203170776367188
+      }
+    }
+  ],
+  "pending_current_batches": 81,
+  "failures": [],
+  "available_gib": 83.53954696655273,
+  "cpu_percent": 50.4,
+  "disk_free_gib": 1335.108787536621,
+  "max_workers": 48,
+  "original_max_workers": 16,
+  "resource_control_path": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/resource_control.json",
+  "growth_reserve_gib": 21.55081558227539,
+  "available_reserve_gib": 64.0,
+  "projected_worker_gib": 6.5,
+  "simulation_worker_gib": 4.0,
+  "building_workers": 1,
+  "max_building_workers": 4,
+  "next_worker_memory_required_gib": 92.05081558227539,
+  "additional_worker_slots_by_memory": 0,
+  "dispatch_deadline": 1791806199.8229969,
+  "updated_unix": 1790921266.13851
+}

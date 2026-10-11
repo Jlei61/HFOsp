@@ -1,0 +1,153 @@
+{
+  "status": "LAYOUT_AND_VALUE_CHECKS_PASS_VISUAL_PENDING",
+  "checks": {
+    "BC_equal_y_edges": true,
+    "C_axis_size_mm": [
+      51.00000000000002,
+      44.99999999999998
+    ],
+    "C_no_title_or_caption": true,
+    "C_legend_inside": true,
+    "C_artist_data_exact": true,
+    "C_original_reducer_independently_checked": true,
+    "BC_visible_gap_mm": 6.804201388888813,
+    "B_axis_corner_gap_px": 0,
+    "no_3d_axes": true,
+    "text_outside_canvas": [],
+    "J_legend_labels": [
+      "Subject",
+      "Median"
+    ],
+    "J_legend_location": "upper right",
+    "J_legend_clear_of_points": true,
+    "J_legend_columns": 1,
+    "J_legend_rows": 2,
+    "matched_mode_values_unchanged": true,
+    "C_summary_style": "mean_std",
+    "C_sample_std_ddof": 1,
+    "C_restarts": 4,
+    "C_shading_artist_values_exact": true,
+    "C_individual_trajectories": false
+  },
+  "current_package_and_pointer_unchanged": true,
+  "human_visual_acceptance": "PENDING",
+  "matched_mode_values_unchanged": true,
+  "author_designated_on": "2026-09-29",
+  "other_standalone_panels_pixel_identical": [
+    "a",
+    "b",
+    "c",
+    "e",
+    "f",
+    "h",
+    "i",
+    "j"
+  ],
+  "panel_c_author_accepted_on": "2026-10-08",
+  "panel_c_summary": "mean +/- sample SD; n=4; ddof=1",
+  "outside_updated_panels_changed_pixels": 0,
+  "unchanged_standalone_panels": [
+    "a",
+    "b",
+    "c",
+    "e",
+    "f",
+    "h",
+    "i",
+    "j"
+  ],
+  "D_source_tables_and_checks_match": "Three response curves and E/F references match the previous formal D; density matches the author-selected completed snapshot.",
+  "panel_b": {
+    "version": "post_prior_stages_6_16_v1",
+    "included_original_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "excluded_original_stages": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "visible_workpoints": 194,
+    "prior_workpoints": 32,
+    "original_workpoints": 226,
+    "stage_numbers_renumbered": false,
+    "prior_interpretation": "Stages 1-5 belong to the preceding label-informed development phase and are omitted from B. Subsequent searches inherit its candidate pool and patient geometry as development priors; their scoring objectives omit TA/TB labels. This display restriction does not establish independence from development data or remove historical information use.",
+    "visible_source": "source/B_visible_workpoints.csv",
+    "prior_source": "source/B_prior_workpoints.csv",
+    "requested_on": "2026-10-09",
+    "human_visual_acceptance": "PENDING"
+  },
+  "density_source_author_accepted_on": "2026-10-09",
+  "layout_revision": {
+    "version": "efh_aligned_to_b_v1",
+    "left_axis_x_mm": 147.99999999999997,
+    "letter_x_mm": 137,
+    "added_gap_beside_D_mm": 18,
+    "envelope_width_mm": 18,
+    "H_width_mm": 23,
+    "I_translation_mm": 4,
+    "J_translation_mm": 4,
+    "canvas_size_unchanged": true,
+    "fonts_unchanged": true,
+    "image_and_curve_values_unchanged": true,
+    "D_colourbar_to_F_contacts_gap_mm": 9.350121527777732
+  },
+  "left_column_layout": {
+    "version": "adg_equal_visible_width_v1",
+    "visible_edges_mm": {
+      "A": [
+        6.960999999999999,
+        128.6640625
+      ],
+      "D": [
+        6.961,
+        128.6640625
+      ],
+      "G": [
+        6.961000000000003,
+        128.66406250000003
+      ]
+    },
+    "common_visible_width_mm": 121.7030625,
+    "previous_DG_visible_edges_mm": {
+      "D": [
+        1.927187499999999,
+        121.78678472222221
+      ],
+      "G": [
+        1.27694444444444,
+        114.99999999999997
+      ]
+    },
+    "includes_axis_labels_and_D_colourbar": true,
+    "fonts_and_heights_unchanged": true,
+    "density_xy_aspect_unchanged": true,
+    "image_and_curve_values_unchanged": true,
+    "D_response_axis_width_mm": 40.9217326388889,
+    "G_axis_width_mm": 107.98000694444448
+  },
+  "outside_dg_changed_pixels": 0,
+  "agent_visual_review": {
+    "full_png": true,
+    "full_pdf_raster": true,
+    "ADG_edges_aligned": true,
+    "density_square_and_equal_height_colorbar": true,
+    "no_text_overlap_or_clipping": true
+  },
+  "regression_tests": {
+    "command": "python -m unittest tests.test_fig4_current_version -v",
+    "passed": 8
+  }
+}

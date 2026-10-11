@@ -1,0 +1,62 @@
+{
+  "id": "wide_initial_29",
+  "layout": "up3",
+  "centers_mm": [
+    [
+      9.379565536806977,
+      6.74181552479515
+    ],
+    [
+      10.947440264022973,
+      2.4458047587990355
+    ]
+  ],
+  "radii_mm": [
+    1.7525782905619196,
+    1.7525782905619196
+  ],
+  "parameters": {
+    "EE_same_core_scale": 0.85,
+    "EE_core_to_out_scale": 1.2559888591058552,
+    "EE_out_to_out_scale": 1.0,
+    "EI_same_core_scale": 1.0,
+    "IE_same_core_scale": 1.0,
+    "II_same_core_scale": 1.0,
+    "depth_A_scale": 1.0,
+    "depth_B_scale": 1.0,
+    "radius_A_mm": 1.7525782905619196,
+    "radius_B_mm": 1.7525782905619196,
+    "EE_core_to_out_degree_scale": 1.0,
+    "EE_kernel_perp_scale": 1.5,
+    "EE_kernel_parallel_scale": 1.0,
+    "EE_angle_offset_deg": 57.020919285714626
+  },
+  "changed_parameter": "core_ou_correlation",
+  "changed_value": 0.0,
+  "adjacency_changes": true,
+  "stage": "initial",
+  "parent_id": "refine_mid_EE085_mean095",
+  "changed_parameters": {
+    "core_ou_correlation": 0.0
+  },
+  "display_name": "wide_initial_29",
+  "core_mean_rate_scale": 0.95,
+  "geometry_change": null,
+  "core_ou_correlation": 0.0,
+  "shape": {},
+  "outgoing": {},
+  "contrast": "broad_sobol_initial",
+  "comparison": "g1_axis3_plus",
+  "response_coordinates": {
+    "shape": "circle",
+    "EE_out": 1.25,
+    "EI": 1.0,
+    "degree": 1.0,
+    "dx_mm": -0.75
+  },
+  "optimization_axis": null,
+  "search_role": "broad_sobol_initial",
+  "search_source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914",
+  "epoch": 29,
+  "batch": 0
+}

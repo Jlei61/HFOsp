@@ -1,0 +1,65 @@
+{
+  "N": 147,
+  "status": "SCORABLE",
+  "J": 1.6489474203842673,
+  "groups": {
+    "rank_pattern": {
+      "N": 147,
+      "A": 0.0699164043111338,
+      "B": 0.0017636065349156313,
+      "D_off": 0.06815279777621817,
+      "D16": 0.08435593281575553,
+      "scaled": 1.5192781997140603
+    },
+    "participation": {
+      "N": 147,
+      "A": 0.07796433594294673,
+      "B": 0.0012657749901544366,
+      "D_off": 0.07669856095279229,
+      "D16": 0.08832786867483618,
+      "scaled": 1.682265527229416
+    },
+    "local_and_interrod_timing": {
+      "N": 147,
+      "A": 0.07796847232921539,
+      "B": 0.002696765351747317,
+      "D_off": 0.07527170697746807,
+      "D16": 0.10004823864664654,
+      "scaled": 1.7452985342093252
+    }
+  },
+  "candidate": "dense_axis4_07",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_07/2511_847401/workers/trajectory.json",
+  "source_sha256": "e6c70063de0ff0514c64ca35a1512358834215b160c8389db921a3122ba589bd",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.2916666666666665,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.5192781997140603,
+    1.7452985342093252,
+    1.682265527229416
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789513341.7911434,
+  "J_joint": 1.6215958037787472,
+  "joint": {
+    "N": 147,
+    "A": 0.08939621887379125,
+    "B": 0.0027496304647281196,
+    "D_off": 0.08664658840906313,
+    "scaled": 1.6215958037787472
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis4_07.json",
+  "historical_score_sha256": "6fada081db25fd80100494e6e3c8ad857b443ae6718d9c69ac2ce5e291989fc8"
+}

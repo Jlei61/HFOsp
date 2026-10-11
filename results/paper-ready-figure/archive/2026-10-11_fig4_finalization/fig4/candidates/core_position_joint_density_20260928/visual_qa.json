@@ -1,0 +1,384 @@
+{
+  "status": "AGENT_QA_PASS_PENDING_AUTHOR_REVIEW",
+  "other_panels_pixel_identical": {
+    "A": true,
+    "B": true,
+    "D": true,
+    "E": true,
+    "F": true,
+    "G": true,
+    "H": true,
+    "I": true
+  },
+  "C_upper_curves_pixel_identical": true,
+  "position_and_score_checks": {
+    "A_local_circuit_source_pixels_unchanged": true,
+    "A_local_circuit_mm_per_source_pixel": 0.021,
+    "A_external_typography_pt": {
+      "title": 11,
+      "labels": 10,
+      "ticks": 9,
+      "legend": 8.8
+    },
+    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "A_circuit_frame_vector_stroke_pt": 0.65,
+    "A_circuit_frame_source_crop_padding_px": 12,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_profile_and_3D_label_colors_match": true,
+    "B_3D_error_axis_labels_bold": true,
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_profile_scatter_colorbar_palette_match": true,
+    "BC_rank_error_name": "Mean rank error",
+    "B_error_symbols": {
+      "rank": "epsilon_r",
+      "within_rod_order": "epsilon_o",
+      "participation": "epsilon_p"
+    },
+    "B_restored_source_axis_sizes_mm": {
+      "profile": [
+        42,
+        45
+      ],
+      "trajectory": [
+        51,
+        51
+      ]
+    },
+    "B_workpoints": 226,
+    "B_stages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_axis_corner_gap_px": 0.0,
+    "B_category_labels_do_not_overlap": true,
+    "B_profile_ylabel": "Error",
+    "B_mean_rank_error_native_axis_label": true,
+    "B_order_error_native_axis_label": true,
+    "B_order_error_label_rotation_deg": 31.113561108745245,
+    "C_axis_label_font_pt": 12.0,
+    "C_palette": {
+      "curves": {
+        "rank_error": "#3D5C6F",
+        "within_rod_order_error": "#E47159",
+        "participation_error": "#6B7546"
+      },
+      "density_batches": {
+        "1": "#549AAB",
+        "2": "#AE8B53",
+        "3": "#7461AD"
+      }
+    },
+    "C_position_candidates": 24,
+    "C_position_B_stages": [
+      14,
+      15,
+      16
+    ],
+    "C_density_sigma_mm": 0.35,
+    "C_local_maps_equal_scale_mm": [
+      6,
+      6
+    ],
+    "C_centers_verified_against_applied_physics": true,
+    "C_search_bounds_visible": true,
+    "C_star_rule": "Minimum J_joint within each of the three batches",
+    "C_density_is_not_confidence_or_posterior": true,
+    "C_position_summary": {
+      "A": {
+        "batch_means_mm": [
+          [
+            3.2848349937462435,
+            12.296214224246606
+          ],
+          [
+            3.12625101647467,
+            12.23886073853635
+          ],
+          [
+            2.9732237086642157,
+            12.171527882239479
+          ]
+        ],
+        "largest_batch_mean_shift_mm": 0.3356311619525087,
+        "candidate_coordinate_min_mm": [
+          2.7247460133784576,
+          11.466464748403437
+        ],
+        "candidate_coordinate_max_mm": [
+          3.9492143200000003,
+          12.62890135
+        ],
+        "candidates_on_any_search_boundary": 12,
+        "distinct_coordinates": 24
+      },
+      "B": {
+        "batch_means_mm": [
+          [
+            16.114056449993406,
+            4.713277206811321
+          ],
+          [
+            15.556483154990108,
+            6.000906626687332
+          ],
+          [
+            15.277696507488459,
+            6.000906626687332
+          ]
+        ],
+        "largest_batch_mean_shift_mm": 1.5354111750137522,
+        "candidate_coordinate_min_mm": [
+          14.998909859986808,
+          4.498672303498653
+        ],
+        "candidate_coordinate_max_mm": [
+          17.22920304,
+          6.21551153
+        ],
+        "candidates_on_any_search_boundary": 24,
+        "distinct_coordinates": 4
+      }
+    },
+    "DE_native_colorbar_quantity": {
+      "observable": "E neurons firing at least once within each spatial/time bin",
+      "spatial_bin_mm2": 1.0,
+      "time_bin_ms": 2.0,
+      "display_range": [
+        0,
+        75
+      ]
+    },
+    "DE_frozen_event_ids": [
+      [
+        114,
+        14
+      ],
+      [
+        39,
+        151
+      ]
+    ],
+    "DE_frozen_events_and_scales_match": true,
+    "DE_axis_label_font_pt": 12.0,
+    "DE_channel_tick_font_pt": 8.5,
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_legend_position": "inside upper right, original framed placement",
+    "I_paired_patients": 24,
+    "I_condition_counts": [
+      1,
+      12,
+      20,
+      28
+    ],
+    "I_palette": {
+      "Subject": "#D7B08A",
+      "Median": "#8C4B20",
+      "subject_alpha": 0.85
+    },
+    "I_xaxis_label": "Epochs",
+    "I_xaxis_definition": "Author-requested Epochs display label; values remain cumulative evaluated-condition indices at batch boundaries: 1, 12, 20, 28, not minibatch or gradient-training epochs. B colors identify proposal stages 1 through 16.",
+    "FGHI_axis_bounds_mm": {
+      "F": [
+        14.999999999999998,
+        17.999999999999996,
+        114.99999999999997,
+        57.99999999999999
+      ],
+      "G": [
+        130.99999999999997,
+        17.999999999999996,
+        166.0,
+        57.99999999999999
+      ],
+      "H": [
+        178.99999999999997,
+        17.999999999999996,
+        218.99999999999997,
+        57.99999999999999
+      ],
+      "I": [
+        241.99999999999997,
+        17.999999999999996,
+        274.0,
+        57.99999999999999
+      ]
+    },
+    "FGHI_equal_height_and_edges": true,
+    "E_native_shared_xlabel_center_mm": 241.24999999999991,
+    "E_native_xlabel_centered_across_three_columns": true,
+    "CDE_axis_bounds_mm": {
+      "D": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            143.49999999999997,
+            52.99999999999999,
+            183.5
+          ],
+          [
+            67.0,
+            143.49999999999997,
+            107.0,
+            183.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            143.49999999999997,
+            154.0,
+            183.5
+          ],
+          [
+            166.0,
+            143.49999999999997,
+            190.0,
+            183.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          143.49999999999997,
+          271.5,
+          183.5
+        ]
+      },
+      "E": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            84.5,
+            52.99999999999999,
+            124.5
+          ],
+          [
+            66.99999999999999,
+            84.5,
+            106.99999999999999,
+            124.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            84.5,
+            154.0,
+            124.5
+          ],
+          [
+            166.0,
+            84.5,
+            190.0,
+            124.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          84.5,
+          271.5,
+          124.49999999999997
+        ]
+      }
+    },
+    "CDE_equal_row_height_and_edges": true,
+    "common_axis_height_mm": 40.0,
+    "F_legend_inside_axes_verified": true,
+    "G_legend_straddles_axes_upper_edge": true,
+    "I_legend_inside_axes_verified": true,
+    "I_legend_labels": [
+      "Subject",
+      "Median"
+    ],
+    "C_four_yaxis_tick_labels": [
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ]
+    ],
+    "visible_row_gaps_mm": {
+      "AB_to_CDE": 6.651944444444411,
+      "CDE_to_FGHI": 6.745694444444435
+    },
+    "FGHI_downward_shift_mm": 6.5,
+    "H_leftward_shift_mm": 5.0,
+    "I_leftward_shift_mm": 9.0,
+    "I_axes_right_margin_mm": 11.0,
+    "GH_visible_horizontal_gap_mm": 2.364143359969527,
+    "HI_visible_horizontal_gap_mm": 1.1646527777777476,
+    "text_outside_canvas": [],
+    "minimum_visible_font_pt": 7.0,
+    "dense_font_at_180mm_page_width_pt": 4.7368421052631575,
+    "DE_semantic_titles_verified": true
+  },
+  "pdf_pages": 1,
+  "png_and_pdf_render_review": "Inspected standalone C and complete PNG/PDF; C y ticks explicit on both maps.",
+  "spatial_view_review": "Inspected same-data 3D density and full-sheet positions.",
+  "current_author_designated_outputs_unchanged": true,
+  "new_simulations": 0,
+  "author_review": "PENDING"
+}

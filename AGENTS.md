@@ -1,10 +1,12 @@
+<!-- CURRENT_FIGURE4_20261011 -->
+> **Figure 4已定稿（2026-10-11）：** 先读`docs/current_figure4.md`与`results/paper-ready-figure/fig4/current_version.json`；共享机器的旧worktree以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`core_search_final_20261011`、`AUTHOR_ACCEPTED_FINAL`，布局`compact_ai_v4_a_core_search_central_shading_v15`，正式完整图和A–I单图在`fig4/figures/`。A保留三个问号区域、两个core及上方两条OPTM箭头；下方无箭头，浅绿底纹仅在中央取样框，右侧只有局部高斯采样权重。正式入口`build_fig4_current.py`验证并恢复冻结导出；原始数值和绘图代码在`source/`，不需重跑实验。旧正式v10、58个候选、旧动画和重复导出均在`archive/2026-10-11_fig4_finalization/`，历史身份以`fig4/historical_versions.json`为准。后续修改先输出独立修订，禁止用旧producer或候选目录覆盖定稿。
+<!-- /CURRENT_FIGURE4_20261011 -->
+
 > **2026-09-30 模型/结果路由**：分岔分析先读 `docs/topic4_model_versions.md` 和 `config/topic4_model_versions.json`。默认是20×20格、935群体的空间rate版；三区域六E/I群体版另存，不能混用。Figure 5当前入口为 `docs/current_figure5.md`。工作区清理状态见 `docs/workspace_status.md`。
 
 ## 当前 Figure 4 入口
 
-- **当前 Fig4（A机制图整合，2026-10-10）**：先读[当前版本说明](docs/current_figure4.md)、`results/paper-ready-figure/fig4/current_version.json`及正式registry。当前为三行A–I，producer为`scripts/paper_figures/build_fig4_a_mechanism_candidate.py`；A的zoom-in小框位于(-8.5,0) mm，虚线避开电极并连接两框；B/C/D/E/H/I坐标轴统一50×50 mm，相邻横向留白按含标签和色条的实际边界收紧，C/D约3.87 mm、G/H约5.20 mm，D/H与E/I逐列对齐，B/C整体边界与F/G组合对齐。B两端无横轴空白延伸，色条间距1.5 mm；紧凑行距保留，画布300×232 mm。A机制图v10已并入正式入口；右侧为Local sampling及两组SEEG readout。中排B/C/角度响应D/位置密度E，底排旧G/H/I/J改为F/G/H/I；旧E/F传播showcase移出。B保留原第6–16阶段194点并去除E/F标记；I保留红蓝25患者散点及右上Subject/Median图例。旧A–J整包归档于`results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/`，不得用旧producer覆盖新版；本轮拼版待作者目视检查。
 - **Fig4当前数据版本**：C保留E1146一至四core、每组4次重复、共同前31个epoch的均值±样本标准差。新D为`angle_three_error_response_v1`，沿用旧D的13点方向响应；新E为`completed_position_density_standalone_v1`，保留83/413低J_joint前20%配置的位置密度。旧D版本`three_error_responses_density_v1`只作为归档来源；旧向外EE/核内EE扫描及showcase引用随本次草图简化移出，不能自动恢复。
-- **Fig4A当前机制图v10（2026-10-10作者指定并入整图）**：`fig4/current_version.json.accepted_panel_a_revision`登记当前A，正式布局为`compact_ai_v4_a_left_circuit_spacing_v10`。A包含放大的原局部E/I回路、中央二维sheet，以及右侧Local sampling和下方两组SEEG readout。左侧中央红色下行箭头与蓝色抑制竖线间距为0.22示意单位，z↓边框为0.60 pt、1.5/1.5细密虚线。中央(-8.5,0) mm小框表示通用局部回路；电极附近仅有无填充灰色放大定位框。右侧在3.8×1.9 mm视野内显示五个错落的椭圆连接核和三个连续触点SL3/SL4/SL5，绿色高斯采样权重σ=0.25 mm仅在右侧显示。下方两组120 ms冻结burst与这些触点对应，源通道为ICL3/ICL4/ICL5。椭圆为局部连接核示意，读出是SNN发放密度代理，不是新增电位前向模型或实测SEEG电压。B–I的PNG/PDF/SVG逐字节保持前一正式v4，当前完整拼版待作者目视检查。
 - **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panel_b/c/d/e/i`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
 
 # Agent Guide

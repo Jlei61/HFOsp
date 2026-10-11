@@ -141,80 +141,25 @@
   },
   "current_figures": {
     "fig4": {
+      "figure": "Fig4",
+      "version": "core_search_final_20261011",
+      "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
+      "status": "AUTHOR_ACCEPTED_FINAL",
       "pointer": "results/paper-ready-figure/fig4/current_version.json",
       "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
       "documentation": "docs/current_figure4.md",
-      "layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
-      "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
+      "producer": "scripts/paper_figures/build_fig4_current.py",
+      "history_registry": "results/paper-ready-figure/fig4/historical_versions.json",
       "fallback_to_historical_layout": false,
       "accepted_panel_a_revision": {
-        "status": "AUTHOR_DESIGNATED_CURRENT",
-        "version": "a_left_circuit_spacing_v10",
-        "updated_on": "2026-10-10",
-        "package": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
-        "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-        "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-        "preview": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figures/fig4-complete-layout-preview.png",
-        "registry": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figure4_candidate_registry.json",
-        "canonical_figure_replaced": true,
-        "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-        "original_left_circuit": "Original circuit structure and neuron positions retained at 1.20x scale. Central red E-to-I path and blue I-to-E shaft/T-bar each move 0.07 schematic units outward; z-down border becomes thin and dense.",
-        "layout": "All axes and placements retain v9. Only the left central reciprocal E/I connection spacing and z-down border change; all full-figure pixels outside that detail footprint are identical to v9.",
-        "zoom_roles": "Central sheet has no green sampling fill, halos or footprint rings; only an unfilled neutral gray dashed frame locates the zoom. Gaussian sampling weights are shown only in the right Local sampling view.",
-        "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
-        "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, restored to the v6 displayed scale; each contains 6-7 hollow E triangles and 1-2 internal I circles. Exactly three consecutive contacts, with no intervening or additional contacts in the small box.",
-        "readout": "The exact v8 SL3/SL4/SL5 waveform crops, axes and labels are preserved pixel-for-pixel; actual frozen ICL3/ICL4/ICL5 source data and both event windows unchanged.",
-        "sampling_contact_labels": [
-          "SL3",
-          "SL4",
-          "SL5"
-        ],
-        "tiny_readout_arrow_removed": true,
-        "sampling_source_contacts": [
-          "ICL3",
-          "ICL4",
-          "ICL5"
-        ],
-        "display_label_to_source_contact": {
-          "SL3": "ICL3",
-          "SL4": "ICL4",
-          "SL5": "ICL5"
-        },
-        "right_sampling_weights": {
-          "sigma_mm": 0.25,
-          "display": "Green smoothly fading Gaussian alpha; no hard boundary ring. Tails are clipped by the unchanged zoom view.",
-          "theoretical_95_percent_mass_radius_mm": 0.6119367076702041,
-          "quantity": "Spatial weighting of the existing virtual-contact firing-density readout, not a computed electric potential."
-        },
-        "left_detail_producer": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-        "left_detail": {
-          "native_producer": "local_circuit_native_source.py",
-          "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-          "central_offset_schematic_units": 0.11,
-          "previous_central_offset_schematic_units": 0.04,
-          "z_border_linewidth_pt": 0.6,
-          "previous_z_border_linewidth_pt": 1.6,
-          "z_border_dash_pattern": [
-            1.5,
-            1.5
-          ],
-          "previous_z_border_dash_pattern": [
-            2.0,
-            1.7
-          ],
-          "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-        },
-        "author_designated_on": "2026-10-10"
-      },
-      "pending_panel_a_revision": {
-        "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+        "status": "AUTHOR_ACCEPTED_FINAL",
         "version": "a_core_search_central_shading_v15",
         "updated_on": "2026-10-11",
-        "package": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011",
-        "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-        "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figures/fig4-complete-layout-preview.png",
-        "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figure4_candidate_registry.json",
-        "canonical_figure_replaced": false,
+        "package": "results/paper-ready-figure/fig4",
+        "producer": "scripts/paper_figures/build_fig4_current.py",
+        "preview": "results/paper-ready-figure/fig4/figures/fig4-complete-layout-preview.png",
+        "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
+        "canonical_figure_replaced": true,
         "candidate_region_count": 3,
         "updated_core_count": 2,
         "representation": "Two upper OPTM arrows point to the two cores. The bottom question region has no arrow or label. Light-green frame shading appears only in the central source frame; the right inset retains its original background and local Gaussian sampling weights.",
@@ -263,7 +208,10 @@
         },
         "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; central green frame shading is only a zoom-location cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
         "preservation": "All pixels outside the central sheet, including the right Local sampling inset, match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
-        "supersedes": "a_core_search_sampling_links_v14"
+        "supersedes": "a_core_search_sampling_links_v14",
+        "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
+        "author_accepted_on": "2026-10-11",
+        "archived_source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/a_core_search_central_shading_20261011"
       }
     }
   }

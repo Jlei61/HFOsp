@@ -1,0 +1,206 @@
+# results/ 图总索引（FIGURE INDEX）
+
+> **2026-10-10 Figure 1 定稿：** [当前完整图和A–F](paper-ready-figure/fig1/figures/README.md)、[7页PPTX](paper-ready-figure/fig1/figures/fig1-final.pptx)；唯一入口为`paper-ready-figure/fig1/current_revision.json`。旧正式图及全部候选/修订已归档，来源代码和数据见[版本说明](../docs/current_figure1.md)。
+
+
+> 解决"重要的图埋太深、容易错过"的问题。本文件是 `results/` 下所有**结论级图**的导航入口。
+> 每个目录里仍有自己的中文 `figures/README.md`（逐图说明），本文件只负责"按 topic 快速定位 + 指路"。
+>
+> 用法：先看下面「只看这几张」挑代表图；要细节就点到对应目录的 `README.md`。
+> per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
+> `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
+>
+> 最近更新：2026-07-30。新增结论图目录时，请在对应 topic 表里补一行。
+>
+> **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
+> 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
+
+---
+
+## 只看这几张（每个 topic 的代表图）
+
+| Topic | 代表图 | 一句话 |
+|---|---|---|
+| 0 方法学 | [lagpatrank_audit/figures/ami_vs_noise_floor.png](lagpatrank_audit/figures/) | lagPatRank phantom-rank 审计：旧聚类特征被非参与通道污染的程度 |
+| 1 同步 | [interictal_synchrony/analysis/combined/figures/figure_b_trajectory_all.png](interictal_synchrony/analysis/combined/figures/) | 合并队列：事件级同步性随时间的轨迹 |
+| 1 传播 | [interictal_propagation_masked/figures/cohort_propagation_summary.png](interictal_propagation_masked/figures/) | 队列间期传播汇总（masked = 当前 canonical） |
+| 2 周期性 | [event_periodicity/figures/yuquan_cohort_psd_stack.png](event_periodicity/figures/) | 群体事件脉冲序列的功率谱（是否有周期峰） |
+| 3 空间/SOZ | [spatial_modulation/soz_comparison/figures/soz_vs_nonsoz_lag1r_paired.png](spatial_modulation/soz_comparison/figures/) | SOZ vs 非 SOZ 通道的配对差异 |
+| 3 几何骨架 | [spatial_modulation/propagation_geometry/components/path_axis/figures/along_axis_stereotypy_profile.png](spatial_modulation/propagation_geometry/components/path_axis/figures/) | 传播是否沿一条稳定空间轴 |
+| 4 模型 | [topic4_sef_hfo/snn_heterogeneity/figures/mean_scan.png](topic4_sef_hfo/snn_heterogeneity/figures/) | SNN 阈值异质核：点火边界的参数扫描 |
+| 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
+| 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
+| 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
+| 5 bounded sequence | [topic5_interictal_scaffold_reliability_history_necessity/figures/topic5_scaffold_reliability_history_necessity_v0_1.png](topic5_interictal_scaffold_reliability_history_necessity/figures/) | 34人 target-blind：participation scaffold 可重复；真实顺序增量集中在最近2–3个 rank set，full history 不超过 H3 |
+| 5 minimal sequence closeout | [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_minimal_sequence_kernel_closeout/figures/topic5_minimal_sequence_kernel_closeout.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_minimal_sequence_kernel_closeout/figures/) | 当前 canonical bounded figure：稳定 contact scaffold + 当前/前一 rank 的短程 contact 修正；第三 rank 主要预测 STOP，ordered residual 的 early-ictal 增量与真实时间 state 均未建立 |
+| 5 contact topography | [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_static_contact_topography/figures/fig6_static_contact_topography.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_static_contact_topography/figures/) | Supplementary boundary control：间期 contact topography 与 early-ictal energy 有 reused-target 的 orientation-free 静态对应；fixed positive direction 与 GRU-specific 跨状态增量未建立 |
+| 5 ordered-history audit | [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_ordered_history_architecture_audit/figures/fig6_ordered_history_architecture_audit.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_ordered_history_architecture_audit/figures/) | 34人 target-blind 架构与顺序控制：linear-state 利用事件内顺序，但跨架构稳定性仅 1/7；冻结 ordered residual 对 clinical-onset early-ictal field 的条件增量未建立 |
+| 5 V2 state 层 | [topic5_ictal_recruitment/v2_criticality/figures/phase2_state_layer_alignment.png](topic5_ictal_recruitment/v2_criticality/figures/) | 发作前"变脆状态"是否沿间期 HFO 几何排布（EXPLORATORY，偏阴性；动力学 leg 0/16 显著）|
+| 5 子型×方向 | [topic5_ictal_recruitment/subtype_direction/figures/cohort_C_to_A_connection_broadband.png](topic5_ictal_recruitment/subtype_direction/figures/) | C 线：发作子型是否决定激活方向 + 与 A 线奇偶不稳的连接（队列不可行/无信号） |
+| 5 方向两类 | [topic5_ictal_recruitment/directional_clustering/figures/epilepsiae_442__classes_vs_interictal_hist_broadband.png](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类是否对应间期 A/B（6 ECoG 全无 two_class_mapped；442 真两堆但对不齐；防自欺 null） |
+
+---
+
+## Topic 0 — 方法学审计（任何数字前先读）
+
+| 目录 | 内容 |
+|---|---|
+| [lagpatrank_audit/figures/](lagpatrank_audit/figures/) | lagPatRank phantom-rank 诊断（ami_vs_noise_floor / phantom_fraction_vs_delta / stable_k_confusion） |
+| [interictal_propagation_vs_masked/figures/](interictal_propagation_vs_masked/figures/) | phantom vs masked PR-2 的 before/after 对比 |
+
+## Topic 1 — 间期事件动态（传播 + 同步）
+
+**同步性**
+| 目录 | 内容 |
+|---|---|
+| [interictal_synchrony/analysis/combined/figures/](interictal_synchrony/analysis/combined/figures/) | 合并队列（Epilepsiae+Yuquan）：trajectory / fixed_window / robustness / coverage / event_rate |
+| [interictal_synchrony/analysis/yuquan/figures/](interictal_synchrony/analysis/yuquan/figures/) | Yuquan 独立队列（含 per-subject timeline） |
+
+**传播（masked = 当前 canonical）**
+| 目录 | 内容 |
+|---|---|
+| [interictal_propagation_masked/figures/](interictal_propagation_masked/figures/) | PR-2/PR-3 队列传播汇总 |
+| [interictal_propagation_masked/rank_displacement/figures/](interictal_propagation_masked/rank_displacement/figures/) | 连续 swap 几何（displacement / cardinality / SOZ overlap） |
+| [interictal_propagation_masked/template_anchoring/figures/](interictal_propagation_masked/template_anchoring/figures/) | endpoint 几何 + 模板对几何 |
+| [interictal_propagation_masked/template_share_switching/figures/](interictal_propagation_masked/template_share_switching/figures/) | 发作前后窗口的模板占比 + 切换 |
+| [paper-ready-figure/fig1/figures/](paper-ready-figure/fig1/figures/) | **Figure 1 canonical outputs**：无角标的 B1/B2、C、D、E、F 独立 PNG/PDF + 带 B–F 字母的 `fig1-complete-layout`；A 为作者手绘。Fig1-F canonical v5 固定使用 single-template vs multi-cluster MI 的配对分布 inset，不再使用右下灰色 median ΔMI 小字。 |
+| [paper-ready-figure/fig2/figures/](paper-ready-figure/fig2/figures/) | **Figure 2 canonical outputs**：无角标的 A–F 独立 PNG/PDF + 带 A–F 字母的 `fig2-complete-layout`；A 为局部电极几何→平面投影→TA/TB 场，C–F 合同见登记表。 |
+| [paper-ready-figure/fig5/figures/](paper-ready-figure/fig5/figures/) | **Figure 5 A–F，2026-09-30过渡展示版**：A为15触点未滤波原始电流读出，保留持续电平，按进入前原始信号P95固定定标，仅一个波形轴；B为蓝色Z/橙色adaptation上下两行，All E实线/Core A虚线，共用8–11秒时间轴；C为两个Core A/B E-only raster窗；D为四张Pre-ictal至Onset空间图；E为同步状态轨迹，F为其下方的模型/患者场。Rest和Interictal空间图移除，原参数图及长时结果留在parameter_scan。整图、单panel PNG/PDF/SVG、图注与下载包齐全，自查通过，待作者目视检查。 |
+
+**传播（旧版 phantom-contaminated，部分未重跑——引用前确认是否已有 masked 对应）**
+| 目录 | 内容 |
+|---|---|
+| [interictal_propagation/pr6_step6_held_out_template/figures/](interictal_propagation/pr6_step6_held_out_template/figures/) | 留出时间窗的模板稳定性 |
+| [interictal_propagation/pr6_sup1_rank_entropy/figures/](interictal_propagation/pr6_sup1_rank_entropy/figures/) | first-rank entropy 补充 |
+| [interictal_propagation/template_share_switching/figures/](interictal_propagation/template_share_switching/figures/) | 模板占比/切换（旧版，masked 版见上） |
+
+**broad channel-pool 扩展**
+| 目录 | 内容 |
+|---|---|
+| [lagpat_broad/figures/](lagpat_broad/figures/) | broad lagPat 通道池扩展（SOZ 内外覆盖 + 更大 KMeans） |
+
+## Topic 2 — 事件周期性
+
+| 目录 | 内容 |
+|---|---|
+| [event_periodicity/figures/](event_periodicity/figures/) | cohort PSD stack + IEI summary（Epilepsiae & Yuquan） |
+| [event_periodicity/phase2/figures/](event_periodicity/phase2/figures/) | Phase 2 五个实验图 |
+
+## Topic 3 — 空间 / SOZ 调制
+
+| 目录 | 内容 |
+|---|---|
+| [spatial_modulation/soz_comparison/figures/](spatial_modulation/soz_comparison/figures/) | SOZ vs 非 SOZ 配对（lag1r / IEI / deadtime / detrend） |
+| [spatial_modulation/propagation_geometry/figures/](spatial_modulation/propagation_geometry/figures/) | 传播几何总图 |
+| [spatial_modulation/propagation_geometry/components/path_axis/figures/](spatial_modulation/propagation_geometry/components/path_axis/figures/) | 路径轴骨架（沿轴刻板性 + 轴框示例） |
+| [spatial_modulation/propagation_geometry/components/entry_variability/figures/](spatial_modulation/propagation_geometry/components/entry_variability/figures/) | 入口分散度（含 3D overlap，per-subject 在子目录） |
+| [spatial_modulation/propagation_geometry/observation_readout/figures/](spatial_modulation/propagation_geometry/observation_readout/figures/) | 触点平面读出（static_maps 子目录 52 张 per-subject） |
+| [refine_soz_validation/figures/](refine_soz_validation/figures/) · [.../epilepsiae/figures/](refine_soz_validation/epilepsiae/figures/) | refine-SOZ 验证（cohort + per-subject） |
+| [propagation_entry_dispersion/figures/](propagation_entry_dispersion/figures/) | 入口分散度（独立目录，3D overlap 在子目录） |
+
+## Topic 4 — SEF-HFO / SEF-ITP 机制模型
+
+**SEF-HFO（rate field + spiking network）**
+| 目录 | 内容 |
+|---|---|
+| [topic4_sef_hfo/schematic/figures/](topic4_sef_hfo/schematic/figures/) | 机制示意图 |
+| [topic4_sef_hfo/data_driven_snn_cohort_v1/formal/figures/](topic4_sef_hfo/data_driven_snn_cohort_v1/formal/figures/) | **34 人 data-driven SNN cohort 收官（2026-08-16）＝两道闸门未过，主张不成立**。A 队列统计（谁在队列 / 是否赢过"同杆内换标签"对照 / 同网络是否长出两簇 / 换真实几何后是否同向）、B 代表患者场+两模式+同网络电极读数、C 代表患者聚类核验，外加带 A–C 字母的 `-complete-layout`。数字：只看电极名字的摆位上 23/34 赢过对照、中位优势 +0.0063（零假设水平的 3.3%）、p=0.043（符号检验 0.058 过不了）；**换真实植入几何效应归零**（−0.0007，p=0.98，两臂符号一致 14/28＝掷硬币）；同网络双模式仅 15/34。⚠️ canonical 摆位是**只看电极名字**排出的读出，**不是解剖**；两种读法（理想摆位假象 / 真实几何太弱）分不开，故状态是 unresolved 而非证伪。结果 `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md` |
+| [paper-ready-figure/fig4/current_version.json](paper-ready-figure/fig4/current_version.json) | **Figure 4 当前 A–J 版（CURRENT_AUTHOR_DESIGNATED，2026-09-29）**：[完整 PDF](paper-ready-figure/fig4/figures/fig4-complete-layout.pdf)，B 紫色、J 为TA–MTA红色／TB–MTB蓝色，右上角为一列两行的Subject / Median图例；producer 为 build_fig4_current_aj.py，详见 docs/current_figure4.md。 |
+| [paper-ready-figure/fig4/figures/](paper-ready-figure/fig4/figures/) | **历史 A–G package（B 预留；当前版本见上一行）**：A、C–G 无角标独立 PNG/PDF + 带 A–G 字母的 `fig4-complete-layout`；A 为已确认的 local circuit + patient substrate，B 使用右上留白预留且当前无独立文件，C 为 Node field + Model TA/MTB，D 为 rank profile，E 为 cross-fit，F 为 readout，G 为 cohort。KMeans heatmap 保留在 FigS7-E。当前显示标签统一使用 E10，科学边界见登记表。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_hG_runaway_transition/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_hG_runaway_transition/figures/) | **M3A-v2.2 全局恢复 h_G 单轨迹 GIF**（visual diagnostic，非 sweep）：间期 axis-like→runaway 转变，把全局抑制恢复标量 `h_G` 打开。`h_G` 只在 runaway 时升起（局部事件期 χ_G≈0），但 runaway **未被逆转**；`eta_G` 阶梯 0→80（>10× 膜跨度）结构性无效——减法式全局刹车拉不回饱和 recurrent 雪崩，瓶颈在 E→E 衬底。配 v2.1 `fig_m3a_v2_1_qigk_runaway_transition`（同轨迹 h_G OFF） |
+| [topic4_criticality/figures/](topic4_criticality/figures/) | **M3A-v2.2 criticality M1**：frozen-Jacobian 轨迹判读；采样快照跨过失稳边界但没有直接命中 crossing，故 `csd_verdict=unresolved_operating_point`，作为历史诊断保留 |
+| [topic4_criticality_m2/figures/](topic4_criticality_m2/figures/) | **M3A-v2.2 criticality M2（2026-07-12 有界验收）**：线性起燃模式为 `core_localized`；非线性铺开对扰动强度/极性敏感，维持 `undetermined`。这是 M4 的上游诊断，不替代 M4 的恢复/终止设计 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m4_dynamic_qi/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m4_dynamic_qi/figures/) | **M4 pass-1 除法共享抑制池 = bounded 第三态机制筛选通过，非完整 seizure cycle（2026-07-09 验收）**：活动依赖的除法池 `S_G` 打开窄窗口 bounded sustained attractor；40s 多 seed 稳健锚点 `(k_q=0.10,aG16)` 为 3/4 seed。限制：空间宽、marginal、不可撤回/不自终止，故结论是池只 bound 不 terminate；matched-subtractive 仍失控、clamped-SG 压死活动。连续性/经验本征模只支持 Hopf-like 迹象，不能写成严格 Hopf。验收文档 `docs/archive/topic4/sef_hfo/m4_pass1_divisive_shared_pool_acceptance_2026-07-09.md`；已于 2026-07-12 合入 `main` |
+| [topic4_m4_dynamic_p1_sweep/figures/](topic4_m4_dynamic_p1_sweep/figures/) | **M4-2 STD 终止器 P1 sweep = 3-seed scoped clean no-go（2026-07-08）**：同一有界工作点扫 `ee_std_u × ee_std_tau_ms`，全网格 0 `terminate_clean`；弱 STD 碎裂，强/慢 STD 压死，中间无干净终止，且 seed4 Arm0 本身 fragment。只限此衬底/工作点/网格/3 seed，不外推为普适失败。archive `docs/archive/topic4/m4_2_std_termination_p1_sweep_2026-07-08.md`；已于 2026-07-12 合入 `main` |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/figures/) | **M3A-v2.2 q_I 载体 + 轴向 g_K 疲劳 runaway GIF（E1146 真实电极几何）**（visual diagnostic）：顶部画 **抑制资源 `q_I(t)`（mean+min）+ 轴向区域 `g_K` 疲劳**（h_G 关、左图 E→E 梯度画成椭圆）。看 `q_I`（min=轴向走廊先耗竭）掉到地板 + `g_K` 累积→局部小事件铺成 runaway（757 ms）。`g_K` 膜耦合关（eta_K=0，只可视化不改轨迹）；**真耦合 eta_K=1 反而在点火前就压住核、阻止 runaway**（=limit 角色，另一张图）。电极=ICL/SCL 真实触点 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/figures/) | **M3A-v2.2 刺激 vs 不刺激 对照 GIF（E1146 真实电极几何）**（visual diagnostic，外部预防式压制示意，非治疗/recovery 主张）：与 `fig_m3a_v2_2_qI_runaway_transition` 同轨迹，两臂唯一区别=刺激臂在 500–1400 ms 把中段 4 触点 `ICL4–7` 附近 E 细胞 V_th clamp。两臂在刺激开前**逐比特一致**。不刺激 runaway 758 ms；刺激把间期事件压掉→`q_I` 少耗竭（窗内基本不掉，叠 no-stim 灰虚线对照）→runaway 推后到 **1592 ms（+834 ms）**，且**关刺激后才反弹**（窗内不发生）。布局=2 行（上不刺激/下刺激）× `permissivity` \| `2D 活动` \| (`q_I/g_K 轨迹` \| `SEEG readout`)。脚本 `plot_fig_m3a_v2_2_qI_stim_runaway_gif.py` |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_site_compare_epilepsiae_1146/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_site_compare_epilepsiae_1146/figures/) | **M3A-v2.2 刺激位点对照：最早端点 vs 中段（E1146 真实电极几何）**（visual diagnostic，非治疗主张）：同轨迹、两条刺激臂比哪个把 runaway 推得更后。上行=刺激最先点火的灶端点 `ICL8–11`、下行=刺激中段 `ICL4–7`，都在 500–1400 ms。不刺激 runaway 758 ms；**端点只推到 1171 ms（+414，窗内就击穿）、中段推到 1592 ms（+834，关刺激后才反弹）→中段更狠**。机制=打端点只掐掉一个灶（另一灶+中段走廊仍在磨 `q_I`）、打中段堵走廊让两灶事件都传不过去。脚本 `plot_fig_m3a_v2_2_qI_stim_runaway_gif.py --mode endpoint_vs_middle` |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_both_foci_epilepsiae_1146/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_m3a_v2_2_qI_stim_both_foci_epilepsiae_1146/figures/) | **M3A-v2.2 刺激两个灶都打 vs 不刺激（E1146 真实电极几何）**（visual diagnostic，非治疗主张）：刺激臂在 500–1400 ms 把**两个灶端点** `ICL1–4`+`ICL8–11`（8 触点）都 clamp。不刺激 runaway 758 ms；两灶都打推到 **1606 ms（+848）、关刺激后才反弹**——和只打中段（+834）**几乎打平**，虽然触点数/覆盖 E 细胞翻倍（3102 vs 1749）。说明"堵中段走廊"≈"掐两个灶"，都靠窗内保住 `q_I`；延迟主要由刺激窗时长决定。脚本 `plot_fig_m3a_v2_2_qI_stim_runaway_gif.py --mode no_stim_vs_both_foci` |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_stage4_axis_vs_core_difficulty/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_stage4_axis_vs_core_difficulty/figures/) | **挡轴 vs 打灶 + 自发难点图**（visual diagnostic，非临床证明；runaway 非 ictal）：两张图。**难点图** `difficulty_3row`（3 行 big/small/kick）=为什么自发单灶出不了事件串——大核 23 ms 整片同步爆（1 事件、铺满 1.0）、小核 42.8 ms 前锋铺满整片（1 事件、1.0）、只有外部戳的两灶先出 **3** 次分开事件（`q_I` 3 档台阶、col1 contained frac_ever=0.22）再 757 ms 失控。**轴 vs 灶图** `axis_vs_core`（固定 footprint=4）=两灶+中段走廊（有咽喉）挡轴 **+834** ≥ 打灶 **+414**（引用 E1146）；单中心核（无咽喉、径向漏）打灶 **+37** > 挡轴 **+8**＝诚实压力测试不成立。脚本 `plot_fig_stage4_axis_vs_core_difficulty.py` + `run_stage4_axis_vs_core_stim.py`；归档 `docs/archive/topic4/axis_vs_core_stim_2026-07-02.md` |
+| [topic4_sef_hfo/linear_stability/figures/](topic4_sef_hfo/linear_stability/figures/) | Step 0a：LIF 自洽工作点 |
+| [topic4_sef_hfo/finite_pulse/figures/](topic4_sef_hfo/finite_pulse/figures/) | Step 0b/0d：LIF rate field 真实场 |
+| [topic4_sef_hfo/step1_noise/figures/](topic4_sef_hfo/step1_noise/figures/) | Step 1：drive × σ 联合分析 |
+| [topic4_sef_hfo/lif_snn/figures/](topic4_sef_hfo/lif_snn/figures/) | LIF ↔ spiking-network 验证 |
+| [topic4_sef_hfo/low_rate_template_stability/figures/](topic4_sef_hfo/low_rate_template_stability/figures/) | 低事件率：传播模板 vs 发放计数复现度 |
+| [topic4_sef_hfo/snn_heterogeneity/figures/](topic4_sef_hfo/snn_heterogeneity/figures/) | **SNN 阈值异质核 sweep**（headline: mean_scan / sweep_ignition；mechanism_* 是各 kick×core 组合） |
+| [topic4_sef_hfo/skeleton_geometry/figures/](topic4_sef_hfo/skeleton_geometry/figures/) | 几何骨架（per-subject 在子目录） |
+| [topic4_sef_hfo/observation_layer/figures/](topic4_sef_hfo/observation_layer/figures/) | 虚拟 SEEG 观测层 |
+| [topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/](topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/) | rate parity 增量 |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | cm-SNN 自发（headline: stage2_summary / stage3_regime_compare；**M2 刹车 core_model 三行图: s3_brakeoff/brakeon + s4_brakeoff/brakeon**，刹车不复现沿轴空间自限=诚实 NULL） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/) | 候选格电极读出 train |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/) | **axis-A A1** 阈值离散→指纹 = NULL（只改点火率不改指纹） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/) | **axis-A A3** 局部 E/I 病灶 screen = NULL（不复现 V_th↓ 方向模板） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/ei_param_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/ei_param_scan/figures/) | **axis-A E/I 参数扫描** broad-basis NULL（无"既安静又出模板"甜区） |
+| [topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/figures/](topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/figures/) | **data-driven SNN 双图规范源（rev10-D5.2）**：连续场 + 同网络 MTA/MTB 波形，以及复用 Figure 1E painter 的 KMeans 核验图。图型已确认，科学状态 `KMEANS_BELOW_PATIENT_BENCHMARK`（purity `0.674` < patient q05 `0.884`，pooled MTB↔TB `−0.60`）。规范 `docs/topic4_data_driven_snn_figure_spec.md` |
+| [topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/figures/](topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/figures/) | **rev10-D6.3 复制臂 = `DIAGNOSTIC_ONLY`**：冻结连续场候选在 12 张全新网络上 `NOT_REPLICATED`（patient cross-fit paired delta `−0.107`、K=2 支持 `4/12`）。图是 pooled 展示，不覆盖网络级失败，不得替换主文 Fig.4。闭环 `docs/archive/topic4/sef_hfo/rev10_d4_1_to_d7_fig4_goal_closeout_2026-08-14.md` |
+
+**SEF-ITP**
+| 目录 | 内容 |
+|---|---|
+| [topic4_sef_itp/phase1_spatial_geometry/figures/](topic4_sef_itp/phase1_spatial_geometry/figures/) | Phase 1 cohort 空间几何 |
+| [topic4_sef_itp/phase3_ictal_adjacent/v2_trajectory/figures/](topic4_sef_itp/phase3_ictal_adjacent/v2_trajectory/figures/) | Phase 3 v2.2：per-event timeline + RMS-vs-k |
+| [topic4_sef_itp/direction_axis/figures/](topic4_sef_itp/direction_axis/figures/) | H2b 方向轴诊断（per-event 多） |
+| ⚠️ [topic4_sef_itp/phase4_hr_route_SUPERSEDED/...](topic4_sef_itp/phase4_hr_route_SUPERSEDED/) | **已废弃**（目录名标 SUPERSEDED），只作历史 |
+
+**attractor（无 figures/README，旧诊断）**：`topic4_attractor/`、`topic4_attractor_masked/`
+
+## Topic 5 — 亚型 / ictal 回响 / network axis / 临床结局
+
+| 目录 | 内容 |
+|---|---|
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_structured_rank_rnn/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_structured_rank_rnn/figures/) | **历史 Figure 6 structured path-mode graph RNN bounded-negative（34 人 × 3 seeds × 5 conditions，510 runs）**：局部 next-set NLL 可学，但自由生成与 graph/mode necessity 未过门。该图不再是当前主文 Figure 6 候选，只保留旧模型谱系。 |
+| [topic5_symmetric_axis_propagation_state_v2_2/closeout_v2_2_1/figures/](topic5_symmetric_axis_propagation_state_v2_2/closeout_v2_2_1/figures/) | **v2.2.1 supplementary bounded-negative diagnostic**：A 同一 22 人 Markov/isotropic/axis 相对 node-bias；B next-set cardinality calibration；C local/axis kernel 共线性与 operator distance；D learned axis–PCA1 与 gamma→0 的实际 logit change。Markov 21/22 阳性，而 full/isotropic 均仅 1/22 阳性；真实 set size=1、模型预测约1.65。结论只限当前非负线性单状态 observation mapping，不进入主文 Figure 6。 |
+| [topic5_interictal_transition_decomposition_v0_1/figures/](topic5_interictal_transition_decomposition_v0_1/figures/) | **v2.3 设计依据 / supplementary transition decomposition**：A Markov 相对 node、local geometry 与 cross-shaft control；B symmetric residual 与额外 skew；C axis-aligned residual 与微小 source modulation，并显式显示 axis coefficient 正负；D last-rank 与 ordered multi-step history。正式 gate 允许起草最小 v2.3，但 14/22 axis coefficient 为负、source增益极小，不能写成正向病理轴恢复或 early-ictal transfer。 |
+| [topic5_symmetric_axis_competitive_propagation_v2_3/figures/](topic5_symmetric_axis_competitive_propagation_v2_3/figures/) | **v2.3 formal / bounded computational result**：A 精确结构模型；B 22/22 full>node；C history通过但 delayed competition失败；D full-axis、matched-axis 与 source term 均未过置信区间门；E 结构模型恢复 ordered-history Markov cohort-median benefit 的约58%；F 冻结解释门。只支持 rank sequence 自监督可预测性，不支持 physical-axis recovery、latent-state mechanism 或 early-ictal transfer。 |
+| [data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/](data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/) | ictal ER-onset timing atlas（per_seizure：全 371 张横向布局[上gamma/下broad，左raw/右heatmap，y轴对齐]，Epilepsiae 339 + Yuquan 32，EEG-zoom ±90s，z-ER bin=0.1s 与 field 一致；见 figures/README.md） |
+| [data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/](data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/) | PR-1 z-ER 子型聚类（per-subject 在子目录） |
+| [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
+| [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
+| [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
+| [topic5_ictal_recruitment/contact_similarity/figures/](topic5_ictal_recruitment/contact_similarity/figures/) | 触点相似性几何阶梯（R1 无几何 / R2 同平面触点核 / R3 场）+ R2b native-3D 灵敏度：相似度数值抬高主要来自平面几何平滑，但平滑也抬高轴内 null；网格无可分辨增益，native-3D vs 2D-plane 等价通过。属于 sensitivity，不升级主张；producer `scripts/plot_topic5_cs_paper.py` |
+| [paper-ready-figure/fig2/figures/](paper-ready-figure/fig2/figures/) | **Figure 2 canonical package（all-event Timing+Space 更新）**：A 保持原 2×2 内容并收紧内部留白；B 放大主图文字；C 行标题为 `TA samples` / `TB samples`；D 左侧为 `TA field` / `TB field`；E 显示 4 例，F 使用完整 18 人分母。 |
+| [paper-ready-figure/fig3/figures/](paper-ready-figure/fig3/figures/) | **Figure 3正式A–E（2026-10-10，AUTHOR_ACCEPTED_FINAL）**：A为E10/SZ3 broadband，B为Y1/SZ6固定0–10 s的30–80 Hz gamma；两行均含波形/TFR、发作能量场、间期TA场。C为n=17/16/11统计，D为E10 signed q（−1～1），E为17人A/B contrast。含色条的列宽对齐、行距4.064 mm；[当前说明](../docs/current_figure3.md)、`fig3/current_revision.json`与`build_fig3_current.py`为统一入口，旧A–F已归档。 |
+| [paper-ready-figure/archive/2026-08-31_pre_all_event_timing_plus_space/](paper-ready-figure/archive/2026-08-31_pre_all_event_timing_plus_space/) | **更新前 Fig2/Fig3 完整快照**：保存逐 panel、complete layout、README、metadata、registry 与旧 null 资产；覆盖前已通过逐文件一致性检查。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/design_variants/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready_journal_clean.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/design_variants/figures/) | **Fig3-E visual template locked**：E1146 peri-onset shared-gradient 双轨迹期刊版；无内部 panel 字母、标题和病例数灰字，扁平横向双 panel，各自 `Time (s)`，上/右边框隐藏。左图为 `max(|r_A|,|r_B|)`，右图为 signed similarity，红/蓝图例只写 `TA` / `TB`。这是个体级描述性 visual template，不是 cohort gate、onset-emergent alignment 或机制证据。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_ictal_field_concordance_grid_rebuild/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_ictal_field_concordance_grid_rebuild/figures/) | **Fig3 gradient-axis R3 dense-grid 全量重算（n=17 / 167，2026-07-18）**：把发作相关 field-similarity 统一迁移到 gradient-axis R3 dense-grid scorer（primary），R2 同输入配对敏感性。Pooled 真实中位 0.768 vs all-contact 洗牌零假设 0.679（差 +0.041，单侧 Wilcoxon p=0.022，12/17 正）；七带 δ/θ 过联合 maxT（pFWER 0.002/0.041），直接频段检验无差异（Friedman p=0.169）= band-generic 无赢家频段；R2 vs R3 rho=0.92（不作等价）；纯 within-shaft 严格 min-group-4 只 2 被试合格 → 上限=coarse scaffold。含 `field_concordance_cohort_stat` / `multiband_field_concordance_stat` / `r2_vs_r3_sensitivity` / `multiband_within_shaft_sensitivity` + Fig3-B provenance + `peri_onset_r3/`（paper-facing 现登记 Fig3-E；artifact 保留历史 Fig3-C 名）。计算根 `results/topic5_ictal_recruitment/field_concordance_grid_parent_matched/`；规范 `docs/archive/topic5/fig3_ictal_gradient_r3_full_recompute_{handoff,run_form}_2026-07-18.md`。旧 `fig3_field_concordance_cohort_stat`（endpoint R3）与 `fig3-sup-tspectral-field-concordance`（gradient R2）保留溯源不删。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_ictal_field_concordance_grid_method_sensitivity/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_ictal_field_concordance_grid_method_sensitivity/) | **Fig3 方法学敏感性重算 + 统计合同修复（2026-07-19）**：审阅后修 F1（预注册 coherent cohort spatial-null p，Pooled=0.037 非 Wilcoxon 0.022）/F2（N=161 primary，beta 未过 81 subject 收敛门）/F3a（within-shaft phenotype-matched）/F3b（Fig3-E supporting within-shaft min-2→**min-4**；artifact 保留历史 Fig3-C 名，代码算出只 E1146 合格，E958 旧 4maxT/17cluster 撤回）/F5（补 event+null-draws+grid 审计产物）。含 `multiband_4cell_sigma_policy`（R2/R3×subject_fixed/frozen_per_model 2×2 + joint-28 maxT：R3 有 δ/θ 显著、R2 全 n.s.→R2→R3 变化来自 dense-grid 读出非 sigma；LOO 判据两 policy 打平）、`n161_subject_fixed/figures/`（N=161 cohort/multiband/r2_vs_r3/within_shaft）、`peri_onset_r3_min4/`（Fig3-E supporting 纯 min-4，只 E1146 eligible 余 6 unavailable）。计算根 `results/topic5_ictal_recruitment/field_concordance_grid_method_sensitivity/`；run form addendum `docs/archive/topic5/fig3_ictal_gradient_r3_full_recompute_run_form_2026-07-18.md`。旧 `fig3_ictal_field_concordance_grid_rebuild/`（N=81 primary）与 `peri_onset_r3/`（min-2）保留作审计证据。 |
+| [paper-ready-figure/archive/2026-08-09_stale_aliases/fig3_sup2_raw_spectral_context/figures/](paper-ready-figure/archive/2026-08-09_stale_aliases/fig3_sup2_raw_spectral_context/figures/) | **历史路径**：Fig3-A 定稿前的 raw spectral context 输出；已离开 paper-ready 顶层，仅保留溯源。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/fig3_peri_onset_run_manifest.json](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/fig3_peri_onset_run_manifest.json) | **Fig3-E 二维 shared-gradient peri-onset trajectory material pool**：只消费 fingerprint-valid `shared_a/shared_b`，不 fallback own，并要求 `geometry_2d_supported=true`。denominator flow：40 frozen → 14 shared/fingerprint → 12 二维 → 10 有 inventory → 7 有 derived cache → **7 出图**；coverage=`complete_ok 3 / partial_ok 3 / severely_partial 1`，E583 仅 3/22。当前 canonical run=`20260718T071020Z_d99c96ec`，manifest 指向 immutable run artifacts；subset/中断不改 canonical。E139 单杆仅在 `sensitivity_1d/`；raw 个体级描述，非 cohort gate / onset-emergent alignment。历史计算 contract 中的 `fig3c_*` 仅保留 provenance。 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/spatial_null/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig3_peri_onset_field_similarity/spatial_null/figures/) | **Fig3-E supporting shared-matched maxAB 空间 null（fixed-time-mapping v2）**：同 7 人、同 fingerprint、同成功 seizure 集、同 `shared_a/shared_b` scorer；每个 seizure×replicate 的空间映射固定贯穿 66 窗，R=1000。vectorized/exact 与 source observed 最大误差 ≤`5.6e-14`；3/7 有 within-shaft cluster、2/7 有 maxT 窗，只作 per-subject 时间分辨描述。旧逐窗置换 `5/7` 已撤回；不能替代 frozen archive 的 cohort n=7 shared-field null（p=0.346）。manifest 含 summary，共 35 个 null artifacts。 |
+| [topic5_ictal_recruitment/v2_band_timecourse/figures/](topic5_ictal_recruitment/v2_band_timecourse/figures/) | **多频带 peri-onset field-similarity 时程图（Fig3-Sup1 的时间分辨扩展，2026-07-08，EXPLORATORY 候选骨架）**：读 `v2_band_scan/cache` 的 masked band-power robust-z，`[-120,+20]s`/10s/2s 滑窗，用与 Fig3-E 相同的 formal-plane mirror-invariant signed-corr，逐频带（primary 7 + composite 4）算 maxAB\|r\|+signed A/B。每被试 band×time 热图（maxAB\|r\| + signed A/B sidecar）+ primary-7 三组线图（median±IQR + 1–150 Fig3-E 参考）；cohort band×time 热图 broad(17)/narrow(20) **各一张永不 pool** + `cohort_pre_vs_early_delta_{broad,narrow}.csv`。20/20 cached subjects ok。**描述性结论**：pre-onset 全频段 cohort 中位 \|r\|~0.70–0.76（**band-generic、preictal-present**）、early−pre 增量绝大多数 ≈±0.02、**只 δ/低频小上抬**（δ narrow +0.071/13-of-20、broad +0.080/10-of-17）→ 偏 band-generic-preictal-present + δ 小增量、非 onset 频带分化。**禁** formal Gate/HFO-/ripple-/FR-specific/机制。脚本 `scripts/plot_topic5_multiband_field_similarity_timecourse.py`，索引 `../multiband_timecourse_subject_index.{csv,json}` |
+| [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
+| [topic5_ictal_recruitment/directional_clustering/figures/](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类 ↔ 间期 A/B（每被试玫瑰 + 442 间期事件 hist×两色发作方向类；exploratory negative，6 ECoG 全无 two_class_mapped） |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |
+| [topic5_ictal_recruitment/field_dynamics/figures/](topic5_ictal_recruitment/field_dynamics/figures/) | **发作内 field 动力学 pilot — broad 9（8 swap + E916 非swap）**；field_vs_ictal 形式锚发作前：间期 A\|B 锚 + 平均早期场 + progress/offset summary + 每 subject 1 个 **field 演化 GIF**（onset→offset 直观看场传播）；方向(轴向降/非轴向升)broad 有暗示但 narrow 证否=不稳健；z-ER 中后期示意 |
+| [topic5_ictal_recruitment/field_dynamics_narrow/figures/](topic5_ictal_recruitment/field_dynamics_narrow/figures/) | 同上 **narrow 平行批 7**（用间期模板端点 compact core 构轴，证明**不必 swap**）；narrow 多数被试方向反向 → broad 的方向暗示不复现（扩队列证否），exploratory |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/fields/](topic5_ictal_recruitment/event_resolved_alignment/figures/fields/) | 同上的**场图版**（用户 pivot）：A 类全事件场 \| B 类全事件场 \| 发作场，同一物理平面、左图形式 |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/class_vs_template_field_similarity_cohort.png](topic5_ictal_recruitment/event_resolved_alignment/figures/) | cohort 级：用 class 事件造的间期场 ≈ 用模板投影造的间期场（N=23 中位 \|r\|=0.985；构念等价） |
+| [topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/](topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/) | **6 面板/被试**（全 12 epi）：模板A\|模板B\|发作前−10..0s / 类A场\|类B场\|发作前−120..−90s；配 max-AB 统计（class 场 ≈ template 场） |
+| [topic5_ictal_recruitment/field_extrapolation/figures/](topic5_ictal_recruitment/field_extrapolation/figures/) | **间期场外推到发作隐身电极 pilot**（2026-06-30，exploratory-negative）：间期 broad 顺序场预测 broad∖narrow 隐身电极发作 z-ER 招募序，比"场 F vs 逐通道 C vs 半径"；**被数据现实阻塞**——队列 ~15/16 发作排序本身不稳(s_sz<0.3)，唯一干净被试 583 场无增益(F≈C≈radial≈0.22)；印证"粗骨架共享/细发作招募不稳" |
+| [topic5_ictal_recruitment/field_extrapolation/figures/cohort_energy_F_core_vs_baselines_{bb,hfa}.png](topic5_ictal_recruitment/field_extrapolation/figures/) | **能量基础 cohort（2026-07-01）**：F_core_only(核心场留一预测隐身电极发作能量) vs C1/C2 baselines，16-subject；延伸成立(过 null 两频段)、但场必要性不立(never beats C1)；FDR 表 `energy_field_extrapolation_FINAL.md` |
+| [topic5_ictal_recruitment/field_extrapolation/figures/triptych_preview/](topic5_ictal_recruitment/field_extrapolation/figures/triptych_preview/) | **1-3 vs 2-3 单被试图（16×2 频段=32 张，2026-07-01）**：单行 5 格=发作能量场\|1-3 core外推场\|2-3 自身order场\|colorbar\|(D)逐发作\|corr\|箱线；隐身=红方块三场对齐；问"core 外推能否比电极自身间期顺序更好预测发作能量" |
+| [topic5_ictal_recruitment/field_extrapolation/figures/cohort_1v3_vs_2v3_summary.png](topic5_ictal_recruitment/field_extrapolation/figures/) | **1-3 vs 2-3 cohort 汇总**：每频段配对图(F_core_only→C1) + 计数；**大致打平** broadband 7:5:4、HFA 5:8:3(16-subject) → 外推不系统性赢过自身间期顺序；590/1146 nhid=4 低功率；报告 `docs/archive/topic5/field_extrapolation_1v3_vs_2v3_report_2026-07-01.md` |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_field_extrapolation_energy/figures/topic5_field_extrapolation_energy_main.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_field_extrapolation_energy/figures/) | **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计（core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ(F_core−C1) 直接裁决 / C 证据阶梯；结论=network extension supported，但 added advantage over own order 不支持 |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_network_extension_null/figures/topic5_network_extension_three_way_comparison.png](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_network_extension_null/figures/) | **Topic 5 network-extension three-way 统计图**：每频段同图比较 core-field prediction / hidden own-order C1 / channel-shuffle null。Core 和 Own 都显著高于 null（network signal exists）；Core 不系统性赢 Own（added advantage 不成立；BB core>own/own>core/tie=7/5/4, p=0.297；HFA 5/8/3, p=0.872） |
+| [paper-ready-figure/archive/2026-08-09_fig2_pre_panel_contract/fig_axis_representativeness/figures/axis_representativeness_cohort.png](paper-ready-figure/archive/2026-08-09_fig2_pre_panel_contract/fig_axis_representativeness/figures/) | **间期 TA/TB gradient 轴的单事件方向代表性**：subject 内等权折叠 TA/TB，在所有 axis 可拟合且两类均有足量二维 QC-clean 事件的患者中（主分析 n=26），检验真实轴的 mean signed cosine 是否高于同 montage template-rank-shuffle null；strict-stability n=13 仅作 sensitivity，不比较 endpoint，不含 ictal 输入 |
+| [topic1_topic5_bridge/figures/](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 桥接（q1 / q1prime 系列） |
+| [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
+| [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
+| [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
+| [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（**每队列一张、真实秒数横轴**：主图 `v3_axis_vs_offaxis_{narrow,broad}` 沿轴组织度 vs 离轴流随时间、扣发作前基线，看 onset 前后是否反向张开；附图 `v3_mode_direction_{narrow,broad}` 模态方向阴性）；EXPLORATORY **脆弱阳性**——配对后非轴向净流增量在主(Holm 0.031)+复制(0.008)队列都队列级显著(tier4 机械/supported)，但 null-relative(原始流大多在降)+同时共激活为主(lag1≈lag0)+个体稳健性弱(流腿 0/7)+模态腿全阴 → 数据侧候选信号非确立的模态转移，pending sensitivity/V3b。详见 docs/archive/topic5/v3a_mode_transition_2026-07-04.md |
+| [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作真正开始前最后两分钟（横轴=相对脑电起始的真实秒数 P0..P3＝−105/−75/−45/−20s，只画到 −10 秒边界，onset 本身及之后完全不碰）连锁活动是否逐渐搬到间期固定高频通路之外——real-time 轴重绘（2026-07-05，替换旧 6 面板栅格图），narrow/broad 各自独立出图，从不共享一根轴。每队列 2 张：**主图** `v3p_axis_vs_offaxis_{narrow,broad}.png`＝沿轴组织度（橙）vs 离轴流（青）migration pair，两线各自按发作前最远基线（−105/−75s）归一为基线标准差单位；**附图** `v3p_mode_direction_{narrow,broad}.png`＝最易放大模态的离轴方向（紫）。图上只留一行斜体角注（Holm p，实时读自 tier JSON），文字说明在各队列 `figures/README.md`。**结果沿用真实 n_perm=1000 大跑（80 核/20 job/7h35m）数字，未变：完整硬门阴性 tier 0**（narrow 0/7 Holm p=1.000/1.000、broad_expanded 0/13 Holm p=0.685/0.685、broad_core 0/9 Holm p=0.652；broad 有 3 人非轴向流 + 2 人模态方向零散单-null 命中，全被 rate/lag1/phase/block/双 span 硬门筛掉，不算潜在阳性） |
+| [paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_scaffold_ab/figures/](paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig_topic5_scaffold_ab/figures/) | V3d：间期传播轴的 A/B 两态占据 + 发作按类型分。**cohort 3 张**：`cohort_two_state_vs_geometry`（两态是否几何伪影 —— ρ≈0/>0 时中点仍空 ≤10% → 两态 largely real）、`cohort_ab_typing`（发作分型，cross-seizure-shuffle null **11/20 显著、9/20 可区分两型**）、`cohort_h1_nearonset_forest`（近-onset 收敛 **1/3 合格锁定、binom p=0.14 → 非队列效应**）；**per_subject/ 14 张**：per-seizure C_AB 分布图**全部 12 个被试**（发作分成 A/B 主导，全被试交付物）+ 时程图**只 E442、E1146 两个被试**（轴存在窗口密度够连续读出趋势才出图；其余 10 个被试窗口太稀疏、中位线会碎成孤立短线段读不出趋势，已不再渲染这张图，避免误导）。口径 = 间期两模板投到发作能量：能量落两个离散态（强 A/强 B，几乎不落中点）、发作按 A/B 分型、近-onset 收敛只 442 单被试锁定（E1146 数据量够但未锁定，作为诚实对照一并出图）。详见 figures/README.md + spec `docs/superpowers/specs/2026-07-09-topic5-v3d-*` |
+| [topic5_rnn_training_sufficiency_v0_1/figures/](topic5_rnn_training_sufficiency_v0_1/figures/) | Topic 5 RNN 训练充分性 / 目标充分性审计（9 张）。**收敛四联** `topic5_rnn_training_sufficiency_convergence`＝留出一步预测随训练量的变化＋逐遍改善对预注册 plateau 带＋留出减训练差距＋学习率/优化器敏感性；**生成六联** `topic5_rnn_{objective,formal}_sufficiency_generation{,_native}`＝四个训练目标（Phase C）与三个训练条件（Phase D，外层留出只读一次）在两台发生器下的自由生成，逐患者配对点＋灰连线＋中位横杠；**队列分层** `*_cohort`；**代表患者** `topic5_rnn_representative_patient_formal{,_native}`＝观测 vs 生成的参与/名次/成对顺序。核心读法：同一模型换发生器结论相反——复合发生器随模型变好而变差（成对先后 0.184→0.014），模型自身发生器六端点全部改善（匹配消融显示部分来自事件内顺序）；但预注册整场门槛（17/34）仍未达到（13–14/34）。详见 figures/README.md 与 docs/archive/topic5/rnn_training_and_objective_sufficiency_v0_1_report_2026-07-30.md |
+
+---
+
+## 其他（无 curated README 的图目录）
+
+以下目录有图但没写 `figures/README.md`，含义需看对应 archive doc：
+`spatial_modulation/figures/`、`refine_soz_validation/yuquan/figures/`、`topic4_sef_hfo/figures/`、
+`topic4_sef_hfo/observation_layer/snn_cm_spontaneous/regime_screen/figures/`、`topic4_sef_itp/swap_mechanics/figures/`。
+
+## 保留不动的大目录（非图，供参考）
+
+`_legacy_2021_readonly/`（1.6G 引用基线，只读）、`hfo_detection/` `hfo_detector_v2/`（检测产物/输入）、
+`interictal_synchrony/epilepsiae_ready_full_artifacts/`（2.9G 同步输入）、`_cold_archive/`（phantom-superseded 打包冷藏）。

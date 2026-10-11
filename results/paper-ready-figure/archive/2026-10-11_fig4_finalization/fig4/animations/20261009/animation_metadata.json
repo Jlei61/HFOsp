@@ -1,0 +1,205 @@
+{
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_ef_gifs.py",
+  "producer_sha256": "306d854928065cf2670f836ae4d6ed7a618a5ab503b66b9ec3eebbefdd5b6979",
+  "manifest": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/propagation_manifest.json",
+  "manifest_sha256": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+  "current_figure_unchanged": true,
+  "new_simulations": 0,
+  "timing": "Each row replays its own complete frozen 250 ms event window. Rows advance together from their window starts; displayed times are relative to each event's earliest centroid, not simultaneous absolute times.",
+  "selection": "Exact frozen current Fig4 E/F model-mode medoids, no reselection.",
+  "human_visual_acceptance": "PENDING",
+  "outputs": [
+    {
+      "panel": "E",
+      "candidate": "lf_bo04_07",
+      "gif": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/animations/20261009/figures/fig4-panele.gif",
+      "gif_sha256": "73208f9238000dc9724caa40f8c2e5aaa4edf5cc66c2b6a5c88b439f1cf1750a",
+      "size_px": [
+        1248,
+        768
+      ],
+      "n_frames": 125,
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_07/2511_847401/workers/trajectory.json",
+      "source_sha256": "f76fa12fbe4e0df2a0d37193e36acd434ec26e6b26a2c21d736290a294a77a2c",
+      "arrays_sha256": "9e3623c47ae8f95eecc4f8c702423f77aeadaa268caee4faf103ec3423a09466",
+      "applied_physics_sha256": "c0fdd56bbdc8cdfabb6b7e78325e83adb7fa83c008f0fc988c9abd702f1bed9e",
+      "native_frame_ms": 2.0,
+      "playback_frame_ms": 50,
+      "playback_fps": 20,
+      "playback_duration_s": 6.25,
+      "field_scale": [
+        0,
+        75
+      ],
+      "envelope_scale": [
+        0,
+        1
+      ],
+      "contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "events": [
+        {
+          "event": 114,
+          "mode": "MTA",
+          "lo": 38018.0,
+          "hi": 38268.0,
+          "zero": 38126.21921877001,
+          "denominator": [
+            1e-20,
+            0.1963086873292923,
+            2.0403215482537054e-17,
+            0.3819389045238495,
+            2.8244812710909173e-08,
+            0.540619432926178,
+            0.5860738754272461,
+            0.19529186189174652,
+            0.49272775650024414,
+            0.043458156287670135,
+            0.2818208932876587,
+            0.4100995361804962,
+            0.5334402918815613,
+            0.5757502317428589,
+            0.6111865639686584
+          ]
+        },
+        {
+          "event": 14,
+          "mode": "MTB",
+          "lo": 5002.0,
+          "hi": 5252.0,
+          "zero": 5095.310227317748,
+          "denominator": [
+            0.015368499793112278,
+            0.6752069592475891,
+            0.00028284976724535227,
+            0.6426452994346619,
+            1.0936543226591766e-08,
+            0.6240996718406677,
+            0.6089211702346802,
+            5.579861017679377e-10,
+            0.6250860691070557,
+            0.6609164476394653,
+            0.6070415377616882,
+            0.6071709394454956,
+            0.5332337021827698,
+            0.40660911798477173,
+            0.3845898509025574
+          ]
+        }
+      ],
+      "all_frames_decoded": true,
+      "text_outside_canvas": []
+    },
+    {
+      "panel": "F",
+      "candidate": "xy_left_20",
+      "gif": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/animations/20261009/figures/fig4-panelf.gif",
+      "gif_sha256": "8f44b04f94e6ecbbeb4ceb9e97b7c9359b811878b59011ce2ee675085da6b020",
+      "size_px": [
+        1248,
+        768
+      ],
+      "n_frames": 125,
+      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "source_sha256": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+      "arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+      "applied_physics_sha256": "d907e6035e8d168a1d749cd7e481aea9b78c913e95499eb3adadc3a71cbd9e75",
+      "native_frame_ms": 2.0,
+      "playback_frame_ms": 50,
+      "playback_fps": 20,
+      "playback_duration_s": 6.25,
+      "field_scale": [
+        0,
+        75
+      ],
+      "envelope_scale": [
+        0,
+        1
+      ],
+      "contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "events": [
+        {
+          "event": 39,
+          "mode": "MTA",
+          "lo": 13342.0,
+          "hi": 13592.0,
+          "zero": 13457.407841545657,
+          "denominator": [
+            0.17969529330730438,
+            0.34416550397872925,
+            0.0008295332081615925,
+            0.41755035519599915,
+            0.06663485616445541,
+            0.5428410172462463,
+            0.622482180595398,
+            0.4327450394630432,
+            0.5888697504997253,
+            0.6008509397506714,
+            0.6326797604560852,
+            0.6503365635871887,
+            0.6739546656608582,
+            0.6283783912658691,
+            0.6942382454872131
+          ]
+        },
+        {
+          "event": 151,
+          "mode": "MTB",
+          "lo": 46756.0,
+          "hi": 47006.0,
+          "zero": 46829.3043715259,
+          "denominator": [
+            0.6305510997772217,
+            0.6545515060424805,
+            0.6402300596237183,
+            0.6393460631370544,
+            0.6804973483085632,
+            0.6195299625396729,
+            0.6062862873077393,
+            0.6144917011260986,
+            0.6067761182785034,
+            0.6317382454872131,
+            0.6131846904754639,
+            0.6116651296615601,
+            0.5828487873077393,
+            0.13432525098323822,
+            0.49913641810417175
+          ]
+        }
+      ],
+      "all_frames_decoded": true,
+      "text_outside_canvas": []
+    }
+  ]
+}

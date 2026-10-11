@@ -1,0 +1,65 @@
+{
+  "N": 150,
+  "status": "SCORABLE",
+  "J": 1.5609315339302052,
+  "groups": {
+    "rank_pattern": {
+      "N": 150,
+      "A": 0.06717043422335817,
+      "B": 0.001751813787032125,
+      "D_off": 0.06541862043632604,
+      "D16": 0.08184187468975221,
+      "scaled": 1.4583272752884775
+    },
+    "participation": {
+      "N": 150,
+      "A": 0.07585968652069208,
+      "B": 0.0013119628148217726,
+      "D_off": 0.0745477237058703,
+      "D16": 0.08684737509482443,
+      "scaled": 1.6350902046388798
+    },
+    "local_and_interrod_timing": {
+      "N": 150,
+      "A": 0.07110661092293984,
+      "B": 0.002559524766254772,
+      "D_off": 0.06854708615668506,
+      "D16": 0.09254263084032355,
+      "scaled": 1.5893771218632586
+    }
+  },
+  "candidate": "dense_axis2_00",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_00/2511_847401/workers/trajectory.json",
+  "source_sha256": "3019b170932c66cde33220c282408faa6fe046903f57d0b28fc9459d9b465c28",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    14.97920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.4583272752884775,
+    1.5893771218632586,
+    1.6350902046388798
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789477759.2801275,
+  "J_joint": 1.5060369521630939,
+  "joint": {
+    "N": 150,
+    "A": 0.08314732673440499,
+    "B": 0.0026753844545641336,
+    "D_off": 0.08047194227984085,
+    "scaled": 1.5060369521630939
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis2_00.json",
+  "historical_score_sha256": "e0eb817ae0bd589b8f86d738b1d0f07ae3199f9a7607bfbe0329fce707ea6d64"
+}

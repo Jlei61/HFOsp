@@ -1,0 +1,38 @@
+{
+  "status": "AGENT_DATA_AND_RENDER_CHECKS_PASS_PENDING_AUTHOR_VISUAL_REVIEW",
+  "checked_at": "2026-10-08T09:55:44+08:00",
+  "independent_score_rank_selection_pass": true,
+  "scorable_n": 288,
+  "selected_n": 58,
+  "all_evaluated_n": 290,
+  "all_original_coordinates_retained": true,
+  "no_position_jitter": true,
+  "outlying_new_selected_candidate_retained": "wide_initial_46",
+  "gaussian_sigma_mm": 0.35,
+  "density_integrals": [
+    0.9999999999365405,
+    1.0
+  ],
+  "contour_mass_max_error": 0.0010239484799183796,
+  "all_observed_positions_inside_display_limits": true,
+  "colorbar_alignment_error_pixels": 1.1368683772161603e-13,
+  "header_and_caption_count": 0,
+  "typography": {
+    "font_family": "DejaVu Sans",
+    "xy_label_pt": 12.0,
+    "tick_pt": 9.0,
+    "legend_pt": 8.8,
+    "reference": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figure4_panel_registry.json",
+    "reference_sha256": "f93a09694912ea64256a18f293d0f454ab46fca25edc79dfc91617456d035d1e"
+  },
+  "png_dimensions": [
+    1743,
+    1410
+  ],
+  "inspected_png": "figures/core-position-search-context.png",
+  "inspected_pdf_render": "qa/core-position-search-context-pdf.png",
+  "visual_findings": "Search coverage, selected positions, surface peaks, both density contours, labels and isolated selected points are visible; tick labels clear; no clipping; same-height colorbar.",
+  "source_and_output_hashes_match": true,
+  "formal_current_fig4_replaced": false,
+  "author_visual_acceptance": "PENDING"
+}

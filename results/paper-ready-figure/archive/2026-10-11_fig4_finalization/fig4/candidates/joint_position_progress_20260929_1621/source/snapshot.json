@@ -1,0 +1,1105 @@
+{
+  "asof": "2026-09-29T16:24:40+08:00",
+  "run": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928",
+  "new_completed": 32,
+  "new_scorable": 31,
+  "initial_completed": 32,
+  "adaptive_completed": 0,
+  "planned_new": 256,
+  "historical_reused": 226,
+  "historical_best": {
+    "N": 124,
+    "status": "SCORABLE",
+    "J": 1.2230789589291622,
+    "groups": {
+      "rank_pattern": {
+        "N": 124,
+        "A": 0.049793748688001516,
+        "B": 0.0020640191543903202,
+        "D_off": 0.047729729533611195,
+        "D16": 0.06372587798013618,
+        "scaled": 1.0640023583003624
+      },
+      "participation": {
+        "N": 124,
+        "A": 0.05096239543841101,
+        "B": 0.0015040180876632059,
+        "D_off": 0.049458377350747804,
+        "D16": 0.06111451753013765,
+        "scaled": 1.0847937981662759
+      },
+      "local_and_interrod_timing": {
+        "N": 124,
+        "A": 0.06880723886278968,
+        "B": 0.0032332604669107613,
+        "D_off": 0.06557397839587892,
+        "D16": 0.09063174701443732,
+        "scaled": 1.520440720320849
+      }
+    },
+    "candidate": "joint_bo03_01",
+    "source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_01/2511_847401/workers/trajectory.json",
+    "source_sha256": "a15eff01774a958ec038b536dd9791d4891acadb09073bf3b2b257f7a678880f",
+    "vector": [
+      2.8632512261294796,
+      11.869657361897922,
+      14.998909859986808,
+      6.21551153,
+      1.1245345132675812,
+      9.55477455907139
+    ],
+    "topology": 2511,
+    "noise": 847401,
+    "reused": true,
+    "J_joint": 1.0601303963391657,
+    "joint": {
+      "N": 124,
+      "A": 0.05986180595802503,
+      "B": 0.003215950130397534,
+      "D_off": 0.056645855827627496,
+      "D16": 0.08156946933820838,
+      "scaled": 1.0601303963391657
+    },
+    "physical_status": "COMPLETE_NO_RUNAWAY",
+    "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+    "device": "cuda:0",
+    "time": 1789609649.6725688,
+    "search_role": "historical",
+    "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_01.json",
+    "historical_score_sha256": "5039c561725ae1c8477575d8a1a2410a9bfa56a3f18273d9e6c8bd2e08a31fdc"
+  },
+  "new_best": {
+    "candidate": "wide_initial_26",
+    "epoch": 26,
+    "batch": 0,
+    "role": "broad_sobol_initial",
+    "centers_mm": [
+      [
+        5.231693495773713,
+        14.358375220247602
+      ],
+      [
+        11.704863340988975,
+        4.884128537323099
+      ]
+    ],
+    "vector": [
+      5.231693495773713,
+      14.358375220247602,
+      11.704863340988975,
+      4.884128537323099,
+      1.0825421484187245,
+      -30.48170104622841
+    ],
+    "J": 1.6997868412725854,
+    "J_joint": 1.5198495221169621,
+    "N": 137,
+    "status": "SCORABLE",
+    "physical_status": "COMPLETE_NO_RUNAWAY",
+    "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_26/2511_847401/workers/trajectory.json",
+    "source_sha256": "458d6b5049d349c2c3916e2ade9f1bb2c7dfe09de14b208fdbae70f55c2fd463"
+  },
+  "active_workers": 8,
+  "records": [
+    {
+      "candidate": "wide_initial_01",
+      "epoch": 1,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          6.808598965288967,
+          9.59751704955945
+        ],
+        [
+          11.475125195557299,
+          3.30630941013419
+        ]
+      ],
+      "vector": [
+        6.808598965288967,
+        9.59751704955945,
+        11.475125195557299,
+        3.30630941013419,
+        1.2212217613123357,
+        -46.726840026676655
+      ],
+      "J": 3.6603038344587993,
+      "J_joint": 4.010095589736598,
+      "N": 162,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_01/2511_847401/workers/trajectory.json",
+      "source_sha256": "700478ee2798ff49770183d2c83c68a220337153379c8a65dcd0ff58e2081803"
+    },
+    {
+      "candidate": "wide_initial_02",
+      "epoch": 2,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          4.046502873852019,
+          12.514803412058448
+        ],
+        [
+          16.813057235302654,
+          8.723439151690306
+        ]
+      ],
+      "vector": [
+        4.046502873852019,
+        12.514803412058448,
+        16.813057235302654,
+        8.723439151690306,
+        1.3497517053037882,
+        55.22286459803581
+      ],
+      "J": 3.2579089285299765,
+      "J_joint": 2.953921758865447,
+      "N": 167,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_02/2511_847401/workers/trajectory.json",
+      "source_sha256": "50ed6b2e792f32bb38f991d148f274a73eb336c17d5a2dff28464c6cce1f00c0"
+    },
+    {
+      "candidate": "wide_initial_03",
+      "epoch": 3,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          2.6073790843565674,
+          6.25176349902997
+        ],
+        [
+          13.555807336451169,
+          5.466047949030763
+        ]
+      ],
+      "vector": [
+        2.6073790843565674,
+        6.25176349902997,
+        13.555807336451169,
+        5.466047949030763,
+        1.4883355856873095,
+        8.457856737077236
+      ],
+      "J": null,
+      "J_joint": null,
+      "N": 0,
+      "status": "INSUFFICIENT_EVENTS",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_03/2511_847401/workers/trajectory.json",
+      "source_sha256": "998b153568102c7360f7e925693622a30eed8d182b075523ee08df6a9c698141"
+    },
+    {
+      "candidate": "wide_initial_04",
+      "epoch": 4,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          9.16431619608107,
+          15.286042811968422
+        ],
+        [
+          14.974099424599096,
+          6.035596783100812
+        ]
+      ],
+      "vector": [
+        9.16431619608107,
+        15.286042811968422,
+        14.974099424599096,
+        6.035596783100812,
+        1.1100331069901586,
+        -2.070978283882141
+      ],
+      "J": 3.0142153385594557,
+      "J_joint": 2.8332303591781436,
+      "N": 123,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_04/2511_847401/workers/trajectory.json",
+      "source_sha256": "391fdec121ab0543dbf59d8b1ccd8bf8208020b302e6712fee16206726a8a6dd"
+    },
+    {
+      "candidate": "wide_initial_05",
+      "epoch": 5,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          7.67124836310436,
+          8.128270341702795
+        ],
+        [
+          17.872107819988198,
+          7.335378988280801
+        ]
+      ],
+      "vector": [
+        7.67124836310436,
+        8.128270341702795,
+        17.872107819988198,
+        7.335378988280801,
+        1.0512745971791446,
+        -36.29351321607828
+      ],
+      "J": 2.3167932634476203,
+      "J_joint": 2.4400720439326546,
+      "N": 120,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_05/2511_847401/workers/trajectory.json",
+      "source_sha256": "6ca8ecdc835b4046450c6e67c926df38525e1d1736cee1e410072d88f55daf7b"
+    },
+    {
+      "candidate": "wide_initial_06",
+      "epoch": 6,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          3.027005608678863,
+          17.162830079593753
+        ],
+        [
+          10.664875532236827,
+          4.724254126735723
+        ]
+      ],
+      "vector": [
+        3.027005608678863,
+        17.162830079593753,
+        10.664875532236827,
+        4.724254126735723,
+        1.4220119901001453,
+        42.680062651634216
+      ],
+      "J": 4.539943770914807,
+      "J_joint": 3.9583068840994713,
+      "N": 125,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_06/2511_847401/workers/trajectory.json",
+      "source_sha256": "fc4670b92c0cf56cf860cd2592dc0a747a48f9a6a77f8ac9f751f97425f2c6c0"
+    },
+    {
+      "candidate": "wide_initial_07",
+      "epoch": 7,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          5.418692077395803,
+          10.712124182530737
+        ],
+        [
+          15.852195345131772,
+          9.464385162812757
+        ]
+      ],
+      "vector": [
+        5.418692077395803,
+        10.712124182530737,
+        15.852195345131772,
+        9.464385162812757,
+        1.2832359154708683,
+        28.49317979067564
+      ],
+      "J": 2.032667437782574,
+      "J_joint": 2.317614671591847,
+      "N": 158,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_07/2511_847401/workers/trajectory.json",
+      "source_sha256": "f17ede6bdecff07375987509b1181c11408a85855205cd23f7a130e383ada846"
+    },
+    {
+      "candidate": "wide_initial_08",
+      "epoch": 8,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          6.2708937514515375,
+          13.629324759044742
+        ],
+        [
+          12.44400584226786,
+          2.007357013823555
+        ]
+      ],
+      "vector": [
+        6.2708937514515375,
+        13.629324759044742,
+        12.44400584226786,
+        2.007357013823555,
+        1.1627583829686046,
+        -19.997026473283768
+      ],
+      "J": 2.2772854139485705,
+      "J_joint": 2.002024514993334,
+      "N": 142,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_08/2511_847401/workers/trajectory.json",
+      "source_sha256": "51336ee66a35b6b65c62584d7b1cc34965c47058b601b884a90c4c41e920b46b"
+    },
+    {
+      "candidate": "wide_initial_09",
+      "epoch": 9,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          5.783879793083547,
+          7.465584716447687
+        ],
+        [
+          15.468144153161804,
+          3.9946397368459436
+        ]
+      ],
+      "vector": [
+        5.783879793083547,
+        7.465584716447687,
+        15.468144153161804,
+        3.9946397368459436,
+        1.3361648637801409,
+        -11.123866327106953
+      ],
+      "J": 3.6856479507894506,
+      "J_joint": 5.0347025970849835,
+      "N": 165,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_09/2511_847401/workers/trajectory.json",
+      "source_sha256": "b9811e758b0bc075ade3628040236e93f189c15046d7ff5d0fb32b3e0b055654"
+    },
+    {
+      "candidate": "wide_initial_10",
+      "epoch": 10,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          4.962911469890395,
+          16.50015299270401
+        ],
+        [
+          13.083852860626484,
+          7.497585077253216
+        ]
+      ],
+      "vector": [
+        4.962911469890395,
+        16.50015299270401,
+        13.083852860626484,
+        7.497585077253216,
+        1.2154278843663633,
+        0.8697836101055145
+      ],
+      "J": 2.5132413934355466,
+      "J_joint": 2.3281225464801767,
+      "N": 141,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_10/2511_847401/workers/trajectory.json",
+      "source_sha256": "f5084dc566840cd1bb0b33039d76522ee2b0d09eb16900cfba8402e909aac0c4"
+    },
+    {
+      "candidate": "wide_initial_11",
+      "epoch": 11,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          3.4794754664080356,
+          10.249080023416376
+        ],
+        [
+          17.307396419294506,
+          2.613984442276128
+        ]
+      ],
+      "vector": [
+        3.4794754664080356,
+        10.249080023416376,
+        17.307396419294506,
+        2.613984442276128,
+        1.0768521027639508,
+        47.86942418664694
+      ],
+      "J": 2.5549140053648234,
+      "J_joint": 2.0244886826730775,
+      "N": 123,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_11/2511_847401/workers/trajectory.json",
+      "source_sha256": "18aa528b7c031e626b1743a04f3304026b57fd8c999d223c2536961842566fe7"
+    },
+    {
+      "candidate": "wide_initial_12",
+      "epoch": 12,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          8.154105653251086,
+          13.166266250112152
+        ],
+        [
+          11.003936257844217,
+          9.434275991355797
+        ]
+      ],
+      "vector": [
+        8.154105653251086,
+        13.166266250112152,
+        11.003936257844217,
+        9.434275991355797,
+        1.4473301754333079,
+        -52.73265302181244
+      ],
+      "J": 3.165088853492838,
+      "J_joint": 3.6335994672859755,
+      "N": 176,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_12/2511_847401/workers/trajectory.json",
+      "source_sha256": "6dfdb510d993feca31bb51b48d2a3ad22417ece009e9b64f2232c6fdbb41c9e9"
+    },
+    {
+      "candidate": "wide_initial_13",
+      "epoch": 13,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          8.692642029817135,
+          12.122388600059843
+        ],
+        [
+          13.894163508222437,
+          8.118372480355132
+        ]
+      ],
+      "vector": [
+        8.692642029817135,
+        12.122388600059843,
+        13.894163508222437,
+        8.118372480355132,
+        1.3889054767787457,
+        -26.94042507559061
+      ],
+      "J": 3.600810547419106,
+      "J_joint": 3.286255024736708,
+      "N": 150,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_13/2511_847401/workers/trajectory.json",
+      "source_sha256": "1aaffe9120e8d096b9176c11de41b5a4b429f5579122e75910751fde60e34c06"
+    },
+    {
+      "candidate": "wide_initial_14",
+      "epoch": 14,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          2.1064551001356326,
+          15.039660702147579
+        ],
+        [
+          14.409154552751742,
+          3.339964457551682
+        ]
+      ],
+      "vector": [
+        2.1064551001356326,
+        15.039660702147579,
+        14.409154552751742,
+        3.339964457551682,
+        1.0103741656057537,
+        22.077096104621887
+      ],
+      "J": 3.8866266155818594,
+      "J_joint": 4.131586593951152,
+      "N": 66,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_14/2511_847401/workers/trajectory.json",
+      "source_sha256": "d943d4085a7c87ce8b61f5e735fcddd4dee335f547fd95d60947277ab8ab0c47"
+    },
+    {
+      "candidate": "wide_initial_15",
+      "epoch": 15,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          4.5433868682579,
+          8.601162074753141
+        ],
+        [
+          12.115680908127182,
+          6.772750640976721
+        ]
+      ],
+      "vector": [
+        4.5433868682579,
+        8.601162074753141,
+        12.115680908127182,
+        6.772750640976721,
+        1.1491278363391757,
+        34.15486168116331
+      ],
+      "J": 2.5453762532527198,
+      "J_joint": 3.1625950689754943,
+      "N": 125,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_15/2511_847401/workers/trajectory.json",
+      "source_sha256": "00d8ea1433ed20dedb4773e9e59d3b373a122aa798460d0c959738c9f879a96b"
+    },
+    {
+      "candidate": "wide_initial_16",
+      "epoch": 16,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          7.2768457033704586,
+          17.635450015463924
+        ],
+        [
+          16.429243654861484,
+          5.3093806396417875
+        ]
+      ],
+      "vector": [
+        7.2768457033704586,
+        17.635450015463924,
+        16.429243654861484,
+        5.3093806396417875,
+        1.277428821194917,
+        -44.4085867702961
+      ],
+      "J": 3.194081959558977,
+      "J_joint": 3.253913929217303,
+      "N": 162,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_16/2511_847401/workers/trajectory.json",
+      "source_sha256": "b1f2f21c2a823ce79cb90941863f878655e9604faf7f32a5da329a85c8af10c3"
+    },
+    {
+      "candidate": "wide_initial_17",
+      "epoch": 17,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          7.435900718255085,
+          8.903405959405994
+        ],
+        [
+          13.367300872442245,
+          9.872690270901025
+        ]
+      ],
+      "vector": [
+        7.435900718255085,
+        8.903405959405994,
+        13.367300872442245,
+        9.872690270901025,
+        1.1041077421978116,
+        16.616846434772015
+      ],
+      "J": 2.6184794606536332,
+      "J_joint": 2.5571306383204884,
+      "N": 132,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_17/2511_847401/workers/trajectory.json",
+      "source_sha256": "4edb6e08ea2fadc19e80d26a393c13e845c2bd76b8bb7883b40738c77227d52d"
+    },
+    {
+      "candidate": "wide_initial_18",
+      "epoch": 18,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          4.195780488972433,
+          17.89245538289199
+        ],
+        [
+          15.690100693540918,
+          2.1596114858252524
+        ]
+      ],
+      "vector": [
+        4.195780488972433,
+        17.89245538289199,
+        15.690100693540918,
+        2.1596114858252524,
+        1.4826412633992732,
+        -24.878727346658707
+      ],
+      "J": 3.232443675665029,
+      "J_joint": 2.798663731089188,
+      "N": 175,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_18/2511_847401/workers/trajectory.json",
+      "source_sha256": "568bdd20696b5baeafaf20f04477ab78ba39d8eb224a5185997c2aeffddeeb0c"
+    },
+    {
+      "candidate": "wide_initial_19",
+      "epoch": 19,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          1.86059137951603,
+          11.393875295915699
+        ],
+        [
+          11.22643794761661,
+          6.931625072274304
+        ]
+      ],
+      "vector": [
+        1.86059137951603,
+        11.393875295915699,
+        11.22643794761661,
+        6.931625072274304,
+        1.3711660373955965,
+        -38.83123520761728
+      ],
+      "J": 3.6783949838825336,
+      "J_joint": 4.572191745582802,
+      "N": 179,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_19/2511_847401/workers/trajectory.json",
+      "source_sha256": "7bab2e642cf353b95bb3eeae36bd0eca68de96cdde39610faf3bded8973cb15d"
+    },
+    {
+      "candidate": "wide_initial_20",
+      "epoch": 20,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          8.895567213887013,
+          14.45306555802474
+        ],
+        [
+          17.589474887022682,
+          4.576558662004871
+        ]
+      ],
+      "vector": [
+        8.895567213887013,
+        14.45306555802474,
+        17.589474887022682,
+        4.576558662004871,
+        1.2428599833510816,
+        32.21020817756653
+      ],
+      "J": 3.7091325409748883,
+      "J_joint": 3.3490681167162277,
+      "N": 152,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_20/2511_847401/workers/trajectory.json",
+      "source_sha256": "ee03875a8e83b7388f4901d1d1185ce042678dfe4aa44910d5f64be6845b243b"
+    },
+    {
+      "candidate": "wide_initial_21",
+      "epoch": 21,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          8.47769086565788,
+          10.27294633040676
+        ],
+        [
+          14.699028886824628,
+          5.875373836367288
+        ]
+      ],
+      "vector": [
+        8.47769086565788,
+        10.27294633040676,
+        14.699028886824628,
+        5.875373836367288,
+        1.18419502209872,
+        6.417952738702297
+      ],
+      "J": 5.202010013818092,
+      "J_joint": 6.29050349307302,
+      "N": 134,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_21/2511_847401/workers/trajectory.json",
+      "source_sha256": "2e032658a474c7e2a80f94a505436242e19bf7538021e951b9849d9eb9f3195f"
+    },
+    {
+      "candidate": "wide_initial_22",
+      "epoch": 22,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          3.3556427453983275,
+          13.332417017468309
+        ],
+        [
+          14.124902704354344,
+          6.190798767345573
+        ]
+      ],
+      "vector": [
+        3.3556427453983275,
+        13.332417017468309,
+        14.124902704354344,
+        6.190798767345573,
+        1.3049283628351986,
+        -13.039108514785767
+      ],
+      "J": 2.930673179849828,
+      "J_joint": 3.099996880733231,
+      "N": 143,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_22/2511_847401/workers/trajectory.json",
+      "source_sha256": "f0eb54a67bdaadcd73b7d703a637a0a20a6ab8abe6ece25220a08204c87b36ad"
+    },
+    {
+      "candidate": "wide_initial_23",
+      "epoch": 23,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          4.7317355267167,
+          7.0213082755590435
+        ],
+        [
+          16.658524978902847,
+          2.9015171991249376
+        ]
+      ],
+      "vector": [
+        4.7317355267167,
+        7.0213082755590435,
+        16.658524978902847,
+        2.9015171991249376,
+        1.4160931967198849,
+        -58.16349137574434
+      ],
+      "J": 2.6237811477870903,
+      "J_joint": 2.340323467871567,
+      "N": 128,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_23/2511_847401/workers/trajectory.json",
+      "source_sha256": "5ebe101432a1157ae760d1c7c34422eb27c2c18d1a10a5c2b14d7cf51b0a1b30"
+    },
+    {
+      "candidate": "wide_initial_24",
+      "epoch": 24,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          6.061727981805715,
+          16.010271913060045
+        ],
+        [
+          12.405953178255075,
+          8.57277865896189
+        ]
+      ],
+      "vector": [
+        6.061727981805715,
+        16.010271913060045,
+        12.405953178255075,
+        8.57277865896189,
+        1.0456197182647884,
+        49.90193948149681
+      ],
+      "J": 2.7452645841841075,
+      "J_joint": 2.495133175796888,
+      "N": 134,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_24/2511_847401/workers/trajectory.json",
+      "source_sha256": "2200fc2743e70cbd828f05fb2a37a485836ab03e704299b2ba575cb318cf5837"
+    },
+    {
+      "candidate": "wide_initial_25",
+      "epoch": 25,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          6.530700541613344,
+          11.298913160958385
+        ],
+        [
+          17.103814849405154,
+          6.60155727462846
+        ]
+      ],
+      "vector": [
+        6.530700541613344,
+        11.298913160958385,
+        17.103814849405154,
+        6.60155727462846,
+        1.45327507564798,
+        40.96992742270231
+      ],
+      "J": 3.5513070620931946,
+      "J_joint": 2.9471547288147897,
+      "N": 152,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_25/2511_847401/workers/trajectory.json",
+      "source_sha256": "622d5c8de934263475ec3aac15264fbc92d3b5ac5ceebc092039ed4111374e55"
+    },
+    {
+      "candidate": "wide_initial_26",
+      "epoch": 26,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          5.231693495773713,
+          14.358375220247602
+        ],
+        [
+          11.704863340988975,
+          4.884128537323099
+        ]
+      ],
+      "vector": [
+        5.231693495773713,
+        14.358375220247602,
+        11.704863340988975,
+        4.884128537323099,
+        1.0825421484187245,
+        -30.48170104622841
+      ],
+      "J": 1.6997868412725854,
+      "J_joint": 1.5198495221169621,
+      "N": 137,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_26/2511_847401/workers/trajectory.json",
+      "source_sha256": "458d6b5049d349c2c3916e2ade9f1bb2c7dfe09de14b208fdbae70f55c2fd463"
+    },
+    {
+      "candidate": "wide_initial_27",
+      "epoch": 27,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          2.8521406697526586,
+          7.871071139969921
+        ],
+        [
+          15.204381799340688,
+          8.285024385596342
+        ]
+      ],
+      "vector": [
+        2.8521406697526586,
+        7.871071139969921,
+        15.204381799340688,
+        8.285024385596342,
+        1.1940254583023489,
+        -18.169560469686985
+      ],
+      "J": 2.7543226878790463,
+      "J_joint": 2.7396704515790558,
+      "N": 158,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_27/2511_847401/workers/trajectory.json",
+      "source_sha256": "5713293344a7c3c8b99c6ce5b58f47a1c844e5a5721a14787f043e18f2928347"
+    },
+    {
+      "candidate": "wide_initial_28",
+      "epoch": 28,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          8.004794994441411,
+          16.860049037882185
+        ],
+        [
+          13.845196326549448,
+          3.7606828531338015
+        ]
+      ],
+      "vector": [
+        8.004794994441411,
+        16.860049037882185,
+        13.845196326549448,
+        3.7606828531338015,
+        1.3144994769245386,
+        22.798640727996826
+      ],
+      "J": 2.686027849974024,
+      "J_joint": 2.4565518345272292,
+      "N": 46,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_28/2511_847401/workers/trajectory.json",
+      "source_sha256": "104cf49147c93dba14d7a950356580757e5d272ad4e7bca0947a8ed5f22517de"
+    },
+    {
+      "candidate": "wide_initial_29",
+      "epoch": 29,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          9.379565536806977,
+          6.74181552479515
+        ],
+        [
+          10.947440264022973,
+          2.4458047587990355
+        ]
+      ],
+      "vector": [
+        9.379565536806977,
+        6.74181552479515,
+        10.947440264022973,
+        2.4458047587990355,
+        1.2559888591058552,
+        57.020919285714626
+      ],
+      "J": 4.394097090220558,
+      "J_joint": 5.821150238075308,
+      "N": 149,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_29/2511_847401/workers/trajectory.json",
+      "source_sha256": "1e121e12007225b564b3132e2a6e75ed06c6e3facf468569521b5c3a6fd6bb82"
+    },
+    {
+      "candidate": "wide_initial_30",
+      "epoch": 30,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          2.315587826092196,
+          15.730879298099374
+        ],
+        [
+          18.09506541106754,
+          9.009978497657261
+        ]
+      ],
+      "vector": [
+        2.315587826092196,
+        15.730879298099374,
+        18.09506541106754,
+        9.009978497657261,
+        1.1274539707228541,
+        -52.39219665527344
+      ],
+      "J": 2.543083493568849,
+      "J_joint": 2.517593573493425,
+      "N": 120,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_30/2511_847401/workers/trajectory.json",
+      "source_sha256": "7ca77eefb3d3f5272c34785aa65c8d1d2e5225798ec5e4b2bbe59af46ac80309"
+    },
+    {
+      "candidate": "wide_initial_31",
+      "epoch": 31,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          3.736977409393637,
+          9.431195336082077
+        ],
+        [
+          12.665506481340023,
+          4.158260443461487
+        ]
+      ],
+      "vector": [
+        3.736977409393637,
+        9.431195336082077,
+        12.665506481340023,
+        4.158260443461487,
+        1.0162667478434741,
+        -3.7519310787320137
+      ],
+      "J": 5.5738310515672,
+      "J_joint": 5.739425763266193,
+      "N": 117,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_31/2511_847401/workers/trajectory.json",
+      "source_sha256": "c60bcd82a84f83d11baf36c9b0fcdb99817c1e0ce485379c73ecc9323fbc9a31"
+    },
+    {
+      "candidate": "wide_initial_32",
+      "epoch": 32,
+      "batch": 0,
+      "role": "broad_sobol_initial",
+      "centers_mm": [
+        [
+          6.948241610340253,
+          12.490377059825754
+        ],
+        [
+          16.135157092889564,
+          7.917331348460684
+        ]
+      ],
+      "vector": [
+        6.948241610340253,
+        12.490377059825754,
+        16.135157092889564,
+        7.917331348460684,
+        1.3945713080465794,
+        14.24025759100914
+      ],
+      "J": 3.116058163342434,
+      "J_joint": 2.847284082173167,
+      "N": 171,
+      "status": "SCORABLE",
+      "physical_status": "COMPLETE_NO_RUNAWAY",
+      "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_32/2511_847401/workers/trajectory.json",
+      "source_sha256": "12ec2a5e8388c72a61860dd416a3107fe977e254c3b89aace043f7ce96f9ecfd"
+    }
+  ],
+  "density_selection": "Every completed new configuration, including insufficient-event configurations; initial and adaptive phases plotted separately.",
+  "sigma_mm": 0.35,
+  "statistical_unit": "One evaluated configuration, same fixed topology/noise; each simulation supplies both core positions.",
+  "scientific_status": "INITIAL_COVERAGE_ONLY",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_joint_position_progress.py",
+  "producer_sha256": "200e730a8b095ace227c6c580bccec2b62e7ed26ceef3e837d78b0ce12b9df39",
+  "geometry_source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_expanded_response_20260920/source/position_map_source.json",
+  "geometry_sha256": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69"
+}

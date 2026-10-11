@@ -1,0 +1,65 @@
+{
+  "N": 145,
+  "status": "SCORABLE",
+  "J": 1.473979742628817,
+  "groups": {
+    "rank_pattern": {
+      "N": 145,
+      "A": 0.06161017454190058,
+      "B": 0.001852514487958228,
+      "D_off": 0.05975766005394235,
+      "D16": 0.07654607260106379,
+      "scaled": 1.3321318148080323
+    },
+    "participation": {
+      "N": 145,
+      "A": 0.06278688358509017,
+      "B": 0.0013094949141399857,
+      "D_off": 0.061477388670950185,
+      "D16": 0.0733446863303438,
+      "scaled": 1.3484124132247957
+    },
+    "local_and_interrod_timing": {
+      "N": 145,
+      "A": 0.07798082108384366,
+      "B": 0.00287746679128285,
+      "D_off": 0.0751033542925608,
+      "D16": 0.10118039708856164,
+      "scaled": 1.7413949998536236
+    }
+  },
+  "candidate": "dense_axis2_10",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_10/2511_847401/workers/trajectory.json",
+  "source_sha256": "ca3e032cb656897ccb1cdb96bc96d6b22066a5828cf684584721757a634333d9",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    17.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.3321318148080323,
+    1.7413949998536236,
+    1.3484124132247957
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789498832.133471,
+  "J_joint": 1.5980631959384204,
+  "joint": {
+    "N": 145,
+    "A": 0.08824493713642345,
+    "B": 0.0028557645278830274,
+    "D_off": 0.08538917260854043,
+    "scaled": 1.5980631959384204
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis2_10.json",
+  "historical_score_sha256": "87cd773fc1b3c4040e1d8ac01b5e263322acf7e5adcbbb1263ac2d09b77539a6"
+}

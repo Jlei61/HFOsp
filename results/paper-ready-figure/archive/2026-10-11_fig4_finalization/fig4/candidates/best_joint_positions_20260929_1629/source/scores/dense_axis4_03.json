@@ -1,0 +1,65 @@
+{
+  "N": 125,
+  "status": "SCORABLE",
+  "J": 2.680916076774581,
+  "groups": {
+    "rank_pattern": {
+      "N": 125,
+      "A": 0.09560358528439487,
+      "B": 0.002293679917483385,
+      "D_off": 0.09330990536691149,
+      "D16": 0.11122927972225044,
+      "scaled": 2.0800863598705974
+    },
+    "participation": {
+      "N": 125,
+      "A": 0.06468083668826409,
+      "B": 0.0017238443193997356,
+      "D_off": 0.06295699236886436,
+      "D16": 0.07642452611417479,
+      "scaled": 1.3808652554168963
+    },
+    "local_and_interrod_timing": {
+      "N": 125,
+      "A": 0.20108282485229673,
+      "B": 0.003477861874656379,
+      "D_off": 0.19760496297764035,
+      "D16": 0.22477575887339332,
+      "scaled": 4.58179661503625
+    }
+  },
+  "candidate": "dense_axis4_03",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_03/2511_847401/workers/trajectory.json",
+  "source_sha256": "2a1171b97d1cfe73fd5018b3d48148b2798d319c5a87e225f7bf6d2e950663ee",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.125,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.0800863598705974,
+    4.58179661503625,
+    1.3808652554168963
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789477216.3077967,
+  "J_joint": 3.4422925712265946,
+  "joint": {
+    "N": 125,
+    "A": 0.18737806087104839,
+    "B": 0.0034463394719088086,
+    "D_off": 0.18393172139913957,
+    "scaled": 3.4422925712265946
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis4_03.json",
+  "historical_score_sha256": "6e5b3cbceb527d38c742bed25873a4335f4b0ed58a3925df0851c275e84f429c"
+}

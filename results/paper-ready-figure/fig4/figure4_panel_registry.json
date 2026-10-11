@@ -1,9 +1,9 @@
 {
-  "status": "CURRENT_AUTHOR_DESIGNATED",
-  "human_visual_acceptance": "PENDING_COMPOSITE_VISUAL_REVIEW",
-  "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-  "layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
-  "updated_on": "2026-10-10",
+  "status": "AUTHOR_ACCEPTED_FINAL",
+  "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
+  "producer": "scripts/paper_figures/build_fig4_current.py",
+  "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
+  "updated_on": "2026-10-11",
   "panel_letters": [
     "A",
     "B",
@@ -16,7 +16,7 @@
     "I"
   ],
   "titles": {
-    "A": "局部E/I回路、二维空间基底、局部椭圆连接与SEEG采样读出",
+    "A": "局部E/I回路、二维多core优化示意、局部采样与SEEG读出",
     "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
     "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
     "D": "E→E角度的Mean rank／Order／Participation误差响应",
@@ -31,7 +31,7 @@
     232.0
   ],
   "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-  "base_published_complete_sha256": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
+  "base_published_complete_sha256": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
   "panel_mapping": {
     "A": "A",
     "B": "B",
@@ -50,7 +50,7 @@
     "D within-core EE response"
   ],
   "panel_a": {
-    "status": "AUTHOR_DESIGNATED_CURRENT",
+    "status": "AUTHOR_ACCEPTED_FINAL",
     "original_left_circuit_structure_preserved": true,
     "overview_neuron_samples_preserved": true,
     "left_circuit_detail_revision": {
@@ -444,11 +444,10 @@
       "maximum_alpha": 0.67,
       "render_extent_sigma": 4.0,
       "clipped_at_zoom_boundary": true,
-      "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+      "central_sheet": "Light-green zoom-frame background only; Gaussian sampling weights remain in the right inset."
     },
     "sampling_weight_sigma_mm": 0.25,
     "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
-    "central_sampling_region_removed": true,
     "sampling_footprint_boundary_rings_removed": true,
     "sampling_contact_coordinates_overview_mm": [
       [
@@ -596,54 +595,131 @@
     ],
     "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
     "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-    "left_detail_validation": {
-      "native_baseline_pixel_identical_to_v9": true,
-      "changed_pixels": 33230,
-      "changed_bounds_pixels": [
-        1141,
-        1007,
-        1398,
-        1499
+    "central_gaussian_sampling_weights_removed": true,
+    "sampling_frame_background_shading": {
+      "color": "#93C4A7",
+      "alpha": 0.22,
+      "locations": [
+        "Central zoom-location frame"
       ],
-      "allowed_change_bounds_pixels": [
-        1050,
-        800,
-        1500,
-        1520
+      "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+    },
+    "right_sampling_whole_frame_shading": false,
+    "schematic_core_optimization": {
+      "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
+      "candidate_region_count": 3,
+      "updated_core_count": 2,
+      "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+      "candidate_centres_mm": [
+        [
+          -6.4,
+          7.0
+        ],
+        [
+          6.65,
+          3.6
+        ],
+        [
+          -3.85,
+          -7.2
+        ]
       ],
-      "unchanged_pixels_outside_requested_detail_region": true,
-      "previous_shaft_separation_schematic_units": 0.08,
-      "new_shaft_separation_schematic_units": 0.22,
-      "parameters": {
-        "native_producer": "local_circuit_native_source.py",
-        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-        "central_offset_schematic_units": 0.11,
-        "previous_central_offset_schematic_units": 0.04,
-        "z_border_linewidth_pt": 0.6,
-        "previous_z_border_linewidth_pt": 1.6,
-        "z_border_dash_pattern": [
-          1.5,
-          1.5
+      "updated_centres_mm": [
+        [
+          -6.6875,
+          2.0625
         ],
-        "previous_z_border_dash_pattern": [
-          2.0,
-          1.7
+        [
+          6.4375,
+          -4.5625
+        ]
+      ],
+      "candidate_radius_mm": 1.15,
+      "updated_radius_mm": 1.05,
+      "candidate_fill": "#AC8BC9",
+      "candidate_fill_alpha": 0.32,
+      "candidate_edge": "#B8A3CF",
+      "updated_fill": "#805AA6",
+      "updated_edge": "#76519D",
+      "arrow_color": "#9479B2",
+      "arrow_dash_pattern": [
+        3.0,
+        2.5
+      ],
+      "search_direction_arrows_mm": [
+        [
+          [
+            -6.4,
+            5.7
+          ],
+          [
+            -6.6875,
+            3.3125
+          ]
         ],
-        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+        [
+          [
+            6.65,
+            2.3000000000000003
+          ],
+          [
+            6.4375,
+            -3.3125
+          ]
+        ]
+      ],
+      "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
+      "arrow_label": "OPTM",
+      "arrow_label_xy_mm": [
+        [
+          -4.7,
+          4.35
+        ],
+        [
+          8.15,
+          -0.4
+        ]
+      ],
+      "arrow_target_core_indices": [
+        0,
+        1
+      ],
+      "sampling_frame_shading": {
+        "color": "#93C4A7",
+        "alpha": 0.22,
+        "locations": [
+          "Central zoom-location frame"
+        ],
+        "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+      },
+      "question_mark_in_each_candidate_region": true,
+      "candidate_regions_have_light_purple_shading": true,
+      "regions_and_question_marks_below_neuron_markers": true,
+      "update_arrows_are_not_propagation_paths": true,
+      "simulations_and_readout_unchanged": true,
+      "core_position_source": {
+        "panel": "E",
+        "snapshot": "source/D_position_density.npz",
+        "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+        "reference_centres_mm": [
+          [
+            3.3125,
+            12.0625
+          ],
+          [
+            16.4375,
+            5.4375
+          ]
+        ],
+        "coordinate_shift_mm": [
+          -10.0,
+          -10.0
+        ],
+        "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
+        "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
       }
     },
-    "left_detail_allowed_bounds_mm": [
-      42.62436399999998,
-      169.48219999999998,
-      51.19033599999997,
-      185.33223199999998
-    ],
-    "all_pixels_outside_left_detail_identical_to_v9": true,
-    "burst_axes_and_labels_pixel_identical_to_v9": true,
-    "sampling_geometry_and_circuits_preserved_from_v9": true,
-    "consecutive_contact_crops_verified_against_frozen_F": true,
-    "frozen_geometry_and_full_F_waveform_snapshot_unchanged": true,
-    "author_designated_on": "2026-10-10"
+    "author_accepted_on": "2026-10-11"
   },
   "panel_b": {
     "version": "post_prior_stages_6_16_v1",
@@ -675,11 +751,11 @@
     "visible_source": "source/B_visible_workpoints.csv",
     "prior_source": "source/B_prior_workpoints.csv",
     "requested_on": "2026-10-09",
-    "human_visual_acceptance": "PENDING",
+    "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
     "showcase_labels": false
   },
   "panel_c": {
-    "preview_package": "results/paper-ready-figure/fig4/candidates/core_count_mean_sd_20261008",
+    "preview_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_count_mean_sd_20261008",
     "core_counts": [
       1,
       2,
@@ -724,14 +800,14 @@
   },
   "panel_e": {
     "version": "completed_position_density_standalone_v1",
-    "source_package": "results/paper-ready-figure/fig4/candidates/core_count_panel_c_20260929",
+    "source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_count_panel_c_20260929",
     "requested_on": "2026-10-08",
     "source_registry_sha256": "efec3ef3cefe614e91ff11e39ee3a32b9228205b4c525704061abd14703e9fc9",
     "source_panel_png_sha256": "b1382021545e630415108e4b1dd35af64f165899ee0edf316bae9f9f48a54429",
     "source_data_and_panel_pixels_verified": false,
     "column_reflow_promoted": false,
     "density_version": "completed_joint_densification_top20_relief_v1",
-    "density_source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+    "density_source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009",
     "density_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
     "density_source_png_sha256": "9e004997f220ed3e42d1c1cd2ef6adfcf21238d3f9ff4b4751b63fba48d72973",
     "density_selected": 83,
@@ -878,7 +954,7 @@
   },
   "checks": {
     "A_revision": {
-      "status": "AUTHOR_DESIGNATED_CURRENT",
+      "status": "AUTHOR_ACCEPTED_FINAL",
       "original_left_circuit_structure_preserved": true,
       "overview_neuron_samples_preserved": true,
       "left_circuit_detail_revision": {
@@ -1272,11 +1348,10 @@
         "maximum_alpha": 0.67,
         "render_extent_sigma": 4.0,
         "clipped_at_zoom_boundary": true,
-        "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+        "central_sheet": "Light-green zoom-frame background only; Gaussian sampling weights remain in the right inset."
       },
       "sampling_weight_sigma_mm": 0.25,
       "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
-      "central_sampling_region_removed": true,
       "sampling_footprint_boundary_rings_removed": true,
       "sampling_contact_coordinates_overview_mm": [
         [
@@ -1424,54 +1499,131 @@
       ],
       "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
       "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-      "left_detail_validation": {
-        "native_baseline_pixel_identical_to_v9": true,
-        "changed_pixels": 33230,
-        "changed_bounds_pixels": [
-          1141,
-          1007,
-          1398,
-          1499
+      "central_gaussian_sampling_weights_removed": true,
+      "sampling_frame_background_shading": {
+        "color": "#93C4A7",
+        "alpha": 0.22,
+        "locations": [
+          "Central zoom-location frame"
         ],
-        "allowed_change_bounds_pixels": [
-          1050,
-          800,
-          1500,
-          1520
+        "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+      },
+      "right_sampling_whole_frame_shading": false,
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
+          ],
+          [
+            6.65,
+            3.6
+          ],
+          [
+            -3.85,
+            -7.2
+          ]
         ],
-        "unchanged_pixels_outside_requested_detail_region": true,
-        "previous_shaft_separation_schematic_units": 0.08,
-        "new_shaft_separation_schematic_units": 0.22,
-        "parameters": {
-          "native_producer": "local_circuit_native_source.py",
-          "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-          "central_offset_schematic_units": 0.11,
-          "previous_central_offset_schematic_units": 0.04,
-          "z_border_linewidth_pt": 0.6,
-          "previous_z_border_linewidth_pt": 1.6,
-          "z_border_dash_pattern": [
-            1.5,
-            1.5
+        "updated_centres_mm": [
+          [
+            -6.6875,
+            2.0625
           ],
-          "previous_z_border_dash_pattern": [
-            2.0,
-            1.7
+          [
+            6.4375,
+            -4.5625
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "#AC8BC9",
+        "candidate_fill_alpha": 0.32,
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -6.4,
+              5.7
+            ],
+            [
+              -6.6875,
+              3.3125
+            ]
           ],
-          "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+          [
+            [
+              6.65,
+              2.3000000000000003
+            ],
+            [
+              6.4375,
+              -3.3125
+            ]
+          ]
+        ],
+        "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
+        "arrow_label": "OPTM",
+        "arrow_label_xy_mm": [
+          [
+            -4.7,
+            4.35
+          ],
+          [
+            8.15,
+            -0.4
+          ]
+        ],
+        "arrow_target_core_indices": [
+          0,
+          1
+        ],
+        "sampling_frame_shading": {
+          "color": "#93C4A7",
+          "alpha": 0.22,
+          "locations": [
+            "Central zoom-location frame"
+          ],
+          "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+        },
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_have_light_purple_shading": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true,
+        "core_position_source": {
+          "panel": "E",
+          "snapshot": "source/D_position_density.npz",
+          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+          "reference_centres_mm": [
+            [
+              3.3125,
+              12.0625
+            ],
+            [
+              16.4375,
+              5.4375
+            ]
+          ],
+          "coordinate_shift_mm": [
+            -10.0,
+            -10.0
+          ],
+          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
+          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
         }
       },
-      "left_detail_allowed_bounds_mm": [
-        42.62436399999998,
-        169.48219999999998,
-        51.19033599999997,
-        185.33223199999998
-      ],
-      "all_pixels_outside_left_detail_identical_to_v9": true,
-      "burst_axes_and_labels_pixel_identical_to_v9": true,
-      "sampling_geometry_and_circuits_preserved_from_v9": true,
-      "consecutive_contact_crops_verified_against_frozen_F": true,
-      "frozen_geometry_and_full_F_waveform_snapshot_unchanged": true,
-      "author_designated_on": "2026-10-10"
+      "author_accepted_on": "2026-10-11"
     },
     "B_workpoints": 194,
     "B_stages": [
@@ -1611,7 +1763,7 @@
       "selection_metric": "J_joint",
       "unit": "mm^-2",
       "interpretation": "Descriptive density of the lowest 20% J_joint in the evaluated search pool; deliberate local densification affects concentration. Secondary good regions remain; not unique convergence or a posterior.",
-      "source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+      "source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009",
       "source_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
       "pool_completed": 418,
       "new_completed": 128,
@@ -1807,19 +1959,153 @@
       "compact_row_gaps_preserved": true,
       "approved_v4_B_through_I_bounds_preserved": true,
       "A_uses_previously_reserved_mechanism_space": true
+    },
+    "core_optimization_revision": {
+      "status": "PASS",
+      "unchanged_panels": {
+        "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
+      },
+      "all_pixels_outside_central_sheet_identical_to_v10": true,
+      "right_local_sampling_identical_to_v10": true,
+      "changed_pixels_in_central_sheet": 55848,
+      "previous_formal_unchanged_during_candidate_generation": true,
+      "candidate_coordinates_are_illustrative": true,
+      "updated_core_coordinates_match_E_density_modes": true,
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
+          ],
+          [
+            6.65,
+            3.6
+          ],
+          [
+            -3.85,
+            -7.2
+          ]
+        ],
+        "updated_centres_mm": [
+          [
+            -6.6875,
+            2.0625
+          ],
+          [
+            6.4375,
+            -4.5625
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "#AC8BC9",
+        "candidate_fill_alpha": 0.32,
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -6.4,
+              5.7
+            ],
+            [
+              -6.6875,
+              3.3125
+            ]
+          ],
+          [
+            [
+              6.65,
+              2.3000000000000003
+            ],
+            [
+              6.4375,
+              -3.3125
+            ]
+          ]
+        ],
+        "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
+        "arrow_label": "OPTM",
+        "arrow_label_xy_mm": [
+          [
+            -4.7,
+            4.35
+          ],
+          [
+            8.15,
+            -0.4
+          ]
+        ],
+        "arrow_target_core_indices": [
+          0,
+          1
+        ],
+        "sampling_frame_shading": {
+          "color": "#93C4A7",
+          "alpha": 0.22,
+          "locations": [
+            "Central zoom-location frame"
+          ],
+          "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+        },
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_have_light_purple_shading": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true,
+        "core_position_source": {
+          "panel": "E",
+          "snapshot": "source/D_position_density.npz",
+          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+          "reference_centres_mm": [
+            [
+              3.3125,
+              12.0625
+            ],
+            [
+              16.4375,
+              5.4375
+            ]
+          ],
+          "coordinate_shift_mm": [
+            -10.0,
+            -10.0
+          ],
+          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
+          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
+        }
+      },
+      "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL"
     }
   },
   "source_files": {
     "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
     "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/figure_registry.json": "0b0879919914d4804eebe783b7ea28d9af1913fa3f25d2ddfc40f78dd9b000c4",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/core-position-search-context.npz": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_geometry.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_straight_display.json": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/density_contours.json": "be1aabdadf7760032481d5350c6393e11262ccea1b4d851fd3f08ebf299b8519",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/figure_registry.json": "0b0879919914d4804eebe783b7ea28d9af1913fa3f25d2ddfc40f78dd9b000c4",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/core-position-search-context.npz": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/electrode_geometry.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/electrode_straight_display.json": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/density_contours.json": "be1aabdadf7760032481d5350c6393e11262ccea1b4d851fd3f08ebf299b8519",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
     "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
     "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
   },
@@ -1827,27 +2113,27 @@
   "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
   "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
   "outputs": {
-    "figures/fig4-panela.pdf": "dd8500e036a50340b0b7c4fbbc91076caf9a5c39bb6473c55927990a924b46d0",
+    "figures/fig4-panela.pdf": "7301ff0bf0d6d87ebd2e863f02db6e13e74cfccc7e60b746bbe5e2c20da04983",
     "figures/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
     "figures/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
     "figures/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
-    "figures/fig4-complete-layout.svg": "0a4b8cccfe7f93741ecb8c6e4210b7f8778430af398c5cb3095fd8e51cd4016d",
+    "figures/fig4-complete-layout.svg": "f747e69390357784fe94c5bb94677c4b4ebec79624696794f92749126e6f68b4",
     "figures/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
-    "figures/fig4-complete-layout.png": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
+    "figures/fig4-complete-layout.png": "6a18e5e6f69a67dd1b9930951eb5a77523964390b84cf8f31695a86b60de3ea5",
     "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
     "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
-    "figures/fig4-panela.svg": "437104facf72d9b37998458a12baddeab9f1dc26943698baf8a8beeae90eb975",
+    "figures/fig4-panela.svg": "d1f34662f4fe81dc47b88f7b0cec88efd4daea451686438b06e9e824cfe68a3b",
     "figures/fig4-paneld.pdf": "e4bc79df071408c80096a81d972c84392bbecebb34fe81fc2af31d960b202595",
     "figures/fig4-panelb.pdf": "82d11b25fe64eb6293832fd13ee11f946bf5f6e32726f2da0cea8079eae7fc57",
     "figures/fig4-paneld.svg": "29d9f2c1a5ccbc792e9a6b6c3ee781db94718e2556625d29a8c67358f430a6b5",
     "figures/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
     "figures/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
     "figures/fig4-panelb.svg": "aa78bb6195f3fd65e3cb8992d4e9ca9ef9a13b6310c6a432848423df5f1a78d4",
-    "figures/fig4-complete-layout-preview.png": "6426f47a4b799fb31793ed7c2128252d76a7ff7b7d82f9af8b64dbef3402c719",
-    "figures/fig4-complete-layout.pdf": "97bb07af601240c4f6b7a4938cc2a6c93e3b3f634adf60adb0271018b0912e8a",
+    "figures/fig4-complete-layout-preview.png": "13e91ac9ad251f7f9e65302612fd4f39497c51163d57689ba902aa5c2ccf4f4b",
+    "figures/fig4-complete-layout.pdf": "f37c3ee7390ec87271c6ddc7788e25abd751beb628ccf21f1e164867907bb75d",
     "figures/fig4-panelc.pdf": "b2aa7a9daabec70b0ba8a4060c3e7dc0dab1eef3006f3b09559dda8e7c85b178",
     "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
-    "figures/fig4-panela.png": "0ef3b55779f7b12c995ab27a205ba9bd061387189dc4250638cf96d480749f72",
+    "figures/fig4-panela.png": "7097f9c02077209addbf0cfa4fad6d4a643492541ffa32035c4cf5c030a0044a",
     "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
     "figures/fig4-panelc.svg": "747021382dda973c73840c9d0ad37dddc200e729cef89109dca37a2e3b1c8cf0",
     "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
@@ -1859,89 +2145,32 @@
     "figures/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
     "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
   },
-  "base_layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "base_layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
   "canonical_figure_replaced": true,
   "unchanged_panels": {
-    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
-    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+    "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+    "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
   },
-  "original_left_circuit_artwork_preserved_except_requested_details": true,
-  "published_from": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
-  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-10_pre_mechanism_fig4/fig4",
+  "version": "core_search_final_20261011",
+  "author_accepted_on": "2026-10-11",
+  "original_render_producer": "source/build_fig4_a_core_optimization_candidate.py",
+  "published_from": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/a_core_search_central_shading_20261011",
+  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4",
   "accepted_panel_a_revision": {
-    "status": "AUTHOR_DESIGNATED_CURRENT",
-    "version": "a_left_circuit_spacing_v10",
-    "updated_on": "2026-10-10",
-    "package": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010",
-    "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
-    "standalone_producer": "scripts/paper_figures/draw_fig4_a_spatial_readout.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_left_circuit_spacing_20261010/figure4_candidate_registry.json",
-    "canonical_figure_replaced": true,
-    "B_through_I": "PIXEL_IDENTICAL_TO_CURRENT_V4",
-    "original_left_circuit": "Original circuit structure and neuron positions retained at 1.20x scale. Central red E-to-I path and blue I-to-E shaft/T-bar each move 0.07 schematic units outward; z-down border becomes thin and dense.",
-    "layout": "All axes and placements retain v9. Only the left central reciprocal E/I connection spacing and z-down border change; all full-figure pixels outside that detail footprint are identical to v9.",
-    "zoom_roles": "Central sheet has no green sampling fill, halos or footprint rings; only an unfilled neutral gray dashed frame locates the zoom. Gaussian sampling weights are shown only in the right Local sampling view.",
-    "electrodes": "Overview and sampling zoom share E-panel rigid rod projections; display only, simulation coordinates unchanged.",
-    "third_component": "Five irregular elliptical neighbourhoods in 2+3 rows, restored to the v6 displayed scale; each contains 6-7 hollow E triangles and 1-2 internal I circles. Exactly three consecutive contacts, with no intervening or additional contacts in the small box.",
-    "readout": "The exact v8 SL3/SL4/SL5 waveform crops, axes and labels are preserved pixel-for-pixel; actual frozen ICL3/ICL4/ICL5 source data and both event windows unchanged.",
-    "sampling_contact_labels": [
-      "SL3",
-      "SL4",
-      "SL5"
-    ],
-    "tiny_readout_arrow_removed": true,
-    "sampling_source_contacts": [
-      "ICL3",
-      "ICL4",
-      "ICL5"
-    ],
-    "display_label_to_source_contact": {
-      "SL3": "ICL3",
-      "SL4": "ICL4",
-      "SL5": "ICL5"
-    },
-    "right_sampling_weights": {
-      "sigma_mm": 0.25,
-      "display": "Green smoothly fading Gaussian alpha; no hard boundary ring. Tails are clipped by the unchanged zoom view.",
-      "theoretical_95_percent_mass_radius_mm": 0.6119367076702041,
-      "quantity": "Spatial weighting of the existing virtual-contact firing-density readout, not a computed electric potential."
-    },
-    "left_detail_producer": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-    "left_detail": {
-      "native_producer": "local_circuit_native_source.py",
-      "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-      "central_offset_schematic_units": 0.11,
-      "previous_central_offset_schematic_units": 0.04,
-      "z_border_linewidth_pt": 0.6,
-      "previous_z_border_linewidth_pt": 1.6,
-      "z_border_dash_pattern": [
-        1.5,
-        1.5
-      ],
-      "previous_z_border_dash_pattern": [
-        2.0,
-        1.7
-      ],
-      "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-    },
-    "author_designated_on": "2026-10-10"
-  },
-  "pending_panel_a_revision": {
-    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+    "status": "AUTHOR_ACCEPTED_FINAL",
     "version": "a_core_search_central_shading_v15",
     "updated_on": "2026-10-11",
-    "package": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011",
-    "producer": "scripts/paper_figures/build_fig4_a_core_optimization_candidate.py",
-    "preview": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/candidates/a_core_search_central_shading_20261011/figure4_candidate_registry.json",
-    "canonical_figure_replaced": false,
+    "package": "results/paper-ready-figure/fig4",
+    "producer": "scripts/paper_figures/build_fig4_current.py",
+    "preview": "results/paper-ready-figure/fig4/figures/fig4-complete-layout-preview.png",
+    "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
+    "canonical_figure_replaced": true,
     "candidate_region_count": 3,
     "updated_core_count": 2,
     "representation": "Two upper OPTM arrows point to the two cores. The bottom question region has no arrow or label. Light-green frame shading appears only in the central source frame; the right inset retains its original background and local Gaussian sampling weights.",
@@ -1990,6 +2219,10 @@
     },
     "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; central green frame shading is only a zoom-location cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
     "preservation": "All pixels outside the central sheet, including the right Local sampling inset, match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
-    "supersedes": "a_core_search_sampling_links_v14"
-  }
+    "supersedes": "a_core_search_sampling_links_v14",
+    "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
+    "author_accepted_on": "2026-10-11",
+    "archived_source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/a_core_search_central_shading_20261011"
+  },
+  "source_files_role": "Historical provenance; current package verification and export restoration use only bundled files."
 }

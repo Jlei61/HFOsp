@@ -1,0 +1,65 @@
+{
+  "N": 128,
+  "status": "SCORABLE",
+  "J": 3.7599442784349706,
+  "groups": {
+    "rank_pattern": {
+      "N": 128,
+      "A": 0.11809241647240341,
+      "B": 0.0020908128126568173,
+      "D_off": 0.1160016036597466,
+      "D16": 0.13272810616100114,
+      "scaled": 2.585935036017289
+    },
+    "participation": {
+      "N": 128,
+      "A": 0.06670987693300645,
+      "B": 0.0016078628288079262,
+      "D_off": 0.06510201410419852,
+      "D16": 0.07796491673466194,
+      "scaled": 1.42791302366292
+    },
+    "local_and_interrod_timing": {
+      "N": 128,
+      "A": 0.3165061622497879,
+      "B": 0.0031368066848731038,
+      "D_off": 0.3133693555649148,
+      "D16": 0.3384638090438996,
+      "scaled": 7.265984775624702
+    }
+  },
+  "candidate": "dense_axis4_02",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_02/2511_847401/workers/trajectory.json",
+  "source_sha256": "1a7ab399aebe857b37a0179c0dfe1dcf690b3b77cafe65bb08e54da65a9bccb0",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.0833333333333333,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.585935036017289,
+    7.265984775624702,
+    1.42791302366292
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789494836.6862712,
+  "J_joint": 4.760846063899336,
+  "joint": {
+    "N": 128,
+    "A": 0.2575566558710362,
+    "B": 0.00317077967652826,
+    "D_off": 0.254385876194508,
+    "scaled": 4.760846063899336
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis4_02.json",
+  "historical_score_sha256": "20ae90695e077f94f96a289b9eb3017fdb875920714a4ed3227f34ca656e1f63"
+}

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 """Render and publish the author-designated A-J Fig4 with J's upper-right legend."""
+
+# Direct execution follows the author-accepted current Figure 4.
+if __name__ == "__main__":
+    import runpy
+    from pathlib import Path as _Figure4Path
+    runpy.run_path(str(_Figure4Path(__file__).with_name("build_fig4_current.py")), run_name="__main__")
+    raise SystemExit(0)
+
 from pathlib import Path
 import argparse
 import csv

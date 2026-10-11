@@ -1,0 +1,37 @@
+{
+  "status": "PARTIAL_RESULTS_PENDING_AUTHOR_VISUAL_REVIEW",
+  "asof": "2026-09-29T16:24:40+08:00",
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_joint_position_progress.py",
+  "producer_sha256": "f6485f0b473bbb5287e189db1e581131185fa6c1c378b3cd3d5f3d13262c0119",
+  "new_completed": 32,
+  "new_scorable": 31,
+  "initial_completed": 32,
+  "adaptive_completed": 0,
+  "best_new_J_joint": 1.5198495221169621,
+  "best_historical_J_joint": 1.0601303963391657,
+  "density_panels": [
+    {
+      "stem": "core-position-density-3d",
+      "n": 32,
+      "phase": "Initial search coverage",
+      "sigma_mm": 0.35,
+      "density_integral": 0.9999999993333917,
+      "zmax": 0.03885699871411424,
+      "density_unit": "mm^-2",
+      "linear_color_normalization": true,
+      "colorbar_orientation": "vertical",
+      "z_axis_hidden": true,
+      "xy_axes_aligned": true,
+      "interpretation": "Density of sampled positions, not an optimized-position posterior or parameter uncertainty."
+    }
+  ],
+  "source_snapshot_sha256": "3f09d2d0bd8851f06f81bafe581c2baef04ddb99e8d07118a431eb8d13260572",
+  "outputs": {
+    "core-position-density-3d.pdf": "ab015136519c9f86bd02585f6497ed772fde109865297cf74d1671958cfb5a69",
+    "core-position-density-3d.png": "568904afd8a450af9863a9d88e8dea362de03e559b134b64d4fb92af03fadb19",
+    "core-position-density-3d.svg": "b970a779cfaf6d6f78bd3f1601216df9a5dc8688754c5f976da4a071c048b755",
+    "joint-loss-progress.pdf": "f96a05f32c693d2d59a5400e6f90e20decdd47e7f6444f2338878ce0d652a006",
+    "joint-loss-progress.png": "dd04732dd318a6c68555f3279805905257a5fcc56f8c73b0e5ba9d4d75b6f8ef",
+    "joint-loss-progress.svg": "3d9f8fb558549e5ebc79fad685eca2c529647e3ba524dfa3c58aeddd1b93df2b"
+  }
+}

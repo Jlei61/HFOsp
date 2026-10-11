@@ -1,0 +1,172 @@
+{
+  "checked_at": "2026-10-08T16:00:24+08:00",
+  "state_age_seconds": 5.09505295753479,
+  "state": {
+    "status": "RUNNING",
+    "controller_pid": 1049791,
+    "updated_unix": 1791446419.5376823,
+    "deadline_unix": 1792638244.3549058,
+    "new_complete": 24,
+    "new_scorable": 23,
+    "planned_new": 128,
+    "historical_reused": 290,
+    "proposed_new": 96,
+    "queued_workers": 72,
+    "active": [
+      {
+        "task": [
+          "worker",
+          "dens_main_07"
+        ],
+        "pid": 1356654,
+        "created": 1791442807.35,
+        "rss_gib": 2.2463340759277344
+      },
+      {
+        "task": [
+          "worker",
+          "dens_remote_07"
+        ],
+        "pid": 1417984,
+        "created": 1791444103.79,
+        "rss_gib": 2.2256317138671875
+      },
+      {
+        "task": [
+          "worker",
+          "dens_broad_07"
+        ],
+        "pid": 1442911,
+        "created": 1791444587.79,
+        "rss_gib": 2.1118927001953125
+      },
+      {
+        "task": [
+          "worker",
+          "wide_bo01_07"
+        ],
+        "pid": 1466750,
+        "created": 1791445085.75,
+        "rss_gib": 2.10589599609375
+      },
+      {
+        "task": [
+          "worker",
+          "dens_main_08"
+        ],
+        "pid": 1486908,
+        "created": 1791445544.1,
+        "rss_gib": 2.1171798706054688
+      },
+      {
+        "task": [
+          "worker",
+          "dens_remote_08"
+        ],
+        "pid": 1503439,
+        "created": 1791445889.19,
+        "rss_gib": 2.1158599853515625
+      },
+      {
+        "task": [
+          "worker",
+          "dens_broad_08"
+        ],
+        "pid": 1508935,
+        "created": 1791445976.67,
+        "rss_gib": 2.204418182373047
+      },
+      {
+        "task": [
+          "worker",
+          "wide_bo01_08"
+        ],
+        "pid": 1514059,
+        "created": 1791446095.11,
+        "rss_gib": 2.0921783447265625
+      }
+    ],
+    "available_gib": 227.48183059692383,
+    "free_disk_gib": 972.5081024169922,
+    "cpu_percent": 11.9,
+    "max_workers": 8,
+    "failures": [],
+    "best_joint": 1.0601303963391657,
+    "blocked_tasks": []
+  },
+  "controller_live": true,
+  "workers": [
+    {
+      "task": [
+        "worker",
+        "dens_main_07"
+      ],
+      "pid": 1356654,
+      "status": "running",
+      "rss_gib": 2.2464141845703125
+    },
+    {
+      "task": [
+        "worker",
+        "dens_remote_07"
+      ],
+      "pid": 1417984,
+      "status": "running",
+      "rss_gib": 2.2256851196289062
+    },
+    {
+      "task": [
+        "worker",
+        "dens_broad_07"
+      ],
+      "pid": 1442911,
+      "status": "running",
+      "rss_gib": 2.111949920654297
+    },
+    {
+      "task": [
+        "worker",
+        "wide_bo01_07"
+      ],
+      "pid": 1466750,
+      "status": "running",
+      "rss_gib": 2.1059913635253906
+    },
+    {
+      "task": [
+        "worker",
+        "dens_main_08"
+      ],
+      "pid": 1486908,
+      "status": "running",
+      "rss_gib": 2.1172561645507812
+    },
+    {
+      "task": [
+        "worker",
+        "dens_remote_08"
+      ],
+      "pid": 1503439,
+      "status": "running",
+      "rss_gib": 2.1160430908203125
+    },
+    {
+      "task": [
+        "worker",
+        "dens_broad_08"
+      ],
+      "pid": 1508935,
+      "status": "running",
+      "rss_gib": 2.2044639587402344
+    },
+    {
+      "task": [
+        "worker",
+        "wide_bo01_08"
+      ],
+      "pid": 1514059,
+      "status": "running",
+      "rss_gib": 2.0922164916992188
+    }
+  ]
+}

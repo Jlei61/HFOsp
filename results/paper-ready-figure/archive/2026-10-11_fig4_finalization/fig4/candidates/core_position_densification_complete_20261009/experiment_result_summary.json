@@ -1,0 +1,121 @@
+{
+  "status": "COMPLETE_PENDING_SCIENTIFIC_AND_VISUAL_REVIEW",
+  "new_complete": 128,
+  "new_scorable": 125,
+  "historical_reused": 290,
+  "best_candidate": "dens_bo01_01",
+  "best_J_joint": 1.0276641503973967,
+  "previous_best_J_joint": 1.0601303963391657,
+  "best_new": {
+    "N": 135,
+    "status": "SCORABLE",
+    "J": 1.2710329113603989,
+    "groups": {
+      "rank_pattern": {
+        "N": 135,
+        "A": 0.0445469015063162,
+        "B": 0.002167512391736833,
+        "D_off": 0.04237938911457936,
+        "D16": 0.06066777491985889,
+        "scaled": 0.9447313111105647
+      },
+      "participation": {
+        "N": 135,
+        "A": 0.03678607572383829,
+        "B": 0.0018575494251687218,
+        "D_off": 0.03492852629866957,
+        "D16": 0.05060159957353066,
+        "scaled": 0.7661037570880097
+      },
+      "local_and_interrod_timing": {
+        "N": 135,
+        "A": 0.09400472300922985,
+        "B": 0.0033377273371211586,
+        "D_off": 0.09066699567210869,
+        "D16": 0.11882907007906847,
+        "scaled": 2.1022636658826217
+      }
+    },
+    "candidate": "dens_bo01_01",
+    "source": "/data/hfosp/topic4_sef_hfo/joint_position_densification_20261008/search/units/dens_bo01_01/2511_847401/workers/trajectory.json",
+    "source_sha256": "60c783b1f81e1f487176d6e3a4e8f577515332b4335ecb8f2b1c2ad1ebbc38c8",
+    "vector": [
+      2.0565546553412264,
+      17.096148831422646,
+      12.582472936134492,
+      8.686056485492353,
+      1.0946546954977192,
+      -53.4206956633458
+    ],
+    "topology": 2511,
+    "noise": 847401,
+    "reused": false,
+    "J_joint": 1.0276641503973967,
+    "joint": {
+      "N": 135,
+      "A": 0.05831128191943681,
+      "B": 0.003400192204763367,
+      "D_off": 0.05491108971467344,
+      "D16": 0.08360021144236435,
+      "scaled": 1.0276641503973967
+    },
+    "physical_status": "COMPLETE_NO_RUNAWAY",
+    "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+    "device": "cuda:0",
+    "time": 1791490565.2824414
+  },
+  "fixed_comparison_cutoff_J_joint": 1.4858054657811923,
+  "strata": {
+    "main_sobol_densification": {
+      "n_evaluated": 48,
+      "n_scorable": 47,
+      "median_J_joint": 2.432691983458775,
+      "min_J_joint": 1.311808085411475,
+      "n_below_frozen_pre_expansion_top20_cutoff": 3
+    },
+    "remote_sobol_densification": {
+      "n_evaluated": 16,
+      "n_scorable": 15,
+      "median_J_joint": 2.4638954720545776,
+      "min_J_joint": 1.3130743719999303,
+      "n_below_frozen_pre_expansion_top20_cutoff": 2
+    },
+    "broad_sobol_densification": {
+      "n_evaluated": 16,
+      "n_scorable": 16,
+      "median_J_joint": 3.125758735419606,
+      "min_J_joint": 1.1611275384717084,
+      "n_below_frozen_pre_expansion_top20_cutoff": 1
+    },
+    "pending_parent_qLogEI_J_joint": {
+      "n_evaluated": 12,
+      "n_scorable": 12,
+      "median_J_joint": 1.5003229593837764,
+      "min_J_joint": 1.0610107301980856,
+      "n_below_frozen_pre_expansion_top20_cutoff": 6
+    },
+    "pending_parent_global_uncertainty_J_joint": {
+      "n_evaluated": 4,
+      "n_scorable": 4,
+      "median_J_joint": 4.537607442928308,
+      "min_J_joint": 4.375044577815939,
+      "n_below_frozen_pre_expansion_top20_cutoff": 0
+    },
+    "qLogEI_J_joint": {
+      "n_evaluated": 24,
+      "n_scorable": 24,
+      "median_J_joint": 1.5076373740191928,
+      "min_J_joint": 1.0276641503973967,
+      "n_below_frozen_pre_expansion_top20_cutoff": 12
+    },
+    "global_uncertainty_J_joint": {
+      "n_evaluated": 8,
+      "n_scorable": 7,
+      "median_J_joint": 3.1078761865074482,
+      "min_J_joint": 2.3033738313806835,
+      "n_below_frozen_pre_expansion_top20_cutoff": 0
+    }
+  },
+  "scientific_boundary": "Targeted sampling deliberately increases local sampling density. Report stratum and stage separately; tighter pooled KDE is not evidence of increased stability or independent convergence.",
+  "created_unix": 1791505883.0531044
+}

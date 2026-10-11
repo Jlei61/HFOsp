@@ -1,0 +1,378 @@
+{
+  "status": "CURRENT_AUTHOR_DESIGNATED",
+  "producer": "scripts/paper_figures/build_fig4_readable_complete.py",
+  "whole_canvas_mm": [
+    285.0,
+    264.5
+  ],
+  "font_pt": {
+    "label": 10.0,
+    "tick": 9.0,
+    "dense": 7.5,
+    "legend": 8.8,
+    "title": 10.0,
+    "letter": 15.0
+  },
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/all_workpoints_source.csv": "ee5bd0559803bab393b8f995727282b61cafaf4196d7725f42a57d2977b00748",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/selected_workpoints.json": "47c7d5499864ce84db906d7bc9dc65774cf7bd08a49026eb2c14458a8d2e55ce",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/connection_response_source.csv": "20de4e62e29e900b954fc55ca4316149276887f12d75f49a95583c8893261263",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_expanded_response_20260920/source/position_map_source.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "/data/hfosp/topic4_sef_hfo/cohort_three_observable_optimization_20260920/cohort_loss_improvement_20260923/figure_data.json": "3bd491a960daf8f2777f2bad0d44b1559b4045021443ba5e6540d3bc5ec1bd65",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_readable_complete.py": "166b36c656fb54929741ed5a485264a9e3b39b48ec52ae3f7c66cbd05b605b0d",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_geometry_patient_comparison.py": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_panel_a_combined.py": "974f3d219967d83304ffe92f0bb87fee89005b0e2be3557d4d5bb2c3c24a1f35",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_topic4_cohort_loss_improvement.py": "378feb235d1b669814b9da4539ed6eff1fe114342ceb7f5eaa1d2bdae01e6ff6"
+  },
+  "checks": {
+    "A_local_circuit_source_pixels_unchanged": true,
+    "A_local_circuit_mm_per_source_pixel": 0.021,
+    "A_external_typography_pt": {
+      "title": 11,
+      "labels": 10,
+      "ticks": 9,
+      "legend": 8.8
+    },
+    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "A_circuit_frame_vector_stroke_pt": 0.65,
+    "A_circuit_frame_source_crop_padding_px": 12,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_profile_and_3D_label_colors_match": true,
+    "B_3D_error_axis_labels_bold": true,
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_profile_scatter_colorbar_palette_match": true,
+    "BC_rank_error_name": "Mean rank error",
+    "B_error_symbols": {
+      "rank": "epsilon_r",
+      "within_rod_order": "epsilon_o",
+      "participation": "epsilon_p"
+    },
+    "B_restored_source_axis_sizes_mm": {
+      "profile": [
+        42,
+        45
+      ],
+      "trajectory": [
+        51,
+        51
+      ]
+    },
+    "B_workpoints": 226,
+    "B_stages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_axis_corner_gap_px": 0.0,
+    "B_category_labels_do_not_overlap": true,
+    "B_profile_ylabel": "Error",
+    "B_mean_rank_error_native_axis_label": true,
+    "B_order_error_native_axis_label": true,
+    "B_order_error_label_rotation_deg": 31.113561108745245,
+    "C_axis_label_font_pt": 12.0,
+    "C_position_conditions": 83,
+    "C_palette": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "order_text": "#E47159",
+      "map_limits": [
+        0.0,
+        0.3
+      ],
+      "map_gradient": "light to the corresponding curve color"
+    },
+    "DE_native_colorbar_quantity": {
+      "observable": "E neurons firing at least once within each spatial/time bin",
+      "spatial_bin_mm2": 1.0,
+      "time_bin_ms": 2.0,
+      "display_range": [
+        0,
+        75
+      ]
+    },
+    "DE_frozen_event_ids": [
+      [
+        114,
+        14
+      ],
+      [
+        39,
+        151
+      ]
+    ],
+    "DE_frozen_events_and_scales_match": true,
+    "DE_axis_label_font_pt": 12.0,
+    "DE_channel_tick_font_pt": 8.5,
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_legend_position": "inside upper right, original framed placement",
+    "I_paired_patients": 24,
+    "I_condition_counts": [
+      1,
+      12,
+      20,
+      28
+    ],
+    "I_palette": {
+      "Subject": "#D7B08A",
+      "Median": "#8C4B20",
+      "subject_alpha": 0.85
+    },
+    "I_xaxis_label": "Epochs",
+    "I_xaxis_definition": "Author-requested Epochs display label; values remain cumulative evaluated-condition indices at batch boundaries: 1, 12, 20, 28, not minibatch or gradient-training epochs. B colors identify proposal stages 1 through 16.",
+    "FGHI_axis_bounds_mm": {
+      "F": [
+        14.999999999999998,
+        17.999999999999996,
+        114.99999999999997,
+        57.99999999999999
+      ],
+      "G": [
+        130.99999999999997,
+        17.999999999999996,
+        166.0,
+        57.99999999999999
+      ],
+      "H": [
+        178.99999999999997,
+        17.999999999999996,
+        218.99999999999997,
+        57.99999999999999
+      ],
+      "I": [
+        241.99999999999997,
+        17.999999999999996,
+        274.0,
+        57.99999999999999
+      ]
+    },
+    "FGHI_equal_height_and_edges": true,
+    "E_native_shared_xlabel_center_mm": 241.24999999999991,
+    "E_native_xlabel_centered_across_three_columns": true,
+    "CDE_axis_bounds_mm": {
+      "D": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            143.49999999999997,
+            52.99999999999999,
+            183.5
+          ],
+          [
+            67.0,
+            143.49999999999997,
+            107.0,
+            183.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            143.49999999999997,
+            154.0,
+            183.5
+          ],
+          [
+            166.0,
+            143.49999999999997,
+            190.0,
+            183.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          143.49999999999997,
+          271.5,
+          183.5
+        ]
+      },
+      "E": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            84.5,
+            52.99999999999999,
+            124.5
+          ],
+          [
+            66.99999999999999,
+            84.5,
+            106.99999999999999,
+            124.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            84.5,
+            154.0,
+            124.5
+          ],
+          [
+            166.0,
+            84.5,
+            190.0,
+            124.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          84.5,
+          271.5,
+          124.49999999999997
+        ]
+      }
+    },
+    "CDE_equal_row_height_and_edges": true,
+    "common_axis_height_mm": 40.0,
+    "F_legend_inside_axes_verified": true,
+    "G_legend_straddles_axes_upper_edge": true,
+    "I_legend_inside_axes_verified": true,
+    "I_legend_labels": [
+      "Subject",
+      "Median"
+    ],
+    "C_four_yaxis_tick_labels": [
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ]
+    ],
+    "visible_row_gaps_mm": {
+      "AB_to_CDE": 6.651944444444411,
+      "CDE_to_FGHI": 6.745694444444435
+    },
+    "FGHI_downward_shift_mm": 6.5,
+    "H_leftward_shift_mm": 5.0,
+    "I_leftward_shift_mm": 9.0,
+    "I_axes_right_margin_mm": 11.0,
+    "GH_visible_horizontal_gap_mm": 2.364143359969527,
+    "HI_visible_horizontal_gap_mm": 1.1646527777777476,
+    "text_outside_canvas": [],
+    "minimum_visible_font_pt": 7.0,
+    "dense_font_at_180mm_page_width_pt": 4.7368421052631575,
+    "DE_semantic_titles_verified": true
+  },
+  "typography_exception": "A preserves the local circuit pixels and physical scale; only its external title, coordinate labels/ticks and neuron legend are enlarged.",
+  "layout_contract": "F/G/H/I share identical rendered y bounds; C upper row/D and C lower row/E each share rendered y bounds with both contact envelopes and the combined two-row native fields. All data-axis heights are 40 mm. H and spatial maps retain equal x/y aspect. The bottom row is 6.5 mm lower relative to the upper panels, matching the visible row gaps; H moves left 5 mm and I left 9 mm, with all axis sizes preserved.",
+  "data_changes": false,
+  "new_simulations": 0,
+  "reference": "User-provided complete A–I plate, 2026-09-23",
+  "source_version_mix": "B: September 18, 226 workpoints / 16 stages; C: September 20 expanded 83-condition position maps, with unchanged connection curves. Matches the attachment.",
+  "semantic_colors": {
+    "MTA": "#C63D3A",
+    "MTB": "#287FA1",
+    "rank_error": "#3D5C6F",
+    "within_rod_order_error": "#E47159",
+    "participation_error": "#6B7546"
+  },
+  "canonical_assets_overwritten": false,
+  "outputs": {
+    "figures/fig4-panela.pdf": "8d2a3beb933cdcc982605703a68d3fbb057863c11b65ee859d705f18133abd33",
+    "figures/fig4-panelf.svg": "a41cbab07066a1329309bff1cc99e1b9c8603f06b0513e315d1007f7f175d887",
+    "figures/fig4-panelh.pdf": "6d850f7e9777bb79f54eda8c4209c6698f60980d2ddc1605d384d2feccd7d755",
+    "figures/fig4-panelf.pdf": "1dd05f33cdeb93f31091879f518c95765435e0a65e219044381bfce8fe2378f2",
+    "figures/fig4-complete-layout.svg": "9563da0ef1e75359b19d915bf1c586feeadd2adaad2c540389c96d4aa8e90f0e",
+    "figures/fig4-panelg.pdf": "02f44a765e3767294e5c70ebf53b90b4280824a2afd83693a88370a7bead8578",
+    "figures/fig4-complete-layout.png": "0fa9e473c9d6ebdb41dc06f005aa70580506547c85619e69dfc466e26f4909b7",
+    "figures/fig4-panelf.png": "53f9d2f86f8699227403905202bc6172e58064267511c14b4e191d65c6911c11",
+    "figures/fig4-panelc.png": "33be1a84fd62e6e372b2d9e57bb900ca133bc932204fff5abcd52681260e4896",
+    "figures/fig4-panela.svg": "ec2b84d86ebe5ac0ac6c34ed599c1d7cf3cd05fd08e299f6d8e0ba6136d4acd7",
+    "figures/fig4-paneld.pdf": "7016d14a2a72739194a693af11fb03dd68ca9545ed27cf341ec72ce73dca8193",
+    "figures/fig4-panelb.pdf": "175020eb86b1c3fcae92fcc5e064b6803a778043aa484bfc3bb1ef83d80216b8",
+    "figures/fig4-paneld.svg": "c4aaf8d5464ca731f6973de66f9f0cab0a63544e5a443b952652efe136c3e67f",
+    "figures/fig4-panelh.svg": "1b4c7de277d4042dfc905839f2d3ffaef8936dfc5c52b061b29997510dcdde97",
+    "figures/fig4-panelg.svg": "8cc2e6aa74d3539dc54945767655d03defdf9a56b71092bed25e18e1681ff8a5",
+    "figures/fig4-panelb.svg": "c213d4de6f8715364da86c21fec3e39cfd2ade802e8a43a28586e4807eccfb70",
+    "figures/fig4-complete-layout-preview.png": "f86ebdc3a8e6c4756426441f3e8b32d1e110cf1d52c5eab6df1f27da567c4493",
+    "figures/fig4-complete-layout.pdf": "0d1ae85aeb894037fc574ff27ecc678411f28c798309efd7d90035dfed7ad16a",
+    "figures/fig4-panelc.pdf": "5ab27e2c4643b91733f3f066fc24642ace62df2208827e367e03fde4fc95f789",
+    "figures/fig4-paneld.png": "86526a3a4c0016f285937f71021f07d6ceea52516c45c3373a95aca4f34f0121",
+    "figures/fig4-panela.png": "8a32046b7d97b1c6c24ef1ac0b3f033cf516ce67ae8a7e25a31c89a238be410d",
+    "figures/fig4-panelh.png": "7062ed8dbccc9bc2d5bd9b7bcdfdad2728032465f9c4bfcbb17ec17fd772de5e",
+    "figures/fig4-panelc.svg": "7d225ee27cd92e4bd71c5a9b5f390a4693afe25e79575abf048227a230c7a843",
+    "figures/fig4-paneli.png": "ab8dca3f41994a284532f27871e0f9116d3b23bd31a9334c205fd56119301cb8",
+    "figures/fig4-panele.svg": "40891bababfc8deaebba06e89aaae85aa06bae55918258a6e27820b2a47243fd",
+    "figures/fig4-panelb.png": "7cda111796ca5488d279065e12a44be36bb3e36313eed796b01b6d05a86829d1",
+    "figures/fig4-panelg.png": "870d8097fcfa7414d811f8a96a0b67d8e6fd8b6376c6b5c417cc76afe8d5fb73",
+    "figures/fig4-panele.pdf": "557e52e919cf043cd07beee8645365468aae527c716f7bab6e1076eef75dd4da",
+    "figures/fig4-paneli.svg": "55ebd3c4ae21b9dc98aff4f98c2fddaebced816e565922389f99578f690dbfcd",
+    "figures/fig4-paneli.pdf": "0fc3b4a85e2d4b94e3aaba1d1fe42dbf653362ddba736a5572da74f27a5e66db",
+    "figures/fig4-panele.png": "6246eb292854ea412b5645c6d58d99150aed31a3755a8d6dcc3a34d1afe53ed7"
+  },
+  "author_designated_on": "2026-09-28",
+  "current_version_document": "docs/current_figure4.md"
+}

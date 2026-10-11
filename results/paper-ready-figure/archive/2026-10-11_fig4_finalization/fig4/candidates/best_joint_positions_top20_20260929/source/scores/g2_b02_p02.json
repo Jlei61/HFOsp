@@ -1,0 +1,64 @@
+{
+  "candidate": "g2_b02_p02",
+  "J": 2.131903042376027,
+  "N": 166,
+  "groups": {
+    "rank_pattern": {
+      "N": 166,
+      "A": 0.08619358521807628,
+      "B": 0.000930982149301296,
+      "D_off": 0.08526260306877499,
+      "D16": 0.09492154286777593,
+      "scaled": 1.900694004061341
+    },
+    "participation": {
+      "N": 166,
+      "A": 0.08111177488376141,
+      "B": 0.00042600913012856947,
+      "D_off": 0.08068576575363284,
+      "D16": 0.08510561047871675,
+      "scaled": 1.7697187610728276
+    },
+    "local_and_interrod_timing": {
+      "N": 166,
+      "A": 0.11959977339167531,
+      "B": 0.0020624551816996687,
+      "D_off": 0.11753731820997564,
+      "D16": 0.1389352907201097,
+      "scaled": 2.7252963619939123
+    }
+  },
+  "components": [
+    1.900694004061341,
+    2.7252963619939123,
+    1.7697187610728276
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/adaptive/units/g2_b02_p02/2511_847401/workers/trajectory.json",
+  "source_sha256": "1c9b39bfbc46335f08c2f3d7702c864b34b455938e97d0a157de239c82c30b64",
+  "reused": true,
+  "vector": [
+    2.112058196052648,
+    11.124684669696784,
+    15.712387560620854,
+    4.783305434338033,
+    1.1677527751307935,
+    12.86309452727437
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 1.9467025974760883,
+  "joint": {
+    "N": 166,
+    "A": 0.10583526012879946,
+    "B": 0.001817268515040342,
+    "D_off": 0.10401799161375912,
+    "scaled": 1.9467025974760883
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g2_b02_p02.json",
+  "historical_score_sha256": "3c9831296bdd184f811bb5949fed68a558a7dfa04c97fd73d2361f1ecdf785ff"
+}

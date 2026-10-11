@@ -1,0 +1,64 @@
+{
+  "candidate": "g1_axis3_plus",
+  "J": 1.621877257961985,
+  "N": 148,
+  "groups": {
+    "rank_pattern": {
+      "N": 148,
+      "A": 0.06712166788810231,
+      "B": 0.001812511090035592,
+      "D_off": 0.06530915679806672,
+      "D16": 0.08207488438089594,
+      "scaled": 1.4558870861151019
+    },
+    "participation": {
+      "N": 148,
+      "A": 0.07425010959215168,
+      "B": 0.0012779311026917249,
+      "D_off": 0.07297217848945996,
+      "D16": 0.08479304118935842,
+      "scaled": 1.6005330321022309
+    },
+    "local_and_interrod_timing": {
+      "N": 148,
+      "A": 0.0808001120308688,
+      "B": 0.002771942673926502,
+      "D_off": 0.0780281693569423,
+      "D16": 0.10366863909076245,
+      "scaled": 1.8092116556686222
+    }
+  },
+  "components": [
+    1.4558870861151019,
+    1.8092116556686222,
+    1.6005330321022309
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/initial/units/g1_axis3_plus/2511_847401/workers/trajectory.json",
+  "source_sha256": "c72ee65afa623d75e8c30b874ef67259c0edee8034001448dcded09340e7953a",
+  "reused": true,
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 1.6733518979376774,
+  "joint": {
+    "N": 148,
+    "A": 0.09220951545532335,
+    "B": 0.002797448140974783,
+    "D_off": 0.08941206731434857,
+    "scaled": 1.6733518979376774
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g1_axis3_plus.json",
+  "historical_score_sha256": "2857f05d849e5281602a8e0c7853cd5e7f26c4254301fec1ebfa1aeba22f62af"
+}

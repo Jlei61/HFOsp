@@ -1,0 +1,86 @@
+{
+  "status": "LAYOUT_AND_VALUE_CHECKS_PASS_VISUAL_PENDING",
+  "checks": {
+    "BC_equal_y_edges": true,
+    "C_axis_size_mm": [
+      51.00000000000002,
+      44.99999999999998
+    ],
+    "C_no_title_or_caption": true,
+    "C_legend_inside": true,
+    "C_artist_data_exact": true,
+    "C_original_reducer_independently_checked": true,
+    "BC_visible_gap_mm": 6.804201388888813,
+    "B_axis_corner_gap_px": 0,
+    "no_3d_axes": true,
+    "text_outside_canvas": [],
+    "J_legend_labels": [
+      "Subject",
+      "Median"
+    ],
+    "J_legend_location": "upper right",
+    "J_legend_clear_of_points": true,
+    "J_legend_columns": 1,
+    "J_legend_rows": 2,
+    "matched_mode_values_unchanged": true,
+    "C_summary_style": "mean_std",
+    "C_sample_std_ddof": 1,
+    "C_restarts": 4,
+    "C_shading_artist_values_exact": true,
+    "C_individual_trajectories": false
+  },
+  "current_package_and_pointer_unchanged": true,
+  "human_visual_acceptance": "PENDING",
+  "matched_mode_values_unchanged": true,
+  "author_designated_on": "2026-09-29",
+  "other_standalone_panels_pixel_identical": true,
+  "panel_c_author_accepted_on": "2026-10-08",
+  "panel_c_summary": "mean +/- sample SD; n=4; ddof=1",
+  "outside_updated_panels_changed_pixels": 0,
+  "unchanged_standalone_panels": [
+    "a",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j"
+  ],
+  "D_matches_latest_candidate_pixels": true,
+  "D_source_tables_and_checks_match": true,
+  "outside_panel_b_changed_pixels": 0,
+  "panel_b": {
+    "version": "post_prior_stages_6_16_v1",
+    "included_original_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "excluded_original_stages": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "visible_workpoints": 194,
+    "prior_workpoints": 32,
+    "original_workpoints": 226,
+    "stage_numbers_renumbered": false,
+    "prior_interpretation": "Stages 1-5 belong to the preceding label-informed development phase and are omitted from B. Subsequent searches inherit its candidate pool and patient geometry as development priors; their scoring objectives omit TA/TB labels. This display restriction does not establish independence from development data or remove historical information use.",
+    "visible_source": "source/B_visible_workpoints.csv",
+    "prior_source": "source/B_prior_workpoints.csv",
+    "requested_on": "2026-10-09",
+    "human_visual_acceptance": "PENDING"
+  }
+}

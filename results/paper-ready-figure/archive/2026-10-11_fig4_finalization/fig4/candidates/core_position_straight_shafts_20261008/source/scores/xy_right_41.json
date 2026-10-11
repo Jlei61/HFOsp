@@ -1,0 +1,66 @@
+{
+  "N": 145,
+  "status": "SCORABLE",
+  "J": 1.371530837577568,
+  "groups": {
+    "rank_pattern": {
+      "N": 145,
+      "A": 0.058205760477804624,
+      "B": 0.0018400615178140085,
+      "D_off": 0.056365698959990614,
+      "D16": 0.07304125646518007,
+      "scaled": 1.2565174202054767
+    },
+    "participation": {
+      "N": 145,
+      "A": 0.06350599853834772,
+      "B": 0.0014080006829518142,
+      "D_off": 0.06209799785539591,
+      "D16": 0.07485800404464672,
+      "scaled": 1.3620245256804335
+    },
+    "local_and_interrod_timing": {
+      "N": 145,
+      "A": 0.06728322574241376,
+      "B": 0.0027611524787798805,
+      "D_off": 0.06452207326363388,
+      "D16": 0.08954501760257655,
+      "scaled": 1.4960505668467943
+    }
+  },
+  "candidate": "xy_right_41",
+  "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_41/2511_847401/workers/trajectory.json",
+  "source_sha256": "d57a774196ae867e7a8245732333090e1ea1d18af9d5c333d8cd5d48f530e4c1",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.22920304,
+    5.96551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.2565174202054767,
+    1.4960505668467943,
+    1.3620245256804335
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789565776.2093546,
+  "J_joint": 1.4065969774761033,
+  "joint": {
+    "N": 145,
+    "A": 0.07797040887784215,
+    "B": 0.0028118341696448976,
+    "D_off": 0.07515857470819726,
+    "D16": 0.10064082187060414,
+    "scaled": 1.4065969774761033
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/xy_right_41.json",
+  "historical_score_sha256": "3dc5ffad48600d1763b006ee97281c61112b96b3bda56cadad03bd69c47ccdcc"
+}

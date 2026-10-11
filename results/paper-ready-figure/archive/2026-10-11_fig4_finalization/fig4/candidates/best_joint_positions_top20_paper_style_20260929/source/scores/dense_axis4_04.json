@@ -1,0 +1,65 @@
+{
+  "N": 129,
+  "status": "SCORABLE",
+  "J": 2.1864247759518687,
+  "groups": {
+    "rank_pattern": {
+      "N": 129,
+      "A": 0.08318138996345274,
+      "B": 0.002290411989707978,
+      "D_off": 0.08089097797374477,
+      "D16": 0.09935742464076533,
+      "scaled": 1.8032407090988862
+    },
+    "participation": {
+      "N": 129,
+      "A": 0.0749445211338994,
+      "B": 0.0016775423048591117,
+      "D_off": 0.07326697882904029,
+      "D16": 0.08679216366196688,
+      "scaled": 1.6069990262816622
+    },
+    "local_and_interrod_timing": {
+      "N": 129,
+      "A": 0.13921902199755345,
+      "B": 0.0034066068372573637,
+      "D_off": 0.1358124151602961,
+      "D16": 0.1632781827856836,
+      "scaled": 3.149034592475058
+    }
+  },
+  "candidate": "dense_axis4_04",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_04/2511_847401/workers/trajectory.json",
+  "source_sha256": "c350b61c4cf6d801d13bf3d475cee56bab68b47a596039c29eb17409950559b4",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.1666666666666667,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.8032407090988862,
+    3.149034592475058,
+    1.6069990262816622
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789510081.9026964,
+  "J_joint": 2.547324017219768,
+  "joint": {
+    "N": 129,
+    "A": 0.13954681903176913,
+    "B": 0.0034358750158598756,
+    "D_off": 0.13611094401590926,
+    "scaled": 2.547324017219768
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis4_04.json",
+  "historical_score_sha256": "423832909a66316f2716023cbc0c72e66150e8d44794496a77f218073cf16d20"
+}

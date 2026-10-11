@@ -1,0 +1,66 @@
+{
+  "N": 149,
+  "status": "SCORABLE",
+  "J": 1.9639401395511458,
+  "groups": {
+    "rank_pattern": {
+      "N": 149,
+      "A": 0.08633041377502633,
+      "B": 0.0018939609128002656,
+      "D_off": 0.08443645286222606,
+      "D16": 0.10207396386267854,
+      "scaled": 1.8822772693203786
+    },
+    "participation": {
+      "N": 149,
+      "A": 0.08234929520595292,
+      "B": 0.001498683397522842,
+      "D_off": 0.08085061180843008,
+      "D16": 0.09480710094786154,
+      "scaled": 1.773334406944669
+    },
+    "local_and_interrod_timing": {
+      "N": 149,
+      "A": 0.09915505261918388,
+      "B": 0.0027112374791185096,
+      "D_off": 0.09644381514006536,
+      "D16": 0.1216922141643565,
+      "scaled": 2.236208742388389
+    }
+  },
+  "candidate": "xy_left_34",
+  "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_34/2511_847401/workers/trajectory.json",
+  "source_sha256": "59f62b122a599249d831822d414b2612c608bde7269f2bcfcf777e988f2a60a6",
+  "vector": [
+    3.9492143200000003,
+    12.37890135,
+    16.47920304,
+    5.46551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.8822772693203786,
+    2.236208742388389,
+    1.773334406944669
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789565170.0057366,
+  "J_joint": 2.2759156673356102,
+  "joint": {
+    "N": 149,
+    "A": 0.12438308274886746,
+    "B": 0.0027742776311939325,
+    "D_off": 0.12160880511767352,
+    "D16": 0.14744426555816703,
+    "scaled": 2.2759156673356102
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/xy_left_34.json",
+  "historical_score_sha256": "9202a2aba9bb157c98a0798a1f32dd319c12038f46ec3444d177f2ea13afeb80"
+}

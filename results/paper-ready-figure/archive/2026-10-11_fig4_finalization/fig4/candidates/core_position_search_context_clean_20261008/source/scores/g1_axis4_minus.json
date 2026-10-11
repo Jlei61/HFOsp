@@ -1,0 +1,64 @@
+{
+  "candidate": "g1_axis4_minus",
+  "J": 3.2359953284496825,
+  "N": 126,
+  "groups": {
+    "rank_pattern": {
+      "N": 126,
+      "A": 0.11266021944627996,
+      "B": 0.0020584848576241273,
+      "D_off": 0.11060173458865584,
+      "D16": 0.12681230284244582,
+      "scaled": 2.4655598844650934
+    },
+    "participation": {
+      "N": 126,
+      "A": 0.07212821205192115,
+      "B": 0.0014308892438892062,
+      "D_off": 0.07069732280803194,
+      "D16": 0.08196557560365944,
+      "scaled": 1.550637554993556
+    },
+    "local_and_interrod_timing": {
+      "N": 126,
+      "A": 0.2488679766978951,
+      "B": 0.003390981670185632,
+      "D_off": 0.24547699502770945,
+      "D16": 0.2721809756804213,
+      "scaled": 5.6917885458903985
+    }
+  },
+  "components": [
+    2.4655598844650934,
+    5.6917885458903985,
+    1.550637554993556
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/initial/units/g1_axis4_minus/2511_847401/workers/trajectory.json",
+  "source_sha256": "e6441a85185c1be9bf3a786d9d4a74e2bce9ca8eaecf2eb95e19d5f138b8c549",
+  "reused": true,
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.125,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 4.1734456162633125,
+  "joint": {
+    "N": 126,
+    "A": 0.2262505897995793,
+    "B": 0.0032512309474424994,
+    "D_off": 0.2229993588521368,
+    "scaled": 4.1734456162633125
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g1_axis4_minus.json",
+  "historical_score_sha256": "2920b38191e105034e7815261b268753a4ce4e8d4d845851878efe6a07ed86ea"
+}

@@ -1,0 +1,32 @@
+{
+ "N": 2,
+ "status": "INSUFFICIENT_EVENTS",
+ "J": null,
+ "groups": {},
+ "candidate": "dens_bo01_16",
+ "source": "/data/hfosp/topic4_sef_hfo/joint_position_densification_20261008/search/units/dens_bo01_16/2511_847401/workers/trajectory.json",
+ "source_sha256": "751a242270d9c93f7a948075e728e1a3f9cfe2d69ae5577dfbb0f50fd934dc4d",
+ "vector": [
+  3.2234372805202733,
+  6.392434085407352,
+  17.855735777536292,
+  2.0179110161411384,
+  1.0800911197438836,
+  42.25436411798
+ ],
+ "topology": 2511,
+ "noise": 847401,
+ "reused": false,
+ "J_joint": null,
+ "joint": {
+  "N": 2,
+  "A": null,
+  "B": null,
+  "D_off": null,
+  "scaled": null
+ },
+ "physical_status": "COMPLETE_NO_RUNAWAY",
+ "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+ "device": "cuda:0",
+ "time": 1791496620.9373393
+}

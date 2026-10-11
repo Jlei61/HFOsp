@@ -1,0 +1,65 @@
+{
+  "N": 145,
+  "status": "SCORABLE",
+  "J": 1.4290419854584846,
+  "groups": {
+    "rank_pattern": {
+      "N": 145,
+      "A": 0.05842757783905158,
+      "B": 0.001804847873987861,
+      "D_off": 0.05662272996506372,
+      "D16": 0.07297916382307872,
+      "scaled": 1.2622472158323619
+    },
+    "participation": {
+      "N": 145,
+      "A": 0.06551455360614264,
+      "B": 0.0012235081180129556,
+      "D_off": 0.06429104548812968,
+      "D16": 0.07537908780762209,
+      "scaled": 1.4101256684696817
+    },
+    "local_and_interrod_timing": {
+      "N": 145,
+      "A": 0.07248917181170456,
+      "B": 0.002847664814656672,
+      "D_off": 0.06964150699704788,
+      "D16": 0.09544846937987397,
+      "scaled": 1.6147530720734105
+    }
+  },
+  "candidate": "dense_axis3_02",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_02/2511_847401/workers/trajectory.json",
+  "source_sha256": "e531d16efe46cbf338c6f90a8bb9caa4d89f990be75d6ffda65e3628e99adc57",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    2.96551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.2622472158323619,
+    1.6147530720734105,
+    1.4101256684696817
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789495743.6475224,
+  "J_joint": 1.4041012050046124,
+  "joint": {
+    "N": 145,
+    "A": 0.07786626160013352,
+    "B": 0.002841043286665469,
+    "D_off": 0.07502521831346805,
+    "scaled": 1.4041012050046124
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis3_02.json",
+  "historical_score_sha256": "64c617e52a469ef944bad1c3f8e33414bbbe976c9f9ff302b7c8e7abe1bcb683"
+}

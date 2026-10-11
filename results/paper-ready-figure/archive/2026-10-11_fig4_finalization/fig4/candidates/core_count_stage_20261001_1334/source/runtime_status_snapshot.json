@@ -1,0 +1,434 @@
+{
+  "status": "RUNNING",
+  "controller_pid": 1667845,
+  "train_complete": 249,
+  "train_planned": 1536,
+  "confirmation_complete": 0,
+  "confirmation_planned": 32,
+  "canary_pass": true,
+  "validated_core_counts": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "pending_canary_core_counts": [],
+  "streams": [
+    {
+      "core_count": 1,
+      "restart": 0,
+      "completed": 20,
+      "scorable": 20
+    },
+    {
+      "core_count": 2,
+      "restart": 0,
+      "completed": 20,
+      "scorable": 19
+    },
+    {
+      "core_count": 3,
+      "restart": 0,
+      "completed": 20,
+      "scorable": 20
+    },
+    {
+      "core_count": 4,
+      "restart": 0,
+      "completed": 5,
+      "scorable": 5
+    },
+    {
+      "core_count": 1,
+      "restart": 1,
+      "completed": 19,
+      "scorable": 17
+    },
+    {
+      "core_count": 2,
+      "restart": 1,
+      "completed": 19,
+      "scorable": 18
+    },
+    {
+      "core_count": 3,
+      "restart": 1,
+      "completed": 19,
+      "scorable": 18
+    },
+    {
+      "core_count": 4,
+      "restart": 1,
+      "completed": 5,
+      "scorable": 5
+    },
+    {
+      "core_count": 1,
+      "restart": 2,
+      "completed": 19,
+      "scorable": 17
+    },
+    {
+      "core_count": 2,
+      "restart": 2,
+      "completed": 19,
+      "scorable": 19
+    },
+    {
+      "core_count": 3,
+      "restart": 2,
+      "completed": 19,
+      "scorable": 18
+    },
+    {
+      "core_count": 4,
+      "restart": 2,
+      "completed": 4,
+      "scorable": 4
+    },
+    {
+      "core_count": 1,
+      "restart": 3,
+      "completed": 19,
+      "scorable": 17
+    },
+    {
+      "core_count": 2,
+      "restart": 3,
+      "completed": 19,
+      "scorable": 17
+    },
+    {
+      "core_count": 3,
+      "restart": 3,
+      "completed": 19,
+      "scorable": 19
+    },
+    {
+      "core_count": 4,
+      "restart": 3,
+      "completed": 4,
+      "scorable": 4
+    }
+  ],
+  "active": [
+    {
+      "task": [
+        "train",
+        4,
+        2,
+        "initial_04"
+      ],
+      "pid": 1695733,
+      "rss_gib": 2.0298805236816406,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9701194763183594
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        3,
+        "initial_04"
+      ],
+      "pid": 1695854,
+      "rss_gib": 2.1400680541992188,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8599319458007812
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        0,
+        "initial_05"
+      ],
+      "pid": 1696155,
+      "rss_gib": 2.262523651123047,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.7374763488769531
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        1,
+        "initial_05"
+      ],
+      "pid": 1696771,
+      "rss_gib": 2.1326980590820312,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8673019409179688
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        2,
+        "initial_05"
+      ],
+      "pid": 1696941,
+      "rss_gib": 2.1352920532226562,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8647079467773438
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        3,
+        "initial_05"
+      ],
+      "pid": 1697277,
+      "rss_gib": 2.2444534301757812,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.7555465698242188
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        0,
+        "initial_06"
+      ],
+      "pid": 1697852,
+      "rss_gib": 2.133617401123047,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8663825988769531
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        1,
+        "initial_06"
+      ],
+      "pid": 1698444,
+      "rss_gib": 2.1258277893066406,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8741722106933594
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        2,
+        "initial_06"
+      ],
+      "pid": 1698481,
+      "rss_gib": 2.1355514526367188,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8644485473632812
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        3,
+        "initial_06"
+      ],
+      "pid": 1698660,
+      "rss_gib": 2.1390419006347656,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8609580993652344
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        0,
+        "initial_07"
+      ],
+      "pid": 1699010,
+      "rss_gib": 2.1215133666992188,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8784866333007812
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        1,
+        "initial_07"
+      ],
+      "pid": 1699233,
+      "rss_gib": 2.2454833984375,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.7545166015625
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        2,
+        "initial_07"
+      ],
+      "pid": 1699685,
+      "rss_gib": 2.125469207763672,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8745307922363281
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        3,
+        "initial_07"
+      ],
+      "pid": 1701238,
+      "rss_gib": 2.1158294677734375,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8841705322265625
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        0,
+        "initial_08"
+      ],
+      "pid": 1701830,
+      "rss_gib": 2.112834930419922,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8871650695800781
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        1,
+        "initial_08"
+      ],
+      "pid": 1702033,
+      "rss_gib": 2.1184768676757812,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8815231323242188
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        2,
+        "initial_08"
+      ],
+      "pid": 1703046,
+      "rss_gib": 2.107685089111328,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.8923149108886719
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        3,
+        "initial_08"
+      ],
+      "pid": 1703953,
+      "rss_gib": 2.099346160888672,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9006538391113281
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        0,
+        "initial_09"
+      ],
+      "pid": 1704594,
+      "rss_gib": 2.0954666137695312,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9045333862304688
+      }
+    },
+    {
+      "task": [
+        "train",
+        4,
+        1,
+        "initial_09"
+      ],
+      "pid": 1704797,
+      "rss_gib": 2.0926971435546875,
+      "memory_forecast": {
+        "stage": "SIMULATING",
+        "projected_gib": 4.0,
+        "growth_gib": 1.9073028564453125
+      }
+    }
+  ],
+  "pending_current_batches": 67,
+  "failures": [],
+  "available_gib": 102.5130500793457,
+  "cpu_percent": 89.4,
+  "disk_free_gib": 1419.5058097839355,
+  "max_workers": 48,
+  "original_max_workers": 16,
+  "resource_control_path": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/resource_control.json",
+  "growth_reserve_gib": 37.2862434387207,
+  "available_reserve_gib": 64.0,
+  "projected_worker_gib": 6.5,
+  "simulation_worker_gib": 4.0,
+  "building_workers": 0,
+  "max_building_workers": 4,
+  "next_worker_memory_required_gib": 107.7862434387207,
+  "additional_worker_slots_by_memory": 0,
+  "dispatch_deadline": 1791806199.8229969,
+  "updated_unix": 1790832928.5383518
+}
