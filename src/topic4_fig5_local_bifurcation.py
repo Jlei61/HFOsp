@@ -7,23 +7,29 @@ from dataclasses import replace
 import numpy as np
 from scipy import sparse, linalg
 from scipy.optimize import root
+from functools import lru_cache
+import src.topic4_patient_zm_meanfield as _meanfield
 from src.topic4_patient_zm_meanfield import _transfer_derivatives
 from src.topic4_dual_core_spatial_z import (
     spatial_z_moments, spatial_z_residual, spatial_z_jacobian)
 from src.topic4_dual_core_spatial_z_delay import delayed_step_matrix
 
+# Quadrature nodes are deterministic constants; reuse their exact arrays.
+_meanfield.leggauss = lru_cache(maxsize=8)(_meanfield.leggauss)
+
 
 class Family:
-    def __init__(self, model, z_moments, eta, parameter, operators=None):
+    def __init__(self, model, z_moments, eta, parameter, operators=None, z_anchor=1.):
         self.base = model
         self.z_moments = z_moments
         self.eta = eta
         self.parameter = parameter
         self.operators = operators
+        self.z_anchor = z_anchor
 
     def at(self, p):
         m = self.base
-        eta, tau, dose = self.eta, 500., 1.
+        eta, tau, dose = self.eta, 500., self.z_anchor
         ops = self.operators
         if self.parameter == 'z_loss':
             dose = p
@@ -76,7 +82,7 @@ class Family:
 
     def solve(self, p, x):
         fit=root(lambda q:self.f(q,p),x,jac=lambda q:self.jac(q,p),
-                 options={'xtol':1e-9,'maxfev':2000})
+                 options={'xtol':1e-9,'maxfev':500})
         err=float(np.max(np.abs(self.f(fit.x,p))))
         return fit.x, bool(err<1e-8 and self.physical(fit.x)), err
 
@@ -128,7 +134,17 @@ def polish_fold(family, x, p):
     def equations(q):
         r,s,w=q[:n],q[n],q[n+1:]
         return np.r_[family.f(r,s),family.jac(r,s)@w,np.dot(w,w)-1.]
-    fit=root(equations,np.r_[x,p,v],options={'xtol':1e-8,'maxfev':3500})
+    def augmented_jacobian(q):
+        r,s,w=q[:n],q[n],q[n+1:];h=1e-4
+        j=family.jac(r,s)
+        # Hessian symmetry: d(Jv)/dx = directional derivative of J along v.
+        hv=(family.jac(r+h*w,s)-family.jac(r-h*w,s))/(2*h)
+        jp=((family.jac(r,s+h)-family.jac(r,s-h))/(2*h))@w
+        return np.block([[j,family.dp(r,s)[:,None],np.zeros((n,n))],
+                         [hv,jp[:,None],j],
+                         [np.zeros((1,n+1)),2*w[None,:]]])
+    fit=root(equations,np.r_[x,p,v],jac=augmented_jacobian,
+             options={'xtol':1e-8,'maxfev':1000})
     q=fit.x;r,s,v=q[:n],float(q[n]),q[n+1:]
     err=float(np.max(np.abs(equations(q))))
     if err>1e-7 or not family.physical(r):

@@ -12,6 +12,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import numpy as np
 from PIL import Image
 
@@ -600,7 +601,7 @@ def _overview(candidate, run, segment, evaluator):
                         event["window_ms"][1] / 1000,
                         color=COLORS[mode], alpha=0.20)
     for boundary in (6, 12, 18): axes[0].axvline(boundary, color=".65", ls="--", lw=.7)
-    axes[0].axvspan(0, .5, color=".7", alpha=.2, label="burn-in")
+    axes[0].axvspan(0, .5, color=".7", alpha=.2)
     actual_seconds = float(run["actual_duration_ms"]) / 1000.0
     if actual_seconds < 24.0:
         axes[0].axvspan(
@@ -610,7 +611,19 @@ def _overview(candidate, run, segment, evaluator):
     axes[0].set(xlim=(0, 24), ylabel="Active E fraction",
                 title=(f"{candidate_id} | topo {topology}, dyn {dynamics} | "
                        f"{run['physical_status']} | actual {actual_seconds:.3f} s"))
-    axes[0].legend(frameon=False, fontsize=7, loc="upper right")
+    legend_handles = [
+        Patch(facecolor=COLORS[0], alpha=.20, label="M0 primary window"),
+        Patch(facecolor=COLORS[1], alpha=.20, label="M1 primary window"),
+        Patch(facecolor=COLORS[-1], alpha=.20, label="non-primary detected window"),
+        Patch(facecolor=".7", alpha=.20, label="burn-in (0–0.5 s)"),
+    ]
+    if actual_seconds < 24.0:
+        legend_handles.append(Patch(
+            facecolor="white", edgecolor=".65", hatch="///",
+            label="not simulated after early stop",
+        ))
+    axes[0].legend(handles=legend_handles, frameon=False, fontsize=6.5,
+                   loc="upper right", ncol=2)
     counts = np.asarray([row["primary_mode_counts"] for row in segment["segments"]])
     x = np.arange(4)
     axes[1].bar(x, counts[:, 0], color=COLORS[0], label="M0")

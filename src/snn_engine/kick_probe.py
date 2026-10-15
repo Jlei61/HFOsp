@@ -121,7 +121,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
                   external_e_rate_drive=None, node_accessibility=None,
-                  initial_voltage=None, step_observer=None):
+                  initial_voltage=None, step_observer=None, external_i_state=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -147,6 +147,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     (the external block then reduces to model.simulate's, modulo scalar-vs-array
     poisson internals).
     """
+    if external_i_state is not None:
+        if resume_state is not None or checkpoint_steps is not None:
+            raise ValueError("continuous I state checkpointing is not implemented in R1")
+        if np.any(external_i_state.indices < net["NE"]) or np.any(external_i_state.indices >= net["NE"]+net["NI"]):
+            raise ValueError("continuous I state may target only inhibitory neurons")
     e_gaba = p.E_gaba if e_gaba is None else e_gaba   # M2 shunting GABA reversal (=V_reset); default path unused
     E_A = e_gaba                                      # M4-3A a-shunt reversal; reuses the resolved e_gaba default
     rng = net["rng"]
@@ -449,6 +454,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
         ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
+        # Continuous-core-state R1: retain the legacy Poisson draw and master
+        # RNG consumption; a separate coupling changes only selected I counts.
+        if external_i_state is not None:
+            external_i_state.apply(ext, nu_vec, t, dt)
         s_E += ext * ext_incr
         # ==================================================================================
 

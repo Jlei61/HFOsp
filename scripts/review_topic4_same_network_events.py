@@ -120,7 +120,7 @@ def strobograms(w,z,folder):
         fig.subplots_adjust(top=1-.7/(count*1.8),bottom=.02,hspace=.25,wspace=.02)
         fig.savefig(folder/f'native_chronological_page_{page+1:02d}.png',dpi=120);plt.close(fig)
 
-def movie(w,z,patient,ev,candidate,folder):
+def movie(w,z,patient,ev,candidate,folder,*,max_events=None,selection_note=None):
     names=z['contact_names'].astype(str).tolist();pn=patient['contact_order'].astype(str).tolist()
     order=[pn.index(n) for n in names];pxy=patient['points_mm'][order]
     obs=w['observation'];table_all=np.asarray(obs['centroid_ms'],float);ll,ss,_=ev.classify(table_all)
@@ -162,7 +162,8 @@ def movie(w,z,patient,ev,candidate,folder):
     for ax in axs.ravel():ax.title.set_fontsize(9);ax.tick_params(labelsize=7)
     dynamic=[im,*raw.patches,raw_contacts,sc,cursor,tcursor,title,stamp]+[x[1] for x in patient_dynamic]
     frames=[];duration=[];records=[];selected_frames=[]
-    for i,row in enumerate(table_all):
+    shown_count=len(table_all) if max_events is None else min(int(max_events),len(table_all))
+    for i,row in enumerate(table_all[:shown_count]):
         start,stop=obs['windows_ms'][i];ix=np.flatnonzero((centers>=start)&(centers<stop))[::2]
         t0=float(np.nanmin(row));him.set_data(env[:,int(start/dt):int(stop/dt)]);him.set_extent((start-t0,stop-t0,-.5,14.5));heat.set_xlim(start-t0,stop-t0)
         marks.set_offsets(np.column_stack([row-t0,np.arange(15)]))
@@ -201,7 +202,8 @@ def movie(w,z,patient,ev,candidate,folder):
     result={'path':str(path),'sha256':sha(path),'frames':expected,'all_frames_decoded':True,'events':records,
         'biological_step_ms':4,'frame_duration_ms':40,'first_frame_duration_ms':400,
         'normalization':'model scales fixed over complete simulation; patient fixed exemplar full-window q99, gamma .5; native linear full-simulation max',
-        'selection':'Two previously reviewed candidates; lowest seed 2511; ALL detected windows chronological, including excluded windows; no likeness selection.',
+        'selection':selection_note or 'Two previously reviewed candidates; lowest seed 2511; ALL detected windows chronological, including excluded windows; no likeness selection.',
+        'rendered_event_count':shown_count,'total_detected_event_count':len(table_all),
         'continuous_simulation':True,'continuous_playback':False,'gaps_explicit':True,'no_event_specific_model_changes':True,
         'patient_times':'Same relative centroid milliseconds, unpaired repeated examples, no time warp. Extends beyond published -8..50 ms using same cache.',
         'patient_measure':'HFO envelope versus model firing-density proxy; amplitudes not equated','agent_visual_review':False,'human_acceptance':False}
