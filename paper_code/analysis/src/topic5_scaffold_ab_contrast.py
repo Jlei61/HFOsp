@@ -1,4 +1,3 @@
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from analysis.src.topic5_axis_alignment import within_shaft_shuffle
 from analysis.src.propagation_skeleton_geometry import parse_shaft

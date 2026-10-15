@@ -8,7 +8,6 @@ estimate. This is the formal producer-grade function extracted from the plotting
 (scripts/plot_topic5_dab_axis_subject.py::compute).
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Dict, Optional, Sequence
 import numpy as np
 from analysis.src.topic5_scaffold_ab_contrast import build_D_AB

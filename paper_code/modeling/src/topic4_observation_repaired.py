@@ -4,7 +4,6 @@ Both time descriptors use the same fixed event windows and participation mask.
 Recruitment is auxiliary and is NOT compared to patient lagPat centroids as if
 they were the same measurement. No model results choose the observer settings.
 """
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from scipy.ndimage import maximum_filter1d
 

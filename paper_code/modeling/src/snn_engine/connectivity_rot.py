@@ -23,7 +23,6 @@ direction (along the (1,1) diagonal) and a comparable elongation ratio (~2 vs th
 original rho=0.6 ratio of ~1.9); confirmed by `_sanity_check` below.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from scipy import sparse
 from scipy.spatial import cKDTree

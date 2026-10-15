@@ -10,7 +10,6 @@ only). Δr = rank_T_b − rank_T_a is per-subject only; never aggregate signed
 values across subjects.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from itertools import combinations, product
 from math import floor
 from typing import Any, Dict, List, Optional, Sequence, Tuple

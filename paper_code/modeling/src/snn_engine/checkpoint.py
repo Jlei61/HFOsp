@@ -7,8 +7,6 @@ slot or one RNG stream produces a resumed trajectory that looks plausible and is
 wrong. Gate C (perturbed reload == full rerun) is what catches an omission.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
-import hashlib
 import json
 import os
 import tempfile
@@ -126,7 +124,7 @@ def _flatten(state):
     return (arrays, scalars)
 
 def save(state, path):
-    """Atomic write; returns the file's sha256 so a caller can record it."""
+    """Write a model state atomically."""
     path = str(path)
     arrays, scalars = _flatten(state)
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
@@ -134,7 +132,7 @@ def save(state, path):
     os.close(handle)
     np.savez(tmp, __meta__=np.array(json.dumps(scalars, sort_keys=True)), **arrays)
     os.replace(tmp + '.npz', path)
-    return hashlib.sha256(open(path, 'rb').read()).hexdigest()
+    return path
 
 def load(path):
     with np.load(path, allow_pickle=False) as handle:
@@ -171,25 +169,3 @@ def load(path):
     for key in ('s_E_rec', 'I_E_rec'):
         state.setdefault(key, None)
     return state
-
-def _digest_update(hasher, value, label):
-    hasher.update(label.encode())
-    if value is None:
-        hasher.update(b'None')
-    elif isinstance(value, np.ndarray):
-        hasher.update(np.ascontiguousarray(value).tobytes())
-        hasher.update(str(value.dtype).encode())
-        hasher.update(str(value.shape).encode())
-    else:
-        hasher.update(json.dumps(value, sort_keys=True, default=str).encode())
-
-def digest(state):
-    hasher = hashlib.sha256()
-    for key in sorted(state):
-        value = state[key]
-        if isinstance(value, dict):
-            for sub in sorted(value):
-                _digest_update(hasher, value[sub], f'{key}.{sub}')
-        else:
-            _digest_update(hasher, value, key)
-    return hasher.hexdigest()

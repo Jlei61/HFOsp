@@ -10,7 +10,6 @@ CLI: ``scripts/run_interictal_propagation.py``,
      ``scripts/run_pr7_template_pairing.py``.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import datetime
 from pathlib import Path
 import os

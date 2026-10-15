@@ -5,8 +5,6 @@ collinearity, shared bisector) from the downstream ictal field readout.  It has 
 filesystem I/O; the cohort runner owns joins, caching and serialization.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
-import hashlib
 from typing import Dict, Mapping, Optional, Sequence
 import numpy as np
 from analysis.src.dab_gradient_axis import RCOND, compute_dab_gradient_axis
@@ -14,7 +12,6 @@ from analysis.src.topic5_contact_similarity import kernel_smooth_at_contacts, me
 TEMPLATE_AXIS_DEFINITION = 'template_propagation_axis_v2'
 TEMPLATE_AXIS_DIRECTION = 'positive_early_to_late'
 INTERICTAL_FIELD_CONTRACT = 'topic5_interictal_template_fields_v1'
-INTERICTAL_FIELD_FINGERPRINT_ALGORITHM = 'sha256_v1p1_nonfinite_canonical'
 
 def z_earliness(rank: Sequence[float]) -> np.ndarray:
     """Return earliness = -z(rank); fail closed to zeros for a constant vector."""
@@ -278,70 +275,7 @@ def build_interictal_template_field_record(*, subject_id: str, dataset: str, sub
             scorers['shared_b'] = make_field_scorer(feb, shared['points'], fsb, shared['sigma'])
             planes['shared'] = shared
     record['interictal_field'] = {'status': 'ok', 'field_contact_policy': 'joint_valid_mapped_and_positive_support_in_both_TA_TB', 'contact_order': fnames, 'coords': fx, 'shafts': sh[keep], 'rank_a': fra, 'rank_b': frb, 'earliness_a': fea, 'earliness_b': feb, 'support_a': fsa, 'support_b': fsb, 'n_contacts': int(keep.sum()), 'planes': planes, 'field_models': scorers, 'reuse_contract': {'join': 'align future activation by exact channel name to contact_order', 'frozen': ['axis', 'plane', 'bandwidth', 'support', 'template_field', 'kernel_weights'], 'forbidden': 'do not refit axis or plane from ictal/onset values'}}
-    record['interictal_field']['fingerprint_algorithm'] = INTERICTAL_FIELD_FINGERPRINT_ALGORITHM
-    record['interictal_field']['fingerprint_sha256'] = interictal_field_fingerprint(record)
     return record
-
-def interictal_field_fingerprint(record: Mapping[str, object]) -> str:
-    """Hash every frozen numerical component needed by future activation scoring."""
-    if record.get('contract') != INTERICTAL_FIELD_CONTRACT:
-        raise ValueError(f"unsupported interictal field contract: {record.get('contract')}")
-    field = record.get('interictal_field') or {}
-    if field.get('status') != 'ok':
-        raise ValueError(f"interictal field unavailable: {field.get('status')}")
-    algorithm = field.get('fingerprint_algorithm')
-    if algorithm != INTERICTAL_FIELD_FINGERPRINT_ALGORITHM:
-        raise ValueError(f'unsupported interictal field fingerprint algorithm: {algorithm}')
-    digest = hashlib.sha256()
-
-    def add_text(value: object) -> None:
-        if value is None or (isinstance(value, (float, np.floating)) and (not np.isfinite(float(value)))):
-            value = '<nonfinite>'
-        digest.update(str(value).encode('utf-8'))
-        digest.update(b'\x00')
-
-    def add_array(value: object) -> None:
-        array = np.ascontiguousarray(np.asarray(value, dtype='<f8'))
-        digest.update(str(array.shape).encode('ascii'))
-        digest.update(array.tobytes())
-    add_text(record.get('contract'))
-    add_text(algorithm)
-    add_text(record.get('subject_id'))
-    add_text(record.get('axis_definition'))
-    add_text(record.get('axis_direction_convention'))
-    for name in field.get('contact_order', []):
-        add_text(name)
-    for key in ('coords', 'rank_a', 'rank_b', 'earliness_a', 'earliness_b', 'support_a', 'support_b'):
-        add_array(field[key])
-    pair = record.get('axis_pair') or {}
-    for key in ('axis_a', 'axis_b'):
-        axis = pair.get(key) or {}
-        for array_key in ('u', 'along', 'earliness_gradient_u', 'propagation_vector'):
-            add_array(axis[array_key])
-        for scalar_key in ('n', 'n_shafts', 'effective_rank', 'R2', 'bootstrap_cosine', 'loso_cosine'):
-            add_text(axis.get(scalar_key))
-    relation = pair.get('relation') or {}
-    for key in ('cosine', 'abs_cosine', 'line_angle_deg', 'collinear', 'relation'):
-        add_text(relation.get(key))
-    pair_bootstrap = pair.get('pair_bootstrap') or {}
-    for key in ('p_collinear', 'p_sign_stable', 'robust_collinear'):
-        add_text(pair_bootstrap.get(key))
-    if (pair.get('shared_axis') or {}).get('status') == 'ok':
-        add_array(pair['shared_axis']['u'])
-    for key in sorted((field.get('planes') or {}).keys()):
-        plane = field['planes'][key]
-        add_text(key)
-        for array_key in ('points', 'u', 'w', 'origin'):
-            add_array(plane[array_key])
-        add_text(float(plane['scale_mm']))
-        add_text(float(plane['sigma']))
-    for key in sorted((field.get('field_models') or {}).keys()):
-        model = field['field_models'][key]
-        add_text(key)
-        for array_key in ('template_field', 'points', 'support', 'weight_id', 'weight_mirror'):
-            add_array(model[array_key])
-        add_text(float(model['sigma']))
-    return digest.hexdigest()
 
 def interictal_field_quality_tier(record: Mapping[str, object]) -> str:
     """Return a descriptive input-quality tier without changing eligibility."""
@@ -362,12 +296,6 @@ def scorers_from_interictal_record(record: Mapping[str, object]) -> Dict[str, Di
     field = record.get('interictal_field') or {}
     if field.get('status') != 'ok':
         raise ValueError(f"interictal field unavailable: {field.get('status')}")
-    algorithm = field.get('fingerprint_algorithm')
-    if algorithm != INTERICTAL_FIELD_FINGERPRINT_ALGORITHM:
-        raise ValueError(f'unsupported interictal field fingerprint algorithm: {algorithm}')
-    expected = field.get('fingerprint_sha256')
-    if not expected or str(expected) != interictal_field_fingerprint(record):
-        raise ValueError('interictal field fingerprint mismatch')
     models = field.get('field_models') or {}
     required = ('own_a', 'own_b')
     if not all((k in models for k in required)):

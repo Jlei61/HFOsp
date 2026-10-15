@@ -10,7 +10,6 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import numpy as np
 from data_processing.raw_to_events import read_samples
 from workflows.common import write_json
-from paper_paths import sha256
 
 
 def main():
@@ -26,7 +25,7 @@ def main():
     target.parent.mkdir(parents=True,exist_ok=True)
     np.savez_compressed(target,samples_V=x,sfreq=fs,channel_names=names)
     write_json(target.with_suffix('.json'),dict(source=str(Path(a.input).resolve()),source_start_sec=a.start_sec,
-        duration_sec=x.shape[1]/fs,sfreq=fs,channel_names=names,unit='V',processing='none',sha256=sha256(target)))
+        duration_sec=x.shape[1]/fs,sfreq=fs,channel_names=names,unit='V',processing='none'))
     print(target)
 
 if __name__=='__main__':main()

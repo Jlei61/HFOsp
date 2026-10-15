@@ -3,7 +3,6 @@
 No simulation or event-specific drive is defined here. GPU use only accelerates
 the same float64 Fourier feature multiplication used on CPU.
 """
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from itertools import combinations
 import warnings
 import numpy as np

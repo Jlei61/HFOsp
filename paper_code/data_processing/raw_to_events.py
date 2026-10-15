@@ -61,10 +61,16 @@ def preprocess(x, fs, names, config):
         x = np.stack([x[names.index(a)] - x[names.index(b)] for a, b in pairs.values()])
     elif cfg['reference'] == 'car':
         x = x - np.mean(x, axis=0, keepdims=True); out_names = names
+    elif cfg['reference'] == 'channel':
+        # A saved full-montage reference allows a compact raw-voltage demo.
+        ref = names.index(cfg['reference_channel'])
+        keep = [i for i in range(len(names)) if i != ref]
+        x = x[keep] - x[ref][None, :]
+        out_names = [names[i] for i in keep]
     elif cfg['reference'] == 'none':
         out_names = names
     else:
-        raise ValueError('reference must be bipolar/car/none')
+        raise ValueError('reference must be bipolar/car/channel/none')
     target = float(cfg['target_sfreq'])
     if target <= 2 * cfg['band_hz'][1]:
         raise ValueError('Target rate must exceed twice the upper filter frequency')

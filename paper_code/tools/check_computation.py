@@ -3,8 +3,6 @@ from pathlib import Path
 import sys,copy
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import numpy as np
-from tools.runtime_guard import install_guard,local_import_report
-install_guard()
 from data_processing.raw_to_events import event_features,join_blocks
 from data_processing.src.group_event_analysis import EventWindow
 from analysis.src.lagpat_rank_audit import build_masked_kmeans_features
@@ -76,6 +74,5 @@ def main():
             runs.append(engine(p,net,0,slow=slow))
         for key in ['E_spk_bool','rate_E','rate_I']:np.testing.assert_array_equal(runs[0][key],runs[1][key])
     print('PASS: known time shifts, absent-channel invariance, name alignment, signed direction, held-out isolation, fixed-field translation invariance, no autapses, full dynamics parity')
-    print(local_import_report())
 
 if __name__=='__main__':main()

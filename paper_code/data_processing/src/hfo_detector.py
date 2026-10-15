@@ -17,7 +17,6 @@ Author: HFOsp Team
 Date: 2026-01-31
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from dataclasses import dataclass, field
 from pathlib import Path
 import time

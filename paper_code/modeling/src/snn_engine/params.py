@@ -21,7 +21,6 @@ Units: time = ms, length = mm (Table 1 lists µm; converted here), voltage = mV,
 rate = 1/ms (Hz = 1e-3 / ms).
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from dataclasses import dataclass
 ALPHA = 2.065
 

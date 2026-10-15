@@ -20,7 +20,6 @@ adaptive threshold phi, sAHP g_K) are NOT in this core loop; they attach via
 slow_vars.py and are off by default. Hook points are marked `SLOWVAR HOOK`.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import time
 import numpy as np
 from modeling.src.snn_engine.params import Params, compute_nu_theta

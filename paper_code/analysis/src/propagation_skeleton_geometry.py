@@ -7,7 +7,6 @@ derived from a template axis whose non-participating channels are NaN, so a
 phantom can never enter a core (NaN sorts out of nanargsort).
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import re
 from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np

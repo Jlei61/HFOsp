@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 import os
 import numpy as np
-from paper_paths import new_output,OUTPUT_ROOT
+from paper_paths import new_output, OUTPUT_ROOT
 
 
 def safe(value):

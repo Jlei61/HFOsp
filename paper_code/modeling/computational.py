@@ -20,7 +20,7 @@ from modeling.src.snn_engine.lfp import LFPRecorder
 from modeling.src.topic4_streaming_spike_readout import simulate_streaming
 from modeling.src.topic4_core_field import sample_core_quantiles, core_thresholds
 from modeling.src.topic4_core_connectivity_v2 import core_index_for, scale_pathway_blocks
-from modeling.scripts.topic4_core_count_optimization.physics import CoreCountOU
+from modeling.core_input import CoreCountOU
 from modeling.src.topic4_observation_repaired import observe, calibrate_reference
 from modeling.src.topic4_three_observable_objective import ThreeObservableObjective
 from modeling.src.topic4_three_observable_label_free import LabelFreeThreeObservableObjective
@@ -148,7 +148,7 @@ def optimize_cores(substrate,contacts,observer,objective,*,k=2,budget=8,restart=
     """Bounded, sequential Sobol + local refinement; every loss runs a new SNN.
 
     Equal proposal budget across K. This transparent notebook optimizer is not
-    the historical delayed Matern-GP/qLogEI batch scheduler (copied separately).
+    the historical delayed Matern-GP/qLogEI batch scheduler (not included in this basic package).
     Missing events/runaway remain unscorable, with no artificial penalty value.
     """
     cfg=substrate['config'];r=cfg['radius_mm'];lo=r+.05;hi=substrate['params'].L-r-.05

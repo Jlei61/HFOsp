@@ -12,7 +12,6 @@ The frozen interictal axes and fields are *only* consumed through
 bandwidth, support map, or template field from ictal data.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from dataclasses import dataclass
 from itertools import combinations
 from math import comb
@@ -34,17 +33,6 @@ class WindowScale:
 WINDOW_SCALES = (WindowScale('2s_step0p5s', 2.0, 0.5), WindowScale('5s_step1s', 5.0, 1.0), WindowScale('10s_step2s', 10.0, 2.0), WindowScale('20s_step2s', 20.0, 2.0))
 FIXED_WINDOWS = {'pre10': (-10.0, 0.0), 'post10': (0.0, 10.0), 'pre20': (-20.0, 0.0), 'post20': (0.0, 20.0), 'late20_30': (20.0, 30.0)}
 
-def eligibility_drop_reason(*, band_available: bool, field_status: str, fingerprint_ok: bool, n_finite_contacts: int, minimum_contacts: int=6) -> str | None:
-    """Return the first fail-closed data-eligibility reason, or ``None``."""
-    if not band_available:
-        return 'missing_band'
-    if str(field_status) != 'ok':
-        return 'missing_axis_or_field'
-    if not bool(fingerprint_ok):
-        return 'fingerprint_drift'
-    if int(n_finite_contacts) < int(minimum_contacts):
-        return 'fewer_than_6_finite_contacts'
-    return None
 
 def tspectral_zeroed_times(times_rel_reference: Sequence[float], t_spectral_rel_reference_sec: float) -> np.ndarray:
     """Convert a clinical/EEG-reference time grid to accepted T_spectral=0."""

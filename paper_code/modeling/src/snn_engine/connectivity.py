@@ -28,7 +28,6 @@ candidate restriction -- left as a TODO; the kernel + in-degree contract is
 identical, only the candidate set is pruned.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from scipy import sparse
 PARTNER_SAMPLER_VERSION = 'positive_weight_no_autapse_v2'

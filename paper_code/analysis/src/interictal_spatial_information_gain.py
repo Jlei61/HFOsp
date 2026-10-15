@@ -8,7 +8,6 @@ directions are opened only for scoring.  This keeps the spatial outcome out of
 the held-out classifier.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Any, Dict, Mapping, Sequence
 import numpy as np
 from sklearn.cluster import KMeans

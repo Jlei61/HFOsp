@@ -4,7 +4,9 @@
 
 ## 数据接口
 
-原始 SEEG 可直接使用 EDF，或不含检测结果的 NPZ：
+默认E1146 demo为4×200秒电压片段，15个分析触点另加一行 `CAR_REFERENCE`。该行是原114个颅内触点的均值；使用 `reference="channel"` 减去这一行并移除参考行，再执行后续处理。保存的是电压与参考，未保存检测、rank或聚类结果。
+
+自己的原始 SEEG 可直接使用 EDF，或不含检测结果的 NPZ：
 
 ```python
 np.savez_compressed('record.npz', samples_V=raw_volts,
@@ -15,7 +17,7 @@ np.savez_compressed('record.npz', samples_V=raw_volts,
 
 Epilepsiae 原始 `.data/.head` 用包内 `load_epilepsiae_block` 读取；其参考、采样率和起始时刻随 `PreprocessingResult` 返回。该输出已经参考并按 `.head` 的 conversion_factor 转换：先核对该批次的物理单位再换算为V，继续处理时设 reference="none"，已陷波则设 notch_freqs=[]；不要再次双极。不能把未核对单位的int16或微伏当V。Yuquan示例的几何采用左触点别名；其他研究若用双极中点，要显式更换坐标合同。
 
-可用 `python tools/export_raw_excerpt.py recording.edf --config config/raw_example.json --start-sec 0 --duration-sec 200 --output ../paper_inputs/computational/example.npz` 导出未参考的原始片段及来源记录；也可以直接把EDF路径放进records，不需要预生成任何事件表。
+可用 `python tools/export_raw_excerpt.py recording.edf --start-sec 0 --duration-sec 200 --output ../paper_inputs/computational/example.npz` 导出未参考的原始片段及来源记录；也可以直接把EDF路径放进records，不需要预生成任何事件表。
 
 每个患者的坐标JSON为 `{channel_name: [x_mm,y_mm,z_mm]}`。缺失映射保留NaN；不把坐标缺失的事件删出timing训练。
 
@@ -75,14 +77,14 @@ Z/M使用当前Fig5历史版本：τz=5000ms、τm=500ms、ηm=0.007451594355587
 
 原三项分布目标用患者FIT重新建立Fourier映射与目标矩，按原CAL记录内连续16事件的256组索引重算尺度。E1146尺度核对值为rank 0.04485866893176316、timing 0.043128270322858264、participation 0.04559242266535053。它们是实现/输入口径核对，不证明患者机制识别。少于16个合格模型事件、runaway、无事件均保留原状态，不伪造惩罚loss。
 
-默认预算的core比较使用相同独立Sobol初始设计；后半段若已有可评分点则作局部精修。完整参数文件可扩大评估数，但该透明优化器仍不同于论文历史delayed Matern-GP/qLogEI。历史调度器副本在 `modeling/scripts/topic4_core_count_optimization`，依赖自己的冻结实验输入；不自动指向原工作区启动旧实验。
+默认预算的core比较使用相同独立Sobol初始设计；后半段若已有可评分点则作局部精修。完整参数文件可扩大评估数，但该透明优化器仍不同于论文历史delayed Matern-GP/qLogEI。历史调度器不包含在这个基本代码包中。
 
 ## 复现证据与公开边界
 
-自动检查证明代码可独立运行、观测定义一致、输入与输出可追溯；不能替代作者验图或科学验收。每次运行输出独立时间戳目录，保留参数、输入身份、事件表、仿真轨迹、评分及PNG/PDF/GIF。新的输出不覆盖正式paper-ready图。
+自动检查证明代码可独立运行、观测定义一致、输入与输出可追溯；不能替代作者验图或科学验收。每次运行输出独立时间戳目录，保留参数、事件表、仿真轨迹、评分及PNG/PDF/GIF。新的输出不覆盖正式paper-ready图。
 
 完整临床队列与原历史优化的逐次数值未在短示例中重跑。代码目录可以独立复制；运行仍需合规取得的原始数据/患者观测输入。原始临床数据包留在本机且不进入Git。
 
 多患者SNN入口：`python -m modeling.cohort manifest.json --output ../paper_outputs/model_cohort`。manifest每项提供subject、observations、configuration、contact_contract；观测NPZ另需cal_block_ids以保留校准的记录内连续抽样。逐患者保存训练选优、触点交叉匹配和独立噪声确认；Fig4I汇总单位为患者。此完整队列入口尚未用整队列执行。
 
-Fig5E临床例图可提供 `paper_inputs/computational/clinical_examples.json`：每项为file、onset_sec、baseline_sec、seizure_index；file指向含samples_V、sfreq、channel_names的完整CAR montage原始NPZ。baseline_sec为该片段内真实远端基线（通常对应发作前−120至−90s）。`compare_raw_patient_fields`从原始采样逐次重算10s场，再执行正平均增强门槛与最大signed identity-field相关的描述性选择；不输出独立验证p值。默认未附这组原始发作输入。
+Fig5E临床例图可提供 `paper_inputs/E1146_demo/clinical_examples.json`：每项为file、onset_sec、baseline_sec、seizure_index；file指向含samples_V、sfreq、channel_names的完整CAR montage原始NPZ。baseline_sec为该片段内真实远端基线（通常对应发作前−120至−90s）。`compare_raw_patient_fields`从原始采样逐次重算10s场，再执行正平均增强门槛与最大signed identity-field相关的描述性选择；不输出独立验证p值。默认未附这组原始发作输入。

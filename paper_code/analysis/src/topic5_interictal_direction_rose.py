@@ -6,7 +6,6 @@ quantity for individual masked-rank events, then express those 3D directions in
 the plane spanned by the frozen TA and TB axes.  No ictal data enter this module.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Dict, Optional, Sequence
 import numpy as np
 from analysis.src.dab_gradient_axis import RCOND

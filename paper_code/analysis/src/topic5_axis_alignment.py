@@ -16,7 +16,6 @@ src.propagation_contact_plane_readout (R_smooth_rank / corr_pair_mirror_invarian
 orchestration that loads the cache + axis record lives in scripts/run_topic5_axis_alignment.py.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Dict, List, Sequence
 import numpy as np
 

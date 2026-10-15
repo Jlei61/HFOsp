@@ -13,7 +13,6 @@ on high-rate channels (a propagation order requires participation); SOZ channels
 misses are low-rate -> a shared blind spot of both readouts, not geometry's failure.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Optional, Sequence
 MIN_CH_EVENTS = 30
 MIN_HOURS = 12

@@ -3,7 +3,6 @@
 Pure computation: no simulation, no engine import.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 M_DEFAULT = 9
 EPS = 0.001

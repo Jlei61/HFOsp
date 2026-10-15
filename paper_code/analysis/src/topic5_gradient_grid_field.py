@@ -23,8 +23,6 @@ Design invariants (handoff §3):
   from the ictal outcome; the ``S >= 0.15`` region must not touch a grid edge.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
-import hashlib
 import math
 from typing import Dict, Optional, Sequence
 import numpy as np
@@ -52,13 +50,6 @@ def support_radius(sigma: float, support_budget: float, s_thresh: float=S_THRESH
     budget = max(float(support_budget) / float(s_thresh), 1.0)
     return float(sigma) * (math.sqrt(2.0 * math.log(budget)) + 1.0)
 
-def _grid_sha256(model: str, x_lo: float, x_hi: float, y_ext: float, n: int, sigma: float, support_budget: float) -> str:
-    digest = hashlib.sha256()
-    for token in (model, f'{x_lo:.12e}', f'{x_hi:.12e}', f'{y_ext:.12e}', str(int(n)), f'{sigma:.12e}', f'{support_budget:.12e}'):
-        digest.update(token.encode('utf-8'))
-        digest.update(b'\x00')
-    return digest.hexdigest()
-
 def make_adaptive_grid(points: np.ndarray, sigma: float, support_budget: float, n: int=GRID_N, s_thresh: float=S_THRESH, model: str='') -> Dict[str, object]:
     """Adaptive, y-symmetric dense grid for one plane (handoff §3.3).
 
@@ -77,7 +68,7 @@ def make_adaptive_grid(points: np.ndarray, sigma: float, support_budget: float, 
     y = np.linspace(-y_ext, y_ext, int(n))
     Y, X = np.meshgrid(y, x, indexing='ij')
     Y = 0.5 * (Y - np.flip(Y, axis=0))
-    return {'X': X, 'Y': Y, 'n': int(n), 'x_lo': x_lo, 'x_hi': x_hi, 'y_ext': y_ext, 'spacing_x': float(x[1] - x[0]) if n > 1 else 0.0, 'spacing_y': float(y[1] - y[0]) if n > 1 else 0.0, 'sigma': float(sigma), 'support_budget': float(support_budget), 'support_radius': r, 's_thresh': float(s_thresh), 'model': str(model), 'sha256': _grid_sha256(str(model), x_lo, x_hi, y_ext, n, sigma, support_budget)}
+    return {'X': X, 'Y': Y, 'n': int(n), 'x_lo': x_lo, 'x_hi': x_hi, 'y_ext': y_ext, 'spacing_x': float(x[1] - x[0]) if n > 1 else 0.0, 'spacing_y': float(y[1] - y[0]) if n > 1 else 0.0, 'sigma': float(sigma), 'support_budget': float(support_budget), 'support_radius': r, 's_thresh': float(s_thresh), 'model': str(model)}
 
 def support_region_touches_boundary(S: np.ndarray, s_thresh: float=S_THRESH) -> bool:
     """True if any ``S >= s_thresh`` pixel sits on the grid border."""
@@ -539,11 +530,3 @@ def loo_contact_reconstruction(points: np.ndarray, support: np.ndarray, values: 
     ok = den > 1e-12
     out[ok] = num[ok] / den[ok]
     return out
-
-def permutation_mapping_hash(perms: np.ndarray) -> str:
-    """SHA-256 of a permutation-index matrix for cross-use reuse audits (§4.1)."""
-    arr = np.ascontiguousarray(np.asarray(perms, dtype='<i8'))
-    digest = hashlib.sha256()
-    digest.update(str(arr.shape).encode('ascii'))
-    digest.update(arr.tobytes())
-    return digest.hexdigest()

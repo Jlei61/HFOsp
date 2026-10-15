@@ -5,7 +5,6 @@ Only its dense E-spike recorder allocation is replaced. No model source, RNG,
 integration operation or recorded spike is modified. Linear spatial sampling and
 temporal convolution commute; output equivalence is checked against dense R1.
 """
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import types
 import numpy as np
 from modeling.src.topic4_node_dualmode import sheet_bin_indices

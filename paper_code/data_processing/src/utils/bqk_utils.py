@@ -1,4 +1,3 @@
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from scipy.signal import butter, filtfilt, sosfiltfilt
 import os

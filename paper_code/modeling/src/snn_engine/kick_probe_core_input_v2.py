@@ -17,7 +17,7 @@ trajectories are bit-identical between kick-ON and kick-OFF).
 Run:  python kick_probe.py
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
+from paper_paths import OUTPUT_ROOT
 import os
 import time
 import numpy as np

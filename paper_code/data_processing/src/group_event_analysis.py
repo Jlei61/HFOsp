@@ -26,7 +26,6 @@ Design principles
 - Backwards compatibility: this module is additive and does not change existing APIs.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from dataclasses import dataclass
 import time
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union

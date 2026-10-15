@@ -1,6 +1,6 @@
 # 论文图件、方法与公开代码精简指南
 
-> **独立计算入口已改为三个 notebook：** [原始 SEEG → Fig1](../paper_code/notebooks/01_raw_seeg_to_fig1.ipynb)、[rank/坐标 → Fig2](../paper_code/notebooks/02_ranks_to_spatial_fields_fig2.ipynb)、[新 SNN 仿真 → Fig4/5/Video2](../paper_code/notebooks/03_snn_model_fit_fig4_fig5.ipynb)。模型、目标函数、core优化及动态场均从本次输入重新计算。依赖实现直接复制在 [paper_code](../paper_code/README.md) 内；原始/训练输入和输出分别在相邻 `paper_inputs/`、`paper_outputs/`。计算面板与完整论文预算的区别见 [方法接口](../paper_code/METHODS_AND_PANELS.md)。下文保留定稿来源及整队列公开准备的审计记录。
+> **独立计算入口已改为三个 notebook：** [原始 SEEG → Fig1](../paper_code/notebooks/01_raw_seeg_to_fig1.ipynb)、[rank/坐标 → Fig2](../paper_code/notebooks/02_ranks_to_spatial_fields_fig2.ipynb)、[新 SNN 仿真 → Fig4/5/Video2](../paper_code/notebooks/03_snn_model_fit_fig4_fig5.ipynb)。模型、目标函数、core优化及动态场均从本次输入重新计算。精简后的实现直接保存在 [paper_code](../paper_code/README.md) 内，默认使用相邻 `paper_inputs/E1146_demo/`；原始/训练输入和输出分别在相邻 `paper_inputs/`、`paper_outputs/`。计算面板与完整论文预算的区别见 [方法接口](../paper_code/METHODS_AND_PANELS.md)。下文保留定稿来源及整队列公开准备的审计记录。
 
 更新：2026-10-15。用途：确定论文每张图依赖的方法、数据和代码，作为最后整理公开代码的依据。本文是**发布准备清单**；图件定稿、图件重建成功和原始分析复现完成是三个不同状态。
 

@@ -3,7 +3,6 @@
 Reuse only the original label-free feature maps. No classifier, class proportions,
 mode target, class weighting, or per-mode calibration is retained.
 """
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from copy import deepcopy
 import numpy as np
 from modeling.src.topic4_three_observable_objective import ThreeObservableObjective, GROUPS, validate, signed_statistic

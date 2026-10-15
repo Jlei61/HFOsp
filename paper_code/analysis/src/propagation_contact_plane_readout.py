@@ -5,7 +5,7 @@ Spec: docs/superpowers/specs/2026-06-11-propagation-contact-plane-readout-design
 SOZ overlay 匹配。轴框架/端点核/stereotypy/数据加载复用其它模块。
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
+from paper_paths import CODE_ROOT
 from typing import Dict, Sequence, Optional, List
 import numpy as np
 GRID_N = 81

@@ -15,7 +15,6 @@ This module handles:
 Author: HFOsp Team
 Date: 2026-01-14
 """
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import json
 import os
 import struct

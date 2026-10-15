@@ -30,7 +30,6 @@ What it does NOT do
   consumer side.
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 from typing import Dict
 import numpy as np
 from sklearn.cluster import KMeans

@@ -12,7 +12,6 @@ EXCITATORY neurons:
 Sites sit on a regular grid (pitch `grid_spacing`, `grid_margin` from edges).
 """
 from __future__ import annotations
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 
 def make_grid(p):

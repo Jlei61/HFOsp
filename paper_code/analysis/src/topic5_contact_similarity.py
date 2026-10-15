@@ -1,7 +1,6 @@
 """Topic5 contact-level similarity ladder (R1 raw / R2 same-plane kernel),
 grid-free counterparts of the field maxAB. See
 docs/superpowers/specs/2026-06-30-topic5-contact-similarity-ladder-design.md."""
-from paper_paths import CODE_ROOT, INPUT_ROOT, OUTPUT_ROOT
 import numpy as np
 from scipy.stats import pearsonr, spearmanr, kendalltau
 from analysis.src.topic5_axis_alignment import within_shaft_shuffle, channel_shuffle, anchor_matched_shuffle, effective_shuffle_n
