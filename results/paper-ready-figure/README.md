@@ -1,5 +1,7 @@
 # Paper-ready figure outputs
 
+> **论文公开代码整理入口：** [图件、Methods 与代码精简指南](../../docs/paper_code_and_methods.md)汇总逐图来源、复现命令、最小保留范围及终稿对齐事项。
+
 当前Figure 4已于2026-10-11由作者确认定稿，版本`core_search_final_20261011`、状态`AUTHOR_ACCEPTED_FINAL`；[正式整图及A–I单图](fig4/figures/README.md)、[版本说明](../../docs/current_figure4.md)和[机器入口](fig4/current_version.json)统一指向本版。
 
 > **当前Fig3已定稿（2026-10-10）：** 正式[完整图和A–E单panel](fig3/figures/README.md)为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`。统一入口：[版本说明](../../docs/current_figure3.md)、[机器指针](fig3/current_revision.json)；`build_fig3_current.py`可在远端从随包原生图层重建。旧A–F及旧代码已归档。
