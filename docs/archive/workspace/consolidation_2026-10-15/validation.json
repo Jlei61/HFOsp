@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "figure1": {
+    "status": "PASS",
+    "files_verified": 123,
+    "original_26_channel_arrays_preserved": true,
+    "display_channels": 18,
+    "events": 18190,
+    "cluster_counts": [
+      13160,
+      5030
+    ],
+    "cohort_n": 40,
+    "release_version": "y1_final_20261010"
+  },
+  "figure3": {
+    "status": "PASS",
+    "version": "visual_alignment_compact_rows_20261010",
+    "panels": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "files_verified": 49,
+    "author_acceptance": "CONFIRMED"
+  },
+  "figure4": {
+    "status": "PASS",
+    "version": "core_search_final_20261011",
+    "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
+    "author_acceptance": "CONFIRMED",
+    "files_verified": 124,
+    "export_files_verified": 31
+  },
+  "registry_regression_tests": {
+    "command": "python -m pytest -q -p no:cacheprovider tests/test_paper_figure_source_registry.py",
+    "passed": 6,
+    "failed": 0,
+    "log": "......                                                                   [100%]\n6 passed in 1.26s"
+  },
+  "validation_environment": {
+    "python": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "PyMuPDF": "1.28.2",
+    "isolated_PYTHONPATH": "/tmp/hfosp-workspace-validation-pydeps-20261015"
+  },
+  "accepted_packages_unchanged": true,
+  "local_manuscript_excluded": true,
+  "source_worktree_conflicts_preserved": true,
+  "merged_files": {
+    "python_syntax_checked": 354,
+    "json_checked": 5379,
+    "failures": []
+  },
+  "staged_diff_check": "PASS"
+}

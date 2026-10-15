@@ -1,0 +1,65 @@
+{
+  "N": 98,
+  "status": "SCORABLE",
+  "J": 3.755690178426222,
+  "groups": {
+    "rank_pattern": {
+      "N": 98,
+      "A": 0.127490550550438,
+      "B": 0.0031013091353996403,
+      "D_off": 0.12438924141503836,
+      "D16": 0.14338475986936117,
+      "scaled": 2.7729142298950795
+    },
+    "participation": {
+      "N": 98,
+      "A": 0.06811600969017574,
+      "B": 0.0026809600768840217,
+      "D_off": 0.06543504961329172,
+      "D16": 0.08185593008420636,
+      "scaled": 1.4352176477566578
+    },
+    "local_and_interrod_timing": {
+      "N": 98,
+      "A": 0.3079609221457048,
+      "B": 0.003521107527096379,
+      "D_off": 0.3044398146186084,
+      "D16": 0.32600659822207373,
+      "scaled": 7.058938657626928
+    }
+  },
+  "candidate": "lf_bo01_07",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_07/2511_847401/workers/trajectory.json",
+  "source_sha256": "178a20285f1e177ef7192694d57d2159050cd345deeda298f84321286d99bf89",
+  "vector": [
+    1.993049234453328,
+    13.615749431462085,
+    16.650655551101963,
+    2.836157103362708,
+    1.0215500653721392,
+    -17.735332995653152
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.7729142298950795,
+    7.058938657626928,
+    1.4352176477566578
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789477034.7622292,
+  "J_joint": 5.134861988142973,
+  "joint": {
+    "N": 98,
+    "A": 0.27809842661167516,
+    "B": 0.003727789867802002,
+    "D_off": 0.2743706367438732,
+    "scaled": 5.134861988142973
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/lf_bo01_07.json",
+  "historical_score_sha256": "d356e2d477d41db6120124f165ee57bcd5842d917fdd8391475855e44888243c"
+}

@@ -1,0 +1,88 @@
+{
+  "status": "PASS",
+  "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz",
+  "source_sha256": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+  "expected_matched_rhos": [
+    0.8750000000000001,
+    0.517857142857143
+  ],
+  "readout": {
+    "status": "ESTIMABLE",
+    "matched_rhos": [
+      0.875,
+      0.5178571428571428
+    ],
+    "dual_recovery": 0.5178571428571428,
+    "folds": [
+      {
+        "assignment_contacts": [
+          0,
+          1,
+          4,
+          5,
+          8,
+          10,
+          12,
+          14
+        ],
+        "evaluation_contacts": [
+          2,
+          3,
+          6,
+          7,
+          9,
+          11,
+          13
+        ],
+        "mode_counts": [
+          105,
+          46
+        ],
+        "evaluation_contact_counts": [
+          7,
+          7
+        ],
+        "matched_rhos": [
+          0.8214285714285714,
+          0.4642857142857143
+        ],
+        "n_unassigned": 0
+      },
+      {
+        "assignment_contacts": [
+          2,
+          3,
+          6,
+          7,
+          9,
+          11,
+          13
+        ],
+        "evaluation_contacts": [
+          0,
+          1,
+          4,
+          5,
+          8,
+          10,
+          12,
+          14
+        ],
+        "mode_counts": [
+          106,
+          45
+        ],
+        "evaluation_contact_counts": [
+          8,
+          8
+        ],
+        "matched_rhos": [
+          0.9285714285714286,
+          0.5714285714285714
+        ],
+        "n_unassigned": 0
+      }
+    ],
+    "minimum_mode_events_per_fold": 45
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "branch": "codex/topic4-substrate-autapse-fix",
+  "base": "23b7b267a8101a157d89715d1f5f0185f2fe6ab1",
+  "exit": 0,
+  "conflict_markers": 240,
+  "changed_in_both": 20,
+  "output_bytes": 33992287,
+  "method": "classic git merge-tree; content preview only, working trees unchanged",
+  "conflicting_file_blocks": [
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 a77f4eb07364203b4a16847fb857108919a2837d docs/archive/topic5/INDEX.md",
+        "  our    100644 22d6cdd32110d33d009dae22063d1e9d430c3454 docs/archive/topic5/INDEX.md",
+        "  their  100644 f8fb0fa666c328bc2a52e23d1858fa31ca3b2784 docs/archive/topic5/INDEX.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 4e83ecd1f8e67284ad0b7010f3931ed582e91aa4 docs/fig2c_interictal_event_envelope_field_spec.md",
+        "  our    100644 e6d3bd98a1dc704306f2392515447ce96053ff25 docs/fig2c_interictal_event_envelope_field_spec.md",
+        "  their  100644 610c10c00d607bf076acdd3b5c2a6174a8d2a27a docs/fig2c_interictal_event_envelope_field_spec.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 6e9762d481ae426ee2170797df46e935a6f21bac docs/fig3b_interictal_ictal_shared_field_spec.md",
+        "  our    100644 2663846c29e06e108d308b0965490d1cec943592 docs/fig3b_interictal_ictal_shared_field_spec.md",
+        "  their  100644 8e73f9785a03d7a2b834208cd7ad979778a9b5d2 docs/fig3b_interictal_ictal_shared_field_spec.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 963ffd544d72063290c279ffbb3ac3bc690a091d docs/figure_style_guide.md",
+        "  our    100644 68f18162826cccdc084d28235e87e76c38cbbee0 docs/figure_style_guide.md",
+        "  their  100644 af74d0ae3dea09abdaf0670f3a2153cf9e2f687e docs/figure_style_guide.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 8a4888d08fe6c9cdfb16dd6fdb42f010695b2623 docs/main_figure_plan.md",
+        "  our    100644 211315e576ba6689d2890a133a913f0377928c27 docs/main_figure_plan.md",
+        "  their  100644 f3ddc9f0511913e086c3ff48084cfe9952f97b52 docs/main_figure_plan.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 26b07cccf6a249c43216a28743d20f0b9a4cfd2e docs/paper-draft/README.md",
+        "  our    100644 c4e90ac07a43d78ca9a87ab731c22a19c480da62 docs/paper-draft/README.md",
+        "  their  100644 c3029e0920c84d3d058448145381cab1e6c82fae docs/paper-draft/README.md"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 c2596c138b46968cf55843ec9ab94a1e71687ecb docs/paper-draft/figure4_subject_specific_snn.md",
+        "  their  100644 b0d3ac74f8da8841b18b1ebb9aacdf1026023090 docs/paper-draft/figure4_subject_specific_snn.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 d36bd38b0871c01af8c5e0ef35653f4558bc2249 docs/paper-draft/methods_revised_draft.md",
+        "  our    100644 8d0ae4489e585d62c4a6a697876a66a042f22278 docs/paper-draft/methods_revised_draft.md",
+        "  their  100644 6e0e22e3a410ca32702304bab2575cb7fd199455 docs/paper-draft/methods_revised_draft.md"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 1596f583d0879e8d47f8b0787b1fb11f10731669 docs/paper_figure_registry.md",
+        "  their  100644 ad3d594b865d875538885e6b725858ee430b2373 docs/paper_figure_registry.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 18da7fb51a186874929a7d3c9398b5704388f5c1 docs/topic4_sef_hfo.md",
+        "  our    100644 329dcf830f83b817be66225ff9e87d4b8745debc docs/topic4_sef_hfo.md",
+        "  their  100644 f1eb8a2b2b47848731ac2d22ce1206ffe6506628 docs/topic4_sef_hfo.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 23418c1f3ca93fe2968b68db017fcace4d30ce2a results/FIGURE_INDEX.md",
+        "  our    100644 d20eec2a0b27c90848c9ccd262aca62808c1beec results/FIGURE_INDEX.md",
+        "  their  100644 37fffe4aac045567c6b49afad242c80f5f3f455a results/FIGURE_INDEX.md"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 495ba1a59f02d26905288c45ccf2fa73a163bc61 results/paper-ready-figure/fig5/figures/README.md",
+        "  their  100644 72f7ca6e6b6ea3299be074b38edb74cdb33d651c results/paper-ready-figure/fig5/figures/README.md"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 8fe61b963c1d85253b32b3d4d7b40e07355b16de results/topic4_sef_hfo/snn_heterogeneity/engine_versions.json",
+        "  our    100644 7485325cca72b602126b36c322a41c2f19fa2e79 results/topic4_sef_hfo/snn_heterogeneity/engine_versions.json",
+        "  their  100644 759a654e1e94cfaa846fc5ddd0ca8475c534f71e results/topic4_sef_hfo/snn_heterogeneity/engine_versions.json"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 062440bd7761468bd5a35f976d38146a300af712 scripts/freeze_topic4_rev10_sa_v6_mode_boundary_candidates.py",
+        "  their  100644 344dc2885a52cf05a77cc0218e4a548dfaf1c706 scripts/freeze_topic4_rev10_sa_v6_mode_boundary_candidates.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 e4016db3260896de3c1449a40e6a95e0633a1c3f scripts/paper_figures/README.md",
+        "  our    100644 f9517fd055ba2b8635c77b6b21500724892921c6 scripts/paper_figures/README.md",
+        "  their  100644 c86f9d1e1ce1bf598d57b5d2378864466f154024 scripts/paper_figures/README.md"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 d53ab3326e0f9021e45d79b0eaf8a5e2a5625958 scripts/paper_figures/build_main_figures_1_2.py",
+        "  their  100644 d1c62f1b372ccd553a5fd741b5f60d1fbe302fb6 scripts/paper_figures/build_main_figures_1_2.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 d6a8d5d5e74138054f54710a13f07d63bb771504 scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
+        "  our    100644 62f104e6ec2c90fdecd709f5d541e78d8d0e8182 scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
+        "  their  100644 e143fcf6dd94e8a0c62b3c7b120a249b3ed7fbf2 scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 146936d2196a5c51c4be27eec61578068057ca99 scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py",
+        "  our    100644 b3f8880ea1103aa50acf02ade2dab4a459843d84 scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py",
+        "  their  100644 5e98872171da8e66d33166c384ad8595531b3b23 scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 8b027e28981fc0f7836d43b4126e55585cab28e6 scripts/paper_figures/plot_fig3_raw_spectral_context.py",
+        "  our    100644 e8639e70007f355b4e926ab8870f015c86a0c3a4 scripts/paper_figures/plot_fig3_raw_spectral_context.py",
+        "  their  100644 11422a7081086c8bcb3a055862857eeec7e325ae scripts/paper_figures/plot_fig3_raw_spectral_context.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 5dae95275e867d936358e79746235e74c4c4ec34 scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
+        "  our    100644 89a9a20ee687427cdb587616933ff07711217920 scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
+        "  their  100644 cf442b35cf4d5be5f74c7c0e9d30c4f4e70f720c scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 6792f261e105663c8337bc79d07ffb9e6a30b178 scripts/paper_figures/plot_supp_fig2_soz_auc.py",
+        "  their  100644 5cd10ea35815a0571d13f0bc62b4101d558ec8a2 scripts/paper_figures/plot_supp_fig2_soz_auc.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 49b0d0c176af41b978f25c7b4fe141fa4f550662 scripts/paper_figures/plot_supp_fig3_k_scan_and_templates.py",
+        "  their  100644 d03864d5290499f587436dcf67f3c53fe47c73c1 scripts/paper_figures/plot_supp_fig3_k_scan_and_templates.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 5ca90a6a0ae2207128dd1be7961a334841fd634a scripts/paper_figures/plot_supp_fig4_axis_geometry_sensitivity.py",
+        "  their  100644 e0b0b2066d2d7775324984e251ca75c38658e337 scripts/paper_figures/plot_supp_fig4_axis_geometry_sensitivity.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 f9f87d350aaed495b34d8621a4bc5bd5cd321316 scripts/plot_topic5_template_field_ta_tb_contact_scatter.py",
+        "  our    100644 0e051cc51d283b06540021f4f88ff3094ddeadf8 scripts/plot_topic5_template_field_ta_tb_contact_scatter.py",
+        "  their  100644 215f525b1957e62dd0fc615922643f1ede006a43 scripts/plot_topic5_template_field_ta_tb_contact_scatter.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 145e7c929eaccb9c84ca0e1384086f292c9973b5 scripts/run_topic4_fig5_qigk_morphology_reference.py",
+        "  their  100644 7d99d95eacde9d836dbf4a579c4bcc0dc47ed48c scripts/run_topic4_fig5_qigk_morphology_reference.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 6f2c23cddd2f37b97cd41d788a204c6553508cf9 scripts/run_topic4_rev10_r_edge_flow_worker.py",
+        "  their  100644 8da082a88658f99a99056b62879f1a585c649ba0 scripts/run_topic4_rev10_r_edge_flow_worker.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 ad6662a6c409d108aa2a5af759eaabb43a523db7 scripts/run_topic4_rev10_sa_spectral_field_worker.py",
+        "  their  100644 5f95e780fd9b28bdb049149e96ba9cc12aedd053 scripts/run_topic4_rev10_sa_spectral_field_worker.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 7be57e94a9fb86e9066dac453998319fac6d2f04 scripts/run_topic4_rev12_node_worker.py",
+        "  their  100644 5d264a0680ec0bd348e5e8b966529396ee7c38a8 scripts/run_topic4_rev12_node_worker.py"
+      ]
+    },
+    {
+      "kind": "changed in both",
+      "header": [
+        "  base   100644 861f8f640eaa0eac8df899ea4775bd25c1bea901 src/snn_engine/kick_probe.py",
+        "  our    100644 b3a35cd920c674dbf6520c3441027b9a5393e83f src/snn_engine/kick_probe.py",
+        "  their  100644 c16a99fa55d42b9a58046297d93ffd1ae40a41d2 src/snn_engine/kick_probe.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 118fd658658ac0dbbf014eef2ccdd9449140e758 src/topic4_core_field_rev9.py",
+        "  their  100644 0c786e2a75cfeae07f3c54287fd584c038a510a2 src/topic4_core_field_rev9.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 b71cae27e7ab8df90cab9e96884bee4bfa614af1 src/topic4_manual_dual_core.py",
+        "  their  100644 5df1059df21bdd2f8d81bf0d126ccfd513998288 src/topic4_manual_dual_core.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 ba912f3ffb837d2995a2eaec0549d796a84cb3eb src/topic4_rev20_dual_core_mechanism.py",
+        "  their  100644 1a75c4295c6c5783ee1ebba638e3ee9f2c1c79be src/topic4_rev20_dual_core_mechanism.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 e28d67bfbedeaae6f20816cbac22333b891c9e1e src/topic4_runaway_morphology.py",
+        "  their  100644 9d08809b0cea96a2599c5cc151d0427227d673cf src/topic4_runaway_morphology.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 6429f0b1f5a7411eeffc53c7e0ade0fe1a1c9a4d src/topic4_zm_ictal_transition.py",
+        "  their  100644 78bd37e653fb6cd6b4dcba6ef29dcea88129a241 src/topic4_zm_ictal_transition.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 0d23047c89bf88025da3f1bb615bd687ea093105 src/topic4_zm_slow_vars.py",
+        "  their  100644 c49f16b8e297d165695886907a95e7835d02c6a5 src/topic4_zm_slow_vars.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 96e2b4c0f4116a75beda018fe7730f6242a662ba tests/test_kick_probe_zm_itx_parity.py",
+        "  their  100644 58618445232737085e52c96d7ccc026aa996759b tests/test_kick_probe_zm_itx_parity.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 b6359c71793a792eb759fd9ef145478350a0e4b6 tests/test_mz_slow_vars.py",
+        "  their  100644 bb6ef5004142de9d8ab2498ad61d7265ce9d5d94 tests/test_mz_slow_vars.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 70a049741cd73b6fa484122703ff85af9cb74076 tests/test_topic4_core_field_rev9.py",
+        "  their  100644 4f4627c99fcc870c05c65e31718fc436b54f0160 tests/test_topic4_core_field_rev9.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 c88c95b700aad134c465b33ff67816ef9f558b6b tests/test_topic4_node_event_source_topology.py",
+        "  their  100644 0ccb2f5fa7a083fae43adffab052af264afd0eef tests/test_topic4_node_event_source_topology.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 fcc8f85f93b20704121f69ecca10a65eda846b20 tests/test_zm_ictal_transition_substrate.py",
+        "  their  100644 7c275752cc656b0f74c7bfc7ff5f155dd209d310 tests/test_zm_ictal_transition_substrate.py"
+      ]
+    },
+    {
+      "kind": "added in both",
+      "header": [
+        "  our    100644 d0f4ba220e015f6de2cba78d4f360566a1edf76e tests/test_zm_traced_slow_vars.py",
+        "  their  100644 c817a64eb5e256d3b05dc4fccc023241e5dc06db tests/test_zm_traced_slow_vars.py"
+      ]
+    }
+  ]
+}

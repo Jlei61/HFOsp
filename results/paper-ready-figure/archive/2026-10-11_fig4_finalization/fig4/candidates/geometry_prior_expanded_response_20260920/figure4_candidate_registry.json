@@ -1,0 +1,96 @@
+{
+  "schema": "paper_fig4_expanded_response_v1",
+  "asset_id": "patient_geometry_prior_snn_expanded_response",
+  "status": "CANDIDATE",
+  "paper_slot": "Fig4 A/B update and standalone position map",
+  "producer": "scripts/paper_figures/build_fig4_expanded_response.py",
+  "previous_candidate": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918",
+  "replaces_candidate_panels": [
+    "A",
+    "B"
+  ],
+  "inherited_panels": [
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+  ],
+  "preserved_examples": {
+    "D": "lf_bo04_07",
+    "E": "xy_left_20"
+  },
+  "panels": {
+    "B": {
+      "pixels": [
+        2202,
+        980
+      ],
+      "minimum_font_pt": 8.0,
+      "files": {
+        "figures/fig4-panelb.png": "1534b7f556eef3e391c9c01fcc7a1f0ab917493fd1e9f3f23258aadb296b3e11",
+        "figures/fig4-panelb.svg": "a2a8472f83d25a477846e91f24dcf326029ee6b83ca6d94394ed4d34bd2c9a50"
+      }
+    },
+    "position_detail": {
+      "pixels": [
+        2582,
+        1244
+      ],
+      "minimum_font_pt": 8.0,
+      "files": {
+        "figures/core_position_response.png": "8a85fb9070c60642ff8193cbdfe2f40b541315690bb99aafa6a687f692cf1adb",
+        "figures/core_position_response.svg": "c7bfe4eac0d0bf78f7af4fb1cc15e5d3c2f371922d8095be23061a7e12f6b569"
+      }
+    },
+    "A": {
+      "pixels": [
+        1554,
+        1381
+      ],
+      "minimum_font_pt": 8.0,
+      "files": {
+        "figures/fig4-panela.png": "cd6462b1fbc6513dff00686e3558f201af578d1db56499c5a1efecf3860576ae",
+        "figures/fig4-panela.svg": "f0c9f2073344ad2da943a451774cd1f3e0a23f83e763e19b5f7565c21f2e696d"
+      }
+    }
+  },
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/all_workpoints_source.csv": "ee5bd0559803bab393b8f995727282b61cafaf4196d7725f42a57d2977b00748",
+    "/data/hfosp/topic4_sef_hfo/core_position_wide_response_20260918/plan.json": "1b10cf754f5e0c4f222c39976f537c3a10adb4a5f4407f13cbe90340ee749ac4",
+    "/data/hfosp/topic4_sef_hfo/core_position_wide_response_20260918/analysis/observables.csv": "95b6025ab1cac37ead6c74f025e295a2505e7552ac4abaca6b2c1efee7b7f42f",
+    "/data/hfosp/topic4_sef_hfo/core_position_overnight_expansion_20260918/plan.json": "4d7b4d62a24d52544b65b1d7be83ce6497ec3533e5cf778fb96e1d6a9faa69b8",
+    "/data/hfosp/topic4_sef_hfo/core_position_overnight_expansion_20260918/analysis/observables.csv": "68ae6893a58660327bb8f947f892e1aef82b43e82a1730f4ca6eacc65e7fbc7d",
+    "/data/hfosp/topic4_sef_hfo/core_position_overnight_expansion_20260918/proposals/batch_01.json": "737ede56323024803aa305776b8b88343700ba9353910ebd958162021e49380e",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_expanded_response.py": "52018da3f891d029986c897032ea16acb76aa51d7df82b6853124f51a271d28b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a"
+  },
+  "actual_new_simulations": {
+    "previous_wide": 40,
+    "overnight_grid": 34,
+    "overnight_bayesian": 8,
+    "total_added_to_B": 82
+  },
+  "export_started_simulations": 0,
+  "B_conditions": 308,
+  "B_stages": 19,
+  "A_unique_grid_conditions": 83,
+  "simulation_status": {
+    "overnight_completed": 42,
+    "overnight_not_dispatched": 8,
+    "active": 0,
+    "original_status": "WINDOW_ENDED_PARTIAL_PENDING_REVIEW"
+  },
+  "meanings": {
+    "colors": "Proposal/admission stage, not worker finish time. Darker blue is later, not necessarily better.",
+    "B": "Three descriptive errors on the same FIT19770 patient reference; not the algebraic loss components.",
+    "D_E": "Previous figure examples retained as plain annotations; no recoloring, bold lines, stars or reselection.",
+    "trajectory": "Old adaptive-batch representative paths retained. New separate path links minimum-J observations after expansion stages 17/18/19. No edge crosses objective changes.",
+    "A": "Fixed-other-core conditional responses; Bayesian joint XY points appear only in B."
+  },
+  "scientific_status": "PARAMETER_TRADEOFF; NOT_ACCEPTED_AS_DUAL_MODE_RECOVERY",
+  "statistical_unit": "One 60s topology2511/noise847401 trajectory per workpoint; no seed uncertainty.",
+  "agent_visual_review": "PASS: opened standalone map, full A and B PNGs. Fixed limits, 83-condition heatmaps, 308 profiles and 3D points, stage 1–19 bar beside profile, plain D/E references, no clipped labels. Human review pending.",
+  "human_visual_review": "PENDING"
+}

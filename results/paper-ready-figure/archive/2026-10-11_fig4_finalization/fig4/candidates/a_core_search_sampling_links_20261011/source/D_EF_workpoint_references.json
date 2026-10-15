@@ -1,0 +1,77 @@
+{
+  "cases": {
+    "E": {
+      "candidate": "lf_bo04_07",
+      "parameters": {
+        "EE_core_to_out_scale": 1.0183399664238095,
+        "EE_angle_offset_deg": 16.887476183474064,
+        "EE_same_core_scale": 0.85
+      },
+      "centers_mm": [
+        [
+          4.707742161418982,
+          10.656531542227661
+        ],
+        [
+          17.688613113235633,
+          2.7833488279164125
+        ]
+      ],
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_07/2511_847401/workers/trajectory.json",
+      "design_sha256": "5344f1e38d382f250eebeacc55d1f1ee6dc31534e88009b7d70bcd43c7aa4c05",
+      "applied_physics_sha256": "c0fdd56bbdc8cdfabb6b7e78325e83adb7fa83c008f0fc988c9abd702f1bed9e"
+    },
+    "F": {
+      "candidate": "xy_left_20",
+      "parameters": {
+        "EE_core_to_out_scale": 1.25,
+        "EE_angle_offset_deg": 0.0,
+        "EE_same_core_scale": 0.85
+      },
+      "centers_mm": [
+        [
+          2.9492143200000003,
+          12.12890135
+        ],
+        [
+          16.47920304,
+          5.46551153
+        ]
+      ],
+      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "design_sha256": "42fe777ef022f2e058b415d792a04f0e254cbe91738d6f6afb678e94f6bba2ae",
+      "applied_physics_sha256": "d907e6035e8d168a1d749cd7e481aea9b78c913e95499eb3adadc3a71cbd9e75"
+    }
+  },
+  "reference_lines": {
+    "EE_core_to_out_scale": [
+      [
+        "E",
+        1.0183399664238095
+      ],
+      [
+        "F",
+        1.25
+      ]
+    ],
+    "EE_angle_offset_deg": [
+      [
+        "E",
+        16.887476183474064
+      ],
+      [
+        "F",
+        0.0
+      ]
+    ],
+    "EE_same_core_scale": [
+      [
+        "E/F",
+        0.85
+      ]
+    ]
+  },
+  "meaning": "Coordinates of the E/F example parameter vectors, not the error values where lines cross a fixed-background sweep.",
+  "original_unlabelled_lines": "Fixed sweep references (outward EE 1.25, angle 0 degrees, core EE 0.85); not separate E/F workpoints.",
+  "verified_against_executed_design_and_applied_physics": true
+}

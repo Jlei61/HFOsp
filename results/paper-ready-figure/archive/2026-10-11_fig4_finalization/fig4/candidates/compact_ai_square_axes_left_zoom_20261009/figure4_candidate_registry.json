@@ -1,0 +1,721 @@
+{
+  "status": "CURRENT_AUTHOR_DESIGNATED",
+  "human_visual_acceptance": "PENDING",
+  "producer": "scripts/paper_figures/build_fig4_compact_ai.py",
+  "layout_version": "compact_ai_square_axes_left_zoom_v3",
+  "updated_on": "2026-10-09",
+  "panel_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+  ],
+  "titles": {
+    "A": "局部 E/I 回路与患者空间基底；右侧预留机制连接图",
+    "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
+    "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
+    "D": "E→E角度的Mean rank／Order／Participation误差响应",
+    "E": "413个可评分配置中低J_joint前20%（83个）的位置密度",
+    "F": "连续30–80 Hz虚拟接触活动及MTA／MTB事件标记",
+    "G": "模型与患者的平均传播rank",
+    "H": "模型—患者触点交叉匹配矩阵",
+    "I": "25位患者TA–MTA／TB–MTB模板相似度"
+  },
+  "whole_canvas_mm": [
+    300.0,
+    222.0
+  ],
+  "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
+  "base_published_complete_sha256": "00d9ab9bda41d7673033760592b9a1590102ccae5d05ef6fa8fe1ce6d2aa3d38",
+  "panel_mapping": {
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "D": "D angle response",
+    "E": "D position density",
+    "F": "G",
+    "G": "H",
+    "H": "I",
+    "I": "J"
+  },
+  "omitted_parent_panels": [
+    "E propagation showcase",
+    "F propagation showcase",
+    "D outward EE response",
+    "D within-core EE response"
+  ],
+  "panel_a": {
+    "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
+    "artwork_scale": 1.23,
+    "zoom_center_mm": [
+      -8.5,
+      0.0
+    ],
+    "zoom_field_of_view_mm": [
+      1.6754742547425474,
+      1.3143631436314362
+    ],
+    "nearest_contact_to_box_mm": 3.5203799692651128,
+    "old_contact_callout_removed": true,
+    "frozen_spatial_geometry_verified": true,
+    "zoom_metadata": "source/A_zoom_in.json",
+    "reserved_right_region_mm": [
+      180,
+      145,
+      100,
+      70
+    ],
+    "next_redraw": [
+      "show physical anisotropy direction",
+      "show possible core locations",
+      "add right-side physical connectivity mechanism"
+    ],
+    "connector_minimum_contact_distance_mm": 3.041647358308974,
+    "connectors_clear_of_electrode_footprints": true,
+    "connectors_attached_to_both_frames": true
+  },
+  "panel_b": {
+    "version": "post_prior_stages_6_16_v1",
+    "included_original_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "excluded_original_stages": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "visible_workpoints": 194,
+    "prior_workpoints": 32,
+    "original_workpoints": 226,
+    "stage_numbers_renumbered": false,
+    "prior_interpretation": "Stages 1-5 belong to the preceding label-informed development phase and are omitted from B. Subsequent searches inherit its candidate pool and patient geometry as development priors; their scoring objectives omit TA/TB labels. This display restriction does not establish independence from development data or remove historical information use.",
+    "visible_source": "source/B_visible_workpoints.csv",
+    "prior_source": "source/B_prior_workpoints.csv",
+    "requested_on": "2026-10-09",
+    "human_visual_acceptance": "PENDING",
+    "showcase_labels": false
+  },
+  "panel_c": {
+    "preview_package": "results/paper-ready-figure/fig4/candidates/core_count_mean_sd_20261008",
+    "core_counts": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "summary_style": "mean_std",
+    "std_ddof": 1,
+    "statistical_unit": "optimization_restart_within_E1146",
+    "restarts": 4,
+    "common_epoch": 31,
+    "comparison": {
+      "subject": "epilepsiae_1146",
+      "display_id": "E1146",
+      "common_epoch": 31,
+      "planned_epochs": 96,
+      "restarts": 4,
+      "core_counts": "1,2,3,4",
+      "single_core_mean": 3.310180135792793,
+      "single_core_std": 0.612009454297094,
+      "dual_core_mean": 1.7035437461176952,
+      "dual_core_std": 0.20555287828006355,
+      "three_core_mean": 1.264872097960017,
+      "three_core_std": 0.18293680164782206,
+      "four_core_mean": 1.4364581504388079,
+      "four_core_std": 0.15851642446091144,
+      "std_ddof": 1,
+      "mean_reduction_percent": 48.53622231317952,
+      "stage": "adaptive_search"
+    },
+    "author_accepted_on": "2026-10-08",
+    "snapshot_sha256": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97"
+  },
+  "panel_d": {
+    "version": "angle_three_error_response_v1",
+    "source_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
+    "source_table": "source/D_connection_response.csv",
+    "parent_panel": "D",
+    "parameter": "EE_angle_offset_deg",
+    "conditions": 13,
+    "showcase_references": false
+  },
+  "panel_e": {
+    "version": "completed_position_density_standalone_v1",
+    "source_package": "results/paper-ready-figure/fig4/candidates/core_count_panel_c_20260929",
+    "requested_on": "2026-10-08",
+    "source_registry_sha256": "efec3ef3cefe614e91ff11e39ee3a32b9228205b4c525704061abd14703e9fc9",
+    "source_panel_png_sha256": "b1382021545e630415108e4b1dd35af64f165899ee0edf316bae9f9f48a54429",
+    "source_data_and_panel_pixels_verified": false,
+    "column_reflow_promoted": false,
+    "density_version": "completed_joint_densification_top20_relief_v1",
+    "density_source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+    "density_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+    "density_source_png_sha256": "9e004997f220ed3e42d1c1cd2ef6adfcf21238d3f9ff4b4751b63fba48d72973",
+    "density_selected": 83,
+    "density_scorable": 413,
+    "density_completed": 418,
+    "density_author_accepted_on": "2026-10-09",
+    "response_curve_sources_verified_unchanged": true,
+    "parent_panel": "D"
+  },
+  "panel_i": {
+    "groups": [
+      {
+        "mode": "TA–MTA",
+        "n": 25,
+        "subjects": [
+          "epilepsiae_1077",
+          "epilepsiae_1084",
+          "epilepsiae_1096",
+          "epilepsiae_1125",
+          "epilepsiae_1146",
+          "epilepsiae_1150",
+          "epilepsiae_253",
+          "epilepsiae_384",
+          "epilepsiae_442",
+          "epilepsiae_548",
+          "epilepsiae_583",
+          "epilepsiae_590",
+          "epilepsiae_620",
+          "epilepsiae_635",
+          "epilepsiae_922",
+          "epilepsiae_958",
+          "yuquan_chengshuai",
+          "yuquan_huanghanwen",
+          "yuquan_litengsheng",
+          "yuquan_liyouran",
+          "yuquan_pengzihang",
+          "yuquan_xuxinyi",
+          "yuquan_zhangbichen",
+          "yuquan_zhangkexuan",
+          "yuquan_zhaochenxi"
+        ],
+        "points": [
+          0.02857142857142857,
+          0.14545454545454545,
+          -0.07142857142857142,
+          0.8571428571428571,
+          0.5071428571428571,
+          0.7166666666666667,
+          0.30952380952380953,
+          -0.21428571428571427,
+          0.575,
+          0.12727272727272726,
+          0.6,
+          0.8251748251748252,
+          0.7666666666666667,
+          0.32142857142857145,
+          0.4523809523809524,
+          0.17058823529411765,
+          -0.09523809523809523,
+          0.47878787878787876,
+          0.4591304347826087,
+          0.6764705882352942,
+          0.48951048951048953,
+          0.11785714285714285,
+          0.69785708187484,
+          0.7935042735042735,
+          0.5692307692307692
+        ],
+        "q25_q50_q75": [
+          0.14545454545454545,
+          0.47878787878787876,
+          0.6764705882352942
+        ]
+      },
+      {
+        "mode": "TB–MTB",
+        "n": 25,
+        "subjects": [
+          "epilepsiae_1077",
+          "epilepsiae_1084",
+          "epilepsiae_1096",
+          "epilepsiae_1125",
+          "epilepsiae_1146",
+          "epilepsiae_1150",
+          "epilepsiae_253",
+          "epilepsiae_384",
+          "epilepsiae_442",
+          "epilepsiae_548",
+          "epilepsiae_583",
+          "epilepsiae_590",
+          "epilepsiae_620",
+          "epilepsiae_635",
+          "epilepsiae_922",
+          "epilepsiae_958",
+          "yuquan_chengshuai",
+          "yuquan_huanghanwen",
+          "yuquan_litengsheng",
+          "yuquan_liyouran",
+          "yuquan_pengzihang",
+          "yuquan_xuxinyi",
+          "yuquan_zhangbichen",
+          "yuquan_zhangkexuan",
+          "yuquan_zhaochenxi"
+        ],
+        "points": [
+          0.37142857142857144,
+          -0.01818181818181818,
+          0.9428571428571428,
+          0.8571428571428571,
+          0.7357142857142858,
+          0.45,
+          0.16666666666666666,
+          0.6333333333333333,
+          0.6107142857142858,
+          0.5181818181818182,
+          0.5,
+          0.6588235294117647,
+          0.23333333333333334,
+          0.6785714285714286,
+          0.5952380952380952,
+          0.34705882352941175,
+          0.7857142857142857,
+          0.40606060606060607,
+          0.4617391304347826,
+          -0.2107843137254902,
+          0.7902097902097902,
+          0.28214285714285714,
+          0.38359088192606505,
+          0.26,
+          0.07829059829059828
+        ],
+        "q25_q50_q75": [
+          0.28214285714285714,
+          0.4617391304347826,
+          0.6588235294117647
+        ]
+      }
+    ],
+    "legend_present": true,
+    "legend_location": "upper right",
+    "legend_columns": 1,
+    "summary_interval": "interquartile range, not confidence interval",
+    "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
+  },
+  "checks": {
+    "A_local_circuit_source_pixels_unchanged": true,
+    "A_local_circuit_mm_per_source_pixel": 0.021,
+    "A_external_typography_pt": {
+      "title": 11,
+      "labels": 10,
+      "ticks": 9,
+      "legend": 8.8
+    },
+    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "A_circuit_frame_vector_stroke_pt": 0.65,
+    "A_circuit_frame_source_crop_padding_px": 12,
+    "A_revision": {
+      "status": "LEFT_ZOOM_CLEAR_OF_ELECTRODES_ADDITIONAL_MECHANISM_DIAGRAM_PENDING",
+      "artwork_scale": 1.23,
+      "zoom_center_mm": [
+        -8.5,
+        0.0
+      ],
+      "zoom_field_of_view_mm": [
+        1.6754742547425474,
+        1.3143631436314362
+      ],
+      "nearest_contact_to_box_mm": 3.5203799692651128,
+      "old_contact_callout_removed": true,
+      "frozen_spatial_geometry_verified": true,
+      "zoom_metadata": "source/A_zoom_in.json",
+      "reserved_right_region_mm": [
+        180,
+        145,
+        100,
+        70
+      ],
+      "next_redraw": [
+        "show physical anisotropy direction",
+        "show possible core locations",
+        "add right-side physical connectivity mechanism"
+      ],
+      "connector_minimum_contact_distance_mm": 3.041647358308974,
+      "connectors_clear_of_electrode_footprints": true,
+      "connectors_attached_to_both_frames": true
+    },
+    "B_workpoints": 194,
+    "B_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_profile_only": true,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_values_colors_exact_no_showcase_labels": true,
+    "B_horizontal_spacing": {
+      "x_limits": [
+        0,
+        2
+      ],
+      "first_category_at_left_axis": true,
+      "last_category_at_right_axis": true,
+      "data_to_axis_padding_mm": [
+        0,
+        0
+      ],
+      "axis_to_colorbar_mm": 1.5
+    },
+    "C_frozen_mean_sample_sd_exact": true,
+    "D_angle_values_exact_no_dangling_showcase_references": true,
+    "D_position_density": {
+      "selection": {
+        "fraction": 0.2,
+        "nominal_count": 83,
+        "count": 83,
+        "cutoff_J_joint": 1.485977988620093,
+        "candidate_ids": [
+          "dens_bo01_01",
+          "joint_bo03_01",
+          "wide_bo01_05",
+          "joint_bo03_04",
+          "dens_bo02_07",
+          "wide_bo01_07",
+          "dens_bo02_02",
+          "dens_broad_16",
+          "dens_bo02_05",
+          "joint_bo02_03",
+          "wide_initial_46",
+          "dens_bo01_10",
+          "dens_bo01_03",
+          "lf_bo02_01",
+          "wide_bo01_01",
+          "wide_bo01_10",
+          "xy_combined_01",
+          "joint_bo03_02",
+          "lf_bo02_04",
+          "dens_bo01_09",
+          "joint_bo02_05",
+          "dens_main_46",
+          "dens_remote_14",
+          "xy_right_04",
+          "joint_bo03_08",
+          "xy_combined_03",
+          "dense_axis3_12",
+          "xy_left_31",
+          "joint_bo02_02",
+          "xy_right_33",
+          "xy_right_40",
+          "joint_bo03_06",
+          "lf_bo04_01",
+          "g2_b04_p01",
+          "dense_axis0_02",
+          "lf_bo03_01",
+          "dens_remote_10",
+          "dens_main_48",
+          "xy_right_42",
+          "joint_bo03_03",
+          "dense_axis3_02",
+          "dense_axis0_01",
+          "xy_right_41",
+          "lf_bo02_02",
+          "xy_right_23",
+          "lf_bo04_03",
+          "xy_right_01",
+          "dens_main_34",
+          "lf_bo03_04",
+          "dens_bo02_01",
+          "dens_bo02_12",
+          "interaction_y1_a1_g0",
+          "interaction_y3_a1_g0",
+          "xy_right_10",
+          "xy_right_43",
+          "xy_right_11",
+          "xy_left_11",
+          "interaction_y3_a0_g0",
+          "xy_right_00",
+          "lf_bo04_05",
+          "xy_left_20",
+          "wide_bo01_11",
+          "interaction_y1_a2_g0",
+          "xy_combined_02",
+          "xy_right_44",
+          "dens_bo02_04",
+          "dens_bo02_03",
+          "dense_axis2_08",
+          "dense_axis2_02",
+          "g2_b01_p01",
+          "xy_right_03",
+          "g2_b03_p01",
+          "xy_right_20",
+          "xy_left_21",
+          "lf_bo01_04",
+          "lf_bo01_01",
+          "dens_bo01_06",
+          "xy_right_13",
+          "xy_left_10",
+          "joint_bo02_04",
+          "wide_bo01_04",
+          "dense_axis2_03",
+          "interaction_y2_a2_g0"
+        ],
+        "historical": 59,
+        "new": 24
+      },
+      "pool_scorable": 413,
+      "asof": "2026-10-09T09:44:52+08:00",
+      "sigma_mm": 0.35,
+      "density_integral": 0.999999999768181,
+      "selection_metric": "J_joint",
+      "unit": "mm^-2",
+      "interpretation": "Descriptive density of the lowest 20% J_joint in the evaluated search pool; deliberate local densification affects concentration. Secondary good regions remain; not unique convergence or a posterior.",
+      "source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+      "source_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+      "pool_completed": 418,
+      "new_completed": 128,
+      "new_scorable": 125,
+      "straight_electrodes": true,
+      "contacts_overlay_above_surface": true
+    },
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_all_50_subject_values_and_quartiles_unchanged": true,
+    "layout": {
+      "axis_boxes_mm": {
+        "B": [
+          18.0,
+          84.0,
+          45.0,
+          45.00000000000001
+        ],
+        "C": [
+          91.0,
+          84.0,
+          45.00000000000001,
+          45.00000000000001
+        ],
+        "D": [
+          164.0,
+          84.0,
+          45.00000000000001,
+          45.00000000000001
+        ],
+        "E": [
+          237.0,
+          84.0,
+          45.00000000000001,
+          45.00000000000001
+        ],
+        "F": [
+          18.0,
+          17.0,
+          74.0,
+          45.00000000000001
+        ],
+        "G": [
+          109.0,
+          17.0,
+          27.000000000000007,
+          45.00000000000001
+        ],
+        "H": [
+          164.0,
+          17.0,
+          45.00000000000001,
+          45.00000000000001
+        ],
+        "I": [
+          237.0,
+          17.0,
+          45.00000000000001,
+          45.00000000000001
+        ]
+      },
+      "visible_bounds_mm": {
+        "A": [
+          7.0,
+          139.44890444444445,
+          156.22923249999997,
+          216.55898500000004
+        ],
+        "B": [
+          6.697881944444444,
+          75.25640277777778,
+          76.40993055555555,
+          129.00000000000003
+        ],
+        "C": [
+          82.71413194444445,
+          74.72194444444445,
+          137.58071274630544,
+          129.00000000000003
+        ],
+        "D": [
+          153.40343749999997,
+          75.07472222222222,
+          209.00000000000003,
+          129.00000000000003
+        ],
+        "E": [
+          226.69006944444442,
+          74.72194444444445,
+          296.78678472222225,
+          129.83647354033144
+        ],
+        "G": [
+          99.98652777777778,
+          7.721944444444445,
+          137.46926797945207,
+          65.37500000000001
+        ],
+        "H": [
+          154.66902777777776,
+          12.43152777777778,
+          218.8353472222222,
+          67.32694444444446
+        ],
+        "F": [
+          4.276944444444444,
+          7.721944444444445,
+          91.99999999999999,
+          62.00000000000002
+        ],
+        "I": [
+          226.05506944444443,
+          12.37861111111111,
+          282.0,
+          62.000000000000036
+        ]
+      },
+      "row_edges_aligned": true,
+      "paired_column_edges_aligned": true,
+      "no_panel_overlap": true,
+      "all_text_inside_canvas": true,
+      "square_axis_panels": [
+        "B",
+        "C",
+        "D",
+        "E",
+        "H",
+        "I"
+      ],
+      "square_axis_side_mm": 45,
+      "middle_row_column_pitch_mm": 73,
+      "BC_outer_edges_match_FG": true,
+      "DH_and_EI_both_edges_aligned": true,
+      "row_gaps_mm": [
+        9.612430904113012,
+        7.394999999999982
+      ],
+      "previous_row_gaps_mm": [
+        9.612430904113069,
+        7.395000000000003
+      ],
+      "compact_row_gaps_preserved": true
+    }
+  },
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-09-29_pre_template_recovery_fig4/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/figure_registry.json": "0b0879919914d4804eebe783b7ea28d9af1913fa3f25d2ddfc40f78dd9b000c4",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/core-position-search-context.npz": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_geometry.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_straight_display.json": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/density_contours.json": "be1aabdadf7760032481d5350c6393e11262ccea1b4d851fd3f08ebf299b8519",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
+  },
+  "scientific_claims": "Unchanged frozen observations; no new simulations.",
+  "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
+  "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
+  "outputs": {
+    "figures/fig4-panela.pdf": "15f1f86c50c252545dc7dafed28bc53b9df7997da6527e421d981e2e55224a83",
+    "figures/fig4-panelf.svg": "d955b10705e87d54afbafaecc61fe377cd59682f9024ef74bbc0d0eb923c29f8",
+    "figures/fig4-panelh.pdf": "8085864678e58f9c03eee715245729a7e20c026a3f2d0dc7786c6db37f77edd3",
+    "figures/fig4-panelf.pdf": "e0fc2906b2a8744a81b284e48f3a7a50aad82a2918bd8426b6480be1cb6d5ace",
+    "figures/fig4-complete-layout.svg": "ff093377b1149188245d834d63f27b7c42a47c9119bdfb72aac25e861f7bfa8d",
+    "figures/fig4-panelg.pdf": "9b72a78562bcfa12103611be3a79d304d34f984881693991e37328b286534b6e",
+    "figures/fig4-complete-layout.png": "703ea0ca497d98a893d8b82badd0329603dd220a311fbbf0aa061bd55c47d1df",
+    "figures/fig4-panelf.png": "c907e463f93c3043de86db29a915f6592ce642513f56060c842fa590a9a00e8d",
+    "figures/fig4-panelc.png": "d78dfac2484ba3073ee9612a0026522b9d63ef566c79ba75586e919f9f31bfe6",
+    "figures/fig4-panela.svg": "5f9f30503b640ca4f356afa3fef23b0dbccb0406c3bd5dc48cfe0fa61e1c371a",
+    "figures/fig4-paneld.pdf": "79604b0a93282f264ff2274d8b1db0985c5f86361aa48e73ae84bd40a9da15e2",
+    "figures/fig4-panelb.pdf": "7678c7767392763bf6fe689a42b6ea469e5f512a6e21cedbad933c4f210d11c3",
+    "figures/fig4-paneld.svg": "15d6fa480aa61ed896d2a385d0fd369dce546bb29c1d0359c30a075cefdd623f",
+    "figures/fig4-panelh.svg": "1d729f2dde81b7f028cca87e7fd65353149fabb9238830fbea512e5eb5d837e0",
+    "figures/fig4-panelg.svg": "4c7a7a35191096cdc9f77fefd3210e33cecf225c808ec6bc0797658180bd442b",
+    "figures/fig4-panelb.svg": "e59a33e4093b054232577b9d5c21cdf25e4ccf08006f3a6070fa4643641564de",
+    "figures/fig4-complete-layout-preview.png": "5851c194e1986b3015a8d4570a034b6a34758aa107e3ba97a9e8ca0d90cf398b",
+    "figures/fig4-complete-layout.pdf": "60a0149b4c0ecf397a32ce2b4441cdffb77d0db0c387d87425ee069e0c05506e",
+    "figures/fig4-panelc.pdf": "fc8d8cf2b48ff654d1c3396e199f79e7a7603b59279f0eb80417455508b5590e",
+    "figures/fig4-paneld.png": "3b96c45790edbff24e1bbb34ecf35021adff4bfff900b13e2b265f632e555053",
+    "figures/fig4-panela.png": "7ca922433afab22131a8de6c47e46f0f2923581bc13797844e2eb10410ef48c5",
+    "figures/fig4-panelh.png": "eccb7b637bc05994ea947af984fa1f8f1b2a6d062a59248c18e053054f010227",
+    "figures/fig4-panelc.svg": "6db9330525db1da98a2fdf8bd8ab4ef9137abc9131bbce7fd48c20f122a84f77",
+    "figures/fig4-paneli.png": "db55d44ff5e329613a9d8de00b627cc0a20cabb1187409b70c20aebceeed09da",
+    "figures/fig4-panele.svg": "88ac1a73a63871b4820de2e895dd38de504514e9cb3ea63891fd0f6becaf1501",
+    "figures/fig4-panelb.png": "80f2dbd05bbedc76a637c6f42fcda1620385949b94567eec0e723e807351972d",
+    "figures/fig4-panelg.png": "59299e48666a2c2cf6cc20ed7087187b940ae057e665c4ea7736c282dd7b29c1",
+    "figures/fig4-panele.pdf": "0b04bd5944ede6436e619f0a572c39361f6d353540de7430afd709d267296e12",
+    "figures/fig4-paneli.svg": "dd6686011946be72738f2cd9eabf432b9b3fecb9450f3afa86db754a8a90456f",
+    "figures/fig4-paneli.pdf": "0dd110e477678f59d690a7e1a1690421135e99b28a57578d218fda3890e04004",
+    "figures/fig4-panele.png": "8750f7b32b2ed2fd4a0faa1966b1a8f1008e09bc67c20e81596387a0f07a0ae6"
+  }
+}

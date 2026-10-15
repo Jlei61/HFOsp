@@ -1,0 +1,1826 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "human_visual_acceptance": "PENDING",
+  "producer": "scripts/paper_figures/build_fig4_a_mechanism_candidate.py",
+  "layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
+  "updated_on": "2026-10-09",
+  "panel_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+  ],
+  "titles": {
+    "A": "仅调整左侧中央E/I连线间距和z下降节点的细密虚线边框",
+    "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
+    "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
+    "D": "E→E角度的Mean rank／Order／Participation误差响应",
+    "E": "413个可评分配置中低J_joint前20%（83个）的位置密度",
+    "F": "连续30–80 Hz虚拟接触活动及MTA／MTB事件标记",
+    "G": "模型与患者的平均传播rank",
+    "H": "模型—患者触点交叉匹配矩阵",
+    "I": "25位患者TA–MTA／TB–MTB模板相似度"
+  },
+  "whole_canvas_mm": [
+    300.0,
+    232.0
+  ],
+  "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
+  "base_published_complete_sha256": "01026b11f56fbd5fd8c07f7d86611a277ae3eb4918f33bab35ff1541a730930b",
+  "panel_mapping": {
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "D": "D angle response",
+    "E": "D position density",
+    "F": "G",
+    "G": "H",
+    "H": "I",
+    "I": "J"
+  },
+  "omitted_parent_panels": [
+    "E propagation showcase",
+    "F propagation showcase",
+    "D outward EE response",
+    "D within-core EE response"
+  ],
+  "panel_a": {
+    "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+    "original_left_circuit_structure_preserved": true,
+    "overview_neuron_samples_preserved": true,
+    "left_circuit_detail_revision": {
+      "native_producer": "local_circuit_native_source.py",
+      "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+      "central_offset_schematic_units": 0.11,
+      "previous_central_offset_schematic_units": 0.04,
+      "z_border_linewidth_pt": 0.6,
+      "previous_z_border_linewidth_pt": 1.6,
+      "z_border_dash_pattern": [
+        1.5,
+        1.5
+      ],
+      "previous_z_border_dash_pattern": [
+        2.0,
+        1.7
+      ],
+      "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+    },
+    "left_circuit_artwork_scale": 1.2,
+    "left_circuit_axes_mm": [
+      7.000000000000009,
+      155.926988,
+      77.39701199999993,
+      60.87614399999996
+    ],
+    "left_circuit_original_axes_mm": [
+      7.000000000000009,
+      161.0,
+      64.49750999999995,
+      50.73011999999997
+    ],
+    "sheet_axes_mm": [
+      109.564528,
+      156.727718,
+      70.639884,
+      70.63988399999998
+    ],
+    "sheet_scale_from_v6": 1.06,
+    "electrode_shafts_are_straight": true,
+    "shaft_collinearity_residual_mm": {
+      "SCL": 4.440892098500626e-16,
+      "ICL": 1.2212453270876722e-15
+    },
+    "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+    "electrode_display": {
+      "source": "D_position_straight_electrodes.json",
+      "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+      "geometry_snapshot": "rigid_contact_geometry.npz",
+      "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+      "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+      "maximum_display_displacement_mm": 0.20730072911893763,
+      "overview_and_sampling_use_identical_contacts": true
+    },
+    "original_left_title_and_internal_labels_preserved": true,
+    "combined_third_component": true,
+    "formulas_and_lower_explanations_removed": true,
+    "zoom_center_mm": [
+      -8.5,
+      0.0
+    ],
+    "zoom_field_of_view_mm": [
+      1.6754742547425474,
+      1.3143631436314362
+    ],
+    "left_zoom_connector_minimum_contact_distance_mm": 3.2585021053195193,
+    "left_zoom_connectors_clear_of_electrode_footprints": true,
+    "actual_workpoint_kernel": {
+      "l_par": 0.5374011537017762,
+      "l_perp": 0.40305086527633205,
+      "theta_deg": -22.80538396505847,
+      "theta_rad": -0.3980290373717898,
+      "reference_theta_deg": -22.80538396505847,
+      "reference_ar": 2.0,
+      "perp_scale": 1.5,
+      "parallel_scale": 1.0,
+      "angle_offset_deg": 0.0,
+      "is_reference": false
+    },
+    "kernel_centres_E_coordinates_mm": [
+      [
+        12.151403427124023,
+        4.944769382476807
+      ],
+      [
+        13.909762382507324,
+        4.9577555656433105
+      ],
+      [
+        11.787443161010742,
+        3.968081474304199
+      ],
+      [
+        13.032197952270508,
+        3.884768486022949
+      ],
+      [
+        14.045100212097168,
+        3.9619879722595215
+      ]
+    ],
+    "layout_refinement": {
+      "sheet_shift_x_mm": 24.0,
+      "sampling_axes_mm": [
+        218.5,
+        190.0,
+        60.0,
+        30.0
+      ],
+      "previous_sampling_axes_mm": [
+        203.0,
+        190.0,
+        68.0,
+        34.0
+      ],
+      "readout_axes_mm": [
+        [
+          207.0,
+          155.0,
+          34.0,
+          22.0
+        ],
+        [
+          256.0,
+          155.0,
+          34.0,
+          22.0
+        ]
+      ],
+      "previous_readout_axes_mm": [
+        [
+          179.0,
+          155.0,
+          47.0,
+          22.0
+        ],
+        [
+          245.0,
+          155.0,
+          47.0,
+          22.0
+        ]
+      ],
+      "left_circuit_scale": 1.2,
+      "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
+      "sheet_scale": 1.06,
+      "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
+    },
+    "local_population_coordinates_mm": [
+      {
+        "E": [
+          [
+            12.151403427124023,
+            4.944769382476807
+          ],
+          [
+            12.304140090942383,
+            4.9625444412231445
+          ],
+          [
+            12.395358085632324,
+            4.898394584655762
+          ],
+          [
+            12.275625228881836,
+            4.794172286987305
+          ],
+          [
+            12.227322578430176,
+            5.0637688636779785
+          ],
+          [
+            12.034781455993652,
+            4.771931171417236
+          ]
+        ],
+        "I": [
+          [
+            11.971738952223859,
+            4.926103714872796
+          ],
+          [
+            11.953223930433865,
+            5.1074732206518085
+          ]
+        ]
+      },
+      {
+        "E": [
+          [
+            13.909762382507324,
+            4.9577555656433105
+          ],
+          [
+            14.016875267028809,
+            4.808532238006592
+          ],
+          [
+            13.70569896697998,
+            4.8910017013549805
+          ],
+          [
+            13.792451858520508,
+            4.987637996673584
+          ],
+          [
+            14.155109405517578,
+            4.876069068908691
+          ],
+          [
+            13.95798110961914,
+            5.150943279266357
+          ],
+          [
+            13.701952934265137,
+            5.07421350479126
+          ]
+        ],
+        "I": [
+          [
+            14.069424793465144,
+            5.037958340919517
+          ],
+          [
+            13.837128616656454,
+            5.111711940660591
+          ]
+        ]
+      },
+      {
+        "E": [
+          [
+            11.787443161010742,
+            3.968081474304199
+          ],
+          [
+            11.984225273132324,
+            3.79966402053833
+          ],
+          [
+            11.564770698547363,
+            4.10961389541626
+          ],
+          [
+            11.862934112548828,
+            3.8602023124694824
+          ],
+          [
+            11.947848320007324,
+            4.065094947814941
+          ],
+          [
+            11.678738594055176,
+            4.014657020568848
+          ]
+        ],
+        "I": [
+          [
+            11.763234933014688,
+            4.157546046048493
+          ],
+          [
+            11.774906009994329,
+            3.798027401525916
+          ]
+        ]
+      },
+      {
+        "E": [
+          [
+            13.032197952270508,
+            3.884768486022949
+          ],
+          [
+            13.224488258361816,
+            3.8485240936279297
+          ],
+          [
+            13.181347846984863,
+            3.715062141418457
+          ],
+          [
+            13.12874984741211,
+            3.952385425567627
+          ],
+          [
+            13.081881523132324,
+            4.10737943649292
+          ],
+          [
+            13.00422191619873,
+            3.704172134399414
+          ]
+        ],
+        "I": [
+          [
+            12.930556066091496,
+            4.088410408328311
+          ],
+          [
+            12.801061207277563,
+            4.003966101489869
+          ]
+        ]
+      },
+      {
+        "E": [
+          [
+            14.045100212097168,
+            3.9619879722595215
+          ],
+          [
+            13.838899612426758,
+            4.0432329177856445
+          ],
+          [
+            13.814152717590332,
+            3.9273929595947266
+          ],
+          [
+            14.1874361038208,
+            3.7812366485595703
+          ],
+          [
+            14.132532119750977,
+            4.063586711883545
+          ],
+          [
+            13.912890434265137,
+            3.968815803527832
+          ]
+        ],
+        "I": [
+          [
+            14.31302613950283,
+            3.8759139608328024
+          ]
+        ]
+      }
+    ],
+    "local_population_counts": [
+      {
+        "E": 6,
+        "I": 2
+      },
+      {
+        "E": 7,
+        "I": 2
+      },
+      {
+        "E": 6,
+        "I": 2
+      },
+      {
+        "E": 6,
+        "I": 2
+      },
+      {
+        "E": 6,
+        "I": 1
+      }
+    ],
+    "all_local_E_markers_hollow": true,
+    "all_ellipses_contain_fewer_I_than_E": true,
+    "local_synaptic_arrowheads_removed": true,
+    "ellipse_rows": [
+      2,
+      3
+    ],
+    "labeled_sampling_contacts": [
+      "ICL3",
+      "ICL4",
+      "ICL5"
+    ],
+    "displayed_sampling_labels": [
+      "SL3",
+      "SL4",
+      "SL5"
+    ],
+    "display_label_to_source_contact": {
+      "SL3": "ICL3",
+      "SL4": "ICL4",
+      "SL5": "ICL5"
+    },
+    "exactly_three_consecutive_contacts": true,
+    "sampling_weights_shown_only_in_right_zoom": true,
+    "sampling_weight_display": {
+      "location": "Right Local sampling only",
+      "sigma_mm": 0.25,
+      "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
+      "maximum_alpha": 0.67,
+      "render_extent_sigma": 4.0,
+      "clipped_at_zoom_boundary": true,
+      "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+    },
+    "sampling_weight_sigma_mm": 0.25,
+    "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
+    "central_sampling_region_removed": true,
+    "sampling_footprint_boundary_rings_removed": true,
+    "sampling_contact_coordinates_overview_mm": [
+      [
+        4.887288107598678,
+        -5.82446371225047
+      ],
+      [
+        3.022935542047014,
+        -5.579826094279083
+      ],
+      [
+        1.52689879808878,
+        -5.383518339940077
+      ]
+    ],
+    "local_sampling_labels_match_both_readouts": true,
+    "tiny_readout_arrow_removed": true,
+    "local_circuit_count": 5,
+    "sampling_zoom_center_overview_mm": [
+      3.207093452843729,
+      -5.603991026095273
+    ],
+    "sampling_zoom_field_of_view_mm": [
+      3.8,
+      1.9
+    ],
+    "sampling_frame_is_a_coordinate_exact_enlargement": true,
+    "two_distinct_zoom_roles": true,
+    "mode_readouts_below_sampling": true,
+    "physical_xy_equal_scale": true,
+    "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
+    "readout": {
+      "type": "normalized Gaussian average of smoothed E spike density",
+      "sigma_mm": 0.25,
+      "bin_ms": 2.0,
+      "smooth_ms": 5.0,
+      "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+      "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+      "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+      "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+      "display_title": "SEEG readout",
+      "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+    },
+    "mode_showcases": {
+      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+      "events": [
+        {
+          "mode": "MTA",
+          "event_index": 10,
+          "frozen_mode_label": 1,
+          "window_absolute_ms": [
+            4310,
+            4430
+          ],
+          "peak_absolute_ms": [
+            4386.0,
+            4378.0,
+            4372.0
+          ],
+          "peak_relative_ms": [
+            76.0,
+            68.0,
+            62.0
+          ],
+          "contact_order": [
+            "ICL3",
+            "ICL4",
+            "ICL5"
+          ],
+          "display_labels": [
+            "SL3",
+            "SL4",
+            "SL5"
+          ]
+        },
+        {
+          "mode": "MTB",
+          "event_index": 8,
+          "frozen_mode_label": 0,
+          "window_absolute_ms": [
+            3710,
+            3830
+          ],
+          "peak_absolute_ms": [
+            3756.0,
+            3756.0,
+            3762.0
+          ],
+          "peak_relative_ms": [
+            46.0,
+            46.0,
+            52.0
+          ],
+          "contact_order": [
+            "ICL3",
+            "ICL4",
+            "ICL5"
+          ],
+          "display_labels": [
+            "SL3",
+            "SL4",
+            "SL5"
+          ]
+        }
+      ],
+      "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+      "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+      "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
+      "snapshot": "burst_readout_arrays.npz",
+      "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
+      "waveform_source": "waveform_arrays.npz",
+      "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+      "exact_frozen_F_waveform_crops_verified": true,
+      "no_artificial_peak_sharpening_or_time_warping": true,
+      "peak_relative_ms": [
+        [
+          76.0,
+          68.0,
+          62.0
+        ],
+        [
+          46.0,
+          46.0,
+          52.0
+        ]
+      ],
+      "display_label_to_source_contact": {
+        "SL3": "ICL3",
+        "SL4": "ICL4",
+        "SL5": "ICL5"
+      }
+    },
+    "readout_peak_times_relative_ms": [
+      [
+        76.0,
+        68.0,
+        62.0
+      ],
+      [
+        46.0,
+        46.0,
+        52.0
+      ]
+    ],
+    "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
+    "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
+    "left_detail_validation": {
+      "native_baseline_pixel_identical_to_v9": true,
+      "changed_pixels": 33230,
+      "changed_bounds_pixels": [
+        1141,
+        1007,
+        1398,
+        1499
+      ],
+      "allowed_change_bounds_pixels": [
+        1050,
+        800,
+        1500,
+        1520
+      ],
+      "unchanged_pixels_outside_requested_detail_region": true,
+      "previous_shaft_separation_schematic_units": 0.08,
+      "new_shaft_separation_schematic_units": 0.22,
+      "parameters": {
+        "native_producer": "local_circuit_native_source.py",
+        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+        "central_offset_schematic_units": 0.11,
+        "previous_central_offset_schematic_units": 0.04,
+        "z_border_linewidth_pt": 0.6,
+        "previous_z_border_linewidth_pt": 1.6,
+        "z_border_dash_pattern": [
+          1.5,
+          1.5
+        ],
+        "previous_z_border_dash_pattern": [
+          2.0,
+          1.7
+        ],
+        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+      }
+    },
+    "left_detail_allowed_bounds_mm": [
+      42.62436399999998,
+      169.48219999999998,
+      51.19033599999997,
+      185.33223199999998
+    ],
+    "all_pixels_outside_left_detail_identical_to_v9": true,
+    "burst_axes_and_labels_pixel_identical_to_v9": true,
+    "sampling_geometry_and_circuits_preserved_from_v9": true,
+    "consecutive_contact_crops_verified_against_frozen_F": true,
+    "frozen_geometry_and_full_F_waveform_snapshot_unchanged": true
+  },
+  "panel_b": {
+    "version": "post_prior_stages_6_16_v1",
+    "included_original_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "excluded_original_stages": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "visible_workpoints": 194,
+    "prior_workpoints": 32,
+    "original_workpoints": 226,
+    "stage_numbers_renumbered": false,
+    "prior_interpretation": "Stages 1-5 belong to the preceding label-informed development phase and are omitted from B. Subsequent searches inherit its candidate pool and patient geometry as development priors; their scoring objectives omit TA/TB labels. This display restriction does not establish independence from development data or remove historical information use.",
+    "visible_source": "source/B_visible_workpoints.csv",
+    "prior_source": "source/B_prior_workpoints.csv",
+    "requested_on": "2026-10-09",
+    "human_visual_acceptance": "PENDING",
+    "showcase_labels": false
+  },
+  "panel_c": {
+    "preview_package": "results/paper-ready-figure/fig4/candidates/core_count_mean_sd_20261008",
+    "core_counts": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "summary_style": "mean_std",
+    "std_ddof": 1,
+    "statistical_unit": "optimization_restart_within_E1146",
+    "restarts": 4,
+    "common_epoch": 31,
+    "comparison": {
+      "subject": "epilepsiae_1146",
+      "display_id": "E1146",
+      "common_epoch": 31,
+      "planned_epochs": 96,
+      "restarts": 4,
+      "core_counts": "1,2,3,4",
+      "single_core_mean": 3.310180135792793,
+      "single_core_std": 0.612009454297094,
+      "dual_core_mean": 1.7035437461176952,
+      "dual_core_std": 0.20555287828006355,
+      "three_core_mean": 1.264872097960017,
+      "three_core_std": 0.18293680164782206,
+      "four_core_mean": 1.4364581504388079,
+      "four_core_std": 0.15851642446091144,
+      "std_ddof": 1,
+      "mean_reduction_percent": 48.53622231317952,
+      "stage": "adaptive_search"
+    },
+    "author_accepted_on": "2026-10-08",
+    "snapshot_sha256": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97"
+  },
+  "panel_d": {
+    "version": "angle_three_error_response_v1",
+    "source_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
+    "source_table": "source/D_connection_response.csv",
+    "parent_panel": "D",
+    "parameter": "EE_angle_offset_deg",
+    "conditions": 13,
+    "showcase_references": false
+  },
+  "panel_e": {
+    "version": "completed_position_density_standalone_v1",
+    "source_package": "results/paper-ready-figure/fig4/candidates/core_count_panel_c_20260929",
+    "requested_on": "2026-10-08",
+    "source_registry_sha256": "efec3ef3cefe614e91ff11e39ee3a32b9228205b4c525704061abd14703e9fc9",
+    "source_panel_png_sha256": "b1382021545e630415108e4b1dd35af64f165899ee0edf316bae9f9f48a54429",
+    "source_data_and_panel_pixels_verified": false,
+    "column_reflow_promoted": false,
+    "density_version": "completed_joint_densification_top20_relief_v1",
+    "density_source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+    "density_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+    "density_source_png_sha256": "9e004997f220ed3e42d1c1cd2ef6adfcf21238d3f9ff4b4751b63fba48d72973",
+    "density_selected": 83,
+    "density_scorable": 413,
+    "density_completed": 418,
+    "density_author_accepted_on": "2026-10-09",
+    "response_curve_sources_verified_unchanged": true,
+    "parent_panel": "D"
+  },
+  "panel_i": {
+    "groups": [
+      {
+        "mode": "TA–MTA",
+        "n": 25,
+        "subjects": [
+          "epilepsiae_1077",
+          "epilepsiae_1084",
+          "epilepsiae_1096",
+          "epilepsiae_1125",
+          "epilepsiae_1146",
+          "epilepsiae_1150",
+          "epilepsiae_253",
+          "epilepsiae_384",
+          "epilepsiae_442",
+          "epilepsiae_548",
+          "epilepsiae_583",
+          "epilepsiae_590",
+          "epilepsiae_620",
+          "epilepsiae_635",
+          "epilepsiae_922",
+          "epilepsiae_958",
+          "yuquan_chengshuai",
+          "yuquan_huanghanwen",
+          "yuquan_litengsheng",
+          "yuquan_liyouran",
+          "yuquan_pengzihang",
+          "yuquan_xuxinyi",
+          "yuquan_zhangbichen",
+          "yuquan_zhangkexuan",
+          "yuquan_zhaochenxi"
+        ],
+        "points": [
+          0.02857142857142857,
+          0.14545454545454545,
+          -0.07142857142857142,
+          0.8571428571428571,
+          0.5071428571428571,
+          0.7166666666666667,
+          0.30952380952380953,
+          -0.21428571428571427,
+          0.575,
+          0.12727272727272726,
+          0.6,
+          0.8251748251748252,
+          0.7666666666666667,
+          0.32142857142857145,
+          0.4523809523809524,
+          0.17058823529411765,
+          -0.09523809523809523,
+          0.47878787878787876,
+          0.4591304347826087,
+          0.6764705882352942,
+          0.48951048951048953,
+          0.11785714285714285,
+          0.69785708187484,
+          0.7935042735042735,
+          0.5692307692307692
+        ],
+        "q25_q50_q75": [
+          0.14545454545454545,
+          0.47878787878787876,
+          0.6764705882352942
+        ]
+      },
+      {
+        "mode": "TB–MTB",
+        "n": 25,
+        "subjects": [
+          "epilepsiae_1077",
+          "epilepsiae_1084",
+          "epilepsiae_1096",
+          "epilepsiae_1125",
+          "epilepsiae_1146",
+          "epilepsiae_1150",
+          "epilepsiae_253",
+          "epilepsiae_384",
+          "epilepsiae_442",
+          "epilepsiae_548",
+          "epilepsiae_583",
+          "epilepsiae_590",
+          "epilepsiae_620",
+          "epilepsiae_635",
+          "epilepsiae_922",
+          "epilepsiae_958",
+          "yuquan_chengshuai",
+          "yuquan_huanghanwen",
+          "yuquan_litengsheng",
+          "yuquan_liyouran",
+          "yuquan_pengzihang",
+          "yuquan_xuxinyi",
+          "yuquan_zhangbichen",
+          "yuquan_zhangkexuan",
+          "yuquan_zhaochenxi"
+        ],
+        "points": [
+          0.37142857142857144,
+          -0.01818181818181818,
+          0.9428571428571428,
+          0.8571428571428571,
+          0.7357142857142858,
+          0.45,
+          0.16666666666666666,
+          0.6333333333333333,
+          0.6107142857142858,
+          0.5181818181818182,
+          0.5,
+          0.6588235294117647,
+          0.23333333333333334,
+          0.6785714285714286,
+          0.5952380952380952,
+          0.34705882352941175,
+          0.7857142857142857,
+          0.40606060606060607,
+          0.4617391304347826,
+          -0.2107843137254902,
+          0.7902097902097902,
+          0.28214285714285714,
+          0.38359088192606505,
+          0.26,
+          0.07829059829059828
+        ],
+        "q25_q50_q75": [
+          0.28214285714285714,
+          0.4617391304347826,
+          0.6588235294117647
+        ]
+      }
+    ],
+    "legend_present": true,
+    "legend_location": "upper right",
+    "legend_columns": 1,
+    "summary_interval": "interquartile range, not confidence interval",
+    "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
+  },
+  "checks": {
+    "A_revision": {
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+      "original_left_circuit_structure_preserved": true,
+      "overview_neuron_samples_preserved": true,
+      "left_circuit_detail_revision": {
+        "native_producer": "local_circuit_native_source.py",
+        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+        "central_offset_schematic_units": 0.11,
+        "previous_central_offset_schematic_units": 0.04,
+        "z_border_linewidth_pt": 0.6,
+        "previous_z_border_linewidth_pt": 1.6,
+        "z_border_dash_pattern": [
+          1.5,
+          1.5
+        ],
+        "previous_z_border_dash_pattern": [
+          2.0,
+          1.7
+        ],
+        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+      },
+      "left_circuit_artwork_scale": 1.2,
+      "left_circuit_axes_mm": [
+        7.000000000000009,
+        155.926988,
+        77.39701199999993,
+        60.87614399999996
+      ],
+      "left_circuit_original_axes_mm": [
+        7.000000000000009,
+        161.0,
+        64.49750999999995,
+        50.73011999999997
+      ],
+      "sheet_axes_mm": [
+        109.564528,
+        156.727718,
+        70.639884,
+        70.63988399999998
+      ],
+      "sheet_scale_from_v6": 1.06,
+      "electrode_shafts_are_straight": true,
+      "shaft_collinearity_residual_mm": {
+        "SCL": 4.440892098500626e-16,
+        "ICL": 1.2212453270876722e-15
+      },
+      "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+      "electrode_display": {
+        "source": "D_position_straight_electrodes.json",
+        "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+        "geometry_snapshot": "rigid_contact_geometry.npz",
+        "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+        "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+        "maximum_display_displacement_mm": 0.20730072911893763,
+        "overview_and_sampling_use_identical_contacts": true
+      },
+      "original_left_title_and_internal_labels_preserved": true,
+      "combined_third_component": true,
+      "formulas_and_lower_explanations_removed": true,
+      "zoom_center_mm": [
+        -8.5,
+        0.0
+      ],
+      "zoom_field_of_view_mm": [
+        1.6754742547425474,
+        1.3143631436314362
+      ],
+      "left_zoom_connector_minimum_contact_distance_mm": 3.2585021053195193,
+      "left_zoom_connectors_clear_of_electrode_footprints": true,
+      "actual_workpoint_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -22.80538396505847,
+        "theta_rad": -0.3980290373717898,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 0.0,
+        "is_reference": false
+      },
+      "kernel_centres_E_coordinates_mm": [
+        [
+          12.151403427124023,
+          4.944769382476807
+        ],
+        [
+          13.909762382507324,
+          4.9577555656433105
+        ],
+        [
+          11.787443161010742,
+          3.968081474304199
+        ],
+        [
+          13.032197952270508,
+          3.884768486022949
+        ],
+        [
+          14.045100212097168,
+          3.9619879722595215
+        ]
+      ],
+      "layout_refinement": {
+        "sheet_shift_x_mm": 24.0,
+        "sampling_axes_mm": [
+          218.5,
+          190.0,
+          60.0,
+          30.0
+        ],
+        "previous_sampling_axes_mm": [
+          203.0,
+          190.0,
+          68.0,
+          34.0
+        ],
+        "readout_axes_mm": [
+          [
+            207.0,
+            155.0,
+            34.0,
+            22.0
+          ],
+          [
+            256.0,
+            155.0,
+            34.0,
+            22.0
+          ]
+        ],
+        "previous_readout_axes_mm": [
+          [
+            179.0,
+            155.0,
+            47.0,
+            22.0
+          ],
+          [
+            245.0,
+            155.0,
+            47.0,
+            22.0
+          ]
+        ],
+        "left_circuit_scale": 1.2,
+        "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
+        "sheet_scale": 1.06,
+        "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
+      },
+      "local_population_coordinates_mm": [
+        {
+          "E": [
+            [
+              12.151403427124023,
+              4.944769382476807
+            ],
+            [
+              12.304140090942383,
+              4.9625444412231445
+            ],
+            [
+              12.395358085632324,
+              4.898394584655762
+            ],
+            [
+              12.275625228881836,
+              4.794172286987305
+            ],
+            [
+              12.227322578430176,
+              5.0637688636779785
+            ],
+            [
+              12.034781455993652,
+              4.771931171417236
+            ]
+          ],
+          "I": [
+            [
+              11.971738952223859,
+              4.926103714872796
+            ],
+            [
+              11.953223930433865,
+              5.1074732206518085
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              13.909762382507324,
+              4.9577555656433105
+            ],
+            [
+              14.016875267028809,
+              4.808532238006592
+            ],
+            [
+              13.70569896697998,
+              4.8910017013549805
+            ],
+            [
+              13.792451858520508,
+              4.987637996673584
+            ],
+            [
+              14.155109405517578,
+              4.876069068908691
+            ],
+            [
+              13.95798110961914,
+              5.150943279266357
+            ],
+            [
+              13.701952934265137,
+              5.07421350479126
+            ]
+          ],
+          "I": [
+            [
+              14.069424793465144,
+              5.037958340919517
+            ],
+            [
+              13.837128616656454,
+              5.111711940660591
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              11.787443161010742,
+              3.968081474304199
+            ],
+            [
+              11.984225273132324,
+              3.79966402053833
+            ],
+            [
+              11.564770698547363,
+              4.10961389541626
+            ],
+            [
+              11.862934112548828,
+              3.8602023124694824
+            ],
+            [
+              11.947848320007324,
+              4.065094947814941
+            ],
+            [
+              11.678738594055176,
+              4.014657020568848
+            ]
+          ],
+          "I": [
+            [
+              11.763234933014688,
+              4.157546046048493
+            ],
+            [
+              11.774906009994329,
+              3.798027401525916
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              13.032197952270508,
+              3.884768486022949
+            ],
+            [
+              13.224488258361816,
+              3.8485240936279297
+            ],
+            [
+              13.181347846984863,
+              3.715062141418457
+            ],
+            [
+              13.12874984741211,
+              3.952385425567627
+            ],
+            [
+              13.081881523132324,
+              4.10737943649292
+            ],
+            [
+              13.00422191619873,
+              3.704172134399414
+            ]
+          ],
+          "I": [
+            [
+              12.930556066091496,
+              4.088410408328311
+            ],
+            [
+              12.801061207277563,
+              4.003966101489869
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              14.045100212097168,
+              3.9619879722595215
+            ],
+            [
+              13.838899612426758,
+              4.0432329177856445
+            ],
+            [
+              13.814152717590332,
+              3.9273929595947266
+            ],
+            [
+              14.1874361038208,
+              3.7812366485595703
+            ],
+            [
+              14.132532119750977,
+              4.063586711883545
+            ],
+            [
+              13.912890434265137,
+              3.968815803527832
+            ]
+          ],
+          "I": [
+            [
+              14.31302613950283,
+              3.8759139608328024
+            ]
+          ]
+        }
+      ],
+      "local_population_counts": [
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 7,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 1
+        }
+      ],
+      "all_local_E_markers_hollow": true,
+      "all_ellipses_contain_fewer_I_than_E": true,
+      "local_synaptic_arrowheads_removed": true,
+      "ellipse_rows": [
+        2,
+        3
+      ],
+      "labeled_sampling_contacts": [
+        "ICL3",
+        "ICL4",
+        "ICL5"
+      ],
+      "displayed_sampling_labels": [
+        "SL3",
+        "SL4",
+        "SL5"
+      ],
+      "display_label_to_source_contact": {
+        "SL3": "ICL3",
+        "SL4": "ICL4",
+        "SL5": "ICL5"
+      },
+      "exactly_three_consecutive_contacts": true,
+      "sampling_weights_shown_only_in_right_zoom": true,
+      "sampling_weight_display": {
+        "location": "Right Local sampling only",
+        "sigma_mm": 0.25,
+        "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
+        "maximum_alpha": 0.67,
+        "render_extent_sigma": 4.0,
+        "clipped_at_zoom_boundary": true,
+        "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+      },
+      "sampling_weight_sigma_mm": 0.25,
+      "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
+      "central_sampling_region_removed": true,
+      "sampling_footprint_boundary_rings_removed": true,
+      "sampling_contact_coordinates_overview_mm": [
+        [
+          4.887288107598678,
+          -5.82446371225047
+        ],
+        [
+          3.022935542047014,
+          -5.579826094279083
+        ],
+        [
+          1.52689879808878,
+          -5.383518339940077
+        ]
+      ],
+      "local_sampling_labels_match_both_readouts": true,
+      "tiny_readout_arrow_removed": true,
+      "local_circuit_count": 5,
+      "sampling_zoom_center_overview_mm": [
+        3.207093452843729,
+        -5.603991026095273
+      ],
+      "sampling_zoom_field_of_view_mm": [
+        3.8,
+        1.9
+      ],
+      "sampling_frame_is_a_coordinate_exact_enlargement": true,
+      "two_distinct_zoom_roles": true,
+      "mode_readouts_below_sampling": true,
+      "physical_xy_equal_scale": true,
+      "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
+      "readout": {
+        "type": "normalized Gaussian average of smoothed E spike density",
+        "sigma_mm": 0.25,
+        "bin_ms": 2.0,
+        "smooth_ms": 5.0,
+        "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+        "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+        "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+        "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+        "display_title": "SEEG readout",
+        "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+      },
+      "mode_showcases": {
+        "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+        "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+        "events": [
+          {
+            "mode": "MTA",
+            "event_index": 10,
+            "frozen_mode_label": 1,
+            "window_absolute_ms": [
+              4310,
+              4430
+            ],
+            "peak_absolute_ms": [
+              4386.0,
+              4378.0,
+              4372.0
+            ],
+            "peak_relative_ms": [
+              76.0,
+              68.0,
+              62.0
+            ],
+            "contact_order": [
+              "ICL3",
+              "ICL4",
+              "ICL5"
+            ],
+            "display_labels": [
+              "SL3",
+              "SL4",
+              "SL5"
+            ]
+          },
+          {
+            "mode": "MTB",
+            "event_index": 8,
+            "frozen_mode_label": 0,
+            "window_absolute_ms": [
+              3710,
+              3830
+            ],
+            "peak_absolute_ms": [
+              3756.0,
+              3756.0,
+              3762.0
+            ],
+            "peak_relative_ms": [
+              46.0,
+              46.0,
+              52.0
+            ],
+            "contact_order": [
+              "ICL3",
+              "ICL4",
+              "ICL5"
+            ],
+            "display_labels": [
+              "SL3",
+              "SL4",
+              "SL5"
+            ]
+          }
+        ],
+        "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+        "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+        "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
+        "snapshot": "burst_readout_arrays.npz",
+        "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
+        "waveform_source": "waveform_arrays.npz",
+        "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+        "exact_frozen_F_waveform_crops_verified": true,
+        "no_artificial_peak_sharpening_or_time_warping": true,
+        "peak_relative_ms": [
+          [
+            76.0,
+            68.0,
+            62.0
+          ],
+          [
+            46.0,
+            46.0,
+            52.0
+          ]
+        ],
+        "display_label_to_source_contact": {
+          "SL3": "ICL3",
+          "SL4": "ICL4",
+          "SL5": "ICL5"
+        }
+      },
+      "readout_peak_times_relative_ms": [
+        [
+          76.0,
+          68.0,
+          62.0
+        ],
+        [
+          46.0,
+          46.0,
+          52.0
+        ]
+      ],
+      "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
+      "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery."
+    },
+    "B_workpoints": 194,
+    "B_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_profile_only": true,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_values_colors_exact_no_showcase_labels": true,
+    "B_horizontal_spacing": {
+      "x_limits": [
+        0,
+        2
+      ],
+      "first_category_at_left_axis": true,
+      "last_category_at_right_axis": true,
+      "data_to_axis_padding_mm": [
+        0,
+        0
+      ],
+      "axis_to_colorbar_mm": 1.5
+    },
+    "C_frozen_mean_sample_sd_exact": true,
+    "D_angle_values_exact_no_dangling_showcase_references": true,
+    "D_position_density": {
+      "selection": {
+        "fraction": 0.2,
+        "nominal_count": 83,
+        "count": 83,
+        "cutoff_J_joint": 1.485977988620093,
+        "candidate_ids": [
+          "dens_bo01_01",
+          "joint_bo03_01",
+          "wide_bo01_05",
+          "joint_bo03_04",
+          "dens_bo02_07",
+          "wide_bo01_07",
+          "dens_bo02_02",
+          "dens_broad_16",
+          "dens_bo02_05",
+          "joint_bo02_03",
+          "wide_initial_46",
+          "dens_bo01_10",
+          "dens_bo01_03",
+          "lf_bo02_01",
+          "wide_bo01_01",
+          "wide_bo01_10",
+          "xy_combined_01",
+          "joint_bo03_02",
+          "lf_bo02_04",
+          "dens_bo01_09",
+          "joint_bo02_05",
+          "dens_main_46",
+          "dens_remote_14",
+          "xy_right_04",
+          "joint_bo03_08",
+          "xy_combined_03",
+          "dense_axis3_12",
+          "xy_left_31",
+          "joint_bo02_02",
+          "xy_right_33",
+          "xy_right_40",
+          "joint_bo03_06",
+          "lf_bo04_01",
+          "g2_b04_p01",
+          "dense_axis0_02",
+          "lf_bo03_01",
+          "dens_remote_10",
+          "dens_main_48",
+          "xy_right_42",
+          "joint_bo03_03",
+          "dense_axis3_02",
+          "dense_axis0_01",
+          "xy_right_41",
+          "lf_bo02_02",
+          "xy_right_23",
+          "lf_bo04_03",
+          "xy_right_01",
+          "dens_main_34",
+          "lf_bo03_04",
+          "dens_bo02_01",
+          "dens_bo02_12",
+          "interaction_y1_a1_g0",
+          "interaction_y3_a1_g0",
+          "xy_right_10",
+          "xy_right_43",
+          "xy_right_11",
+          "xy_left_11",
+          "interaction_y3_a0_g0",
+          "xy_right_00",
+          "lf_bo04_05",
+          "xy_left_20",
+          "wide_bo01_11",
+          "interaction_y1_a2_g0",
+          "xy_combined_02",
+          "xy_right_44",
+          "dens_bo02_04",
+          "dens_bo02_03",
+          "dense_axis2_08",
+          "dense_axis2_02",
+          "g2_b01_p01",
+          "xy_right_03",
+          "g2_b03_p01",
+          "xy_right_20",
+          "xy_left_21",
+          "lf_bo01_04",
+          "lf_bo01_01",
+          "dens_bo01_06",
+          "xy_right_13",
+          "xy_left_10",
+          "joint_bo02_04",
+          "wide_bo01_04",
+          "dense_axis2_03",
+          "interaction_y2_a2_g0"
+        ],
+        "historical": 59,
+        "new": 24
+      },
+      "pool_scorable": 413,
+      "asof": "2026-10-09T09:44:52+08:00",
+      "sigma_mm": 0.35,
+      "density_integral": 0.999999999768181,
+      "selection_metric": "J_joint",
+      "unit": "mm^-2",
+      "interpretation": "Descriptive density of the lowest 20% J_joint in the evaluated search pool; deliberate local densification affects concentration. Secondary good regions remain; not unique convergence or a posterior.",
+      "source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+      "source_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+      "pool_completed": 418,
+      "new_completed": 128,
+      "new_scorable": 125,
+      "straight_electrodes": true,
+      "contacts_overlay_above_surface": true
+    },
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_all_50_subject_values_and_quartiles_unchanged": true,
+    "layout": {
+      "axis_boxes_mm": {
+        "B": [
+          18.0,
+          89.0,
+          50.0,
+          50.0
+        ],
+        "C": [
+          93.0,
+          89.0,
+          50.00000000000001,
+          50.0
+        ],
+        "D": [
+          159.0,
+          89.0,
+          49.999999999999986,
+          50.0
+        ],
+        "E": [
+          232.99999999999997,
+          89.0,
+          49.999999999999986,
+          50.0
+        ],
+        "F": [
+          18.0,
+          17.0,
+          84.00000000000001,
+          50.0
+        ],
+        "G": [
+          116.0,
+          17.0,
+          27.000000000000007,
+          50.0
+        ],
+        "H": [
+          159.0,
+          17.0,
+          49.999999999999986,
+          50.0
+        ],
+        "I": [
+          232.99999999999997,
+          17.0,
+          49.999999999999986,
+          50.0
+        ]
+      },
+      "visible_bounds_mm": {
+        "A": [
+          7.000000000000008,
+          145.99999999999997,
+          292.67890625,
+          228.55822699999996
+        ],
+        "B": [
+          6.697881944444444,
+          80.25640277777775,
+          81.40993055555555,
+          139.0
+        ],
+        "C": [
+          84.71413194444445,
+          79.72194444444443,
+          144.53145166256155,
+          139.0
+        ],
+        "D": [
+          148.4034375,
+          80.07472222222219,
+          209.00000000000003,
+          139.0
+        ],
+        "E": [
+          222.6900694444444,
+          79.72194444444443,
+          297.7867847222222,
+          139.79712337814604
+        ],
+        "G": [
+          106.98652777777775,
+          7.721944444444441,
+          144.46926797945207,
+          70.75
+        ],
+        "H": [
+          149.66902777777779,
+          12.431527777777774,
+          218.8353472222222,
+          72.32694444444444
+        ],
+        "F": [
+          4.276944444444444,
+          7.721944444444441,
+          102.00000000000001,
+          66.99999999999999
+        ],
+        "I": [
+          222.05506944444437,
+          12.378611111111107,
+          283.0,
+          67.0
+        ]
+      },
+      "row_edges_aligned": true,
+      "paired_column_edges_aligned": true,
+      "no_panel_overlap": true,
+      "all_text_inside_canvas": true,
+      "square_axis_panels": [
+        "B",
+        "C",
+        "D",
+        "E",
+        "H",
+        "I"
+      ],
+      "square_axis_side_mm": 50,
+      "horizontal_visible_gaps_mm": {
+        "BC": 3.304201388888899,
+        "CD": 3.8719858374384444,
+        "DE": 13.690069444444362,
+        "FG": 4.986527777777738,
+        "GH": 5.199759798325715,
+        "HI": 3.219722222222174
+      },
+      "previous_horizontal_visible_gaps_mm": {
+        "BC": 6.304201388888899,
+        "CD": 15.82272475369453,
+        "DE": 17.69006944444439,
+        "FG": 7.986527777777795,
+        "GH": 17.199759798325687,
+        "HI": 7.219722222222231
+      },
+      "horizontal_gaps_measured_including_labels_and_colorbars": true,
+      "all_adjacent_horizontal_gaps_reduced": true,
+      "BC_outer_edges_match_FG": true,
+      "DH_and_EI_both_edges_aligned": true,
+      "row_gaps_mm": [
+        6.202876621853932,
+        7.394999999999996
+      ],
+      "previous_row_gaps_mm": [
+        9.612430904113012,
+        7.394999999999982
+      ],
+      "row_gap_change_mm": [
+        0.03935016218537157,
+        1.4210854715202004e-14
+      ],
+      "compact_row_gaps_preserved": true,
+      "approved_v4_B_through_I_bounds_preserved": true,
+      "A_uses_previously_reserved_mechanism_space": true
+    }
+  },
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/figure_registry.json": "0b0879919914d4804eebe783b7ea28d9af1913fa3f25d2ddfc40f78dd9b000c4",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/core-position-search-context.npz": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_geometry.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/source/electrode_straight_display.json": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009/density_contours.json": "be1aabdadf7760032481d5350c6393e11262ccea1b4d851fd3f08ebf299b8519",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
+  },
+  "scientific_claims": "Unchanged frozen observations; no new simulations.",
+  "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
+  "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
+  "outputs": {
+    "figures/fig4-panela.pdf": "dd8500e036a50340b0b7c4fbbc91076caf9a5c39bb6473c55927990a924b46d0",
+    "figures/fig4-panelf.svg": "8a91c89e6bcf2eab3c5af793a104b3e2a87397a2348fe84ad4c687b8b0282b17",
+    "figures/fig4-panelh.pdf": "2fe3c7969e0c7cb0b0c091f4f413069cfc2b5c13004d0c4b31cb923b9dd55250",
+    "figures/fig4-panelf.pdf": "04a6dbc0d14f74262881c61b48e76055ca6a4a7561a815a7735b4504aa23ece2",
+    "figures/fig4-complete-layout.svg": "0a4b8cccfe7f93741ecb8c6e4210b7f8778430af398c5cb3095fd8e51cd4016d",
+    "figures/fig4-panelg.pdf": "cfa07ab6ebde6aaf954aa3f857a3beec0c9a0c77418460c91de6004f71d03ea8",
+    "figures/fig4-complete-layout.png": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
+    "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
+    "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
+    "figures/fig4-panela.svg": "437104facf72d9b37998458a12baddeab9f1dc26943698baf8a8beeae90eb975",
+    "figures/fig4-paneld.pdf": "06b93fe4c285879b2457fe6860a2f687e6faf2005298a242de792b50583f9279",
+    "figures/fig4-panelb.pdf": "aca2824f8dd1988bfd0f95889b21efb056966018b673c088264b372e01b3b8df",
+    "figures/fig4-paneld.svg": "ca6b5608caaed0243576298250a5c715f21acf162c7edc59c7ef1860ee203443",
+    "figures/fig4-panelh.svg": "1283613094c6c9994b5429f61aa706cae0571314153532f682d8cd6f788b2d5e",
+    "figures/fig4-panelg.svg": "e06fc53c7dbedfdae188f908e1af33c17400c5a64019a1d5d23e02786d260405",
+    "figures/fig4-panelb.svg": "dd11043e861eba6ae02219ccdda7a62f107bd9a8e8c17793af12ad4bf99cd4a0",
+    "figures/fig4-complete-layout-preview.png": "6426f47a4b799fb31793ed7c2128252d76a7ff7b7d82f9af8b64dbef3402c719",
+    "figures/fig4-complete-layout.pdf": "97bb07af601240c4f6b7a4938cc2a6c93e3b3f634adf60adb0271018b0912e8a",
+    "figures/fig4-panelc.pdf": "d12029c77ee7c7d409f7fea50602f62e1e4afb3b94db1cef016ad30b09d5f21d",
+    "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
+    "figures/fig4-panela.png": "0ef3b55779f7b12c995ab27a205ba9bd061387189dc4250638cf96d480749f72",
+    "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
+    "figures/fig4-panelc.svg": "1f59b394277fa5f9c29a70b149bebceb52c3b0544600090b5a4a841dd15a06c9",
+    "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
+    "figures/fig4-panele.svg": "cc9f61c4040e688555b927c1596f68239d62a292703402ddd7ef6d1eac90c83c",
+    "figures/fig4-panelb.png": "d01f589b1718c232aecf194233f7c122efbe243a7a23e56babda45089f34a312",
+    "figures/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
+    "figures/fig4-panele.pdf": "34752004b5a09f05fd8639b64344a750ee5080b4b366b3c75369c6d6d2ff1e97",
+    "figures/fig4-paneli.svg": "9990eb3f1a9327b718aa65a082d64bc1642002fd1bef421744241ecfe324fe9f",
+    "figures/fig4-paneli.pdf": "a9d621226a22d477817cfb247c16caa0a4f5780950b379d53fde0db1b01bffec",
+    "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
+  },
+  "base_layout_version": "compact_ai_tighter_columns_larger_squares_v4",
+  "canonical_figure_replaced": false,
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "original_left_circuit_artwork_preserved_except_requested_details": true
+}

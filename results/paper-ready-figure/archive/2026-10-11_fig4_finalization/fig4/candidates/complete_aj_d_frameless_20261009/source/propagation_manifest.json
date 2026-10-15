@@ -1,0 +1,253 @@
+{
+  "cases": [
+    {
+      "panel": "D",
+      "candidate": "lf_bo04_07",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_07/2511_847401/workers/trajectory.json",
+      "source_sha256": "f76fa12fbe4e0df2a0d37193e36acd434ec26e6b26a2c21d736290a294a77a2c",
+      "events": [
+        {
+          "mode": "TA",
+          "event": 114,
+          "N_mode": 30,
+          "medoid_distance": 0.048470648795149396,
+          "window_ms": [
+            38018.0,
+            38268.0
+          ],
+          "zero_centroid_ms": 38126.21921877001,
+          "frames": [
+            {
+              "offset_ms": 0,
+              "frame_index": 19063
+            },
+            {
+              "offset_ms": 30,
+              "frame_index": 19078
+            },
+            {
+              "offset_ms": 60,
+              "frame_index": 19093
+            }
+          ]
+        },
+        {
+          "mode": "TB",
+          "event": 14,
+          "N_mode": 100,
+          "medoid_distance": 0.011261100782941597,
+          "window_ms": [
+            5002.0,
+            5252.0
+          ],
+          "zero_centroid_ms": 5095.310227317748,
+          "frames": [
+            {
+              "offset_ms": 0,
+              "frame_index": 2548
+            },
+            {
+              "offset_ms": 30,
+              "frame_index": 2563
+            },
+            {
+              "offset_ms": 60,
+              "frame_index": 2578
+            }
+          ]
+        }
+      ],
+      "contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "time_limits_ms": [
+        -125,
+        200
+      ],
+      "field_scale": [
+        0,
+        75
+      ],
+      "envelope_scale": [
+        0,
+        1
+      ]
+    },
+    {
+      "panel": "E",
+      "candidate": "xy_left_20",
+      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "source_sha256": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+      "events": [
+        {
+          "mode": "TA",
+          "event": 39,
+          "N_mode": 105,
+          "medoid_distance": 0.03177317663803956,
+          "window_ms": [
+            13342.0,
+            13592.0
+          ],
+          "zero_centroid_ms": 13457.407841545657,
+          "frames": [
+            {
+              "offset_ms": 0,
+              "frame_index": 6729
+            },
+            {
+              "offset_ms": 30,
+              "frame_index": 6744
+            },
+            {
+              "offset_ms": 60,
+              "frame_index": 6759
+            }
+          ]
+        },
+        {
+          "mode": "TB",
+          "event": 151,
+          "N_mode": 46,
+          "medoid_distance": 0.010405335796664156,
+          "window_ms": [
+            46756.0,
+            47006.0
+          ],
+          "zero_centroid_ms": 46829.3043715259,
+          "frames": [
+            {
+              "offset_ms": 0,
+              "frame_index": 23415
+            },
+            {
+              "offset_ms": 30,
+              "frame_index": 23430
+            },
+            {
+              "offset_ms": 60,
+              "frame_index": 23445
+            }
+          ]
+        }
+      ],
+      "contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "time_limits_ms": [
+        -125,
+        200
+      ],
+      "field_scale": [
+        0,
+        75
+      ],
+      "envelope_scale": [
+        0,
+        1
+      ]
+    }
+  ],
+  "selection": "Within-model mode medoids; not patient-nearest events",
+  "native_clipping": [
+    {
+      "panel": "D",
+      "mode": "TA",
+      "frame": 19063,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "D",
+      "mode": "TA",
+      "frame": 19078,
+      "clipped_fraction": 0.005
+    },
+    {
+      "panel": "D",
+      "mode": "TA",
+      "frame": 19093,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "D",
+      "mode": "TB",
+      "frame": 2548,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "D",
+      "mode": "TB",
+      "frame": 2563,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "D",
+      "mode": "TB",
+      "frame": 2578,
+      "clipped_fraction": 0.01
+    },
+    {
+      "panel": "E",
+      "mode": "TA",
+      "frame": 6729,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "E",
+      "mode": "TA",
+      "frame": 6744,
+      "clipped_fraction": 0.0175
+    },
+    {
+      "panel": "E",
+      "mode": "TA",
+      "frame": 6759,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "E",
+      "mode": "TB",
+      "frame": 23415,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "E",
+      "mode": "TB",
+      "frame": 23430,
+      "clipped_fraction": 0.0
+    },
+    {
+      "panel": "E",
+      "mode": "TB",
+      "frame": 23445,
+      "clipped_fraction": 0.005
+    }
+  ]
+}

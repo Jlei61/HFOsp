@@ -1,0 +1,65 @@
+{
+  "N": 152,
+  "status": "SCORABLE",
+  "J": 1.7400162657797347,
+  "groups": {
+    "rank_pattern": {
+      "N": 152,
+      "A": 0.07482850586866979,
+      "B": 0.001761931172308835,
+      "D_off": 0.07306657469636096,
+      "D16": 0.08980492083329489,
+      "scaled": 1.6288172706931254
+    },
+    "participation": {
+      "N": 152,
+      "A": 0.08291764893673775,
+      "B": 0.0012631359179288884,
+      "D_off": 0.08165451301880887,
+      "D16": 0.0936543042391333,
+      "scaled": 1.790966749412615
+    },
+    "local_and_interrod_timing": {
+      "N": 152,
+      "A": 0.08032312729559585,
+      "B": 0.0026808213303508165,
+      "D_off": 0.07764230596524503,
+      "D16": 0.10311010860357779,
+      "scaled": 1.8002647772334637
+    }
+  },
+  "candidate": "dense_axis0_05",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_05/2511_847401/workers/trajectory.json",
+  "source_sha256": "593b7307c137f8d127a3b8c1550c08cccabe71186d9dd8272f83d1cb3a34f408",
+  "vector": [
+    3.1992143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.6288172706931254,
+    1.8002647772334637,
+    1.790966749412615
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789510627.3481576,
+  "J_joint": 1.7944702931758207,
+  "joint": {
+    "N": 152,
+    "A": 0.09858973681031136,
+    "B": 0.002705960752938967,
+    "D_off": 0.09588377605737239,
+    "scaled": 1.7944702931758207
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis0_05.json",
+  "historical_score_sha256": "a8c215ce64822cc4ca87051f875f01076460cc3ca37cd2f94e2245f5089cb972"
+}

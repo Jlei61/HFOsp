@@ -1,0 +1,144 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "asof": "2026-09-29T16:31:55+08:00",
+  "main_fraction": 0.2,
+  "main_selection": {
+    "fraction": 0.2,
+    "nominal_count": 52,
+    "count": 52,
+    "cutoff_J_joint": 1.478466627002942,
+    "candidate_ids": [
+      "joint_bo03_01",
+      "joint_bo03_04",
+      "joint_bo02_03",
+      "lf_bo02_01",
+      "xy_combined_01",
+      "joint_bo03_02",
+      "lf_bo02_04",
+      "joint_bo02_05",
+      "xy_right_04",
+      "joint_bo03_08",
+      "xy_combined_03",
+      "dense_axis3_12",
+      "xy_left_31",
+      "joint_bo02_02",
+      "xy_right_33",
+      "xy_right_40",
+      "joint_bo03_06",
+      "lf_bo04_01",
+      "g2_b04_p01",
+      "dense_axis0_02",
+      "lf_bo03_01",
+      "xy_right_42",
+      "joint_bo03_03",
+      "dense_axis3_02",
+      "dense_axis0_01",
+      "xy_right_41",
+      "lf_bo02_02",
+      "xy_right_23",
+      "lf_bo04_03",
+      "xy_right_01",
+      "lf_bo03_04",
+      "interaction_y1_a1_g0",
+      "interaction_y3_a1_g0",
+      "xy_right_10",
+      "xy_right_43",
+      "xy_right_11",
+      "xy_left_11",
+      "interaction_y3_a0_g0",
+      "xy_right_00",
+      "lf_bo04_05",
+      "xy_left_20",
+      "interaction_y1_a2_g0",
+      "xy_combined_02",
+      "xy_right_44",
+      "dense_axis2_08",
+      "dense_axis2_02",
+      "g2_b01_p01",
+      "xy_right_03",
+      "g2_b03_p01",
+      "xy_right_20",
+      "xy_left_21",
+      "lf_bo01_04"
+    ],
+    "historical": 52,
+    "new": 0
+  },
+  "pool_completed": 258,
+  "pool_scorable": 257,
+  "historical_completed": 226,
+  "new_completed": 32,
+  "new_scorable": 31,
+  "density_panels": [
+    {
+      "stem": "core-position-best-joint",
+      "n": 52,
+      "phase": "Low-loss candidate positions",
+      "sigma_mm": 0.35,
+      "density_integral": 0.9999999999993023,
+      "zmax": 0.472728689618904,
+      "density_unit": "mm^-2",
+      "linear_color_normalization": true,
+      "colorbar_orientation": "vertical",
+      "z_axis_hidden": true,
+      "xy_axes_aligned": true,
+      "xy_tick_pad_points": {
+        "x": -4,
+        "y": 0
+      },
+      "xy_label_pad_points": {
+        "x": 2,
+        "y": 2
+      },
+      "display": {
+        "show_header": false,
+        "colorbar_match_xy_height": true,
+        "font_family": "DejaVu Sans",
+        "font_pt": {
+          "label": 10.0,
+          "tick": 9.0,
+          "dense": 7.5,
+          "legend": 8.8,
+          "title": 10.0,
+          "letter": 15.0,
+          "xy_label": 12.0
+        },
+        "typography_reference": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/complete_readability_20260923/figure4_candidate_registry.json",
+        "typography_reference_sha256": "56de04412e8bed92867b5befce86fa68fd620844e9f8f3dd87f091b5f1649363"
+      },
+      "layout_checks": {
+        "xy_plane_height_mm": 91.44289349035029,
+        "colorbar_height_mm": 91.44289349035029,
+        "colorbar_vertical_alignment_error_pixels": 0.0,
+        "header_text_count": 0,
+        "xy_axis_label_font_pt": [
+          12.0,
+          12.0
+        ],
+        "xy_tick_font_pt": [
+          9.0
+        ],
+        "core_legend_font_pt": [
+          8.8
+        ],
+        "colorbar_label_font_pt": 10.0,
+        "colorbar_tick_font_pt": [
+          9.0
+        ]
+      },
+      "interpretation": "Descriptive density of selected candidate positions; not a parameter posterior or independent-restart uncertainty."
+    }
+  ],
+  "scientific_status": "DESCRIPTIVE_LOW_LOSS_REGIONS; CORE_B_NOT_UNIQUELY_LOCALIZED; EXPANDED_SEARCH_NOT_COMPLETE",
+  "sources": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_best_joint_positions.py": "3da344eccfcc10859eae18af479cf16e0940ea2b32c2bb0c64f6debadc0cab13",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_joint_position_progress.py": "546e56825f0805cd67244553ec68f69450b72e8852b290e9c3fad12a485c40e7",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_core_position_density_3d.py": "7a8f4fc2f39330d2abe1cfc04ab101ae33d9ccf4c7c9910c7aeefacac3e0992a",
+    "results/paper-ready-figure/fig4/candidates/best_joint_positions_top20_paper_style_20260929/source/snapshot.json": "48eccea29566520495c5614d425e979ad9bcf7865fc33bba7dc1e5d84f1d6245"
+  },
+  "outputs": {
+    "core-position-best-joint.pdf": "f193e5fa59505c9d9cb243c5eeece9555bd4f02abd36fc32a9b1e13feb6cf5ba",
+    "core-position-best-joint.png": "bc1e6005b570a0d59d1e45f80417c506b60f252bc6df24ebabbb1e9ca5c8e819",
+    "core-position-best-joint.svg": "f7c34a944b48f09426d4e1aa29ffbd70ef1d754e258ac2dbf3e850c361aee855"
+  }
+}

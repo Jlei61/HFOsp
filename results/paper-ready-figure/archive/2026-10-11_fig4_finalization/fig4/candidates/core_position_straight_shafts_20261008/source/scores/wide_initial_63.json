@@ -1,0 +1,32 @@
+{
+ "N": 8,
+ "status": "INSUFFICIENT_EVENTS",
+ "J": null,
+ "groups": {},
+ "candidate": "wide_initial_63",
+ "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_63/2511_847401/workers/trajectory.json",
+ "source_sha256": "03215b9750984f65a45cd5d522876d61166deb5711b5563ee3bc3b0392d119dc",
+ "vector": [
+  4.094678621504743,
+  6.50941986093769,
+  14.773498026290781,
+  7.668181995669657,
+  1.090288050007075,
+  43.14228571951389
+ ],
+ "topology": 2511,
+ "noise": 847401,
+ "reused": false,
+ "J_joint": null,
+ "joint": {
+  "N": 8,
+  "A": null,
+  "B": null,
+  "D_off": null,
+  "scaled": null
+ },
+ "physical_status": "COMPLETE_NO_RUNAWAY",
+ "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+ "device": "cuda:0",
+ "time": 1790734081.902682
+}

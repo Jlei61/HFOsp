@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-15",
+  "origin_main_before": "48ffeacabdae555b2d520867b639781f689ecccd",
+  "worktrees": [
+    {
+      "worktree": "/home/honglab/leijiaxin/HFOsp",
+      "HEAD": "bcafd00088429fa11313ca030f67fedc8da73bd7",
+      "branch": "refs/heads/codex/topic5-state-r1-5-h3-long",
+      "last_commit": "bcafd00088429fa11313ca030f67fedc8da73bd7 2026-08-27T18:23:55+08:00 feat: add spatially informed direction analysis",
+      "origin_main_counts": "518\t279",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/codex/archive-history-20260916-root",
+        "  origin/codex/fig1f-paired-inset",
+        "  origin/codex/fig3-timing-space-refresh",
+        "  origin/codex/recent-results-20260916-root",
+        "  origin/codex/topic4-state-s-native-z-pilot",
+        "  origin/codex/topic5-state-r1-5-h3-long"
+      ],
+      "unmerged": [
+        "docs/archive/topic4/INDEX.md",
+        "scripts/aggregate_topic4_spatial_zm_qigk.py",
+        "src/topic4_global_recruited_oscillation.py",
+        "tests/test_aggregate_topic4_spatial_zm_qigk.py"
+      ],
+      "status_counts": {
+        " M": 86,
+        "UU": 1,
+        "AM": 1,
+        "A ": 20,
+        " D": 307,
+        "DU": 3,
+        "??": 2906
+      },
+      "changed_file_count": 3324,
+      "disposition": "KEEP_ACTIVE_SHARED_ROOT",
+      "reason": "Concurrent RNN and patient-analysis work, active controllers, local manuscript, and four pre-existing conflicts. No global cleanup or staging."
+    },
+    {
+      "worktree": "/home/honglab/leijiaxin/HFOsp/.worktrees/main-cherry",
+      "HEAD": "77c94c2ddd4ec911a460717796a1811502bc3d37",
+      "branch": "refs/heads/main",
+      "last_commit": "77c94c2ddd4ec911a460717796a1811502bc3d37 2026-10-10T22:30:13+08:00 Correct current Figure 1 reference in archive note",
+      "origin_main_counts": "1\t0",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/HEAD -> origin/main",
+        "  origin/main"
+      ],
+      "unmerged": [],
+      "status_counts": {
+        " M": 1
+      },
+      "changed_file_count": 1,
+      "disposition": "KEEP_INTEGRATION_CHECKOUT",
+      "reason": "Reused for validated integration; its AGENTS overlay was byte-identical to incoming origin/main and preserved before fast-forward."
+    },
+    {
+      "worktree": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1",
+      "HEAD": "f01db07cdb1dbb28c2695f54ce9742915747e093",
+      "branch": "refs/heads/codex/topic4-continuous-core-state-r1",
+      "last_commit": "f01db07cdb1dbb28c2695f54ce9742915747e093 2026-09-08T05:19:59+08:00 topic4 initial-state v1: round results archive doc, montage headroom, report formatting",
+      "origin_main_counts": "518\t608",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/codex/archive-history-20260916-continuous-core",
+        "  origin/codex/recent-results-20260916-continuous-core-state-r1",
+        "  origin/codex/topic4-initial-state-propagation-v1"
+      ],
+      "unmerged": [],
+      "status_counts": {
+        " M": 2,
+        "??": 173
+      },
+      "changed_file_count": 175,
+      "disposition": "KEEP_RUNTIME_AND_RESULT_DEPENDENCY",
+      "reason": "Current root scripts import code or load data from this exact path; unpublished working files retained and locally backed up.",
+      "merge_preview_conflicting_file_blocks": 49,
+      "working_copy_backup": "/data/hfosp/workspace_audit_20261015/dependency_local_changes/topic4-continuous-core-state-r1"
+    },
+    {
+      "worktree": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix",
+      "HEAD": "336800aabfed51f0d2a8bf008b90fc1d94e0046c",
+      "branch": "refs/heads/codex/topic4-substrate-autapse-fix",
+      "last_commit": "336800aabfed51f0d2a8bf008b90fc1d94e0046c 2026-09-05T04:23:43+08:00 Complete rev22 objective-control figure audit",
+      "origin_main_counts": "518\t603",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/codex/archive-history-20260916-continuous-core",
+        "  origin/codex/archive-history-20260916-substrate",
+        "  origin/codex/recent-results-20260916-continuous-core-state-r1",
+        "  origin/codex/topic4-initial-state-propagation-v1",
+        "  origin/codex/topic4-rev22-final-audit"
+      ],
+      "unmerged": [],
+      "status_counts": {
+        " M": 9,
+        "??": 259
+      },
+      "changed_file_count": 268,
+      "disposition": "KEEP_RUNTIME_AND_RESULT_DEPENDENCY",
+      "reason": "Current root scripts import code or load data from this exact path; unpublished working files retained and locally backed up.",
+      "merge_preview_conflicting_file_blocks": 41,
+      "working_copy_backup": "/data/hfosp/workspace_audit_20261015/dependency_local_changes/topic4-substrate-autapse-fix"
+    },
+    {
+      "worktree": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab",
+      "HEAD": "f27f048cd2372efeacd6801c9cf5326a974179db",
+      "branch": "refs/heads/codex/topic5-ges-v033-training-lab",
+      "last_commit": "f27f048cd2372efeacd6801c9cf5326a974179db 2026-09-04T14:02:50+08:00 feat(topic5): close v033-v035 RNN development chain",
+      "origin_main_counts": "518\t446",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/codex/archive-history-20260916-training-lab",
+        "  origin/codex/rnn-v038-contact-bridge-tests-20260905",
+        "  origin/codex/topic5-ges-v033-training-lab"
+      ],
+      "unmerged": [],
+      "status_counts": {
+        " M": 14,
+        "??": 290
+      },
+      "changed_file_count": 304,
+      "disposition": "KEEP_RNN_EXPLICIT_USER_REQUEST",
+      "reason": "RNN remains under parallel development. No write, merge, reset, or removal of this worktree."
+    },
+    {
+      "worktree": "/tmp/hfosp-fig3-publish-20261010",
+      "HEAD": "48ffeacabdae555b2d520867b639781f689ecccd",
+      "branch": "refs/heads/codex/fig3-paper-ready-20261010",
+      "last_commit": "48ffeacabdae555b2d520867b639781f689ecccd 2026-10-10T22:55:36+08:00 Publish author-approved Figure 3 A–E and current agent entry points",
+      "origin_main_counts": "0\t0",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/HEAD -> origin/main",
+        "  origin/main"
+      ],
+      "unmerged": [],
+      "status_counts": {},
+      "changed_file_count": 0,
+      "disposition": "RETIRE_AFTER_FINAL_CHECK",
+      "reason": "Clean checkout at current origin/main; only disposable Python caches are ignored."
+    },
+    {
+      "worktree": "/tmp/hfosp-fig4-publish-20261009",
+      "HEAD": "0f12127b806ce492c0ea99db0e60505882edf81b",
+      "branch": "refs/heads/codex/fig4-compact-layout-20261009",
+      "last_commit": "0f12127b806ce492c0ea99db0e60505882edf81b 2026-10-11T11:19:56+08:00 Finalize Paper Ready Figure 4 and archive superseded versions",
+      "origin_main_counts": "4\t18",
+      "not_on_any_origin_ref_count": 0,
+      "remote_branches_containing_head": [
+        "  origin/codex/fig4-compact-layout-20261009"
+      ],
+      "unmerged": [],
+      "status_counts": {
+        " M": 1,
+        "??": 2
+      },
+      "changed_file_count": 3,
+      "disposition": "MERGE_THEN_RETIRE_AFTER_FINAL_CHECK",
+      "reason": "18 Figure 4 commits reviewed and integrated; local overlays backed up. Two untracked Figure 1 pointers are older shared-machine shims superseded by main."
+    }
+  ]
+}

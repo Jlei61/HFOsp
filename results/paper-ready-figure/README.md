@@ -1,5 +1,7 @@
 # Paper-ready figure outputs
 
+当前Figure 4已于2026-10-11由作者确认定稿，版本`core_search_final_20261011`、状态`AUTHOR_ACCEPTED_FINAL`；[正式整图及A–I单图](fig4/figures/README.md)、[版本说明](../../docs/current_figure4.md)和[机器入口](fig4/current_version.json)统一指向本版。
+
 > **当前Fig3已定稿（2026-10-10）：** 正式[完整图和A–E单panel](fig3/figures/README.md)为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`。统一入口：[版本说明](../../docs/current_figure3.md)、[机器指针](fig3/current_revision.json)；`build_fig3_current.py`可在远端从随包原生图层重建。旧A–F及旧代码已归档。
 
 > **Figure 1当前为作者定稿（2026-10-10）。** [完整图、A–F和PPTX](fig1/figures/README.md)，[代码与数据说明](../../docs/current_figure1.md)。当前指针为`fig1/current_revision.json`，旧版移至`archive/2026-10-10_fig1_finalization/fig1/`。
@@ -14,7 +16,7 @@
 
 1. 引用格式统一为 `asset_id (paper_slot)`，例如
    `ictal_phenotype_to_field_layout (Fig3-A–E)`。
-2. 只有登记为 `LOCKED` 的资产可直接进入当前稿件；`CANDIDATE` 仍需总拼版或作者锁图。
+2. 登记为 `LOCKED` 或 `AUTHOR_ACCEPTED_FINAL` 的资产可直接进入当前稿件；`CANDIDATE` 仍需总拼版或作者锁图。
 3. `SOURCE` 只提供正式 panel 的素材或 renderer，不能作为独立结论引用。
 4. 正式 supplementary 保留在顶层；source、诊断和模型谱系只从 `archive/` 查找。
 5. 旧版不删除，统一移到 `archive/<date>_<reason>/`；顶层不再保留多个同义入口。
@@ -25,12 +27,12 @@
 
 | paper slot | asset_id | status | canonical path |
 |---|---|---|---|
-| Fig1-B–F | `interictal_hfo_temporal_scaffold` | `LOCKED` | `fig1/figures/` |
+| Fig1-A–F | `interictal_hfo_temporal_scaffold` | `AUTHOR_ACCEPTED_FINAL` | `fig1/figures/` |
 | Fig2-A–F | `interictal_spatial_scaffold` | `CANDIDATE` | `fig2/figures/` |
 | Fig3-A–E | `ictal_phenotype_to_field_layout` | `AUTHOR_ACCEPTED_FINAL` | `fig3/figures/` |
-| Fig4-A–G | `data_driven_interictal_snn_fig4` | `LAYOUT_INCOMPLETE_RESERVED_PANEL_B` | `fig4/figures/` |
-| Fig5-A–D | `data_driven_zm_transition_fig5` | `CANDIDATE` | `fig5/figures/` |
-Fig1-A 是从登记的 legacy supplementary TIFF 固定裁剪得到的代表性植入脑图；裁剪后的 source asset 随 producer 入库，不重新绘制科学内容。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
+| Fig4-A–I | `patient_geometry_prior_snn_compact_a_i` | `AUTHOR_ACCEPTED_FINAL` | `fig4/figures/` |
+| Fig5-A–F | `single_seed_zm_entry_and_onset_field` | `CURRENT_AUTHOR_DESIGNATED` | `fig5/figures/` |
+Fig1-A 为作者接受的 Y1 脑投影、A杆与波形；冻结图层及科学输入见[当前版本说明](../../docs/current_figure1.md)。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
 `fig1-complete-layout`、`fig2-complete-layout` 和 `fig3-complete-layout`，仅完整排版带 panel 字母。
 旧素材与 producer/source 包不作为论文组装入口，正式引用只回到 `fig1/figures/`、`fig2/figures/`、
 `fig3/figures/`、`fig4/figures/` 或 `fig5/figures/`。
@@ -39,7 +41,7 @@ Fig1-F 自 2026-09-02 起以 `fig1/figures/fig1-panelf.{png,pdf}` 的 v5 配对 
 canonical 输出：主散点右下比较 single-template 与 multi-cluster MI，显示患者配对连线、均值柱和
 paired Wilcoxon 括号；旧灰色 `median ΔMI` 小字版已被替代，不得作为后续拼版或重建来源。
 
-Fig4 同样遵守无角标独立 panel + 带字母完整排版规则。当前 A–G 按 2026-09-03 最新作者顺序重排：A 为已确认的 local E/I circuit + patient-specific substrate；B 使用 A 右侧现有留白明确预留，当前不放图和占位文字；C 为 Node field + Model TA/MTB；D 为模型/患者 rank profile；E 为 cross-fit matrix；F 为 recruitment-onset-span readout；G 为 34 人 cohort。原 KMeans heatmap/rank distribution 保留在 FigS7-E。当前状态为 `LAYOUT_INCOMPLETE_RESERVED_PANEL_B`；该视觉状态不扩大 development-level scientific claim。
+Fig4采用已确认的三行A–I版式，独立面板无角标、完整图带字母。A为v15多core优化与局部采样示意；B–I及统计口径保持。正式入口build_fig4_current.py，旧A–G、A–J和58个候选均已登记为历史，见[历史登记](fig4/historical_versions.json)。
 
 ## 当前补充视频入口
 

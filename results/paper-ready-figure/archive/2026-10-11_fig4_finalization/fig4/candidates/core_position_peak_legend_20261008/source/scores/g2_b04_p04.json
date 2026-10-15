@@ -1,0 +1,64 @@
+{
+  "candidate": "g2_b04_p04",
+  "J": 3.1665004044167584,
+  "N": 166,
+  "groups": {
+    "rank_pattern": {
+      "N": 166,
+      "A": 0.09256865877062037,
+      "B": 0.0008055432781242201,
+      "D_off": 0.09176311549249615,
+      "D16": 0.10012062700303494,
+      "scaled": 2.0456049561363887
+    },
+    "participation": {
+      "N": 166,
+      "A": 0.10530623692382701,
+      "B": 0.00010313946305762817,
+      "D_off": 0.10520309746076939,
+      "D16": 0.10627316938999228,
+      "scaled": 2.3074689018603514
+    },
+    "local_and_interrod_timing": {
+      "N": 166,
+      "A": 0.22378750474765097,
+      "B": 0.0018309945733240188,
+      "D_off": 0.22195651017432694,
+      "D16": 0.24095307887256365,
+      "scaled": 5.146427355253534
+    }
+  },
+  "components": [
+    2.0456049561363887,
+    5.146427355253534,
+    2.3074689018603514
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/adaptive/units/g2_b04_p04/2511_847401/workers/trajectory.json",
+  "source_sha256": "cc52168b107e9ce4491c182f10a3600f3852de62cdc4b2942ff982f1b7a69753",
+  "reused": true,
+  "vector": [
+    2.083769422325976,
+    13.590249865935242,
+    16.789573325063984,
+    4.136700460980861,
+    1.494666469283402,
+    19.792813025414944
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 2.827035469705885,
+  "joint": {
+    "N": 166,
+    "A": 0.15266545641661197,
+    "B": 0.0016087145388746324,
+    "D_off": 0.15105674187773735,
+    "scaled": 2.827035469705885
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g2_b04_p04.json",
+  "historical_score_sha256": "17cec33ac56576ef82aa5ac8582bfe03fd2ce6cf5688c59daa7b98b8e565e514"
+}

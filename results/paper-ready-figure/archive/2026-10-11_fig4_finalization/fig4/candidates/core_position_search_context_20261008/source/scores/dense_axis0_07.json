@@ -1,0 +1,65 @@
+{
+  "N": 147,
+  "status": "SCORABLE",
+  "J": 1.7026829483510886,
+  "groups": {
+    "rank_pattern": {
+      "N": 147,
+      "A": 0.07559344615193053,
+      "B": 0.0019057357176508942,
+      "D_off": 0.07368771043427964,
+      "D16": 0.09119665734019723,
+      "scaled": 1.642663774673516
+    },
+    "participation": {
+      "N": 147,
+      "A": 0.08476039312597944,
+      "B": 0.0014519081435651745,
+      "D_off": 0.08330848498241426,
+      "D16": 0.0966478910514193,
+      "scaled": 1.8272440925962747
+    },
+    "local_and_interrod_timing": {
+      "N": 147,
+      "A": 0.07339478018098365,
+      "B": 0.002744593264186574,
+      "D_off": 0.07065018691679707,
+      "D16": 0.09586613753151123,
+      "scaled": 1.6381409777834752
+    }
+  },
+  "candidate": "dense_axis0_07",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_07/2511_847401/workers/trajectory.json",
+  "source_sha256": "c856451cca75b4d5b23bd6776a6d92b5b81dd0166664774c97977432e97dcd8e",
+  "vector": [
+    3.6992143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.642663774673516,
+    1.6381409777834752,
+    1.8272440925962747
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789511714.036376,
+  "J_joint": 1.7700580245295847,
+  "joint": {
+    "N": 147,
+    "A": 0.09743870272686501,
+    "B": 0.00285934530981768,
+    "D_off": 0.09457935741704733,
+    "scaled": 1.7700580245295847
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis0_07.json",
+  "historical_score_sha256": "66ba5b7c321d9c5a8c5d37fbff37bb0c64bfcda290efb575f322206413124eb2"
+}

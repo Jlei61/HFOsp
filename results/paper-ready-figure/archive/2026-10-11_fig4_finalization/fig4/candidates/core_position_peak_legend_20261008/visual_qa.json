@@ -1,0 +1,53 @@
+{
+  "status": "AGENT_DATA_AND_RENDER_CHECKS_PASS_PENDING_AUTHOR_VISUAL_REVIEW",
+  "comparison_directory": "results/paper-ready-figure/fig4/candidates/core_position_search_context_clean_20261008",
+  "data_arrays_exactly_equal": true,
+  "selection_identical": true,
+  "selected_n": 58,
+  "scorable_n": 288,
+  "sigma_mm": 0.35,
+  "all_selected_positions_in_density": 116,
+  "identical_90pct_contours": true,
+  "peak_guides_match_per_core_grid_maxima": true,
+  "peak_locations": {
+    "A": {
+      "x_mm": 3.3125,
+      "y_mm": 12.0625,
+      "displayed_density_per_mm2": 0.4620752751047013,
+      "per_core_density_per_mm2": 0.9241505502094026
+    },
+    "B": {
+      "x_mm": 16.4375,
+      "y_mm": 5.4375,
+      "displayed_density_per_mm2": 0.18964616970579873,
+      "per_core_density_per_mm2": 0.37929233941159746
+    }
+  },
+  "legend_labels": [
+    "Search positions",
+    "Outlying best 20%",
+    "90% density"
+  ],
+  "legend_frame_visible": true,
+  "common_z_box_extent": 9.0,
+  "peak_height_ratio_B_to_A": 0.41042267336815835,
+  "colorbar_alignment_error_pixels": 2.842170943040401e-14,
+  "typography": {
+    "font_family": "DejaVu Sans",
+    "xy_label_pt": 12.0,
+    "tick_pt": 9.0,
+    "legend_pt": 8.8,
+    "reference": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figure4_panel_registry.json",
+    "reference_sha256": "a414bf851bdf57d89ce61a2907944d0c21d6b90a26fb36ab5b527fbc7fd747af"
+  },
+  "png_visual_inspection": "Summit markers and leaders identify both peaks; framed legend groups the two point entries before the contour line; labels are legible with no clipping.",
+  "pdf_visual_inspection": "Same-state PDF raster inspected at 160 dpi; summit leaders, framed legend, and axes match PNG.",
+  "pdf_preview": "qa/core-position-search-context-pdf.png",
+  "output_hashes": {
+    "core-position-search-context.pdf": "3a7700268e0a846c0ef59f86883c3be8dec2b508227a26425969fe04849e0519",
+    "core-position-search-context.png": "afec0d1645778bb672ebb449e18dc719c2cacccb4bc8ea3a691939d5ba3ee714",
+    "core-position-search-context.svg": "46575d0307bb3521553a5b97a69e5cb1dead43379040a4924cafd2765640388e"
+  },
+  "formal_current_figure_replaced": false,
+  "author_visual_acceptance": "PENDING"
+}

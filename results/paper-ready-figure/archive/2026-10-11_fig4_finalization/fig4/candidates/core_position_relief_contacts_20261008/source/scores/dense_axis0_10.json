@@ -1,0 +1,65 @@
+{
+  "N": 144,
+  "status": "SCORABLE",
+  "J": 2.2361727515479592,
+  "groups": {
+    "rank_pattern": {
+      "N": 144,
+      "A": 0.08056335614839444,
+      "B": 0.001994157814356034,
+      "D_off": 0.0785691983340384,
+      "D16": 0.09651661866324271,
+      "scaled": 1.7514830512147848
+    },
+    "participation": {
+      "N": 144,
+      "A": 0.06852464132842517,
+      "B": 0.0014273797297475043,
+      "D_off": 0.06709726159867767,
+      "D16": 0.07994367916640521,
+      "scaled": 1.471675723204559
+    },
+    "local_and_interrod_timing": {
+      "N": 144,
+      "A": 0.15340117519574178,
+      "B": 0.003083649360281265,
+      "D_off": 0.1503175258354605,
+      "D16": 0.1780703700779919,
+      "scaled": 3.4853594802245347
+    }
+  },
+  "candidate": "dense_axis0_10",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_10/2511_847401/workers/trajectory.json",
+  "source_sha256": "8bc0e4cc4368593d2dccd21a26f7f4d6b087046c71054b883a35da53cc9ae50c",
+  "vector": [
+    4.44921432,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.7514830512147848,
+    3.4853594802245347,
+    1.471675723204559
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789496287.27141,
+  "J_joint": 2.546912330770464,
+  "joint": {
+    "N": 144,
+    "A": 0.13919406430050596,
+    "B": 0.0031051178910552757,
+    "D_off": 0.13608894640945068,
+    "scaled": 2.546912330770464
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis0_10.json",
+  "historical_score_sha256": "5ef055e74ef67904ead9391719a0bb555e62746f03e785b49aac4c3eff4ebaee"
+}

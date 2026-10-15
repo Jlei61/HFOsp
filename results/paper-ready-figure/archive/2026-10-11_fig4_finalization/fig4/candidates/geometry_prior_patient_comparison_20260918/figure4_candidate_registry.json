@@ -1,0 +1,115 @@
+{
+  "schema": "paper_fig4_geometry_patient_comparison_v2",
+  "asset_id": "patient_geometry_prior_snn_patient_comparison",
+  "status": "CANDIDATE",
+  "paper_slot": "Fig4-A/B/D/E/F/G/H candidate",
+  "producer": "scripts/paper_figures/build_fig4_geometry_patient_comparison.py",
+  "previous_candidate": "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918",
+  "panel_remap": {
+    "old C": "D",
+    "old D": "E"
+  },
+  "panel_cases": {
+    "D": "lf_bo04_07",
+    "E": "xy_left_20"
+  },
+  "FGH_workpoint": "xy_left_20",
+  "panels": {
+    "A": {
+      "pixels": [
+        1554,
+        1381
+      ],
+      "files": {
+        "figures/fig4-panela.png": "71abbe78808dfec187e17de14fbc1c26d2d1ef2ec2d22cb854e9207ff223506e",
+        "figures/fig4-panela.svg": "5ea3da236291be83bcba1969c56642f7bf1d8bd5b840590a654452b4b90f9146"
+      }
+    },
+    "B": {
+      "pixels": [
+        2202,
+        980
+      ],
+      "files": {
+        "figures/fig4-panelb.png": "01585db5ceed3b5cd9ac70d14a2b22afcfcece2cca832852099405e3b5d4e999",
+        "figures/fig4-panelb.svg": "e5516a0524e6b8577312b30b121d4b17903f32771786e62364770f15e3915935"
+      }
+    },
+    "D": {
+      "pixels": [
+        3251,
+        799
+      ],
+      "files": {
+        "figures/fig4-paneld.png": "238f7c52d0657ef7c96bba2ab52b250117aca3080d49ce47575ab5a1105aca43",
+        "figures/fig4-paneld.svg": "5356867c3749604694286129f18170a81cc92acbae9bd897cd37a647f05135a2"
+      }
+    },
+    "E": {
+      "pixels": [
+        3251,
+        799
+      ],
+      "files": {
+        "figures/fig4-panele.png": "fa6551a9e9baee293b3122653b93c63661462df48b5d0ad545d0368163cdec21",
+        "figures/fig4-panele.svg": "0e925709c14c07b0d1d7b6ece47b17cc18e66599d77dc7e700958379f01f618d"
+      }
+    },
+    "F": {
+      "pixels": [
+        2834,
+        1055
+      ],
+      "files": {
+        "figures/fig4-panelf.png": "230d8a799dbe8e9b3b8ac52c595d032b2aa4113d56bdbbcab40a3a432d4fc184",
+        "figures/fig4-panelf.svg": "964e1cd5af7e2b290f1faac84957a6a72e64eb7d0653329bae2ca6a3f05824cf"
+      }
+    },
+    "G": {
+      "pixels": [
+        1370,
+        1543
+      ],
+      "files": {
+        "figures/fig4-panelg.png": "63acb1fbcaa6dedb428f2fdb5da4ee0b6a6b6f488cc1a9844c66313187a0f6ea",
+        "figures/fig4-panelg.svg": "ecd03652a84e3b92a275bdd4505247d8d4ae995b27d16dab72bfdd35f8b7d810"
+      }
+    },
+    "H": {
+      "pixels": [
+        1448,
+        1086
+      ],
+      "files": {
+        "figures/fig4-panelh.png": "eb564455a003c1215d5abb98fe4917bc5ff619f95859bc391e414e6589d4da92",
+        "figures/fig4-panelh.svg": "323cb2cb8d6223af584bde44c0ad32b7a6fd6daa8b1df6e2d66a1cd6519f6e6e"
+      }
+    }
+  },
+  "new_simulations": 0,
+  "previous_candidate_preserved": true,
+  "patient_template_contract": "all-event Timing+Space; profiles on existing 30049 development events",
+  "statistical_unit": "One topology2511/noise847401 trajectory with 151 eligible events",
+  "scientific_status": "DESCRIPTIVE_PATIENT_TEMPLATE_COMPARISON; NOT_MECHANISM_RECOVERY",
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_geometry_patient_comparison.py": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1146.json": "b5b0d65823f13caed389c890295887bcea5ca3f79fbfd27c4814962a2f962c1b"
+  },
+  "source_array_hashes": {
+    "source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "source/waveform_arrays.npz": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d"
+  },
+  "agent_visual_review": "Reviewed B/F/G/H; waveform extremes corrected to avoid clipping; G fixed shaft order and boundary break; H equal-aspect cells and matched colorbar. D/E are byte-identical approved-source crops.",
+  "human_visual_review": "PENDING",
+  "full_layout": "Standalone panels supplied. Panel C composition is not defined by this update; no invented C or full A–H layout.",
+  "qa_file": "qa.json",
+  "registered_date": "2026-09-18",
+  "canonical_path": "results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/figures",
+  "supersedes_candidate": "patient_geometry_prior_snn_parameter_response"
+}

@@ -1,0 +1,65 @@
+{
+  "N": 143,
+  "status": "SCORABLE",
+  "J": 1.7114035404932537,
+  "groups": {
+    "rank_pattern": {
+      "N": 143,
+      "A": 0.07288713968755675,
+      "B": 0.001714104370633012,
+      "D_off": 0.07117303531692373,
+      "D16": 0.08649284312945628,
+      "scaled": 1.5866060454265534
+    },
+    "participation": {
+      "N": 143,
+      "A": 0.07797282285770042,
+      "B": 0.0013115183614199094,
+      "D_off": 0.07666130449628052,
+      "D16": 0.08838299985147095,
+      "scaled": 1.6814483638866116
+    },
+    "local_and_interrod_timing": {
+      "N": 143,
+      "A": 0.08299755680214149,
+      "B": 0.0025134672191392577,
+      "D_off": 0.08048408958300224,
+      "D16": 0.10294820285405935,
+      "scaled": 1.866156212166597
+    }
+  },
+  "candidate": "lf_bo01_03",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_03/2511_847401/workers/trajectory.json",
+  "source_sha256": "99004e9e69246f6644eefd99e0943710601800ac63ebc9743a6849b6f0fb93ef",
+  "vector": [
+    3.2001618144756447,
+    12.178234061979936,
+    14.97920304,
+    4.15518908703342,
+    1.2877262773301033,
+    0.05650948998475158
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.5866060454265534,
+    1.866156212166597,
+    1.6814483638866116
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789479936.4707248,
+  "J_joint": 1.5794255819622482,
+  "joint": {
+    "N": 143,
+    "A": 0.08705938382113187,
+    "B": 0.00266607322910462,
+    "D_off": 0.08439331059202726,
+    "scaled": 1.5794255819622482
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/lf_bo01_03.json",
+  "historical_score_sha256": "8046fdf18750d77af586788171fc9c91cb7eb40697791049c290493db5078a3d"
+}

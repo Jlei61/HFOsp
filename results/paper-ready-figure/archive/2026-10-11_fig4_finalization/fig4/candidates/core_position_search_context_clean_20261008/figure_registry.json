@@ -1,0 +1,155 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "generated_at": "2026-10-08T10:10:22+08:00",
+  "source_snapshot_time": "2026-10-08T09:52:00+08:00",
+  "pool_completed": 290,
+  "pool_scorable": 288,
+  "main_selection": {
+    "fraction": 0.2,
+    "nominal_count": 58,
+    "count": 58,
+    "cutoff_J_joint": 1.4858054657811923,
+    "candidate_ids": [
+      "joint_bo03_01",
+      "joint_bo03_04",
+      "joint_bo02_03",
+      "wide_initial_46",
+      "lf_bo02_01",
+      "xy_combined_01",
+      "joint_bo03_02",
+      "lf_bo02_04",
+      "joint_bo02_05",
+      "xy_right_04",
+      "joint_bo03_08",
+      "xy_combined_03",
+      "dense_axis3_12",
+      "xy_left_31",
+      "joint_bo02_02",
+      "xy_right_33",
+      "xy_right_40",
+      "joint_bo03_06",
+      "lf_bo04_01",
+      "g2_b04_p01",
+      "dense_axis0_02",
+      "lf_bo03_01",
+      "xy_right_42",
+      "joint_bo03_03",
+      "dense_axis3_02",
+      "dense_axis0_01",
+      "xy_right_41",
+      "lf_bo02_02",
+      "xy_right_23",
+      "lf_bo04_03",
+      "xy_right_01",
+      "lf_bo03_04",
+      "interaction_y1_a1_g0",
+      "interaction_y3_a1_g0",
+      "xy_right_10",
+      "xy_right_43",
+      "xy_right_11",
+      "xy_left_11",
+      "interaction_y3_a0_g0",
+      "xy_right_00",
+      "lf_bo04_05",
+      "xy_left_20",
+      "interaction_y1_a2_g0",
+      "xy_combined_02",
+      "xy_right_44",
+      "dense_axis2_08",
+      "dense_axis2_02",
+      "g2_b01_p01",
+      "xy_right_03",
+      "g2_b03_p01",
+      "xy_right_20",
+      "xy_left_21",
+      "lf_bo01_04",
+      "lf_bo01_01",
+      "xy_right_13",
+      "xy_left_10",
+      "joint_bo02_04",
+      "dense_axis2_03"
+    ],
+    "historical": 57,
+    "new": 1
+  },
+  "rendering": {
+    "stem": "core-position-search-context",
+    "display_limits_mm": [
+      [
+        1.0,
+        1.0
+      ],
+      [
+        19.0,
+        19.0
+      ]
+    ],
+    "all_evaluated_configurations": 290,
+    "plotted_background_positions": 343,
+    "background_repeated_coordinates_collapsed": true,
+    "selected_configurations": 58,
+    "plotted_selected_positions": 3,
+    "selected_positions_in_density": 116,
+    "isolated_selected_marker_rule": "Selected positions outside their per-core 90 percent KDE mass contour",
+    "isolated_selected_positions_mm": [
+      [
+        1.9913752393645043,
+        17.400220508375263
+      ],
+      [
+        12.550394513804191,
+        8.375872104191638
+      ],
+      [
+        16.47920304,
+        2.96551153
+      ]
+    ],
+    "display_mode": "simplified",
+    "visible_contour_masses": [
+      0.9
+    ],
+    "display_density_floor_per_mm2": 4.620752751047013e-05,
+    "mass_above_display_floor": 0.9998028239744783,
+    "per_core_density_integrals": [
+      0.9999999999365405,
+      1.0
+    ],
+    "displayed_mixture_integral": 0.9999999999682704,
+    "sigma_mm": 0.35,
+    "zmax": 0.4620752751047013,
+    "z_is_density": true,
+    "negative_values": false,
+    "color_normalization": "linear",
+    "surface_alpha": 1.0,
+    "density_smoothing_includes_all_selected": true,
+    "no_position_jitter": true,
+    "xy_plane_height_mm": 94.1950578275085,
+    "colorbar_height_mm": 94.19505782750853,
+    "colorbar_alignment_error_pixels": 1.1368683772161603e-13,
+    "title_or_caption_count": 0,
+    "typography": {
+      "font_family": "DejaVu Sans",
+      "xy_label_pt": 12.0,
+      "tick_pt": 9.0,
+      "legend_pt": 8.8,
+      "reference": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figure4_panel_registry.json",
+      "reference_sha256": "a414bf851bdf57d89ce61a2907944d0c21d6b90a26fb36ab5b527fbc7fd747af"
+    },
+    "legend_labels": [
+      "Search positions",
+      "90% density",
+      "Outlying best 20%"
+    ]
+  },
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_core_position_search_context.py",
+  "producer_sha256": "915ec2a4efeabe4604fa3d06b43670b68e086f4af9c482e39978f36faef1a2c7",
+  "source_snapshot_sha256": "31b22088bc3f448ee025fdffcc466091e56bd28a2309a1fc8b6cb5bb44589821",
+  "interpretation": "Descriptive concentration of low-loss evaluated configurations relative to observed search coverage; not independent convergence, a posterior, or an objective-function landscape.",
+  "formal_current_figure_replaced": false,
+  "outputs": {
+    "core-position-search-context.pdf": "474264ea3c76fa7a7e6d7f284b33fd19bc6065ef511d392d87456fc622c2065e",
+    "core-position-search-context.png": "a1ab462ec607c63bcdc143f6ed69bd31dd94288b438e96629371b9f0ad8dd576",
+    "core-position-search-context.svg": "0be212405d79c482f5e27024d2ed64c8847decf888c5056d3a67f6f67fa4a346"
+  }
+}

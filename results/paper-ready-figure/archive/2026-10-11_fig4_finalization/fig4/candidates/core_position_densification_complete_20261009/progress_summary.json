@@ -1,0 +1,328 @@
+{
+  "status": "COMPLETE_PENDING_SCIENTIFIC_AND_AUTHOR_VISUAL_REVIEW",
+  "snapshot_asof": "2026-10-09T09:44:52+08:00",
+  "completed_at": "2026-10-09T08:31:27+08:00",
+  "new_complete": 128,
+  "new_scorable": 125,
+  "new_unscorable": [
+    {
+      "candidate": "dens_bo01_16",
+      "N": 2,
+      "status": "INSUFFICIENT_EVENTS"
+    },
+    {
+      "candidate": "dens_main_43",
+      "N": 5,
+      "status": "INSUFFICIENT_EVENTS"
+    },
+    {
+      "candidate": "dens_remote_05",
+      "N": 0,
+      "status": "INSUFFICIENT_EVENTS"
+    }
+  ],
+  "planned_new": 128,
+  "physical_runaways": 0,
+  "execution_failures": [],
+  "active_workers": 0,
+  "pool_complete": 418,
+  "pool_scorable": 413,
+  "top20": {
+    "fraction": 0.2,
+    "nominal_count": 83,
+    "count": 83,
+    "cutoff_J_joint": 1.485977988620093,
+    "candidate_ids": [
+      "dens_bo01_01",
+      "joint_bo03_01",
+      "wide_bo01_05",
+      "joint_bo03_04",
+      "dens_bo02_07",
+      "wide_bo01_07",
+      "dens_bo02_02",
+      "dens_broad_16",
+      "dens_bo02_05",
+      "joint_bo02_03",
+      "wide_initial_46",
+      "dens_bo01_10",
+      "dens_bo01_03",
+      "lf_bo02_01",
+      "wide_bo01_01",
+      "wide_bo01_10",
+      "xy_combined_01",
+      "joint_bo03_02",
+      "lf_bo02_04",
+      "dens_bo01_09",
+      "joint_bo02_05",
+      "dens_main_46",
+      "dens_remote_14",
+      "xy_right_04",
+      "joint_bo03_08",
+      "xy_combined_03",
+      "dense_axis3_12",
+      "xy_left_31",
+      "joint_bo02_02",
+      "xy_right_33",
+      "xy_right_40",
+      "joint_bo03_06",
+      "lf_bo04_01",
+      "g2_b04_p01",
+      "dense_axis0_02",
+      "lf_bo03_01",
+      "dens_remote_10",
+      "dens_main_48",
+      "xy_right_42",
+      "joint_bo03_03",
+      "dense_axis3_02",
+      "dense_axis0_01",
+      "xy_right_41",
+      "lf_bo02_02",
+      "xy_right_23",
+      "lf_bo04_03",
+      "xy_right_01",
+      "dens_main_34",
+      "lf_bo03_04",
+      "dens_bo02_01",
+      "dens_bo02_12",
+      "interaction_y1_a1_g0",
+      "interaction_y3_a1_g0",
+      "xy_right_10",
+      "xy_right_43",
+      "xy_right_11",
+      "xy_left_11",
+      "interaction_y3_a0_g0",
+      "xy_right_00",
+      "lf_bo04_05",
+      "xy_left_20",
+      "wide_bo01_11",
+      "interaction_y1_a2_g0",
+      "xy_combined_02",
+      "xy_right_44",
+      "dens_bo02_04",
+      "dens_bo02_03",
+      "dense_axis2_08",
+      "dense_axis2_02",
+      "g2_b01_p01",
+      "xy_right_03",
+      "g2_b03_p01",
+      "xy_right_20",
+      "xy_left_21",
+      "lf_bo01_04",
+      "lf_bo01_01",
+      "dens_bo01_06",
+      "xy_right_13",
+      "xy_left_10",
+      "joint_bo02_04",
+      "wide_bo01_04",
+      "dense_axis2_03",
+      "interaction_y2_a2_g0"
+    ],
+    "historical": 59,
+    "new": 24
+  },
+  "best_candidate": "dens_bo01_01",
+  "best_J_joint": 1.0276641503973967,
+  "best_centers_mm": [
+    [
+      2.0565546553412264,
+      17.096148831422646
+    ],
+    [
+      12.582472936134492,
+      8.686056485492353
+    ]
+  ],
+  "previous_best_J_joint": 1.0601303963391657,
+  "best_loss_relative_improvement_percent": 3.062476658897928,
+  "regions": {
+    "main": {
+      "definition": "Both core XY coordinates inside the prospectively frozen sampling box; not the current 90 percent density contour.",
+      "lower_xy_mm": [
+        [
+          1.8025782905619196,
+          11.037564278966805
+        ],
+        [
+          14.47920304,
+          3.647740581366449
+        ]
+      ],
+      "upper_xy_mm": [
+        [
+          4.027109344472628,
+          13.12890135
+        ],
+        [
+          17.72920304,
+          6.715511530000001
+        ]
+      ],
+      "n_top20": 75,
+      "n_new_top20": 18,
+      "candidate_ids": [
+        "joint_bo03_01",
+        "wide_bo01_05",
+        "joint_bo03_04",
+        "wide_bo01_07",
+        "dens_bo02_02",
+        "joint_bo02_03",
+        "dens_bo01_10",
+        "dens_bo01_03",
+        "lf_bo02_01",
+        "wide_bo01_01",
+        "wide_bo01_10",
+        "xy_combined_01",
+        "joint_bo03_02",
+        "lf_bo02_04",
+        "dens_bo01_09",
+        "joint_bo02_05",
+        "dens_main_46",
+        "xy_right_04",
+        "joint_bo03_08",
+        "xy_combined_03",
+        "dense_axis3_12",
+        "xy_left_31",
+        "joint_bo02_02",
+        "xy_right_33",
+        "xy_right_40",
+        "joint_bo03_06",
+        "lf_bo04_01",
+        "g2_b04_p01",
+        "dense_axis0_02",
+        "lf_bo03_01",
+        "dens_main_48",
+        "xy_right_42",
+        "joint_bo03_03",
+        "dense_axis0_01",
+        "xy_right_41",
+        "lf_bo02_02",
+        "xy_right_23",
+        "lf_bo04_03",
+        "xy_right_01",
+        "dens_main_34",
+        "lf_bo03_04",
+        "dens_bo02_01",
+        "dens_bo02_12",
+        "interaction_y1_a1_g0",
+        "interaction_y3_a1_g0",
+        "xy_right_10",
+        "xy_right_43",
+        "xy_right_11",
+        "xy_left_11",
+        "interaction_y3_a0_g0",
+        "xy_right_00",
+        "lf_bo04_05",
+        "xy_left_20",
+        "wide_bo01_11",
+        "interaction_y1_a2_g0",
+        "xy_combined_02",
+        "xy_right_44",
+        "dens_bo02_04",
+        "dens_bo02_03",
+        "dense_axis2_08",
+        "dense_axis2_02",
+        "g2_b01_p01",
+        "xy_right_03",
+        "g2_b03_p01",
+        "xy_right_20",
+        "xy_left_21",
+        "lf_bo01_04",
+        "lf_bo01_01",
+        "dens_bo01_06",
+        "xy_right_13",
+        "xy_left_10",
+        "joint_bo02_04",
+        "wide_bo01_04",
+        "dense_axis2_03",
+        "interaction_y2_a2_g0"
+      ]
+    },
+    "remote": {
+      "definition": "Both core XY coordinates inside the prospectively frozen sampling box; not the current 90 percent density contour.",
+      "lower_xy_mm": [
+        [
+          1.8025782905619196,
+          16.150220508375263
+        ],
+        [
+          11.300394513804191,
+          7.125872104191638
+        ]
+      ],
+      "upper_xy_mm": [
+        [
+          3.2413752393645043,
+          18.12890135
+        ],
+        [
+          13.800394513804191,
+          9.625872104191638
+        ]
+      ],
+      "n_top20": 6,
+      "n_new_top20": 5,
+      "candidate_ids": [
+        "dens_bo01_01",
+        "dens_bo02_07",
+        "dens_bo02_05",
+        "wide_initial_46",
+        "dens_remote_14",
+        "dens_remote_10"
+      ]
+    }
+  },
+  "n_top20_outside_both_regions": 2,
+  "fixed_old_top20_cutoff": 1.4858054657811923,
+  "strata": {
+    "main_sobol_densification": {
+      "n_evaluated": 48,
+      "n_scorable": 47,
+      "median_J_joint": 2.432691983458775,
+      "min_J_joint": 1.311808085411475,
+      "n_below_frozen_pre_expansion_top20_cutoff": 3
+    },
+    "remote_sobol_densification": {
+      "n_evaluated": 16,
+      "n_scorable": 15,
+      "median_J_joint": 2.4638954720545776,
+      "min_J_joint": 1.3130743719999303,
+      "n_below_frozen_pre_expansion_top20_cutoff": 2
+    },
+    "broad_sobol_densification": {
+      "n_evaluated": 16,
+      "n_scorable": 16,
+      "median_J_joint": 3.125758735419606,
+      "min_J_joint": 1.1611275384717084,
+      "n_below_frozen_pre_expansion_top20_cutoff": 1
+    },
+    "pending_parent_qLogEI_J_joint": {
+      "n_evaluated": 12,
+      "n_scorable": 12,
+      "median_J_joint": 1.5003229593837764,
+      "min_J_joint": 1.0610107301980856,
+      "n_below_frozen_pre_expansion_top20_cutoff": 6
+    },
+    "pending_parent_global_uncertainty_J_joint": {
+      "n_evaluated": 4,
+      "n_scorable": 4,
+      "median_J_joint": 4.537607442928308,
+      "min_J_joint": 4.375044577815939,
+      "n_below_frozen_pre_expansion_top20_cutoff": 0
+    },
+    "qLogEI_J_joint": {
+      "n_evaluated": 24,
+      "n_scorable": 24,
+      "median_J_joint": 1.5076373740191928,
+      "min_J_joint": 1.0276641503973967,
+      "n_below_frozen_pre_expansion_top20_cutoff": 12
+    },
+    "global_uncertainty_J_joint": {
+      "n_evaluated": 8,
+      "n_scorable": 7,
+      "median_J_joint": 3.1078761865074482,
+      "min_J_joint": 2.3033738313806835,
+      "n_below_frozen_pre_expansion_top20_cutoff": 0
+    }
+  },
+  "scientific_boundary": "Targeted sampling deliberately increases local sampling density. Report stratum and stage separately; tighter pooled KDE is not evidence of increased stability or independent convergence."
+}

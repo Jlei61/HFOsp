@@ -1,0 +1,65 @@
+{
+  "N": 148,
+  "status": "SCORABLE",
+  "J": 3.020608412827844,
+  "groups": {
+    "rank_pattern": {
+      "N": 148,
+      "A": 0.10277077708393942,
+      "B": 0.0020251037105399137,
+      "D_off": 0.1007456733733995,
+      "D16": 0.11947788269589371,
+      "scaled": 2.2458462493982814
+    },
+    "participation": {
+      "N": 148,
+      "A": 0.0865479346588544,
+      "B": 0.001600749895723545,
+      "D_off": 0.08494718476313085,
+      "D16": 0.09975412129857364,
+      "scaled": 1.8631864638263513
+    },
+    "local_and_interrod_timing": {
+      "N": 148,
+      "A": 0.2164383407933457,
+      "B": 0.002832965910948081,
+      "D_off": 0.21360537488239761,
+      "D16": 0.23981030955866736,
+      "scaled": 4.952792525258899
+    }
+  },
+  "candidate": "dense_axis1_01",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_01/2511_847401/workers/trajectory.json",
+  "source_sha256": "92cc1d8468e795b06ada23fc62a59af946f9984db5a0860f2104e1f11f417a16",
+  "vector": [
+    3.4492143200000003,
+    10.87890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.2458462493982814,
+    4.952792525258899,
+    1.8631864638263513
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789494472.0686924,
+  "J_joint": 3.882937216425435,
+  "joint": {
+    "N": 148,
+    "A": 0.21043124396224083,
+    "B": 0.002954595326467313,
+    "D_off": 0.20747664863577353,
+    "scaled": 3.882937216425435
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis1_01.json",
+  "historical_score_sha256": "bde6d474f4dfa628e09e44d303ef0aa85b837238d0b74889ff8d2a334fed2527"
+}

@@ -1,3 +1,11 @@
+<!-- WORKSPACE_STATUS_20261015 -->
+> **工作区清理（2026-10-15）：** 当前5个worktree及准确提交/退役记录见 [工作区状态](docs/workspace_status.md)。RNN线按作者要求保留；`topic4-continuous-core-state-r1`和`topic4-substrate-autapse-fix`仍提供代码与数据依赖，不能只看提交日期删除。Figure 3/4临时发布checkout已关闭，分支和提交保留。主目录的并行工作和既存冲突不属于本次清理范围。
+<!-- /WORKSPACE_STATUS_20261015 -->
+
+<!-- CURRENT_FIGURE4_20261011 -->
+> **Figure 4已定稿（2026-10-11）：** 先读`docs/current_figure4.md`与`results/paper-ready-figure/fig4/current_version.json`；共享机器的旧worktree以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`core_search_final_20261011`、`AUTHOR_ACCEPTED_FINAL`，布局`compact_ai_v4_a_core_search_central_shading_v15`，正式完整图和A–I单图在`fig4/figures/`。A保留三个问号区域、两个core及上方两条OPTM箭头；下方无箭头，浅绿底纹仅在中央取样框，右侧只有局部高斯采样权重。正式入口`build_fig4_current.py`验证并恢复冻结导出；原始数值和绘图代码在`source/`，不需重跑实验。旧正式v10、58个候选、旧动画和重复导出均在`archive/2026-10-11_fig4_finalization/`，历史身份以`fig4/historical_versions.json`为准。后续修改先输出独立修订，禁止用旧producer或候选目录覆盖定稿。
+<!-- /CURRENT_FIGURE4_20261011 -->
+
 <!-- CURRENT_FIGURE3_20261010 -->
 > **Figure 3已定稿（2026-10-10）：** 先读`docs/current_figure3.md`与`results/paper-ready-figure/fig3/current_revision.json`；共享机器上的旧worktree也以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`，正式完整图和A–E单panel统一在`fig3/figures/`。A是E10/SZ3 broadband，B是Y1/SZ6固定0–10 s、30–80 Hz gamma及自身TA平面（非shared axis）；C/D/E为原D、原E右半、原F。列宽包含色条与标签，三行可见间距4.064 mm。正式入口`build_fig3_current.py`可验证并从冻结原生图层重建；旧`build_main_figure_3.py`已转到同一入口。旧A–F及旧代码在`archive/2026-10-10_pre_current_fig3_ae/`，不得从旧producer或候选目录覆盖正式图；后续修改先输出独立修订。
 <!-- /CURRENT_FIGURE3_20261010 -->
@@ -7,6 +15,11 @@
 <!-- /CURRENT_FIGURE1_20261010 -->
 
 > **2026-09-30 模型/结果路由**：分岔分析先读 `docs/topic4_model_versions.md` 和 `config/topic4_model_versions.json`。默认是20×20格、935群体的空间rate版；三区域六E/I群体版另存，不能混用。Figure 5当前入口为 `docs/current_figure5.md`。工作区清理状态见 `docs/workspace_status.md`。
+
+## 当前 Figure 4 入口
+
+- **Fig4当前数据版本**：C保留E1146一至四core、每组4次重复、共同前31个epoch的均值±样本标准差。新D为`angle_three_error_response_v1`，沿用旧D的13点方向响应；新E为`completed_position_density_standalone_v1`，保留83/413低J_joint前20%配置的位置密度。旧D版本`three_error_responses_density_v1`只作为归档来源；旧向外EE/核内EE扫描及showcase引用随本次草图简化移出，不能自动恢复。
+- **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panel_b/c/d/e/i`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
 
 # Agent Guide
 

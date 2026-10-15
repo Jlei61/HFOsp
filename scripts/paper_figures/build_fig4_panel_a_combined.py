@@ -229,7 +229,7 @@ def _data_box_to_canvas(
     return tuple(round(v) for v in (left, top, right, bottom))
 
 
-def _render_clean_panel_b() -> tuple[Image.Image, dict]:
+def _render_clean_panel_b(*, include_legend: bool = True) -> tuple[Image.Image, dict]:
     """Render the frozen patient substrate without redundant overlays."""
     from scripts.paper_figures.plot_fig4_subject_snn_grouped import DEFAULT_TAG
     from scripts.paper_figures.plot_fig_subject_snn import _registered_axis_display
@@ -293,8 +293,11 @@ def _render_clean_panel_b() -> tuple[Image.Image, dict]:
         )
     legend = ax.get_legend()
     if legend is not None:
-        for text in legend.get_texts():
-            text.set_fontsize(12.5)
+        if include_legend:
+            for text in legend.get_texts():
+                text.set_fontsize(12.5)
+        else:
+            legend.remove()
 
     buffer = io.BytesIO()
     fig.savefig(
@@ -310,6 +313,7 @@ def _render_clean_panel_b() -> tuple[Image.Image, dict]:
     return clean_panel, {
         "figdata_path": str(source_path.relative_to(ROOT)),
         "figdata_sha256": _sha256(source_path),
+        "contact_xy_mm": contacts_display.tolist(),
         "removed_display_layers": [
             "anisotropic E-to-E corridor and label",
             "possible data driven core contours and label",

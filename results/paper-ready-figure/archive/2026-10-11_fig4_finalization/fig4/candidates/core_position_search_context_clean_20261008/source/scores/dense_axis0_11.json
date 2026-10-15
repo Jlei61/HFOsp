@@ -1,0 +1,65 @@
+{
+  "N": 134,
+  "status": "SCORABLE",
+  "J": 2.306854240102265,
+  "groups": {
+    "rank_pattern": {
+      "N": 134,
+      "A": 0.08154769357931792,
+      "B": 0.0021159055705659326,
+      "D_off": 0.07943178800875199,
+      "D16": 0.09715249716224167,
+      "scaled": 1.7707121031517852
+    },
+    "participation": {
+      "N": 134,
+      "A": 0.0593440641706727,
+      "B": 0.0015255286523538304,
+      "D_off": 0.05781853551831887,
+      "D16": 0.0705948379817822,
+      "scaled": 1.2681610701565105
+    },
+    "local_and_interrod_timing": {
+      "N": 134,
+      "A": 0.17070084354678142,
+      "B": 0.003290287454416844,
+      "D_off": 0.16741055609236458,
+      "D16": 0.19496671352310563,
+      "scaled": 3.881689546998501
+    }
+  },
+  "candidate": "dense_axis0_11",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_11/2511_847401/workers/trajectory.json",
+  "source_sha256": "e746071709b755580382909ec8bebc94afedf0c0ed263d3a2826eda68eac66cd",
+  "vector": [
+    4.69921432,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.7707121031517852,
+    3.881689546998501,
+    1.2681610701565105
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789494653.37207,
+  "J_joint": 2.7641480409656203,
+  "joint": {
+    "N": 134,
+    "A": 0.15099060724632876,
+    "B": 0.003294123912344684,
+    "D_off": 0.14769648333398408,
+    "scaled": 2.7641480409656203
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis0_11.json",
+  "historical_score_sha256": "46566dbf811b04a1967a645b6a500ae35790526a8a81a6fbcb96547cfe2ad9ba"
+}

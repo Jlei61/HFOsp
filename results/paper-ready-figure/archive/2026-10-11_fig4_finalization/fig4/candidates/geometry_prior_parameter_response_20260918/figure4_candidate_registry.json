@@ -1,0 +1,160 @@
+{
+  "schema": "paper_fig4_geometry_prior_candidate_v1",
+  "asset_id": "patient_geometry_prior_snn_parameter_response",
+  "paper_slot": "Fig4-A–D candidate",
+  "status": "CANDIDATE",
+  "registered_date": "2026-09-18",
+  "authorization": "User requested this exact plate as paper-ready Fig4 candidate and separate panels.",
+  "canonical_path": "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures",
+  "producer": "scripts/paper_figures/build_fig4_geometry_prior_candidate.py",
+  "renderer_reuse": "Exact existing matplotlib artists, vector export crops; not a raster screenshot or a refit.",
+  "panels": {
+    "A": {
+      "files": [
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panela.png",
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panela.svg"
+      ],
+      "axes": 8,
+      "size_mm": [
+        98.74175,
+        87.72583333333334
+      ],
+      "pixels": [
+        1554,
+        1381
+      ],
+      "minimum_font_pt": 8,
+      "corner_panel_letter": false
+    },
+    "B": {
+      "files": [
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panelb.png",
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panelb.svg"
+      ],
+      "axes": 3,
+      "size_mm": [
+        139.85259915425002,
+        62.290702722462875
+      ],
+      "pixels": [
+        2202,
+        980
+      ],
+      "minimum_font_pt": 8,
+      "corner_panel_letter": false
+    },
+    "C": {
+      "files": [
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panelc.png",
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-panelc.svg"
+      ],
+      "axes": 12,
+      "size_mm": [
+        206.4739722222223,
+        50.75783333333333
+      ],
+      "pixels": [
+        3251,
+        799
+      ],
+      "minimum_font_pt": 8,
+      "corner_panel_letter": false
+    },
+    "D": {
+      "files": [
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-paneld.png",
+        "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-paneld.svg"
+      ],
+      "axes": 11,
+      "size_mm": [
+        206.4739722222223,
+        50.75783333333334
+      ],
+      "pixels": [
+        3251,
+        799
+      ],
+      "minimum_font_pt": 8,
+      "corner_panel_letter": false
+    }
+  },
+  "complete_layout": [
+    "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-complete-layout.png",
+    "results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/figures/fig4-complete-layout.svg"
+  ],
+  "panel_letters_in_individual_files": false,
+  "panel_letters_in_complete_layout": true,
+  "source_plate": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/key_results/data_driven_metric_tradeoffs/shared_plane_position_response",
+  "fixed_snapshot": true,
+  "new_wider_xy_results_included": false,
+  "XY_offsets_mm": [
+    -0.5,
+    -0.25,
+    0,
+    0.25,
+    0.5
+  ],
+  "XY_step_mm": 0.25,
+  "source_counts": {
+    "B_conditions": 226,
+    "XY_unique_conditions": 49,
+    "XY_grid_cells_per_metric": 50
+  },
+  "panel_cases": {
+    "C": "lf_bo04_07",
+    "D": "xy_left_20"
+  },
+  "scientific_status": "SINGLE_NETWORK_PARAMETER_RESPONSE_AND_PROPAGATION_EXAMPLES",
+  "scientific_limits": [
+    "Does not establish patient dual-mode propagation recovery.",
+    "One topology2511/noise847401 unit per displayed condition; no between-seed uncertainty.",
+    "Blue chronology records 16 historical stages across objective changes, not one fixed-loss monotonic convergence.",
+    "A XY sweeps and EE/angle response curves retain their distinct documented reference backgrounds.",
+    "C/D are high/low descriptive-error examples, not patient-matched selection or different clinical conditions."
+  ],
+  "individual_C_axis_change": "Restore Time (ms) and x (mm) labels shared with D in the complete layout.",
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_geometry_prior_candidate.py": "af971fb1921f6761d022d96fc6b071d91894ed6952ba2c28f86c29aca8a67369"
+  },
+  "source_snapshot_files": {
+    "source/connection_response_source.csv": "20de4e62e29e900b954fc55ca4316149276887f12d75f49a95583c8893261263",
+    "source/all_workpoints_source.csv": "ee5bd0559803bab393b8f995727282b61cafaf4196d7725f42a57d2977b00748",
+    "source/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "source/position_map_source.json": "b32301b58c192a941ca5c084dfa85e5999dfd903c1a2df0be1a059ce9a70747d",
+    "source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+    "source/selected_workpoints.json": "5277fe2c5e834ee2f41cdd3924671faaf13ab61e42c5f207d3118ee70f169906",
+    "source/figure_contract.json": "e2f1348a070c3d52a0bec0d31c353239879c540c153e54187974fdb8ee1089a4",
+    "source/trajectory_representatives.json": "3ba8c2456db131eacffa9e22966e70fe58767a59b8acec8d7ba77d8c7f6f6e8f",
+    "source/history.json": "b7ac63c8049b7613ea0d8f6e6ebe4357e0f767c9f4467910fc0f38dff19630f4",
+    "source/xy_grid_source.csv": "c93f267a10c905c3f8d40c21988b0846f71c715da3e98766c2ee105eecb6eeb8",
+    "source/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+    "source/qa.json": "5ffb9e3324e128f7687d9e4300e51c3f4d560822580cc579c7b30f98733c985f",
+    "source/source_preflight.json": "cd2a38c9e2be70c771403e71ee9ade901beb3ff93070708e2dd4af54846201c6"
+  },
+  "outputs": {
+    "figures/fig4-complete-layout.svg": "47bebb82de6a1101740219c6066e404d46d213e7ab8a4e216b07232ab6c70453",
+    "figures/fig4-complete-layout.png": "4c0e4d93846fd220e332e16897b408943d22fd9f0ba7d028696232342508ad23",
+    "figures/fig4-panelc.png": "238f7c52d0657ef7c96bba2ab52b250117aca3080d49ce47575ab5a1105aca43",
+    "figures/fig4-panela.svg": "5ea3da236291be83bcba1969c56642f7bf1d8bd5b840590a654452b4b90f9146",
+    "figures/fig4-paneld.svg": "0e925709c14c07b0d1d7b6ece47b17cc18e66599d77dc7e700958379f01f618d",
+    "figures/fig4-panelb.svg": "1e953839250b3681d111b6432a28c27a0274739532e5afe66a802c65f218923d",
+    "figures/fig4-paneld.png": "fa6551a9e9baee293b3122653b93c63661462df48b5d0ad545d0368163cdec21",
+    "figures/fig4-panela.png": "71abbe78808dfec187e17de14fbc1c26d2d1ef2ec2d22cb854e9207ff223506e",
+    "figures/fig4-panelc.svg": "5356867c3749604694286129f18170a81cc92acbae9bd897cd37a647f05135a2",
+    "figures/fig4-panelb.png": "94630fa1b935b70a685b6f48ef99511f3e0d1763b4c00007e1b9bf844108e653"
+  },
+  "agent_visual_review": "PASS: A/B/C/D opened and checked; B projected labels and D crop clipping corrected; channel labels and all four native row colorbars visible.",
+  "human_visual_review": "Candidate registration authorized; new individual crops pending inspection.",
+  "qa": {
+    "outputs_decoded_and_hashed": 10,
+    "editable_svg": 5,
+    "source_complete_layout_byte_identical": true,
+    "panel_case_and_event_parity": true,
+    "position_grid_parity": true,
+    "corner_letters_in_individual_panels": false,
+    "export_profile": "PNG 400 dpi plus editable SVG, as requested; no PDF report or atlas.",
+    "preflight_review": "Style is inherited from the existing renderer; its font/color settings remain authoritative. Static PDF/TIFF defaults not applicable to this PNG/SVG candidate export."
+  }
+}

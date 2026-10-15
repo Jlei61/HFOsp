@@ -1,0 +1,61 @@
+{
+  "N": 159,
+  "status": "SCORABLE",
+  "J": 1.9867973779291999,
+  "groups": {
+    "rank_pattern": {
+      "N": 159,
+      "A": 0.08072109171945163,
+      "B": 0.0020001820241568533,
+      "D_off": 0.07872090969529477,
+      "D16": 0.09859771856035351,
+      "scaled": 1.7548650365672067
+    },
+    "participation": {
+      "N": 159,
+      "A": 0.08261047543314246,
+      "B": 0.0016852195964435466,
+      "D_off": 0.0809252558366989,
+      "D16": 0.09767212557635666,
+      "scaled": 1.774971609442477
+    },
+    "local_and_interrod_timing": {
+      "N": 159,
+      "A": 0.10742057008029582,
+      "B": 0.0025949159687032597,
+      "D_off": 0.10482565411159256,
+      "D16": 0.1306126315505812,
+      "scaled": 2.4305554877779154
+    }
+  },
+  "candidate": "joint_bo01_03",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_03/2511_847401/workers/trajectory.json",
+  "source_sha256": "921e394c532c3cbbaf1d1b9991ce4151fcf2f8f9df1be6d1004e381b5c43606b",
+  "vector": [
+    2.9152047680720754,
+    11.71703258774851,
+    17.22920304,
+    4.498672303498653,
+    1.386318863636053,
+    -16.325822294413282
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "J_joint": 2.306631069814485,
+  "joint": {
+    "N": 159,
+    "A": 0.12601887759603903,
+    "B": 0.0027688590328175514,
+    "D_off": 0.12325001856322147,
+    "D16": 0.1507655552018459,
+    "scaled": 2.306631069814485
+  },
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "device": "cuda:0",
+  "time": 1789598960.3876936,
+  "search_role": "historical",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_03.json",
+  "historical_score_sha256": "38b401c659c9b6b680e5998ff3791eea31228f6a6e972dfc83c2c330b43815ad"
+}

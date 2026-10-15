@@ -1,0 +1,74 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "producer": "scripts/paper_figures/plot_fig4_core_position_density_3d.py",
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_joint_density_20260928/source/core_position_data.json": "da026dca2b612f40e369c0fcd645ba34b82255c0b0d1ed2e3ab9646a49b0c265",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_expanded_response_20260920/source/position_map_source.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_joint_core_density.py": "6c520b0a5290df178b7686392fbfb4e488a259714968e89a033eee8948284ccc",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_core_position_density_3d.py": "7a8f4fc2f39330d2abe1cfc04ab101ae33d9ccf4c7c9910c7aeefacac3e0992a"
+  },
+  "displayed_quantity": "Equal-weight core A/B pooled candidate-position KDE in mm^-2.",
+  "candidates": 24,
+  "simulation_count": 24,
+  "optimization_stages": [
+    14,
+    15,
+    16
+  ],
+  "batches": 3,
+  "simulations_per_batch": 8,
+  "duration_per_simulation_s": 60,
+  "same_simulation_provides_both_core_centers": true,
+  "count_annotation": "n = 24 simulations; 3 batches × 8",
+  "bandwidth_mm": 0.35,
+  "density_array_identical_to_previous_3d": true,
+  "integrated_density": 0.9999999999999997,
+  "density_range": [
+    0.0,
+    0.322016462056562
+  ],
+  "cmap": {
+    "kind": "single purple hue, white mixing",
+    "saturated_endpoint": "#65509A",
+    "color_normalization": "linear",
+    "low_mix": 0.035,
+    "high_mix": 1.0,
+    "surface_shading": false
+  },
+  "layout": "Near-XY orthographic view: horizontal X and vertical Y, slight tilt to show height; vertical colorbar and no Z-axis ticks or line.",
+  "z_axis_hidden": true,
+  "colorbar_orientation": "vertical",
+  "view_elevation_deg": 72.0,
+  "view_azimuth_deg": -90.000001,
+  "projection": "orthographic",
+  "xy_axes_aligned_verified": true,
+  "y_axis_position": "left at z=0",
+  "export_bbox_inches": [
+    0.45,
+    0.75,
+    6.85,
+    5.45
+  ],
+  "interpretation": "Descriptive constrained-search candidate density; not tissue excitability, independent fits or a confidence region.",
+  "formats": [
+    "png",
+    "pdf",
+    "svg"
+  ],
+  "new_simulations": 0,
+  "outputs": {
+    "figures/core-position-density-3d.png": "3ece1726b1db1639f11589c220b4eb1c808c123f479a4aea3d4e0295b7ff2724",
+    "figures/core-position-density-3d.pdf": "9c2f5905e659a44cb84a1d8e50010e6243b331fdf8f3eef7de2067edb26d02ee",
+    "figures/core-position-density-3d.svg": "66eb1b7a9325d09e86eb295297a8a1860f0b26d57026cc04bb927ce79a1d8ad8"
+  },
+  "agent_visual_qa": {
+    "png_reviewed": true,
+    "same_state_pdf_render_reviewed": true,
+    "xy_axis_aligned_near_overhead_view_verified": true,
+    "left_y_axis_at_base_plane_verified": true,
+    "vertical_colorbar_and_no_z_axis_verified": true,
+    "count_annotation_visible": true,
+    "density_unchanged_verified": true,
+    "author_review": "PENDING"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "candidate": "g2_b03_p03",
+  "J": 2.6136413671896377,
+  "N": 152,
+  "groups": {
+    "rank_pattern": {
+      "N": 152,
+      "A": 0.09004138061478494,
+      "B": 0.0009269371472319636,
+      "D_off": 0.08911444346755297,
+      "D16": 0.09792034636625663,
+      "scaled": 1.9865601363051937
+    },
+    "participation": {
+      "N": 152,
+      "A": 0.08641592076732701,
+      "B": 0.0003415683836665635,
+      "D_off": 0.08607435238366046,
+      "D16": 0.08931925202849281,
+      "scaled": 1.8879091601569027
+    },
+    "local_and_interrod_timing": {
+      "N": 152,
+      "A": 0.1731277501525078,
+      "B": 0.0020614150944609348,
+      "D_off": 0.1710663350580469,
+      "D16": 0.19064977845542574,
+      "scaled": 3.966454805106817
+    }
+  },
+  "components": [
+    1.9865601363051937,
+    3.966454805106817,
+    1.8879091601569027
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/adaptive/units/g2_b03_p03/2511_847401/workers/trajectory.json",
+  "source_sha256": "4fb470b76324e842e0018c2b5876e38324edef6b80b744736fee65255a0c33dd",
+  "reused": true,
+  "vector": [
+    2.3122587309439853,
+    12.374537178468948,
+    15.110383952721904,
+    3.682362450580328,
+    1.2842040236573666,
+    13.820591792464256
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 2.4546575746838064,
+  "joint": {
+    "N": 152,
+    "A": 0.1329655297832336,
+    "B": 0.0018060237810607277,
+    "D_off": 0.13115950600217285,
+    "scaled": 2.4546575746838064
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/g2_b03_p03.json",
+  "historical_score_sha256": "93ba138bcaec31115e6d80510189a23612720f5f615d90cafd712accf9bb5667"
+}

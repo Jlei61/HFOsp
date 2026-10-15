@@ -69,6 +69,16 @@ def _registered_files(
 ) -> Iterator[tuple[str, Path, str | None]]:
     for figure in figures:
         figure_record = contract[figure]
+        if figure_record.get("status") == "AUTHOR_ACCEPTED_FINAL":
+            for key in ("producer", "pointer", "panel_registry", "release_manifest"):
+                yield f"{figure}.{key}", resolve_repo_path(figure_record[key]), None
+            manifest_path = resolve_repo_path(figure_record["release_manifest"])
+            if manifest_path.is_file():
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                package = resolve_repo_path(figure_record["package"])
+                for name, record in manifest["files"].items():
+                    yield f"{figure}.{name}", package / name, record["sha256"]
+            continue
         for panel in figure_record["updated_panels"]:
             record = figure_record[panel]
             producer = resolve_repo_path(record["producer"])

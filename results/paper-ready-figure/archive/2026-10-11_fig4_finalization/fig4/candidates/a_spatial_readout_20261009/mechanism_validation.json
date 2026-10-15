@@ -1,0 +1,54 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "zoom_center_mm": [
+    -8.5,
+    0.0
+  ],
+  "zoom_field_of_view_mm": [
+    1.6754742547425474,
+    1.3143631436314362
+  ],
+  "reference_kernel": {
+    "type": "elliptical-exponential partner-sampling kernel",
+    "l_parallel_mm": 0.5374011537017762,
+    "l_perpendicular_mm": 0.26870057685088805,
+    "theta_deg": -22.80538396505847,
+    "role": "Reference kernel; fitted length scales and angle may vary."
+  },
+  "planar_angle_consistent": true,
+  "connector_minimum_contact_distance_mm": 3.439065358582509,
+  "connectors_clear_of_electrode_footprints": true,
+  "connectors_attached_to_both_frames": true,
+  "readout": {
+    "type": "normalized Gaussian average of smoothed E spike density",
+    "sigma_mm": 0.25,
+    "bin_ms": 2.0,
+    "smooth_ms": 5.0,
+    "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+    "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+    "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+    "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale."
+  },
+  "waveform_contacts": [
+    "ICL9",
+    "ICL6",
+    "ICL3"
+  ],
+  "waveform_window_relative_to_F_ms": [
+    100,
+    270
+  ],
+  "kernel_contours": "Local and zoom: rho=0.4/0.7/1; three distant examples: rho=2, at physical scale.",
+  "data_lineage": "A retains its frozen schematic substrate. Waveforms are exact F values, not a simulation of the illustrated substrate.",
+  "unchanged_panels": {
+    "B": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "C": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "D": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "E": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "F": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "G": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "H": "PIXEL_IDENTICAL_TO_APPROVED_V4",
+    "I": "PIXEL_IDENTICAL_TO_APPROVED_V4"
+  },
+  "canonical_output_hashes_unchanged": true
+}

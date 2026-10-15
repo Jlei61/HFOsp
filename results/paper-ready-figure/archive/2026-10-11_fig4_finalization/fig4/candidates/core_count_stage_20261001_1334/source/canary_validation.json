@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "core_count": 1,
+      "actual_duration_ms": 1000.0,
+      "counts": [
+        847
+      ],
+      "wall_seconds": 344.3827111721039,
+      "peak_rss_gib": 5.895580291748047
+    },
+    {
+      "core_count": 2,
+      "actual_duration_ms": 1000.0,
+      "counts": [
+        742,
+        767
+      ],
+      "wall_seconds": 384.28344202041626,
+      "peak_rss_gib": 5.7396392822265625
+    },
+    {
+      "core_count": 3,
+      "actual_duration_ms": 1000.0,
+      "counts": [
+        772,
+        736,
+        766
+      ],
+      "wall_seconds": 352.92548537254333,
+      "peak_rss_gib": 5.740795135498047
+    },
+    {
+      "core_count": 4,
+      "actual_duration_ms": 1000.0,
+      "counts": [
+        776,
+        744,
+        750,
+        708
+      ],
+      "wall_seconds": 905.9712057113647,
+      "peak_rss_gib": 5.895263671875
+    }
+  ],
+  "historical_two_core_1000ms_prefix_exact": true,
+  "conclusion": "Physical implementation gate only; no loss or propagation acceptance.",
+  "updated_unix": 1790786020.9619987
+}

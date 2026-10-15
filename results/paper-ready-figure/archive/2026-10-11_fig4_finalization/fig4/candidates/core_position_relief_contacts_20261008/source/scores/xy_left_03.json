@@ -1,0 +1,66 @@
+{
+  "N": 145,
+  "status": "SCORABLE",
+  "J": 1.7172979630561527,
+  "groups": {
+    "rank_pattern": {
+      "N": 145,
+      "A": 0.06621365693480263,
+      "B": 0.0019765313559100533,
+      "D_off": 0.06423712557889258,
+      "D16": 0.08214944099182744,
+      "scaled": 1.4319891140017327
+    },
+    "participation": {
+      "N": 145,
+      "A": 0.059592813889109544,
+      "B": 0.001555855657454187,
+      "D_off": 0.058036958231655354,
+      "D16": 0.07213690012733392,
+      "scaled": 1.2729518380202782
+    },
+    "local_and_interrod_timing": {
+      "N": 145,
+      "A": 0.10840869299985732,
+      "B": 0.0028758452592933387,
+      "D_off": 0.10553284774056398,
+      "D16": 0.13159519540290987,
+      "scaled": 2.446952937146447
+    }
+  },
+  "candidate": "xy_left_03",
+  "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_03/2511_847401/workers/trajectory.json",
+  "source_sha256": "d0920d7997eec2b4edc8c1e115334563a2a386d7e7d1c8d18c05401e2f7531f9",
+  "vector": [
+    3.6992143200000003,
+    11.62890135,
+    16.47920304,
+    5.46551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.4319891140017327,
+    2.446952937146447,
+    1.2729518380202782
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789555590.8073199,
+  "J_joint": 1.9402569816169755,
+  "joint": {
+    "N": 145,
+    "A": 0.10664664942645281,
+    "B": 0.002973065847720709,
+    "D_off": 0.1036735835787321,
+    "D16": 0.13061699282370104,
+    "scaled": 1.9402569816169755
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/xy_left_03.json",
+  "historical_score_sha256": "c03a804a9367b4c2e9661043e03408a89511f42e8fb6968f391452bdafe3e60a"
+}

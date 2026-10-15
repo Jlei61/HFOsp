@@ -3,6 +3,10 @@
 results/paper-ready-figure/**/*.pdf binary
 results/paper-ready-figure/**/*.pptx binary
 
-# Preserve accepted generated Figure 3 SVG bytes; do not line-merge vector output.
-results/paper-ready-figure/fig3/figures/*.svg binary
-results/paper-ready-figure/fig3/source/native_panels/*.svg binary
+# Preserve native SVG bytes in accepted figures and their frozen archives.
+results/paper-ready-figure/**/*.svg binary
+
+# Frozen numerical exports may use CRLF; preserve their bytes and readable diffs.
+results/paper-ready-figure/**/*.csv -text whitespace=cr-at-eol
+# Historical figure notes are retained exactly as released.
+results/paper-ready-figure/archive/**/figures/README.md whitespace=-blank-at-eof

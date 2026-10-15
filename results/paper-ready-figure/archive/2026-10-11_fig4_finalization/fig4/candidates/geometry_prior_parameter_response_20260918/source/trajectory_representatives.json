@@ -1,0 +1,128 @@
+{
+  "records": [
+    {
+      "stage": 2,
+      "objective": "mode_conditioned",
+      "candidate": "g2_b01_p01",
+      "original_selection_score": 0.6991404559603278,
+      "xyz": [
+        0.05967421747796389,
+        0.09432596884742717,
+        0.16549729884878445
+      ]
+    },
+    {
+      "stage": 3,
+      "objective": "mode_conditioned",
+      "candidate": "g2_b02_p01",
+      "original_selection_score": 0.7778827769301908,
+      "xyz": [
+        0.06449768612183374,
+        0.16967440682658952,
+        0.15228810939096765
+      ]
+    },
+    {
+      "stage": 4,
+      "objective": "mode_conditioned",
+      "candidate": "g2_b03_p04",
+      "original_selection_score": 0.8990179712241189,
+      "xyz": [
+        0.06995534460555239,
+        0.15039624885861214,
+        0.14007434067903562
+      ]
+    },
+    {
+      "stage": 5,
+      "objective": "mode_conditioned",
+      "candidate": "g2_b04_p01",
+      "original_selection_score": 0.7492923482304319,
+      "xyz": [
+        0.09102863340453662,
+        0.16812934640304847,
+        0.14642153218878717
+      ]
+    },
+    {
+      "stage": 7,
+      "objective": "label_free",
+      "candidate": "lf_bo01_01",
+      "original_selection_score": 1.598534888787858,
+      "xyz": [
+        0.054585377947744526,
+        0.0987980515485312,
+        0.16894505524616527
+      ]
+    },
+    {
+      "stage": 8,
+      "objective": "label_free",
+      "candidate": "lf_bo02_01",
+      "original_selection_score": 1.3893632593978398,
+      "xyz": [
+        0.055967997859575014,
+        0.09997884568712387,
+        0.15585858504327815
+      ]
+    },
+    {
+      "stage": 9,
+      "objective": "label_free",
+      "candidate": "lf_bo03_01",
+      "original_selection_score": 1.430772403991064,
+      "xyz": [
+        0.06792127121334109,
+        0.10564634097778802,
+        0.16052192684679517
+      ]
+    },
+    {
+      "stage": 10,
+      "objective": "label_free",
+      "candidate": "lf_bo04_01",
+      "original_selection_score": 1.4958694392534522,
+      "xyz": [
+        0.03699408467117509,
+        0.08791147731989742,
+        0.17529786619204632
+      ]
+    },
+    {
+      "stage": 14,
+      "objective": "joint_label_free",
+      "candidate": "joint_bo01_01",
+      "original_selection_score": 1.6421059831383922,
+      "xyz": [
+        0.07211986586803534,
+        0.09034728883620606,
+        0.15013714244304321
+      ]
+    },
+    {
+      "stage": 15,
+      "objective": "joint_label_free",
+      "candidate": "joint_bo02_03",
+      "original_selection_score": 1.3320934583846837,
+      "xyz": [
+        0.1142914147371295,
+        0.16518568908368453,
+        0.14565272515977318
+      ]
+    },
+    {
+      "stage": 16,
+      "objective": "joint_label_free",
+      "candidate": "joint_bo03_04",
+      "original_selection_score": 1.188965709574128,
+      "xyz": [
+        0.12020116985351101,
+        0.1988030133483188,
+        0.13133918194027555
+      ]
+    }
+  ],
+  "rule": "Minimum original mode-conditioned two-noise J in early batches; minimum frozen label-free J in later batches, including the J/J_joint phase. Descriptive batch representatives, not Pareto incumbents or parent-child ancestry.",
+  "edges": "Only consecutive adaptive batches inside each objective regime. Grid/recombination proposals are shown as points, not given an invented BO trajectory.",
+  "manual_baseline_metric_point": false
+}

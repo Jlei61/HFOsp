@@ -1,0 +1,65 @@
+{
+  "N": 139,
+  "status": "SCORABLE",
+  "J": 1.5799170837688783,
+  "groups": {
+    "rank_pattern": {
+      "N": 139,
+      "A": 0.0629741308604688,
+      "B": 0.0019142284828228759,
+      "D_off": 0.06105990237764592,
+      "D16": 0.07768976232216966,
+      "scaled": 1.361161707016481
+    },
+    "participation": {
+      "N": 139,
+      "A": 0.07105609270182056,
+      "B": 0.0013348101692612622,
+      "D_off": 0.0697212825325593,
+      "D16": 0.08131744587801651,
+      "scaled": 1.529229605636778
+    },
+    "local_and_interrod_timing": {
+      "N": 139,
+      "A": 0.08269907483787974,
+      "B": 0.0029393794793723645,
+      "D_off": 0.07975969535850737,
+      "D16": 0.10529555458555478,
+      "scaled": 1.849359938653376
+    }
+  },
+  "candidate": "dense_axis3_04",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_04/2511_847401/workers/trajectory.json",
+  "source_sha256": "e84d0ce0d58c90420967fc521dd39c21116011398cf65f71379752ea8fefdee5",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    3.46551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.361161707016481,
+    1.849359938653376,
+    1.529229605636778
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789509724.6670547,
+  "J_joint": 1.5776344686792618,
+  "joint": {
+    "N": 139,
+    "A": 0.08727549603829382,
+    "B": 0.002977889847488655,
+    "D_off": 0.08429760619080516,
+    "scaled": 1.5776344686792618
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis3_04.json",
+  "historical_score_sha256": "f924e41ce58983efc0cc64195d0951f82bd2db2558c04792b4e64270a4db75c9"
+}

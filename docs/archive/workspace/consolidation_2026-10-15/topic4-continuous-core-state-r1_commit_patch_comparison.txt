@@ -1,0 +1,608 @@
++ aa25676120dbfe8653aba52f6bff7ef64a17b787 docs(topic4-core-field): spec for the axis-constrained data-driven pathology field
++ 6cd6ddee57f66c970bfd872698f7ce907d032148 docs(topic4-core-field): spec rev2 after the P0-1..P0-5 technical review
++ 806a853353c87317f731ad972b496c2abda7eff0 docs(topic4-core-field): spec rev2.1 after the second technical review
++ d95d81ab819d1c1b2eac94f10839b17b06ac216b docs(topic4-core-field): spec rev2.2 — transverse freedom must be a fixed-area aspect ratio
++ b9397e503f8370dffd3eeadfe5736e87d2f1340b docs(topic4-core-field): implementation plan for Stage 0 and Stage 1
++ 23e14cc337442577132203986c1e0d042e9a39e7 docs(topic4-core-field): spec rev3 — exploratory posture, eight arms, eight fixes
++ 3e6700e3084a35b21a49bb140be0c8f128e26c45 docs(topic4-core-field): plan rev2 after the third review
++ e1ac83fc1fab95c9e88e31bd86b93ceee2b89eb3 feat(topic4-core-field): axial coordinates and a partition-of-unity basis
++ dacb4304daf1711a9139d8f506af7b88250dfa0a feat(topic4-core-field): latent-quantile sampling and effective-count budget
++ e00d0840b84dd8e591783edc82bacb53c0ed1c9a feat(topic4-core-field): eight arms, with manual_projected as the hard mask
++ 88c8e0b38041081ea8838b9e6e9a4bf89c02f7ab feat(topic4-core-field): frozen-support scoring, per-direction coverage
++ 0143dee5340ac08b69182efb97a486dff8f81503 feat(topic4-core-field): rank candidates lexicographically by (n_dir, S)
++ 7509f9d59f869022831b58f411e8458d4fe4a00b feat(topic4-core-field): cache networks under a full connectivity hash
++ 792f807f4a99221a35f95b8e830938bbb484bbf8 test(topic4-core-field): lock the OU trajectory, not just RNG call counts
++ f36e4d61d25c1c3d60d3ad6a63bd07c59abbf6fd feat(topic4-core-field): descriptive Stage 1 report, integrity-only fail-closed
++ 2441848480287726c507bb4811b315412429dbfa feat(topic4-core-field): Stage 0 parity run, three references, frozen config
++ 064927c3093ad9119b4c431b244d646ec80156c9 docs(topic4-core-field): record the k_dir default-binding finding from Stage 0 parity
++ f2dee109433d0e433ee2842c36ffaffb074c2e7a feat(topic4-core-field): Stage 1 probe, parallelised over network seeds
++ 3b6a372b9551553e0d7347cd0cd5374b97cbd1a8 fix(topic4-core-field): pre-flight metrics contaminated by inter-core separation
++ 659a7d9a3a2e2dbb99b80f06faaacaa32878556d feat(topic4-core-field): coverage-matched axis-only reference
++ 8fb95015943ab72203ed52292d23275660941d35 feat(topic4-core-field): Stage 1 comparisons, report and figures
++ bd8f7f2cd677610f2548ccadc2588cf391227d4d docs(topic4-core-field): record the pre-flight metric correction
++ 189224e110c9798f28e5d3764392db30ca15696f feat(topic4-core-field): Stage 2 field parameterisation
++ f7e21d11a640811d095565d4a1df21d7d40a8ab8 feat(topic4-core-field): Stage 2 outcome taxonomy, frozen before the run
++ 5fd42970afe7f4b1225134e6c392050e4104766f feat(topic4-core-field): in-tree CMA-ES
++ 1b66e17d830260d3326bc03924c3a160c651b84e feat(topic4-core-field): Stage 2 driver, checkpointed and wall-capped
++ 74de02d49ca3cb3d651deb4f1cd012a456aa92cb feat(topic4-core-field): record the direction-tier observation alongside the frozen test
++ 64b39a2486b8cdaa73931e1894d25ac381755071 feat(topic4-core-field): Stage 2 held-out assessment and frozen classification
++ ff902d79047c0ef5d2dbdc28a36e7f823cc33dba feat(topic4-core-field): let a resumed Stage 2 raise its evaluation ceiling
++ a652c5790c47666c45f7c1bc790b9190ba11f72f feat(topic4-core-field): show what the search actually learned
++ 7759a6b393ec78a377fe4dd7f64891202ed26bad feat(topic4-core-field): render the learned field the way the hand-placed one is rendered
++ 7059631b59eef6318ef6e302e91ca871c9b43d27 fix(topic4-core-field): stop drawing the hand-placed cores on the learned-field run
++ cecea9340faed46ce778bfbe7d550370550d7c62 feat(topic4-core-field): let the representative event maps see past the event window
++ 56c149d14bca97f5906b0fd43e4bc0837b24b463 feat(topic4-core-field): the learned field's readout and its two-cluster validation
++ 753289b06637241897c37c8da6a0479c405964b6 docs(topic4-core-field): close out the first phase and rewrite Stage 3 as a global 2D search
++ 1a93c5178fe304ecfad72341943ca4161497168c docs(topic4-stage3): plan the global 2D search and hand it off for review
++ c0b51583ceb49d8aebc34379b495f709fd8ad37a docs(topic4): correct two factual errors and tighten the Stage 3 plan after review
++ f495d8b03a14def0286a4851ed06c568d46e1594 feat(topic4-stage3): free-centre mixture parameterisation with no direction prior
++ b6e4e166a4e6dfb07ce4019ab3b227aaeebc6f75 feat(topic4-stage3): rank recruitment per direction, above template match
++ 59e75c8fc39ecdd8656f3dea65b21dae6f8437ea feat(topic4-stage3): freeze the outcome taxonomy so no label can hide the rest
++ 8b0eed415282fd2f1d6e4ddbea82379a0b0d1872 feat(topic4-stage3): sweep a fixed-budget heterogeneity across the sheet
++ 14a0fb1e7087157eb06d29c143be74e48a273f60 fix(topic4-stage3): keep provenance out of the frozen-design checksum
++ a13d0a2ff01064836d4d8ff9402c56c5392136bd feat(topic4-stage3): stamp every sweep cell with its design hash and provenance
++ f78571f194bb4356a3df6a737c6fe532e26a87c5 feat(topic4-stage3): summarise and draw Leg A with its denominators intact
++ e9d97bd7cd19467d12104ded9798e04e463c7e7f feat(topic4-stage3): measure the winner's curse instead of inheriting it
++ dcd8d618b729d1830865f54d46550d646c002fd1 feat(topic4-stage3): Leg A run -- a fixed heterogeneity is readable almost nowhere
++ 270bb85f1c4969e78a8e492caa38e74386ec2a6f docs(topic4-stage3): mark what this window actually completed
++ 3ec4d0e7fee34ccbe43f26af2df0588cf6353d0c feat(topic4-stage3): fit the per-event profile shape, not two averaged templates
++ 86f8a27ffd0ceda9f51e48e6b50478af0c7a336b feat(topic4-stage3): score every existing field under the rev5 objective, no new runs
++ fc839c4ce6cd4684b74a2c4f23266d77819153eb feat(topic4-stage3): fit a flexible field to the patient's per-event distribution
++ ca39b6d71debfcbcc10736920c83eaf75ca34e65 fix(topic4-stage3): start the search where the field can actually ignite
++ 6760b233be517d5940e667c057340095eab5b4a8 feat(topic4-stage3): the flexible field halves the gap to the patient, confirmed
++ 5004190befa8e12d17ba042697adafb80ebcbc50 feat(topic4-stage3): render the flexible field, and the direction failure it hides
++ 8389cab6db3aaee63240de4e2db3f94a169b3bfb fix: commit the placement helper every subject-SNN run depends on
++ b6f8fb2a0d3966d9563efa0882742b5b8e47bc75 fix(topic4): make provenance mean what it claims, and commit the missing producer
++ 3d2e775439249a083d399b838ecc1300ec4222c4 docs(topic4-stage3): state in the confirmation script what its number is not
++ e499f42d506a0001e683f72658bed4ff92313ebd docs(topic4-stage3): record that the objective run was not the objective frozen
++ 01c7e68a5a361c5282711b6796e90dda269e00e0 fix(topic4-stage3): correct the floor, retract two inferences, fix the field description
++ e6ccdbc799939d6d9cc9168bae78eb1da4b98471 docs(topic4-stage3): finish replacing the unmatched floor in the figure notes
++ d0c13772e8d36d7a77e6f709375043b85384c1a4 fix(topic4-stage3): make the confirmation reproducible and its floor structurally honest
++ a901e3d3788cdd0ef0a013ccd030afd1dcab259b fix(topic4-stage3): floor matched to the scorer's structure, plan synced to rev5
++ 18c648065329a385e152a0f90b77844eadfaebb4 feat(topic4): freeze joint field objective and convergence guards
++ 63eeab79767755652892937bb187d608b0301e60 results(topic4): freeze joint calibration and core audit
++ 0f7281ddb13bc3810820bdd403e8d7a6a13f3c5d feat(topic4): add unseen-network joint field confirmation
++ 6bd7bbc8cb257c677e2f4ea2d20545a3d64811ed fix(topic4): fail closed on joint confirmation worker errors
++ d219421c090c4eeece0d8294feebe8e503447144 fix(topic4): gate opposing profiles on cluster support
++ 47ff1b8e5f533dfdaa14493fc1cf2af71150be18 fix(topic4): persist opposition support diagnostics
++ c66ce42132866765f3ea2d0ed91681eb4518077f feat(topic4): plot joint confirmation tradeoff
++ e6dc9ebf39f89197a82dc390f8fadb4457efad63 fix(topic4): clarify joint confirmation gate plot
++ 6fcb390fe1bb3bb531447c2f782e11cae919381d results(topic4): freeze unseen-network field confirmation
++ a02fee81bcb2aec64509af4ade9be301423ff2bb feat(topic4): gate field modes against patient KMeans
++ 9d79e0fa7f811d98191f9d26960395c77bc8a3ab fix(topic4): audit KMeans mode stability
++ 6d9d81d0d98d5630d8577fb3dc0d64af7cdc5adf results(topic4): freeze KMeans field confirmation
++ 4efddf6d367361f4a0ca49c84ac0de87d7feef08 feat(topic4): optimize field against patient KMeans modes
++ 904841f9268deee3597f838e0ec2a31822210a28 fix(topic4): spawn rev8 simulation workers
++ 3b3ec25673764a5e144a35857ece12eceb1d2bcf fix(topic4): prioritize patient KMeans mode identity
++ 015f8bce026efb435b7da99356e1de61d82d7f06 fix(topic4): close rev8.1 blind confirmation
++ c669e5f96cf2a2ccba717331e458ac2fe17c057a results(topic4): record rev8.1 blind KMeans outcome
++ fae91100a8efb9fb2c38fbbd44478af54627901d feat(topic4): add rev8 onset and uncertainty diagnostics
++ 09c01e53725ad8ca5ac1a088b0019d3773419c0c docs(topic4): freeze rev9 node edge factorization
++ 380afb6a63bb2fbf3ad8c541ed05cdb92bd218f2 results(topic4): finalize rev8 diagnostics and rev9 contract
++ c75f1f48197caa10005a9859f66f98a6248bcafd feat(topic4): start exploratory rev9 node-edge audit
++ e785eb28534c31b90d486359a7f6f32c4e3b6616 feat(topic4): add rev9 node kick canary
++ 0782fb90211fb9a0a8d5c574b070830a46d781a4 fix(topic4): exclude contaminated rev9 kick responses
++ b7f7a28730aee729b7527f2cf2d7d745a0f2b7ed feat(topic4): freeze quiet rev9 kick onset
++ 95a67f0106da67bffff3e1a9397036e8bb7c55ba feat(topic4): lower rev9 kick canary dose
++ 944293a2da2797fb9abf75a8bca06d9fc2ad01b0 docs(topic4): freeze rev9 linear canary range
++ 43a6f6aa169bbf62ccc096d18692e9b36a305c4e fix(topic4): reconcile rev9 kick windows independently
++ 642e926eb4d3222778d74c3d6f60484ca06bd2c1 fix(topic4): snapshot rev9 execution provenance
++ 2cab02324f02c5251a8a97f691987c579d841a68 feat(topic4): parameterize rev9 edge response workers
++ 817248f2a84d9cabab5fd00beca809824d97945e feat(topic4): launch parallel rev9 response workers
++ e2dc7f55b138bf2f93eb09e9f767683ca04767c2 fix(topic4): anchor rev9 worker paths
++ 54b289339e5cc794f5f02bcf544790a5f2a401e2 feat(topic4): score rev9 edge response matching
++ cad1a640b7e8b4fa25ff3bd84b4cb9384f9785d4 docs(topic4): add rev9 alpha midpoints
++ e282dda8af2ba629e28d52f6d95677bb1f3c9a14 feat(topic4): plot rev9 edge alpha calibration
++ 989a4cac772b6bffd408f12e43f186ae54ecea22 fix(topic4): label rev9 alpha midpoints
++ 07cbde29d83e79199f83ab25f0de39af56b9ec8f fix(topic4): separate rev9 alpha tick labels
++ 849c87a803f97d450ea9b15e2a8395ed501b992f docs(topic4): freeze rev9 alpha reference
++ d841396b2c3986779efcab75ec43f35ecf26ef5d feat(topic4): evaluate rev9 alpha out of selection
++ b0ff089eda7bede1f8597c3ba8952944547f927a feat(topic4): plot rev9 alpha transfer diagnostics
++ c10444520885c3e72182c182298e4dd086215635 docs(topic4): close rev9 alpha transfer calibration
++ 357a1d638542d207330ec468bb94c4b12fbfd6de feat(topic4): add rev9 four-arm factorial workers
++ 8bdd78c041dc478c416f774cbdfc405be9a39686 feat(topic4): capture rev9 factorial representatives
++ 5e89d5ee6ab5be1101c19f21b8684930b84e967d feat(topic4): plot rev9 factorial waveforms and modes
++ c619529fd4ae462056fb2354343d22a62eb1d692 docs(topic4): close rev9 factorial exploration
++ 32e6c6b26e38c314807810879642fbf6ec321119 docs(topic4): tighten rev9 mode claim
++ ce77da291b2847ad06d9de5276b1900fd4635c49 topic4: start rev9-L learnability audit
++ 3c2d99c10df2b4585e54dd81f576f46fd48b2f58 topic4: fix rev9-L figure typography
++ 4c12d727930f2d87f380a66aae1707de012ef6f6 topic4: close rev9-L objective replay
++ c264af2b4bb841540545363a6f486df46d93d164 topic4: correct rev9 scientific audit
++ 0ff8ce73a48d82cd98ad5dedd002be58c33c64b5 topic4: add rev9-L forced-source canary
++ 2eb04938ed69ca3708794446b61ee2442dbca331 docs(topic4): reconcile rev9 review and next assay
++ 95d24e95811569da906facea6ea77a14483c7122 topic4: audit rev9 edge structural flow
++ 245fbef2b9260d80124f68298b973a1368c5ffa9 topic4: launch rev9-L forced fit audit
++ 211444f857dffab381136f9409e72fdaf249356a topic4: harden rev9-L forced fit readout
++ 73b916e1fdd7d4db911638fdff10065acdfc9822 topic4: test forced packet frame exclusion
++ a0e07a80e499382254a6484a9c65da5b1a962736 fix(topic4): make edge structure aggregator runnable
++ 2df4d4ce71c89bce913073d94c017477fc25c131 topic4: interpret rev9-L forced fit
++ 21b836b0c0d53c5b3c1649ee92fa9567d5776652 topic4: audit rev9-L forced fit interpretation
++ 2e4a4c32d55b320020371bdb497edfe2fb250141 style(topic4): clarify forced audit sensitivity
++ c46cc183f5a5e91e8c74b44e409cbceeb411bc1f topic4: start component-pair edge oracle
++ 8d7207d5f0265d9ae36121bb25f415208313fd63 docs(topic4): freeze rev9-L diagnosis and L2 oracle
++ 9c627a1baf3a4db978ae062b4221088c6a8bff51 topic4: implement identifiable component-pair residual
++ 839c57eac00b69a7186f49fad572e09ad72a33a7 topic4: freeze rev9-L Sobol oracle
++ 735017e1aa7cc1b8c3174ac2aaf23574d2fb31b8 perf(topic4): cache rev9-L patient floor references
++ f602eed8781450980d168daff1f27275a2e9160d fix(topic4): validate six-dimensional L2 candidates
++ d86a8bef5b5100caa76d478c5cb37faa2a4a0bd7 topic4: retain scalar baseline in L2 selection
++ 1c3f69f342759ff12bba19c18a5fe9f5e8988a0d fix(topic4): correct rev9-L selection audit
++ f5d861e9c8d1b103dd0aa3fde766c73c2e822afa topic4: audit L2 shared route capacity
++ 980d02d65e2e57fd2af30048cc47f42cf9503d50 style(topic4): declutter L2 review figure
++ 5eeda51e0327d6c340111b8a1d42ceaf21b2ca1c docs(topic4): close rev9-L L2 oracle
++ 251ac8fa9d8cb59259346a8e968d58385bf4d8e2 docs(topic4): define L3 route-shape surrogate
++ 7e50295f9ce49979b3e57d33eabe6a662cdd38e8 topic4: add L3 network route surrogate
++ 3d85c7e4733468cdd0f45ee82fec0b649bc0667e topic4: freeze L3a selection sanity
++ 3dc2852f629d0fac44f9c25cecafa3ed985c1db5 fix(topic4): tolerate unrelated HEAD advancement
++ 535ad86098863c34a4d5fcd84a75844f59196cc9 docs(topic4): freeze repeated-event L3b oracle
++ 6e6281b80d01e9267de2d0706122487fbdaffb71 topic4: separate network and dynamics seeds
++ 217f9982c07b780f870d11f32e1e39ffbdb9d29e topic4: launch repeated-event network oracle
++ 3d654fff30a655d805bd208fd66d08db3f51680a fix(topic4): count-match repeated oracle floors
++ ec34034ec2a130911d587f23926ec55482debd75 feat(topic4): close repeated capacity audit
++ 22089d8668f954ed8768c7dd0a78356c072a0d4f docs(topic4): record rev9-L capacity verdict
++ 6c85170ffa34230399adf32b7860f9a40ce2d560 fix(topic4): correct rev9-L L3b capacity claims and review figure
++ c6bde4b49c8d8f20f2ea203f0b1355157f676040 feat(topic4): add shaft-aware dual-shaft audit
++ 226338e948451206102f7d62231d28925f76dee6 results(topic4): freeze rev10-SA shaft-aware audit
++ b066026f166f038bd66142f63820fde3cb9bd56f feat(topic4): launch dual-shaft field capacity canary
++ 9725eb8db9c19bc658fba7cb69631eb8475a1979 fix(topic4): adjudicate dual-shaft capacity canary
++ 810e08cbe0c6145ab009e24fca84d6b700e515e9 fix(topic4): normalize capacity csv output
++ 030559f7182334e6d80eb6317f4fa0c33feb4153 results(topic4): freeze dual-shaft capacity canary
++ e2bc47d2fbcae96be12ab4a8e1e843ff9dcc5e14 feat(topic4): replace K3 canary with continuous field
++ 425e8b368fc41158d1532e00ac2ee3d3f9a68389 feat(topic4): add no-K continuous support canary
++ cc95b1dcfd12dc7e23392aa0b91c8b5ae3b6a959 docs(topic4): adjudicate continuous support capacity
++ 0d42a73fdb35ac0f7aeb5677bfe1ecff874dc8b6 results(topic4): freeze no-K continuous field canaries
++ dd9ae9aca06ea5eec08c9576936eaf8eb55892df feat(topic4): add observation-invariant field search
++ c933986b7c7463e2ebb671f3f660ce26f6efde67 feat(topic4): add uniform spectral field refinement
++ 3ba94b8bf3c9e0f97ec5c5c8ccfa3f9de03da54f feat(topic4): factorize shaft-aware spline field search
++ 48d49318f2ad5003f5880dda11d72764bf7dcdd1 fix(topic4): bound spline search numeric threads
++ 1ace20f40e22a695a201a559c020c2cd1255e0e4 feat(topic4): bridge V3 fields to stable spline coordinates
++ be1cf6fd0a38146c93f89fb63e5666836858d9f6 feat(topic4): interpolate stable continuous field anchors
++ 36d87a15a550c71fb6a368729ca30b1fa0e29759 feat(topic4): confirm continuous fields across network seeds
++ 1a40d646954b1014fe9b8b870756b843ec169058 feat(topic4): freeze fresh-network continuous field confirmation
++ 8bf665370d7daeb807e0918ed39cf04196f9c4c6 fix(topic4): couple direction modes to patient-supported joint events
++ caed5423ad9454d21a96f2db203a4d63a3870764 feat(topic4): refine continuous mode support boundary
++ 9f502af082bed3458148ded9f93b29f0ebf8cb95 feat(topic4): validate mode coexistence across networks
++ 1756e3ecddfccf6314e6f01ef43932f3b4f6646b feat(topic4): confirm continuous mode coexistence on fresh networks
++ b5a7c55fde2e6ab60f9876d4d2178d16126b8dd0 docs(topic4): close continuous field capacity audit
++ 0f7d9f9f9592ffc615292d0c9a0629110466e5fc fix(topic4): use common direct-readout amplitude scale
++ db9b830152cc3dbff06127c5690be67471c645a6 fix(topic4): move direct-readout scale bar clear of traces
++ e2f0cf26e7f20a28fac22884fb17adcd4f14ffb9 docs(topic4): freeze edge flow follow-up contract
++ e4f670afa6c74246822a97a2d5aa04451a8a2697 fix(topic4): correct direct-readout scale value
++ 743e1088d7ef50da9c3c43198e680c3e4ee554c9 feat(topic4): add fail-closed Fig4 validation
++ a6a9cc786ef06c0430471fe30ea9db031a079326 feat(topic4): freeze graph spectral edge exploration
++ 97bad612a6d1675100ac5b15b3179e7d3bdbae8e feat(topic4): add graph edge fit screen
++ d4a57b55935c70e742af64469f719ba9a197fe9b feat(topic4): add continuous spatial edge capacity audit
++ e9e515ffcf623dbac937a1ff3bdf82d0b6846506 feat(topic4): freeze spatial edge candidate family
++ 5b8a76c638bacfad510617887a5c15e0a78612ab feat(topic4): add spatial edge Fig4 validation
++ 9128a1d1c7c86476a9f12650808718de1bcfa677 feat(topic4): freeze diverse spatial edge selection
++ b604006684dc4f69fe75b20495b41dd7ac8750e3 fix(topic4): calibrate spatial edge perturbation dose
++ 07d6ca0f056ebe1d6fe998acd3c8ca283bc276ea fix(topic4): score only returned interictal events
++ cc731d6fe9c45c94a28f7b8dbc82983c99e7b4a7 feat(topic4): add spatial edge selection phase
++ b41f53d869e6db723145148e79efa312d85baebd fix(topic4): make edge launcher standalone
++ 6b1128fbf89b2a4058dcefc1ede66cd3c376712e feat(topic4): freeze spatial edge confirmation
++ 72ff2d77b996c0f361a40c78eb317bf8a20c0f58 docs(topic4): close static spatial edge route
++ 7a462c0e5a3bdc9fc3fbffe290aa2846f06d293e feat(topic4): add dynamic accessibility canary
++ 81cb569fe5ce80b363dbd3602fdb8e844ee82218 fix(topic4): align adaptation candidate hashes
++ 2822ff0fc6f4054572f9d5f6e08ab9a43fb26737 fix(topic4): make adaptation freezer executable
++ 66c740ad8542f0ae770617c8ac0fcb490b0b60e3 docs(topic4): close local adaptation canary
++ 897391e07e382d52822d1e2a1964a13821469786 feat(topic4): add inhibitory resource canary
++ b27fa2a510c65d46e3db5243cddfb07405c47575 fix(topic4): recalibrate inhibitory resource dose
++ be32772624f9ab79d6e2ff9692d5e2602c0abfa9 fix(topic4): encode resource dose in candidate ids
++ f85ad6c7ee714bf98356cde9c9992edeabbbacaf feat(topic4): freeze resource boundary extension
++ 27c5b8761e78d373136d04db808ce5a8c971d02a docs(topic4): close inhibitory resource canary
++ b238cf3ecd677fa9b8bc5b84410b9ce9b2bbbae8 feat(topic4): add dynamic E-E route canary
++ 3b16ee3c23259750f41de600011513bc92756500 docs(topic4): close dynamic E-E route canary
++ 9469a7411e0ba081bc4e40d18189506cce7b09b9 feat(topic4): add uniform forced route map
++ 3ed95a21dfe5068d572a22ddf92c7911e09c6879 docs(topic4): record forced mode A route capacity
++ 32620b78759c1c2414ae9088192bfdfc0d7be06d feat(topic4): add fresh-network route dose confirmation
++ f6712df797da7931cdf3c67831ecfa3713ff78de feat(topic4): audit forced route timing failures
++ ed400ea1e31ecea0179b8fe5588f7443c06a5503 docs(topic4): close fresh route timing audit
++ a657451c2966bfa915b319d145ca0e353db4a739 feat(topic4): add continuous spatial OU accessibility canary
++ d9ecdfab9c86ea1dec9b5f7800b274a9688c0a0d feat(topic4): bracket continuous access amplitude
++ bc07a5e1012a8e78ed052c068b84fc1d90682b05 feat(topic4): confirm continuous route accessibility
++ 2d24c3919bec8b5d67112907b5bd28df917f5bfa fix(topic4): make confirmation audit executable
++ 9c11d4757b4ed87bd9312ec393e68b5a2acc7d0e fix(topic4): restore canonical Fig4 KMeans contract
++ a3ee749b0aa4259c00b28a855931adbe1d02def6 feat(topic4): tune continuous access for Fig4 KMeans
++ 781c3dc4d44130ac1c60e310d67e082b4e643e55 fix(topic4): make D5.3 audit executable
++ 0e2d8afe987fcc7c5804530c9f52630946a98a70 fix(topic4): resolve canary bundle summary
++ f2558c6814a7b10fd53d2a17afc4e8f12e31e085 fix(topic4): emit strict D5.3 audit JSON
++ a3a72a5e583691bb3ae16d0eed06e6e8bc843700 feat(topic4): confirm KMeans OU candidate on fresh networks
++ 5322f7eb4ab0c195d7763eefb0a84bc916a30777 topic4: add continuous field kmeans sensitivity screen
++ b4ee5e5ded4940903435cb00d39ad9b474dd6c15 topic4: close out natural kmeans field screen
++ 9f2707c94a4cda4236f10332b728fecb9b22f59e feat(topic4): add data-driven h plus ZM transfer audit
++ 29be11642b9a1bab0589ad959e17ac48b60617fb fix(topic4): measure ZM arm in memory sentinel
++ 879f36ae39c59da2f8e4cc631eac07d8911e567e feat(fig4): freeze data-driven SNN validation figures
++ 698fe0db30e783325456db788a3e984d706949b7 topic4: bound D6 natural repertoire conclusion
++ 1c0c59074651a0cadce777d4a8d10f52e62bd987 fix(topic4): initialize ZM controller import path
++ bdc0ca9650a9fa217049dfed27d51bf80321e2d0 topic4: test joint continuous field directions
++ b5b527170337c208c8294217aa69421137de252b topic4: route D6.2 diagnostic figures
++ e21c0a473aac2ccfa07cef8bd36a3df6687c0ee6 feat(topic4): calibrate ZM recovery on learned field
++ 3d5955165c2fccabf1398824cbea6d84a09e5cbb fix(topic4): break D6.2 audit display dependency
++ 45f7c84379ea9b4dc23881f36d912d4f1d4230f7 fix(topic4): finalize ZM tau negative screen
++ 33a724effb6a0b546fe79ba4cdb258704ef1412d topic4: replicate near-boundary continuous field
++ f27cf3a647ac58844b01e2d92b3fad32202dcd59 feat(topic4): share ZM baseline across field searches
++ 258d0dff924dde2c32c4ed2fddce113faaa7b3a7 fix(topic4): plot D6.3 replication schema
++ ce55f60be666f849ec6ba6c8204cf3e9a69889f0 topic4: start active ZM continuous field canary
++ c2545895654878e1a60e18d2b86608048a653d35 fix(topic4): expose active ZM runtime contract
++ 17c9d478b21f58d9b4d50d19794e8a0aaf26cc13 topic4: close active ZM field canary
++ 6f0837f82adc4c98aad52e9194baca8758dfb5ca topic4: add data-driven local connectivity canary
++ dc17d60a85e06db87b325fdd8892563c28f0930c topic4: refresh rev11 NLC spec hash
++ 9dab6714aa03c7435a75c0930ad0a30be6f02018 topic4: fix rev11 NLC freezer entrypoint
++ c986293886a3c9fa043b2251d567e1536d9f244d topic4: wire rev11 NLC canary launcher
++ e0ba77614ba395f5ce1f3de7cd029126b5a1bdb0 fix(topic4): make Fig.4 producer state its own verdict
++ 4872cdc7bcb915af0adb6e7b24299fb62d00e29e fix(topic4): aggregate pathway-specific NLC audits
++ b8acc5509ed336cfd6cd12836143268e02130bae fix(topic4): route NLC canary bundle
++ 1e266be3d54ceb1f48051454ece9db3bad5d25cd topic4: add NLC contact-split rescoring
++ 41cda9e49fff63341d108666b17ec8b6bf71e561 topic4: add joint Node connectivity fit
++ 1186b59f2c09d50bf7f6e05d1c23409c53d551cd topic4: add fresh NLC joint selection
++ 0eeb460baa78e26d7c14d6b18f23f0df11da7d34 fix(fig2c): make static propagation field legible
++ 9395c8b885f084ec25c11cfeaf7c166b44efc4c5 fix(topic4): compare NLC selection against all candidates
++ ff6cb0b782788c8d50f5342ce72c5a3b51623611 topic4: add frozen NLC substrate confirmation
++ db70492180c8b761df5ea1d7d421b5d61b6791ca fix(topic4): route frozen NLC confirmation bundle
++ a7a80d6bbe271072e9e4d705e58831567f61fcfd topic4: render frozen NLC Fig4 validation
++ 50393e1ae10d3ef33bcd152fe430635584531bcd topic4: calibrate rev11-NLC acceptance statistics and rebuild Fig.4
++ cb327d78496f085f747a2133ec5be1394bd74052 topic4: record the rev11-NLC confirmation review
++ a303583d89c875096eac26b8d31bf380c6315c2d Revert the rev11-NLC Fig.4 rebuild
++ 64fb21f882894d40219a0f21b5eb2d24261edde2 topic4: keep the rev11-NLC figures as accepted
++ c721f17d8eb60e790315cc2be03e0cd695d4d84c topic4: freeze NLC pathway mechanism confirmation
++ b6ad2408dc9270122687dd067808f5e94026b874 topic4: add data-driven SNN cohort target contract
++ 96198f72c7d466bd698fc7b9a18b8017ca95e4f8 topic4: add multisubject SNN cohort canary
++ d8929a024e7172fe5d8a0b7160228dc5a9ee5627 topic4: define canonical shaft cohort layout
++ b0f62449d07dec1c1563178442bc0b5ee9a4d240 docs: register confirmed Fig4C pathway panel
++ 09e9ae96380e76c63fcab3b7dd8d6137ee69a50b topic4: freeze shaft-balanced formal cohort scorer
++ e872a3edb468af0c5c662a7ea28ff6e2c2ea959b topic4: freeze formal cohort observation layouts and matched nulls
++ 96618174e9768f39a5e04ea699df1a43ba078a23 topic4: build the staged formal cohort run
++ e2edd2275835870e63630461ab40ec6e450e1d4f topic4: clarify Fig4C mode and pathway labels
++ 794458c4824a380c5483b957217b23b900eb7137 topic4: draw the formal cohort statistics figure
++ 39d5df2512a5a450d8cc2faa4f85eaf5d285948b topic4: audit the canary against its acceptance gate
++ 7046f8df745e01e75e5a15fa8d40d3d631017d52 topic4: report the contact-count confound alongside the event-count one
++ 0c8a03b0e3495014abc293cf5969b588f9973894 topic4: draw the representative subject's clustering check
++ d4bd26778f1e462b6004e11dfe5a7022a102cc25 topic4: draw the representative subject's field and same-network readout
++ 14b455207b1baca30be5767c76671ba732fa2362 topic4: archive the canary verdict and assemble the cohort layout
++ 9a08c63c383a78322095be9fa8f10824a0c28fd8 topic4: state the cohort figure boundary in the README's own language
++ a6dcbdd9d67d5f0da729695303a5505d5df40073 topic4: exercise all three aggregation stages before they fire unattended
++ 40e1bd190f10dbddc0a0d6fec1686050af99685b topic4: record stage A and the volume cleanup in the cohort archive
++ 364c2eec9d4707a9b5de57cb06b06d486dc91067 topic4: test the conditioning claim on held-out data, not on the split that chose it
++ 6772f1dd9a13b3b25f3efd89017811cf3a083d3f topic4: finish the cohort run unattended
++ ff805392fd2cf809a2439d00daa473d57f103a7f topic4: report every failed cohort gate, not only the first
++ c13e3466dd2572fc33eae8d46d27671ae59b6a18 topic4: adjudicate the formal cohort run as a two-gate failure
++ 7393745c6777adaf88fbf0c5bc087e4c2f1c0a9e topic4: record the cohort outcome in the main doc and figure index
++ 8afc7d1b36fb5807d22854c462cb7f38b262cb63 topic4: design the data-driven Z/M interictal-to-ictal transition round
++ b762a5fcfeaafe1db6fce77dda0e953119f6082f topic4: plan the data-driven Z/M interictal-to-ictal transition round
++ c85be5d48feb162c769581ddc72a1bfbc000333c topic4 zm-itx: rework spec and plan after design review
++ f2d1d44ef284157bcc618f409fa7e3b1d411261d topic4 zm-itx: second review pass -- regime checks, directional stop, frozen windows
++ 63ed255b69e23eff2d7fe2c2f943d2d7f4f7a5be topic4 zm-itx: substrate rebuild and checkpoint state module
++ 9147941a3dccf72b0e7e06bf6a8f30c2c0f0bdf2 topic4 zm-itx: engine checkpointing, absolute clock, bounded post-detection tail
++ d9343e4cfe95c9ff3c1d0e1435210a792b55fa23 topic4 zm-itx: analysis modules (transform, state, recruitment, response, statistics)
++ e9b4303d0058ef5e0ffdb0b6de3d5cf964135013 topic4 zm-itx: primary worker and the Gate A parity audit
++ 69f08170d1aab6fb2d3db28f996f834a1f108cd1 topic4 zm-itx: Gate A passes; P0 fixes from the third review
++ 6c129f65105fc04946e36d15904821bfa18999e3 topic4 zm-itx: Phase 2 classifies the endpoint and runs Node for the Edge contrast
++ a37ab20c3703194d07f3303b4b22961184ff99cf topic4 zm-itx: launcher with measured per-class worker pools
++ 4ae289a64fbfbcfc9b44d0c191f7523f8fc5e99d topic4 zm-itx: perturbation worker and the Phase 1A gates
++ 93d2b95c9ff010a4dbcd0f9b200b64f1c7c85420 topic4 zm-itx: Phase 1B gates and launcher phases
++ 346ddd94083fe50668665298a85ea77ac75ec1a8 topic4 zm-itx: fig5-first chain
++ e45595dd73b047f95a23cb36b4eaa2ff4963fef1 topic4 zm-itx: a nested ndarray must never cost a completed run
++ d191383c6cf3bd078dee161b8a1964b1240a959c topic4 zm-itx: stop the launcher from throttling itself
++ b344f9a2e71fafaa2e05b7dff33bea6022262fb4 topic4 zm-itx: the resume check never fired, and one bad unit killed the batch
++ 9583eb346a264d7f9ffd2e4858f27b4153e4e33b topic4 zm-itx: three review fixes, all verified before accepting
++ 63b9b7bf486b4ed3d99bdfad323e36790a524656 topic4 zm-itx: baseline discovery, and withdraw the monotonic-ordering claim
++ e6a4447df57b904b8c98aa2a6409585c6fa8cd03 topic4 zm-itx: record the measured baseline definition and the stage-2 scope
++ 1dfcc9553f783e64eb9fcee0b6f040a80adf309d topic4 zm-itx: base Figure 5 -- data-driven substrate, low activity to runaway
++ 01fa66216d9537feaa40c695570b8d3ba8d320de topic4 zm-itx: emit the discovered low-activity checkpoint alongside the 2 s one
++ fa7b8345a688e2c6280ccf89f3352c1f45f9bef0 topic4 zm-itx: add a passive Z/M observer so the baseline's z/m clauses have a real reference
++ 26951f882d3c03d0f864880d6049d975c305fdbf topic4 fig5: add reference-layout main figure producer
++ d6edbde1424cb8aaec3a3bcfea777f6da03f0078 topic4 zm-itx: stage 2 chain, state-susceptibility screen and the baseline-label rule
++ 34531ac650266db25a05c469573201269ee20c32 topic4 zm-itx: stop the stage 2 chain from waiting on its own unit
++ d29d46ea773c542afc2cbcfd4c3d9d50b281314c topic4 zm-itx: keep ignited sites out of the per-seed median, not just out of the unit count
++ 4ddac306c3592809a093712555bd3766b2a13a93 topic4 zm-itx: archive the stage 1 round, tagged preliminary pending stages 2-4
++ 3bcde42ac7e97984930a11b8b5b45788bd3cd368 topic4 zm-itx: withdraw the single-frame slow-field reading and build the state supplement on time averages
++ eb0549e351a0eed51d8e64dbb6b38f16a5ee7064 topic4 zm-itx: assert the 2 s label by intent instead of by an exact source line
++ c51b24644f638c130a4db0cd6af917440421567a topic4 zm-itx: report ignition as a second endpoint so a dose that ignites at pre-ictal is not read as nothing found
++ 98ad07f83e4971633fcbdc89e5feec94615b6f13 topic4 zm-itx: stage 3 factorial - censored endpoint, exact paired sign-flip, formal launch phase
++ ebc4d449b4b434d6f362cddba43762af78a6fa02 topic4 fig5: handle relative replay output paths
++ 4e0d1727e9c4666384cc3628d1cbdff2db1fe887 topic4 zm-itx: queue the stage 3 factorial behind stage 2
++ 2ec3c5622da0b388f56fa5f5de7514e60b4e5fab topic4 zm-itx: keep dose artifacts collision-free
++ 7e352e30af09411ae4134c0796a91609f8ddc1bc topic4 zm-itx: bound disinhibition, not z - the clause was inverted and rejected the quietest windows
++ 32adbe8b36d02746cee3f168a792956716367604 topic4 zm-itx: make the stage 2 chain resumable over rungs an earlier controller already produced
++ 4b314f8a8deca6e507b9f98ce8ef8c2cc13ddb34 topic4 zm-itx: record the baseline verdict and the inverted-clause correction
++ 02bd2c1dd8490a71b965c14a1789df5b07c33d64 topic4 zm-itx: make the hotspot tail a required argument - a clustered decrease lives in the low tail
++ db73e3bcd400be6e77b88c31a624e0042c2a3ac8 topic4 zm-itx: measure the probe endpoint against the size of one spontaneous event
++ 7e6eecf3cc7261e1aaca6d6840c20e4c2a8d8162 topic4 zm-itx: archive the stage 2 dose-gate stop and what it means
++ b5fe6a84c9379a966c286465258acde0bfb9cc92 topic4 fig5: add immediate probe response maps
++ 328cc77629a852e90a3a52ed49e1d31b0caeb6ca topic4 zm-itx: pass --out-json in the formal phase so an interrupted factorial resumes instead of restarting
++ de98e9ac1e56ecf5ce3bfedba792d754b02beb9f topic4 zm-itx: state what the sign of each factorial contrast means - the endpoint is a time
++ d6bc3790e7124fab912e9cfcbb215545002451b4 Add sustained runaway morphology audit
++ 0fa8ca73501a4cc8ca05b25fab52a01aac435aa0 Require complete runaway morphology windows
++ ddcd8201be83574cfc84e06d081947b3766c4916 topic4 zm-itx: run the registered matched re-registration control, the sensitivity gate for the factorial
++ 64497c013886840078105b2eb1d8fad73682bf5f topic4 zm-itx: fix the control phase job plan - a deleted loop variable killed it on the second seed
++ ee9c4a578d657d8bfe9091c0f11f63dd79335116 topic4 zm-itx: archive the connectivity factorial and withdraw the mid-flight non-overlap claim
++ c34d941df7f25ac2af09944a070845cff2344705 Build ZM Fig5 morphology workpoint pipeline
++ 916681c751cdb3597b248d69f4380618b12f363b Render selected 5 percent E-to-I ZM Fig5 workpoint
++ f40d57adb07dcbfd32e3b69cf0cc1421e268ff51 Prepare exact Fig5 post-onset state contrast
++ 5427eaf643d2d2ea357ce6f4304aef3fcc9172bc Preserve slow-field accumulation across checkpoint restore
++ 94c3c5d17a2935aadfda94b13bd6378c133664a5 Reuse frozen baseline for targeted Fig5 state contrasts
++ d37b66c6a2dd4b643dd343af66503f38bf9edf64 Finalize data-driven ZM Figure 5 workpoint
++ 07559f8efa3864a7cf386a5befa554c01b487fd6 Restore neuron-resolved and energy-map Fig5 panels
++ 91c7fd5e7a2a5899b72c239d1828180c19d63651 topic4 rev4: land the discovery-audit spec and plan as the contract of record
++ fb316e2daa8ee47c54142fe19d72fa5b19258ac4 Use mode-matched snapshot and global probes in Fig5
++ 0f5f7b9d0fdb40160547fe98e84e976a425eb101 Add monitored Fig5 global perturbation runner
++ 1508eef67e8dadb6ad2aa46855df53aa194a0a18 topic4 rev4: freeze the discovery boundary before anything is rescored
++ fd4b885fbb29376b20269bba0117c49de43c42be topic4 rev4: separate the exact Fig.4 carry-over arm from every calibrated point
++ 6fa3356cffba32b4c38e2f73bdaef1521c420ee1 topic4 rev4: add MODEL_ICTAL_ELIGIBLE_V2 beside the historical classifier
++ 99b0d7bf98d5898bb5549656e45f0bbb786c582d topic4 rev4: score repertoire retention from the frozen contracts, unrefit
++ 0c3a4f272b9e1517197f231267329965277f8977 topic4 rev4: motif reuse on contacts, and prove the nulls before using them
++ 7c2f58c5535e45f23b05a621e369e4ec74544471 Finalize mode-matched global-probe Fig5 v5
++ 767d3c2175511d837f5dad9271205296a390b66e topic4 rev4: abstain on the rate clause when its baseline denominator is zero
++ 7ac4ca5cbc5e92346c13ce93d056afba2f1b180b topic4 rev4: rescore every archived candidate from model-internal evidence only
++ 7998ed15c6df76f3c06b3a59aeb0a02a19a289c5 topic4 rev4: a negative agreement that clears a lower null is not reuse
++ 8c139e130032f63c7a060ac3cdd9ef56c30580ca topic4 rev4: stop rebuilding the same precedence matrices inside the null loop
++ 5067e4bfa4110dad0b5286c588576207edffffaf topic4 rev4: land the zero-simulation discovery-audit artifacts
++ a5951ea6475a8d6fbedb5d79891936ebb6060dab topic4 rev4: separate insufficient pre-ictal evidence from a lost repertoire
++ 792c0d920e3c167374ec45b75b44cfabc791adb3 topic4 rev4: gate the edge null on its weight distribution, and bound the contact claim
++ f457dddf9f799ef663c599d8fbe083672b5dd8a4 topic4 rev4: require the three layers on the same run, and stop calling the output a shortlist
++ 9494d3e6ba291ab314ee318697a6f5d3a5ef9045 topic4 rev4: regenerate the audit artifacts under the corrected contracts
++ c9d04b0138729bb174a13851c70b6f2b2a5db0a6 topic4 rev4: drop the shortlist artifact superseded by the replication design set
++ 313b10a73d0899df806e90399077d267487f80d9 topic4 rev5: freeze target-informed ZM bridge contract and scoring
++ 63149f37cbbc0cfa99a9f1538c65c668be9fa1f6 topic4 rev5: add matched-band target scoring and candidate rescore
++ fae737313267f49489b3d3afd945d5a959722b9a topic4 rev5: add low-frequency stage1 monitor
++ 2482e90e810b8b485fb2e89fb21bc6ccbb0f2f5b topic4 rev5: automate fixed-seed selection and confirmation
++ f60085e7f40f0723b8b617d389910e3860a2e9d1 topic4 rev5: retain scored spatial frames for the final figure
++ fea4fa92dd5db39518f1d7a19d9e96d3665e7c6c topic4 rev5: repeat candidate selection under matched contact nulls
++ e0ec50bca4ca1e27beb5968ef3e7822eda627e69 topic4 rev5: run selection-aware null before selection
++ 87a0aae9578e48124b6d8fd9ee313fce1023c55b topic4 rev5: add frozen target-bridge figure and movie producer
++ df331c86b5bc1d281a7052d9c99a85323e51c6a2 topic4 rev5: finalize figures provenance and collaborator report
++ 37c32cf75984355a841455e19e5329cb80d8f746 topic4 rev5: floor the discrete positive-contact loss
++ 5c22942157c3019be3138f9036dd172f2a3626f0 fix topic4 ictal bridge qualification before fitting
++ 27f7eea80543348e331fcbc51c97ac9606d4260b align topic4 objective with early energy bridge
++ 957b46eabbab1ff1c95aa6c9a8d4d56c06a47fc4 add final model-internal ZM boundary cross
++ f4f36790b7fc1100520c3238a2a08ac07028b6a5 keep finalizer waiting during ZM refinement
++ 912cd1e75f26d7c7439d4f27d451f0e4a5998891 report ZM qualification boundary on negative closeout
++ 30e1c9b136f01e7fed91ef46c7161920fe089739 add topic4 ZM qualification boundary figure
++ 12c5b8b064c43bdbb6e561aebd0a2ebb1679d544 close provenance for negative ZM bridge result
++ 1617443ee33a01e05a93c38f9a333c8a697b6580 audit interictal variance and event source topology
++ b8da43d649b7c9e111be6a6edafd3d18da9cf0f5 topic4: freeze node dual-mode refit canary
++ 250233d94fb91f24aff6c18ec7cd923f7b3011ea topic4: retain compact source activity movies
++ 6711dde61e7390b27610a286a5c2b650053e6276 topic4: add node event activity gif
++ 2c8505b477bb1836243cffcb3423227cdd54ae67 topic4: resolve canary inputs across worktrees
++ 07011a4e62c254b7c5647c3d12032d9babd070d4 topic4: add whole-sheet node stage-a freezer
++ cca9de672474b2bed29897d4b4126458cc84b759 topic4: retain node worker runtime status
++ b27dcb7c5d8736260ebd52fc19c38b3de578755c topic4: freeze node stage-a inputs
++ 24fcd716de1ab7cc4c7799c2d5ca43fcc15f2261 topic4: add bounded node worker queue
++ dbe39b304f338db8e5d79a8b03dcddd8c9926dbf topic4: freeze node selection shortlist
++ 7152e17c669a25ce975bb6410c1985c55185367a topic4: freeze node pareto selection rule
++ d103c5abc69550c1ed8fd31712b562aef676ab46 topic4: record node selection decision
++ 7b620b8576db9a56be5816446cab244ce15faa15 topic4: freeze local node stage-b refinement
++ 5f08949b07d11debbbcf1bcdd457261677299ff9 topic4: freeze stage-b node shortlist
++ 78d6aece662832a8dc19876f80ef200b7565e398 topic4: freeze node confirmation contract
++ 046cf92e01dead0c25f4ca8234ac1c266dd5c308 topic4: align confirmation worker role
++ c4360e7043582883f45ef031f70470c0f58b40f5 topic4: add node hotspot intervention targets
++ d9a0ac51656fa312a8dd39b41340bd1a5a088cf0 topic4: balance intervention targets by network
++ c5e76a9fb0316551c5a70b62ea81af517be75ef9 topic4: add same-checkpoint node intervention
++ c397ef00d4ec6556863620f2bb6d07eab4474d99 topic4: fail closed on intervention parity
++ 01a8bcbe74eb03cfdcd529ba33cde1c656a6c738 topic4: add node confirmation figures
++ fbf29230e01256aadba36a246b5acb5581f4f32f topic4: score settled event episodes
++ 19edcad0b96f1252f12f4588c533ea715f4a43c3 topic4: freeze settled-episode stage C search
++ 749637ff8b7bee0523d28b635f731953a8177e9f topic4: plot independent settled episodes
++ b6b201dfb36fa9d0040b05865fbf305b568a3231 topic4: define population excursion event unit
++ dfd1683fe90be9aa94be74e3c36a2e63015b0910 topic4: fix population canary freeze summary
++ fd23c1cbf8bc57f51f25d2d8fcb6c09b202d30a1 topic4: segment contact-independent cascade events
++ a5773866d510e3ecb63bbcbaed4ea80ae19e103d topic4: score Node fields on causal-consistent cascades
++ 515a18c84ac78b756abf986f19f0e94522805c46 topic4: make cascade worker event summary generic
++ 18b4d73a2ac10ae6890cc971db772ac4955b0133 topic4: preserve directed event lineages
++ 374e3ef406a90e273a92615ac5f85e7e2ec38eec topic4: restrict event readout to causal lineages
++ 442560a5ca3bef54014cb9eac4aaf0c174e1383a topic4: audit lineage-restricted event scoring
++ c1a4b81b35e828f525c5343b5bf341f4ddc29c74 topic4: enforce causal lineage readout in native worker
++ 015c518586b8a3118f8ad7181b0b84f0781e0726 topic4: freeze causal Node field search
++ 5f189d5d5601fee38cd70d7381dee3a31d52152e topic4: bound causal fit worker memory
++ dcba384c78bad1ecef0cf08d7c348e8483cb7ada topic4: use exact neuron lineage contact readout
++ f6b562757528f7b54ad898ac24e46da3b1f5aaa6 topic4: freeze exact neuron lineage canary
++ 46f6822a549c4f4e3056834b90e2e586b0f8abf5 topic4: freeze exact neuron causal field fit
++ ed9cafff9602fcd692ee203752222cdc4829b665 topic4: preserve event roots across fast-state gaps
++ a00081f16d5a5fbea277481e22152ae8c5c78f53 topic4: record persistent lineage sensitivities
++ 5de091853ad632bdabfc61f022527fb812c621e5 topic4: score complete causal population episodes
++ df434f7e1fbf56703f60241d7bbd5723e544336e topic4: audit event segmentation with matched loss
++ f2577bae841950bcf2cdb7448de5e24cb80a2a2f topic4: materialize complete episode diagnostics
++ 1505baf5c29d4dcbfedfb6713439ab6a302ff1c4 topic4: define complete root coactivity events
++ 4b0f6f7ac901aaa20e7dff8580f590e59716b497 topic4: derive event memory from local excitatory response
++ 0757e522ff321f925506b09555a3b4e5f143a51b topic4: admit engine-derived event canary role
++ b52b982ccd133960dcd83c02a3907fbded8c965e topic4: separate observable causal root events
++ 9c182ca01ca5b31ea3c162dc442832523dd3c8d2 topic4: distinguish causal root canary provenance
++ ba18165d98edfb499be54601c0a299810ad06209 topic4: render causal-root event GIFs
++ 889f020fe9e47dda0928f1c08e2e615686130ef9 topic4: refit node fields on causal-root events
++ 1cf66263f6f0d63e6f941ba00a4bea5a39923801 topic4: make event identity edge-delay aware
++ 6e7f0658259dea16c8f99842dac006619a508528 topic4: retire unstable K2 fit penalty
++ b0ece06d1a80b35192bade5ceb74ec43e4ad19d1 topic4: fix replay audit entrypoint
++ 1ed18960f506d6fb768d4ea5a545ec9c1842c10d topic4: freeze corrected event field refit
++ b7b2153fcb5c6e62bb0afc1fd22b6a6031432430 topic4: admit corrected full fit replay role
++ a7eafeb5a81bb8480bfd019f0bd74c269c657c9c topic4: fix causal-root GIF rendering
++ 52330b195705ac14317f1f09f9a8d7aae2aad3e7 topic4: freeze causal field continuation
++ 994a83722e28a5540828f620cad9f2f1d337b47c topic4: correct mode direction aggregation
++ 454b005df2cd2b4a86a6bdf37883d0910acd9bdd topic4: make direction rescore executable
++ 7c279388eae76fe2ac2693214130114ff5e83234 docs: record corrected node field ranking
++ 1599f5824d6658da5bf52f7a5a0ab5cd702b630f topic4: diagnose node field search coordinates
++ 38d10b648c48681f01ea2225bbdd1ad62294f214 topic4: freeze orthogonal free field screen
++ 47dfb5eea1f15cdaaa674aaf6aaa7c7cc156eb83 topic4: automate orthogonal field analysis
++ de7780b8ec172ae2deb264e8011b7598aa75efd0 topic4: freeze orthogonal outer amplitude checks
++ 8eae42cd29d7c82c33321bb78672c5f2e7a773e2 topic4: audit outer amplitude response persistence
++ b1d06dad673e4d1860eb7d728245a67540ec0fae topic4: replace outer extrapolation with anchor audit
++ bfacfbe34a3c5e177a01fb0ae52b0fa797ce16cd topic4: make anchor audit directly executable
++ 73130b47bb993fdd69595ed1033797bd18e36982 topic4: freeze local curvature node canary
++ 7e43f7fdb535be51686e32ea6c748dc9b7e08976 topic4: automate local curvature decision
++ e8abe8387a643a57420d56085e7d15a4b2212fdf topic4: freeze paired local field replication
++ ef86736bd8470b9d7cf447a9ed00f09571ddc7db topic4: automate paired field replication
++ c9f3d6c478b1b431c553d75f29459b354f7d7adb topic4: replace hard mode fit with soft target audit
++ 41a852c26af01f8be8a7cfcee6627244b9996fd9 topic4: launch global soft Node field screen
++ c420c43bc9aa96dccb355500a3bd963f7f6aa19a topic4: allow global Node screen worker role
++ c07044ed6dabcdc37064c768f06c71705db6bbb4 topic4: calibrate global screen worker memory
++ bc4126a0904d58899193ccc11f2f9ecddc355304 topic4: expand global Node nominees on fresh fits
++ 183742435ed5ace2b3e9d91b40522fc433690e91 topic4: audit fresh global Node fits
++ b3ba6d4ef684a430c1f07d3835b066825979907d topic4: recover omitted Pareto Node field
++ bba4e8c57e721ee1c048205a2dc806f29c0e58e1 topic4: interpolate Node mode donors
++ a7932ed0be79310a702b4bd43595b2b10120ccad topic4: use supported Node screen role
++ 0922888b34a29e4b2d00b0a00c341a2cc0500232 topic4: test Node directional capacity
++ 85f82c65cfd70d1412f368d6c1ee87e634fe4868 topic4: close Node directional capacity audit
++ decc287f7c74e2d1c236959234a8ff0fe27a6519 topic4: diagnose Node joint objective conflict
++ 0d40aca38ca20e29c150f9023e19b9eb2df9eadb topic4: calibrate orthogonal Node field responses
++ 1272555d6039007afefda54444c91f7d7e06c693 topic4: close local Node response extrapolation
++ de53cfdb77941863f6b6a83dae4ef2d0ef6d31e0 topic4: freeze broad Node field canary
++ 3b7853af48db92fdcee701ba592ed690a535a4f4 topic4: close broad Node field screen
++ 253a9c7f7956fec66f73d8b902ff6305001dffc1 topic4: add signed-depth Node mapping audit
++ f98c0171dec62eccd1d4414197d14d8a69c65b57 topic4: record signed-depth mapping result
++ b3144ed2e6ef128d626c8153701e6654bf453618 topic4: audit prior Node parameter axes
++ a7824b7dfe0e0f6040c26ff465592dbade2f0dc1 topic4: clarify Node axis inventory references
++ 6a88f2e25d5728223f2ab82e281db01c25d3a43c topic4: add scalar Node gain canary
++ a6f0eb0c6d4fe4b8ad13746341e71d12bdee6a20 topic4: allow scalar Node gain workers
++ eafb5f71bb873f2fba7648d10f9741f154fb07ec topic4: test dual continuous Node channels
++ 1f3ebd282bfc125ba817b3952b4b103c7410ccfe topic4: freeze final dual node local bridge
++ 34a07c68e1981acb007ae9683f4ccad6c264af8b topic4: fix local bridge freezer entrypoint
++ 689f37b9b060224f9f14b45b753a59a199c8ed3e topic4: support nonradius local bridge aggregation
++ 750eccbdc3087e0c5e33abf7b3e7355bc1f8fdda topic4: close static node threshold local bridge
++ 0c03bcc5fe27f72e5a57faab727c87f176338122 topic4: record static node threshold verdict
++ 8f2e0a022fe330e34b3a3750358ecd96aa400c1a topic4: make kmeans bridge audit label invariant
++ 178019ad2d9753b323d95ef4c5dade33a4f9db84 topic4: constrain dynamic node memory timescale
++ db3a0fca977b2fcbaf39c3758e73e07ccf627f8e topic4: expose patient event end times
++ 12870fce6e73594d7100c2f638c635e317f61f9c topic4: freeze rev13 zero-sum node canary
++ fca488e95cdeae08869a1d25fa8fcfaef7f70d37 topic4: add dedicated rev13 node worker
++ 7cb41bf02b43abe794ee569f3b286c97bcdbbf79 topic4: close patient mode memory gap audit
++ c1deafce1536c43b3f2e245b56fee0e6add2385f topic4: harden rev13 spatial control contract
++ 0f8d6a65d84ac53c9e5113e104b1e650ece0fe92 topic4: implement spatially matched node control
++ f03fdcbda582093e8533fca2f381ea861d907e01 topic4: freeze directional rev13 K2 audit
++ ce8d635c17f626a8dec459cbbc943c8531513264 topic4: add rev13 exact-off artifact parity audit
++ bd64b945573c288d7ff7ce1b9c3272416de4b8f6 topic4: require isolated 20s rev13 families
++ 56314cb4f741c9f38e37990367d7ea42b24247d4 topic4: checkpoint dynamic node controller
++ 72f7e55f0f7d5b860388c9ff6208b44261f2bcdf topic4: harden rev13 worker provenance
++ 2c3c3919b67bfe29dfd6821cb2d0f803b238bdff topic4: exclude overlapping event families
++ 04850ebf6e81a98872c9339244ff6bc6383dc4ca topic4: add bounded rev13 worker queue
++ 7ff0871fed472283be61e5cc0b1a77c3dcc3aa42 topic4: isolate rev13 engineering CLI
++ 554adbb6ffaf461d48d2e2303c50b81ab44e099c topic4: enforce rev13 execution order
++ fe203e635dd1ba64001ae9e506d37ec5a85f551b topic4: close rev13 zero-sum node capacity
++ 35c707289a3a6e033bd867fa779e2152f63b175f topic4: freeze rev14 static node diagnostic
++ 8cd58a4822397d82c1793c0de29abaa626db5737 topic4: freeze rev14 J14 training objective
++ 49681c9fd4d55ff5c4376849b283c1ca97460961 topic4: harden rev14 static-node objective controls
++ 6946b5a1b2973d18eca7c5057286626900243cc0 topic4: freeze rev14 historical static-node rescore
++ 6899ead9957f2d92cf11226048b3760e2b7f17c4 topic4: freeze rev14 interictal heldout endpoint contract
++ 8f988b4c2d93fed00b532e3091dcd99b536175fd topic4: record heldout freeze provenance
++ a6bf8942a685cc8329a3583b9fbe1cc45ca5da9a topic4: project rev14 pure Fourier node fields
++ 67cf65d83f266b5570ce49dbd3c568f373cfab0e topic4: freeze rev14 M3 and patient support contracts
++ a9dc1ca63e22ecc6ff36722103fcbeeca442732e topic4: launch and aggregate rev14 M3 canary
++ a7a5321c915bfb91266c283c4a8cbd9fd7da7ec5 topic4: stabilize rev14 M3 coordinates across BLAS
++ d84ec0163e5be1da6433caa2b3cd8c43ff7c1f83 topic4: make M3 RMS normalization deterministic
++ 87286cd20e78fa2a7e8b8736ec16ac62ad9c2762 topic4: accept frozen worker booleans and support hashes
++ a83d8cbe3d9f24ec47cd465ba4aa22df0dd0d9a0 topic4: permit audited M3 analysis descendants
++ b3e8d7e3ea08884c4f155d4516606018170e1560 topic4: accept historical integer edge-off audit flag
++ 03e214c2ecfa69ece4ae58f9dfd4565dbb0a1f4a topic4: freeze M3 network replication contract
++ c7ce4557f99eaeeeee81c037a8d7c484111915de topic4: declare M3 replication seeds to composed worker
++ 1e6db3ceed2cbb70cab5f179e97257cd9bf2ecb1 Add full M3 weak-mode coordinate atlas
++ 19303a076f24c77eaec4a7d37b57198459579b65 Fix rev15 coordinate field dispatch
++ 4cc9080ff38d33d276e21efe95283b8104ec4da4 Add training-only M3 coordinate atlas aggregation
++ 884a9390f9e21c50988af63786ff32d1a1d577b6 Freeze rev15 M3 response combinations
++ 349de1af48a6a78306bfd2e37167f0ce4ffe00bc Declare fresh rev15 seeds to composed worker
++ 86c1a8ca7d69b653e22e1d4ca725963d29772439 Freeze rev15 multinetwork M3 atlas
++ 0b2730359d888276915c89b0f8d7f8ba663e87de Define rev15 multinetwork response analysis
++ 25526606990a54a2c5f2f3ae8b4c4d2feeab4f01 Add rev15 multinetwork aggregate waiter
++ 0d80a774595a9bbb4654c0a6c8951192b281b5b6 Prepare rev15 robust Node candidate replication
++ e332857197fa50a2038a5b457e9d7e651379c2b1 Add rev15 robust config waiter
++ b91a91a7156ddd82d6a36f34cc328ff8f9d2c190 Add rev15 Node post-selection KMeans audit
++ 443ee7034aa03ea58495513816c25020ca7a456e Fix rev15 classifier timing contract
++ 9d346fed53b240c2105dc2f0f20a226116df5924 Add rev15 Node final science audit
++ 5bd95dc85d9b6138fd1a1811b1ef8040ea26ba7a Specify rev15 final Node acceptance
++ 37f502a39b74107a3c5551bf145bfa266471793b Add rev15 Node intervention substrate adapter
++ 27fc6da4fa9c3ddd37dcf0d241d46031bd4d4122 Use crossed rev15 hotspot intervention
++ faa3aba484dc84511cc6c376fa13a470c059ed4f Freeze crossed rev15 hotspot intervention
++ a23d5a87b48b7b588c40d7724b3bc68fbd7ac67e Define crossed hotspot selectivity
++ edfc63a1c9a69fbf046bc91aa9d8e8390e79d3f8 Complete rev15 crossed Node intervention pipeline
++ a5b626ca66d76b7e9fd0619981c5edb185a04600 Fix rev15 robust waiter inventory contract
++ c74f50a623b26e5043ed9a5dc20dcb41773f8950 Freeze rev15 robust Node candidate config
++ e2d0ae96ac25d3945f181e62c041b665e20437b8 Fix rev15 robust worker freezer compatibility
++ 525dcf48d25f07f039f77e033093aef17531345b Define rev16 joint M3 M4 response atlas
++ 8971b332cd0bdb9b1e1a8cbce0927feb968ab77c Implement rev16 joint response aggregation
++ 8a071c677895d54333ca8966550d9b382abd2933 Implement rev16 joint candidate pipeline
++ 53438af12e4b77f58aff68ee7ee38089fe17bf54 Add rev16 completion waiter and fresh aggregate
++ 5f7e01b0285a03f6bbd8f4f2f5b6fa5b2a81b99d Prepare rev16 Node postselection and intervention
++ 309877c6cdbeb2e4540f52f2b532fbd5f63dcfcb Freeze rev16 Node acceptance contract
++ e03e5f1fcfd4631cccbbd05d7ba1ee62b87aa86f Add rev16 intervention controller
++ fe7d207a8388ab0af52ff82e939a10b40f009f8f Separate heldout prototypes from event clouds
++ 291f9650bbbac6127741073a1fc1b6e1cc2506e3 Strengthen crossed Node hotspot controls
++ b858d393a13cedd319c9b9282d94d27219e24f57 Add unseen-network Node confirmation stage
++ 36f16e325ee41be589763d434e4c973f358babc4 Align rev16 Node selection with full objective
++ 4495ceaf4299611898940004f480ad20e563f0f7 Require independent Node scientific confirmation
++ 3f7c87a3037ba8624df155cc5de95c225f671099 Restrict Node topology to patient-supported events
++ 82c23c4ff39ed7f4c4ea632ed51ca9ecfa4b89c8 Score preservation of native Node modes
++ 6cbe58467f3b74ac860ce35e94546be3b50fa802 Automate rev16 Node selection transition
++ bd1eff92d0b3fc44d12bf678371e8cd2f503c2fa Freeze rev16 joint Node candidates
++ fb9c13d8e91e6b502f1bd82173211c1d59eb28df Freeze quantized rev16 joint coordinates
++ f8da6b165d74fdef481d0ac33ad0130905ee920f Decouple rev16 analysis from worker freeze
++ 7286543ec6900c6027f62bbeb62c04261f6a79ff Repair dual-field Node residual mapping
++ 586bb11b55b05add92c9603743e3cee143020fe5 Compare rev17 parity through SNN threshold path
++ 03889ff0a367151e6566869a4cae4c10db389372 Aggregate rev17 dual-field response atlas
++ 0573cfa0ca1006b0d3446be325a8cdf55f6080d0 Prepare rev17 dual-field selection
++ b8c1c9007f9b8a86564ccdd9f806c66537069b15 Gate rev17 fresh-network selection
++ a618af05160532d99caca64cd2fee53d3be6b55b Prepare rev17 unseen-network confirmation
++ 4f2d6fef17d9935a1f6c3af7e6cd848cb5b24b12 Audit rev17 frozen-node natural KMeans
++ a1efb21694aa8689608d49acf52b11a9b0312e5c Gate rev17 heldout and source topology
++ 534a8fdbe9b6007cc9ae0f795d9563b6ba9e2323 Prepare rev17 same-checkpoint hotspot intervention
++ 6b777f06fb19e18db5165b067732ba0289a18728 Align rev17 spec with final Node freeze chain
++ 8e3fe8f026c2a31c1e72ecf90289eda4692a4787 Prepare fail-closed rev17 final Fig4 renderer
++ 3838c2adc60ee5b4c3c774b4a5ced3510558366d Add rev17 Node causal validation figure
++ ab1153023e2fc71b8064222540d27215dbeb7df0 Automate fail-closed rev17 Node continuation
++ 6a0df99588a1b3c0214b1c354345fc369c49151b Add rev17 discrete response fallback
++ cd48b01aa4e5b9c469d408b384d3d280d636db86 Freeze rev17 dual-field selection config
++ 362a381638226c0439d85f46366eaeafe9867475 Fix rev17 stage seed geometry audit
++ a1ec53991f818568885934a4741535ede4508f8a Add robust rev18 dual-field global screen
++ 0a0120ca19c79e6bcf1b014005529e7d60fedaac Add frozen dual-core mechanism atlas
++ e8bebbb65c8491d654aed18c0a1746c98c8b3964 Fix dual-core atlas freezer entrypoint
++ bdc1bed8791bba4511d031d06b3f6dfed6539d1d Pin rev20 worker working directory
++ 3032d0b097e75b4ac7eac01856d3902e7819fdbb Add separated rev20 dual-core endpoints
++ 5f98efe6c589cd1379a898115b91ced7509b2ff9 Seal rev20 validation after level selection
++ db6a9866d8c2472bafca166c7b6544d5ceae74ff Add rev20 dual-core baseline audit figure
++ 83150af68e6a4474387687fb9cd2b35be18436af Add rev20 dual-core response atlas analysis
++ bc36c351c6ed03512610a4f5eadcad410de4b301 Allow measured rev20 worker concurrency override
++ 2271041bdeb7937055461a5b53c637c6511ff44a Close rev20 dual-core mechanism atlas
++ 2c6df508a02d25d329c3dd94c072eea6fb247b5c Specify rev22 dual-core interictal parameter search
++ 75d685792d177f1010b83f89642f7f894f87ae3d Tighten rev22 objective and feasibility contracts
++ 3d019e87e80e922f9bf3136414fb7441d937ddc9 Expand rev22 validation metric atlas
++ 002c3909726503d46314ec372e271e841627b480 rev22-DCI v4: vector training endpoint, per-component surfaces, topology-replicated seeds, structural nulls
++ 1956e4e56372c6c4227ebc28e83406de40e4328d rev22-DCI G1/G3 code: vector objective, rev20 offline rescoring, topology/dynamics seed split
++ 2dffc26da598dacab9b00c3d126ed9176f57c50e rev22-DCI: freeze geometry, design, validation and response analysis
++ a388d23195ad7456b78ad8e466f4fe8c9464224c rev22-DCI: add worker execution contract compiler
++ 7c074e6da913d603cba81628eadf700c0f469e7d rev22-DCI: harden preflight and execution contracts
++ 5fbe945bdc98263fd9efd9404d491b513b454be2 rev22-DCI: normalize fit responses to candidate floors
++ dd73c61b0586b88f41c60c2b728b769fda5f5956 rev22-DCI v5.1: bind the ellipse reference to the graph kernel axis
++ 759d6388e0a7409836bf82b3377cd3586b9c65ad rev22-DCI plan: Task 8 must re-bind the execution manifest with frozen proposals
++ 639f60361af736d17548733e356d72a7297230e3 rev22-DCI Task 8: freeze conditional proposals, variance decomposition and the recall budget
++ a0ae6cd6ebc42b8a78011ee73f4ed5da17f3242e rev22-DCI: geometry figure README and panel titles follow the graph-axis reference
++ 7d7e5d6611b452d33744e02dc7fb1fe55b218764 rev22-DCI v5.2: composed edge-ratio floor 0.20 with a flagged relaxed band
++ f6c0a7806a7408ac52f7f660bb4b5cde22f2c171 rev22-DCI G4b/G6: execution contract frozen; network caches warmed
++ 3ca957eda4887e7b6ec6a41a0836197a452f30c4 Fix rev22 worker provenance flag aggregation
++ c628a80875b103c99c67fb500a61eb6c37636572 Add strict rev22 validation aggregate
++ 26763baca1c6dc5844fd90204a5bad103a52c34a Add rev22 frozen-stage training aggregate
++ a6b4dc591bd01208c9a388c1b7baf9af35870a66 Add pure rev22 Task 12 figure renderer
++ b2120b92e8f1d51e5c6a870c346df773c7c27dbb Extend rev22 validation to fit design
++ ec74ad711024bf39c41b119459e0795e706fbe80 Add descriptive rev22 validation response surfaces
++ 5f13fbc95949503a78e9c265b40a6368f335031b Fix rev22 Task 12 response figures
++ 8c614d4ad49c2e9b4e07bba370eef3e0c8e2a4ac Support rev22 dual-core spatial null transforms
++ 8432870576f7ed39563cb07e8c3cd808f6d9a68d Add frozen rev22 structural null overrides
++ 9f95695d03c9de54ef24f017ae74d93dc58cbe69 Correct rev22 structural null run budget
++ 1510416678ed948d13082e6642a345ab10cab216 Freeze rev22 Node blocking controls
++ d32e86f060dd06086ea1bc18e4497513fe6729db Add rev22 structural null execution phase
++ ca8e22e01ffc920573cb14a2e38fff4946c0ca34 Add rev22 isotropic topology control
++ 66ccce5c95833521588e4d93a4d0ba309a85342e Freeze rev22 structural null design
++ 5f50a716d5714a92a0b2ce4f28766c341d82d365 Aggregate rev22 structural controls
++ bd20f13426800721a9e8a9380f0f9d3df1e32478 Plot rev22 structural sensitivity controls
++ 839c000e9bc4e74c798945f77b201a44139bd5e7 Fix rev22 pooled fit estimability contract
++ 0183977a633a99cf169458574b060bd14a506671 Chain rev22 training-only postfit
++ 04626698e9a1e9491271d579d57a6fa11ae082ca Align rev22 frozen-stage pooled estimability
++ 11ed41ac7d44a181ac7048b7ecefaac006048b6f Preserve rev22 endpoint-specific estimability
++ 2fd170cde67b54d5de6e73915f015a46802c0275 Add rev22 final candidate visual acceptance
++ 0950839c7de8bc5c885a7f9cc056fb638d161f91 Fix rev22 structural freezer CLI import path
++ a53c7b5185e375d6a334a6b43886d1d807104f2c Automate rev22 frozen postfit stages
++ c8a60ad345c71aa1a25b6f2421000f81a6dc2ab5 Audit rev22 end-to-end completion
++ c362f41ceb33ec00d47b54d26651778764db669f Clarify rev22 response figure benchmarks
++ fb707ab0b3187e18102069f5949e10d39a623d9a Freeze rev22 postfit execution contracts
++ e38edfd10bb8e85e55abb5cd4e5745d66dad3fa5 Fix rev22 isotropic operator reference audit
++ 74c44b6d1374828c23550cd39caf144bb762bc4a Allow audited rev22 structural-null resume
++ 336800aabfed51f0d2a8bf008b90fc1d94e0046c Complete rev22 objective-control figure audit
++ db6186764bec9068ef248e8a85e3c1bf1cbbb9c4 snapshot: frozen dirty source state of topic4-substrate-autapse-fix (336800aa + 207 paths) for initial-state v1
++ 0431f8cea2b9dbb28dd0add0171fa0f8c8fb8323 topic4: initial-state conditioned propagation v1 (engine initial_voltage + observer, prepare/worker/qualify/controller/analyze/render/report)
++ cf58161278d312e70a6c322ff340f0171455d2c8 topic4 initial-state v1: lighter all-events GIF (12 ms step, 64 dpi, 96 colours)
++ c5fe63b3405656baefa6e8af0ddffd4476ec3f8a topic4 initial-state v1: descriptive-only propagation comparison vs B0 (interval separation required), instability note in report
++ f01db07cdb1dbb28c2695f54ce9742915747e093 topic4 initial-state v1: round results archive doc, montage headroom, report formatting

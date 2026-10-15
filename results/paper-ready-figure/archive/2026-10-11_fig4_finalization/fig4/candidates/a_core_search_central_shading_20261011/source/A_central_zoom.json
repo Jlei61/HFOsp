@@ -1,0 +1,103 @@
+{
+  "source": {
+    "figdata_path": "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722.npz",
+    "figdata_sha256": "a8f46627fe2726fa73ef0130cbc3342414906d53f08f2ebc714173c0223056d2",
+    "contact_xy_mm": [
+      [
+        0.5370093502378683,
+        3.6774238772945456
+      ],
+      [
+        -1.3436953765814579,
+        4.658497902855213
+      ],
+      [
+        -2.6216545932856707,
+        5.215952799938329
+      ],
+      [
+        -4.502359320104997,
+        6.197026825498998
+      ],
+      [
+        8.0,
+        -6.197026825498998
+      ],
+      [
+        6.537611389323725,
+        -6.164611432369993
+      ],
+      [
+        4.8999977319854136,
+        -5.74182714311035
+      ],
+      [
+        3.0100886578560626,
+        -5.676161517634431
+      ],
+      [
+        1.5523022208348003,
+        -5.186041924463051
+      ],
+      [
+        0.08991361015852384,
+        -5.153626531334046
+      ],
+      [
+        -1.5523022208347985,
+        -5.1885464421167775
+      ],
+      [
+        -3.0100886578560617,
+        -4.698426848945398
+      ],
+      [
+        -4.8999977319854136,
+        -4.632761223469478
+      ],
+      [
+        -6.537611389323724,
+        -4.209976934209836
+      ],
+      [
+        -8.0,
+        -4.177561541080831
+      ]
+    ],
+    "removed_display_layers": [
+      "anisotropic E-to-E corridor and label",
+      "possible data driven core contours and label",
+      "historical discrete core outlines, labels, and connecting line"
+    ],
+    "preserved_information": [
+      "frozen E-neuron positions",
+      "deterministically reconstructed I-neuron positions",
+      "patient contact geometry",
+      "E/I neuron legend"
+    ],
+    "seeg_sampling_overlay": {
+      "readout": "virtual-contact firing-density envelope used by Figure 4F",
+      "kernel": "normalized isotropic Gaussian without hard cutoff",
+      "sigma_mm": 0.25,
+      "displayed_radius": "theoretical 95% mass radius",
+      "displayed_radius_mm": 0.6119367076702041,
+      "contact_span_xy_mm": [
+        16.0,
+        12.394053650997996
+      ],
+      "color": "#245C3F",
+      "alpha": 0.12,
+      "not_the_current_lfp_cutoff": "LFPRecorder Rr=0.278 mm is a separate path"
+    }
+  },
+  "center_mm": [
+    0.0,
+    0.0
+  ],
+  "field_of_view_mm": [
+    1.6754742547425474,
+    1.3143631436314362
+  ],
+  "nearest_contact_to_box_mm": 3.0202423054788277,
+  "meaning": "Representative local circuit anywhere in the spatial model; not restricted to SEEG contacts."
+}

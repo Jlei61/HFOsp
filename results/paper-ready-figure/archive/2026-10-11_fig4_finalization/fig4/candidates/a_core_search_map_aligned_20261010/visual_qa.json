@@ -1,0 +1,1080 @@
+{
+  "status": "LAYOUT_AND_VALUE_CHECKS_PASS_VISUAL_PENDING",
+  "human_visual_acceptance": "PENDING",
+  "checks": {
+    "A_revision": {
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+      "original_left_circuit_structure_preserved": true,
+      "overview_neuron_samples_preserved": true,
+      "left_circuit_detail_revision": {
+        "native_producer": "local_circuit_native_source.py",
+        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
+        "central_offset_schematic_units": 0.11,
+        "previous_central_offset_schematic_units": 0.04,
+        "z_border_linewidth_pt": 0.6,
+        "previous_z_border_linewidth_pt": 1.6,
+        "z_border_dash_pattern": [
+          1.5,
+          1.5
+        ],
+        "previous_z_border_dash_pattern": [
+          2.0,
+          1.7
+        ],
+        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
+      },
+      "left_circuit_artwork_scale": 1.2,
+      "left_circuit_axes_mm": [
+        7.000000000000009,
+        155.926988,
+        77.39701199999993,
+        60.87614399999996
+      ],
+      "left_circuit_original_axes_mm": [
+        7.000000000000009,
+        161.0,
+        64.49750999999995,
+        50.73011999999997
+      ],
+      "sheet_axes_mm": [
+        109.564528,
+        156.727718,
+        70.639884,
+        70.63988399999998
+      ],
+      "sheet_scale_from_v6": 1.06,
+      "electrode_shafts_are_straight": true,
+      "shaft_collinearity_residual_mm": {
+        "SCL": 4.440892098500626e-16,
+        "ICL": 1.2212453270876722e-15
+      },
+      "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
+      "electrode_display": {
+        "source": "D_position_straight_electrodes.json",
+        "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+        "geometry_snapshot": "rigid_contact_geometry.npz",
+        "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
+        "maximum_collinearity_residual_mm": 7.788908407135864e-16,
+        "maximum_display_displacement_mm": 0.20730072911893763,
+        "overview_and_sampling_use_identical_contacts": true
+      },
+      "original_left_title_and_internal_labels_preserved": true,
+      "combined_third_component": true,
+      "formulas_and_lower_explanations_removed": true,
+      "zoom_center_mm": [
+        -8.5,
+        0.0
+      ],
+      "zoom_field_of_view_mm": [
+        1.6754742547425474,
+        1.3143631436314362
+      ],
+      "left_zoom_connector_minimum_contact_distance_mm": 3.2585021053195193,
+      "left_zoom_connectors_clear_of_electrode_footprints": true,
+      "actual_workpoint_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -22.80538396505847,
+        "theta_rad": -0.3980290373717898,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 0.0,
+        "is_reference": false
+      },
+      "kernel_centres_E_coordinates_mm": [
+        [
+          12.151403427124023,
+          4.944769382476807
+        ],
+        [
+          13.909762382507324,
+          4.9577555656433105
+        ],
+        [
+          11.787443161010742,
+          3.968081474304199
+        ],
+        [
+          13.032197952270508,
+          3.884768486022949
+        ],
+        [
+          14.045100212097168,
+          3.9619879722595215
+        ]
+      ],
+      "layout_refinement": {
+        "sheet_shift_x_mm": 24.0,
+        "sampling_axes_mm": [
+          218.5,
+          190.0,
+          60.0,
+          30.0
+        ],
+        "previous_sampling_axes_mm": [
+          203.0,
+          190.0,
+          68.0,
+          34.0
+        ],
+        "readout_axes_mm": [
+          [
+            207.0,
+            155.0,
+            34.0,
+            22.0
+          ],
+          [
+            256.0,
+            155.0,
+            34.0,
+            22.0
+          ]
+        ],
+        "previous_readout_axes_mm": [
+          [
+            179.0,
+            155.0,
+            47.0,
+            22.0
+          ],
+          [
+            245.0,
+            155.0,
+            47.0,
+            22.0
+          ]
+        ],
+        "left_circuit_scale": 1.2,
+        "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
+        "sheet_scale": 1.06,
+        "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
+      },
+      "local_population_coordinates_mm": [
+        {
+          "E": [
+            [
+              12.151403427124023,
+              4.944769382476807
+            ],
+            [
+              12.304140090942383,
+              4.9625444412231445
+            ],
+            [
+              12.395358085632324,
+              4.898394584655762
+            ],
+            [
+              12.275625228881836,
+              4.794172286987305
+            ],
+            [
+              12.227322578430176,
+              5.0637688636779785
+            ],
+            [
+              12.034781455993652,
+              4.771931171417236
+            ]
+          ],
+          "I": [
+            [
+              11.971738952223859,
+              4.926103714872796
+            ],
+            [
+              11.953223930433865,
+              5.1074732206518085
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              13.909762382507324,
+              4.9577555656433105
+            ],
+            [
+              14.016875267028809,
+              4.808532238006592
+            ],
+            [
+              13.70569896697998,
+              4.8910017013549805
+            ],
+            [
+              13.792451858520508,
+              4.987637996673584
+            ],
+            [
+              14.155109405517578,
+              4.876069068908691
+            ],
+            [
+              13.95798110961914,
+              5.150943279266357
+            ],
+            [
+              13.701952934265137,
+              5.07421350479126
+            ]
+          ],
+          "I": [
+            [
+              14.069424793465144,
+              5.037958340919517
+            ],
+            [
+              13.837128616656454,
+              5.111711940660591
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              11.787443161010742,
+              3.968081474304199
+            ],
+            [
+              11.984225273132324,
+              3.79966402053833
+            ],
+            [
+              11.564770698547363,
+              4.10961389541626
+            ],
+            [
+              11.862934112548828,
+              3.8602023124694824
+            ],
+            [
+              11.947848320007324,
+              4.065094947814941
+            ],
+            [
+              11.678738594055176,
+              4.014657020568848
+            ]
+          ],
+          "I": [
+            [
+              11.763234933014688,
+              4.157546046048493
+            ],
+            [
+              11.774906009994329,
+              3.798027401525916
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              13.032197952270508,
+              3.884768486022949
+            ],
+            [
+              13.224488258361816,
+              3.8485240936279297
+            ],
+            [
+              13.181347846984863,
+              3.715062141418457
+            ],
+            [
+              13.12874984741211,
+              3.952385425567627
+            ],
+            [
+              13.081881523132324,
+              4.10737943649292
+            ],
+            [
+              13.00422191619873,
+              3.704172134399414
+            ]
+          ],
+          "I": [
+            [
+              12.930556066091496,
+              4.088410408328311
+            ],
+            [
+              12.801061207277563,
+              4.003966101489869
+            ]
+          ]
+        },
+        {
+          "E": [
+            [
+              14.045100212097168,
+              3.9619879722595215
+            ],
+            [
+              13.838899612426758,
+              4.0432329177856445
+            ],
+            [
+              13.814152717590332,
+              3.9273929595947266
+            ],
+            [
+              14.1874361038208,
+              3.7812366485595703
+            ],
+            [
+              14.132532119750977,
+              4.063586711883545
+            ],
+            [
+              13.912890434265137,
+              3.968815803527832
+            ]
+          ],
+          "I": [
+            [
+              14.31302613950283,
+              3.8759139608328024
+            ]
+          ]
+        }
+      ],
+      "local_population_counts": [
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 7,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 2
+        },
+        {
+          "E": 6,
+          "I": 1
+        }
+      ],
+      "all_local_E_markers_hollow": true,
+      "all_ellipses_contain_fewer_I_than_E": true,
+      "local_synaptic_arrowheads_removed": true,
+      "ellipse_rows": [
+        2,
+        3
+      ],
+      "labeled_sampling_contacts": [
+        "ICL3",
+        "ICL4",
+        "ICL5"
+      ],
+      "displayed_sampling_labels": [
+        "SL3",
+        "SL4",
+        "SL5"
+      ],
+      "display_label_to_source_contact": {
+        "SL3": "ICL3",
+        "SL4": "ICL4",
+        "SL5": "ICL5"
+      },
+      "exactly_three_consecutive_contacts": true,
+      "sampling_weights_shown_only_in_right_zoom": true,
+      "sampling_weight_display": {
+        "location": "Right Local sampling only",
+        "sigma_mm": 0.25,
+        "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
+        "maximum_alpha": 0.67,
+        "render_extent_sigma": 4.0,
+        "clipped_at_zoom_boundary": true,
+        "central_sheet": "Neutral unfilled zoom-location frame only; no sampling weights."
+      },
+      "sampling_weight_sigma_mm": 0.25,
+      "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
+      "central_sampling_region_removed": true,
+      "sampling_footprint_boundary_rings_removed": true,
+      "sampling_contact_coordinates_overview_mm": [
+        [
+          4.887288107598678,
+          -5.82446371225047
+        ],
+        [
+          3.022935542047014,
+          -5.579826094279083
+        ],
+        [
+          1.52689879808878,
+          -5.383518339940077
+        ]
+      ],
+      "local_sampling_labels_match_both_readouts": true,
+      "tiny_readout_arrow_removed": true,
+      "local_circuit_count": 5,
+      "sampling_zoom_center_overview_mm": [
+        3.207093452843729,
+        -5.603991026095273
+      ],
+      "sampling_zoom_field_of_view_mm": [
+        3.8,
+        1.9
+      ],
+      "sampling_frame_is_a_coordinate_exact_enlargement": true,
+      "two_distinct_zoom_roles": true,
+      "mode_readouts_below_sampling": true,
+      "physical_xy_equal_scale": true,
+      "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
+      "readout": {
+        "type": "normalized Gaussian average of smoothed E spike density",
+        "sigma_mm": 0.25,
+        "bin_ms": 2.0,
+        "smooth_ms": 5.0,
+        "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
+        "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
+        "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
+        "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
+        "display_title": "SEEG readout",
+        "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
+      },
+      "mode_showcases": {
+        "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+        "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+        "events": [
+          {
+            "mode": "MTA",
+            "event_index": 10,
+            "frozen_mode_label": 1,
+            "window_absolute_ms": [
+              4310,
+              4430
+            ],
+            "peak_absolute_ms": [
+              4386.0,
+              4378.0,
+              4372.0
+            ],
+            "peak_relative_ms": [
+              76.0,
+              68.0,
+              62.0
+            ],
+            "contact_order": [
+              "ICL3",
+              "ICL4",
+              "ICL5"
+            ],
+            "display_labels": [
+              "SL3",
+              "SL4",
+              "SL5"
+            ]
+          },
+          {
+            "mode": "MTB",
+            "event_index": 8,
+            "frozen_mode_label": 0,
+            "window_absolute_ms": [
+              3710,
+              3830
+            ],
+            "peak_absolute_ms": [
+              3756.0,
+              3756.0,
+              3762.0
+            ],
+            "peak_relative_ms": [
+              46.0,
+              46.0,
+              52.0
+            ],
+            "contact_order": [
+              "ICL3",
+              "ICL4",
+              "ICL5"
+            ],
+            "display_labels": [
+              "SL3",
+              "SL4",
+              "SL5"
+            ]
+          }
+        ],
+        "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
+        "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
+        "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
+        "snapshot": "burst_readout_arrays.npz",
+        "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
+        "waveform_source": "waveform_arrays.npz",
+        "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+        "exact_frozen_F_waveform_crops_verified": true,
+        "no_artificial_peak_sharpening_or_time_warping": true,
+        "peak_relative_ms": [
+          [
+            76.0,
+            68.0,
+            62.0
+          ],
+          [
+            46.0,
+            46.0,
+            52.0
+          ]
+        ],
+        "display_label_to_source_contact": {
+          "SL3": "ICL3",
+          "SL4": "ICL4",
+          "SL5": "ICL5"
+        }
+      },
+      "readout_peak_times_relative_ms": [
+        [
+          76.0,
+          68.0,
+          62.0
+        ],
+        [
+          46.0,
+          46.0,
+          52.0
+        ]
+      ],
+      "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
+      "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
+          ],
+          [
+            6.65,
+            3.6
+          ],
+          [
+            -3.85,
+            -7.2
+          ]
+        ],
+        "updated_centres_mm": [
+          [
+            -6.6875,
+            2.0625
+          ],
+          [
+            6.4375,
+            -4.5625
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "#AC8BC9",
+        "candidate_fill_alpha": 0.32,
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -6.4,
+              5.7
+            ],
+            [
+              -6.6875,
+              3.3125
+            ]
+          ]
+        ],
+        "arrows": "One dashed illustrative optimization-direction arrow labeled OPTM; no exhaustive candidate-to-core pairing.",
+        "arrow_label": "OPTM",
+        "arrow_label_xy_mm": [
+          -4.7,
+          4.35
+        ],
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_have_light_purple_shading": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true,
+        "core_position_source": {
+          "panel": "E",
+          "snapshot": "source/D_position_density.npz",
+          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+          "reference_centres_mm": [
+            [
+              3.3125,
+              12.0625
+            ],
+            [
+              16.4375,
+              5.4375
+            ]
+          ],
+          "coordinate_shift_mm": [
+            -10.0,
+            -10.0
+          ],
+          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
+          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
+        }
+      }
+    },
+    "B_workpoints": 194,
+    "B_stages": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_profile_only": true,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_values_colors_exact_no_showcase_labels": true,
+    "B_horizontal_spacing": {
+      "x_limits": [
+        0,
+        2
+      ],
+      "first_category_at_left_axis": true,
+      "last_category_at_right_axis": true,
+      "data_to_axis_padding_mm": [
+        0,
+        0
+      ],
+      "axis_to_colorbar_mm": 1.5
+    },
+    "C_frozen_mean_sample_sd_exact": true,
+    "D_angle_values_exact_no_dangling_showcase_references": true,
+    "D_position_density": {
+      "selection": {
+        "fraction": 0.2,
+        "nominal_count": 83,
+        "count": 83,
+        "cutoff_J_joint": 1.485977988620093,
+        "candidate_ids": [
+          "dens_bo01_01",
+          "joint_bo03_01",
+          "wide_bo01_05",
+          "joint_bo03_04",
+          "dens_bo02_07",
+          "wide_bo01_07",
+          "dens_bo02_02",
+          "dens_broad_16",
+          "dens_bo02_05",
+          "joint_bo02_03",
+          "wide_initial_46",
+          "dens_bo01_10",
+          "dens_bo01_03",
+          "lf_bo02_01",
+          "wide_bo01_01",
+          "wide_bo01_10",
+          "xy_combined_01",
+          "joint_bo03_02",
+          "lf_bo02_04",
+          "dens_bo01_09",
+          "joint_bo02_05",
+          "dens_main_46",
+          "dens_remote_14",
+          "xy_right_04",
+          "joint_bo03_08",
+          "xy_combined_03",
+          "dense_axis3_12",
+          "xy_left_31",
+          "joint_bo02_02",
+          "xy_right_33",
+          "xy_right_40",
+          "joint_bo03_06",
+          "lf_bo04_01",
+          "g2_b04_p01",
+          "dense_axis0_02",
+          "lf_bo03_01",
+          "dens_remote_10",
+          "dens_main_48",
+          "xy_right_42",
+          "joint_bo03_03",
+          "dense_axis3_02",
+          "dense_axis0_01",
+          "xy_right_41",
+          "lf_bo02_02",
+          "xy_right_23",
+          "lf_bo04_03",
+          "xy_right_01",
+          "dens_main_34",
+          "lf_bo03_04",
+          "dens_bo02_01",
+          "dens_bo02_12",
+          "interaction_y1_a1_g0",
+          "interaction_y3_a1_g0",
+          "xy_right_10",
+          "xy_right_43",
+          "xy_right_11",
+          "xy_left_11",
+          "interaction_y3_a0_g0",
+          "xy_right_00",
+          "lf_bo04_05",
+          "xy_left_20",
+          "wide_bo01_11",
+          "interaction_y1_a2_g0",
+          "xy_combined_02",
+          "xy_right_44",
+          "dens_bo02_04",
+          "dens_bo02_03",
+          "dense_axis2_08",
+          "dense_axis2_02",
+          "g2_b01_p01",
+          "xy_right_03",
+          "g2_b03_p01",
+          "xy_right_20",
+          "xy_left_21",
+          "lf_bo01_04",
+          "lf_bo01_01",
+          "dens_bo01_06",
+          "xy_right_13",
+          "xy_left_10",
+          "joint_bo02_04",
+          "wide_bo01_04",
+          "dense_axis2_03",
+          "interaction_y2_a2_g0"
+        ],
+        "historical": 59,
+        "new": 24
+      },
+      "pool_scorable": 413,
+      "asof": "2026-10-09T09:44:52+08:00",
+      "sigma_mm": 0.35,
+      "density_integral": 0.999999999768181,
+      "selection_metric": "J_joint",
+      "unit": "mm^-2",
+      "interpretation": "Descriptive density of the lowest 20% J_joint in the evaluated search pool; deliberate local densification affects concentration. Secondary good regions remain; not unique convergence or a posterior.",
+      "source_package": "results/paper-ready-figure/fig4/candidates/core_position_densification_complete_20261009",
+      "source_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
+      "pool_completed": 418,
+      "new_completed": 128,
+      "new_scorable": 125,
+      "straight_electrodes": true,
+      "contacts_overlay_above_surface": true
+    },
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_all_50_subject_values_and_quartiles_unchanged": true,
+    "layout": {
+      "axis_boxes_mm": {
+        "B": [
+          18.0,
+          89.0,
+          50.0,
+          50.0
+        ],
+        "C": [
+          93.0,
+          89.0,
+          50.00000000000001,
+          50.0
+        ],
+        "D": [
+          159.0,
+          89.0,
+          49.999999999999986,
+          50.0
+        ],
+        "E": [
+          232.99999999999997,
+          89.0,
+          49.999999999999986,
+          50.0
+        ],
+        "F": [
+          18.0,
+          17.0,
+          84.00000000000001,
+          50.0
+        ],
+        "G": [
+          116.0,
+          17.0,
+          27.000000000000007,
+          50.0
+        ],
+        "H": [
+          159.0,
+          17.0,
+          49.999999999999986,
+          50.0
+        ],
+        "I": [
+          232.99999999999997,
+          17.0,
+          49.999999999999986,
+          50.0
+        ]
+      },
+      "visible_bounds_mm": {
+        "A": [
+          7.000000000000008,
+          145.99999999999997,
+          292.67890625,
+          228.55822699999996
+        ],
+        "B": [
+          6.697881944444444,
+          80.25640277777775,
+          81.40993055555555,
+          139.0
+        ],
+        "C": [
+          84.71413194444445,
+          79.72194444444443,
+          144.53145166256155,
+          139.0
+        ],
+        "D": [
+          148.4034375,
+          80.07472222222219,
+          209.00000000000003,
+          139.0
+        ],
+        "E": [
+          222.6900694444444,
+          79.72194444444443,
+          297.7867847222222,
+          139.79712337814604
+        ],
+        "G": [
+          106.98652777777775,
+          7.721944444444441,
+          144.46926797945207,
+          70.75
+        ],
+        "H": [
+          149.66902777777779,
+          12.431527777777774,
+          218.8353472222222,
+          72.32694444444444
+        ],
+        "F": [
+          4.276944444444444,
+          7.721944444444441,
+          102.00000000000001,
+          66.99999999999999
+        ],
+        "I": [
+          222.05506944444437,
+          12.378611111111107,
+          283.0,
+          67.0
+        ]
+      },
+      "row_edges_aligned": true,
+      "paired_column_edges_aligned": true,
+      "no_panel_overlap": true,
+      "all_text_inside_canvas": true,
+      "square_axis_panels": [
+        "B",
+        "C",
+        "D",
+        "E",
+        "H",
+        "I"
+      ],
+      "square_axis_side_mm": 50,
+      "horizontal_visible_gaps_mm": {
+        "BC": 3.304201388888899,
+        "CD": 3.8719858374384444,
+        "DE": 13.690069444444362,
+        "FG": 4.986527777777738,
+        "GH": 5.199759798325715,
+        "HI": 3.219722222222174
+      },
+      "previous_horizontal_visible_gaps_mm": {
+        "BC": 6.304201388888899,
+        "CD": 15.82272475369453,
+        "DE": 17.69006944444439,
+        "FG": 7.986527777777795,
+        "GH": 17.199759798325687,
+        "HI": 7.219722222222231
+      },
+      "horizontal_gaps_measured_including_labels_and_colorbars": true,
+      "all_adjacent_horizontal_gaps_reduced": true,
+      "BC_outer_edges_match_FG": true,
+      "DH_and_EI_both_edges_aligned": true,
+      "row_gaps_mm": [
+        6.202876621853932,
+        7.394999999999996
+      ],
+      "previous_row_gaps_mm": [
+        9.612430904113012,
+        7.394999999999982
+      ],
+      "row_gap_change_mm": [
+        0.03935016218537157,
+        1.4210854715202004e-14
+      ],
+      "compact_row_gaps_preserved": true,
+      "approved_v4_B_through_I_bounds_preserved": true,
+      "A_uses_previously_reserved_mechanism_space": true
+    },
+    "core_optimization_revision": {
+      "status": "PASS",
+      "unchanged_panels": {
+        "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
+        "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
+      },
+      "all_pixels_outside_central_sheet_identical_to_v10": true,
+      "changed_pixels_in_central_sheet": 42854,
+      "canonical_output_hashes_unchanged": true,
+      "candidate_coordinates_are_illustrative": true,
+      "updated_core_coordinates_match_E_density_modes": true,
+      "schematic_core_optimization": {
+        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
+        "candidate_region_count": 3,
+        "updated_core_count": 2,
+        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
+        "candidate_centres_mm": [
+          [
+            -6.4,
+            7.0
+          ],
+          [
+            6.65,
+            3.6
+          ],
+          [
+            -3.85,
+            -7.2
+          ]
+        ],
+        "updated_centres_mm": [
+          [
+            -6.6875,
+            2.0625
+          ],
+          [
+            6.4375,
+            -4.5625
+          ]
+        ],
+        "candidate_radius_mm": 1.15,
+        "updated_radius_mm": 1.05,
+        "candidate_fill": "#AC8BC9",
+        "candidate_fill_alpha": 0.32,
+        "candidate_edge": "#B8A3CF",
+        "updated_fill": "#805AA6",
+        "updated_edge": "#76519D",
+        "arrow_color": "#9479B2",
+        "arrow_dash_pattern": [
+          3.0,
+          2.5
+        ],
+        "search_direction_arrows_mm": [
+          [
+            [
+              -6.4,
+              5.7
+            ],
+            [
+              -6.6875,
+              3.3125
+            ]
+          ]
+        ],
+        "arrows": "One dashed illustrative optimization-direction arrow labeled OPTM; no exhaustive candidate-to-core pairing.",
+        "arrow_label": "OPTM",
+        "arrow_label_xy_mm": [
+          -4.7,
+          4.35
+        ],
+        "question_mark_in_each_candidate_region": true,
+        "candidate_regions_have_light_purple_shading": true,
+        "regions_and_question_marks_below_neuron_markers": true,
+        "update_arrows_are_not_propagation_paths": true,
+        "simulations_and_readout_unchanged": true,
+        "core_position_source": {
+          "panel": "E",
+          "snapshot": "source/D_position_density.npz",
+          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
+          "reference_centres_mm": [
+            [
+              3.3125,
+              12.0625
+            ],
+            [
+              16.4375,
+              5.4375
+            ]
+          ],
+          "coordinate_shift_mm": [
+            -10.0,
+            -10.0
+          ],
+          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
+          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
+        }
+      },
+      "human_visual_acceptance": "PENDING"
+    }
+  }
+}

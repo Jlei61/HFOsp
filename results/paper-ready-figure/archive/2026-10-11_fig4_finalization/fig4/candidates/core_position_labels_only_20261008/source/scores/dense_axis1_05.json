@@ -1,0 +1,65 @@
+{
+  "N": 157,
+  "status": "SCORABLE",
+  "J": 1.6189226510544767,
+  "groups": {
+    "rank_pattern": {
+      "N": 157,
+      "A": 0.0692071167876841,
+      "B": 0.0018058470867840053,
+      "D_off": 0.06740126970090009,
+      "D16": 0.08512114423996814,
+      "scaled": 1.5025249590759737
+    },
+    "participation": {
+      "N": 157,
+      "A": 0.07806673025195549,
+      "B": 0.0013849155313041817,
+      "D_off": 0.0766818147206513,
+      "D16": 0.09027129837157359,
+      "scaled": 1.6818982242619054
+    },
+    "local_and_interrod_timing": {
+      "N": 157,
+      "A": 0.07466480339369157,
+      "B": 0.002539466087637019,
+      "D_off": 0.07212533730605455,
+      "D16": 0.0970438482909928,
+      "scaled": 1.6723447698255511
+    }
+  },
+  "candidate": "dense_axis1_05",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_05/2511_847401/workers/trajectory.json",
+  "source_sha256": "6466670721f3f3d0bf360d829c52d62db93311c916264b345f922807821f6078",
+  "vector": [
+    3.4492143200000003,
+    11.87890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.5025249590759737,
+    1.6723447698255511,
+    1.6818982242619054
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789511895.0455291,
+  "J_joint": 1.6626457296523194,
+  "joint": {
+    "N": 157,
+    "A": 0.09151101222651245,
+    "B": 0.002671006676691078,
+    "D_off": 0.08884000554982137,
+    "scaled": 1.6626457296523194
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis1_05.json",
+  "historical_score_sha256": "3e91640326d96e03eccceb2a0fcc7c27beaba36352e66600721389c5c919b093"
+}

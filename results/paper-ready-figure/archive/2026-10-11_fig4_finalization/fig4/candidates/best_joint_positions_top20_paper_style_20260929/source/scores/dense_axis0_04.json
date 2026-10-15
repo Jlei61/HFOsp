@@ -1,0 +1,65 @@
+{
+  "N": 153,
+  "status": "SCORABLE",
+  "J": 2.0744916203331734,
+  "groups": {
+    "rank_pattern": {
+      "N": 153,
+      "A": 0.09277102875455205,
+      "B": 0.0016582727149956906,
+      "D_off": 0.09111275603955636,
+      "D16": 0.10696998887670266,
+      "scaled": 2.0311069902264083
+    },
+    "participation": {
+      "N": 153,
+      "A": 0.10772096767310534,
+      "B": 0.0013532518848895247,
+      "D_off": 0.10636771578821581,
+      "D16": 0.11930818693747189,
+      "scaled": 2.333013022118991
+    },
+    "local_and_interrod_timing": {
+      "N": 153,
+      "A": 0.08240985874608045,
+      "B": 0.002219100207208302,
+      "D_off": 0.08019075853887214,
+      "D16": 0.10141090427030153,
+      "scaled": 1.859354848654121
+    }
+  },
+  "candidate": "dense_axis0_04",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_04/2511_847401/workers/trajectory.json",
+  "source_sha256": "cf5682492745d19f064d4e28795cda1a47bbd24219e8dc4d273ff643dd802344",
+  "vector": [
+    2.9492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.0311069902264083,
+    1.859354848654121,
+    2.333013022118991
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789509354.7966056,
+  "J_joint": 1.9293618824603773,
+  "joint": {
+    "N": 153,
+    "A": 0.10557364752233847,
+    "B": 0.0024822208350449423,
+    "D_off": 0.10309142668729353,
+    "scaled": 1.9293618824603773
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis0_04.json",
+  "historical_score_sha256": "db8254146c68bbafc9d919bae2dade01f3a84f30496e1f2324fca6382faa6d37"
+}

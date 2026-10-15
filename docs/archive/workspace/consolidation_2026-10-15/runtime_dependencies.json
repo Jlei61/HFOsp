@@ -1,0 +1,406 @@
+[
+  {
+    "dependency": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1",
+    "consumer_count": 26,
+    "consumers": [
+      {
+        "path": "config/topic4_geometry_ee_axis_optimization_v1_design.json",
+        "sha256": "10838b45764d22bf7dcf4ea6b540c44e0c4cf18fb25a1693279a8295e0faf289",
+        "matching_lines": [
+          9
+        ]
+      },
+      {
+        "path": "scripts/finish_topic4_core_input_pilot_queue.py",
+        "sha256": "57c74584d800f19ce9398c99df7a888a4b5847987f0a5a3722d7304080753bf9",
+        "matching_lines": [
+          11
+        ]
+      },
+      {
+        "path": "scripts/topic4_burst_regime/runtime.py",
+        "sha256": "afbd452b1415b0199293a22870fad6df6988bdc0f5dad363ce208538a07083c9",
+        "matching_lines": [
+          14
+        ]
+      },
+      {
+        "path": "scripts/topic4_spatial_reduction_validation/common.py",
+        "sha256": "3e4500dbb46477d25918a83ff78007b8ac73e6915d8d03311324c37029242d20",
+        "matching_lines": [
+          9
+        ]
+      },
+      {
+        "path": "scripts/topic4_core_spatial_readout_v10/reduced.py",
+        "sha256": "ceff63231c21ee6b7143fc4b23a5fdbfca846a1b6c9d0b1f5a37e38fd8632efd",
+        "matching_lines": [
+          93
+        ]
+      },
+      {
+        "path": "scripts/topic4_core_spatial_readout_v10/analyze_native.py",
+        "sha256": "bbad34658c42def662e2353fb60d18aed2985576c4bdcef49c80a2cccb8c9b98",
+        "matching_lines": [
+          9
+        ]
+      },
+      {
+        "path": "scripts/audit_topic4_zm_core_label_semantics.py",
+        "sha256": "ac233c542b9961b3d5d4452c5959d3f4bff2e8ae33f673a0670284acd80f981c",
+        "matching_lines": [
+          78
+        ]
+      },
+      {
+        "path": "scripts/topic4_core_count_optimization/common.py",
+        "sha256": "fd1ee87ec0ab96257d2b43f55250ad979b6025d8586fc40560efb7cb17baa99c",
+        "matching_lines": [
+          11
+        ]
+      },
+      {
+        "path": "scripts/topic4_joint_position_densification/common.py",
+        "sha256": "8110f876ca1730a291fb80dddaa706b3d3229eab972b831e3b4ddb338909c8f7",
+        "matching_lines": [
+          11
+        ]
+      },
+      {
+        "path": "scripts/paper_figures/build_fig4_expanded_response.py",
+        "sha256": "52018da3f891d029986c897032ea16acb76aa51d7df82b6853124f51a271d28b",
+        "matching_lines": [
+          10
+        ]
+      },
+      {
+        "path": "scripts/paper_figures/build_fig4_geometry_patient_comparison.py",
+        "sha256": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+        "matching_lines": [
+          280
+        ]
+      },
+      {
+        "path": "scripts/paper_figures/build_fig4_geometry_prior_candidate.py",
+        "sha256": "af971fb1921f6761d022d96fc6b071d91894ed6952ba2c28f86c29aca8a67369",
+        "matching_lines": [
+          14
+        ]
+      },
+      {
+        "path": "scripts/paper_figures/build_fig4_readable_complete.py",
+        "sha256": "a2d29d26e993c737fd5953b8ec02572fb0d6296559ec5a98d473ffe90de08284",
+        "matching_lines": [
+          19
+        ]
+      },
+      {
+        "path": "scripts/topic4_brunel_spatial_bifurcation/expanded_readouts.py",
+        "sha256": "c96b8de2f9bef3d2ca3fc4c0528842bf84b6c1196a36f9af16d485d40fcc70fa",
+        "matching_lines": [
+          11
+        ]
+      },
+      {
+        "path": "scripts/analyze_topic4_recruitment_readout.py",
+        "sha256": "1b537007fcfc94aa726c506521a74536464cfa06ea02d15514bdd2b3bf206245",
+        "matching_lines": [
+          16
+        ]
+      },
+      {
+        "path": "scripts/run_topic4_fig5_f2_zm.py",
+        "sha256": "78d6ffa6423282ce6b0b2247717de19b6acd111dc5843e37cdbacb3f59555850",
+        "matching_lines": [
+          15
+        ]
+      },
+      {
+        "path": "scripts/topic4_zm_onset_cohort/common.py",
+        "sha256": "8624ef0c567263922a106538a33bed2a9d709b8b4c6e810b2331b888640f78af",
+        "matching_lines": [
+          10
+        ]
+      },
+      {
+        "path": "scripts/topic4_cohort_joint_optimization/common.py",
+        "sha256": "2f798b4b52b41c5f73e041f5bfec420a98449dd6846e16996be04d1adc01c57d",
+        "matching_lines": [
+          7
+        ]
+      },
+      {
+        "path": "scripts/topic4_cohort_interictal_continuation/common.py",
+        "sha256": "e9d80f8d12d6a58fa4137667ec8921eb66da0e474dc060e9ae802eb55d0e1596",
+        "matching_lines": [
+          7
+        ]
+      },
+      {
+        "path": "scripts/run_topic4_fig5_fig4f_historical_zm.py",
+        "sha256": "9ba38856f6cb1d12fb870c3aba9616b99b9d51f3a336d2e1ae6b7bbb2efc901c",
+        "matching_lines": [
+          17
+        ]
+      },
+      {
+        "path": "scripts/topic4_cohort_recurrent_expansion/common.py",
+        "sha256": "a551c6bfbb95ab74ffe91dce444dd666b79eed0b041f5cfffc9a63001f3c7087",
+        "matching_lines": [
+          7
+        ]
+      },
+      {
+        "path": "scripts/topic4_cohort_optimization/common.py",
+        "sha256": "361df71825936f9bd9660e7ab2c5f5eddee6cb3279301e6d930f9faa5fa11c34",
+        "matching_lines": [
+          7
+        ]
+      },
+      {
+        "path": "scripts/topic4_joint_position_expansion/common.py",
+        "sha256": "6a4a92950e5b4628ac40f391cd7ab1f1f2f4a7855a5c4dfb7d5315f042a0fad9",
+        "matching_lines": [
+          11
+        ]
+      },
+      {
+        "path": "scripts/topic4_representative_core_count/common.py",
+        "sha256": "73fcc5c8b14dee9826460c867dec34aa4c7183341536b8ef3548165edeee997a",
+        "matching_lines": [
+          7
+        ]
+      },
+      {
+        "path": "scripts/topic4_interictal_surrogate/evaluate_readouts.py",
+        "sha256": "4710871dee0865cbfb260d63ab07c12568e1cb2538fa5e41f78675df5868e8d9",
+        "matching_lines": [
+          5
+        ]
+      },
+      {
+        "path": "scripts/topic4_interictal_surrogate/animate_native_comparison.py",
+        "sha256": "28569105966250d058a33fe98aa6e88af0241d9d48850834e2551533d55b5ef6",
+        "matching_lines": [
+          121
+        ]
+      }
+    ]
+  },
+  {
+    "dependency": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix",
+    "consumer_count": 14,
+    "consumers": [
+      {
+        "path": "config/topic4_rate_model_dynamics_validation_v1.json",
+        "sha256": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+        "matching_lines": [
+          358,
+          367,
+          371,
+          424,
+          428,
+          481,
+          489,
+          497,
+          505,
+          513,
+          521,
+          529,
+          537,
+          545,
+          553,
+          561,
+          569,
+          577,
+          585,
+          593,
+          601,
+          609,
+          617,
+          625,
+          633,
+          641,
+          649,
+          657,
+          665,
+          673,
+          681,
+          689,
+          697,
+          705,
+          713,
+          721,
+          729,
+          737,
+          745,
+          753,
+          761,
+          769,
+          777,
+          785,
+          793,
+          801,
+          809,
+          817,
+          825,
+          833,
+          841,
+          849,
+          857,
+          865,
+          873,
+          881,
+          889,
+          897,
+          905,
+          913,
+          921,
+          929,
+          937,
+          945,
+          953,
+          961,
+          969,
+          977,
+          985,
+          993,
+          1001,
+          1009,
+          1017,
+          1025,
+          1033,
+          1041,
+          1049,
+          1057,
+          1065,
+          1073,
+          1081,
+          1089,
+          1097,
+          1105,
+          1113,
+          1121,
+          1129,
+          1137,
+          1145,
+          1153,
+          1161,
+          1169,
+          1177,
+          1185,
+          1193,
+          1201,
+          1209,
+          1217,
+          1225,
+          1233,
+          1241,
+          1249,
+          1257,
+          1265,
+          1274,
+          1279,
+          1287,
+          1295,
+          1305,
+          1309,
+          1313,
+          1317,
+          1321
+        ]
+      },
+      {
+        "path": "scripts/validate_topic4_fixed_rate_base.py",
+        "sha256": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+        "matching_lines": [
+          15
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_collaborator_report_v2.py",
+        "sha256": "c70ff90dca5ef61cedb281be932a5d39f04894907ef449ece864021d6cf0c826",
+        "matching_lines": [
+          23
+        ]
+      },
+      {
+        "path": "scripts/patient_state_v1/snn_label_crosswalk.py",
+        "sha256": "df0c3e166036d62b850766bb34119e6e3b0e957a5e89e99e2fe72efdbdf55682",
+        "matching_lines": [
+          4
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_collaborator_report_v4.py",
+        "sha256": "6b5db8b27a3427c9a643391a0401a89a6d08c0ba5729e6b9b4220627c0669118",
+        "matching_lines": [
+          23
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_collaborator_report_v6.py",
+        "sha256": "e33fbcb1f9737ac925c8bd3914fa87a5470f1176e706fff80984c45face6d9c5",
+        "matching_lines": [
+          23
+        ]
+      },
+      {
+        "path": "scripts/topic4_zm_runaway_mechanism/native_fine_external_drive.py",
+        "sha256": "a978ebb68de1c5bb366e6c683ed0c1a798dcceb3f38a2e3b2a6fcb4ce3713365",
+        "matching_lines": [
+          22
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_collaborator_report_v3.py",
+        "sha256": "ef3542dca20c58524dca28122c49a2d61d2a782177b3855d70f5e3bc4203a22c",
+        "matching_lines": [
+          23
+        ]
+      },
+      {
+        "path": "scripts/audit_topic4_reset_initial_boundary.py",
+        "sha256": "adf4840b28d12f3f0b943d1ad5ccbaea48692f2e1bb31be87349f00799d0f79a",
+        "matching_lines": [
+          59
+        ]
+      },
+      {
+        "path": "scripts/freeze_topic4_rate_validation_base.py",
+        "sha256": "d155409b573d72d6cc7036dc536b21e246bd0d50e15aeb2286da850d0eb277f2",
+        "matching_lines": [
+          9
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_collaborator_report_v5.py",
+        "sha256": "c38bdf91860371773adc701ec054e8bc9d2d998ec0838ff7dd69370dac8dbb1c",
+        "matching_lines": [
+          23
+        ]
+      },
+      {
+        "path": "scripts/run_topic4_k100_recurrence.py",
+        "sha256": "ab17e6081106876077182fca1e7a73b149878ed2a253df93e406d95cfd79c839",
+        "matching_lines": [
+          183
+        ]
+      },
+      {
+        "path": "scripts/plot_topic4_fig5_m_return.py",
+        "sha256": "3bc434aac7c4110a0186a558bf170acdbbfe35c98b042352d2810a3e5fca5586",
+        "matching_lines": [
+          259
+        ]
+      },
+      {
+        "path": "scripts/build_topic4_model_core_results_report.py",
+        "sha256": "0232bb9a772000627729b8695f5d8473e407e77baf06777410eb615c84cf8e44",
+        "matching_lines": [
+          23
+        ]
+      }
+    ]
+  }
+]

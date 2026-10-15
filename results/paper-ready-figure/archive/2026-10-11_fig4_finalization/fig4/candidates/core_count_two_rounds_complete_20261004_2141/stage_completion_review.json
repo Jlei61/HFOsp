@@ -1,0 +1,264 @@
+{
+  "status": "BOUNDED_STAGE_COMPUTATION_AND_PROVENANCE_VERIFIED",
+  "completed_at": "2026-10-04 20:11:00 CST",
+  "subject": "E1146",
+  "stage_evaluations": 248,
+  "stage_feedback_rounds_verified": 16,
+  "common_comparison_epochs": 31,
+  "restarts": 4,
+  "summary": [
+    {
+      "core": 1,
+      "initial_best_median": 3.8914411839023932,
+      "two_round_best_median": 3.369193000828531,
+      "initial_to_feedback_reduction_percent": 13.420431104913789,
+      "improved_restarts": 3,
+      "initial_best_by_restart": [
+        3.9489802680421513,
+        3.953076496102028,
+        3.6147024995703667,
+        3.8339020997626356
+      ],
+      "two_round_best_by_restart": [
+        3.8331848550759133,
+        2.9052011465811494,
+        2.6684324417514733,
+        3.8339020997626356
+      ],
+      "selected_candidates": [
+        "bo01_06",
+        "bo02_00",
+        "bo02_01",
+        "initial_12"
+      ],
+      "score_status_counts": {
+        "INSUFFICIENT_EVENTS": 12,
+        "SCORABLE": 112
+      }
+    },
+    {
+      "core": 2,
+      "initial_best_median": 1.7197412332076394,
+      "two_round_best_median": 1.703870051252716,
+      "initial_to_feedback_reduction_percent": 0.922881980640808,
+      "improved_restarts": 1,
+      "initial_best_by_restart": [
+        1.5097446756843915,
+        1.8966902062809574,
+        2.4959505554078087,
+        1.5427922601343214
+      ],
+      "two_round_best_by_restart": [
+        1.5097446756843915,
+        1.8966902062809574,
+        1.8649478423711106,
+        1.5427922601343214
+      ],
+      "selected_candidates": [
+        "initial_10",
+        "initial_04",
+        "bo02_04",
+        "initial_04"
+      ],
+      "score_status_counts": {
+        "SCORABLE": 116,
+        "INSUFFICIENT_EVENTS": 8
+      }
+    },
+    {
+      "core": 3,
+      "initial_best_median": 1.269782681179796,
+      "two_round_best_median": 1.2062121737830802,
+      "initial_to_feedback_reduction_percent": 5.00640844602247,
+      "improved_restarts": 1,
+      "initial_best_by_restart": [
+        1.1186106414534767,
+        1.1698244777088382,
+        1.369740884650754,
+        1.5284534028204309
+      ],
+      "two_round_best_by_restart": [
+        1.1186106414534767,
+        1.1698244777088382,
+        1.2425998698573224,
+        1.5284534028204309
+      ],
+      "selected_candidates": [
+        "initial_08",
+        "initial_08",
+        "bo02_02",
+        "initial_07"
+      ],
+      "score_status_counts": {
+        "SCORABLE": 118,
+        "INSUFFICIENT_EVENTS": 6
+      }
+    },
+    {
+      "core": 4,
+      "initial_best_median": 1.5672616669602983,
+      "two_round_best_median": 1.4171238524749306,
+      "initial_to_feedback_reduction_percent": 9.579626532725698,
+      "improved_restarts": 1,
+      "initial_best_by_restart": [
+        1.2880806996591,
+        1.6361400917200708,
+        1.511019136774326,
+        1.6235041971462707
+      ],
+      "two_round_best_by_restart": [
+        1.2880806996591,
+        1.3232285681755351,
+        1.511019136774326,
+        1.6235041971462707
+      ],
+      "selected_candidates": [
+        "initial_02",
+        "bo01_02",
+        "initial_07",
+        "initial_02"
+      ],
+      "score_status_counts": {
+        "SCORABLE": 124
+      }
+    }
+  ],
+  "physical_status_counts": {
+    "COMPLETE_NO_RUNAWAY": 496
+  },
+  "feedback_round_audit": [
+    {
+      "core": 3,
+      "restart": 0,
+      "batch": 1,
+      "n_scorable": 13,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 0,
+      "batch": 2,
+      "n_scorable": 23,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 1,
+      "batch": 1,
+      "n_scorable": 12,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 1,
+      "batch": 2,
+      "n_scorable": 22,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 2,
+      "batch": 1,
+      "n_scorable": 13,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 2,
+      "batch": 2,
+      "n_scorable": 22,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 3,
+      "batch": 1,
+      "n_scorable": 13,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 3,
+      "restart": 3,
+      "batch": 2,
+      "n_scorable": 21,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 0,
+      "batch": 1,
+      "n_scorable": 8,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 0,
+      "batch": 2,
+      "n_scorable": 23,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 1,
+      "batch": 1,
+      "n_scorable": 8,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 1,
+      "batch": 2,
+      "n_scorable": 23,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 2,
+      "batch": 1,
+      "n_scorable": 8,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 2,
+      "batch": 2,
+      "n_scorable": 23,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 3,
+      "batch": 1,
+      "n_scorable": 8,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    },
+    {
+      "core": 4,
+      "restart": 3,
+      "batch": 2,
+      "n_scorable": 23,
+      "method": "Matern52_qLogEI_plus_global_uncertainty",
+      "evaluated": 8
+    }
+  ],
+  "active_workers": 0,
+  "execution_failures": [],
+  "fresh_noise_confirmation": "DEFERRED_BY_USER_STAGE_DESIGN",
+  "original_96_evaluation_search_complete": false,
+  "interpretation": "Within E1146, same 31-evaluation budget: two cores improve over one, three cores have the lowest median best training loss. Additional BO improvement beyond initialization is modest; three/four cores each improve in one of four restarts. Training comparison does not establish out-of-noise generalization or global optimality."
+}

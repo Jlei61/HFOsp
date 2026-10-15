@@ -1,0 +1,68 @@
+{
+  "N": 140,
+  "status": "SCORABLE",
+  "J": 3.9223659827948727,
+  "groups": {
+    "rank_pattern": {
+      "N": 140,
+      "A": 0.14001788669384363,
+      "B": 0.0024768081396740293,
+      "D_off": 0.1375410785541696,
+      "D16": 0.15921314977631734,
+      "scaled": 3.0660980771273096
+    },
+    "participation": {
+      "N": 140,
+      "A": 0.1236050635432935,
+      "B": 0.002200154349918003,
+      "D_off": 0.12140490919337549,
+      "D16": 0.14065625975515803,
+      "scaled": 2.662830841091521
+    },
+    "local_and_interrod_timing": {
+      "N": 140,
+      "A": 0.2628819309344061,
+      "B": 0.0024661447463050954,
+      "D_off": 0.260415786188101,
+      "D16": 0.28199455271827056,
+      "scaled": 6.038169030165788
+    }
+  },
+  "candidate": "lf_bo02_08",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_08/2511_847401/workers/trajectory.json",
+  "source_sha256": "ecdcc1b971174e151696fd38846545b4a92466f91ef1a67ede713890c99aa860",
+  "vector": [
+    4.74976315658886,
+    11.013166750469303,
+    15.19855374399195,
+    2.4900433880418826,
+    1.0558639485388994,
+    -19.396810233592987
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    3.0660980771273096,
+    6.038169030165788,
+    2.662830841091521
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789509354.9397717,
+  "J_joint": 4.777025854039898,
+  "joint": {
+    "N": 140,
+    "A": 0.2580539802886128,
+    "B": 0.0028035707661402624,
+    "D_off": 0.2552504095224726,
+    "scaled": 4.777025854039898
+  },
+  "search_role": "historical_compatible",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/lf_bo02_08.json",
+  "historical_score_sha256": "fa642cea2b502e2a31e5254dfb22e06e9027a1108292c8d2bdaef9a160e3f98c",
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/lf_bo02_08.json",
+  "reused_from_score_sha256": "1a36eeae4a2aba417f53a2b7d1a2e2908e0cf937ef2f09f8da289fda2e78a1e8",
+  "previous_search_role": "historical"
+}

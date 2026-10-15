@@ -1,0 +1,532 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_REVIEW",
+  "producer": "scripts/paper_figures/build_fig4_joint_core_density.py",
+  "whole_canvas_mm": [
+    285.0,
+    264.5
+  ],
+  "font_pt": {
+    "label": 10.0,
+    "tick": 9.0,
+    "dense": 7.5,
+    "legend": 8.8,
+    "title": 10.0,
+    "letter": 15.0
+  },
+  "source_files": {
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_compact_english_acceptance.py": "ea0f8ebcbb37609ff4a6e2276588f3c54a2ba2c22dce466a14d4efe7ad4fa30a",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/plot_topic4_shared_plane_position_response.py": "7cbae34d05e3c55e0deb9c6be55b35b092bf55a11343f1f20e4c9ea4165f7750",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/all_workpoints_source.csv": "ee5bd0559803bab393b8f995727282b61cafaf4196d7725f42a57d2977b00748",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/history.json": "b7ac63c8049b7613ea0d8f6e6ebe4357e0f767c9f4467910fc0f38dff19630f4",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/plan.json": "e0cb0a7744b712a6c5d6a4bf57106dbed38bb9078ea8055b6518be814562112b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/proposals/batch_01.json": "304665b657c6681fd9ed4d9e64a59b6a92938c05b80726f0436256e407063fc6",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/proposals/batch_02.json": "41505805747429ca839e4d045882d1872d239e9bdb51ef1360b3ec2e9432f8c5",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/proposals/batch_03.json": "fe14cad0e6a1819eadf4a6091428b9ba5512091d6358a7fd4edc664cfd0bff6f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_01/2511_847401/workers/trajectory.json": "c7a4af728530550a153c54eb73bbf990c6b8c16d00f426dfb30d32ce8b7b99b5",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_01/2511_847401/applied_physics.json": "5bb6eb2467f9a70099330f575431b5b70684fd892a515f67ac50f70d50821b5f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_01.json": "0d0635b14be8dbc06477b3fb9c162466a539979d029b4f33cde3cd5698f1a026",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_02/2511_847401/workers/trajectory.json": "f00f22910e6deeec35e09428a3c3642aa1f727aca7a64e653b1f2734b82b0047",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_02/2511_847401/applied_physics.json": "aba72129336a1c151324c9644fc76c1bae45116374eed576b53d36b7b99b9bda",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_02.json": "08d1b3848167de7deb38a93bcfde8fb8780e62a310089fbf336fad1b42787cf6",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_03/2511_847401/workers/trajectory.json": "921e394c532c3cbbaf1d1b9991ce4151fcf2f8f9df1be6d1004e381b5c43606b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_03/2511_847401/applied_physics.json": "a6c8d7639d5198f40a1dce137249a55f0dad3b52d913bb38f1acf078818c5c23",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_03.json": "38b401c659c9b6b680e5998ff3791eea31228f6a6e972dfc83c2c330b43815ad",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_04/2511_847401/workers/trajectory.json": "acf58ddbb079ea45812efa6112f5e0dc625381e12cd117816892840b07a60c4b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_04/2511_847401/applied_physics.json": "0e7ee344f6228233ef4ab52dc818976913e39e87729aef73c6b6d1e5c2a83db7",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_04.json": "e232edf61d7ddeb4e7949adb1f04ce20407b403e8caee875cde872d5251e7518",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_05/2511_847401/workers/trajectory.json": "2552b343a57ea7816f0d14d7b04363d9f26c6f042223d237a0df27da0d9d542a",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_05/2511_847401/applied_physics.json": "bfdbc2c9c7f4ee079f82986f71cbb69238898907a7f9b3e8eca3488d93c82c45",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_05.json": "a7b44cc30515e48b6ff8b7c78cdb1b8102bfc9a8579dba691723101ad6caf0ea",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_06/2511_847401/workers/trajectory.json": "f71883cd08d639df5e2b10952b309ce2bcd403e6b7a24e3c231f051846ec0dd3",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_06/2511_847401/applied_physics.json": "55e0fc5ec895f25853194d236a6c698a36684514487f35fde2490f1705217a05",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_06.json": "9e1b667531357d3317b8cdbcea9c485ca24dd163d5c2ebb5d0d1c0be58aa9a1e",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_07/2511_847401/workers/trajectory.json": "285017de78bc56634fdee967d7c163f596c9b236e807ce22370aadefa618f4c1",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_07/2511_847401/applied_physics.json": "799e0f0d58e02fad40bf9ed3cc167fb379ad4652176b6174ba872d9b1c439473",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_07.json": "5579949704385390311f02ed4b704e1bc72745c3900aba2b94bb00d020610c20",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_08/2511_847401/workers/trajectory.json": "1415fdd14ebe1b8f58595fe4be6552151fc66a541fd0ff2422451726f3cb1e32",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_08/2511_847401/applied_physics.json": "61a6928f9fd819d41a08c7d9be2c05646fc7bcab88fbde7eeb68faa1c4baecf6",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_08.json": "be906f94f7a0a095213b6480ab6bcc22f8a49882726c5009a7a3013b3b307a6a",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_01/2511_847401/workers/trajectory.json": "79e7b9a81f5c553266af02a3604e36cfa18eb29ba75228d418ac16481791c377",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_01/2511_847401/applied_physics.json": "c71acb81555cf94c5c3e1fec596453b951bf99a7af407c53b70091a61daa13a4",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_01.json": "d9f77f1c42457d0748f82ccded59d51e966f47c14a406da7301de7a3b39b92ad",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_02/2511_847401/workers/trajectory.json": "5b18260f381cc7d95e6515ad73ef4e7876d83b8c8be83ffed8824f87a8fadb04",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_02/2511_847401/applied_physics.json": "2b508b935e95d1d1b3e6a24158edf6f1a7c16daeb9ca4a6aea1587f9f77a7fc5",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_02.json": "c2f47dba2e72643589bfcac1f6329d3a7b142b44ec578fd40778ce5bdac318e1",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_03/2511_847401/workers/trajectory.json": "15ea21895528529f28cf919ba7818788f4f0d5aa12152a4f3689afa782a6da35",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_03/2511_847401/applied_physics.json": "0fef0d61c9377725c16872a80dd352cb05b2cc46c0b12dad2e61e35383310c64",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_03.json": "2d5207b53cad80bf8cf02fafc0e4ed44fb54a541ad5ceb64f40d5ee016278513",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_04/2511_847401/workers/trajectory.json": "7678d9c0a75ae0b8c69ea88f134765fcbf809cf133d15a4ba3560044a8dc5922",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_04/2511_847401/applied_physics.json": "a2d3b78ba5c050e07e7c5356de489548761070eeb2827009289561062bfc1903",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_04.json": "325bdee8225d966d7a07f1ea6b1fb28a03203d5e6b95e867f09875808ef5b759",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_05/2511_847401/workers/trajectory.json": "91cdf345f0c67676a8d4031dda8cdfd54bee000c8a7aed2cd18e70ba94bc0f3f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_05/2511_847401/applied_physics.json": "152a91cb5650eab86b62e7a6427d4d877cd9b37ffde9cb06fde615a4ab643c6f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_05.json": "bdaa1331b5a65762994bea8393e233b8b71835cd7a065c0b3a3b6601342460a6",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_06/2511_847401/workers/trajectory.json": "5209e408f9bf18e3a5eaef0252b8ce70ceda562087c75be2a7776760de6fb4ce",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_06/2511_847401/applied_physics.json": "9027643c2feb97c813cb7824e0de6044859460783b21a22f383b3f24f141c71e",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_06.json": "3518250b2f164b906fbc48f8f575177b70f3c0b80d5d7f3e2fa1fecadbd0aea1",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_07/2511_847401/workers/trajectory.json": "4445fd19e0b17c9464cf115d8676f9e0b103b48d68f3dd90d446c6a677a67897",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_07/2511_847401/applied_physics.json": "ff9d6ffb9b65246995bf2ac4a081958f96f93a7a955b7fb19dfb33cfd3873dac",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_07.json": "52c223ce214a6aa31edbcae9b7329581b125ed18a16681fcbc066b466cf1093a",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_08/2511_847401/workers/trajectory.json": "0d0823486d842a42deba6091bdfabedd0378ebcd24b2fdc1d8b19a910de0f9a7",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_08/2511_847401/applied_physics.json": "e7e9b71c5038037c1f30768a4a6dc83dbf9f466a6d570e8420ba351a362b7c7e",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_08.json": "dfd13c63401e2d881d4276a6cd88b8535c07d932ff561d051c636033d976633c",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_01/2511_847401/workers/trajectory.json": "a15eff01774a958ec038b536dd9791d4891acadb09073bf3b2b257f7a678880f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_01/2511_847401/applied_physics.json": "da77a01d560daeb7f09dee4b63e816500a5e50db93245b85c1b3dfe030764705",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_01.json": "5039c561725ae1c8477575d8a1a2410a9bfa56a3f18273d9e6c8bd2e08a31fdc",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_02/2511_847401/workers/trajectory.json": "dbe10ddab4d1c82d4fc6c8392715517596733c3175a436ce073fff9c466f9db3",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_02/2511_847401/applied_physics.json": "75b3a781c62ac99cebe0e15742aacc4859f8005dbdcc2f15b57a0933e5de4a6b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_02.json": "08c698d1b173a994f7074c6e622d369c87db5217fb3199812e767672aa51cf2b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_03/2511_847401/workers/trajectory.json": "bfb7cb457a02a5b12f572467d94d6b842c7de2600ebd6dd88ad8b7e1caf5e2df",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_03/2511_847401/applied_physics.json": "2370f2133306ba42be13698a0e3a47168311d346cb6099c56fc0d7134927a541",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_03.json": "8a1562e6727ad921fcbdb1eac866e922c1874200b48d1f04d28ab6d9a7b0961b",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_04/2511_847401/workers/trajectory.json": "9a5175499163086305cc1c8b2ca9e47e53593aec0b84121c970ff49c6ac8f250",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_04/2511_847401/applied_physics.json": "93e7ea8e3fa3d815ffbfac47389b08b187fdcc59281550731812637d279f0ce4",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_04.json": "6a40c9e8f0f4db251a4ffa19be0eccd4c97f5326057a3f78dd350582e012fce0",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_05/2511_847401/workers/trajectory.json": "06fcf9584d48fdb802880731ae03747ba3e4423033a0c0d7c490a9fb39282080",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_05/2511_847401/applied_physics.json": "fe09879f47472d683215f1188197634b005164d943d706353fa23cc08469b20f",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_05.json": "0af0420fd56e2a516032f71150335de57bba710af5c1699596f5217591640c76",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_06/2511_847401/workers/trajectory.json": "43d0907ea6eb8f03ed9f400b8f2a4e78a713571bde552de96163cdc7a9f188a3",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_06/2511_847401/applied_physics.json": "a0a3dd8081cce5e4ff1213e5c818168bd91ccd013c073e3426dd59687e9f7409",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_06.json": "67e46abe74f6a7f0c0dce385f1b7e5118cafa39b8ee2065d2f1e21e751198b8d",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_07/2511_847401/workers/trajectory.json": "d534533f8b49ed39f43fc36dfa91e2db008a629bf85660ffa95aae2d90f3f482",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_07/2511_847401/applied_physics.json": "02e64f88ba409736e0155143603fe3d16d31ddf1ec05bb29c9fc64c6fc054be1",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_07.json": "26b9653b594b0ba57b20c919ea325046e979271591ede2cd139654f4df4dca60",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_08/2511_847401/workers/trajectory.json": "0565060f2977587d212d3b7a9e56ed01ce20ec8ec77e60e3cb7ef6c45faed2ed",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_08/2511_847401/applied_physics.json": "c0be0ccf2cb57a606e127c9146a83761e9b2311337be9e7a17754360ef3f4b84",
+    "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_08.json": "8c731baaf39392ac9044ad46e02560e3d95bc6fa054a88e8ff1dd873d93e793a",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/selected_workpoints.json": "47c7d5499864ce84db906d7bc9dc65774cf7bd08a49026eb2c14458a8d2e55ce",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/connection_response_source.csv": "20de4e62e29e900b954fc55ca4316149276887f12d75f49a95583c8893261263",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_expanded_response_20260920/source/position_map_source.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela.png": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figures/fig4-panela-metadata.json": "d002d73147edcd2d51e5ba1f7d9b3f4ae155c75aa088d120de354de6f9e6264b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_parameter_response_20260918/source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "/data/hfosp/topic4_sef_hfo/cohort_three_observable_optimization_20260920/cohort_loss_improvement_20260923/figure_data.json": "3bd491a960daf8f2777f2bad0d44b1559b4045021443ba5e6540d3bc5ec1bd65",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_readable_complete.py": "166b36c656fb54929741ed5a485264a9e3b39b48ec52ae3f7c66cbd05b605b0d",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_geometry_patient_comparison.py": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_panel_a_combined.py": "974f3d219967d83304ffe92f0bb87fee89005b0e2be3557d4d5bb2c3c24a1f35",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_topic4_cohort_loss_improvement.py": "378feb235d1b669814b9da4539ed6eff1fe114342ceb7f5eaa1d2bdae01e6ff6",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig4_joint_core_density.py": "6c520b0a5290df178b7686392fbfb4e488a259714968e89a033eee8948284ccc"
+  },
+  "checks": {
+    "A_local_circuit_source_pixels_unchanged": true,
+    "A_local_circuit_mm_per_source_pixel": 0.021,
+    "A_external_typography_pt": {
+      "title": 11,
+      "labels": 10,
+      "ticks": 9,
+      "legend": 8.8
+    },
+    "A_original_png_sha256": "71cfae5661d65d1e73eb7b0a90f442c83388e2f25ec5c542b6f14f4636d5fef5",
+    "A_circuit_frame_vector_stroke_pt": 0.65,
+    "A_circuit_frame_source_crop_padding_px": 12,
+    "B_error_label_colors": {
+      "rank_error": "#3D5C6F",
+      "within_rod_order_error": "#E47159",
+      "participation_error": "#6B7546"
+    },
+    "B_profile_and_3D_label_colors_match": true,
+    "B_3D_error_axis_labels_bold": true,
+    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
+    "B_profile_scatter_colorbar_palette_match": true,
+    "BC_rank_error_name": "Mean rank error",
+    "B_error_symbols": {
+      "rank": "epsilon_r",
+      "within_rod_order": "epsilon_o",
+      "participation": "epsilon_p"
+    },
+    "B_restored_source_axis_sizes_mm": {
+      "profile": [
+        42,
+        45
+      ],
+      "trajectory": [
+        51,
+        51
+      ]
+    },
+    "B_workpoints": 226,
+    "B_stages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "B_axis_corner_gap_px": 0.0,
+    "B_category_labels_do_not_overlap": true,
+    "B_profile_ylabel": "Error",
+    "B_mean_rank_error_native_axis_label": true,
+    "B_order_error_native_axis_label": true,
+    "B_order_error_label_rotation_deg": 31.113561108745245,
+    "C_axis_label_font_pt": 12.0,
+    "C_palette": {
+      "curves": {
+        "rank_error": "#3D5C6F",
+        "within_rod_order_error": "#E47159",
+        "participation_error": "#6B7546"
+      },
+      "density_batches": {
+        "1": "#549AAB",
+        "2": "#AE8B53",
+        "3": "#7461AD"
+      }
+    },
+    "C_position_candidates": 24,
+    "C_position_B_stages": [
+      14,
+      15,
+      16
+    ],
+    "C_density_sigma_mm": 0.35,
+    "C_local_maps_equal_scale_mm": [
+      6,
+      6
+    ],
+    "C_centers_verified_against_applied_physics": true,
+    "C_search_bounds_visible": true,
+    "C_star_rule": "Minimum J_joint within each of the three batches",
+    "C_density_is_not_confidence_or_posterior": true,
+    "C_position_summary": {
+      "A": {
+        "batch_means_mm": [
+          [
+            3.2848349937462435,
+            12.296214224246606
+          ],
+          [
+            3.12625101647467,
+            12.23886073853635
+          ],
+          [
+            2.9732237086642157,
+            12.171527882239479
+          ]
+        ],
+        "largest_batch_mean_shift_mm": 0.3356311619525087,
+        "candidate_coordinate_min_mm": [
+          2.7247460133784576,
+          11.466464748403437
+        ],
+        "candidate_coordinate_max_mm": [
+          3.9492143200000003,
+          12.62890135
+        ],
+        "candidates_on_any_search_boundary": 12,
+        "distinct_coordinates": 24
+      },
+      "B": {
+        "batch_means_mm": [
+          [
+            16.114056449993406,
+            4.713277206811321
+          ],
+          [
+            15.556483154990108,
+            6.000906626687332
+          ],
+          [
+            15.277696507488459,
+            6.000906626687332
+          ]
+        ],
+        "largest_batch_mean_shift_mm": 1.5354111750137522,
+        "candidate_coordinate_min_mm": [
+          14.998909859986808,
+          4.498672303498653
+        ],
+        "candidate_coordinate_max_mm": [
+          17.22920304,
+          6.21551153
+        ],
+        "candidates_on_any_search_boundary": 24,
+        "distinct_coordinates": 4
+      }
+    },
+    "DE_native_colorbar_quantity": {
+      "observable": "E neurons firing at least once within each spatial/time bin",
+      "spatial_bin_mm2": 1.0,
+      "time_bin_ms": 2.0,
+      "display_range": [
+        0,
+        75
+      ]
+    },
+    "DE_frozen_event_ids": [
+      [
+        114,
+        14
+      ],
+      [
+        39,
+        151
+      ]
+    ],
+    "DE_frozen_events_and_scales_match": true,
+    "DE_axis_label_font_pt": 12.0,
+    "DE_channel_tick_font_pt": 8.5,
+    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
+    "G_legend_upward_shift_mm": 3.0,
+    "G_legend_font_pt": 7.0,
+    "H_patient_template_labels_bold": true,
+    "H_model_template_labels_bold": true,
+    "F_additional_event_shading": [
+      {
+        "event": 9,
+        "mode": "MTB",
+        "center_relative_ms": 396.0,
+        "shaded_span_relative_ms": [
+          336.0,
+          426.0
+        ],
+        "color": "#287FA1",
+        "alpha": 0.14
+      }
+    ],
+    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
+    "F_legend_font_pt": 8.0,
+    "F_extra_legend_headroom_fraction": 0.0,
+    "F_waveform_exact_array_parity": true,
+    "GH_frozen_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "I_legend_position": "inside upper right, original framed placement",
+    "I_paired_patients": 24,
+    "I_condition_counts": [
+      1,
+      12,
+      20,
+      28
+    ],
+    "I_palette": {
+      "Subject": "#D7B08A",
+      "Median": "#8C4B20",
+      "subject_alpha": 0.85
+    },
+    "I_xaxis_label": "Epochs",
+    "I_xaxis_definition": "Author-requested Epochs display label; values remain cumulative evaluated-condition indices at batch boundaries: 1, 12, 20, 28, not minibatch or gradient-training epochs. B colors identify proposal stages 1 through 16.",
+    "FGHI_axis_bounds_mm": {
+      "F": [
+        14.999999999999998,
+        17.999999999999996,
+        114.99999999999997,
+        57.99999999999999
+      ],
+      "G": [
+        130.99999999999997,
+        17.999999999999996,
+        166.0,
+        57.99999999999999
+      ],
+      "H": [
+        178.99999999999997,
+        17.999999999999996,
+        218.99999999999997,
+        57.99999999999999
+      ],
+      "I": [
+        241.99999999999997,
+        17.999999999999996,
+        274.0,
+        57.99999999999999
+      ]
+    },
+    "FGHI_equal_height_and_edges": true,
+    "E_native_shared_xlabel_center_mm": 241.24999999999991,
+    "E_native_xlabel_centered_across_three_columns": true,
+    "CDE_axis_bounds_mm": {
+      "D": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            143.49999999999997,
+            52.99999999999999,
+            183.5
+          ],
+          [
+            67.0,
+            143.49999999999997,
+            107.0,
+            183.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            143.49999999999997,
+            154.0,
+            183.5
+          ],
+          [
+            166.0,
+            143.49999999999997,
+            190.0,
+            183.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          143.49999999999997,
+          271.5,
+          183.5
+        ]
+      },
+      "E": {
+        "C_axes": [
+          [
+            12.999999999999998,
+            84.5,
+            52.99999999999999,
+            124.5
+          ],
+          [
+            66.99999999999999,
+            84.5,
+            106.99999999999999,
+            124.5
+          ]
+        ],
+        "envelopes": [
+          [
+            130.0,
+            84.5,
+            154.0,
+            124.5
+          ],
+          [
+            166.0,
+            84.5,
+            190.0,
+            124.5
+          ]
+        ],
+        "native_two_row_bounds_mm": [
+          210.99999999999997,
+          84.5,
+          271.5,
+          124.49999999999997
+        ]
+      }
+    },
+    "CDE_equal_row_height_and_edges": true,
+    "common_axis_height_mm": 40.0,
+    "F_legend_inside_axes_verified": true,
+    "G_legend_straddles_axes_upper_edge": true,
+    "I_legend_inside_axes_verified": true,
+    "I_legend_labels": [
+      "Subject",
+      "Median"
+    ],
+    "C_four_yaxis_tick_labels": [
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ],
+      [
+        "0.0",
+        "0.2",
+        "0.4"
+      ]
+    ],
+    "visible_row_gaps_mm": {
+      "AB_to_CDE": 6.651944444444411,
+      "CDE_to_FGHI": 6.745694444444435
+    },
+    "FGHI_downward_shift_mm": 6.5,
+    "H_leftward_shift_mm": 5.0,
+    "I_leftward_shift_mm": 9.0,
+    "I_axes_right_margin_mm": 11.0,
+    "GH_visible_horizontal_gap_mm": 2.364143359969527,
+    "HI_visible_horizontal_gap_mm": 1.1646527777777476,
+    "text_outside_canvas": [],
+    "minimum_visible_font_pt": 7.0,
+    "dense_font_at_180mm_page_width_pt": 4.7368421052631575,
+    "DE_semantic_titles_verified": true
+  },
+  "typography_exception": "A preserves the local circuit pixels and physical scale; only its external title, coordinate labels/ticks and neuron legend are enlarged.",
+  "layout_contract": "F/G/H/I share identical rendered y bounds; C upper row/D and C lower row/E each share rendered y bounds with both contact envelopes and the combined two-row native fields. All data-axis heights are 40 mm. H and spatial maps retain equal x/y aspect. The bottom row is 6.5 mm lower relative to the upper panels, matching the visible row gaps; H moves left 5 mm and I left 9 mm, with all axis sizes preserved.",
+  "data_changes": "C lower maps: evaluated core centers from stages 14-16 replace position-error grids; upper curves and all other panels retain their frozen data.",
+  "new_simulations": 0,
+  "reference": "User-provided complete A–I plate, 2026-09-23",
+  "source_version_mix": "Parent A-I plate, with C densities from exactly the 24 existing B stages 14-16 candidates.",
+  "semantic_colors": {
+    "MTA": "#C63D3A",
+    "MTB": "#287FA1",
+    "rank_error": "#3D5C6F",
+    "within_rod_order_error": "#E47159",
+    "participation_error": "#6B7546"
+  },
+  "canonical_assets_overwritten": false,
+  "outputs": {
+    "figures/fig4-panela.pdf": "9fb6783e6f2348c16de58af53a028f95b3fba4d993aa5a426eeac02a7fe2dd04",
+    "figures/fig4-panelf.svg": "27b30a33b34a34eb1731d24726fc5e030f923bc42ace5c6a2719066b776bf879",
+    "figures/fig4-panelh.pdf": "6090f2f16a5b0b94af09905b1f6309896f07fdf29684f990b639f25600775686",
+    "figures/fig4-panelf.pdf": "5b42af93eb8a2df89b183cf7c33081ad94e253ed1a64130c225571a71c6b0b9f",
+    "figures/fig4-complete-layout.svg": "8f032c952232cbee6721468f5d63d3cc41d12b1f3cc085163aca84aa18a2189b",
+    "figures/fig4-panelg.pdf": "bd2b257575daff54b8c769ad99caaa0306b3ca68e4aa8a8a0108b81774e21dd7",
+    "figures/fig4-complete-layout.png": "2969ce8709b964dd16ec140dc3e4e6a21723b9fb6f00641638bb746a04ed9624",
+    "figures/fig4-panelf.png": "53f9d2f86f8699227403905202bc6172e58064267511c14b4e191d65c6911c11",
+    "figures/fig4-panelc.png": "42b4d761196cd79c24a6d1a6e8dff79ddaac055547011143a4fd112afe01f876",
+    "figures/fig4-panela.svg": "dd3af957b5e57de5ec5465de9b21cbd7922f060ba9504e26318fb92e3bf6801e",
+    "figures/fig4-paneld.pdf": "dd22f58ee8cf873a215c03f0b118e488092b35a5c3b47e587d132d67005277bb",
+    "figures/fig4-panelb.pdf": "06dd7ba4d0a8de1612af460bc97661b60a6d8c95e1f55e5f3bed47c56072dea7",
+    "figures/fig4-paneld.svg": "69aa705c6713ce975ab57a9ec0f79c441feb7019ef86160ec0aa0d40b79b5cb1",
+    "figures/fig4-panelh.svg": "d3c35f4ae62e48c71a300c7f56223798d80626e332e67081549fbcf885711135",
+    "figures/core-position-spatial-density.pdf": "a3b7b938f3497cda062be402d9bb848a5a8b5a77108200859827551763ab3212",
+    "figures/fig4-panelg.svg": "1b942d019042fbaf0ad86f0dabd06a538913575b38c2317f5c8bc4faf19f7112",
+    "figures/core-position-spatial-density.svg": "6d091d972436c8172a9d5fc8ce463e72726c9ff0451deffb53fcb4fd51724643",
+    "figures/fig4-panelb.svg": "f17b1177f90fe8eb954aa1c1f79cbf1ef9560930f971df02bf5a2586486ea2e1",
+    "figures/fig4-complete-layout-preview.png": "23a9db80c915620a8e5314df0257874ca8a45c05a01d125170e8efe196529c45",
+    "figures/fig4-complete-layout.pdf": "f1f54ee03408566753b2cc52bc8a49627735500ce3bf1083b336c0e9187c1dd0",
+    "figures/fig4-panelc.pdf": "dc15d5dce223a3debd829f625ddeeff8256510fcfca66c015e213c98c3265c9d",
+    "figures/fig4-paneld.png": "86526a3a4c0016f285937f71021f07d6ceea52516c45c3373a95aca4f34f0121",
+    "figures/fig4-panela.png": "8a32046b7d97b1c6c24ef1ac0b3f033cf516ce67ae8a7e25a31c89a238be410d",
+    "figures/fig4-panelh.png": "7062ed8dbccc9bc2d5bd9b7bcdfdad2728032465f9c4bfcbb17ec17fd772de5e",
+    "figures/fig4-panelc.svg": "7976dbdfc44224831a8ca964e40507f4aaa28870364fe06dceb796a498c5dd71",
+    "figures/fig4-paneli.png": "ab8dca3f41994a284532f27871e0f9116d3b23bd31a9334c205fd56119301cb8",
+    "figures/core-position-spatial-density.png": "edbb311e4d9fa590c80133859ab1294d6f8c3558648f402a7acdc14823c79a68",
+    "figures/fig4-panele.svg": "0c4a46576e43f671d2e195b6f7be8869356910d2a4a1e67b017b8eb918ea2362",
+    "figures/fig4-panelb.png": "7cda111796ca5488d279065e12a44be36bb3e36313eed796b01b6d05a86829d1",
+    "figures/fig4-panelg.png": "870d8097fcfa7414d811f8a96a0b67d8e6fd8b6376c6b5c417cc76afe8d5fb73",
+    "figures/fig4-panele.pdf": "de5ee86b08301810509dfda91a4e238a5868cbfb769fb046e1815586d474ea1e",
+    "figures/fig4-paneli.svg": "adc85221c3d58a8b78a13196757594b0962f8fba3d8d405ade876f149a45ff9f",
+    "figures/fig4-paneli.pdf": "685075362fe491c5af93b2dd5b2bdd9ac9e6d00326ffce8b54a4cbe82dfa7a42",
+    "figures/fig4-panele.png": "6246eb292854ea412b5645c6d58d99150aed31a3755a8d6dcc3a34d1afe53ed7"
+  },
+  "parent_package": "results/paper-ready-figure/fig4/candidates/complete_readability_20260923",
+  "scientific_claim": "Local candidate centers across J/J_joint search batches; constrained, dependent search points, not independent optimized solutions.",
+  "current_version_pointer_changed": false
+}

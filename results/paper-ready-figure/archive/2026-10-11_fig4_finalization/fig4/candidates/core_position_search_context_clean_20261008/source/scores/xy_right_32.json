@@ -1,0 +1,66 @@
+{
+  "N": 151,
+  "status": "SCORABLE",
+  "J": 1.5760917439867794,
+  "groups": {
+    "rank_pattern": {
+      "N": 151,
+      "A": 0.07204433882145513,
+      "B": 0.0017832257206883077,
+      "D_off": 0.07026111310076681,
+      "D16": 0.08709030583976272,
+      "scaled": 1.566277260871129
+    },
+    "participation": {
+      "N": 151,
+      "A": 0.07936756643046235,
+      "B": 0.0014636789380226797,
+      "D_off": 0.07790388749243966,
+      "D16": 0.09171735747002871,
+      "scaled": 1.708702519808084
+    },
+    "local_and_interrod_timing": {
+      "N": 151,
+      "A": 0.06513463957443205,
+      "B": 0.002456520492599417,
+      "D_off": 0.06267811908183263,
+      "D16": 0.08586153123073963,
+      "scaled": 1.4532954512811245
+    }
+  },
+  "candidate": "xy_right_32",
+  "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_32/2511_847401/workers/trajectory.json",
+  "source_sha256": "4845816a361a5f8b2c6c15517c284ccddc4dc33353c510cf7a4af8990eace670",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    5.71551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    1.566277260871129,
+    1.4532954512811245,
+    1.708702519808084
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789555470.2150118,
+  "J_joint": 1.5546440113837043,
+  "joint": {
+    "N": 151,
+    "A": 0.08570706635745758,
+    "B": 0.0026379072839811174,
+    "D_off": 0.08306915907347646,
+    "D16": 0.10796440906604826,
+    "scaled": 1.5546440113837043
+  },
+  "search_role": "historical",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/xy_right_32.json",
+  "historical_score_sha256": "e9e1d1d53dde91789f197c28b38308e6ca503410d60e699c12dd3027e4690044"
+}

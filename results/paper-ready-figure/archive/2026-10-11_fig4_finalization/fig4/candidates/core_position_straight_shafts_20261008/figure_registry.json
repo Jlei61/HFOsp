@@ -1,0 +1,277 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "generated_at": "2026-10-08T14:17:53+08:00",
+  "source_snapshot_time": "2026-10-08T09:52:00+08:00",
+  "pool_completed": 290,
+  "pool_scorable": 288,
+  "main_selection": {
+    "fraction": 0.2,
+    "nominal_count": 58,
+    "count": 58,
+    "cutoff_J_joint": 1.4858054657811923,
+    "candidate_ids": [
+      "joint_bo03_01",
+      "joint_bo03_04",
+      "joint_bo02_03",
+      "wide_initial_46",
+      "lf_bo02_01",
+      "xy_combined_01",
+      "joint_bo03_02",
+      "lf_bo02_04",
+      "joint_bo02_05",
+      "xy_right_04",
+      "joint_bo03_08",
+      "xy_combined_03",
+      "dense_axis3_12",
+      "xy_left_31",
+      "joint_bo02_02",
+      "xy_right_33",
+      "xy_right_40",
+      "joint_bo03_06",
+      "lf_bo04_01",
+      "g2_b04_p01",
+      "dense_axis0_02",
+      "lf_bo03_01",
+      "xy_right_42",
+      "joint_bo03_03",
+      "dense_axis3_02",
+      "dense_axis0_01",
+      "xy_right_41",
+      "lf_bo02_02",
+      "xy_right_23",
+      "lf_bo04_03",
+      "xy_right_01",
+      "lf_bo03_04",
+      "interaction_y1_a1_g0",
+      "interaction_y3_a1_g0",
+      "xy_right_10",
+      "xy_right_43",
+      "xy_right_11",
+      "xy_left_11",
+      "interaction_y3_a0_g0",
+      "xy_right_00",
+      "lf_bo04_05",
+      "xy_left_20",
+      "interaction_y1_a2_g0",
+      "xy_combined_02",
+      "xy_right_44",
+      "dense_axis2_08",
+      "dense_axis2_02",
+      "g2_b01_p01",
+      "xy_right_03",
+      "g2_b03_p01",
+      "xy_right_20",
+      "xy_left_21",
+      "lf_bo01_04",
+      "lf_bo01_01",
+      "xy_right_13",
+      "xy_left_10",
+      "joint_bo02_04",
+      "dense_axis2_03"
+    ],
+    "historical": 57,
+    "new": 1
+  },
+  "rendering": {
+    "stem": "core-position-search-context",
+    "display_limits_mm": [
+      [
+        1.0,
+        1.0
+      ],
+      [
+        19.0,
+        19.0
+      ]
+    ],
+    "all_evaluated_configurations": 290,
+    "plotted_background_positions": 343,
+    "background_repeated_coordinates_collapsed": true,
+    "selected_configurations": 58,
+    "plotted_selected_positions": 3,
+    "selected_positions_in_density": 116,
+    "isolated_selected_marker_rule": "Selected positions outside their per-core 90 percent KDE mass contour",
+    "isolated_selected_positions_mm": [
+      [
+        1.9913752393645043,
+        17.400220508375263
+      ],
+      [
+        12.550394513804191,
+        8.375872104191638
+      ],
+      [
+        16.47920304,
+        2.96551153
+      ]
+    ],
+    "display_mode": "simplified",
+    "electrode_display": {
+      "method": "Per-shaft 3-D SVD line fit using all local contacts, then shared-plane projection and affine registration to the frozen SNN sheet; display only.",
+      "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_straight_shafts_20261008/source/electrode_straight_display.json",
+      "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+      "registration_max_abs_error_mm": 1.7763568394002505e-14,
+      "straight_shaft_fit": {
+        "ICL": {
+          "n_contacts": 11,
+          "max_residual_mm": 0.6058926337075228,
+          "rms_residual_mm": 0.39418986883108975
+        },
+        "SCL": {
+          "n_contacts": 9,
+          "max_residual_mm": 0.5333716727324929,
+          "rms_residual_mm": 0.3489886470807463
+        }
+      },
+      "contact_names": [
+        "SCL9",
+        "ICL11",
+        "SCL8",
+        "ICL10",
+        "SCL7",
+        "ICL9",
+        "ICL8",
+        "SCL6",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "displayed_contact_xy_mm": [
+        [
+          5.53715031760305,
+          16.241413753619664
+        ],
+        [
+          2.0054952936395996,
+          5.865866307637906
+        ],
+        [
+          7.373426379939296,
+          15.245276003308419
+        ],
+        [
+          3.4465037340296947,
+          5.676779286841823
+        ],
+        [
+          8.626433967293572,
+          14.56554805564787
+        ],
+        [
+          5.1135165428933105,
+          5.4580363032326495
+        ],
+        [
+          6.977869108444976,
+          5.213398685261263
+        ],
+        [
+          10.462710029629818,
+          13.569410305336625
+        ],
+        [
+          8.47390585240321,
+          5.017090930922255
+        ],
+        [
+          10.085890357698688,
+          4.805568680856007
+        ],
+        [
+          11.52689879808878,
+          4.616481660059923
+        ],
+        [
+          13.022935542047014,
+          4.420173905720917
+        ],
+        [
+          14.887288107598678,
+          4.17553628774953
+        ],
+        [
+          16.554300916462296,
+          3.9567933041403562
+        ],
+        [
+          17.99530935685239,
+          3.7677062833442747
+        ]
+      ],
+      "max_display_displacement_mm": 0.20730072911892658,
+      "simulation_contact_coordinates_changed": false,
+      "collinearity_max_residual_mm": {
+        "SCL": 2.482534153247273e-16,
+        "ICL": 1.9860273225978185e-15
+      }
+    },
+    "visible_contour_masses": [
+      0.9
+    ],
+    "display_density_floor_per_mm2": 4.620752751047013e-05,
+    "mass_above_display_floor": 0.9998028239744783,
+    "per_core_density_integrals": [
+      0.9999999999365405,
+      1.0
+    ],
+    "displayed_mixture_integral": 0.9999999999682704,
+    "sigma_mm": 0.35,
+    "zmax": 0.4620752751047013,
+    "z_is_density": true,
+    "negative_values": false,
+    "color_normalization": "linear",
+    "surface_alpha": 1.0,
+    "peak_guides": false,
+    "peak_labels_only": true,
+    "peak_locations": {
+      "A": {
+        "x_mm": 3.3125,
+        "y_mm": 12.0625,
+        "displayed_density_per_mm2": 0.4620752751047013,
+        "per_core_density_per_mm2": 0.9241505502094026
+      },
+      "B": {
+        "x_mm": 16.4375,
+        "y_mm": 5.4375,
+        "displayed_density_per_mm2": 0.18964616970579873,
+        "per_core_density_per_mm2": 0.37929233941159746
+      }
+    },
+    "common_z_box_extent": 9.0,
+    "peak_definition": "Per-core KDE maximum on the unchanged 0.0625-mm grid; not the best-scoring candidate or a confidence estimate.",
+    "density_smoothing_includes_all_selected": true,
+    "no_position_jitter": true,
+    "xy_plane_height_mm": 91.24149734468432,
+    "colorbar_height_mm": 91.2414973446843,
+    "colorbar_alignment_error_pixels": 2.842170943040401e-14,
+    "title_or_caption_count": 0,
+    "typography": {
+      "font_family": "DejaVu Sans",
+      "xy_label_pt": 12.0,
+      "tick_pt": 9.0,
+      "legend_pt": 8.8,
+      "reference": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/figure4_panel_registry.json",
+      "reference_sha256": "a414bf851bdf57d89ce61a2907944d0c21d6b90a26fb36ab5b527fbc7fd747af"
+    },
+    "legend_labels": [
+      "Search positions",
+      "Outlying best 20%",
+      "90% density"
+    ],
+    "legend_frame_visible": true
+  },
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_core_position_search_context.py",
+  "producer_sha256": "ebf042220b39ce85d26d5957ed24f216954e4b6067d05a23744926ee2bdb5a58",
+  "source_snapshot_sha256": "31b22088bc3f448ee025fdffcc466091e56bd28a2309a1fc8b6cb5bb44589821",
+  "interpretation": "Descriptive concentration of low-loss evaluated configurations relative to observed search coverage; not independent convergence, a posterior, or an objective-function landscape.",
+  "formal_current_figure_replaced": false,
+  "outputs": {
+    "core-position-search-context.pdf": "b337e6a467865b7457c307f107eb01145b2112dbcefc6d76f5e33959a0460187",
+    "core-position-search-context.png": "5b1d1a48f2995907561deb17d9d8d8d7de0778508dd59d266a8e1811bb882fde",
+    "core-position-search-context.svg": "b4552884f1d557fb95d8a46716a6a983f0209553b1cd5dbfebe8a0d84c3109c9"
+  }
+}

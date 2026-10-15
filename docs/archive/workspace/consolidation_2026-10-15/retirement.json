@@ -1,0 +1,48 @@
+{
+  "removed": [
+    {
+      "path": "/tmp/hfosp-fig3-publish-20261010",
+      "head": "48ffeacabdae555b2d520867b639781f689ecccd",
+      "branch": "codex/fig3-paper-ready-20261010",
+      "branch_preserved": true,
+      "reachable_from_origin_main_before_removal": true,
+      "active_references": [],
+      "status_before": "CLEAN",
+      "ignored_removed": [
+        "scripts/__pycache__/__init__.cpython-311.pyc",
+        "scripts/paper_figures/__pycache__/build_fig3_current.cpython-311.pyc",
+        "scripts/paper_figures/__pycache__/build_main_figure_3.cpython-311.pyc"
+      ],
+      "force": false,
+      "removed_at": "2026-10-15T10:30:03.006886+08:00"
+    },
+    {
+      "path": "/tmp/hfosp-fig4-publish-20261009",
+      "head": "0f12127b806ce492c0ea99db0e60505882edf81b",
+      "branch": "codex/fig4-compact-layout-20261009",
+      "branch_preserved": true,
+      "exact_origin_branch_head": true,
+      "integrated_package_identical": true,
+      "active_references": [],
+      "local_overlay_backup": "/data/hfosp/workspace_audit_20261015/local_overlays/fig4_publish",
+      "local_overlays_superseded_by_integration": true,
+      "status_before_removal": "CLEAN",
+      "ignored_removed": [
+        "scripts/__pycache__/__init__.cpython-311.pyc",
+        "scripts/paper_figures/__pycache__/build_fig4_a_mechanism_candidate.cpython-311.pyc",
+        "scripts/paper_figures/__pycache__/draw_fig4_a_spatial_readout.cpython-311.pyc"
+      ],
+      "force": false,
+      "removed_at": "2026-10-15T10:31:49.448306+08:00"
+    }
+  ],
+  "remaining_worktrees": [
+    "/home/honglab/leijiaxin/HFOsp",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/main-cherry",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-ges-v033-training-lab"
+  ],
+  "before_count": 7,
+  "after_count": 5
+}

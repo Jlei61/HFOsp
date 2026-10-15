@@ -11,6 +11,14 @@ The KMeans heatmap/rank-distribution panel remains in Fig. S7.
 """
 from __future__ import annotations
 
+# Direct execution follows the author-accepted current Figure 4.
+if __name__ == "__main__":
+    import runpy
+    from pathlib import Path as _Figure4Path
+    runpy.run_path(str(_Figure4Path(__file__).with_name("build_fig4_current.py")), run_name="__main__")
+    raise SystemExit(0)
+
+
 import hashlib
 import json
 import shutil

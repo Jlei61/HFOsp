@@ -1,0 +1,35 @@
+{
+  "timestamp_utc": "2026-09-29T01:20:35.917376+00:00",
+  "status": "AGENT_CHECKED_AUTHOR_VISUAL_REVIEW_PENDING",
+  "targeted_tests": {
+    "command": "python -m pytest -q tests/test_topic4_template_recovery.py tests/test_topic4_template_recovery_null.py",
+    "passed": 12
+  },
+  "numeric_checks": {
+    "patients": 25,
+    "exact_subject_nulls": 14,
+    "monte_carlo_subject_nulls": 11,
+    "cohort_draws": 9999,
+    "invalid_null_draws": 0,
+    "patient_unit_preserved": true,
+    "workpoints_and_observed_scores_unchanged": true,
+    "per_subject_scalar_null_audit": "PASS",
+    "outside_I_changed_pixels": 0
+  },
+  "visual_inspection": {
+    "PNG": [
+      "fig4-paneli",
+      "cohort_null_comparison",
+      "per_subject_null_comparison"
+    ],
+    "PDF_rasterized_with_pdftoppm": [
+      "fig4-paneli",
+      "fig4-complete-layout",
+      "per_subject_null_comparison"
+    ],
+    "notes": "Checked labels, null/data summary levels, P_ref visibility, legends, subject coverage, and lack of clipping. Corrected overlap in companion legends/annotations."
+  },
+  "scientific_scope": "Post-fit within-shaft contact-correspondence reference only; training and best-workpoint selection were not rerun under the null. No individual comparison passes Holm over 50 tests.",
+  "current_version_pointer_changed": false,
+  "producer_sha256": "062677f665ab19918a0dbba4f920df3248e15122efad1244263374136a780c01"
+}

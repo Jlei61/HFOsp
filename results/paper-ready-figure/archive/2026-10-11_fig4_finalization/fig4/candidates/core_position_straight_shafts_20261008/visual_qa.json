@@ -1,0 +1,122 @@
+{
+  "status": "AGENT_DATA_AND_RENDER_CHECKS_PASS_PENDING_AUTHOR_VISUAL_REVIEW",
+  "comparison_directory": "results/paper-ready-figure/fig4/candidates/core_position_labels_only_20261008",
+  "all_density_and_position_arrays_exactly_equal": true,
+  "selection_identical": true,
+  "original_contact_geometry_byte_identical": true,
+  "electrode_rendering": "Reuse the Fig2A 3-D SVD shaft fit and Fig4 affine sheet registration. Draw each shaft as one straight segment with fitted carrier-contact markers; original simulation coordinates are unchanged.",
+  "electrode_display": {
+    "method": "Per-shaft 3-D SVD line fit using all local contacts, then shared-plane projection and affine registration to the frozen SNN sheet; display only.",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/candidates/core_position_straight_shafts_20261008/source/electrode_straight_display.json",
+    "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
+    "registration_max_abs_error_mm": 1.7763568394002505e-14,
+    "straight_shaft_fit": {
+      "ICL": {
+        "n_contacts": 11,
+        "max_residual_mm": 0.6058926337075228,
+        "rms_residual_mm": 0.39418986883108975
+      },
+      "SCL": {
+        "n_contacts": 9,
+        "max_residual_mm": 0.5333716727324929,
+        "rms_residual_mm": 0.3489886470807463
+      }
+    },
+    "contact_names": [
+      "SCL9",
+      "ICL11",
+      "SCL8",
+      "ICL10",
+      "SCL7",
+      "ICL9",
+      "ICL8",
+      "SCL6",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "displayed_contact_xy_mm": [
+      [
+        5.53715031760305,
+        16.241413753619664
+      ],
+      [
+        2.0054952936395996,
+        5.865866307637906
+      ],
+      [
+        7.373426379939296,
+        15.245276003308419
+      ],
+      [
+        3.4465037340296947,
+        5.676779286841823
+      ],
+      [
+        8.626433967293572,
+        14.56554805564787
+      ],
+      [
+        5.1135165428933105,
+        5.4580363032326495
+      ],
+      [
+        6.977869108444976,
+        5.213398685261263
+      ],
+      [
+        10.462710029629818,
+        13.569410305336625
+      ],
+      [
+        8.47390585240321,
+        5.017090930922255
+      ],
+      [
+        10.085890357698688,
+        4.805568680856007
+      ],
+      [
+        11.52689879808878,
+        4.616481660059923
+      ],
+      [
+        13.022935542047014,
+        4.420173905720917
+      ],
+      [
+        14.887288107598678,
+        4.17553628774953
+      ],
+      [
+        16.554300916462296,
+        3.9567933041403562
+      ],
+      [
+        17.99530935685239,
+        3.7677062833442747
+      ]
+    ],
+    "max_display_displacement_mm": 0.20730072911892658,
+    "simulation_contact_coordinates_changed": false,
+    "collinearity_max_residual_mm": {
+      "SCL": 2.482534153247273e-16,
+      "ICL": 1.9860273225978185e-15
+    }
+  },
+  "legend_layout_colorbar_and_peak_labels_unchanged": true,
+  "core_peak_markers_and_leaders_visible": false,
+  "png_and_pdf_visual_inspection": "Both exports inspected: lower ICL and upper SCL shafts are straight, with hollow contact markers on the carrier lines. Core B density continues to occlude the background shaft; no clipping or guide markers.",
+  "pdf_preview": "qa/core-position-search-context-pdf.png",
+  "output_hashes": {
+    "core-position-search-context.pdf": "b337e6a467865b7457c307f107eb01145b2112dbcefc6d76f5e33959a0460187",
+    "core-position-search-context.png": "5b1d1a48f2995907561deb17d9d8d8d7de0778508dd59d266a8e1811bb882fde",
+    "core-position-search-context.svg": "b4552884f1d557fb95d8a46716a6a983f0209553b1cd5dbfebe8a0d84c3109c9"
+  },
+  "formal_current_figure_replaced": false,
+  "author_visual_acceptance": "PENDING"
+}

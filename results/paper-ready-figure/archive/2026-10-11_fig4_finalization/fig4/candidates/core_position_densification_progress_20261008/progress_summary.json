@@ -1,0 +1,79 @@
+{
+  "status": "RUNNING_PARTIAL_RESULTS_PENDING_AUTHOR_VISUAL_REVIEW",
+  "asof": "2026-10-08T15:56:32+08:00",
+  "run": "/data/hfosp/topic4_sef_hfo/joint_position_densification_20261008",
+  "new_complete": 24,
+  "new_scorable": 23,
+  "new_unscorable": [
+    "dens_remote_05"
+  ],
+  "planned_new": 128,
+  "historical_complete": 290,
+  "pool_completed": 314,
+  "pool_scorable": 311,
+  "selected_n": 63,
+  "selected_historical": 60,
+  "selected_new": 3,
+  "selected_new_candidates": [
+    "wide_bo01_01",
+    "wide_bo01_04",
+    "wide_bo01_05"
+  ],
+  "current_top20_cutoff": 1.4887497656003454,
+  "fixed_old_top20_cutoff": 1.4858054657811923,
+  "previous_best": {
+    "candidate": "joint_bo03_01",
+    "J_joint": 1.0601303963391657
+  },
+  "best_new": {
+    "candidate": "wide_bo01_05",
+    "J_joint": 1.0610107301980856,
+    "centers_mm": [
+      [
+        3.038489456070218,
+        11.971834285454928
+      ],
+      [
+        15.21266521384166,
+        5.78599411042426
+      ]
+    ]
+  },
+  "new_best_improves_previous": false,
+  "strata": {
+    "broad_sobol_densification": {
+      "completed": 6,
+      "scorable": 6,
+      "median_J_joint": 3.258523283162284,
+      "best_J_joint": 2.591578744201664,
+      "below_frozen_old_top20_cutoff": 0,
+      "in_current_top20": 0
+    },
+    "main_sobol_densification": {
+      "completed": 6,
+      "scorable": 6,
+      "median_J_joint": 2.4553272885400945,
+      "best_J_joint": 1.7594836910225895,
+      "below_frozen_old_top20_cutoff": 0,
+      "in_current_top20": 0
+    },
+    "remote_sobol_densification": {
+      "completed": 6,
+      "scorable": 5,
+      "median_J_joint": 2.439637604906219,
+      "best_J_joint": 1.7957687877160111,
+      "below_frozen_old_top20_cutoff": 0,
+      "in_current_top20": 0
+    },
+    "pending_parent_qLogEI_J_joint": {
+      "completed": 6,
+      "scorable": 6,
+      "median_J_joint": 1.568060587002262,
+      "best_J_joint": 1.0610107301980856,
+      "below_frozen_old_top20_cutoff": 3,
+      "in_current_top20": 3
+    }
+  },
+  "scientific_boundary": "Targeted sampling deliberately increases local sampling density. Report stratum and stage separately; tighter pooled KDE is not evidence of increased stability or independent convergence.",
+  "frozen_execution_dependencies_verified": 55
+}
