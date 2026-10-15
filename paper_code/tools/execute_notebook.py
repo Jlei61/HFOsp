@@ -17,10 +17,11 @@ def main():
     from jupyter_client import KernelManager
     from jupyter_client.kernelspec import KernelSpecManager
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--timeout", type=int, default=900, help="Timeout per code cell in seconds")
+    parser.add_argument("--timeout", type=int, default=7200, help="Timeout per code cell in seconds")
+    parser.add_argument("--notebook", default="01_raw_seeg_to_fig1.ipynb")
     args = parser.parse_args()
-    target = new_output("executed_notebooks") / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%f") + ".ipynb")
-    notebook = nbformat.read(CODE / "notebooks/01_reproduce_paper_figures.ipynb", as_version=4)
+    target = new_output("executed_notebooks") / (Path(args.notebook).stem + "_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%f") + ".ipynb")
+    notebook = nbformat.read(CODE / "notebooks" / args.notebook, as_version=4)
     with tempfile.TemporaryDirectory(prefix="paper-notebook-kernel-") as temp:
         spec = Path(temp) / "paper-code"; spec.mkdir()
         (spec / "kernel.json").write_text(json.dumps({"argv": [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"], "display_name": "Paper code", "language": "python"}))

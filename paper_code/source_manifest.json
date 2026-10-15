@@ -1192,6 +1192,41 @@
       "source_sha256": "2f6239dc6f2bc0436858560c08a4c84c6a2212b4ecf1bdb3b3e101d762375361",
       "copied_sha256": "49e5f999dea982c7c7b0299ff6102ed0b4bb756cce33b5b0d3da77f19d02dfde",
       "adaptation": "Local package imports and portable input/output paths; scientific function bodies retained"
+    },
+    {
+      "source": "results/topic4_sef_hfo/fig5_historical_zm_workpoint_current_layout_20260930/historical_source/src/snn_engine/mz_slow_vars.py",
+      "destination": "modeling/src/snn_engine/mz_historical.py",
+      "source_sha256": "91068ef6920f095eed0f7cd1c36262ecec575ff96f8599ad6f1990963c87f20d",
+      "copied_sha256": "91068ef6920f095eed0f7cd1c36262ecec575ff96f8599ad6f1990963c87f20d",
+      "note": "Exact Fig5 historical slow arithmetic"
+    },
+    {
+      "source": "scripts/topic4_cohort_recurrent_expansion/objective.py",
+      "destination": "modeling/cohort_objective.py",
+      "source_sha256": "9ba97f1e0799ffa019d7d5e1f8cccff18d2129dbb0b87edd01f4f1bdd3da2e4f",
+      "copied_sha256": "9bc377731e9f19b4f1d67261deb76b3b0c9c9971d65f713ce75b52c397eb7518",
+      "adaptation": "Only common constants and shaft helper import redirected to local copy"
+    },
+    {
+      "source": "scripts/run_topic5_template_field_negative_null.py",
+      "destination": "analysis/shared_field_null.py",
+      "source_sha256": "7d455be66391b17ec2e6732546b4b507ff01e6ad64f19869c5d19285d42db5a2",
+      "copied_sha256": "32ef04501ff86da21668d25d94ad27359ab8b370873ba98cd0ce14327562dd72",
+      "adaptation": "Five pure scientific functions copied verbatim; CLI and artifact readers omitted"
+    },
+    {
+      "source": "src/topic4_d6_natural_kmeans.py",
+      "destination": "modeling/src/topic4_d6_natural_kmeans.py",
+      "source_sha256": "6b28696dcc4955c6219d22a77a508cd2693d1aac1dc0b1df05d06da98866e274",
+      "copied_sha256": "e3fe101dd9c3ebc258602b3fc11052ff6607f8712b505cef3ed83b97b063f89e",
+      "adaptation": "Local imports only"
+    },
+    {
+      "source": "src/topic4_nlc_null_calibration.py",
+      "destination": "modeling/src/topic4_nlc_null_calibration.py",
+      "source_sha256": "6b6b63d3a526621ab99796f4979614d9ac0c9f71fc2b7c6142d527fdbd514eb0",
+      "copied_sha256": "33ee507d2c76e702b5f8916e5c7461805a82c328cef0ba08de1a661c891cdb76",
+      "adaptation": "Local imports only"
     }
   ]
 }

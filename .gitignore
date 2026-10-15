@@ -257,3 +257,7 @@ results/_legacy_2021_readonly/*
 
 # Large regenerated per-subject propagation summary (62MB) — keep out of history; track only the cohort summary
 results/interictal_propagation_masked/pr1_subject_summary.json
+
+# Standalone paper code keeps clinical inputs and generated outputs local.
+/paper_inputs/
+/paper_outputs/

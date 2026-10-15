@@ -27,9 +27,10 @@ def main():
             raise AssertionError(f"Symlink is not an independent code copy: {path}")
         if path.suffix.lower() in {".npz", ".npy", ".csv", ".png", ".pdf", ".gif", ".tex", ".edf", ".data", ".head"}:
             raise AssertionError(f"Non-code artifact in code directory: {path}")
-    notebook = json.loads((ROOT / "notebooks/01_reproduce_paper_figures.ipynb").read_text())
-    assert all(not c.get("outputs") and c.get("execution_count") is None
-               for c in notebook["cells"] if c["cell_type"] == "code")
+    for path in (ROOT / "notebooks").glob("*.ipynb"):
+        notebook = json.loads(path.read_text())
+        assert all(not c.get("outputs") and c.get("execution_count") is None
+                   for c in notebook["cells"] if c["cell_type"] == "code")
     print(json.dumps({"status": "PASS", "copied_sources": len(manifest["files"]),
                       "python_files": len(python_files), "symlinks": 0, "notebook_outputs_cleared": True}, indent=2))
 

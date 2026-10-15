@@ -22,7 +22,7 @@ def local_import_report():
     from paper_paths import CODE_ROOT
     modules = {}
     for name, module in list(sys.modules.items()):
-        if name.split(".")[0] not in {"data_processing", "analysis", "modeling", "plotting", "paper_paths"}:
+        if name.split(".")[0] not in {"data_processing", "analysis", "modeling", "plotting", "workflows", "paper_paths"}:
             continue
         filename = getattr(module, "__file__", None)
         if filename:
