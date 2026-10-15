@@ -1,5 +1,5 @@
 <!-- WORKSPACE_STATUS_20261015 -->
-> **工作区清理（2026-10-15）：** 当前5个worktree及准确提交/退役记录见 [工作区状态](docs/workspace_status.md)。RNN线按作者要求保留；`topic4-continuous-core-state-r1`和`topic4-substrate-autapse-fix`仍提供代码与数据依赖，不能只看提交日期删除。Figure 3/4临时发布checkout已关闭，分支和提交保留。主目录的并行工作和既存冲突不属于本次清理范围。
+> **当前4个工作区（2026-10-15）：** 主目录、RNN开发区、统一SNN开发区、`main-cherry`整合检查区。见 [工作区状态](docs/workspace_status.md) 和 [SNN维护入口](docs/snn_workspace.md)。SNN新工作统一在 `topic4-continuous-core-state-r1`；`topic4-substrate-autapse-fix`已退出worktree登记，仅保留冻结代码/结果依赖，不再继续开发。旧发布区已关闭；主目录的并行工作和既存冲突保留。
 <!-- /WORKSPACE_STATUS_20261015 -->
 
 <!-- CURRENT_FIGURE4_20261011 -->
