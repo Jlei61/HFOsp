@@ -62,13 +62,59 @@ def statistics(stats,panel="D/F"):
     return fig
 
 
-def spatial_directions(directions,xyz,clustered):
-    fig=plt.figure(figsize=(10,4),layout='constrained');ax=fig.add_subplot(121,projection='3d');ax.scatter(*xyz.T,c=np.arange(len(xyz)),cmap='viridis');ax.set(xlabel='MRI x (mm)',ylabel='y',zlabel='z',title='Fig2A: named contact geometry')
-    ax=fig.add_subplot(122,projection='polar');d=directions['directions'];angle=np.arctan2(d[:,1],d[:,0])
-    for k,color in enumerate(['#4477aa','#cc6677']):
-        use=(clustered['labels']==k)&np.isfinite(angle);ax.hist(angle[use],bins=np.linspace(-np.pi,np.pi,19),alpha=.5,label=['TA','TB'][k],color=color)
-    ax.legend();ax.set_title('Fig2B direction calculation: 3D rank gradient\nshown in fixed MRI x/y plane')
+def contact_geometry(xyz):
+    fig=plt.figure(figsize=(6,4),layout='constrained')
+    ax=fig.add_subplot(111,projection='3d')
+    ax.scatter(*xyz.T,c=np.arange(len(xyz)),cmap='viridis')
+    ax.set(xlabel='MRI x (mm)',ylabel='y (mm)',zlabel='z (mm)',title='Fig2A: contact geometry')
     return fig
+
+
+def rank_directions(directions,clustered):
+    fig,ax=plt.subplots(figsize=(5,4),subplot_kw={'projection':'polar'},layout='constrained')
+    d=directions['directions'];angle=np.arctan2(d[:,1],d[:,0])
+    for k,color in enumerate(['#4477aa','#cc6677']):
+        use=(clustered['labels']==k)&np.isfinite(angle)
+        ax.hist(angle[use],bins=np.linspace(-np.pi,np.pi,19),alpha=.5,label=['TA','TB'][k],color=color)
+    ax.legend();ax.set_title('Fig2B: early-to-late directions\n3D rank gradient shown in MRI x/y')
+    return fig
+
+
+def shared_field_null(result):
+    fig,ax=plt.subplots(figsize=(6,4),layout='constrained')
+    if result['status']=='OK':
+        ax.hist(result['channel_null'],bins=25,color='gray')
+        ax.axvline(result['observed_shared_field_r'],color='red',label='observed')
+        ax.legend()
+    else:
+        ax.text(.5,.5,result['reason'],ha='center',transform=ax.transAxes)
+    ax.set(xlabel='TA/TB shared-field Pearson r',ylabel='Permutations',
+           title='Fig2D: one-patient field comparison')
+    return fig
+
+
+def noise_confirmation(baseline,confirmation):
+    fig,ax=plt.subplots(figsize=(5,4),layout='constrained')
+    for i,run in enumerate([baseline,confirmation]):
+        score=run['score']
+        if score['J'] is None:
+            ax.text(i,0,score['status'],ha='center',fontsize=8)
+        else:
+            ax.bar(i,score['J'],color=['#4477aa','#228833'][i])
+    ax.set(xticks=[0,1],xticklabels=['Training noise','New noise'],ylabel='Calibrated J',
+           title='Fig4I method: one patient, fixed configuration')
+    return fig
+
+
+def selected_propagation_movie(runs,selection,path,radius):
+    """Render the selected new events, or explain why the comparison is unavailable."""
+    if selection['status']!='READY':
+        print('两个工作点尚未各产生两类合格事件，无法生成四事件比较。')
+        return
+    propagation_movie(runs,path,radius,event_indices=selection['events'])
+    selection['status']='GENERATED_FROM_NEW_SPIKES'
+    from IPython.display import Image,display
+    display(Image(filename=str(path)))
 
 
 def crossfit_scores(result):
@@ -117,7 +163,7 @@ def optimization_curves(searches):
         for r in rows:
             if r['J'] is not None:axs[1].scatter(k,r['J'],s=25)
     axs[0].set(xlabel='New simulation evaluation',ylabel='Best training J',title='Fig4C: equal-budget core search');axs[0].legend()
-    axs[1].set(xlabel='Number of cores',ylabel='Training J',xticks=[1,2,3,4],title='No finite loss is invented for invalid runs')
+    axs[1].set(xlabel='Number of cores',ylabel='Training J',xticks=[1,2,3,4],title='Core count and training discrepancy')
     return fig
 
 
@@ -196,7 +242,7 @@ def field_dynamics(run,energy,*,indices=None):
 
 def energy_alignment(energy):
     fig,axs=plt.subplots(1,2,figsize=(10,4),layout='constrained');t=energy['time_sec']
-    scores=energy['scores'];print('Computed spatial score fields:',list(scores))
+    scores=energy['scores']
     for name,values in scores.items():
         a=np.asarray(values)
         if a.shape==t.shape and name in ('signed_r','signed_projection_z'):axs[0].plot(t,a,label=name)
@@ -214,7 +260,8 @@ def raw_errors(rows,*,angle=False):
         ax.plot(x,y,'o-',label=label)
     ax.set(xlabel='E→E angle offset (deg)' if angle else 'New simulated configuration',ylabel='Descriptive error (0–1)',
            title='Fig4D: fixed-background angle response' if angle else 'Fig4B: three observable errors')
-    ax.set_title(ax.get_title()+'\nComplete contact/pair support; partial cases remain in JSON')
+    if not any(r.get('descriptive',{}).get('full_contact_pair_support',False) for r in rows):
+        ax.text(.5,.5,'Insufficient contact/pair support',ha='center',transform=ax.transAxes)
     ax.legend();return fig
 
 

@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.stats import rankdata
 from analysis.from_events import cluster_events
+from analysis.src.interictal_propagation import assign_events_to_templates
 from modeling.src.topic4_d6_natural_kmeans import (contact_split_folds,patient_profiles,
     crossfit_patient_readout,assign_to_profiles,normalize_event_ranks)
 from modeling.src.topic4_nlc_null_calibration import contact_permutation_matrix_draws,crossfit_matrix
@@ -11,6 +12,32 @@ def event_ranks(centroid_ms):
     times=np.asarray(centroid_ms,float);mask=np.isfinite(times);r=np.full_like(times,np.nan)
     for i,row in enumerate(times):r[i,mask[i]]=rankdata(row[mask[i]],method='dense')-1
     return r
+
+
+def centroid_events(centroid_ms, names):
+    """Patient or model event times -> the same masked rank representation."""
+    ranks = event_ranks(centroid_ms)
+    return dict(ranks=np.where(np.isfinite(ranks), ranks, -1).astype(int).T,
+                participating=np.isfinite(ranks).T, channel_names=np.asarray(names))
+
+
+def select_propagation_events(runs, templates, names, burnin_ms):
+    """First chronological eligible event of each patient template at each workpoint."""
+    comparison = sorted([run for run in runs if run['score']['J'] is not None],
+                        key=lambda run: -run['score']['J'])
+    selected = []
+    for run in comparison:
+        events = centroid_events(run['observed']['centroid_ms'], names)
+        labels = assign_events_to_templates(events['ranks'], events['participating'], templates)
+        eligible = run['observed']['primary_event_indices']
+        found = [[i for i in eligible if labels[i] == k and
+                  run['observed']['events'][i]['window_ms'][0] >= burnin_ms]
+                 for k in range(len(templates))]
+        selected.append([group[0] for group in found] if all(found) else None)
+    ready = len(comparison) == 2 and all(ids is not None for ids in selected)
+    return comparison, dict(events=selected,
+        status='READY' if ready else 'NOT_ESTIMABLE',
+        rule='first eligible chronological event per freshly fitted patient template')
 
 
 def model_patient_comparison(model_centroids,patient_centroids,names,contact_contract,*,n_null=1000):

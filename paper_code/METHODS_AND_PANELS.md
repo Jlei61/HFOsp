@@ -35,6 +35,10 @@ Epilepsiae 原始 `.data/.head` 用包内 `load_epilepsiae_block` 读取；其�
 
 当前小例不等于原18190事件，也不提供队列显著性。K=2是模板模型设定，不证明两个生理状态。群事件pack保留legacy重叠处理；不同pack版本不能悄悄混用。
 
+预处理对完整片段执行polyphase重采样、Q=30陷波和三阶Butterworth带通。群窗先按通道事件数mean+k·SD选打包通道，再按±30ms扩展、500Hz栅格、50%通道门槛和患者固定窗合并；同通道重叠检测允许重复计数，重叠群窗成对剔除。拼接群窗后计算50ms Hamming/40ms overlap幅度谱，通道内σ=1.5 Gaussian平滑，取50<f<300Hz，以完整事件窗S³加权求时间质心。仅参与通道获得rank；K-means使用归一化rank、缺失位置event-median=0.5插补，标签按事件数排序。
+
+单患者统计由 `patient_statistics` 生成；多个患者的结果字典交给 `cohort_statistics`，使用患者单位的配对检验。完整原始处理入口为 `workflows/cohort.py`。
+
 ## Notebook2：Fig2及临床能量场接口
 
 | 面板/任务 | 计算 |
@@ -47,6 +51,8 @@ Epilepsiae 原始 `.data/.head` 用包内 `load_epilepsiae_block` 读取；其�
 | Fig3/Fig5临床扩展 | 参考后真实SEEG → 频带功率 → 真实远端基线robust-z → 固定interictal场评分 |
 
 方向轴余弦、平滑场相关、能量幅度投影是不同量。图的显示平面与统计共享平面也要区分。`field_record`保留几何、bootstrap、leave-one-shaft-out资格；`status=ok`表示计算成功，不替代其中的稳定性字段。
+
+Fig2B按alternating recording blocks双向cross-fit；训练空间视图按总方差等权缩放。默认1000次held-out block内方向置换，50次training-space shuffle重拟合。Fig2C固定TA方向轴及剩余空间主方向，用同一个robust length scale归一化。场为 $F(x)=\sum_i K(x,x_i)s_i e_i/\sum_i K(x,x_i)s_i$，其中 $e_i=-z(rank_i)$、$s_i$为模板参与率，$K=\exp[-d^2/(2\sigma^2)]$；核宽由投影后触点间距估计。Fig2D置换时将TB的earliness与support一起移动并重新平滑。
 
 ## Notebook3：Fig4、Fig5及Video2
 
@@ -71,6 +77,8 @@ Epilepsiae 原始 `.data/.head` 用包内 `load_epilepsiae_block` 读取；其�
 | 5F | 13人/140次候选的dB统计需要完整临床队列及其phase定义，默认未执行 |
 | Video2 | 两个新工作点×两个新事件，250ms、2ms帧、20fps；每事件以自身最早质心对齐 |
 
+Notebook将core优化、方向扫描、独立噪声和Z/M分开执行，便于逐项改变实验。`search_core_counts` 并行运行各K/restart，核心 `optimize_cores` 每次提出候选后调用新仿真与目标评分；结果按K/restart排序，与进程结束顺序无关。基准配置用于4G/H和Video2比较；它不是本次小预算搜索的最优配置。Video2按两个工作点的J排序，每个工作点选患者模板各类别在burn-in后最早的合格事件；缺少两类事件时明确不生成四事件比较。
+
 模型能量场先由interictal rank拟合轴并中心化、归一化投影；镜像围绕固定模板轴，不能围绕20mm仿真片的边界。平移坐标原点后相关和投影分数应不变，科学检查包含这一不变量。
 
 Z/M使用当前Fig5历史版本：τz=5000ms、τm=500ms、ηm=0.007451594355587098、抑制电流阈值95.19851312666987。该版本与现代同名模块的运算顺序分别保留。保护触发后保留1.5s记录，确保进入后1s谱窗完整。基本例电流采样2000Hz并展示未滤波波形；与当前候选10kHz采样的30–1000Hz显示区别明确。外部输入、图和core不随Z/M启用重拟合；新图与历史缓存图身份不同，不能承诺相同进入时刻。
@@ -88,3 +96,22 @@ Z/M使用当前Fig5历史版本：τz=5000ms、τm=500ms、ηm=0.007451594355587
 多患者SNN入口：`python -m modeling.cohort manifest.json --output ../paper_outputs/model_cohort`。manifest每项提供subject、observations、configuration、contact_contract；观测NPZ另需cal_block_ids以保留校准的记录内连续抽样。逐患者保存训练选优、触点交叉匹配和独立噪声确认；Fig4I汇总单位为患者。此完整队列入口尚未用整队列执行。
 
 Fig5E临床例图可提供 `paper_inputs/E1146_demo/clinical_examples.json`：每项为file、onset_sec、baseline_sec、seizure_index；file指向含samples_V、sfreq、channel_names的完整CAR montage原始NPZ。baseline_sec为该片段内真实远端基线（通常对应发作前−120至−90s）。`compare_raw_patient_fields`从原始采样逐次重算10s场，再执行正平均增强门槛与最大signed identity-field相关的描述性选择；不输出独立验证p值。默认未附这组原始发作输入。
+
+临床扩展单独调用，避免占据基本模型教程的主线。运行Notebook 03后，已有 `onset_field`、`energy` 和 `patient.names` 时可执行：
+
+```python
+import json
+import numpy as np
+from paper_paths import INPUT_ROOT
+from analysis.model_transition import compare_raw_patient_fields
+
+root = INPUT_ROOT / 'E1146_demo'
+seizures = []
+for item in json.loads((root / 'clinical_examples.json').read_text()):
+    with np.load(root / item['file'], allow_pickle=False) as z:
+        raw = dict(samples_V=z['samples_V'], sfreq=float(z['sfreq']),
+                   channel_names=z['channel_names'].tolist())
+    raw.update({key: item[key] for key in ['onset_sec', 'baseline_sec', 'seizure_index']})
+    seizures.append(raw)
+comparison = compare_raw_patient_fields(onset_field, seizures, patient.names, energy['scorer'])
+```

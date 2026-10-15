@@ -1,6 +1,6 @@
 # 论文计算代码
 
-三个 notebook 从电压或新仿真开始，按论文面板组织。所有实现都在本目录；输入和结果放在旁边。
+三个 notebook 沿着三个问题展开：**脑电中的顺序会重复吗？空间坐标增加了什么信息？怎样的网络能产生这些传播？** 每一步说明为什么计算、图中看什么，核心计算与论文面板一一对应。所有实现都在本目录；输入和结果放在旁边。
 
 ```text
 paper_code/
@@ -9,6 +9,7 @@ paper_code/
 ├── analysis/           rank、K-means、统计、投影、空间场
 ├── modeling/           LIF网络、core输入、目标函数、优化、Z/M
 ├── plotting/           本次计算数组的绘图与GIF
+├── workflows/          输入、结果保存及队列入口
 ├── config/             E1146 demo参数、SNN基础/论文规模参数
 ├── tools/              notebook执行、EDF导出、科学计算检查
 └── METHODS_AND_PANELS.md
@@ -29,9 +30,11 @@ python -m jupyterlab notebooks/
 
 按顺序打开：
 
-1. [01 · 电压 → Fig1](notebooks/01_raw_seeg_to_fig1.ipynb)：四段E1146电压 → 参考/滤波 → 检测/群事件 → 质心/rank → K-means → 统计。
-2. [02 · rank与坐标 → Fig2](notebooks/02_ranks_to_spatial_fields_fig2.ipynb)：读取01本次算出的事件，计算rank-gradient、Timing与Timing+Space交叉验证、投影和Gaussian场。
-3. [03 · 新SNN → Fig4/5](notebooks/03_snn_model_fit_fig4_fig5.ipynb)：新建网络 → 新仿真 → 拟合目标/core搜索 → 波形、传播GIF、Z/M和能量场。可单独运行。
+1. [01 · 重复顺序（Fig1）](notebooks/01_raw_seeg_to_fig1.ipynb)：从原始电压得到事件与模板，再与随机顺序比较。
+2. [02 · 空间信息（Fig2）](notebooks/02_ranks_to_spatial_fields_fig2.ipynb)：计算传播方向，在独立记录上比较有无空间信息，最后投影成场。
+3. [03 · 传播模型（Fig4/5）](notebooks/03_snn_model_fit_fig4_fig5.ipynb)：建立网络和拟合目标，分别运行core搜索、方向实验、传播动画与Z/M仿真。可单独运行。
+
+首次阅读按标题和图走完主线即可；修改实验时看对应的计算 cell。参数细节与扩展接口集中在 [方法说明](METHODS_AND_PANELS.md)，输入和文件保存由 `workflows/tutorial.py` 处理。
 
 命令行执行：`python tools/execute_notebook.py --notebook 01_raw_seeg_to_fig1.ipynb`，替换文件名即可运行另外两个。结果写到相邻 `paper_outputs/`。输入/输出位置可通过 `HFO_PAPER_INPUTS`、`HFO_PAPER_OUTPUTS` 设置。
 
