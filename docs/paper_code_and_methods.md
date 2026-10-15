@@ -1,5 +1,7 @@
 # 论文图件、方法与公开代码精简指南
 
+> **独立代码包已整理：** [paper_code](../paper_code/README.md)按数据处理、分析、建模、绘图分开，依赖实现已复制到包内；[基础 notebook](../paper_code/notebooks/01_reproduce_paper_figures.ipynb)提供已执行的数值核对与图版复现。衍生输入另存为相邻 `paper_inputs/`，输出为 `paper_outputs/`。下文保留原仓库来源和完整原始分析仍需处理的差异。
+
 更新：2026-10-15。用途：确定论文每张图依赖的方法、数据和代码，作为最后整理公开代码的依据。本文是**发布准备清单**；图件定稿、图件重建成功和原始分析复现完成是三个不同状态。
 
 核对基线为本机作者终稿 `author_final_20261015`、当前 paper-ready 包及其来源登记。终稿 `.tex` 继续仅在本机保存，不纳入公开代码包。图件身份以[总登记](paper_figure_registry.md)、[来源登记](../config/paper_figure_source_registry.json)及各图版本指针为准；本文不替换这些记录。
