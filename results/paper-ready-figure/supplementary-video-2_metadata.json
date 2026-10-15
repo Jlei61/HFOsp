@@ -1,0 +1,196 @@
+{
+  "producer": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_supplementary_video2_model_propagation.py",
+  "producer_sha256": "ff88e60b44d7a1714cf39f524e6394fa433544cb6e4fcc2ad1bead042b7c1c69",
+  "status": "AUTHOR_ACCEPTED_FINAL",
+  "static_rows_pixel_identical": true,
+  "static_row_boxes_px": [
+    [
+      32,
+      114,
+      2134,
+      833
+    ],
+    [
+      32,
+      949,
+      2134,
+      1668
+    ]
+  ],
+  "static_size_px": [
+    2166,
+    1700
+  ],
+  "source_metadata": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/animations/20261009/animation_metadata.json",
+  "source_metadata_sha256": "2fdb8eb599ad85b5d9919bd1eeb0614bc2b22b58cfdec1746b7d78a70db20186",
+  "timing": "All four events retain their own complete frozen 250 ms windows. They advance together from their window starts; each time is relative to that event's earliest valid centroid, not a shared absolute time.",
+  "new_simulations": 0,
+  "events_reselected": false,
+  "conditions": [
+    {
+      "label": "Higher error / Poorer fit",
+      "source_candidate": "lf_bo04_07",
+      "J_joint": 5.750174655125208,
+      "events": [
+        {
+          "event": 114,
+          "mode": "MTA",
+          "lo": 38018.0,
+          "hi": 38268.0,
+          "zero": 38126.21921877001,
+          "denominator": [
+            1e-20,
+            0.1963086873292923,
+            2.0403215482537054e-17,
+            0.3819389045238495,
+            2.8244812710909173e-08,
+            0.540619432926178,
+            0.5860738754272461,
+            0.19529186189174652,
+            0.49272775650024414,
+            0.043458156287670135,
+            0.2818208932876587,
+            0.4100995361804962,
+            0.5334402918815613,
+            0.5757502317428589,
+            0.6111865639686584
+          ]
+        },
+        {
+          "event": 14,
+          "mode": "MTB",
+          "lo": 5002.0,
+          "hi": 5252.0,
+          "zero": 5095.310227317748,
+          "denominator": [
+            0.015368499793112278,
+            0.6752069592475891,
+            0.00028284976724535227,
+            0.6426452994346619,
+            1.0936543226591766e-08,
+            0.6240996718406677,
+            0.6089211702346802,
+            5.579861017679377e-10,
+            0.6250860691070557,
+            0.6609164476394653,
+            0.6070415377616882,
+            0.6071709394454956,
+            0.5332337021827698,
+            0.40660911798477173,
+            0.3845898509025574
+          ]
+        }
+      ],
+      "source_sha256": "f76fa12fbe4e0df2a0d37193e36acd434ec26e6b26a2c21d736290a294a77a2c",
+      "arrays_sha256": "9e3623c47ae8f95eecc4f8c702423f77aeadaa268caee4faf103ec3423a09466"
+    },
+    {
+      "label": "Lower error / Better fit",
+      "source_candidate": "xy_left_20",
+      "J_joint": 1.4556526062005162,
+      "events": [
+        {
+          "event": 39,
+          "mode": "MTA",
+          "lo": 13342.0,
+          "hi": 13592.0,
+          "zero": 13457.407841545657,
+          "denominator": [
+            0.17969529330730438,
+            0.34416550397872925,
+            0.0008295332081615925,
+            0.41755035519599915,
+            0.06663485616445541,
+            0.5428410172462463,
+            0.622482180595398,
+            0.4327450394630432,
+            0.5888697504997253,
+            0.6008509397506714,
+            0.6326797604560852,
+            0.6503365635871887,
+            0.6739546656608582,
+            0.6283783912658691,
+            0.6942382454872131
+          ]
+        },
+        {
+          "event": 151,
+          "mode": "MTB",
+          "lo": 46756.0,
+          "hi": 47006.0,
+          "zero": 46829.3043715259,
+          "denominator": [
+            0.6305510997772217,
+            0.6545515060424805,
+            0.6402300596237183,
+            0.6393460631370544,
+            0.6804973483085632,
+            0.6195299625396729,
+            0.6062862873077393,
+            0.6144917011260986,
+            0.6067761182785034,
+            0.6317382454872131,
+            0.6131846904754639,
+            0.6116651296615601,
+            0.5828487873077393,
+            0.13432525098323822,
+            0.49913641810417175
+          ]
+        }
+      ],
+      "source_sha256": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+      "arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
+    }
+  ],
+  "source_static_rows": [
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/complete_aj_completed_density_d_20261009/figures/fig4-panele.png",
+      "sha256": "86526a3a4c0016f285937f71021f07d6ceea52516c45c3373a95aca4f34f0121"
+    },
+    {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/complete_aj_completed_density_d_20261009/figures/fig4-panelf.png",
+      "sha256": "6246eb292854ea412b5645c6d58d99150aed31a3755a8d6dcc3a34d1afe53ed7"
+    }
+  ],
+  "video": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/supplementary-video-2.gif",
+    "sha256": "baf6479bd3ac49e286c51933cb6d93965b32d5a7e0c6a855de5690f71df5aca3",
+    "size_px": [
+      1600,
+      1091
+    ],
+    "n_frames": 125,
+    "native_frame_ms": 2,
+    "playback_fps": 20,
+    "duration_s": 6.25,
+    "all_frames_decoded": true,
+    "envelope_panels": "Original static image pixels plus cursors; uniformly resized only for GIF delivery",
+    "layout": "One condition per row; MTA envelope, MTB envelope, MTA native field, MTB native field",
+    "field_scale": [
+      0,
+      75
+    ],
+    "envelope_scale": [
+      0,
+      1
+    ]
+  },
+  "accepted_figure4_and_manuscript_unchanged": true,
+  "outputs": {
+    "supplementary-video-2.gif": "baf6479bd3ac49e286c51933cb6d93965b32d5a7e0c6a855de5690f71df5aca3",
+    "supplementary-video-2-preview.png": "3f0b2bf1be1b1b7effadd17fa5d1a359a47857ca818d6e68cf6cf09a21388590"
+  },
+  "schema_id": "model_interictal_propagation_fit_comparison_video_v1",
+  "asset_id": "model_interictal_propagation_fit_comparison_video",
+  "paper_slot": "Supplementary Video 2",
+  "version": "paired_rows_20261015",
+  "human_visual_acceptance": "AUTHOR_CONFIRMED",
+  "author_acceptance_date": "2026-10-15",
+  "author_instruction": "这个挺好的，把这个定稿为我们的 supplementary figure 2。就是不是 figure 2，supplementary video 2。",
+  "canonical_path": "results/paper-ready-figure/supplementary-video-2.gif",
+  "package_path": "results/paper-ready-figure/supplementary-video-2-model-propagation",
+  "source_candidate_metadata": "results/paper-ready-figure/supplementary_model_propagation_comparison/paired_rows_20261015/metadata.json",
+  "supersedes": "fig3c_peri_onset_field_evolution_video",
+  "archive": "results/paper-ready-figure/archive/2026-10-15_supplementary_video2_replacement",
+  "scope": "Video 2 only; the static comparison is an unnumbered companion, not Supplementary Figure 2."
+}

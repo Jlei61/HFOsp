@@ -183,15 +183,13 @@ Fig3-C 是 intentionally selected morphology-aware TA representative。它说明
 
 **科学边界**：冻结 archive 的 early-ictal shared-field cohort null（二维共线 n=7，within-shaft p=0.346；shared-vs-own p=0.938）仍是 cohort 级主参照。这里的 sliding-window null 回答逐人哪些时间段偏离杆内置换，不能把 3/7 cluster 写成 cohort superiority，也不能因为 pre-onset cluster 而写 onset-emergent alignment。within-shaft power 仍依赖 shaft sizes；E583 的 3/22 coverage 尤其需要降级解释。
 
-### Supplementary Video 2: Figure 3C peri-onset field evolution
+### Supplementary Video 2：模型间期传播的高／低误差比较
 
-E10 | SZ3 的静态 Figure 3C 被扩展为 `[-120,+20] s` 动态场。上排固定冻结 TA 间期场，仅更新右侧
-1–150 Hz baseline-robust-z 发作场；下排显示幅度感知模板表达量 `Q=max(|q_A|,|q_B|)`，并以红蓝点标记 TA/TB 主导。每帧为
-10 s 滑窗，步长 2 s，右侧 power-z 色标跨帧固定，避免逐帧归一化制造虚假的场强变化；`[0,10] s`
-帧必须通过正式 Fig3C 的逐触点数值一致性闸门。正式投稿入口为
-`results/paper-ready-figure/supplementary-video-2.gif`，生成 sidecar 位于
-`results/paper-ready-figure/supplementary-video-2-fig3c-peri-onset-field/figures/`。该视频只补足代表病例的
-动态可视化，不新增 cohort、onset-emergent alignment、template-free replay 或机制结论。
+2026-10-15 作者确认 `paired_rows_20261015` 为正式 Supplementary Video 2，状态 `AUTHOR_ACCEPTED_FINAL`。
+上排为高误差／较差拟合，下排为低误差／较好拟合；每行依次为 MTA 包络、MTB 包络、MTA 动态场、MTB 动态场。
+原事件、色标、通道顺序和模型几何保持，125 帧、20 fps；各事件回放各自的完整 250 ms 窗。
+正式入口为 `results/paper-ready-figure/supplementary-video-2.gif`，版本与来源见[当前说明](current_supplementary_video2.md)。
+旧 E10/SZ3 围发作场动画已归档，当前无论文编号；本次不更改 Supplementary Figure 2。
 
 ### Fig4: Data-driven interictal SNN（A–G 修订版，B 预留）
 

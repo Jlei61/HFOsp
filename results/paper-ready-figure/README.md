@@ -48,7 +48,7 @@ Fig4采用已确认的三行A–I版式，独立面板无角标、完整图带�
 | paper slot | asset_id | status | canonical path |
 |---|---|---|---|
 | Supplementary Video 1 | `interictal_single_event_propagation_video` | author-locked | `supplementary-video-1.gif` |
-| Supplementary Video 2 | `fig3c_peri_onset_field_evolution_video` | author-locked | `supplementary-video-2.gif` |
+| Supplementary Video 2 | `model_interictal_propagation_fit_comparison_video` | `AUTHOR_ACCEPTED_FINAL` | `supplementary-video-2.gif` |
 
 Supplementary Video 1 展示 E10 一次 TA 和一次 TB 代表事件在冻结 shared axis/plane 上的 HFO
 amplitude-envelope 演化。共 30 帧，生物学步长 2 ms，播放 12.5 fps（80 ms/frame）；中间场使用色盲友好的 soft
@@ -58,13 +58,13 @@ teal-to-navy 顺序色图、固定 `PowerNorm(gamma=0.5)` 和每事件完整显�
 它只支持 representative raw-envelope timing cross-check，不是 template-free、cohort、连续组织
 traveling-wave 或机制证据。完整合同和 SHA-256 见 `supplementary-video-1_metadata.json`。
 
-Supplementary Video 2 的正式投稿入口为 `supplementary-video-2.gif`，生成与海报 sidecar 位于
-`supplementary-video-2-fig3c-peri-onset-field/figures/`。该视频把主图
-E10 | SZ3 的发作场（旧Fig3C，现Fig3A场部分）扩展到临床起始前 120 s 至起始后 20 s。动画固定 shared TA plane、
-15 个触点、support、6 mm 显示核和 power-z 色标，仅更新 10 s 滑窗内的 1–150 Hz robust-z 场；
-下方幅度感知模板表达量 `Q=max(|q_A|,|q_B|)` 用红蓝点标出当时由 TA/TB 主导，并以游标同步当前帧。该视频是单病例动态
-配套，不是 onset-emergent alignment、template-free replay 或 cohort 证据。完整合同和 SHA-256 见
-`supplementary-video-2_metadata.json`。
+Supplementary Video 2 于 **2026-10-15 作者确认定稿**，版本 `paired_rows_20261015`。正式投稿入口为
+[`supplementary-video-2.gif`](supplementary-video-2.gif)，[定稿包](supplementary-video-2-model-propagation/README.md)
+包含冻结 GIF、预览、来源、作者确认记录及版本指针；[当前说明](../../docs/current_supplementary_video2.md)为统一入口。
+上排高误差／较差拟合，下排低误差／较好拟合，每行依次为 MTA 包络、MTB 包络、MTA 动态场、MTB 动态场，
+上下逐列对应。保留原事件、15 触点顺序、模型几何和固定色标；各事件完整 250 ms，2 ms 一步，125 帧、20 fps。
+四个事件按各自窗口起点回放，时间各自相对最早有效质心，不表示同时发生。拟合优劣仅比较这两个配置。
+静态配套不编号为 Supplementary Figure 2。原 E10/SZ3 围发作场视频已[归档](archive/2026-10-15_supplementary_video2_replacement/README.md)，不再占用 Video 2 编号。
 
 ## 补图与计算材料
 
