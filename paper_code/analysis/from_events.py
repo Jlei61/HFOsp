@@ -2,7 +2,7 @@
 import re
 import numpy as np
 from sklearn.cluster import KMeans
-from scipy.stats import wilcoxon
+from scipy.stats import wilcoxon,mannwhitneyu
 from analysis.src.lagpat_rank_audit import build_masked_kmeans_features
 from analysis.src.interictal_propagation import build_cluster_templates, compute_legacy_mi
 from analysis.src.interictal_spatial_information_gain import compute_crossfit_all_event_spatial_information_gain
@@ -35,23 +35,33 @@ def patient_statistics(events, clustered, permutations=200, seed=0):
     for k in range(clustered['k']):
         ix = clustered['labels']==k
         within.append(compute_legacy_mi(r[:,ix], b[:,ix], n_permutations=permutations, seed=seed+k+1))
-    return dict(overall=overall, within=within, scope='one patient; events are not cohort replicates')
+    from analysis.src.interictal_propagation import _multi_seed_tau_summary
+    overall_tau=_multi_seed_tau_summary(r,b,np.flatnonzero(valid))['mean_tau']
+    within_tau=[_multi_seed_tau_summary(r,b,np.flatnonzero(clustered['labels']==k))['mean_tau'] for k in range(clustered['k'])]
+    return dict(overall=overall,within=within,pairwise=dict(overall=overall_tau,within=float(np.nanmean(within_tau)),by_template=within_tau),scope='one patient; events are not cohort replicates')
 
 
-def cohort_statistics(patient_results):
+def cohort_statistics(patient_results,datasets=None):
     """One row per independent patient; no event-level pseudo-replication."""
     if len(set(patient_results)) != len(patient_results):
         raise ValueError('Patient identifiers must be unique')
     data=np.array([v['overall']['mi_mean'] for v in patient_results.values()])
     null=np.array([v['overall']['permuted_mean_median'] for v in patient_results.values()])
-    within=np.array([np.mean([x['mi_mean'] for x in v['within']]) for v in patient_results.values()])
-    ok=np.isfinite(data)&np.isfinite(null)&np.isfinite(within)
-    result=dict(n_patients=int(ok.sum()), observed=data, null=null, within=within,
-                unit='patient', p_vs_null=None, p_within_vs_overall=None)
-    if ok.sum()>=2:
-        def paired(a,b):
-            return 1.0 if np.allclose(a,b) else float(wilcoxon(a,b,alternative='greater').pvalue)
-        result.update(p_vs_null=paired(data[ok],null[ok]),p_within_vs_overall=paired(within[ok],data[ok]))
+    overall=np.array([v['pairwise']['overall'] for v in patient_results.values()])
+    within=np.array([v['pairwise']['within'] for v in patient_results.values()])
+    ok=np.isfinite(data)&np.isfinite(null)
+    paired_ok=np.isfinite(overall)&np.isfinite(within)
+    result=dict(n_patients=int(ok.sum()), n_pairwise_patients=int(paired_ok.sum()),
+                observed=data, null=null, pairwise_overall=overall, pairwise_within=within,
+                unit='patient', data_vs_null_by_dataset={}, p_within_vs_overall=None)
+    groups=np.array([datasets[s] if datasets else 'provided_cohort' for s in patient_results])
+    for group in np.unique(groups):
+        take=ok&(groups==group)
+        result['data_vs_null_by_dataset'][group]=dict(n=int(take.sum()),
+            test='Mann-Whitney U, data > null',p=None if take.sum()<2 else float(mannwhitneyu(data[take],null[take],alternative='greater').pvalue))
+    if paired_ok.sum()>=2:
+        a,b=within[paired_ok],overall[paired_ok]
+        result['p_within_vs_overall']=1. if np.allclose(a,b) else float(wilcoxon(a,b,alternative='two-sided').pvalue)
     return result
 
 

@@ -463,6 +463,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None, verb
         E_spk_bool[t] = spk[:NE]
         if step_observer is not None:
             step_observer.observe(t, tm, xi, nu_now, ext, delta_rate if external_e_rate_drive is not None else None, V, I_E, I_I, spk)
+        if step_observer is not None and getattr(step_observer, 'stop_requested', False):
+            _stop_t = t + 1
+            break
         if early_stop_runaway:
             _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1000.0 - _es_ema)
             _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0

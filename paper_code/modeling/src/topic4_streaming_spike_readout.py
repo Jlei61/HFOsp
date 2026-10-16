@@ -19,7 +19,10 @@ class StreamingSpikes:
         self.bs = round(bin_ms / dt)
         self.seen = 0
         self.count = np.zeros(ne, np.uint16)
+        self.count_1ms=np.zeros(ne,np.uint16);self.ms_steps=round(1/dt)
         self.bins, self.size = sheet_bin_indices(positions, bin_mm=1.0, sheet_mm=20.0)
+        self.spike_movie = np.zeros(((nsteps + self.bs - 1) // self.bs, self.size, self.size), np.uint32)
+        self.field_1ms=np.zeros((nsteps//self.ms_steps,self.size,self.size),np.uint32)
         self.movie = np.zeros(((nsteps + self.bs - 1) // self.bs, self.size, self.size), np.uint16)
         weights = []
         for c in montage.contacts:
@@ -36,11 +39,16 @@ class StreamingSpikes:
         if t != self.seen:
             raise ValueError('recorder must advance one step at a time')
         self.count += spikes
+        self.count_1ms += spikes
         self.seen += 1
+        if self.seen % self.ms_steps == 0:
+            self.field_1ms[self.seen//self.ms_steps-1]=np.bincount(self.bins,weights=self.count_1ms,minlength=self.size**2).reshape(self.size,self.size)
+            self.count_1ms.fill(0)
         if self.seen % self.bs == 0:
             frame = self.seen // self.bs - 1
             self.raw[:, frame] = self.weights @ self.count
             self.movie[frame] = np.bincount(self.bins[self.count > 0], minlength=self.size ** 2).reshape(self.size, self.size)
+            self.spike_movie[frame] = np.bincount(self.bins,weights=self.count,minlength=self.size**2).reshape(self.size,self.size)
             self.count.fill(0)
 
     def __getitem__(self, key):
@@ -53,7 +61,7 @@ class StreamingSpikes:
         nf = (self.seen + self.bs - 1) // self.bs
         if self.seen % self.bs:
             self.movie[nf - 1] = np.bincount(self.bins[self.count > 0], minlength=self.size ** 2).reshape(self.size, self.size)
-        return dict(activity_counts=self.movie[:nf], frame_ms=self.bin_ms, bin_mm=1.0, sheet_mm=20.0)
+        return dict(spike_counts=self.spike_movie[:self.seen//self.bs],activity_counts=self.movie[:nf], frame_ms=self.bin_ms, bin_mm=1.0, sheet_mm=20.0)
 
     def envelope(self):
         raw = self.raw[:, :self.seen // self.bs]

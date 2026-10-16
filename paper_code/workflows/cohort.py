@@ -14,9 +14,10 @@ from workflows.common import write_json
 def run(manifest,output):
     rows=json.loads(Path(manifest).read_text());output=Path(output);output.mkdir(parents=True,exist_ok=False)
     if len({r['subject'] for r in rows})!=len(rows):raise ValueError('Duplicate patients')
-    stats={};gains={}
+    stats={};gains={};datasets={}
     for row in rows:
         config=json.loads(Path(row['config']).read_text());root=Path(row['input_root']);subject=row['subject'];out=output/subject;out.mkdir()
+        datasets[subject]=config.get('dataset','provided_cohort')
         events=join_blocks([process_record(r,config,root)[2] for r in config['records']])
         clustered=cluster_events(events);stats[subject]=patient_statistics(events,clustered)
         np.savez_compressed(out/'events.npz',**events);write_json(out/'statistics.json',stats[subject])
@@ -29,7 +30,7 @@ def run(manifest,output):
             write_json(out/'spatial.json',gain);write_json(out/'field_record.json',field)
         except ValueError as exc:
             write_json(out/'spatial_exclusion.json',dict(status='NOT_ESTIMABLE',reason=str(exc)))
-    write_json(output/'fig1_cohort.json',cohort_statistics(stats))
+    write_json(output/'fig1_cohort.json',cohort_statistics(stats,datasets))
     write_json(output/'fig2_cohort.json',gains)
     return output
 

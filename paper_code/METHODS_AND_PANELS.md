@@ -1,6 +1,6 @@
 # 计算方法与面板接口
 
-本文件描述可公开整理的计算流程。正文终稿保持本机保存；这里不复制 `.tex`。论文定稿面板与本次示例的相同点是计算任务，不预设相同数据规模、随机网络身份或输出数值。
+本文件描述可公开整理的计算流程。正文终稿保持本机保存；这里不复制 `.tex`。面板调用论文 producer 的本地绘图副本，接收本次原始信号分析与仿真产生的数组。E1146 demo 的数据规模、搜索预算与历史论文批次不同，因此不预设相同输出数值。
 
 ## 数据接口
 
@@ -25,67 +25,66 @@ Epilepsiae 原始 `.data/.head` 用包内 `load_epilepsiae_block` 读取；其�
 
 ## Notebook1：Fig1
 
-| 面板 | 输入 → 计算 → 输出 |
+| 面板 | 本次从原始电压计算的内容 | 论文绘图口径 |
+|---|---|---|
+| A | 参考、滤波、HFO检测及群窗，三个160ms片段 | 黑色波形；demo不含MRI |
+| B | HFO片段平均谱；三个群事件的完整S³质心 | 原HFO均谱函数和群事件谱函数；频率在每个触点内向上递增，白点黑线连接质心 |
+| C | 参与触点的dense rank，按名字合并记录 | 原rank热图；右侧离散直方图按每行峰高缩放 |
+| E | masked normalized rank → K-means | 相同通道顺序，按簇排列；原均值±总体SD绘图函数 |
+| D | legacy MI与置换基线 | 每患者一对数据；一个demo患者不画队列分布或显著性 |
+| F | 事件对之间的Kendall一致性，整体与模板内对比 | 原散点/对角线/配对inset结构；两模板等权平均 |
+
+预处理在完整片段上执行polyphase重采样、Q=30陷波和三阶Butterworth带通。按患者mean+k·SD通道事件数规则选择pack触点，±30ms扩展、500Hz栅格、50%通道门槛和固定群窗合并；保留原重叠处理。拼接群窗后计算50ms Hamming、40ms overlap幅度谱，先做σ=1.5 Gaussian平滑，再截50<f<300Hz，以完整事件S³加权求质心。只有真实参与触点获得rank；K-means缺失位置以event-median=0.5插补，标签按事件数排序。
+
+B左侧HFO均谱沿用单独的180ms Hann、160ms overlap及早期基线归一化方法。demo使用新检测片段，论文使用Y1人工标记的178段，不能把两个计数等同。C/E使用E1146新检测事件，不读取Y1的18190事件。K=2是模板设定，不是两个生理状态的证据。
+
+`patient_statistics`同时保存D的legacy MI和F的pairwise统计；`cohort_statistics`以患者为单位，D按队列做Mann–Whitney U单侧检验（data > null），F做整体/模板内的双侧配对Wilcoxon检验。批量原始处理入口为`workflows/cohort.py`。
+
+## Notebook2：Fig2
+
+| 面板 | 计算 | 绘图 |
+|---|---|---|
+| A | 名称对齐的3D触点 → rank梯度 → 固定TA平面 | 实际坐标、投影平面、6mm Gaussian示意 |
+| B | recording-block cross-fit，Timing与Timing+Space用同一训练/测试事件 | 原方向玫瑰图；Timing虚线、Timing+Space实线；单患者held-out配对点 |
+| C | 从原始电压重算每个事件的Hilbert包络和四帧空间分布 | 原时频读出/动态场函数；6mm平滑、每帧前三参与触点定标、PowerNorm γ=0.5 |
+| D | 全事件Timing+Space拟合后的两模板rank场 | 原物理mm平滑；viridis 0=early、1=late |
+| 场比较 | 固定TA平面内两模板场相关及完整触点置换 | 单患者置换分布；不代替论文队列统计 |
+
+B从rank与3D位置做OLS梯度，方向正向early→late。默认1000次held-out block内方向置换和50次training-space shuffle重拟合；两方法共享可评分分母。训练缺少空间坐标的事件保留时序信息。方向玫瑰图使用相同held-out事件和共同投影基底。
+
+C的显示质心沿用其producer的70%主增强成分规则，Fig1的事件rank仍由完整S³计算，两者不混用。D的展示采用物理6mm平滑；统计场保留原方向轴、尺度和支持度的定义：$F(x)=\sum_i K(x,x_i)s_i e_i/\sum_i K(x,x_i)s_i$，$e_i=-z(rank_i)$。方向余弦、展示rank场和统计earliness场是不同读出。`field_record`保存资格与稳定性；`status=ok`不代表通过作者验收。
+
+## Notebook3：Fig4、Fig5、Video2
+
+原生有延迟E/I LIF网络：20×20mm、40,000神经元、E:I=4:1、dt=0.1ms。AMPA/GABA双指数电流；背景阈值18mV、reset 11mV；core内用固定逐细胞分位数降低阈值。独立core OU及逐细胞Poisson输入，无事件定时kick。按原独立RNG重新采样E→E边：垂直连接宽度×1.5，可旋转方向；E→I及GABA拓扑保留。
+
+| 面板 | 新计算及对应绘图 |
 |---|---|
-| A | 原始采样 → 显式参考、重采样、陷波、80–250 Hz带通 → 事件波形 |
-| B | BQK通道检测 → 患者规则选择打包通道 → 扩展/阈值/固定群窗 → 拼接频谱S³时间质心 |
-| C | 新质心 + 真实参与mask → 每事件内dense rank → 按通道名拼接记录 |
-| E | masked normalized rank、缺失插补0.5 → K-means → 新模板/标签 |
-| D/F | 共同参与通道对先后的一致性 → 每患者置换基线与模板内统计 → 患者单位配对检验 |
+| 4A | 本地E/I机制图、新网络/core、Gaussian采样和新事件包络 |
+| 4B | 每次候选的三类可观察误差横向连线，颜色为迭代顺序；与优化目标J分开 |
+| 4C | 1–4 core best-so-far曲线；原均值±样本SD函数 |
+| 4D | −20°至20°共13个E→E方向重新构图、仿真、评分；原三误差响应绘图函数 |
+| 4E | 两core候选中最低20% J的位置，σ=0.35mm密度、90%质量轮廓和原relief绘图函数；新峰超出旧裁框时仅扩展画布 |
+| 4F | 全轨迹30–80Hz四阶零相位滤波，再截窗；统一P99缩放、SCL/ICL固定顺序及类别底色 |
+| 4G/H | 新模型与患者模板mean-rank、触点交叉拟合矩阵；原rank/matrix绘图函数 |
+| 4I | E1146的TA–MTA、TB–MTB signed Spearman相似度；原按mode绘图函数 |
+| Video2 | 上差/下好工作点，每行MTA/MTB包络及两动态场；固定15触点顺序、250ms、2ms帧、20fps |
+| 5A | 新Z/M轨迹10kHz原生电流；原80–1000Hz滤波、募集前P99.5及15% median floor定标 |
+| 5B | 同次积分的All E/Core A的Z和ηM，原慢变量绘图函数 |
+| 5C | 1ms真实spike计数 → 20ms各格E发放率；原四帧magma/PowerNorm(0.6)绘图函数 |
+| 5D | 同轨迹Z、ηM、5ms发放率，原三维绘图函数，颜色t/T |
+| 5E | 新模型进入后1s场与原始临床0–10s场：各自基线robust-z；原Blues/min-max绘图，另附真实模型z色条 |
+| 5F | 原始发作六带阶段 + 新模型最终募集窗口 → dB场；平滑前完整触点置换，每次重选最佳发作；原患者配对统计绘图函数 |
 
-当前小例不等于原18190事件，也不提供队列显著性。K=2是模板模型设定，不证明两个生理状态。群事件pack保留legacy重叠处理；不同pack版本不能悄悄混用。
+患者FIT重新建立原三项Fourier分布目标；独立CAL中连续16事件的256组索引用于重算尺度。少于16合格模型事件、无事件或runaway不提供伪造的惩罚loss。患者模板使用FIT的Timing+Space；模型事件沿用FIT训练的rank K-means分类器，语义按FIT与空间模板的一致性固定映射。F/G/Video2共用这些模型标签，H单独执行触点交叉分组。G/H使用新搜索选出的两core模型；Video2比较基准与选优模型，按本次J排列，按每个模板最早合格事件选片，缺任一类别则不生成四事件比较。
 
-预处理对完整片段执行polyphase重采样、Q=30陷波和三阶Butterworth带通。群窗先按通道事件数mean+k·SD选打包通道，再按±30ms扩展、500Hz栅格、50%通道门槛和患者固定窗合并；同通道重叠检测允许重复计数，重叠群窗成对剔除。拼接群窗后计算50ms Hamming/40ms overlap幅度谱，通道内σ=1.5 Gaussian平滑，取50<f<300Hz，以完整事件窗S³加权求时间质心。仅参与通道获得rank；K-means使用归一化rank、缺失位置event-median=0.5插补，标签按事件数排序。
+优化保留原Sobol起点、Matérn-5/2 ARD GP、固定数值噪声、局部±0.35归一化边界、qLogEI和全局后验不确定性候选。8候选批次为6个qLogEI+2个不确定性点；末批只取剩余预算。不足8个可评分观测时空间填充。可复制入口使用同步批次，原分布式delayed调度未打包；同算法不保证相同历史候选次序。默认10评估×2重启×4core、12s/次；论文规模配置为31×4×4、60s/次。C的样本SD来自独立重启，不把候选当重复实验。
 
-单患者统计由 `patient_statistics` 生成；多个患者的结果字典交给 `cohort_statistics`，使用患者单位的配对检验。完整原始处理入口为 `workflows/cohort.py`。
+Fig5使用2026-10-11六面板候选的定义。τz=5000ms、τm=500ms、ηm=0.007451594355587098、抑制电流阈值95.19851312666987；从Fig4选优几何重新积分，启用Z/M不重拟合拓扑。t120显示进入与200Hz/200ms保护分别保存。10ms非重叠全E率连续200ms达到200Hz后，按max(15s,进入+3s)停止；为容纳新拟合网络的较晚进入，未进入则最多60s。新进入时刻决定显示窗口；不写死历史14.3–15.4s，也不承诺重现历史进入时刻。显示时刻沿用该版本相对t120的偏移；数值编号不预先判定新轨迹的状态名称。滤波80–1000Hz、快照20ms、显示系数0.65及Z/M颜色均取冻结版本的运行参数，不取旧脚本默认值。每个空间快照的总spike数与全网记录相等。
 
-## Notebook2：Fig2及临床能量场接口
+Fig5临床demo包含E1146进入原论文阶段审阅的23次候选发作。打包的是1024Hz未滤波电压、完整颅内CAR参考、SQL时间和先前独立选择的静息基线标注；不含旧频谱、阶段结果或场。`clinical_candidates`先重新参考和50/100/150/200Hz、Q=30零相位陷波，再计算1s Tukey谱（0.5s hop）。Fig5F重算六带共同增强及阶段，在线噪声±2Hz排除后要求≥5/6带、≥2低频带、≥2快频带，且阶段内≥2s共同支持。静息基线标注是输入；本demo不重做整队列的基线人工筛选。
 
-| 面板/任务 | 计算 |
-|---|---|
-| A | 三维触点名称对齐；由时序计算空间方向 |
-| B方向 | OLS rank梯度归一化，正向early→late；数学不可估保留缺失 |
-| B对照 | recording-block cross-fit；Timing与Timing+Space共享训练事件；测试rank-only分配；共同可评分分母；block内方向置换、训练空间视图置换 |
-| C投影 | 评分完成后单独拟合全事件Timing+Space模板；固定轴、横向方向、同一个长度尺度；估计核宽、支持域和Gaussian earliness场 |
-| D | 共同平面触点处TA/TB场Pearson r；打乱TB触点身份并重建场；每患者一个统计单位 |
-| Fig3/Fig5临床扩展 | 参考后真实SEEG → 频带功率 → 真实远端基线robust-z → 固定interictal场评分 |
-
-方向轴余弦、平滑场相关、能量幅度投影是不同量。图的显示平面与统计共享平面也要区分。`field_record`保留几何、bootstrap、leave-one-shaft-out资格；`status=ok`表示计算成功，不替代其中的稳定性字段。
-
-Fig2B按alternating recording blocks双向cross-fit；训练空间视图按总方差等权缩放。默认1000次held-out block内方向置换，50次training-space shuffle重拟合。Fig2C固定TA方向轴及剩余空间主方向，用同一个robust length scale归一化。场为 $F(x)=\sum_i K(x,x_i)s_i e_i/\sum_i K(x,x_i)s_i$，其中 $e_i=-z(rank_i)$、$s_i$为模板参与率，$K=\exp[-d^2/(2\sigma^2)]$；核宽由投影后触点间距估计。Fig2D置换时将TB的earliness与support一起移动并重新平滑。
-
-## Notebook3：Fig4、Fig5及Video2
-
-神经元方程是原生有延迟E/I LIF；突触电流通过AMPA/GABA双指数滤波。背景阈值18mV、reset11mV；core内使用固定每神经元分位数的lowering-only阈值。40,000神经元中32,000为E。独立core OU控制输入率，Poisson创新逐细胞不同；core外E及I采用确定性期望输入。无事件指定的kick。
-
-| 面板 | 从新仿真计算的读出 |
-|---|---|
-| 4A | 位置、无自连接空间图、core阈值、采样位置及E/I发放率 |
-| 4B | 新候选的平均rank、杆内先后概率和participation误差；与优化目标J分开；曲线要求完整触点/通道对支持，部分支持保留JSON单列 |
-| 4C | K=1..4，相同候选预算的best-so-far训练曲线；不可评分尝试计入预算 |
-| 4D | 改变连接核角度，重新构图和仿真，再计算三项误差 |
-| 4E | 本次有限J配置的最低20%core位置；不是读取原83/413点 |
-| 4F | 新spike Gaussian读出、30–80 Hz滤波波形和新检测事件窗 |
-| 4G | 模型/患者平均归一化传播rank，缺席触点不填值 |
-| 4H | 一半触点分配、另一半评分，交换后汇总；within-shaft置换重复完整流程 |
-| 4I | 单患者独立噪声确认；完整队列另走逐患者输入/模型，不能把种子当患者 |
-| 5A | 新Z/M轨迹的原始电流波形、固定P95定标；t120与200Hz/200ms分开 |
-| 5B | 同一新积分的平均E细胞Z及ηM有效适应电流 |
-| 5C | 新2ms活动网格在预定时刻的50ms平均空间快照 |
-| 5D | Z、ηM、5ms全体E速率的三维轨迹；不是分岔图 |
-| 5E | CAR电流 → 1–150Hz、1s Tukey PSD → 0.5–3.5s基线z → 完整进入后1s场；患者另需原始发作信号 |
-| 5F | 13人/140次候选的dB统计需要完整临床队列及其phase定义，默认未执行 |
-| Video2 | 两个新工作点×两个新事件，250ms、2ms帧、20fps；每事件以自身最早质心对齐 |
-
-Notebook将core优化、方向扫描、独立噪声和Z/M分开执行，便于逐项改变实验。`search_core_counts` 并行运行各K/restart，核心 `optimize_cores` 每次提出候选后调用新仿真与目标评分；结果按K/restart排序，与进程结束顺序无关。基准配置用于4G/H和Video2比较；它不是本次小预算搜索的最优配置。Video2按两个工作点的J排序，每个工作点选患者模板各类别在burn-in后最早的合格事件；缺少两类事件时明确不生成四事件比较。
-
-模型能量场先由interictal rank拟合轴并中心化、归一化投影；镜像围绕固定模板轴，不能围绕20mm仿真片的边界。平移坐标原点后相关和投影分数应不变，科学检查包含这一不变量。
-
-Z/M使用当前Fig5历史版本：τz=5000ms、τm=500ms、ηm=0.007451594355587098、抑制电流阈值95.19851312666987。该版本与现代同名模块的运算顺序分别保留。保护触发后保留1.5s记录，确保进入后1s谱窗完整。基本例电流采样2000Hz并展示未滤波波形；与当前候选10kHz采样的30–1000Hz显示区别明确。外部输入、图和core不随Z/M启用重拟合；新图与历史缓存图身份不同，不能承诺相同进入时刻。
-
-原三项分布目标用患者FIT重新建立Fourier映射与目标矩，按原CAL记录内连续16事件的256组索引重算尺度。E1146尺度核对值为rank 0.04485866893176316、timing 0.043128270322858264、participation 0.04559242266535053。它们是实现/输入口径核对，不证明患者机制识别。少于16个合格模型事件、runaway、无事件均保留原状态，不伪造惩罚loss。
-
-默认预算的core比较使用相同独立Sobol初始设计；后半段若已有可评分点则作局部精修。完整参数文件可扩大评估数，但该透明优化器仍不同于论文历史delayed Matern-GP/qLogEI。历史调度器不包含在这个基本代码包中。
+Fig5E独立保留EEG前−120至−90s基线和clinical0–10s观察窗，选择正平均增强、最高signed场相关的示例。Fig5F使用另一套读出：模型100ms谱窗、50ms hop，1Hz零填充网格的真实分辨率为10Hz；静息窗由低率规则确定，最终20%率跨越作为起点，在最后率上升前100ms至200Hz进入后600ms内寻找持续200ms功率峰，峰窗结束后再保留200ms。患者及模型的dB均不除以MAD。完整触点置换先于原空间平滑，每次在同一合格发作池重选最大绝对相关；99999次，各患者独立随机流。`cohort_statistic`在每次置换内取患者中位数；E1146例图只含一个患者，不声称得到13人队列结论。新模型若缺少进入、完整谱窗或稳定平台，则明确返回不可估计。
 
 ## 复现证据与公开边界
 
@@ -93,25 +92,6 @@ Z/M使用当前Fig5历史版本：τz=5000ms、τm=500ms、ηm=0.007451594355587
 
 完整临床队列与原历史优化的逐次数值未在短示例中重跑。代码目录可以独立复制；运行仍需合规取得的原始数据/患者观测输入。原始临床数据包留在本机且不进入Git。
 
-多患者SNN入口：`python -m modeling.cohort manifest.json --output ../paper_outputs/model_cohort`。manifest每项提供subject、observations、configuration、contact_contract；观测NPZ另需cal_block_ids以保留校准的记录内连续抽样。逐患者保存训练选优、触点交叉匹配和独立噪声确认；Fig4I汇总单位为患者。此完整队列入口尚未用整队列执行。
+多患者SNN入口：`python -m modeling.cohort manifest.json --output ../paper_outputs/model_cohort`。manifest每项提供subject、observations、configuration、contact_contract；观测NPZ另需cal_block_ids以保留校准的记录内连续抽样，以及按contact_names排列的coords_mm三维坐标。逐患者保存训练选优、触点交叉匹配和独立噪声确认；Fig4I汇总单位为患者。此完整队列入口尚未用整队列执行。
 
-Fig5E临床例图可提供 `paper_inputs/E1146_demo/clinical_examples.json`：每项为file、onset_sec、baseline_sec、seizure_index；file指向含samples_V、sfreq、channel_names的完整CAR montage原始NPZ。baseline_sec为该片段内真实远端基线（通常对应发作前−120至−90s）。`compare_raw_patient_fields`从原始采样逐次重算10s场，再执行正平均增强门槛与最大signed identity-field相关的描述性选择；不输出独立验证p值。默认未附这组原始发作输入。
-
-临床扩展单独调用，避免占据基本模型教程的主线。运行Notebook 03后，已有 `onset_field`、`energy` 和 `patient.names` 时可执行：
-
-```python
-import json
-import numpy as np
-from paper_paths import INPUT_ROOT
-from analysis.model_transition import compare_raw_patient_fields
-
-root = INPUT_ROOT / 'E1146_demo'
-seizures = []
-for item in json.loads((root / 'clinical_examples.json').read_text()):
-    with np.load(root / item['file'], allow_pickle=False) as z:
-        raw = dict(samples_V=z['samples_V'], sfreq=float(z['sfreq']),
-                   channel_names=z['channel_names'].tolist())
-    raw.update({key: item[key] for key in ['onset_sec', 'baseline_sec', 'seizure_index']})
-    seizures.append(raw)
-comparison = compare_raw_patient_fields(onset_field, seizures, patient.names, energy['scorer'])
-```
+更换临床输入时，在`clinical_examples.json`逐条提供原始NPZ、相对clinical onset的记录起点、EEG起止时间、静息基线区间、分析/资格触点名和参考通道。参考信号须来自原完整颅内montage，不能用打包的15个分析触点重新求CAR。Notebook 03直接从这些采样重算E/F；代码不读取旧临床结果。

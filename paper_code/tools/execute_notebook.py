@@ -11,13 +11,27 @@ sys.path.insert(0, str(CODE))
 from paper_paths import new_output
 
 
+def export_html(notebook):
+    """Retain GIF outputs, which nbconvert's default MIME priority skips."""
+    from copy import deepcopy
+    from nbconvert import HTMLExporter
+    rendered = deepcopy(notebook)
+    for cell in rendered.cells:
+        for output in cell.get('outputs', []):
+            data = output.get('data', {})
+            if 'image/gif' in data:
+                data['text/html'] = ('<img alt="Propagation video" src="data:image/gif;base64,'
+                                     + data['image/gif'] + '">')
+    return HTMLExporter(template_name='lab').from_notebook_node(rendered)[0]
+
+
 def main():
     import nbformat
     from nbclient import NotebookClient
     from jupyter_client import KernelManager
     from jupyter_client.kernelspec import KernelSpecManager
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--timeout", type=int, default=7200, help="Timeout per code cell in seconds")
+    parser.add_argument("--timeout", type=int, default=18000, help="Timeout per code cell in seconds")
     parser.add_argument("--notebook", default="01_raw_seeg_to_fig1.ipynb")
     args = parser.parse_args()
     target = new_output("executed_notebooks") / (Path(args.notebook).stem + "_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%f") + ".ipynb")
@@ -34,7 +48,10 @@ def main():
             nbformat.write(notebook, target)
             if manager.has_kernel:
                 manager.shutdown_kernel(now=True)
-    print(json.dumps({"status": "PASS", "executed_notebook": str(target)}, indent=2))
+    html=export_html(notebook)
+    target.with_suffix('.html').write_text(html)
+    print(json.dumps({"status": "PASS", "executed_notebook": str(target),
+                      "html": str(target.with_suffix('.html'))}, indent=2))
 
 
 if __name__ == "__main__":

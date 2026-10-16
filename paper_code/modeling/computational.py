@@ -9,7 +9,7 @@ import copy
 import json
 from pathlib import Path
 import numpy as np
-from scipy.stats import qmc
+from modeling.ee_kernel import ee_kernel, resample_ee_kernel, _pad
 from modeling.src.snn_engine.params import Params, compute_nu_theta
 from modeling.src.snn_engine.connectivity import place_neurons
 from modeling.src.snn_engine.connectivity_rot import build_connectivity_rot
@@ -36,7 +36,17 @@ def build_substrate(config, *, angle_offset=0.0):
     p=Params(**config['parameters']);rng=np.random.default_rng(p.seed)
     pos,labels,ne,ni=place_neurons(p,rng)
     net=build_connectivity_rot(p,pos,labels,ne,ni,rng,
-        theta_EE=np.deg2rad(config['theta_deg']+angle_offset), AR=config['aspect_ratio'],verbose=False)
+        theta_EE=np.deg2rad(config['theta_deg']), AR=config['aspect_ratio'],verbose=False)
+    kernel=ee_kernel(p,theta_deg=config['theta_deg'],ar=config['aspect_ratio'],
+        perp_scale=config.get('EE_kernel_perp_scale',1.5),angle_offset_deg=angle_offset)
+    if not kernel['is_reference']:
+        net['ampa_by_delay'],_=resample_ee_kernel(net['ampa_by_delay'],pos,ne,
+            topology_seed=p.seed,kernel=kernel,p=p)
+        length=max(len(net['ampa_by_delay']),len(net['gaba_by_delay']))
+        net['ampa_by_delay']=_pad(net['ampa_by_delay'],length,(ne+ni,ne))
+        net['gaba_by_delay']=_pad(net['gaba_by_delay'],length,(ne+ni,ni))
+        net['max_delay_steps']=length-1
+        net.pop('ampa_flat',None);net.pop('gaba_flat',None)
     net['rng']=rng
     return dict(params=p,net=net,config=copy.deepcopy(config),angle_offset=float(angle_offset))
 
@@ -67,28 +77,46 @@ def core_field(substrate, centers, outward=1.25):
 
 class TracedHistoricalSlow(MZSlowVars):
     """Preserve historical arithmetic; sample traces at 2 ms without changing state."""
-    def __init__(self,*args,dt,**kwargs):
-        super().__init__(*args,**kwargs);self.dt=dt;self.samples=[]
+    def __init__(self,*args,dt,core_a,**kwargs):
+        super().__init__(*args,**kwargs);self.dt=dt;self.samples=[];self.core_a=core_a
+    def apply_currents(self,I_E,I_I,labels=None,**kwargs):
+        self.applied_inhibition=float(np.mean(self.z[:self.NE]*I_I[:self.NE]))
+        return super().apply_currents(I_E,I_I,labels=labels,**kwargs)
     def _record_traces(self,spk):
         if self._step_i % round(2/self.dt)==0:
-            self.samples.append([(self._step_i+1)*self.dt,self.z[:self.NE].mean(),self.m[:self.NE].mean()])
+            self.samples.append([(self._step_i+1)*self.dt,self.z[:self.NE].mean(),self.m[:self.NE].mean(),
+                self.z[self.core_a].mean(),self.m[self.core_a].mean(),
+                self.applied_inhibition])
     def trace_arrays(self):
         a=np.asarray(self.samples)
-        return dict(time_ms=a[:,0],z_mean=a[:,1],m_mean=a[:,2])
+        return dict(time_ms=a[:,0],z_mean=a[:,1],m_mean=a[:,2],z_core_a=a[:,3],m_core_a=a[:,4],inhibition_E=a[:,5])
 
 
 class CurrentReadout:
-    """The Fig5 LFP proxy: weighted abs(I_E)+abs(I_I), sampled at 2000 Hz.
+    """The Fig5 LFP proxy: weighted abs(I_E)+abs(I_I), sampled at the native 10 kHz.
 
     Uses native E-cell currents and the original finite-radius radial kernel;
     this is not extracellular voltage and not the Fig4 spike-density envelope.
     """
-    def __init__(self,p,net,contacts):
+    def __init__(self,p,net,contacts,ec,*,stop_after_entry=False):
         self.rec=LFPRecorder(p,net['pos'],net['labels'],sites=contacts)
-        self.stride=round(.5/p.dt);self.times=[];self.currents=[]
+        self.stride=1;self.times=[];self.currents=[]
+        self.core_ids=np.flatnonzero(ec>=0);self.raster_t=[];self.raster_i=[]
+        self.ne=net['NE'];self.dt=p.dt;self.entry_enabled=stop_after_entry
+        self.count_10ms=0;self.high_bins=0;self.entry_ms=None;self.stop_requested=False
     def observe(self,t,tm,xi,nu_now,ext,delta_rate,V,I_E,I_I,spk):
+        ids=np.flatnonzero(spk[self.core_ids])
+        if len(ids):
+            self.raster_t.append(np.full(len(ids),tm));self.raster_i.append(self.core_ids[ids])
         if t%self.stride==0:
             self.times.append(tm);self.currents.append(self.rec.sample(I_E,I_I))
+        self.count_10ms+=int(spk[:self.ne].sum())
+        if (t+1)%round(10/self.dt)==0:
+            rate=self.count_10ms/self.ne/.01;self.count_10ms=0
+            self.high_bins=self.high_bins+1 if rate>=200 else 0
+            if self.high_bins==20 and self.entry_ms is None:self.entry_ms=(t+1)*self.dt-200
+            if self.entry_enabled and self.entry_ms is not None:
+                self.stop_requested=(t+1)*self.dt>=max(15000.,self.entry_ms+3000.)
 
 
 def simulate(substrate, centers, contacts, *, outward=1.25, seed=847401,
@@ -97,22 +125,24 @@ def simulate(substrate, centers, contacts, *, outward=1.25, seed=847401,
     field=core_field(substrate,centers,outward);net=field['net'];ne,ni=net['NE'],net['NI']
     net['rng']=np.random.default_rng(seed)
     drive=CoreCountOU(field['ec'],p.nu_ext_ratio*compute_nu_theta(p)[0],.95,0,p.dt,p.tau_n,p.sigma_n,seed)
-    slow=None if zm is None else TracedHistoricalSlow(ne+ni,p.V_th,MZSlowVarsConfig(**zm),NE=ne,core_mask_E=field['ec']>=0,dt=p.dt)
-    observer=CurrentReadout(p,net,contacts) if record_current else None
+    slow=None if zm is None else TracedHistoricalSlow(ne+ni,p.V_th,MZSlowVarsConfig(**zm),NE=ne,core_mask_E=field['ec']>=0,dt=p.dt,core_a=np.flatnonzero(field['ec']==0))
+    observer=CurrentReadout(p,net,contacts,field['ec'],stop_after_entry=zm is not None) if record_current else None
     result=simulate_streaming(simulate_kick,p,net,KICK_BOOST=0.0,t_kick=1e9,
         positions=net['pos'][:ne],montage=SimpleNamespace(contacts=np.asarray(contacts)),
         V_th_per_neuron=field['vtheta'],slow=slow,global_ou_loading=np.zeros(ne+ni),
         deterministic_external_mask=np.r_[field['ec']<0,np.ones(ni,bool)],external_e_rate_drive=drive,
-        step_observer=observer,early_stop_runaway=True,es_thresh_hz=120 if zm is None else 200,es_dur_ms=100 if zm is None else 200,
-        post_runaway_record_ms=(cfg.get("zm_post_entry_ms",1500) if zm is not None else 500),verbose=False)
+        step_observer=observer,early_stop_runaway=zm is None,es_thresh_hz=120,es_dur_ms=100,
+        post_runaway_record_ms=500,verbose=False)
     spikes=result.pop('E_spk_bool');env,dt,_=spikes.envelope();movie=spikes.native()
-    out=dict(envelope=env,envelope_dt_ms=dt,movie=movie['activity_counts'],frame_ms=movie['frame_ms'],
-        time_ms=result['times'],rate_E=result['rate_E'],rate_I=result['rate_I'],centers=np.asarray(centers),
+    out=dict(contact_names=cfg.get('contact_names'),radius_mm=cfg['radius_mm'],envelope=env,envelope_dt_ms=dt,movie=movie['activity_counts'],frame_ms=movie['frame_ms'],
+        spike_movie=movie['spike_counts'],field_1ms=spikes.field_1ms[:spikes.seen//spikes.ms_steps],time_ms=result['times'],rate_E=result['rate_E'],rate_I=result['rate_I'],centers=np.asarray(centers),
         outward=outward,vtheta=field['vtheta'],positions=net['pos'],ec=field['ec'],contact_xy=np.asarray(contacts),
-        physical_status=('RUNAWAY' if zm is None else 'HIGH_RATE_SAFEGUARD_STOP') if result['runaway_early_stop_ms'] is not None else 'COMPLETE',
+        physical_status='RUNAWAY' if result['runaway_early_stop_ms'] is not None else 'HIGH_RATE_ENTRY_STOP' if observer is not None and observer.stop_requested else 'COMPLETE',
         parameters=asdict(p),seed=seed,wall_seconds=result['wall_s'],angle_offset=substrate['angle_offset'])
     if slow is not None:out['slow']=slow.trace_arrays()
-    if observer is not None:out.update(current_time_ms=np.asarray(observer.times),contact_current=np.asarray(observer.currents).T)
+    if observer is not None:out.update(current_time_ms=np.asarray(observer.times),contact_current=np.asarray(observer.currents).T,
+        raster_time_ms=np.concatenate(observer.raster_t) if observer.raster_t else np.array([]),
+        raster_neuron=np.concatenate(observer.raster_i) if observer.raster_i else np.array([],int))
     return out
 
 
@@ -143,37 +173,6 @@ def score_simulation(run,observer,objective,burnin_ms=1500):
     run.update(observed=obs,primary_centroids_ms=times[ids],score=score)
     return score
 
-
-def optimize_cores(substrate,contacts,observer,objective,*,k=2,budget=8,restart=0,seed=20261015):
-    """Bounded, sequential Sobol + local refinement; every loss runs a new SNN.
-
-    Equal proposal budget across K. This transparent notebook optimizer is not
-    the historical delayed Matern-GP/qLogEI batch scheduler (not included in this basic package).
-    Missing events/runaway remain unscorable, with no artificial penalty value.
-    """
-    cfg=substrate['config'];r=cfg['radius_mm'];lo=r+.05;hi=substrate['params'].L-r-.05
-    sobol=qmc.Sobol(2*k+2,scramble=True,seed=seed+100*k+restart)
-    rng=np.random.default_rng(seed+restart);rows=[];best=None;best_run=None;worst_run=None;worst_j=-np.inf
-    for epoch in range(budget):
-        for attempt in range(1000):
-            if best is not None and epoch>=budget//2 and attempt<50:
-                vec=np.asarray(best['vector'])+rng.normal(0,[1.]*(2*k)+[.08,8.])
-                centers=np.clip(vec[:2*k].reshape(k,2),lo,hi);outward=float(np.clip(vec[-2],.9,1.6));angle=float(np.clip(vec[-1],-60,60))
-            else:
-                z=sobol.random(1)[0];centers=(lo+(hi-lo)*z[:2*k]).reshape(k,2);outward=.9+.7*z[-2];angle=-60+120*z[-1]
-            if all(np.linalg.norm(centers[i]-centers[j])>2*r+.05 for i in range(k) for j in range(i)):break
-        else:raise RuntimeError('No nonoverlapping candidate')
-        # Rotation is part of the graph, not a post-hoc rotation of a picture.
-        angle = angle if cfg.get('optimize_angle',True) else 0.0
-        candidate_sub=build_substrate(cfg,angle_offset=angle) if angle else substrate
-        run=simulate(candidate_sub,centers,contacts,outward=outward,seed=cfg['training_seed'])
-        score=score_simulation(run,observer,objective,burnin_ms=cfg['burnin_ms'])
-        row=dict(epoch=epoch,k=k,restart=restart,vector=[*centers.ravel(),outward,angle],centroid_ms=run['primary_centroids_ms'].tolist(),**score)
-        rows.append(row)
-        print(f"K={k} restart={restart} epoch={epoch}: {score['status']} N={score['N']} J={score['J']}",flush=True)
-        if score['J'] is not None and (best is None or score['J']<best['J']):best=row;best_run=run
-        if score['J'] is not None and score['J']>worst_j:worst_j=score['J'];worst_run=run
-    return dict(rows=rows,best=best,best_run=best_run,worst_run=worst_run)
 
 
 def angle_response(config,centers,contacts,observer,objective,*,angles=(-60,0,60),outward=1.25):

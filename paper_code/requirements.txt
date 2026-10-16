@@ -8,8 +8,15 @@ mne==1.11.0
 joblib==1.3.2
 nbformat==5.10.4
 nbclient==0.10.2
+nbconvert==7.16.6
 ipykernel==6.29.5
 jupyterlab==4.5.0
 
 # Optional ordered-scatter CPU acceleration, verified against the native engine.
 numba==0.63.1
+
+# Paper core-search optimizer.
+torch==2.5.1
+botorch==0.13.0
+gpytorch==1.14
+linear_operator==0.6

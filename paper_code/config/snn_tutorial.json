@@ -31,12 +31,22 @@
     ]
   ],
   "n_fourier": 1024,
-  "optimization_budget": 2,
-  "restarts": 1,
+  "optimization_budget": 10,
+  "restarts": 2,
   "angle_values": [
-    -60,
-    0,
-    60
+    -20.0,
+    -16.666666666666668,
+    -13.333333333333332,
+    -10.0,
+    -6.666666666666666,
+    -3.333333333333332,
+    0.0,
+    3.3333333333333357,
+    6.666666666666668,
+    10.0,
+    13.333333333333336,
+    16.66666666666667,
+    20.0
   ],
   "zm": {
     "use_z": true,
@@ -46,8 +56,12 @@
     "tau_adp": 500.0,
     "eta_m": 0.007451594355587098
   },
-  "scope": "40000-cell native physics, newly sampled graph; bounded notebook budget, not historical optimized identities; tutorial core search freezes angle and scans it separately",
-  "optimize_angle": false,
-  "max_workers": 4,
-  "zm_post_entry_ms": 1500.0
+  "scope": "E1146; original native equations, E→E resampling, label-free objective and Matérn-5/2 qLogEI/uncertainty proposals. Demo: 12 s per candidate, 10 evaluations x 2 restarts x 4 core counts; paper: 60 s, first31 x 4 x 4.",
+  "optimize_angle": true,
+  "max_workers": 16,
+  "EE_kernel_perp_scale": 1.5,
+  "optimizer_seed": 2026092801,
+  "feedback_min_scorable": 8,
+  "initial_conditions": 8,
+  "batch_size": 8
 }

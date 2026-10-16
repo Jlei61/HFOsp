@@ -35,7 +35,9 @@ def energy_field_trajectory(samples,sfreq,xy,template_rank,support,*,baseline_se
     # Mirror symmetry must be around a frozen interictal axis, not y=0 at
     # the lower edge of the 20-mm simulation sheet. Fit geometry from ranks
     # only; ictal/current amplitudes never determine this plane.
-    xyz=np.column_stack([xy,np.zeros(len(xy))]);rank=np.asarray(template_rank,float);support=np.asarray(support,float)
+    xy=np.asarray(xy,float)
+    xyz=xy if xy.shape[1]==3 else np.column_stack([xy,np.zeros(len(xy))])
+    rank=np.asarray(template_rank,float);support=np.asarray(support,float)
     use=np.isfinite(xyz).all(1)&np.isfinite(rank)&(support>0)
     direction=fit_event_directions_3d(np.where(use,rank,np.nan)[:,None],xyz)['directions'][0]
     plane=make_normalized_plane(xyz[use],direction)

@@ -1975,11 +1975,3 @@ def preprocess_edf(file_path: Union[str, Path], target_band: str='ripple', notch
     preprocessor = SEEGPreprocessor(target_band=target_band, notch_freqs=notch_freqs)
     result = preprocessor.run(file_path)
     return (result.data, result.sfreq, result.ch_names)
-if __name__ == '__main__':
-    edf_path = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf'
-    print('=' * 70)
-    print('Smoke test: SEEGPreprocessor (bipolar)')
-    print('=' * 70)
-    pre = SEEGPreprocessor(reference='bipolar', crop_seconds=10)
-    out = pre.run(edf_path)
-    print(f'OK: {out.data.shape} @ {out.sfreq}Hz, ref={out.reference_type}')

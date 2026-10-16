@@ -25,8 +25,11 @@ def model_inputs():
             contacts=z['contact_xy_mm'])
     patient.observer = json.loads((root / 'E1146_observer.json').read_text())
     patient.contact_contract = json.loads((root / 'E1146_contact_contract.json').read_text())
+    coordinates=json.loads((root/'E1146_coordinates.json').read_text())
+    patient.coords_mm=np.asarray([coordinates[name] for name in patient.names],float)
     if patient.observer['contact_names'] != patient.names:
         raise ValueError('Observer and patient contact order differ')
+    config['contact_names']=patient.names
     return config, patient
 
 
@@ -40,8 +43,8 @@ def load_events():
 
 # Export captions live here so saving files does not interrupt the scientific story.
 CAPTIONS = {
-    'fig1_A_waveforms': '原始电压经参考和滤波后的第一个群事件。显示通道间波形与时序。',
-    'fig1_B_centroids': '第一个新检测群事件的时频谱。竖线为完整事件窗的S³时间质心。',
+    'fig1_A_waveforms': '新检测群事件的三个160ms电压片段。显示通道间波形与时序。',
+    'fig1_B_centroids': '三个新检测群事件的时频谱。竖线为完整事件窗的S³时间质心。',
     'fig1_C_ranks': '全部示例片段的群事件rank矩阵。空白表示该通道未参与。',
     'fig1_E_kmeans': '按本次masked-rank K-means标签排列事件。K=2为模板设定。',
     'fig1_D_statistics': '事件顺序一致性与置换基线的比较。统计对象为一个患者的片段。',
@@ -49,22 +52,24 @@ CAPTIONS = {
     'fig2_A_geometry': '按名称对齐的三维触点坐标。空间分析使用这些实测位置。',
     'fig2_B_rank_gradient': '从事件rank与坐标拟合early-to-late方向。三维方向显示于固定MRI x/y平面。',
     'fig2_B_crossfit': '在相同held-out事件上比较两种模板训练方法。置换形成空间信息增益的基线。',
-    'fig2_C_fields': '两模板投影到同一TA平面后的Gaussian场。弱支持区留白，并标示方向稳定性。',
-    'fig2_D_shared_field_null': '共同平面内的TA/TB场相关与触点置换基线。该量区别于方向轴余弦。',
+    'fig2_C_dynamic_fields': '两个新检测事件的波形、时频谱及四帧动态包络场。沿用论文6mm空间平滑、逐帧前三触点归一化及gamma=0.5配色。',
+    'fig2_D_template_fields': '两模板在同一TA平面上的归一化rank场。viridis表示从早到晚，弱支持区留白。',
+    'fig2_field_comparison': '共同平面内的TA/TB场相关与触点置换基线。单患者演示场比较的计算。',
     'fig4_A_model': '新建立的core阈值场、触点位置及E/I发放率。core降低局部E细胞阈值。',
-    'fig4_F_baseline_waveforms': '新spike读出的30–80Hz波形及检测事件窗。这是活动代理，单位不同于SEEG电压。',
+    'fig4_F_fitted_waveforms': '新spike读出的30–80Hz波形及检测事件窗。这是活动代理，单位不同于SEEG电压。',
     'fig4_B_observable_errors': '新候选的rank、杆内顺序及参与率误差。这些可观察误差与优化目标J分开。',
     'fig4_C_core_search': 'K=1至4在相同预算下的优化曲线。曲线展示本次训练误差。',
     'fig4_D_direction_response': '改变E→E连接核方向后重新仿真的误差响应。其他参数与噪声保持固定。',
     'fig4_E_core_positions': '本次最低训练误差20%配置的core位置。小预算仅展示计算方法。',
     'fig4_G_mean_rank': '患者观测与新模型事件的平均传播rank。未参与触点保留缺失。',
     'fig4_H_crossfit': '一半触点分配类别，另一半触点评分。两半交换后汇总相关。',
-    'fig4_I_noise_confirmation': '同一个患者先验网络更换噪声种子后的拟合误差。种子不是独立患者。',
-    'fig5_A_waveforms': '新Z/M轨迹的未滤波突触电流代理。按固定基线P95定标并保留DC。',
+    'fig4_I_template_similarity': 'E1146患者与本次选优模型的TA–MTA及TB–MTB模板相似度。单患者点不代表论文25人队列。',
+    'fig5_A_waveforms': '新Z/M轨迹的10kHz电流读出，经80–1000Hz滤波及募集前固定P99.5缩放。绘图使用20261011六面板版的原函数。',
     'fig5_B_slow_variables': '同次积分的全体E平均Z及有效适应电流ηM。慢变量与活动来自同一轨迹。',
-    'fig5_C_spatial_activity': '预定时刻的50ms平均E活动空间图。显示活动在空间中的扩展。',
+    'fig5_C_spatial_activity': '预定时刻的20ms平均E活动空间图。显示活动在空间中的扩展。',
     'fig5_D_state_trajectory': 'Z、ηM与E发放率的三维轨迹。单条轨迹用于描述本次活动变化。',
-    'fig5_E_model_onset_field': '从新电流计算进入后1–150Hz能量场。固定间期平面上保留有符号robust-z。',
+    'fig5_E_model_onset_field': '新电流进入后1–150Hz能量的robust-z场。沿用论文逐场min-max/Blues显示，空间平面固定于患者间期观测。',
+    'supplementary_onset_signed_z': '同一新仿真进入场，色条恢复实际baseline robust-z。原始正负值完整保留，不能由主图相对高低判断增强方向。',
     'supplementary_gamma_field_scores': '新电流的gamma能量及固定场评分随时间变化。场相关与投影分别显示。',
 }
 
@@ -135,4 +140,4 @@ def save_model_analysis(output, config, objective, matching, selection, onset, e
     output.finish(scope=config['scope'], configuration=config, video2=selection['status'],
         historical_t120_sec=onset, entry=entry, model_onset_field=onset_field['status'],
         clinical_fig5E='NOT_RUN_REQUIRES_RAW_ICTAL_EXAMPLES',
-        clinical_fig5F='NOT_RUN_REQUIRES_RAW_COHORT', fig4I='ONE_PATIENT_NEW_NOISE_ONLY')
+        clinical_fig5F='NOT_RUN_REQUIRES_RAW_COHORT', fig4I='E1146_TEMPLATE_SIMILARITY_ONLY', fig5_layout='reference_layout_20261011')
