@@ -6,6 +6,7 @@ from scipy.signal import spectrogram,periodogram,iirnotch,filtfilt
 from analysis import paper_clinical as paper
 from analysis.spectral_fields import native_entry
 from analysis.src.topic5_template_axis_field import _smooth_matrix_from_weights as smooth
+from analysis.src.topic5_tspectral_field_concordance import distal_baseline_robust_z,aggregate_complete_windows
 
 
 def clinical_candidates(directory,contact_names=None):
@@ -45,9 +46,13 @@ def clinical_candidates(directory,contact_names=None):
                        eligible=bool(qualification['eligible'] and joint>=2 and value is not None and value['n_complete_frames']>=4))
         # Panel E retains its separate distal-baseline / clinical0-10s contract.
         distal=(item['eeg_onset_s']-120,item['eeg_onset_s']-90)
-        example_base=(t-.5>=distal[0]-1e-8)&(t+.5<=distal[1]+1e-8)
+        # E's original baseline selects frame centers; its onset window requires
+        # complete spectral cells. F's separate quiet-baseline rule stays above.
+        example_base=(t>=distal[0]-1e-9)&(t<=distal[1]+1e-9)
         if example_base.sum()>=50:
-            row['example']=paper.contrast(arrays['broadband'],t,example_base,0.,10.)
+            baseline_z=distal_baseline_robust_z(arrays['broadband'],t,distal)
+            value,complete=aggregate_complete_windows(baseline_z['delta'],t,np.array([[0.,10.]]))
+            if complete[0]:row['example']=dict(z=value[0],n_baseline_frames=baseline_z['n_baseline_frames'])
         rows.append(row)
     return rows
 

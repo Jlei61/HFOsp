@@ -56,14 +56,13 @@ def state_trajectory(context):
 
 
 def onset_field(run,result,geometry,*,normalized=True):
-    from plotting.paper.onset_field import _draw_field,_normalize_minmax
+    from plotting.paper.onset_field import _draw_field,_normalize_minmax,_display_geometry
     fig,ax=plt.subplots(figsize=(5,4),layout='constrained')
     if result['status']!='OK':
         ax.text(.5,.5,result['reason'],ha='center',transform=ax.transAxes);return fig
-    scorer=geometry['scorer'];points=np.asarray(scorer['points'])*geometry['plane']['scale_mm']
+    scorer=geometry['scorer']
     values=np.asarray(result['robust_z'])[geometry['contact_mask']];support=np.asarray(scorer['support'])
-    fz=dict(points_mm=points,display_xlim_mm=(points[:,0].min()-12,points[:,0].max()+12),
-        display_ylim_mm=(points[:,1].min()-12,points[:,1].max()+12),display_sigma_mm=6.)
+    fz=_display_geometry(geometry)
     mapped=_draw_field(ax,fz,_normalize_minmax(values),support,cmap='Blues',
         colorbar_values=np.array([0.,1.]) if normalized else values,title='Model onset',title_color='black',show_y=True)
     cb=fig.colorbar(mapped,ax=ax,fraction=.04)

@@ -10,10 +10,10 @@
     "C_IE": 800,
     "C_EI": 200,
     "C_II": 200,
-    "l_EE": 0.4654030511288038
+    "l_EE": 0.38
   },
   "theta_deg": -22.80538396505847,
-  "aspect_ratio": 1.3333333333333333,
+  "aspect_ratio": 2.0,
   "radius_mm": 1.7525782905619196,
   "core_mean": 17.5,
   "core_std": 1.0,
@@ -56,12 +56,55 @@
     "tau_adp": 500.0,
     "eta_m": 0.007451594355587098
   },
-  "scope": "E1146; original native equations, E→E resampling, label-free objective and Matérn-5/2 qLogEI/uncertainty proposals. Demo: 12 s per candidate, 10 evaluations x 2 restarts x 4 core counts; paper: 60 s, first31 x 4 x 4.",
+  "scope": "Short independent core-count search; two-core positions shown as evaluated samples, not a density reproduction. Paper xy_left_20 is separately rebuilt for Fig4F/G and Fig5.",
   "optimize_angle": true,
   "max_workers": 16,
   "EE_kernel_perp_scale": 1.5,
   "optimizer_seed": 2026092801,
   "feedback_min_scorable": 8,
   "initial_conditions": 15,
-  "batch_size": 8
+  "batch_size": 8,
+  "paper_workpoint": {
+    "id": "xy_left_20",
+    "centers_mm": [
+      [
+        2.9492143200000003,
+        12.12890135
+      ],
+      [
+        16.47920304,
+        5.46551153
+      ]
+    ],
+    "outward": 1.25,
+    "angle_offset": 0.0,
+    "duration_ms": 60000.0
+  },
+  "density_experiment": "scatter_only",
+  "comparison_workpoint": {
+    "id": "lf_bo04_07",
+    "centers_mm": [
+      [
+        4.707742161418982,
+        10.656531542227661
+      ],
+      [
+        17.688613113235633,
+        2.7833488279164125
+      ]
+    ],
+    "outward": 1.0183399664238095,
+    "angle_offset": 16.887476183474064,
+    "duration_ms": 60000.0
+  },
+  "angle_scan_centers_mm": [
+    [
+      3.4492143200000003,
+      12.12890135
+    ],
+    [
+      16.47920304,
+      4.715511530000001
+    ]
+  ]
 }

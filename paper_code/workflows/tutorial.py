@@ -9,9 +9,9 @@ from workflows.common import new_session, previous_session, publish_session, wri
 from plotting.computational import save
 
 
-def raw_inputs():
+def raw_inputs(default='raw_example.json'):
     config = json.loads((CODE_ROOT / 'config' / os.environ.get(
-        'HFO_RAW_CONFIG', 'raw_example.json')).read_text())
+        'HFO_RAW_CONFIG', default)).read_text())
     return config, INPUT_ROOT / config.get('input_directory', 'E1146_demo')
 
 
@@ -24,6 +24,8 @@ def model_inputs():
             cal_draw_indices=z['cal_draw_indices'], names=z['contact_names'].tolist(),
             contacts=z['contact_xy_mm'])
     patient.observer = json.loads((root / 'E1146_observer.json').read_text())
+    with np.load(root / 'E1146_template_observations.npz', allow_pickle=False) as z:
+        patient.template_observations = {k:z[k] for k in z.files}
     patient.contact_contract = json.loads((root / 'E1146_contact_contract.json').read_text())
     coordinates=json.loads((root/'E1146_coordinates.json').read_text())
     patient.coords_mm=np.asarray([coordinates[name] for name in patient.names],float)
@@ -33,8 +35,8 @@ def model_inputs():
     return config, patient
 
 
-def load_events():
-    source = previous_session('fig1')
+def load_events(session='fig1'):
+    source = previous_session(session)
     config = json.loads((source / 'run_report.json').read_text())['configuration']
     with np.load(source / 'events.npz', allow_pickle=False) as z:
         events = {key: z[key] for key in z.files}
@@ -55,17 +57,17 @@ CAPTIONS = {
     'fig2_C_dynamic_fields': '两个新检测事件的波形、时频谱及四帧动态包络场。沿用论文6mm空间平滑、逐帧前三触点归一化及gamma=0.5配色。',
     'fig2_D_template_fields': '两模板在同一TA平面上的归一化rank场。viridis表示从早到晚，弱支持区留白。',
     'fig2_field_comparison': '共同平面内的TA/TB场相关与触点置换基线。单患者演示场比较的计算。',
-    'fig4_A_model': '新建立的core阈值场、触点位置及E/I发放率。core降低局部E细胞阈值。',
+    'fig4_A_model': 'E/I局部回路、core与触点几何、Gaussian采样权重及新事件包络。core降低局部E细胞阈值。',
     'fig4_F_fitted_waveforms': '新spike读出的30–80Hz波形及检测事件窗。这是活动代理，单位不同于SEEG电压。',
     'fig4_B_observable_errors': '新候选的rank、杆内顺序及参与率误差。这些可观察误差与优化目标J分开。',
     'fig4_C_core_search': 'K=1至4在相同预算下的优化曲线。曲线展示本次训练误差。',
     'fig4_D_direction_response': '改变E→E连接核方向后重新仿真的误差响应。其他参数与噪声保持固定。',
-    'fig4_E_core_positions': '本次最低训练误差20%配置的core位置。小预算仅展示计算方法。',
+    'fig4_E_core_positions': '两core候选的实际位置散点，颜色为重新计算的J_joint，黑边标出最低20%。小预算不估计位置密度。',
     'fig4_G_mean_rank': '患者观测与新模型事件的平均传播rank。未参与触点保留缺失。',
     'fig4_H_crossfit': '一半触点分配类别，另一半触点评分。两半交换后汇总相关。',
-    'fig4_I_template_similarity': 'E1146患者与本次选优模型的TA–MTA及TB–MTB模板相似度。单患者点不代表论文25人队列。',
+    'fig4_I_template_similarity': 'E1146患者与重新积分的论文xy_left_20工作点的TA–MTA及TB–MTB模板相似度。单患者点不代表论文25人队列。',
     'fig5_A_waveforms': '新Z/M轨迹的10kHz电流读出，经80–1000Hz滤波及募集前固定P99.5缩放。绘图使用20261011六面板版的原函数。',
-    'fig5_B_slow_variables': '同次积分的全体E平均Z及有效适应电流ηM。慢变量与活动来自同一轨迹。',
+    'fig5_B_slow_variables': '同次积分的全体E与Core A的平均Z及有效适应电流ηM。慢变量与活动来自同一轨迹。',
     'fig5_C_spatial_activity': '预定时刻的20ms平均E活动空间图。显示活动在空间中的扩展。',
     'fig5_D_state_trajectory': 'Z、ηM与E发放率的三维轨迹。单条轨迹用于描述本次活动变化。',
     'fig5_E_model_onset_field': '新电流进入后1–150Hz能量的robust-z场。沿用论文逐场min-max/Blues显示，空间平面固定于患者间期观测。',
@@ -115,7 +117,7 @@ def save_fields(output, gain, clustered, record, field_a, field_b, similarity):
         F_a=field_a['field'][0], S_a=field_a['field'][1],
         X_b=field_b['grid']['X'], Y_b=field_b['grid']['Y'],
         F_b=field_b['field'][0], S_b=field_b['field'][1])
-    output.finish(input_events=str(previous_session('fig1') / 'events.npz'),
+    output.finish(input_events=str(previous_session('fig2_raw') / 'events.npz'),
         template_method=clustered['fit']['method'], template_policy=clustered['fit']['event_policy'],
         cosine=float(field_a['direction'] @ field_b['direction']),
         spatial_gain=gain['spatial_information_gain'], field_status=record['status'])

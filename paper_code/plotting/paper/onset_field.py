@@ -10,6 +10,19 @@ AXIS_LABEL_FONTSIZE=14.5
 TICK_LABEL_FONTSIZE=11.5
 FIELD_TITLE_FONTSIZE=14.
 
+def _display_geometry(geometry):
+    # Same display convention as the paper: positive dominant 3D transverse
+    # component, shared physical-mm frame, minimum 35-mm span and 12% padding.
+    plane=geometry['plane'];points=np.asarray(plane['points'])*plane['scale_mm']
+    w=np.asarray(plane['w']);points[:,1]*=1 if w[np.argmax(abs(w))]>=0 else -1
+    limits=[]
+    for values in points.T:
+        low,high=min(float(values.min()),0.),max(float(values.max()),0.)
+        span=max(high-low,35.);mid=(low+high)/2
+        limits.append((mid-.62*span,mid+.62*span))
+    return dict(points_mm=points,display_xlim_mm=limits[0],
+                display_ylim_mm=limits[1],display_sigma_mm=6.)
+
 def _event_field(fz, values, support):
     """Call the established Topic 3/5 physical-mm field smoother without reimplementation."""
     pts = np.asarray(fz["points_mm"], float)
@@ -95,4 +108,3 @@ def _draw_field(
         Normalize(float(finite_colorbar.min()), float(finite_colorbar.max())),
         cmap=cmap,
     )
-

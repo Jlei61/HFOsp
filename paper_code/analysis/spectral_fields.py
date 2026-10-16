@@ -24,7 +24,37 @@ def band_energy(samples,sfreq,*,band=(30,80),window_sec=.1,step_sec=.01):
     return t,power
 
 
-def energy_field_trajectory(samples,sfreq,xy,template_rank,support,*,baseline_sec,band=(30,80),window_sec=.1,step_sec=.01):
+def fit_onset_geometry(observations, coords_mm):
+    """Rebuild Fig5's timing-only TA/TB reference from interictal observations."""
+    from sklearn.cluster import KMeans
+    from analysis.src.lagpat_rank_audit import build_masked_kmeans_features, mask_phantom_ranks
+    from analysis.src.interictal_propagation import _legacy_hist_mean_rank
+    from analysis.src.propagation_skeleton_geometry import assign_events_to_templates
+    from analysis.src.topic5_template_axis_field import _fit_propagation_axis, shared_bisector
+    order=observations['discovery_contact_order']
+    ranks=observations['ranks'][order];mask=observations['participating'][order]
+    features=build_masked_kmeans_features(ranks,mask,impute='event_median')
+    labels=KMeans(2,n_init=10,random_state=0).fit_predict(features)
+    modes=np.argsort(-np.bincount(labels))  # TA is the larger timing-only cluster.
+    templates=np.array([np.argsort(np.argsort(_legacy_hist_mean_rank(
+        ranks[:,labels==k],mask[:,labels==k]))) for k in modes])
+    # The paper's support is measured after nearest-template Spearman assignment.
+    assigned=assign_events_to_templates(mask_phantom_ranks(ranks,mask,normalize=True),*templates)
+    support=np.array([mask[:,assigned==k].mean(1) for k in range(2)])
+    xyz=np.asarray(coords_mm)[order]
+    axes=[_fit_propagation_axis(xyz,z_earliness(r)) for r in templates]
+    direction=shared_bisector(*axes)['u']
+    plane=make_normalized_plane(xyz,direction)
+    if plane['status']!='ok':raise ValueError('Shared interictal plane is not estimable')
+    # Keep the original discovery order for the fit, then return input contact order.
+    inverse=np.argsort(order);plane['points']=plane['points'][inverse]
+    templates=templates[:,inverse];support=support[:,inverse]
+    scorer=make_field_scorer(z_earliness(templates[0]),plane['points'],support[0],plane['sigma'])
+    return dict(plane=plane,scorer=scorer,contact_mask=np.ones(len(order),bool),
+                rank_a=templates[0],rank_b=templates[1],support_a=support[0],support_b=support[1])
+
+
+def energy_field_trajectory(samples,sfreq,xy,template_rank,support,*,baseline_sec,band=(30,80),window_sec=.1,step_sec=.01,geometry=None):
     t,power=band_energy(samples,sfreq,band=band,window_sec=window_sec,step_sec=step_sec)
     logp=np.log(np.maximum(power,np.finfo(float).tiny))
     # Complete windows must be inside the declared baseline interval.
@@ -39,11 +69,14 @@ def energy_field_trajectory(samples,sfreq,xy,template_rank,support,*,baseline_se
     xyz=xy if xy.shape[1]==3 else np.column_stack([xy,np.zeros(len(xy))])
     rank=np.asarray(template_rank,float);support=np.asarray(support,float)
     use=np.isfinite(xyz).all(1)&np.isfinite(rank)&(support>0)
-    direction=fit_event_directions_3d(np.where(use,rank,np.nan)[:,None],xyz)['directions'][0]
-    plane=make_normalized_plane(xyz[use],direction)
-    if plane['status']!='ok':raise ValueError('Interictal template plane is not estimable')
+    if geometry is None:
+        direction=fit_event_directions_3d(np.where(use,rank,np.nan)[:,None],xyz)['directions'][0]
+        plane=make_normalized_plane(xyz[use],direction)
+        if plane['status']!='ok':raise ValueError('Interictal template plane is not estimable')
+        scorer=make_field_scorer(z_earliness(rank[use]),plane['points'],support[use],plane['sigma'])
+    else:
+        plane,scorer,use=geometry['plane'],geometry['scorer'],geometry['contact_mask']
     sigma=plane['sigma']
-    scorer=make_field_scorer(z_earliness(rank[use]),plane['points'],support[use],sigma)
     scores=score_field_batch(scorer,z[use].T)
     return dict(time_sec=t,power=power,log_power=logp,robust_z=z,baseline_sec=baseline_sec,
                 scores=scores,sigma=sigma,scorer=scorer,plane=plane,contact_mask=use)

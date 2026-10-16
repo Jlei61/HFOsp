@@ -6,7 +6,7 @@ from matplotlib.patches import Circle
 from matplotlib.lines import Line2D
 from types import SimpleNamespace
 from scipy.stats import spearmanr
-from plotting.paper import fig4_search,fig4_errors,fig4_matching,fig4_similarity,fig4_density
+from plotting.paper import fig4_search,fig4_errors,fig4_matching,fig4_similarity
 from plotting.paper.fig4_circuit import _draw_integrated_mechanism
 
 RED,BLUE='#C63D3A','#287FA1'
@@ -74,31 +74,39 @@ def optimization_curves(searches):
     return fig
 
 
-def core_density(rows,contacts,names):
-    rows=[r for r in rows if r['k']==2 and r['J'] is not None]
-    if not rows:raise ValueError('No scorable two-core candidates')
-    rows=sorted(rows,key=lambda r:r['J']);selected=rows[:max(1,int(np.ceil(.2*len(rows))))]
-    def xy(r):
-        p=np.asarray(r['vector'][:4]).reshape(2,2);return p[np.argsort(p[:,0])]
-    allxy=np.asarray([xy(r) for r in rows]);good=np.asarray([xy(r) for r in selected])
-    grid=np.linspace(0,20,321);X,Y=np.meshgrid(grid,grid);components=[];contours={}
-    for k in range(2):
-        z=np.mean([np.exp(-((X-p[0])**2+(Y-p[1])**2)/(2*.35**2))/(2*np.pi*.35**2) for p in good[:,k]],axis=0)
-        components.append(z);order=np.sort(z.ravel())[::-1];level=order[np.searchsorted(np.cumsum(order)/order.sum(),.9)]
-        temp,ax=plt.subplots();cs=ax.contour(X,Y,z,levels=[level]);paths=[v.tolist() for v in cs.allsegs[0]];plt.close(temp)
-        contours['AB'[k]]={'0.9':dict(paths_mm=paths,threshold_per_mm2=float(level))}
-    straight=np.asarray(contacts).copy()
-    for rod in ['SCL','ICL']:
-        ids=[i for i,n in enumerate(names) if n.startswith(rod)];p=straight[ids];center=p.mean(0);axis=np.linalg.svd(p-center)[2][0];straight[ids]=center+((p-center)@axis)[:,None]*axis
-    arrays=dict(x_mm=grid,y_mm=grid,density_per_mm2=np.mean(components,axis=0),core_components_per_mm2=components,all_positions_mm=allxy,selected_positions_mm=good)
-    pixels,cmap,norm,labels,extent=fig4_density.completed_density_layer(arrays,dict(density_contours=contours,contact_names=names,straight_contact_xy_mm=straight))
-    fig,ax=plt.subplots(figsize=(4.5,4.8),layout='constrained');ax.imshow(pixels,extent=extent,origin='upper');ax.set(xlabel='x (mm)',ylabel='y (mm)',xticks=[5,10,15],yticks=[5,10,15])
-    for p,label in zip(labels,['Core A','Core B']):ax.text(*p,label,ha='center',fontsize=9,color='#403949')
-    handles=[Line2D([],[],ls='none',marker='o',ms=3,color='#B6B2BF',label='Search'),
-             Line2D([],[],ls='none',marker='o',ms=4,mfc='none',mec='#65509A',label='Outlier'),
-             Line2D([],[],color='#9784B6',lw=.8,label='90% mass')]
-    ax.legend(handles=handles,loc='upper left',frameon=False,fontsize=8,handlelength=1.,labelspacing=.25)
-    fig.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap),ax=ax,label='Position density (mm⁻²)',pad=.02,fraction=.035)
+def core_positions(rows, contacts, names):
+    # One candidate contributes one A/B pair. Core order is physical identity,
+    # including its independent OU stream; never swap cores by their x coordinate.
+    rows = [r for r in rows if r['k'] == 2]
+    finite = [r['J_joint'] for r in rows if r.get('J_joint') is not None]
+    if not finite:
+        raise ValueError('No scorable two-core candidates')
+    cutoff = np.sort(finite)[int(np.ceil(.2*len(finite)))-1]
+    norm = Normalize(min(finite), max(finite))
+    fig, ax = plt.subplots(figsize=(5.3, 5), layout='constrained')
+    xy = np.asarray(contacts)
+    for rod in ['SCL', 'ICL']:
+        ids = sorted([i for i, n in enumerate(names) if n.startswith(rod)],
+                     key=lambda i: int(names[i][len(rod):]))
+        ax.plot(*xy[ids].T, 'o-', color='.6', mfc='white', ms=3, lw=.7, zorder=1)
+    for row in rows:
+        positions = np.asarray(row['vector'][:4]).reshape(2, 2)
+        loss = row.get('J_joint')
+        for k, marker in enumerate(['o', '^']):
+            color = '.8' if loss is None else plt.cm.Purples_r(norm(loss))
+            selected = loss is not None and loss <= cutoff
+            ax.scatter(*positions[k], marker=marker, c=[color], s=45,
+                       edgecolors='black' if selected else '.6', linewidths=1.1 if selected else .4, zorder=3)
+    handles = [Line2D([], [], ls='none', marker=m, color='.5', label=f'Core {n}')
+               for m, n in zip(['o', '^'], ['A', 'B'])]
+    handles.append(Line2D([], [], ls='none', marker='o', mfc='none', mec='black', label='Lowest 20%'))
+    missing = any(r.get('J_joint') is None for r in rows)
+    if missing:
+        handles.append(Line2D([], [], ls='none', marker='o', mfc='.8', mec='.6', label='Unscorable'))
+    ax.legend(handles=handles, frameon=False, loc='upper left', bbox_to_anchor=(0, 1.17), ncol=2 if missing else 3, fontsize=8)
+    ax.set(xlim=(0, 20), ylim=(0, 20), aspect='equal', xlabel='x (mm)', ylabel='y (mm)')
+    fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap='Purples_r'), ax=ax,
+                 label=r'$J_{\mathrm{joint}}$ (lower is better)', fraction=.04, pad=.03)
     return fig
 
 

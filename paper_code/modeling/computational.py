@@ -48,7 +48,7 @@ def build_substrate(config, *, angle_offset=0.0):
         net['max_delay_steps']=length-1
         net.pop('ampa_flat',None);net.pop('gaba_flat',None)
     net['rng']=rng
-    return dict(params=p,net=net,config=copy.deepcopy(config),angle_offset=float(angle_offset))
+    return dict(params=p,net=net,config=copy.deepcopy(config),angle_offset=float(angle_offset),kernel=kernel)
 
 
 def core_field(substrate, centers, outward=1.25):
@@ -76,17 +76,17 @@ def core_field(substrate, centers, outward=1.25):
 
 
 class TracedHistoricalSlow(MZSlowVars):
-    """Preserve historical arithmetic; sample traces at 2 ms without changing state."""
+    """Observe pre-update Z/M every 5 ms, as in the selected paper experiment."""
     def __init__(self,*args,dt,core_a,**kwargs):
         super().__init__(*args,**kwargs);self.dt=dt;self.samples=[];self.core_a=core_a
     def apply_currents(self,I_E,I_I,labels=None,**kwargs):
         self.applied_inhibition=float(np.mean(self.z[:self.NE]*I_I[:self.NE]))
+        if self._step_i % round(5/self.dt)==0:
+            self.samples.append([self._step_i*self.dt,self.z[:self.NE].mean(),self.m[:self.NE].mean(),
+                self.z[self.core_a].mean(),self.m[self.core_a].mean(),self.applied_inhibition])
         return super().apply_currents(I_E,I_I,labels=labels,**kwargs)
     def _record_traces(self,spk):
-        if self._step_i % round(2/self.dt)==0:
-            self.samples.append([(self._step_i+1)*self.dt,self.z[:self.NE].mean(),self.m[:self.NE].mean(),
-                self.z[self.core_a].mean(),self.m[self.core_a].mean(),
-                self.applied_inhibition])
+        pass
     def trace_arrays(self):
         a=np.asarray(self.samples)
         return dict(time_ms=a[:,0],z_mean=a[:,1],m_mean=a[:,2],z_core_a=a[:,3],m_core_a=a[:,4],inhibition_E=a[:,5])
@@ -103,7 +103,7 @@ class CurrentReadout:
         self.stride=1;self.times=[];self.currents=[]
         self.core_ids=np.flatnonzero(ec>=0);self.raster_t=[];self.raster_i=[]
         self.ne=net['NE'];self.dt=p.dt;self.entry_enabled=stop_after_entry
-        self.count_10ms=0;self.high_bins=0;self.entry_ms=None;self.stop_requested=False
+        self.count_10ms=0;self.high_bins=0;self.entry_s=None;self.stop_requested=False
     def observe(self,t,tm,xi,nu_now,ext,delta_rate,V,I_E,I_I,spk):
         ids=np.flatnonzero(spk[self.core_ids])
         if len(ids):
@@ -114,9 +114,11 @@ class CurrentReadout:
         if (t+1)%round(10/self.dt)==0:
             rate=self.count_10ms/self.ne/.01;self.count_10ms=0
             self.high_bins=self.high_bins+1 if rate>=200 else 0
-            if self.high_bins==20 and self.entry_ms is None:self.entry_ms=(t+1)*self.dt-200
-            if self.entry_enabled and self.entry_ms is not None:
-                self.stop_requested=(t+1)*self.dt>=max(15000.,self.entry_ms+3000.)
+            # Preserve the original seconds arithmetic at the 10-ms stop checks.
+            now_s=(t+1)*(self.dt/1000.)
+            if self.high_bins==20 and self.entry_s is None:self.entry_s=now_s-.2
+            if self.entry_enabled and self.entry_s is not None:
+                self.stop_requested=now_s>=max(15.,self.entry_s+3.)
 
 
 def simulate(substrate, centers, contacts, *, outward=1.25, seed=847401,
@@ -139,6 +141,7 @@ def simulate(substrate, centers, contacts, *, outward=1.25, seed=847401,
         outward=outward,vtheta=field['vtheta'],positions=net['pos'],ec=field['ec'],contact_xy=np.asarray(contacts),
         physical_status='RUNAWAY' if result['runaway_early_stop_ms'] is not None else 'HIGH_RATE_ENTRY_STOP' if observer is not None and observer.stop_requested else 'COMPLETE',
         parameters=asdict(p),seed=seed,wall_seconds=result['wall_s'],angle_offset=substrate['angle_offset'])
+    out['EE_kernel']=substrate['kernel']
     if slow is not None:out['slow']=slow.trace_arrays()
     if observer is not None:out.update(current_time_ms=np.asarray(observer.times),contact_current=np.asarray(observer.currents).T,
         raster_time_ms=np.concatenate(observer.raster_t) if observer.raster_t else np.array([]),
@@ -167,9 +170,11 @@ def score_simulation(run,observer,objective,burnin_ms=1500):
     ids=np.asarray([i for i in obs['primary_event_indices'] if obs['events'][i]['window_ms'][0]>=burnin_ms],int)
     times=np.asarray(obs['centroid_ms']).reshape(-1,len(observer['contact_names']))
     score=objective.score(times[ids])
+    if hasattr(objective,'joint'):
+        score.update(objective.joint.score(times[ids]))
     if hasattr(objective,'reference_summary'):
         score['descriptive']=descriptive(times[ids],objective.reference_summary,objective.names)
-    if run['physical_status']!='COMPLETE':score.update(status='RUNAWAY',J=None)
+    if run['physical_status']!='COMPLETE':score.update(status='RUNAWAY',J=None,J_joint=None)
     run.update(observed=obs,primary_centroids_ms=times[ids],score=score)
     return score
 

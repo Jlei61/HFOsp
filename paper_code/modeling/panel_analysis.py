@@ -8,6 +8,7 @@ from analysis.src.interictal_propagation import assign_events_to_templates
 from modeling.src.topic4_d6_natural_kmeans import (contact_split_folds,patient_profiles,
     crossfit_patient_readout,assign_to_profiles,normalize_event_ranks)
 from modeling.src.topic4_nlc_null_calibration import contact_permutation_matrix_draws,crossfit_matrix
+from analysis.src.lagpat_rank_audit import mask_phantom_ranks
 
 
 def event_ranks(centroid_ms):
@@ -23,22 +24,38 @@ def centroid_events(centroid_ms, names):
                 participating=np.isfinite(ranks).T, channel_names=np.asarray(names))
 
 
-def fit_patient_templates(times,names,coords_mm):
+def fit_patient_templates(times,names,coords_mm,reference=None):
     """Timing+Space patient profiles and the paper's rank-only model classifier.
 
-    Both are fitted only to patient FIT observations. Model trajectories never
-    change the patient templates or their semantic TA/TB mapping.
+    Discover templates from the supplied interictal observations; train the
+    rank-only classifier on FIT. Model trajectories never change either fit
+    or their semantic TA/TB mapping.
     """
     from analysis.from_events import spatial_templates
     from analysis.src.topic5_interictal_direction_rose import fit_event_directions_3d
-    events=centroid_events(times,names)
-    directions=fit_event_directions_3d(np.where(events['participating'],events['ranks'],np.nan),coords_mm)
-    result=spatial_templates(events,coords_mm,directions)
+    events=centroid_events(times,names) if reference is None else reference
+    if reference is not None:
+        np.testing.assert_array_equal(reference['channel_names'],names)
+    order=np.arange(len(names)) if reference is None else reference['discovery_contact_order']
+    events=dict(ranks=events['ranks'][order],participating=events['participating'][order])
+    # The paper first removes phantom-rank gaps, then fits the signed gradient.
+    directions=fit_event_directions_3d(mask_phantom_ranks(events['ranks'],events['participating']),coords_mm[order])
+    result=spatial_templates(events,coords_mm[order],directions)
+    inverse=np.argsort(order)
+    result['templates']=result['templates'][:,inverse]
+    result['support']=result['support'][:,inverse]
     km=KMeans(2,n_init=10,random_state=2026090619).fit(rank_features(times))
-    valid=result['labels']>=0
-    swap=np.mean(km.labels_[valid]==result['labels'][valid])<.5
+    if reference is None:
+        valid=result['labels']>=0
+        swap=np.mean(km.labels_[valid]==result['labels'][valid])<.5
+    else:
+        result['discovery_labels']=result['labels'].copy()
+        result['labels']=result['labels'][reference['development_indices']]
+        predicted=km.predict(rank_features(reference['development_centroid_ms']))
+        swap=np.mean(predicted==result['labels'])<.5
     result.update(mode_classifier=km,mode_remap=np.array([1,0] if swap else [0,1]),
-                  classifier_rule='Patient FIT rank KMeans; semantic alignment to Timing+Space by FIT agreement')
+                  classifier_rule='Patient FIT rank KMeans; semantic alignment to '+
+                      ('full interictal' if reference is not None else 'FIT')+' Timing+Space discovery')
     return result
 
 
@@ -49,26 +66,12 @@ def classify_model(times,patient_model):
     return labels
 
 
-def select_propagation_events(runs, templates, names, burnin_ms):
-    """First chronological eligible event of each patient template at each workpoint."""
-    comparison = sorted([run for run in runs if run['score']['J'] is not None],
-                        key=lambda run: -run['score']['J'])
-    selected = []
-    for run in comparison:
-        labels = classify_model(run['observed']['centroid_ms'],templates)
-        eligible = run['observed']['primary_event_indices']
-        found = [[i for i in eligible if labels[i] == k and
-                  run['observed']['events'][i]['window_ms'][0] >= burnin_ms]
-                 for k in range(2)]
-        selected.append([group[0] for group in found] if all(found) else None)
-    ready = len(comparison) == 2 and all(ids is not None for ids in selected)
-    return comparison, dict(events=selected,
-        status='READY' if ready else 'NOT_ESTIMABLE',
-        rule='first eligible chronological event per freshly fitted patient template')
-
-
-def model_patient_comparison(model_centroids,patient_centroids,names,contact_contract,patient_model,*,n_null=1000):
-    model=event_ranks(model_centroids);patient=event_ranks(patient_centroids)
+def model_patient_comparison(model_centroids,patient_centroids,names,contact_contract,patient_model,*,n_null=1000,patient_ranks=None):
+    model=event_ranks(model_centroids)
+    # G/H retain the measured patient rank values (including gaps), then
+    # normalize each event's range. Missing contacts remain NaN throughout.
+    patient=event_ranks(patient_centroids) if patient_ranks is None else np.asarray(patient_ranks,float)
+    np.testing.assert_array_equal(np.isfinite(patient),np.isfinite(patient_centroids))
     labels=patient_model['labels'];keep=labels>=0
     profiles=patient_profiles(patient[keep],labels[keep])
     # Contact folds are fixed by the supplied interictal geometry contract.

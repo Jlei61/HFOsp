@@ -1,6 +1,7 @@
 """Scientific invariants: timing, masks, alignment, geometry, and native dynamics."""
 from pathlib import Path
 import sys,copy
+import json
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import numpy as np
 from data_processing.raw_to_events import event_features,join_blocks
@@ -16,6 +17,19 @@ from modeling.src.snn_engine.mz_historical import MZSlowVars,MZSlowVarsConfig
 
 
 def main():
+    # The published E->E long axis must remain parallel to the patient axis.
+    # Regression: using already-widened l_EE/AR and multiplying by 1.5 again
+    # made the perpendicular width larger and reversed the modeled anisotropy.
+    from modeling.ee_kernel import ee_kernel, _kernel_weights
+    for name in ['snn_tutorial.json', 'snn_paper.json']:
+        cfg=json.loads((Path(__file__).resolve().parents[1]/'config'/name).read_text())
+        kernel=ee_kernel(Params(**cfg['parameters']),theta_deg=cfg['theta_deg'],
+            ar=cfg['aspect_ratio'],perp_scale=cfg['EE_kernel_perp_scale'])
+        np.testing.assert_allclose([kernel['l_par'],kernel['l_perp']],
+            [.5374011537017762,.4030508652763321],rtol=1e-13)
+        u=np.array([np.cos(kernel['theta_rad']),np.sin(kernel['theta_rad'])])
+        weights=_kernel_weights(np.zeros(2),np.array([u,[-u[1],u[0]]]),kernel)
+        assert weights[0]>weights[1]
     # Known 30 ms shift survives full spectrogram centroiding. No synthetic
     # signal from this test is used in the notebooks or paper evidence.
     fs=800;t=np.arange(800)/fs;centers=[.35,.38,.42]
@@ -55,6 +69,13 @@ def main():
     left=energy_field_trajectory(samples,1000,xy,ranks_xy,support,**kwargs)
     right=energy_field_trajectory(samples,1000,xy+np.array([100.,-50.]),ranks_xy,support,**kwargs)
     for key in left['scores']:np.testing.assert_allclose(left['scores'][key],right['scores'][key],atol=1e-11,rtol=1e-11)
+    # SVD may return either transverse sign; anatomical display must be identical.
+    from plotting.paper.onset_field import _display_geometry
+    points=np.array([[-1.,-.4],[0.,.3],[1.,.1]])
+    plane=dict(points=points,scale_mm=20.,w=np.array([.1,.2,.9]))
+    reverse=dict(points=points*np.array([1.,-1.]),scale_mm=20.,w=-plane['w'])
+    np.testing.assert_array_equal(_display_geometry(dict(plane=plane))['points_mm'],
+        _display_geometry(dict(plane=reverse))['points_mm'])
     # A post-entry spectral field needs a complete 1s window and variable baseline.
     from analysis.model_transition import onset_broadband_field
     raw=np.random.default_rng(95).normal(size=(15,12000));raw[:,10000:]*=2
@@ -73,6 +94,6 @@ def main():
             slow=MZSlowVars(240,p.V_th,MZSlowVarsConfig(use_z=enabled,use_m=enabled,tau_z=50,I_th_EI=3,tau_adp=50,eta_m=.1),NE=net['NE'])
             runs.append(engine(p,net,0,slow=slow))
         for key in ['E_spk_bool','rate_E','rate_I']:np.testing.assert_array_equal(runs[0][key],runs[1][key])
-    print('PASS: known time shifts, absent-channel invariance, name alignment, signed direction, held-out isolation, fixed-field translation invariance, no autapses, full dynamics parity')
+    print('PASS: paper kernel widths and long axis, known time shifts, absent-channel invariance, name alignment, signed direction, held-out isolation, fixed-field translation invariance, no autapses, full dynamics parity')
 
 if __name__=='__main__':main()
