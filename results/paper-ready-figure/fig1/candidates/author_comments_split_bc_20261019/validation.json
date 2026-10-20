@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "checks": {
+    "waveform_source_unit": "V",
+    "waveform_display_unit": "μV",
+    "waveform_scale": 1000000.0,
+    "waveform_traces": 178,
+    "waveform_mean_trace": true,
+    "source_arrays_exact": true,
+    "spectra_exact": true,
+    "B_time_limits_s": [
+      0,
+      0.6
+    ],
+    "B_time_ticks_s": [
+      0,
+      0.3,
+      0.6
+    ],
+    "B_titles_removed": [
+      "Raw",
+      "Normalized",
+      "HFO n=178"
+    ],
+    "E_statistical_summary_exact": true,
+    "E_all_80_subject_values_exact": true,
+    "E_axis_inches": [
+      14.98,
+      5.82,
+      3.94,
+      3.3
+    ],
+    "new_panel_bounds_inches": {
+      "B": [
+        10.6959,
+        9.939444444444447,
+        13.93375,
+        14.889999999999997
+      ],
+      "E": [
+        14.081944444444447,
+        5.04,
+        18.96,
+        9.210667292830607
+      ]
+    },
+    "hfo_source": {
+      "source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/data/b/hfo_showcase.npz",
+      "source_unit": "V",
+      "fs_hz": 1000.0,
+      "n_hfo_snippets": 178,
+      "frozen_spectra": true
+    },
+    "E_summary": {
+      "statistics": {
+        "yuquan": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.18301425643076696,
+          "null_median": 5.5666442230071815e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        },
+        "epilepsiae": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.26201202560976666,
+          "null_median": 5.904675455609148e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        }
+      },
+      "null_min": -0.000650968782522525,
+      "null_max": 0.000993703266430539,
+      "null_points": 40,
+      "null_points_shifted": false,
+      "null_glyphs_clipped": false,
+      "null_color": "#343434",
+      "zero_origin_preserved": true
+    },
+    "unexpected_changed_pixels": 0,
+    "accepted_unchanged_regions_pixel_exact": true,
+    "standalone_A_D_F_G_byte_identical": true,
+    "C_spectra_centroids_and_event_selection_preserved": true,
+    "complete_png_rendered_from_delivered_pdf": true
+  },
+  "accepted_package_verified_before_and_after": {
+    "status": "PASS",
+    "files_verified": 123,
+    "original_26_channel_arrays_preserved": true,
+    "display_channels": 18,
+    "events": 18190,
+    "cluster_counts": [
+      13160,
+      5030
+    ],
+    "cohort_n": 40,
+    "release_version": "y1_final_20261010"
+  },
+  "current_revision_pointer_unchanged": true,
+  "pptx_slides": 8
+}

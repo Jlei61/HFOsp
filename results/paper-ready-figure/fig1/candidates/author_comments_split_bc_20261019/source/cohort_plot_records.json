@@ -1,0 +1,2122 @@
+[
+  {
+    "dataset": "epilepsiae",
+    "subject": "1073",
+    "legacy_mi": {
+      "template": [
+        2.114352990546353,
+        0.8416074008223136,
+        0.8989253950186176,
+        2.05772145321228,
+        3.975883481321811,
+        4.2943830146663595
+      ],
+      "masked": true,
+      "mi_mean": 0.2752306092058613,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.5972938376815119,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -0.3333333333333333,
+        "p50": 0.3333333333333333,
+        "p75": 0.8,
+        "p95": 1.0
+      },
+      "n_events": 194521,
+      "n_events_scored": 194521,
+      "n_permutations": 200,
+      "permuted_mean_median": 2.0563332493667135e-06,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.19844609750789546,
+        "mi_median": 0.2,
+        "mi_std": 0.4849199263795124,
+        "permuted_mean_median": -7.84833856841506e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.13260437118495788,
+      "within_cluster_tau_mean": 0.33105927908327043,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1073.json",
+    "source_sha256": "3c2582466bdddeed722d9581e454f9eb985f4ba1724cf66c23d8412831041177"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1077",
+    "legacy_mi": {
+      "template": [
+        0.9585565432389475,
+        0.5388712634979771,
+        1.241374247540743,
+        4.046515160721881,
+        3.9297717666948437,
+        3.9792602377807134
+      ],
+      "masked": true,
+      "mi_mean": 0.3239572829503305,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.6348042428043295,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -0.2,
+        "p50": 0.3333333333333333,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 56527,
+      "n_events_scored": 56527,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0002229023298600667,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.29101963073693393,
+        "mi_median": 0.4666666666666667,
+        "mi_std": 0.45908751868363706,
+        "permuted_mean_median": 0.00024531050058673997,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.1788035868996428,
+      "within_cluster_tau_mean": 0.468808646700597,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1077.json",
+    "source_sha256": "c608bbef220fb08d08f9eaafad571db9d531a7229cec5f0f943fd23ab8c4f2a8"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1084",
+    "legacy_mi": {
+      "template": [
+        9.119273984442524,
+        8.037020417321068,
+        7.994580809690788,
+        8.99785465272191,
+        0.8187919463087249,
+        2.965172524991938,
+        6.03055822906641,
+        0.5804480651731161,
+        3.0005485463521664,
+        8.97713663581927,
+        9.286816578483245
+      ],
+      "masked": true,
+      "mi_mean": 0.22310268694904742,
+      "mi_median": 0.23809523809523808,
+      "mi_std": 0.35249264400901337,
+      "mi_distribution_percentiles": {
+        "p5": -0.42857142857142855,
+        "p25": 0.0,
+        "p50": 0.23809523809523808,
+        "p75": 0.4666666666666667,
+        "p95": 0.7333333333333333
+      },
+      "n_events": 11169,
+      "n_events_scored": 11169,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00043040047069055885,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2104900739872537,
+        "mi_median": 0.23636363636363636,
+        "mi_std": 0.28064839736575053,
+        "permuted_mean_median": -0.00023278717879846023,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.08049060815353488,
+      "within_cluster_tau_mean": 0.2412944206013123,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1084.json",
+    "source_sha256": "bea9fe8b0018cb73270740ebe830bc7367d4d3054516b74aedac9bc39c5c666b"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1096",
+    "legacy_mi": {
+      "template": [
+        0.9655981083804945,
+        0.9247257918392837,
+        2.017194220089701,
+        3.0876469579810704,
+        4.086003297930814,
+        4.990675346218614,
+        0.32624376265994764
+      ],
+      "masked": true,
+      "mi_mean": 0.16371944829815316,
+      "mi_median": 0.2,
+      "mi_std": 0.5471260572588691,
+      "mi_distribution_percentiles": {
+        "p5": -0.8,
+        "p25": -0.23809523809523808,
+        "p50": 0.2,
+        "p75": 0.6,
+        "p95": 1.0
+      },
+      "n_events": 223347,
+      "n_events_scored": 223347,
+      "n_permutations": 200,
+      "permuted_mean_median": 7.594417996169525e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.14507235911150004,
+        "mi_median": 0.14285714285714285,
+        "mi_std": 0.43499927592433685,
+        "permuted_mean_median": 4.178848757016352e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.037157095307315535,
+      "within_cluster_tau_mean": 0.2905564640894672,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1096.json",
+    "source_sha256": "cf822921bd86d60cf6847ce5d0658894102d3e384786e318a86c36c09d56fd3f"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1125",
+    "legacy_mi": {
+      "template": [
+        6.118598275656561,
+        6.455988642230253,
+        0.7006642957793733,
+        1.9311701081612587,
+        3.0001300686111922,
+        3.010432800490955,
+        1.8632339656729902,
+        0.9070240922972514
+      ],
+      "masked": true,
+      "mi_mean": 0.09558897313999355,
+      "mi_median": 0.07142857142857142,
+      "mi_std": 0.4467560063246162,
+      "mi_distribution_percentiles": {
+        "p5": -0.6666666666666666,
+        "p25": -0.2,
+        "p50": 0.07142857142857142,
+        "p75": 0.4,
+        "p95": 0.8095238095238095
+      },
+      "n_events": 70707,
+      "n_events_scored": 70707,
+      "n_permutations": 200,
+      "permuted_mean_median": -1.235817562348164e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.06267716471798106,
+        "mi_median": 0.07142857142857142,
+        "mi_std": 0.31441151610893675,
+        "permuted_mean_median": 4.091330621942863e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.011134668672321178,
+      "within_cluster_tau_mean": 0.3043190519044747,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1125.json",
+    "source_sha256": "4355623086ee555b5d503db5897bed742920fec9033ad90a0cae4195523202f5"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1146",
+    "legacy_mi": {
+      "template": [
+        6.0190560821484995,
+        2.9624239434303568,
+        1.9346196049743964,
+        0.6358934391384441,
+        13.21457715133531,
+        13.26021367098625,
+        12.788937024513947,
+        11.723982694106642,
+        10.027762614052874,
+        8.265886287625419,
+        7.095904179579529,
+        5.015331722728117,
+        0.9537786193837149,
+        3.0115329168668907,
+        0.9208489388264669
+      ],
+      "masked": true,
+      "mi_mean": 0.2487934420136721,
+      "mi_median": 0.37142857142857144,
+      "mi_std": 0.43345630818595365,
+      "mi_distribution_percentiles": {
+        "p5": -0.5636363636363636,
+        "p25": -0.07142857142857142,
+        "p50": 0.37142857142857144,
+        "p75": 0.6,
+        "p95": 0.7818181818181819
+      },
+      "n_events": 46683,
+      "n_events_scored": 46683,
+      "n_permutations": 200,
+      "permuted_mean_median": 9.836003666734336e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.26592549750444483,
+        "mi_median": 0.37142857142857144,
+        "mi_std": 0.41399809959648665,
+        "permuted_mean_median": 0.00013321867958459457,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.07284152132473773,
+      "within_cluster_tau_mean": 0.2750429263359995,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1146.json",
+    "source_sha256": "0c35d1a3094672bd42b06cfdfbbabfb77ad62293ad031dabb3ea3d2d5877e83b"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "1150",
+    "legacy_mi": {
+      "template": [
+        7.047884416924665,
+        4.973143438453713,
+        1.013401403956605,
+        2.915548398640186,
+        4.001571338780641,
+        4.033213644524237,
+        7.345046082949309,
+        7.271356783919598,
+        7.366424535916061
+      ],
+      "masked": true,
+      "mi_mean": 0.3358474382580514,
+      "mi_median": 0.4,
+      "mi_std": 0.42742126595735863,
+      "mi_distribution_percentiles": {
+        "p5": -0.42857142857142855,
+        "p25": 0.0,
+        "p50": 0.4,
+        "p75": 0.6,
+        "p95": 1.0
+      },
+      "n_events": 12362,
+      "n_events_scored": 12362,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00018823686514998642,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.16082439015621347,
+        "mi_median": 0.16666666666666666,
+        "mi_std": 0.33969144342560076,
+        "permuted_mean_median": -0.00023369106041812716,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.12765689480742665,
+      "within_cluster_tau_mean": 0.3673798474358657,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_1150.json",
+    "source_sha256": "884130155633852376911c7ed3d26b44f559d9a9ed0130ac1b7733c4097f25a3"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "139",
+    "legacy_mi": {
+      "template": [
+        1.0262913702443552,
+        0.6459923664122137,
+        0.9597362027073932,
+        2.9700955281738888,
+        3.1142198308993083,
+        4.9938007990081275,
+        5.228135990621336
+      ],
+      "masked": true,
+      "mi_mean": 0.23359486048037886,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.588926371098255,
+      "mi_distribution_percentiles": {
+        "p5": -0.8,
+        "p25": -0.3333333333333333,
+        "p50": 0.3333333333333333,
+        "p75": 0.6666666666666666,
+        "p95": 1.0
+      },
+      "n_events": 14439,
+      "n_events_scored": 14439,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0001731421843617984,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.1707379814589455,
+        "mi_median": 0.23809523809523808,
+        "mi_std": 0.48450168908883917,
+        "permuted_mean_median": 2.3085624581572883e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.06405586225631586,
+      "within_cluster_tau_mean": 0.3343406632657858,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_139.json",
+    "source_sha256": "4911ecf8101d428de85fff2b003492ebcc522d0d053feb59f28e7341d2b55662"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "253",
+    "legacy_mi": {
+      "template": [
+        0.7353169326241135,
+        2.004492503787285,
+        1.0223481271639911,
+        4.039476730724704,
+        4.023150287803034,
+        6.022393638711431,
+        6.046831289932655,
+        6.763200183654728
+      ],
+      "masked": true,
+      "mi_mean": 0.1978386121441196,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.48546039430242816,
+      "mi_distribution_percentiles": {
+        "p5": -0.6666666666666666,
+        "p25": -0.2,
+        "p50": 0.3333333333333333,
+        "p75": 0.6,
+        "p95": 1.0
+      },
+      "n_events": 75062,
+      "n_events_scored": 75062,
+      "n_permutations": 200,
+      "permuted_mean_median": -4.558136702230939e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.16592474030991525,
+        "mi_median": 0.21428571428571427,
+        "mi_std": 0.3596336724142871,
+        "permuted_mean_median": -2.8072031882215345e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.08839078074754173,
+      "within_cluster_tau_mean": 0.3320395340325839,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_253.json",
+    "source_sha256": "5bade4a5689112ca2173d18c326101992b5ea78c8a82fbbb8f5c555edf0148c3"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "384",
+    "legacy_mi": {
+      "template": [
+        6.063339222614841,
+        6.09370901141608,
+        2.027529432592724,
+        2.9708307565450425,
+        0.945646803043779,
+        0.899953466728711,
+        7.21718567329153,
+        3.0455610899501906,
+        0.2313013835973531
+      ],
+      "masked": true,
+      "mi_mean": 0.3122169564696544,
+      "mi_median": 0.4,
+      "mi_std": 0.42308047420047296,
+      "mi_distribution_percentiles": {
+        "p5": -0.4,
+        "p25": 0.0,
+        "p50": 0.4,
+        "p75": 0.6,
+        "p95": 0.9047619047619048
+      },
+      "n_events": 42533,
+      "n_events_scored": 42533,
+      "n_permutations": 200,
+      "permuted_mean_median": 9.956787987963808e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.21982669665645238,
+        "mi_median": 0.2222222222222222,
+        "mi_std": 0.3858842667269811,
+        "permuted_mean_median": 2.9388945054428557e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.17345844596879037,
+      "within_cluster_tau_mean": 0.3704135686931842,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_384.json",
+    "source_sha256": "8a0514d435ce37e37cb9d938d4e613400bb66d9198fb22b46b5deb4132f43998"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "442",
+    "legacy_mi": {
+      "template": [
+        0.8969072164948454,
+        3.023076923076923,
+        12.049085229808123,
+        11.035078534031413,
+        0.9885583524027459,
+        0.770961887477314,
+        1.970614828209765,
+        9.042501517911354,
+        12.001307189542484,
+        13.371515458692345,
+        8.025092250922508,
+        6.006906077348066,
+        13.046436285097194,
+        13.096962616822431,
+        13.085175552665799
+      ],
+      "masked": true,
+      "mi_mean": 0.35608426215503697,
+      "mi_median": 0.4444444444444444,
+      "mi_std": 0.3398687707532021,
+      "mi_distribution_percentiles": {
+        "p5": -0.3333333333333333,
+        "p25": 0.15384615384615385,
+        "p50": 0.4444444444444444,
+        "p75": 0.6111111111111112,
+        "p95": 0.7777777777777778
+      },
+      "n_events": 6556,
+      "n_events_scored": 6556,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0001806181412648775,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2953252563990819,
+        "mi_median": 0.3333333333333333,
+        "mi_std": 0.2841570102852701,
+        "permuted_mean_median": -7.699235887155286e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.20085628610469092,
+      "within_cluster_tau_mean": 0.22383149114306042,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_442.json",
+    "source_sha256": "e009e9efa41828f399145a4ff1b10e5b62c6a9f78e161b94726431ead82f8e56"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "548",
+    "legacy_mi": {
+      "template": [
+        1.9917541229385307,
+        6.044619010212097,
+        1.8140665918443697,
+        2.960485598666984,
+        4.068521594684386,
+        5.076428102429416,
+        6.141123882503193,
+        0.4517713990173261,
+        10.539458186101296,
+        9.175878028859243,
+        9.014769520225776,
+        8.928243714443017
+      ],
+      "masked": true,
+      "mi_mean": 0.46548699786180997,
+      "mi_median": 0.6,
+      "mi_std": 0.39455782902471703,
+      "mi_distribution_percentiles": {
+        "p5": -0.35714285714285715,
+        "p25": 0.2857142857142857,
+        "p50": 0.6,
+        "p75": 0.7333333333333333,
+        "p95": 0.9047619047619048
+      },
+      "n_events": 25282,
+      "n_events_scored": 25282,
+      "n_permutations": 200,
+      "permuted_mean_median": 4.854048640141492e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.430532682253274,
+        "mi_median": 0.5151515151515151,
+        "mi_std": 0.3483483963777459,
+        "permuted_mean_median": 3.236222680886867e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.26621341172478474,
+      "within_cluster_tau_mean": 0.2834137035899429,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_548.json",
+    "source_sha256": "74593fc9d6f77f2482b3406588b789f3c76997509453190edcc7fd8b362ff819"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "583",
+    "legacy_mi": {
+      "template": [
+        0.6052425665101722,
+        0.6370788184651922,
+        5.102164137155706,
+        0.9033391915641475,
+        0.8390641616448068,
+        2.93988861148454,
+        3.039798819155915
+      ],
+      "masked": true,
+      "mi_mean": 0.42882847677230834,
+      "mi_median": 0.4,
+      "mi_std": 0.42339350201335957,
+      "mi_distribution_percentiles": {
+        "p5": -0.3333333333333333,
+        "p25": 0.14285714285714285,
+        "p50": 0.4,
+        "p75": 0.6666666666666666,
+        "p95": 1.0
+      },
+      "n_events": 10967,
+      "n_events_scored": 10967,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00042465057510192945,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2353163386262684,
+        "mi_median": 0.23809523809523808,
+        "mi_std": 0.2986330822548867,
+        "permuted_mean_median": 4.342030420265352e-06,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.3107275858948524,
+      "within_cluster_tau_mean": 0.43459400420297,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_583.json",
+    "source_sha256": "d035b9a678a4d3d0fdb28acf3cc099c9381e82643bff50500e4a4fb7087735cd"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "590",
+    "legacy_mi": {
+      "template": [
+        3.075268817204301,
+        0.9641185647425897,
+        3.089574155653451,
+        1.9791044776119404,
+        2.971608832807571,
+        0.8390353337072349,
+        0.8905908096280089,
+        2.024983563445102,
+        13.028517110266158,
+        14.087635869565219,
+        14.239923224568138,
+        0.6077658975801914,
+        1.0031665611146297,
+        13.01470588235294,
+        14.03986332574032,
+        14.228187919463085
+      ],
+      "masked": true,
+      "mi_mean": 0.18407680194195566,
+      "mi_median": 0.21428571428571427,
+      "mi_std": 0.3198874422475516,
+      "mi_distribution_percentiles": {
+        "p5": -0.3850427350427349,
+        "p25": -0.022222222222222223,
+        "p50": 0.21428571428571427,
+        "p75": 0.42857142857142855,
+        "p95": 0.6466666666666546
+      },
+      "n_events": 7579,
+      "n_events_scored": 7579,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0003125383947392128,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.10083784140387914,
+        "mi_median": 0.11666666666666667,
+        "mi_std": 0.20153835865194114,
+        "permuted_mean_median": 0.00041892070193957,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.08865872546693704,
+      "within_cluster_tau_mean": 0.2991512979518967,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_590.json",
+    "source_sha256": "1b073d3395b55cf649609e9506db36cb07a7171681bdace3061f37a910f428e7"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "620",
+    "legacy_mi": {
+      "template": [
+        6.054989511537309,
+        0.8304066543438078,
+        0.8498877448323914,
+        2.9435570710696335,
+        2.9848148780071657,
+        4.028596112311015,
+        6.9453423211240155,
+        7.180078543377365,
+        5.041027154663518
+      ],
+      "masked": true,
+      "mi_mean": 0.19260165608051277,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.5078924497057751,
+      "mi_distribution_percentiles": {
+        "p5": -0.7333333333333333,
+        "p25": -0.2,
+        "p50": 0.3333333333333333,
+        "p75": 0.6,
+        "p95": 0.8571428571428571
+      },
+      "n_events": 30648,
+      "n_events_scored": 30648,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00024417036456973805,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2222512253835668,
+        "mi_median": 0.3333333333333333,
+        "mi_std": 0.428057132922691,
+        "permuted_mean_median": -1.54079294643117e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.04529669795553822,
+      "within_cluster_tau_mean": 0.27657328888676846,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_620.json",
+    "source_sha256": "affd028990dffe74eccb36df28923865c6167e0af82e8bc938ea78be9a635f48"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "635",
+    "legacy_mi": {
+      "template": [
+        8.403403403403402,
+        0.6977329974811083,
+        1.0051795580110496,
+        1.9614512471655328,
+        2.9528807503349705,
+        3.991881918819188,
+        5.980725388601037,
+        6.001554404145078,
+        8.084137398687766,
+        8.681211041852182
+      ],
+      "masked": true,
+      "mi_mean": 0.10247415934813058,
+      "mi_median": 0.2,
+      "mi_std": 0.5353938758039958,
+      "mi_distribution_percentiles": {
+        "p5": -0.8,
+        "p25": -0.3333333333333333,
+        "p50": 0.2,
+        "p75": 0.6,
+        "p95": 0.8666666666666667
+      },
+      "n_events": 13973,
+      "n_events_scored": 13973,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0005356702665798779,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.04764267595442003,
+        "mi_median": 0.06666666666666667,
+        "mi_std": 0.30678842417648516,
+        "permuted_mean_median": 0.00010178359852731827,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.012122356250587031,
+      "within_cluster_tau_mean": 0.2740746709765606,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_635.json",
+    "source_sha256": "2dff23b0c48bcab1efa24aa6feed9044181464c02e4824ea23198efd73ba417b"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "818",
+    "legacy_mi": {
+      "template": [
+        3.367088607594937,
+        0.6041666666666666,
+        3.5139086557122523,
+        2.0464135021097047,
+        1.839593460008838
+      ],
+      "masked": true,
+      "mi_mean": 0.4278411417207697,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.5726746259491475,
+      "mi_distribution_percentiles": {
+        "p5": -0.6666666666666666,
+        "p25": 0.3333333333333333,
+        "p50": 0.3333333333333333,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 11398,
+      "n_events_scored": 11398,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00016084693221032981,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.35471135286892436,
+        "mi_median": 0.4,
+        "mi_std": 0.4262428027076326,
+        "permuted_mean_median": 8.773469029654268e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.2958121390023079,
+      "within_cluster_tau_mean": 0.6923526946731573,
+      "chosen_k": 4
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_818.json",
+    "source_sha256": "82d5152cd1c8fbe244cf94af1f9452195141902a09c3bb772ad8626b5461a3d2"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "916",
+    "legacy_mi": {
+      "template": [
+        0.419174321613346,
+        0.8046851147686587,
+        0.9739911755774281,
+        2.086612068800947,
+        3.1603915920858627,
+        4.391678570120499
+      ],
+      "masked": true,
+      "mi_mean": 0.4902080630229724,
+      "mi_median": 0.6666666666666666,
+      "mi_std": 0.6125994486903742,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": 0.3333333333333333,
+        "p50": 0.6666666666666666,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 93257,
+      "n_events_scored": 93257,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0002963137709054908,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.26559078675059244,
+        "mi_median": 0.3333333333333333,
+        "mi_std": 0.4881973715024037,
+        "permuted_mean_median": -1.0008185265806641e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.2531930568638854,
+      "within_cluster_tau_mean": 0.7146556868080576,
+      "chosen_k": 4
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_916.json",
+    "source_sha256": "e8fb754972b413c581d86b15dff2cb4ea9db1e3e93d588fa9085ea3e5723e42a"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "922",
+    "legacy_mi": {
+      "template": [
+        5.965054953160729,
+        5.982926732200422,
+        6.134587075427105,
+        2.0218116947472744,
+        6.082197511067731,
+        1.9176647589828306,
+        0.6939078146100339,
+        0.9757900414327392
+      ],
+      "masked": true,
+      "mi_mean": 0.4500239958109306,
+      "mi_median": 0.4666666666666667,
+      "mi_std": 0.33696397383436455,
+      "mi_distribution_percentiles": {
+        "p5": -0.14285714285714285,
+        "p25": 0.23809523809523808,
+        "p50": 0.4666666666666667,
+        "p75": 0.6666666666666666,
+        "p95": 1.0
+      },
+      "n_events": 243991,
+      "n_events_scored": 243991,
+      "n_permutations": 200,
+      "permuted_mean_median": -2.9519043540052612e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.34546473318395227,
+        "mi_median": 0.35714285714285715,
+        "mi_std": 0.25432398010125895,
+        "permuted_mean_median": 3.615472936062647e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.3186766661068884,
+      "within_cluster_tau_mean": 0.45784177503429324,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_922.json",
+    "source_sha256": "4d3122a7deaeba109755a223b2d2ae837a6af4a6fef6d720ce3f4e944b0e5025"
+  },
+  {
+    "dataset": "epilepsiae",
+    "subject": "958",
+    "legacy_mi": {
+      "template": [
+        14.424132254081494,
+        14.164106834443622,
+        12.069293947132307,
+        2.974091150189726,
+        1.7969887955182073,
+        0.8076331565236496,
+        12.145324850588008,
+        11.023144244468352,
+        7.006673053417462,
+        5.952808182307554,
+        3.9395678595543555,
+        13.25523253950447,
+        5.997528143427244,
+        3.994845634730857,
+        14.379421750082138,
+        14.152273702982068
+      ],
+      "masked": true,
+      "mi_mean": 0.10271779055970097,
+      "mi_median": 0.1111111111111111,
+      "mi_std": 0.3104777172150109,
+      "mi_distribution_percentiles": {
+        "p5": -0.42857142857142855,
+        "p25": -0.1111111111111111,
+        "p50": 0.1111111111111111,
+        "p75": 0.3333333333333333,
+        "p95": 0.5833333333333334
+      },
+      "n_events": 165577,
+      "n_events_scored": 165577,
+      "n_permutations": 200,
+      "permuted_mean_median": 6.955302271076804e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.08798927387257892,
+        "mi_median": 0.08333333333333333,
+        "mi_std": 0.24569302471095675,
+        "permuted_mean_median": 5.636853749816252e-06,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.028283730048399864,
+      "within_cluster_tau_mean": 0.20445072219677493,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/epilepsiae_958.json",
+    "source_sha256": "4e12caac3c5ebb85254188c80d7474c82d28876977721e10b0df2354c37230f8"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "chengshuai",
+    "legacy_mi": {
+      "template": [
+        6.037458379578247,
+        6.075692963752665,
+        3.9899049881235156,
+        1.0089569488587113,
+        3.014281790716836,
+        3.01021711366539,
+        5.007283633247644,
+        5.975909196201066
+      ],
+      "masked": true,
+      "mi_mean": 0.1524585022196487,
+      "mi_median": 0.2,
+      "mi_std": 0.4340275127702967,
+      "mi_distribution_percentiles": {
+        "p5": -0.6190476190476191,
+        "p25": -0.14285714285714285,
+        "p50": 0.2,
+        "p75": 0.42857142857142855,
+        "p95": 0.8
+      },
+      "n_events": 27632,
+      "n_events_scored": 27632,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00013872804477900016,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.1046405823475887,
+        "mi_median": 0.14285714285714285,
+        "mi_std": 0.3394938348117863,
+        "permuted_mean_median": -0.0001240797419141363,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.02808364692705727,
+      "within_cluster_tau_mean": 0.2378573921850336,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_chengshuai.json",
+    "source_sha256": "10686e1a4ea2c47430937f34b4133fee11da65f2df9bf571ade5ae0da81c6d91"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "chenziyang",
+    "legacy_mi": {
+      "template": [
+        8.57662573897226,
+        6.85645472061657,
+        7.150252100840335,
+        7.137761377613776,
+        8.185585585585585,
+        8.058377558756634,
+        4.01651376146789,
+        2.9587551556055494,
+        4.009615384615385,
+        4.076681614349775
+      ],
+      "masked": true,
+      "mi_mean": 0.12954356613426238,
+      "mi_median": 0.2,
+      "mi_std": 0.42840982447510256,
+      "mi_distribution_percentiles": {
+        "p5": -0.6,
+        "p25": -0.2,
+        "p50": 0.2,
+        "p75": 0.42857142857142855,
+        "p95": 0.8
+      },
+      "n_events": 9609,
+      "n_events_scored": 9609,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00045261799866857567,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.08989951550051455,
+        "mi_median": 0.1111111111111111,
+        "mi_std": 0.2791758046583598,
+        "permuted_mean_median": -0.0001318208623859578,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.060936309294402004,
+      "within_cluster_tau_mean": 0.35208408813329484,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_chenziyang.json",
+    "source_sha256": "951312cfe4fcefa0adadef934a82ba141f24ee47c2aaada2090208a678cd07df"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "gaolan",
+    "legacy_mi": {
+      "template": [
+        4.992599042228994,
+        4.987424111014745,
+        0.8199930094372597,
+        1.9587137753076618,
+        3.9661928543987703,
+        5.947368421052632,
+        6.9571167883211675,
+        10.305531914893617,
+        10.272727272727273,
+        10.067883211678833,
+        9.882898062342038,
+        10.116970926301555
+      ],
+      "masked": true,
+      "mi_mean": 0.26945004621826524,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.4276182868664167,
+      "mi_distribution_percentiles": {
+        "p5": -0.5238095238095238,
+        "p25": -0.047619047619047616,
+        "p50": 0.3333333333333333,
+        "p75": 0.6111111111111112,
+        "p95": 0.8571428571428571
+      },
+      "n_events": 7451,
+      "n_events_scored": 7451,
+      "n_permutations": 200,
+      "permuted_mean_median": -1.1871693525162187e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2173472749234392,
+        "mi_median": 0.24242424242424243,
+        "mi_std": 0.3670708690420304,
+        "permuted_mean_median": -0.00018911433486658337,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.09737792871274939,
+      "within_cluster_tau_mean": 0.20615879757113686,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_gaolan.json",
+    "source_sha256": "4bf38be451e01a7f263a14e04f26e129e27249cec6b33269d695700db62cb56f"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "hanyuxuan",
+    "legacy_mi": {
+      "template": [
+        20.020497803806734,
+        20.069164265129682,
+        11.016216216216216,
+        11.002766251728907,
+        10.995341614906831,
+        2.9822485207100593,
+        2.0,
+        1.9657794676806084,
+        0.962882096069869,
+        6.046747967479675,
+        7.991181657848324,
+        14.032042723631509,
+        15.029333333333334,
+        13.972337482710927,
+        0.8635743519781719,
+        11.992063492063492,
+        20.227668845315904,
+        19.99134199134199,
+        19.00513347022587,
+        18.010266940451743,
+        18.036817102137768,
+        20.333333333333332
+      ],
+      "masked": true,
+      "mi_mean": 0.1482302248588392,
+      "mi_median": 0.2,
+      "mi_std": 0.3180731287577374,
+      "mi_distribution_percentiles": {
+        "p5": -0.42857142857142855,
+        "p25": -0.07692307692307693,
+        "p50": 0.2,
+        "p75": 0.3939393939393939,
+        "p95": 0.5981699346405209
+      },
+      "n_events": 5468,
+      "n_events_scored": 5468,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.0003729892554486424,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.1346329846695611,
+        "mi_median": 0.18614718614718614,
+        "mi_std": 0.277923863304557,
+        "permuted_mean_median": -0.00021375844345851685,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.039442942460034554,
+      "within_cluster_tau_mean": 0.18806268897516884,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_hanyuxuan.json",
+    "source_sha256": "0752e4f5bfca5d69ce7b5483269eb8f4148d5964f8a12fa7d1944b67d5d98f6d"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "huanghanwen",
+    "legacy_mi": {
+      "template": [
+        3.0285714285714285,
+        4.007299270072993,
+        6.006622516556291,
+        8.192307692307692,
+        8.117647058823529,
+        8.228070175438596,
+        5.0625,
+        8.210526315789473,
+        0.7523809523809524,
+        0.9482758620689655
+      ],
+      "masked": true,
+      "mi_mean": 0.15271546635182998,
+      "mi_median": 0.2,
+      "mi_std": 0.4331748919774824,
+      "mi_distribution_percentiles": {
+        "p5": -0.6,
+        "p25": -0.2,
+        "p50": 0.2,
+        "p75": 0.4380952380952381,
+        "p95": 0.8
+      },
+      "n_events": 484,
+      "n_events_scored": 484,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.000993703266430539,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.1352617079889807,
+        "mi_median": 0.15555555555555556,
+        "mi_std": 0.28039420734203674,
+        "permuted_mean_median": 4.5913682277318016e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.05259929757737495,
+      "within_cluster_tau_mean": 0.21058758081463724,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_huanghanwen.json",
+    "source_sha256": "f988eab1abbf8f7020dadd41cb61fa4225c192ab8e3b21fbbb29c2897c8b4893"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "huangwanling",
+    "legacy_mi": {
+      "template": [
+        1.3101805163372326,
+        1.320266589510022,
+        1.6829626997522529,
+        1.7912939902544667
+      ],
+      "masked": true,
+      "mi_mean": 0.25471642135966593,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.8257642037623317,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -0.3333333333333333,
+        "p50": 0.3333333333333333,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 107062,
+      "n_events_scored": 106737,
+      "n_permutations": 200,
+      "permuted_mean_median": 7.338910905621581e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.18162373204311522,
+        "mi_median": 0.3333333333333333,
+        "mi_std": 0.5572747895301643,
+        "permuted_mean_median": -9.340382208439959e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.034536284019056965,
+      "within_cluster_tau_mean": 0.6174402127875513,
+      "chosen_k": 3
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_huangwanling.json",
+    "source_sha256": "0617f52aa89da0352dbea4c1cd0da02ddd44d3b2a8e0b4426118f6fbf0822708"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "litengsheng",
+    "legacy_mi": {
+      "template": [
+        21.96551724137931,
+        19.074074074074073,
+        20.112469437652813,
+        22.179074446680083,
+        22.163355408388522,
+        15.01158301158301,
+        16.95,
+        16.02826855123675,
+        0.7712765957446809,
+        1.9005524861878451,
+        0.941544885177453,
+        0.9046391752577321,
+        8.043988269794722,
+        6.971608832807571,
+        5.035502958579882,
+        21.092198581560282,
+        22.169230769230772,
+        0.841025641025641,
+        0.9894736842105263,
+        6.9742489270386265,
+        9.980237154150196,
+        14.044052863436123,
+        11.029850746268657,
+        9.936274509803923
+      ],
+      "masked": true,
+      "mi_mean": 0.253928895925878,
+      "mi_median": 0.3076923076923077,
+      "mi_std": 0.31668377451496743,
+      "mi_distribution_percentiles": {
+        "p5": -0.3432967032967033,
+        "p25": 0.05128205128205128,
+        "p50": 0.3076923076923077,
+        "p75": 0.49360639360639363,
+        "p95": 0.6833333333333333
+      },
+      "n_events": 2070,
+      "n_events_scored": 2070,
+      "n_permutations": 200,
+      "permuted_mean_median": -7.394540954756441e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.20174333123293428,
+        "mi_median": 0.2391304347826087,
+        "mi_std": 0.2712959064216536,
+        "permuted_mean_median": -0.00024679689140936746,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.09988881692651791,
+      "within_cluster_tau_mean": 0.20706607905010296,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_litengsheng.json",
+    "source_sha256": "0f0d6d061c7a1cc70e3e78580cfcfc7ade3eca63caff6b4f41bd0b99d392a15c"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "liyouran",
+    "legacy_mi": {
+      "template": [
+        9.955752212389381,
+        4.041407867494824,
+        9.978417266187051,
+        0.9244186046511628,
+        0.9082125603864735,
+        3.0442477876106193,
+        4.968978102189781,
+        3.0228215767634854,
+        6.951807228915663,
+        7.992628992628994,
+        13.038961038961038,
+        15.620331950207468,
+        14.137546468401485,
+        13.072992700729927,
+        13.007797270955164,
+        13.059233449477352,
+        12.0
+      ],
+      "masked": true,
+      "mi_mean": 0.2196712729847979,
+      "mi_median": 0.23076923076923078,
+      "mi_std": 0.34358442012506407,
+      "mi_distribution_percentiles": {
+        "p5": -0.37777777777777777,
+        "p25": -0.022222222222222223,
+        "p50": 0.23076923076923078,
+        "p75": 0.5,
+        "p95": 0.7435897435897436
+      },
+      "n_events": 2346,
+      "n_events_scored": 2346,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0005925731685472929,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.18911413670327468,
+        "mi_median": 0.19117647058823528,
+        "mi_std": 0.29860871795298943,
+        "permuted_mean_median": 0.00010343011885060932,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.08863557072109898,
+      "within_cluster_tau_mean": 0.19573150330610467,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_liyouran.json",
+    "source_sha256": "cdcf2b2bf7ae8ce1097f70d04183edd83481e34698e84f817192750b5e3b5a66"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "pengzihang",
+    "legacy_mi": {
+      "template": [
+        1.9123494413002469,
+        0.7064728798321847,
+        5.027094542659492,
+        1.0333198911180563,
+        7.98517535125567,
+        4.017713243119964,
+        3.9974007970888925,
+        10.114940079893474,
+        10.075675326353883,
+        9.949660903620211,
+        7.021111181341256,
+        7.98747417355372
+      ],
+      "masked": true,
+      "mi_mean": 0.341173733081235,
+      "mi_median": 0.36363636363636365,
+      "mi_std": 0.3275952343311589,
+      "mi_distribution_percentiles": {
+        "p5": -0.23809523809523808,
+        "p25": 0.14285714285714285,
+        "p50": 0.36363636363636365,
+        "p75": 0.6,
+        "p95": 0.8095238095238095
+      },
+      "n_events": 46055,
+      "n_events_scored": 46055,
+      "n_permutations": 200,
+      "permuted_mean_median": -2.993785427831685e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.2604086681602695,
+        "mi_median": 0.2727272727272727,
+        "mi_std": 0.2650431831587649,
+        "permuted_mean_median": -2.2042156446672772e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.1553657092961079,
+      "within_cluster_tau_mean": 0.29133972853286255,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_pengzihang.json",
+    "source_sha256": "81a03b67f893f89669b53c6b7dde6d89116199905c5b432c4f136a41f5d16c4d"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "songzishuo",
+    "legacy_mi": {
+      "template": [
+        14.818181818181818,
+        0.7526881720430108,
+        1.1428571428571428,
+        9.085106382978722,
+        35.0,
+        35.088235294117645,
+        24.97435897435897,
+        31.111111111111107,
+        14.948717948717949,
+        7.0,
+        9.94736842105263,
+        8.969696969696969,
+        7.833333333333334,
+        0.9431818181818181,
+        4.962962962962963,
+        1.9565217391304348,
+        18.170212765957448,
+        21.04878048780488,
+        6.9523809523809526,
+        21.86,
+        12.11320754716981,
+        35.0,
+        32.042857142857144,
+        34.03125,
+        34.03947368421053,
+        36.1,
+        5.0,
+        6.05,
+        35.93939393939394,
+        35.07317073170732,
+        34.92,
+        36.91176470588235,
+        26.0,
+        29.183673469387756,
+        28.080000000000002,
+        17.04878048780488,
+        18.05128205128205,
+        29.057692307692307
+      ],
+      "masked": true,
+      "mi_mean": 0.37383842413066887,
+      "mi_median": 0.4266666666666667,
+      "mi_std": 0.270284447955063,
+      "mi_distribution_percentiles": {
+        "p5": -0.1317948717948718,
+        "p25": 0.2,
+        "p50": 0.4266666666666667,
+        "p75": 0.5900266971777268,
+        "p95": 0.7205905205905204
+      },
+      "n_events": 447,
+      "n_events_scored": 447,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.000278965508360447,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.3159613163145484,
+        "mi_median": 0.34992887624466573,
+        "mi_std": 0.2348738748091917,
+        "permuted_mean_median": 0.00024503486177806345,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.20416605116307002,
+      "within_cluster_tau_mean": 0.2603068944990294,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_songzishuo.json",
+    "source_sha256": "8f8a1c2b2a7822416b507f8e34190d689997d492c4a5b4f9a62d0672c86505a2"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "sunyuanxin",
+    "legacy_mi": {
+      "template": [
+        2.100250626566416,
+        0.9425837320574163,
+        0.7234530175706646,
+        0.9826642335766425,
+        3.05578231292517,
+        10.162451361867703,
+        9.010452961672474,
+        9.059684025746051,
+        8.977678571428573,
+        6.018110236220473,
+        10.180284191829484,
+        4.961538461538462
+      ],
+      "masked": true,
+      "mi_mean": 0.394870832215965,
+      "mi_median": 0.4666666666666667,
+      "mi_std": 0.3789238333532391,
+      "mi_distribution_percentiles": {
+        "p5": -0.35714285714285715,
+        "p25": 0.2,
+        "p50": 0.4666666666666667,
+        "p75": 0.6727272727272727,
+        "p95": 0.8666666666666667
+      },
+      "n_events": 5085,
+      "n_events_scored": 5085,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.00017463580885409722,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.3745895533506153,
+        "mi_median": 0.48484848484848486,
+        "mi_std": 0.33458477853540564,
+        "permuted_mean_median": -0.00019665683382497496,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.19339366128938823,
+      "within_cluster_tau_mean": 0.2913110036870057,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_sunyuanxin.json",
+    "source_sha256": "6aca175ffd2b6660554d5947e157ee8ab244fe59f154b3611044600c8c880bbf"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "wangyiyang",
+    "legacy_mi": {
+      "template": [
+        5.9855072463768115,
+        6.932835820895522,
+        6.971698113207546,
+        0.726063829787234,
+        0.939516129032258,
+        17.924418604651162,
+        18.949152542372882,
+        20.16942148760331,
+        16.059288537549406,
+        13.972549019607843,
+        3.9419795221843006,
+        4.975409836065574,
+        19.947916666666664,
+        1.0097087378640777,
+        0.861878453038674,
+        11.038277511961722,
+        1.8699551569506727,
+        0.7400881057268722,
+        17.03669724770642,
+        19.04428044280443,
+        20.15648854961832,
+        20.028000000000002
+      ],
+      "masked": true,
+      "mi_mean": 0.12002102188312434,
+      "mi_median": 0.15,
+      "mi_std": 0.3090648122032748,
+      "mi_distribution_percentiles": {
+        "p5": -0.40974789915966386,
+        "p25": -0.11764705882352941,
+        "p50": 0.15,
+        "p75": 0.36666666666666664,
+        "p95": 0.5900765900765897
+      },
+      "n_events": 1919,
+      "n_events_scored": 1919,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0002985455457234333,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.09924676678194135,
+        "mi_median": 0.1341991341991342,
+        "mi_std": 0.28872993679288406,
+        "permuted_mean_median": 0.0004827550424215353,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.02305254647458378,
+      "within_cluster_tau_mean": 0.20865242195742922,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_wangyiyang.json",
+    "source_sha256": "4ef1fc62bf3c1f9432dc2a469dafb4c39efaa36a828872e9acca2506693009c6"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "xuxinyi",
+    "legacy_mi": {
+      "template": [
+        13.659127337488869,
+        13.193558673469388,
+        0.5785472972972974,
+        0.7817890092258324,
+        2.9156102861282145,
+        2.9945130315500688,
+        2.989252127183162,
+        4.008617459722743,
+        7.0503597122302155,
+        11.106586826347307,
+        10.063261163734776,
+        10.006195335276969,
+        10.0,
+        3.9870024370430546,
+        2.9619991738950846
+      ],
+      "masked": true,
+      "mi_mean": 0.3878011418857365,
+      "mi_median": 0.4444444444444444,
+      "mi_std": 0.32193430243600407,
+      "mi_distribution_percentiles": {
+        "p5": -0.2222222222222222,
+        "p25": 0.2,
+        "p50": 0.4444444444444444,
+        "p75": 0.6363636363636364,
+        "p95": 0.8021978021978022
+      },
+      "n_events": 9646,
+      "n_events_scored": 9646,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0001886909828025321,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.35556608710247517,
+        "mi_median": 0.3904761904761905,
+        "mi_std": 0.2811421123097833,
+        "permuted_mean_median": 7.799926937393198e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.21153914018068046,
+      "within_cluster_tau_mean": 0.3298890239649265,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_xuxinyi.json",
+    "source_sha256": "67d6a26851a88f4149b70be4016afa02d9ceccfd132fe73f5908c6a405e6a158"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhangbichen",
+    "legacy_mi": {
+      "template": [
+        33.01256281407035,
+        50.18830242510698,
+        3.9693486590038316,
+        11.007766990291262,
+        7.983305509181969,
+        7.008361204013378,
+        5.9727767695099825,
+        8.983193277310924,
+        5.025742574257426,
+        8.037974683544304,
+        17.99381443298969,
+        39.99120879120879,
+        44.00000000000001,
+        46.049040511727085,
+        46.9812030075188,
+        44.004056795131845,
+        0.9123314065510597,
+        0.8796992481203008,
+        13.045774647887324,
+        32.96832579185521,
+        44.005050505050505,
+        24.004672897196258,
+        20.9812734082397,
+        22.99211356466877,
+        22.971677559912855,
+        13.980738362760835,
+        12.019847328244275,
+        50.06794425087108,
+        3.0055555555555555,
+        3.0595238095238093,
+        0.8879668049792531,
+        12.991983967935873,
+        4.965034965034965,
+        0.9396709323583181,
+        48.08902691511388,
+        49.97435897435898,
+        40.03514938488576,
+        44.025782688766114,
+        43.993197278911566,
+        48.00736648250461,
+        50.02580645161291,
+        50.14285714285714,
+        33.03825136612022,
+        36.04383561643836,
+        43.014084507042256,
+        8.031862745098039,
+        17.991620111731844,
+        4.0213776722090255,
+        0.9130434782608696,
+        50.07179487179487,
+        50.03874690849135,
+        50.334722222222226
+      ],
+      "masked": true,
+      "mi_mean": 0.21331304650970398,
+      "mi_median": 0.24307692307692308,
+      "mi_std": 0.2170901764890598,
+      "mi_distribution_percentiles": {
+        "p5": -0.18769230769230769,
+        "p25": 0.06896551724137931,
+        "p50": 0.24307692307692308,
+        "p75": 0.3783783783783784,
+        "p95": 0.5206349206349207
+      },
+      "n_events": 8371,
+      "n_events_scored": 8371,
+      "n_permutations": 200,
+      "permuted_mean_median": 3.794377540392782e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.18697496366198538,
+        "mi_median": 0.20361990950226244,
+        "mi_std": 0.19264339855260806,
+        "permuted_mean_median": -3.531548712038806e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.080511146347181,
+      "within_cluster_tau_mean": 0.1669219681960128,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangbichen.json",
+    "source_sha256": "e70fd45ed55c5cec1d4144e0e11b60e1c27300ed3a130e1f406d4e3e5fde2baf"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhangjiaqi",
+    "legacy_mi": {
+      "template": [
+        5.135037510419561,
+        4.0246979865771815,
+        4.0335383887377265,
+        2.0620333435614198,
+        2.952468662061908,
+        0.937973811164714,
+        0.7853651454290278
+      ],
+      "masked": true,
+      "mi_mean": 0.09018101404788419,
+      "mi_median": 0.14285714285714285,
+      "mi_std": 0.5147535913602309,
+      "mi_distribution_percentiles": {
+        "p5": -0.8,
+        "p25": -0.3333333333333333,
+        "p50": 0.14285714285714285,
+        "p75": 0.5238095238095238,
+        "p95": 0.8666666666666667
+      },
+      "n_events": 48494,
+      "n_events_scored": 48494,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.0001322696769556174,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.09387317429549458,
+        "mi_median": 0.14285714285714285,
+        "mi_std": 0.4358781958005406,
+        "permuted_mean_median": 1.0801532639285788e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.0072374432453032505,
+      "within_cluster_tau_mean": 0.23978546345862042,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangjiaqi.json",
+    "source_sha256": "e06827ac5fd8ccd3f1ff515dfc3ef89e47c60a531411e7d85019ee47df7b78ef"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhangjinhan",
+    "legacy_mi": {
+      "template": [
+        2.0270651254581336,
+        2.1228470111448834,
+        3.1095041322314048,
+        0.9036626654355187,
+        0.9404145077720207
+      ],
+      "masked": true,
+      "mi_mean": 0.11903378523778782,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.6299212325977478,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -0.3333333333333333,
+        "p50": 0.3333333333333333,
+        "p75": 0.6666666666666666,
+        "p95": 1.0
+      },
+      "n_events": 6196,
+      "n_events_scored": 6196,
+      "n_permutations": 200,
+      "permuted_mean_median": -8.607703894986168e-05,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.10429309231762428,
+        "mi_median": 0.2,
+        "mi_std": 0.48655350483165666,
+        "permuted_mean_median": 9.683666881859287e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.03153630627069438,
+      "within_cluster_tau_mean": 0.6585747982417931,
+      "chosen_k": 5
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangjinhan.json",
+    "source_sha256": "48df0b956f34b7a52ae4382de1076a2fdd4cf3baa1d0c0d8c65f11be421218ee"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhangkexuan",
+    "legacy_mi": {
+      "template": [
+        20.96477754237288,
+        14.987147800296588,
+        8.01271676300578,
+        8.959250446162997,
+        10.023765020026703,
+        10.983997967995936,
+        24.124262101534832,
+        22.983106105512746,
+        18.990911844895486,
+        19.007805724197745,
+        22.008674101610904,
+        15.004557106237538,
+        17.99851279000595,
+        18.01697484086087,
+        12.997054491899853,
+        24.16386825960607,
+        24.09327191972364,
+        22.034342406512337,
+        6.075806054639429,
+        7.0200573065902585,
+        0.6342793657206343,
+        1.0025205624834173,
+        5.004948162111216,
+        2.0034310221586846,
+        3.8395886889460153,
+        4.881975199291409
+      ],
+      "masked": true,
+      "mi_mean": 0.49519303934598585,
+      "mi_median": 0.5670995670995671,
+      "mi_std": 0.27413014021804,
+      "mi_distribution_percentiles": {
+        "p5": -0.08771929824561403,
+        "p25": 0.36796536796536794,
+        "p50": 0.5670995670995671,
+        "p75": 0.6923076923076923,
+        "p95": 0.8095238095238095
+      },
+      "n_events": 18190,
+      "n_events_scored": 18190,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.00010864307020045895,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.4395223072694211,
+        "mi_median": 0.5076923076923077,
+        "mi_std": 0.27244463880397274,
+        "permuted_mean_median": 0.00010775151181968148,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.2832795125151923,
+      "within_cluster_tau_mean": 0.2945652640725551,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhangkexuan.json",
+    "source_sha256": "423ea1fa43f0c15c17cd87e5fa58c198c8cc87d897a5067475b765d63f1051af"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhaochenxi",
+    "legacy_mi": {
+      "template": [
+        19.053872053872052,
+        8.01937984496124,
+        18.006849315068493,
+        20.08049535603715,
+        9.047353760445683,
+        12.960227272727273,
+        20.9774011299435,
+        8.93687707641196,
+        8.023419203747071,
+        1.0330739299610894,
+        0.8508946322067594,
+        23.870165745856355,
+        24.062578222778477,
+        24.349804941482443,
+        20.00763358778626,
+        20.00626959247649,
+        22.816414686825052,
+        12.008219178082191,
+        20.0625,
+        14.996941896024465,
+        13.933760683760685,
+        6.93472584856397,
+        15.062240663900415,
+        19.98173515981735,
+        12.0,
+        14.050125313283207
+      ],
+      "masked": true,
+      "mi_mean": 0.12420273867498045,
+      "mi_median": 0.1509209744503862,
+      "mi_std": 0.31105066763875433,
+      "mi_distribution_percentiles": {
+        "p5": -0.42857142857142855,
+        "p25": -0.10256410256410256,
+        "p50": 0.1509209744503862,
+        "p75": 0.3626373626373626,
+        "p95": 0.5897435897435898
+      },
+      "n_events": 3814,
+      "n_events_scored": 3814,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.00032298418538516475,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.09233028115041748,
+        "mi_median": 0.12,
+        "mi_std": 0.2535301058906612,
+        "permuted_mean_median": 0.00019361865193013623,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.024362193822639325,
+      "within_cluster_tau_mean": 0.1569731068252967,
+      "chosen_k": 2
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhaochenxi.json",
+    "source_sha256": "a45a5f32c68201437b30f5f620e19824dacf6b798be83e8e044c24ee5309c25e"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhaojinrui",
+    "legacy_mi": {
+      "template": [
+        1.3065269809595077,
+        1.3992767598842817,
+        1.313813696139438,
+        1.8455652498483646
+      ],
+      "masked": true,
+      "mi_mean": 0.12153628632675315,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.7839420227151077,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -0.6666666666666666,
+        "p50": 0.3333333333333333,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 81141,
+      "n_events_scored": 80393,
+      "n_permutations": 200,
+      "permuted_mean_median": -0.000650968782522525,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.13974439555834905,
+        "mi_median": 0.0,
+        "mi_std": 0.48398309467081363,
+        "permuted_mean_median": -0.00017870127309251857,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.028845376039646174,
+      "within_cluster_tau_mean": 0.8046341367321658,
+      "chosen_k": 6
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhaojinrui.json",
+    "source_sha256": "dd6fdeb60b965618f7f4b8b66bf08ba1f5f7410c6c490a9c33351d057c74c665"
+  },
+  {
+    "dataset": "yuquan",
+    "subject": "zhourongxuan",
+    "legacy_mi": {
+      "template": [
+        1.1483174835405998,
+        1.387477462711031,
+        1.608980167119702,
+        1.6791333072056436
+      ],
+      "masked": true,
+      "mi_mean": 0.12092369652454837,
+      "mi_median": 0.3333333333333333,
+      "mi_std": 0.8367473195236527,
+      "mi_distribution_percentiles": {
+        "p5": -1.0,
+        "p25": -1.0,
+        "p50": 0.3333333333333333,
+        "p75": 1.0,
+        "p95": 1.0
+      },
+      "n_events": 23142,
+      "n_events_scored": 23009,
+      "n_permutations": 200,
+      "permuted_mean_median": 0.00042012545815405683,
+      "p_value": 0.0,
+      "significant": true,
+      "unmasked_sensitivity": {
+        "mi_mean": 0.10799988476939476,
+        "mi_median": 0.0,
+        "mi_std": 0.5131045205543648,
+        "permuted_mean_median": -7.922104110851868e-05,
+        "p_value": 0.0,
+        "significant": true
+      }
+    },
+    "adaptive_cluster": {
+      "overall_tau": 0.017522900102994832,
+      "within_cluster_tau_mean": 0.7790754231473834,
+      "chosen_k": 5
+    },
+    "source_path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject/yuquan_zhourongxuan.json",
+    "source_sha256": "d4c301f8c852260e3ae3e9dd4bf7e5a02baa55898b49607015276f9b75a5708e"
+  }
+]

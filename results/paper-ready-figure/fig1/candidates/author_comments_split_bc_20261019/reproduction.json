@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "-B",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/revise_fig1_author_comments.py",
+    "--output-dir",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/candidates/author_comments_split_bc_20261019"
+  ],
+  "environment": {
+    "PYTHONPATH": "/tmp/fig1_pdf_deps:/tmp/fig1_release_ppt_deps",
+    "LD_LIBRARY_PATH": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib"
+  },
+  "package_versions": {
+    "numpy": "1.26.4",
+    "matplotlib": "3.10.8"
+  },
+  "input_package": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1",
+  "accepted_version": "y1_final_20261010",
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/revise_fig1_author_comments.py": "2985a3a5ccf77f917e650a4bcc6ea4c804d96a833288bfa63eb429e166301004",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_three_column_review.py": "f877ea98488101269d85d226a39a5930cb315a1b8ef488d569a5f4bb39093300",
+    "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig1_readability_review.py": "05d246db7b0e75c4916a6b31f918c258727742763a6bae0659b5428256bbaceb"
+  },
+  "clean_checkout_helper_resolution": "Missing historical layout helpers resolve from the accepted source/code_snapshot package."
+}
