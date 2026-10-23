@@ -1,0 +1,124 @@
+{
+  "schema_version": "figure2f_all_event_timing_plus_space_v3",
+  "template_contract": "timing_plus_space_all_events_missing_view_v1",
+  "input_root": "/data/hfosp_fig3_timing_space_artifacts/results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
+  "distribution": {
+    "n": 18,
+    "n_negative": 15,
+    "median": -0.7180958479166848,
+    "iqr": [
+      -0.8719535261270988,
+      -0.3625852549100998
+    ],
+    "range": [
+      -0.9999917712509017,
+      0.9492032444866747
+    ]
+  },
+  "full_contact_shuffle": {
+    "n_subjects": 18,
+    "n_draws": 100000,
+    "observed_median_delta": -0.6335744440646431,
+    "null_median": -0.0009762444357018715,
+    "null_q025": -0.29122761245238415,
+    "null_q975": 0.2961353763721536,
+    "p_negative": 9.99990000099999e-06,
+    "test": "hierarchical full-contact-shuffle randomization of the centered subject-level cohort median; lower tail"
+  },
+  "display_raw_cohort_median_null": {
+    "n_subjects": 18,
+    "n_draws": 100000,
+    "observed_median_r": -0.7180958479166848,
+    "null_median_r": -0.012651961411805142,
+    "null_q025_r": -0.30929494258878126,
+    "null_q975_r": 0.28321093304343986,
+    "p_negative": 9.99990000099999e-06,
+    "test": "hierarchical full-contact-shuffle randomization of the raw cohort median r; lower tail"
+  },
+  "reported_statistics": {
+    "channel": {
+      "n_subjects": 18,
+      "n_observed_negative": 15,
+      "sign_test_p_more_negative_than_half": 0.0037689208984375,
+      "observed_r_median": -0.7180958479166848,
+      "null_median_across_subject_medians": -0.0012435903600740085,
+      "observed_median_delta_vs_subject_null": -0.6335744440646431,
+      "cohort_shift_p_negative": 9.99990000099999e-06,
+      "n_cohort_permutations": 100000,
+      "n_nominal_subject_p_lt_0_05": 7,
+      "n_bh_fdr_q_lt_0_05": 3,
+      "prevalence_p_nominal_count": 9.99990000099999e-06,
+      "prevalence_p_bh_fdr_count": 0.0003899961000389996,
+      "null_nominal_count_q95": 3.0,
+      "null_bh_fdr_count_q95": 0.0,
+      "paired_wilcoxon_observed_less_than_null_median_p": 0.00384521484375,
+      "n_observed_below_subject_null_median": 15
+    },
+    "within_shaft": {
+      "n_subjects": 18,
+      "n_observed_negative": 15,
+      "sign_test_p_more_negative_than_half": 0.0037689208984375,
+      "observed_r_median": -0.7180958479166848,
+      "null_median_across_subject_medians": -0.36969481540840826,
+      "observed_median_delta_vs_subject_null": -0.15217171313478914,
+      "cohort_shift_p_negative": 9.99990000099999e-06,
+      "n_cohort_permutations": 100000,
+      "n_nominal_subject_p_lt_0_05": 5,
+      "n_bh_fdr_q_lt_0_05": 3,
+      "prevalence_p_nominal_count": 0.0010999890001099988,
+      "prevalence_p_bh_fdr_count": 0.0003099969000309997,
+      "null_nominal_count_q95": 2.0,
+      "null_bh_fdr_count_q95": 0.0,
+      "paired_wilcoxon_observed_less_than_null_median_p": 0.002002716064453125,
+      "n_observed_below_subject_null_median": 13
+    }
+  },
+  "shared_field_change": {
+    "gained": [
+      "epilepsiae_1077",
+      "epilepsiae_1096",
+      "epilepsiae_1150",
+      "epilepsiae_253",
+      "epilepsiae_620",
+      "epilepsiae_635",
+      "yuquan_liyouran",
+      "yuquan_songzishuo",
+      "yuquan_xuxinyi"
+    ],
+    "lost": [
+      "epilepsiae_548",
+      "epilepsiae_583",
+      "yuquan_pengzihang"
+    ],
+    "unchanged": [
+      "epilepsiae_1084",
+      "epilepsiae_1146",
+      "epilepsiae_384",
+      "epilepsiae_590",
+      "epilepsiae_958",
+      "yuquan_chengshuai",
+      "yuquan_huanghanwen",
+      "yuquan_litengsheng",
+      "yuquan_zhaochenxi"
+    ]
+  },
+  "outputs": {
+    "png": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-panelf.png",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/figures/fig2-panelf.pdf"
+  },
+  "display_boundary": "All eligible shared-plane patients are shown without subgroup or example highlighting. Observed r and spatial nulls use exact contact-evaluated fields, not display pixels.",
+  "significance_display": {
+    "negative_prevalence": {
+      "test": "one-sided exact sign test against 50% negative",
+      "p": 0.0037689208984375,
+      "symbol": "**"
+    },
+    "spatial_null": {
+      "test": "hierarchical full-contact-shuffle randomization of the raw cohort median r; lower tail",
+      "p": 9.99990000099999e-06,
+      "symbol": "***"
+    },
+    "diamond_alignment": "upper and lower diamonds both equal the observed raw cohort median r",
+    "symbols": "ns: P>=0.05; *: P<0.05; **: P<0.01; ***: P<0.001"
+  }
+}

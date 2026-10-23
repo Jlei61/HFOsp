@@ -1,0 +1,2662 @@
+{
+  "subject_id": "epilepsiae_548",
+  "dataset": "epilepsiae",
+  "status": "ok",
+  "n_events": 25282,
+  "n_direction_estimable": 25282,
+  "n_channels": 12,
+  "n_blocks": 144,
+  "channel_names": [
+    "GA1",
+    "GA2",
+    "GB1",
+    "GB2",
+    "GB3",
+    "GB4",
+    "GB5",
+    "GD2",
+    "HL7",
+    "HL8",
+    "HL9",
+    "HL10"
+  ],
+  "event_artifact_root": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/548/all_recs",
+  "source_block_inventory": [
+    {
+      "block_id": 0,
+      "record_name": "54800102_0042",
+      "start_event_idx": 0,
+      "end_event_idx": 11,
+      "n_events": 11,
+      "start_t": 1138406403.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138406946.875,
+      "block_end_epoch": 1138409201.385
+    },
+    {
+      "block_id": 1,
+      "record_name": "54800102_0043",
+      "start_event_idx": 11,
+      "end_event_idx": 14,
+      "n_events": 3,
+      "start_t": 1138410015.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138410419.089,
+      "block_end_epoch": 1138413544.067
+    },
+    {
+      "block_id": 2,
+      "record_name": "54800102_0044",
+      "start_event_idx": 14,
+      "end_event_idx": 19,
+      "n_events": 5,
+      "start_t": 1138413613.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138414081.335,
+      "block_end_epoch": 1138417086.772
+    },
+    {
+      "block_id": 3,
+      "record_name": "54800102_0045",
+      "start_event_idx": 19,
+      "end_event_idx": 23,
+      "n_events": 4,
+      "start_t": 1138417214.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138417252.526,
+      "block_end_epoch": 1138419623.535
+    },
+    {
+      "block_id": 4,
+      "record_name": "54800102_0046",
+      "start_event_idx": 23,
+      "end_event_idx": 37,
+      "n_events": 14,
+      "start_t": 1138420814.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138421428.997,
+      "block_end_epoch": 1138422991.45
+    },
+    {
+      "block_id": 5,
+      "record_name": "54800102_0047",
+      "start_event_idx": 37,
+      "end_event_idx": 42,
+      "n_events": 5,
+      "start_t": 1138424415.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138424745.651,
+      "block_end_epoch": 1138427371.432
+    },
+    {
+      "block_id": 6,
+      "record_name": "54800102_0048",
+      "start_event_idx": 42,
+      "end_event_idx": 51,
+      "n_events": 9,
+      "start_t": 1138428016.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138429780.059,
+      "block_end_epoch": 1138431564.461
+    },
+    {
+      "block_id": 7,
+      "record_name": "54800102_0049",
+      "start_event_idx": 51,
+      "end_event_idx": 53,
+      "n_events": 2,
+      "start_t": 1138431616.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138432161.254,
+      "block_end_epoch": 1138433315.089
+    },
+    {
+      "block_id": 8,
+      "record_name": "54800102_0050",
+      "start_event_idx": 53,
+      "end_event_idx": 60,
+      "n_events": 7,
+      "start_t": 1138435217.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138435981.726,
+      "block_end_epoch": 1138438350.162
+    },
+    {
+      "block_id": 9,
+      "record_name": "54800102_0051",
+      "start_event_idx": 60,
+      "end_event_idx": 62,
+      "n_events": 2,
+      "start_t": 1138438817.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138440450.147,
+      "block_end_epoch": 1138440639.661
+    },
+    {
+      "block_id": 10,
+      "record_name": "54800102_0052",
+      "start_event_idx": 62,
+      "end_event_idx": 166,
+      "n_events": 104,
+      "start_t": 1138442417.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138443121.796,
+      "block_end_epoch": 1138444982.088
+    },
+    {
+      "block_id": 11,
+      "record_name": "54800102_0053",
+      "start_event_idx": 166,
+      "end_event_idx": 168,
+      "n_events": 2,
+      "start_t": 1138446017.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138447767.836,
+      "block_end_epoch": 1138448780.939
+    },
+    {
+      "block_id": 12,
+      "record_name": "54800102_0054",
+      "start_event_idx": 168,
+      "end_event_idx": 327,
+      "n_events": 159,
+      "start_t": 1138449618.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138449674.99,
+      "block_end_epoch": 1138453213.003
+    },
+    {
+      "block_id": 13,
+      "record_name": "54800102_0055",
+      "start_event_idx": 327,
+      "end_event_idx": 576,
+      "n_events": 249,
+      "start_t": 1138453218.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138453227.23,
+      "block_end_epoch": 1138456005.078
+    },
+    {
+      "block_id": 14,
+      "record_name": "54800102_0056",
+      "start_event_idx": 576,
+      "end_event_idx": 845,
+      "n_events": 269,
+      "start_t": 1138456818.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138457055.03,
+      "block_end_epoch": 1138460398.422
+    },
+    {
+      "block_id": 15,
+      "record_name": "54800102_0057",
+      "start_event_idx": 845,
+      "end_event_idx": 1089,
+      "n_events": 244,
+      "start_t": 1138460419.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138460476.488,
+      "block_end_epoch": 1138463649.371
+    },
+    {
+      "block_id": 16,
+      "record_name": "54800102_0058",
+      "start_event_idx": 1089,
+      "end_event_idx": 1215,
+      "n_events": 126,
+      "start_t": 1138464019.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138464196.755,
+      "block_end_epoch": 1138467566.364
+    },
+    {
+      "block_id": 17,
+      "record_name": "54800102_0059",
+      "start_event_idx": 1215,
+      "end_event_idx": 1357,
+      "n_events": 142,
+      "start_t": 1138467619.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138467794.035,
+      "block_end_epoch": 1138471195.101
+    },
+    {
+      "block_id": 18,
+      "record_name": "54800102_0060",
+      "start_event_idx": 1357,
+      "end_event_idx": 1503,
+      "n_events": 146,
+      "start_t": 1138471220.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138471220.853,
+      "block_end_epoch": 1138474593.645
+    },
+    {
+      "block_id": 19,
+      "record_name": "54800102_0061",
+      "start_event_idx": 1503,
+      "end_event_idx": 1646,
+      "n_events": 143,
+      "start_t": 1138474820.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138474901.6,
+      "block_end_epoch": 1138478395.075
+    },
+    {
+      "block_id": 20,
+      "record_name": "54800102_0062",
+      "start_event_idx": 1646,
+      "end_event_idx": 1780,
+      "n_events": 134,
+      "start_t": 1138478421.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138478555.68,
+      "block_end_epoch": 1138482007.272
+    },
+    {
+      "block_id": 21,
+      "record_name": "54800102_0063",
+      "start_event_idx": 1780,
+      "end_event_idx": 2006,
+      "n_events": 226,
+      "start_t": 1138482021.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138482029.082,
+      "block_end_epoch": 1138485586.149
+    },
+    {
+      "block_id": 22,
+      "record_name": "54800102_0064",
+      "start_event_idx": 2006,
+      "end_event_idx": 2347,
+      "n_events": 341,
+      "start_t": 1138485622.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138485712.74,
+      "block_end_epoch": 1138489147.069
+    },
+    {
+      "block_id": 23,
+      "record_name": "54800102_0065",
+      "start_event_idx": 2347,
+      "end_event_idx": 2377,
+      "n_events": 30,
+      "start_t": 1138489222.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138489333.647,
+      "block_end_epoch": 1138492430.181
+    },
+    {
+      "block_id": 24,
+      "record_name": "54800102_0066",
+      "start_event_idx": 2377,
+      "end_event_idx": 2382,
+      "n_events": 5,
+      "start_t": 1138492822.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138492873.837,
+      "block_end_epoch": 1138493088.769
+    },
+    {
+      "block_id": 25,
+      "record_name": "54800102_0067",
+      "start_event_idx": 2382,
+      "end_event_idx": 2386,
+      "n_events": 4,
+      "start_t": 1138493203.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138493222.943,
+      "block_end_epoch": 1138494126.523
+    },
+    {
+      "block_id": 26,
+      "record_name": "54800102_0068",
+      "start_event_idx": 2386,
+      "end_event_idx": 2390,
+      "n_events": 4,
+      "start_t": 1138496822.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138497503.082,
+      "block_end_epoch": 1138499220.718
+    },
+    {
+      "block_id": 27,
+      "record_name": "54800102_0069",
+      "start_event_idx": 2390,
+      "end_event_idx": 2395,
+      "n_events": 5,
+      "start_t": 1138500422.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138500874.352,
+      "block_end_epoch": 1138501436.568
+    },
+    {
+      "block_id": 28,
+      "record_name": "54800102_0070",
+      "start_event_idx": 2395,
+      "end_event_idx": 2402,
+      "n_events": 7,
+      "start_t": 1138504022.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138504656.035,
+      "block_end_epoch": 1138507441.238
+    },
+    {
+      "block_id": 29,
+      "record_name": "54800102_0071",
+      "start_event_idx": 2402,
+      "end_event_idx": 2405,
+      "n_events": 3,
+      "start_t": 1138507622.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138509619.787,
+      "block_end_epoch": 1138510967.98
+    },
+    {
+      "block_id": 30,
+      "record_name": "54800102_0072",
+      "start_event_idx": 2405,
+      "end_event_idx": 2435,
+      "n_events": 30,
+      "start_t": 1138511223.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138511996.081,
+      "block_end_epoch": 1138514160.605
+    },
+    {
+      "block_id": 31,
+      "record_name": "54800102_0073",
+      "start_event_idx": 2435,
+      "end_event_idx": 2464,
+      "n_events": 29,
+      "start_t": 1138514823.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138515197.56,
+      "block_end_epoch": 1138517721.392
+    },
+    {
+      "block_id": 32,
+      "record_name": "54800102_0075",
+      "start_event_idx": 2464,
+      "end_event_idx": 2470,
+      "n_events": 6,
+      "start_t": 1138522024.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138523071.902,
+      "block_end_epoch": 1138524010.438
+    },
+    {
+      "block_id": 33,
+      "record_name": "54800102_0076",
+      "start_event_idx": 2470,
+      "end_event_idx": 2479,
+      "n_events": 9,
+      "start_t": 1138525624.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138525695.79,
+      "block_end_epoch": 1138528792.648
+    },
+    {
+      "block_id": 34,
+      "record_name": "54800102_0077",
+      "start_event_idx": 2479,
+      "end_event_idx": 2507,
+      "n_events": 28,
+      "start_t": 1138529224.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138529275.124,
+      "block_end_epoch": 1138532320.642
+    },
+    {
+      "block_id": 35,
+      "record_name": "54800102_0078",
+      "start_event_idx": 2507,
+      "end_event_idx": 2514,
+      "n_events": 7,
+      "start_t": 1138532824.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138533216.888,
+      "block_end_epoch": 1138536150.268
+    },
+    {
+      "block_id": 36,
+      "record_name": "54800102_0079",
+      "start_event_idx": 2514,
+      "end_event_idx": 2530,
+      "n_events": 16,
+      "start_t": 1138536424.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138536821.592,
+      "block_end_epoch": 1138539000.595
+    },
+    {
+      "block_id": 37,
+      "record_name": "54800102_0080",
+      "start_event_idx": 2530,
+      "end_event_idx": 2535,
+      "n_events": 5,
+      "start_t": 1138540025.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138540615.264,
+      "block_end_epoch": 1138543100.485
+    },
+    {
+      "block_id": 38,
+      "record_name": "54800102_0081",
+      "start_event_idx": 2535,
+      "end_event_idx": 2630,
+      "n_events": 95,
+      "start_t": 1138543625.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138543756.192,
+      "block_end_epoch": 1138547197.42
+    },
+    {
+      "block_id": 39,
+      "record_name": "54800102_0082",
+      "start_event_idx": 2630,
+      "end_event_idx": 2867,
+      "n_events": 237,
+      "start_t": 1138547225.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138547227.8,
+      "block_end_epoch": 1138549693.994
+    },
+    {
+      "block_id": 40,
+      "record_name": "54800102_0083",
+      "start_event_idx": 2867,
+      "end_event_idx": 2960,
+      "n_events": 93,
+      "start_t": 1138550826.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138551020.968,
+      "block_end_epoch": 1138554397.983
+    },
+    {
+      "block_id": 41,
+      "record_name": "54800102_0084",
+      "start_event_idx": 2960,
+      "end_event_idx": 3153,
+      "n_events": 193,
+      "start_t": 1138554426.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138554437.971,
+      "block_end_epoch": 1138557966.545
+    },
+    {
+      "block_id": 42,
+      "record_name": "54800102_0085",
+      "start_event_idx": 3153,
+      "end_event_idx": 3475,
+      "n_events": 322,
+      "start_t": 1138558027.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138558490.834,
+      "block_end_epoch": 1138561613.438
+    },
+    {
+      "block_id": 43,
+      "record_name": "54800102_0086",
+      "start_event_idx": 3475,
+      "end_event_idx": 3684,
+      "n_events": 209,
+      "start_t": 1138561628.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138561637.864,
+      "block_end_epoch": 1138565198.785
+    },
+    {
+      "block_id": 44,
+      "record_name": "54800102_0087",
+      "start_event_idx": 3684,
+      "end_event_idx": 3828,
+      "n_events": 144,
+      "start_t": 1138565228.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138565244.322,
+      "block_end_epoch": 1138568827.576
+    },
+    {
+      "block_id": 45,
+      "record_name": "54800102_0088",
+      "start_event_idx": 3828,
+      "end_event_idx": 4087,
+      "n_events": 259,
+      "start_t": 1138568828.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138568835.802,
+      "block_end_epoch": 1138572416.015
+    },
+    {
+      "block_id": 46,
+      "record_name": "54800102_0089",
+      "start_event_idx": 4087,
+      "end_event_idx": 4393,
+      "n_events": 306,
+      "start_t": 1138572428.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138572466.437,
+      "block_end_epoch": 1138576024.955
+    },
+    {
+      "block_id": 47,
+      "record_name": "54800102_0090",
+      "start_event_idx": 4393,
+      "end_event_idx": 4466,
+      "n_events": 73,
+      "start_t": 1138576028.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138576031.343,
+      "block_end_epoch": 1138579322.419
+    },
+    {
+      "block_id": 48,
+      "record_name": "54801102_0000",
+      "start_event_idx": 4466,
+      "end_event_idx": 4481,
+      "n_events": 15,
+      "start_t": 1138580115.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138580345.478,
+      "block_end_epoch": 1138583403.804
+    },
+    {
+      "block_id": 49,
+      "record_name": "54801102_0001",
+      "start_event_idx": 4481,
+      "end_event_idx": 4489,
+      "n_events": 8,
+      "start_t": 1138583715.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138584063.73,
+      "block_end_epoch": 1138587287.621
+    },
+    {
+      "block_id": 50,
+      "record_name": "54801102_0002",
+      "start_event_idx": 4489,
+      "end_event_idx": 4508,
+      "n_events": 19,
+      "start_t": 1138587316.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138587775.22,
+      "block_end_epoch": 1138590264.957
+    },
+    {
+      "block_id": 51,
+      "record_name": "54802102_0000",
+      "start_event_idx": 4508,
+      "end_event_idx": 4557,
+      "n_events": 49,
+      "start_t": 1138590787.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138590799.07,
+      "block_end_epoch": 1138594331.214
+    },
+    {
+      "block_id": 52,
+      "record_name": "54802102_0001",
+      "start_event_idx": 4557,
+      "end_event_idx": 4617,
+      "n_events": 60,
+      "start_t": 1138594388.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138594487.069,
+      "block_end_epoch": 1138597663.23
+    },
+    {
+      "block_id": 53,
+      "record_name": "54802102_0002",
+      "start_event_idx": 4617,
+      "end_event_idx": 4635,
+      "n_events": 18,
+      "start_t": 1138597988.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138598168.8,
+      "block_end_epoch": 1138601193.503
+    },
+    {
+      "block_id": 54,
+      "record_name": "54802102_0003",
+      "start_event_idx": 4635,
+      "end_event_idx": 4691,
+      "n_events": 56,
+      "start_t": 1138601589.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138601620.06,
+      "block_end_epoch": 1138604848.94
+    },
+    {
+      "block_id": 55,
+      "record_name": "54802102_0004",
+      "start_event_idx": 4691,
+      "end_event_idx": 4729,
+      "n_events": 38,
+      "start_t": 1138605189.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138605236.165,
+      "block_end_epoch": 1138608161.778
+    },
+    {
+      "block_id": 56,
+      "record_name": "54802102_0005",
+      "start_event_idx": 4729,
+      "end_event_idx": 4767,
+      "n_events": 38,
+      "start_t": 1138608790.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138608790.85,
+      "block_end_epoch": 1138612255.207
+    },
+    {
+      "block_id": 57,
+      "record_name": "54802102_0006",
+      "start_event_idx": 4767,
+      "end_event_idx": 4809,
+      "n_events": 42,
+      "start_t": 1138612390.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138612458.651,
+      "block_end_epoch": 1138615667.945
+    },
+    {
+      "block_id": 58,
+      "record_name": "54802102_0007",
+      "start_event_idx": 4809,
+      "end_event_idx": 4813,
+      "n_events": 4,
+      "start_t": 1138615990.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138616967.111,
+      "block_end_epoch": 1138619359.084
+    },
+    {
+      "block_id": 59,
+      "record_name": "54802102_0008",
+      "start_event_idx": 4813,
+      "end_event_idx": 4819,
+      "n_events": 6,
+      "start_t": 1138619591.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138619594.044,
+      "block_end_epoch": 1138622763.513
+    },
+    {
+      "block_id": 60,
+      "record_name": "54802102_0009",
+      "start_event_idx": 4819,
+      "end_event_idx": 4822,
+      "n_events": 3,
+      "start_t": 1138623191.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138623467.288,
+      "block_end_epoch": 1138626079.265
+    },
+    {
+      "block_id": 61,
+      "record_name": "54802102_0010",
+      "start_event_idx": 4822,
+      "end_event_idx": 4862,
+      "n_events": 40,
+      "start_t": 1138626791.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138627683.688,
+      "block_end_epoch": 1138630382.892
+    },
+    {
+      "block_id": 62,
+      "record_name": "54802102_0011",
+      "start_event_idx": 4862,
+      "end_event_idx": 5067,
+      "n_events": 205,
+      "start_t": 1138630392.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138630555.808,
+      "block_end_epoch": 1138633965.411
+    },
+    {
+      "block_id": 63,
+      "record_name": "54802102_0012",
+      "start_event_idx": 5067,
+      "end_event_idx": 5266,
+      "n_events": 199,
+      "start_t": 1138633992.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138634000.939,
+      "block_end_epoch": 1138637582.97
+    },
+    {
+      "block_id": 64,
+      "record_name": "54802102_0013",
+      "start_event_idx": 5266,
+      "end_event_idx": 5409,
+      "n_events": 143,
+      "start_t": 1138637592.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138637665.568,
+      "block_end_epoch": 1138641164.9
+    },
+    {
+      "block_id": 65,
+      "record_name": "54802102_0014",
+      "start_event_idx": 5409,
+      "end_event_idx": 5506,
+      "n_events": 97,
+      "start_t": 1138641193.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138641380.128,
+      "block_end_epoch": 1138644595.833
+    },
+    {
+      "block_id": 66,
+      "record_name": "54802102_0015",
+      "start_event_idx": 5506,
+      "end_event_idx": 5589,
+      "n_events": 83,
+      "start_t": 1138644793.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138645013.489,
+      "block_end_epoch": 1138648388.62
+    },
+    {
+      "block_id": 67,
+      "record_name": "54802102_0016",
+      "start_event_idx": 5589,
+      "end_event_idx": 5685,
+      "n_events": 96,
+      "start_t": 1138648394.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138648427.553,
+      "block_end_epoch": 1138650680.765
+    },
+    {
+      "block_id": 68,
+      "record_name": "54802102_0017",
+      "start_event_idx": 5685,
+      "end_event_idx": 5695,
+      "n_events": 10,
+      "start_t": 1138651994.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138652218.596,
+      "block_end_epoch": 1138655553.637
+    },
+    {
+      "block_id": 69,
+      "record_name": "54802102_0018",
+      "start_event_idx": 5695,
+      "end_event_idx": 5898,
+      "n_events": 203,
+      "start_t": 1138655594.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138655682.793,
+      "block_end_epoch": 1138659161.447
+    },
+    {
+      "block_id": 70,
+      "record_name": "54802102_0019",
+      "start_event_idx": 5898,
+      "end_event_idx": 6158,
+      "n_events": 260,
+      "start_t": 1138659194.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138659208.057,
+      "block_end_epoch": 1138662650.75
+    },
+    {
+      "block_id": 71,
+      "record_name": "54802102_0020",
+      "start_event_idx": 6158,
+      "end_event_idx": 6193,
+      "n_events": 35,
+      "start_t": 1138662795.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138662830.001,
+      "block_end_epoch": 1138665618.936
+    },
+    {
+      "block_id": 72,
+      "record_name": "54802102_0021",
+      "start_event_idx": 6193,
+      "end_event_idx": 6237,
+      "n_events": 44,
+      "start_t": 1138665730.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138665889.115,
+      "block_end_epoch": 1138668404.138
+    },
+    {
+      "block_id": 73,
+      "record_name": "54802102_0024",
+      "start_event_idx": 6237,
+      "end_event_idx": 6245,
+      "n_events": 8,
+      "start_t": 1138668862.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138668875.681,
+      "block_end_epoch": 1138670796.351
+    },
+    {
+      "block_id": 74,
+      "record_name": "54802102_0025",
+      "start_event_idx": 6245,
+      "end_event_idx": 6293,
+      "n_events": 48,
+      "start_t": 1138672461.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138672830.521,
+      "block_end_epoch": 1138674774.956
+    },
+    {
+      "block_id": 75,
+      "record_name": "54802102_0026",
+      "start_event_idx": 6293,
+      "end_event_idx": 6302,
+      "n_events": 9,
+      "start_t": 1138676062.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138676895.415,
+      "block_end_epoch": 1138679602.738
+    },
+    {
+      "block_id": 76,
+      "record_name": "54802102_0027",
+      "start_event_idx": 6302,
+      "end_event_idx": 6328,
+      "n_events": 26,
+      "start_t": 1138679662.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138679749.281,
+      "block_end_epoch": 1138681620.988
+    },
+    {
+      "block_id": 77,
+      "record_name": "54802102_0028",
+      "start_event_idx": 6328,
+      "end_event_idx": 6375,
+      "n_events": 47,
+      "start_t": 1138683263.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138683620.072,
+      "block_end_epoch": 1138686831.613
+    },
+    {
+      "block_id": 78,
+      "record_name": "54802102_0029",
+      "start_event_idx": 6375,
+      "end_event_idx": 6393,
+      "n_events": 18,
+      "start_t": 1138686863.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138686897.772,
+      "block_end_epoch": 1138690421.329
+    },
+    {
+      "block_id": 79,
+      "record_name": "54802102_0031",
+      "start_event_idx": 6393,
+      "end_event_idx": 6433,
+      "n_events": 40,
+      "start_t": 1138694063.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138694112.174,
+      "block_end_epoch": 1138697273.705
+    },
+    {
+      "block_id": 80,
+      "record_name": "54802102_0032",
+      "start_event_idx": 6433,
+      "end_event_idx": 6526,
+      "n_events": 93,
+      "start_t": 1138697663.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138697812.114,
+      "block_end_epoch": 1138700329.231
+    },
+    {
+      "block_id": 81,
+      "record_name": "54802102_0033",
+      "start_event_idx": 6526,
+      "end_event_idx": 6531,
+      "n_events": 5,
+      "start_t": 1138701264.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138701780.248,
+      "block_end_epoch": 1138703720.643
+    },
+    {
+      "block_id": 82,
+      "record_name": "54802102_0034",
+      "start_event_idx": 6531,
+      "end_event_idx": 6537,
+      "n_events": 6,
+      "start_t": 1138704864.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138705548.814,
+      "block_end_epoch": 1138708174.025
+    },
+    {
+      "block_id": 83,
+      "record_name": "54802102_0035",
+      "start_event_idx": 6537,
+      "end_event_idx": 6539,
+      "n_events": 2,
+      "start_t": 1138708464.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138709219.531,
+      "block_end_epoch": 1138710325.05
+    },
+    {
+      "block_id": 84,
+      "record_name": "54802102_0036",
+      "start_event_idx": 6539,
+      "end_event_idx": 6544,
+      "n_events": 5,
+      "start_t": 1138712065.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138712197.861,
+      "block_end_epoch": 1138713603.888
+    },
+    {
+      "block_id": 85,
+      "record_name": "54802102_0037",
+      "start_event_idx": 6544,
+      "end_event_idx": 6647,
+      "n_events": 103,
+      "start_t": 1138715665.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138716696.684,
+      "block_end_epoch": 1138719242.23
+    },
+    {
+      "block_id": 86,
+      "record_name": "54802102_0038",
+      "start_event_idx": 6647,
+      "end_event_idx": 6809,
+      "n_events": 162,
+      "start_t": 1138719266.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138719273.221,
+      "block_end_epoch": 1138722816.133
+    },
+    {
+      "block_id": 87,
+      "record_name": "54802102_0039",
+      "start_event_idx": 6809,
+      "end_event_idx": 6989,
+      "n_events": 180,
+      "start_t": 1138722866.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138723055.898,
+      "block_end_epoch": 1138726259.914
+    },
+    {
+      "block_id": 88,
+      "record_name": "54802102_0040",
+      "start_event_idx": 6989,
+      "end_event_idx": 7025,
+      "n_events": 36,
+      "start_t": 1138726466.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138726541.41,
+      "block_end_epoch": 1138730002.219
+    },
+    {
+      "block_id": 89,
+      "record_name": "54802102_0041",
+      "start_event_idx": 7025,
+      "end_event_idx": 7157,
+      "n_events": 132,
+      "start_t": 1138730067.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138730259.005,
+      "block_end_epoch": 1138733434.769
+    },
+    {
+      "block_id": 90,
+      "record_name": "54802102_0042",
+      "start_event_idx": 7157,
+      "end_event_idx": 7193,
+      "n_events": 36,
+      "start_t": 1138733667.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138734225.168,
+      "block_end_epoch": 1138736269.149
+    },
+    {
+      "block_id": 91,
+      "record_name": "54802102_0043",
+      "start_event_idx": 7193,
+      "end_event_idx": 7467,
+      "n_events": 274,
+      "start_t": 1138737267.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138737307.384,
+      "block_end_epoch": 1138740729.023
+    },
+    {
+      "block_id": 92,
+      "record_name": "54802102_0044",
+      "start_event_idx": 7467,
+      "end_event_idx": 7668,
+      "n_events": 201,
+      "start_t": 1138740867.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138741022.743,
+      "block_end_epoch": 1138744341.707
+    },
+    {
+      "block_id": 93,
+      "record_name": "54802102_0045",
+      "start_event_idx": 7668,
+      "end_event_idx": 8029,
+      "n_events": 361,
+      "start_t": 1138744468.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138744545.386,
+      "block_end_epoch": 1138748062.069
+    },
+    {
+      "block_id": 94,
+      "record_name": "54802102_0046",
+      "start_event_idx": 8029,
+      "end_event_idx": 8483,
+      "n_events": 454,
+      "start_t": 1138748068.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138748163.522,
+      "block_end_epoch": 1138751663.822
+    },
+    {
+      "block_id": 95,
+      "record_name": "54802102_0047",
+      "start_event_idx": 8483,
+      "end_event_idx": 8492,
+      "n_events": 9,
+      "start_t": 1138751668.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138751675.365,
+      "block_end_epoch": 1138751903.647
+    },
+    {
+      "block_id": 96,
+      "record_name": "54802102_0049",
+      "start_event_idx": 8492,
+      "end_event_idx": 8546,
+      "n_events": 54,
+      "start_t": 1138755768.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138756675.376,
+      "block_end_epoch": 1138759230.4
+    },
+    {
+      "block_id": 97,
+      "record_name": "54802102_0050",
+      "start_event_idx": 8546,
+      "end_event_idx": 8555,
+      "n_events": 9,
+      "start_t": 1138759368.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138761558.45,
+      "block_end_epoch": 1138761737.314
+    },
+    {
+      "block_id": 98,
+      "record_name": "54802102_0051",
+      "start_event_idx": 8555,
+      "end_event_idx": 8601,
+      "n_events": 46,
+      "start_t": 1138762969.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138762983.999,
+      "block_end_epoch": 1138766393.416
+    },
+    {
+      "block_id": 99,
+      "record_name": "54802102_0052",
+      "start_event_idx": 8601,
+      "end_event_idx": 8614,
+      "n_events": 13,
+      "start_t": 1138766570.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138767812.54,
+      "block_end_epoch": 1138770159.475
+    },
+    {
+      "block_id": 100,
+      "record_name": "54802102_0053",
+      "start_event_idx": 8614,
+      "end_event_idx": 8649,
+      "n_events": 35,
+      "start_t": 1138770170.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138770195.677,
+      "block_end_epoch": 1138773629.993
+    },
+    {
+      "block_id": 101,
+      "record_name": "54802102_0054",
+      "start_event_idx": 8649,
+      "end_event_idx": 8663,
+      "n_events": 14,
+      "start_t": 1138773771.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138774843.917,
+      "block_end_epoch": 1138776879.941
+    },
+    {
+      "block_id": 102,
+      "record_name": "54802102_0055",
+      "start_event_idx": 8663,
+      "end_event_idx": 8735,
+      "n_events": 72,
+      "start_t": 1138777371.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138777489.309,
+      "block_end_epoch": 1138779505.564
+    },
+    {
+      "block_id": 103,
+      "record_name": "54802102_0056",
+      "start_event_idx": 8735,
+      "end_event_idx": 8852,
+      "n_events": 117,
+      "start_t": 1138780972.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138781245.472,
+      "block_end_epoch": 1138784415.066
+    },
+    {
+      "block_id": 104,
+      "record_name": "54802102_0057",
+      "start_event_idx": 8852,
+      "end_event_idx": 8925,
+      "n_events": 73,
+      "start_t": 1138784573.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138785385.882,
+      "block_end_epoch": 1138788154.577
+    },
+    {
+      "block_id": 105,
+      "record_name": "54802102_0058",
+      "start_event_idx": 8925,
+      "end_event_idx": 8940,
+      "n_events": 15,
+      "start_t": 1138788173.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138788188.086,
+      "block_end_epoch": 1138791267.777
+    },
+    {
+      "block_id": 106,
+      "record_name": "54802102_0059",
+      "start_event_idx": 8940,
+      "end_event_idx": 8988,
+      "n_events": 48,
+      "start_t": 1138791773.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138792195.978,
+      "block_end_epoch": 1138794124.395
+    },
+    {
+      "block_id": 107,
+      "record_name": "54802102_0060",
+      "start_event_idx": 8988,
+      "end_event_idx": 9000,
+      "n_events": 12,
+      "start_t": 1138795374.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138795498.215,
+      "block_end_epoch": 1138798968.242
+    },
+    {
+      "block_id": 108,
+      "record_name": "54802102_0061",
+      "start_event_idx": 9000,
+      "end_event_idx": 9166,
+      "n_events": 166,
+      "start_t": 1138798974.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138799330.647,
+      "block_end_epoch": 1138802561.97
+    },
+    {
+      "block_id": 109,
+      "record_name": "54802102_0062",
+      "start_event_idx": 9166,
+      "end_event_idx": 10023,
+      "n_events": 857,
+      "start_t": 1138802575.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138802583.637,
+      "block_end_epoch": 1138805581.633
+    },
+    {
+      "block_id": 110,
+      "record_name": "54802102_0063",
+      "start_event_idx": 10023,
+      "end_event_idx": 10763,
+      "n_events": 740,
+      "start_t": 1138806175.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138806328.262,
+      "block_end_epoch": 1138809763.701
+    },
+    {
+      "block_id": 111,
+      "record_name": "54802102_0064",
+      "start_event_idx": 10763,
+      "end_event_idx": 11242,
+      "n_events": 479,
+      "start_t": 1138809776.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138809776.473,
+      "block_end_epoch": 1138813368.623
+    },
+    {
+      "block_id": 112,
+      "record_name": "54802102_0065",
+      "start_event_idx": 11242,
+      "end_event_idx": 12156,
+      "n_events": 914,
+      "start_t": 1138813376.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138813413.023,
+      "block_end_epoch": 1138816949.52
+    },
+    {
+      "block_id": 113,
+      "record_name": "54802102_0066",
+      "start_event_idx": 12156,
+      "end_event_idx": 12271,
+      "n_events": 115,
+      "start_t": 1138816977.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138816995.713,
+      "block_end_epoch": 1138820575.133
+    },
+    {
+      "block_id": 114,
+      "record_name": "54802102_0067",
+      "start_event_idx": 12271,
+      "end_event_idx": 12504,
+      "n_events": 233,
+      "start_t": 1138820577.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138820577.454,
+      "block_end_epoch": 1138824053.902
+    },
+    {
+      "block_id": 115,
+      "record_name": "54802102_0068",
+      "start_event_idx": 12504,
+      "end_event_idx": 12891,
+      "n_events": 387,
+      "start_t": 1138824177.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138824252.896,
+      "block_end_epoch": 1138827776.653
+    },
+    {
+      "block_id": 116,
+      "record_name": "54802102_0069",
+      "start_event_idx": 12891,
+      "end_event_idx": 13406,
+      "n_events": 515,
+      "start_t": 1138827777.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138827777.484,
+      "block_end_epoch": 1138831376.14
+    },
+    {
+      "block_id": 117,
+      "record_name": "54802102_0070",
+      "start_event_idx": 13406,
+      "end_event_idx": 13948,
+      "n_events": 542,
+      "start_t": 1138831377.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138831380.186,
+      "block_end_epoch": 1138834974.156
+    },
+    {
+      "block_id": 118,
+      "record_name": "54802102_0071",
+      "start_event_idx": 13948,
+      "end_event_idx": 14199,
+      "n_events": 251,
+      "start_t": 1138834977.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138834978.894,
+      "block_end_epoch": 1138838316.533
+    },
+    {
+      "block_id": 119,
+      "record_name": "54802102_0072",
+      "start_event_idx": 14199,
+      "end_event_idx": 14247,
+      "n_events": 48,
+      "start_t": 1138838648.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138838876.697,
+      "block_end_epoch": 1138842068.258
+    },
+    {
+      "block_id": 120,
+      "record_name": "54802102_0073",
+      "start_event_idx": 14247,
+      "end_event_idx": 14323,
+      "n_events": 76,
+      "start_t": 1138842249.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138842271.256,
+      "block_end_epoch": 1138845828.044
+    },
+    {
+      "block_id": 121,
+      "record_name": "54802102_0074",
+      "start_event_idx": 14323,
+      "end_event_idx": 14372,
+      "n_events": 49,
+      "start_t": 1138845849.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138846041.789,
+      "block_end_epoch": 1138849345.381
+    },
+    {
+      "block_id": 122,
+      "record_name": "54802102_0075",
+      "start_event_idx": 14372,
+      "end_event_idx": 14409,
+      "n_events": 37,
+      "start_t": 1138849449.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138849799.72,
+      "block_end_epoch": 1138852818.249
+    },
+    {
+      "block_id": 123,
+      "record_name": "54802102_0076",
+      "start_event_idx": 14409,
+      "end_event_idx": 14460,
+      "n_events": 51,
+      "start_t": 1138853050.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138853186.889,
+      "block_end_epoch": 1138856423.569
+    },
+    {
+      "block_id": 124,
+      "record_name": "54802102_0077",
+      "start_event_idx": 14460,
+      "end_event_idx": 14603,
+      "n_events": 143,
+      "start_t": 1138856650.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138857567.169,
+      "block_end_epoch": 1138859331.379
+    },
+    {
+      "block_id": 125,
+      "record_name": "54802102_0078",
+      "start_event_idx": 14603,
+      "end_event_idx": 14652,
+      "n_events": 49,
+      "start_t": 1138860250.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138860308.366,
+      "block_end_epoch": 1138863652.447
+    },
+    {
+      "block_id": 126,
+      "record_name": "54802102_0079",
+      "start_event_idx": 14652,
+      "end_event_idx": 14737,
+      "n_events": 85,
+      "start_t": 1138863850.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138864401.99,
+      "block_end_epoch": 1138867447.264
+    },
+    {
+      "block_id": 127,
+      "record_name": "54802102_0080",
+      "start_event_idx": 14737,
+      "end_event_idx": 14828,
+      "n_events": 91,
+      "start_t": 1138867450.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138867451.422,
+      "block_end_epoch": 1138868636.059
+    },
+    {
+      "block_id": 128,
+      "record_name": "54802102_0081",
+      "start_event_idx": 14828,
+      "end_event_idx": 14830,
+      "n_events": 2,
+      "start_t": 1138869151.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138870993.656,
+      "block_end_epoch": 1138871374.524
+    },
+    {
+      "block_id": 129,
+      "record_name": "54802102_0082",
+      "start_event_idx": 14830,
+      "end_event_idx": 14905,
+      "n_events": 75,
+      "start_t": 1138872532.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138873012.486,
+      "block_end_epoch": 1138875128.742
+    },
+    {
+      "block_id": 130,
+      "record_name": "54802102_0083",
+      "start_event_idx": 14905,
+      "end_event_idx": 14934,
+      "n_events": 29,
+      "start_t": 1138876143.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138876273.139,
+      "block_end_epoch": 1138879736.188
+    },
+    {
+      "block_id": 131,
+      "record_name": "54802102_0084",
+      "start_event_idx": 14934,
+      "end_event_idx": 14992,
+      "n_events": 58,
+      "start_t": 1138879744.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138879773.289,
+      "block_end_epoch": 1138883295.384
+    },
+    {
+      "block_id": 132,
+      "record_name": "54802102_0085",
+      "start_event_idx": 14992,
+      "end_event_idx": 15040,
+      "n_events": 48,
+      "start_t": 1138883344.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138883381.981,
+      "block_end_epoch": 1138886488.087
+    },
+    {
+      "block_id": 133,
+      "record_name": "54802102_0086",
+      "start_event_idx": 15040,
+      "end_event_idx": 15173,
+      "n_events": 133,
+      "start_t": 1138886945.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138887024.407,
+      "block_end_epoch": 1138890543.358
+    },
+    {
+      "block_id": 134,
+      "record_name": "54802102_0087",
+      "start_event_idx": 15173,
+      "end_event_idx": 16479,
+      "n_events": 1306,
+      "start_t": 1138890546.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138890546.067,
+      "block_end_epoch": 1138894145.796
+    },
+    {
+      "block_id": 135,
+      "record_name": "54802102_0088",
+      "start_event_idx": 16479,
+      "end_event_idx": 17088,
+      "n_events": 609,
+      "start_t": 1138894146.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138894220.203,
+      "block_end_epoch": 1138897744.886
+    },
+    {
+      "block_id": 136,
+      "record_name": "54802102_0089",
+      "start_event_idx": 17088,
+      "end_event_idx": 19076,
+      "n_events": 1988,
+      "start_t": 1138897746.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138897746.43,
+      "block_end_epoch": 1138901345.023
+    },
+    {
+      "block_id": 137,
+      "record_name": "54802102_0090",
+      "start_event_idx": 19076,
+      "end_event_idx": 19886,
+      "n_events": 810,
+      "start_t": 1138901346.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138901346.398,
+      "block_end_epoch": 1138904945.863
+    },
+    {
+      "block_id": 138,
+      "record_name": "54802102_0091",
+      "start_event_idx": 19886,
+      "end_event_idx": 21962,
+      "n_events": 2076,
+      "start_t": 1138904946.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138904948.694,
+      "block_end_epoch": 1138908544.453
+    },
+    {
+      "block_id": 139,
+      "record_name": "54802102_0092",
+      "start_event_idx": 21962,
+      "end_event_idx": 22372,
+      "n_events": 410,
+      "start_t": 1138908547.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138908597.325,
+      "block_end_epoch": 1138912135.952
+    },
+    {
+      "block_id": 140,
+      "record_name": "54802102_0093",
+      "start_event_idx": 22372,
+      "end_event_idx": 23674,
+      "n_events": 1302,
+      "start_t": 1138912147.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138912161.169,
+      "block_end_epoch": 1138915729.382
+    },
+    {
+      "block_id": 141,
+      "record_name": "54802102_0094",
+      "start_event_idx": 23674,
+      "end_event_idx": 24032,
+      "n_events": 358,
+      "start_t": 1138915747.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138915814.138,
+      "block_end_epoch": 1138919295.156
+    },
+    {
+      "block_id": 142,
+      "record_name": "54802102_0095",
+      "start_event_idx": 24032,
+      "end_event_idx": 25266,
+      "n_events": 1234,
+      "start_t": 1138919348.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138919401.884,
+      "block_end_epoch": 1138922940.268
+    },
+    {
+      "block_id": 143,
+      "record_name": "54802102_0096",
+      "start_event_idx": 25266,
+      "end_event_idx": 25282,
+      "n_events": 16,
+      "start_t": 1138922948.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1138923027.145,
+      "block_end_epoch": 1138923253.273
+    }
+  ],
+  "folds": [
+    {
+      "fold": 0,
+      "split": "alternating",
+      "n_train": 15879,
+      "n_test": 9403,
+      "n_direction_test": 9403,
+      "n_common_test": 9403,
+      "train_blocks": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78,
+        80,
+        82,
+        84,
+        86,
+        88,
+        90,
+        92,
+        94,
+        96,
+        98,
+        100,
+        102,
+        104,
+        106,
+        108,
+        110,
+        112,
+        114,
+        116,
+        118,
+        120,
+        122,
+        124,
+        126,
+        128,
+        130,
+        132,
+        134,
+        136,
+        138,
+        140,
+        142
+      ],
+      "test_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35,
+        37,
+        39,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61,
+        63,
+        65,
+        67,
+        69,
+        71,
+        73,
+        75,
+        77,
+        79,
+        81,
+        83,
+        85,
+        87,
+        89,
+        91,
+        93,
+        95,
+        97,
+        99,
+        101,
+        103,
+        105,
+        107,
+        109,
+        111,
+        113,
+        115,
+        117,
+        119,
+        121,
+        123,
+        125,
+        127,
+        129,
+        131,
+        133,
+        135,
+        137,
+        139,
+        141,
+        143
+      ],
+      "single_vmf_nll": 2.418639510355786,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 2.505617682517048,
+          "conditional_nll": 2.472290666747904,
+          "angular_mae_deg": 74.95292291849631,
+          "legacy_direction_score": 0.21986819161635013,
+          "n_test_assigned": 9403
+        },
+        "rank_trajectory": {
+          "nll": 2.4253033105850546,
+          "conditional_nll": 2.4776042757893175,
+          "angular_mae_deg": 60.73893144668599,
+          "legacy_direction_score": 0.4170740743235379,
+          "n_test_assigned": 9403
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              1.9876002917578413,
+              6.038851351351352,
+              1.0816901408450703,
+              2.951699029126213,
+              4.088260996213225,
+              5.119806270711191,
+              6.174367309031808,
+              0.4088714544357272,
+              10.558277490937055,
+              9.160075879177004,
+              9.025707727620505,
+              8.916328066215199
+            ],
+            [
+              3.995590828924162,
+              6.043436293436294,
+              1.9574970484061391,
+              3.040258806613947,
+              5.011829652996845,
+              6.008764241893076,
+              6.978410206084397,
+              0.7077077077077077,
+              0.7773972602739726,
+              0.9275362318840579,
+              9.016985138004245,
+              10.160228898426325
+            ]
+          ],
+          "axes": [
+            [
+              0.21731870671680606,
+              -0.32254649707710276,
+              0.92126887331236
+            ],
+            [
+              -0.05512804315701937,
+              0.17285651185912781,
+              0.983403032924738
+            ]
+          ],
+          "train_counts": [
+            11322,
+            4557
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              1.912174896343762,
+              2.026372443487621,
+              1.924242424242424,
+              3.8974904296044235,
+              5.030493273542601,
+              5.913887716336006,
+              6.102497846683893,
+              0.4062081883864062,
+              10.598816355810616,
+              9.217317073170733,
+              8.982736735211983,
+              8.839060131379483
+            ],
+            [
+              2.9507954125046245,
+              6.058481532147742,
+              1.0124542124542124,
+              2.035614913745131,
+              4.02624469316866,
+              5.081473214285714,
+              6.199454483464029,
+              0.4881748071979435,
+              10.46574993633817,
+              9.064237775647172,
+              9.079556569938049,
+              9.05492482356551
+            ]
+          ],
+          "axes": [
+            [
+              -0.1615822829801101,
+              -0.9056526165950738,
+              -0.392026152037631
+            ],
+            [
+              0.2559163437746988,
+              -0.11406644618455607,
+              0.959945660359906
+            ]
+          ],
+          "train_counts": [
+            7849,
+            8030
+          ],
+          "spatial_scale": 0.8552784484694781
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              0.21731870671680606,
+              -0.32254649707710276,
+              0.92126887331236
+            ],
+            [
+              -0.05512804315701937,
+              0.17285651185912781,
+              0.983403032924738
+            ]
+          ],
+          "kappas": [
+            0.7702858285718053,
+            0.6727153041441505
+          ],
+          "weights": [
+            0.7130171925184206,
+            0.28698280748157945
+          ],
+          "spatial_counts": [
+            11322,
+            4557
+          ],
+          "train_mean_cosines": [
+            0.24714726325175093,
+            0.21775218221676418
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              -0.1615822829801101,
+              -0.9056526165950738,
+              -0.392026152037631
+            ],
+            [
+              0.2559163437746988,
+              -0.11406644618455607,
+              0.959945660359906
+            ]
+          ],
+          "kappas": [
+            1.8954948204461,
+            3.2270286542902116
+          ],
+          "weights": [
+            0.4943006486554569,
+            0.5056993513445431
+          ],
+          "spatial_counts": [
+            7849,
+            8030
+          ],
+          "train_mean_cosines": [
+            0.5186224140641007,
+            0.6932706177176013
+          ]
+        }
+      }
+    },
+    {
+      "fold": 1,
+      "split": "alternating",
+      "n_train": 9403,
+      "n_test": 15879,
+      "n_direction_test": 15879,
+      "n_common_test": 15879,
+      "train_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35,
+        37,
+        39,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61,
+        63,
+        65,
+        67,
+        69,
+        71,
+        73,
+        75,
+        77,
+        79,
+        81,
+        83,
+        85,
+        87,
+        89,
+        91,
+        93,
+        95,
+        97,
+        99,
+        101,
+        103,
+        105,
+        107,
+        109,
+        111,
+        113,
+        115,
+        117,
+        119,
+        121,
+        123,
+        125,
+        127,
+        129,
+        131,
+        133,
+        135,
+        137,
+        139,
+        141,
+        143
+      ],
+      "test_blocks": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78,
+        80,
+        82,
+        84,
+        86,
+        88,
+        90,
+        92,
+        94,
+        96,
+        98,
+        100,
+        102,
+        104,
+        106,
+        108,
+        110,
+        112,
+        114,
+        116,
+        118,
+        120,
+        122,
+        124,
+        126,
+        128,
+        130,
+        132,
+        134,
+        136,
+        138,
+        140,
+        142
+      ],
+      "single_vmf_nll": 2.366498003778075,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 2.4983401165256383,
+          "conditional_nll": 2.4391649297232423,
+          "angular_mae_deg": 71.71444377123663,
+          "legacy_direction_score": 0.26900085073876784,
+          "n_test_assigned": 15879
+        },
+        "rank_trajectory": {
+          "nll": 2.283661833352867,
+          "conditional_nll": 2.274840417259017,
+          "angular_mae_deg": 56.546859140938174,
+          "legacy_direction_score": 0.45824495386804265,
+          "n_test_assigned": 15879
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              1.949514563106796,
+              6.057598039215686,
+              1.7870370370370372,
+              2.058203712995484,
+              4.085697042848522,
+              5.0442678774120315,
+              6.109743040685225,
+              0.3984304255961364,
+              10.547109207708779,
+              9.243695097761405,
+              8.991760756789747,
+              8.879867189858135
+            ],
+            [
+              2.975826972010178,
+              7.033377837116156,
+              2.04029304029304,
+              1.9782178217821782,
+              5.026115342763873,
+              5.962148962148962,
+              8.003699136868065,
+              0.762481089258699,
+              0.7083333333333334,
+              0.975095785440613,
+              1.890625,
+              10.167023554603855
+            ]
+          ],
+          "axes": [
+            [
+              0.2539823040474308,
+              -0.3029541304311824,
+              0.9185378511990915
+            ],
+            [
+              -0.14497941156694233,
+              0.2632479759837338,
+              0.9537722334824864
+            ]
+          ],
+          "train_counts": [
+            6123,
+            3280
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              1.8837535014005604,
+              2.9891732283464565,
+              5.996146435452793,
+              3.103336045565501,
+              5.001806684733514,
+              5.062818336162988,
+              6.03568320278503,
+              0.38673765730880927,
+              10.562699936020474,
+              9.281276962899051,
+              8.959211732355637,
+              8.817928471899673
+            ],
+            [
+              2.916142557651992,
+              6.114704087858451,
+              1.0441988950276242,
+              1.9442786069651743,
+              4.038722826086957,
+              5.014461315979754,
+              6.169004207573632,
+              0.5372117400419287,
+              10.476164079822617,
+              9.131793478260871,
+              9.048543689320388,
+              10.017732742241925
+            ]
+          ],
+          "axes": [
+            [
+              -0.026627699277176828,
+              -0.7580025035746075,
+              -0.651707887174792
+            ],
+            [
+              0.26733474267063045,
+              -0.11146370529179714,
+              0.9571352975226914
+            ]
+          ],
+          "train_counts": [
+            4795,
+            4608
+          ],
+          "spatial_scale": 0.8648641220407008
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              0.2539823040474308,
+              -0.3029541304311824,
+              0.9185378511990915
+            ],
+            [
+              -0.14497941156694233,
+              0.2632479759837338,
+              0.9537722334824864
+            ]
+          ],
+          "kappas": [
+            0.6586991902833959,
+            0.6752998077343721
+          ],
+          "weights": [
+            0.6511751568648304,
+            0.34882484313516965
+          ],
+          "spatial_counts": [
+            6123,
+            3280
+          ],
+          "train_mean_cosines": [
+            0.2134668312573613,
+            0.21854071503717357
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              -0.026627699277176828,
+              -0.7580025035746075,
+              -0.651707887174792
+            ],
+            [
+              0.26733474267063045,
+              -0.11146370529179714,
+              0.9571352975226914
+            ]
+          ],
+          "kappas": [
+            2.179968206089844,
+            2.9039663651093046
+          ],
+          "weights": [
+            0.5099436350101032,
+            0.49005636498989685
+          ],
+          "spatial_counts": [
+            4795,
+            4608
+          ],
+          "train_mean_cosines": [
+            0.5671669577844571,
+            0.6616687584298304
+          ]
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "split": "chronological",
+      "n_train": 6193,
+      "n_test": 19089,
+      "n_direction_test": 19089,
+      "n_common_test": 19089,
+      "train_blocks": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71
+      ],
+      "test_blocks": [
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143
+      ],
+      "single_vmf_nll": 2.4069964548905958,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 2.567792787549903,
+          "conditional_nll": 2.490559200362579,
+          "angular_mae_deg": 72.32817173640197,
+          "legacy_direction_score": 0.23633719291513333,
+          "n_test_assigned": 19089
+        },
+        "rank_trajectory": {
+          "nll": 2.2600358790631576,
+          "conditional_nll": 2.580712781149871,
+          "angular_mae_deg": 65.13572727542977,
+          "legacy_direction_score": 0.38888628305126316,
+          "n_test_assigned": 19089
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              4.002118644067797,
+              5.006038647342995,
+              1.9621710526315788,
+              1.9854182655410593,
+              2.0231316725978647,
+              0.9765861027190332,
+              0.9028620988725065,
+              0.6711538461538462,
+              10.471361900721256,
+              9.136633663366336,
+              9.911019446081319,
+              8.933753943217667
+            ],
+            [
+              4.970724191063174,
+              7.015847860538827,
+              2.0504032258064515,
+              2.0185414091470952,
+              4.0077319587628875,
+              6.036211699164346,
+              9.990536277602525,
+              10.230889235569425,
+              0.8042105263157895,
+              0.9049429657794676,
+              1.899696048632219,
+              0.90625
+            ]
+          ],
+          "axes": [
+            [
+              0.7736225849677012,
+              -0.04800868390644531,
+              0.6318253416075229
+            ],
+            [
+              -0.1916551768574445,
+              0.4049211121357996,
+              0.8940398123855833
+            ]
+          ],
+          "train_counts": [
+            3526,
+            2667
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              1.985052316890882,
+              0.8990384615384616,
+              5.930648769574944,
+              3.0033821871476887,
+              2.976387249114522,
+              0.9825918762088974,
+              0.8492366412213741,
+              0.6955810147299508,
+              10.467384420519316,
+              9.149892933618844,
+              9.067340067340067,
+              8.867674858223062
+            ],
+            [
+              4.0115062761506275,
+              6.059907834101383,
+              1.9443772672309554,
+              0.9541150764748726,
+              3.007383966244726,
+              5.9975550122249395,
+              6.061557788944723,
+              0.7227602905569007,
+              10.431535269709542,
+              9.058227848101266,
+              9.987129987129986,
+              10.00121359223301
+            ]
+          ],
+          "axes": [
+            [
+              0.3208651621254161,
+              -0.5757249011918094,
+              -0.7520547758520729
+            ],
+            [
+              0.3080869947127969,
+              -0.011583810946141741,
+              0.951287663650066
+            ]
+          ],
+          "train_counts": [
+            3034,
+            3159
+          ],
+          "spatial_scale": 0.9089811212267522
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              0.7736225849677012,
+              -0.04800868390644531,
+              0.6318253416075229
+            ],
+            [
+              -0.1916551768574445,
+              0.4049211121357996,
+              0.8940398123855833
+            ]
+          ],
+          "kappas": [
+            1.4802242171843885,
+            0.7849324342687384
+          ],
+          "weights": [
+            0.5693524947521396,
+            0.4306475052478605
+          ],
+          "spatial_counts": [
+            3526,
+            2667
+          ],
+          "train_mean_cosines": [
+            0.43367672363572307,
+            0.2514912486305259
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              0.3208651621254161,
+              -0.5757249011918094,
+              -0.7520547758520729
+            ],
+            [
+              0.3080869947127969,
+              -0.011583810946141741,
+              0.951287663650066
+            ]
+          ],
+          "kappas": [
+            2.2658243815671653,
+            2.577697116211433
+          ],
+          "weights": [
+            0.4899079606006782,
+            0.5100920393993218
+          ],
+          "spatial_counts": [
+            3034,
+            3159
+          ],
+          "train_mean_cosines": [
+            0.5804195621781454,
+            0.6236601680258356
+          ]
+        }
+      }
+    }
+  ],
+  "training_shuffle_failures": [],
+  "rank_sequence_nll": 2.501978899521343,
+  "rank_sequence_conditional_nll": 2.455727798235573,
+  "rank_sequence_angular_mae_deg": 73.33368334486647,
+  "rank_sequence_legacy_direction_score": 0.24443452117755898,
+  "rank_sequence_event_weighted_nll": 2.501046822997327,
+  "rank_sequence_chronological_nll": 2.567792787549903,
+  "rank_sequence_legacy_difference": 2.7755575615628914e-17,
+  "rank_trajectory_nll": 2.354482571968961,
+  "rank_trajectory_conditional_nll": 2.376222346524167,
+  "rank_trajectory_angular_mae_deg": 58.64289529381208,
+  "rank_trajectory_legacy_direction_score": 0.4376595140957903,
+  "rank_trajectory_event_weighted_nll": 2.3363417957931114,
+  "rank_trajectory_chronological_nll": 2.2600358790631576,
+  "rank_trajectory_legacy_difference": 0.0,
+  "single_vmf_nll": 2.3925687570669307,
+  "nll_improvement": 0.14749632755238196,
+  "kappa_cap_hits": 0,
+  "training_shuffle_complete_draws": 20,
+  "training_shuffle_nll": [
+    2.472289788742035,
+    2.4706124661828324,
+    2.4687568756026685,
+    2.4717184024900836,
+    2.470254116144866,
+    2.4718226966850567,
+    2.4671672778395273,
+    2.4689989137520847,
+    2.4704981391054863,
+    2.469065796515865,
+    2.4703056397762877,
+    2.4686338040623967,
+    2.472396701995021,
+    2.4720992554645886,
+    2.4684297220028864,
+    2.4706888373035816,
+    2.470323931126866,
+    2.470408254216273,
+    2.470644978596395,
+    2.4721941483023357
+  ],
+  "training_shuffle_median_nll": 2.4704531966608796
+}

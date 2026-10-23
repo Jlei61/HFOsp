@@ -1,0 +1,1805 @@
+{
+  "subject_id": "epilepsiae_1146",
+  "dataset": "epilepsiae",
+  "status": "ok",
+  "n_events": 46683,
+  "n_direction_estimable": 46683,
+  "n_channels": 15,
+  "n_blocks": 80,
+  "channel_names": [
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9",
+    "ICL1",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "ICL10",
+    "ICL11"
+  ],
+  "event_artifact_root": "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/1146/all_recs",
+  "source_block_inventory": [
+    {
+      "block_id": 0,
+      "record_name": "114600102_0000",
+      "start_event_idx": 0,
+      "end_event_idx": 3,
+      "n_events": 3,
+      "start_t": 1240466978.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240467198.827,
+      "block_end_epoch": 1240467213.454
+    },
+    {
+      "block_id": 1,
+      "record_name": "114600102_0004",
+      "start_event_idx": 3,
+      "end_event_idx": 14,
+      "n_events": 11,
+      "start_t": 1240481382.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240483664.428,
+      "block_end_epoch": 1240484118.132
+    },
+    {
+      "block_id": 2,
+      "record_name": "114600102_0008",
+      "start_event_idx": 14,
+      "end_event_idx": 228,
+      "n_events": 214,
+      "start_t": 1240495786.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240496672.359,
+      "block_end_epoch": 1240499283.348
+    },
+    {
+      "block_id": 3,
+      "record_name": "114600102_0009",
+      "start_event_idx": 228,
+      "end_event_idx": 1045,
+      "n_events": 817,
+      "start_t": 1240499387.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240499472.296,
+      "block_end_epoch": 1240502590.882
+    },
+    {
+      "block_id": 4,
+      "record_name": "114600102_0010",
+      "start_event_idx": 1045,
+      "end_event_idx": 1588,
+      "n_events": 543,
+      "start_t": 1240502988.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240503044.51,
+      "block_end_epoch": 1240506477.838
+    },
+    {
+      "block_id": 5,
+      "record_name": "114600102_0011",
+      "start_event_idx": 1588,
+      "end_event_idx": 2427,
+      "n_events": 839,
+      "start_t": 1240506589.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240506695.975,
+      "block_end_epoch": 1240510186.416
+    },
+    {
+      "block_id": 6,
+      "record_name": "114600102_0012",
+      "start_event_idx": 2427,
+      "end_event_idx": 3158,
+      "n_events": 731,
+      "start_t": 1240510190.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240510190.773,
+      "block_end_epoch": 1240513780.811
+    },
+    {
+      "block_id": 7,
+      "record_name": "114600102_0013",
+      "start_event_idx": 3158,
+      "end_event_idx": 3705,
+      "n_events": 547,
+      "start_t": 1240513791.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240513794.328,
+      "block_end_epoch": 1240517390.022
+    },
+    {
+      "block_id": 8,
+      "record_name": "114600102_0014",
+      "start_event_idx": 3705,
+      "end_event_idx": 4273,
+      "n_events": 568,
+      "start_t": 1240517392.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240517394.069,
+      "block_end_epoch": 1240520988.8
+    },
+    {
+      "block_id": 9,
+      "record_name": "114600102_0015",
+      "start_event_idx": 4273,
+      "end_event_idx": 4623,
+      "n_events": 350,
+      "start_t": 1240520993.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240520995.451,
+      "block_end_epoch": 1240524581.383
+    },
+    {
+      "block_id": 10,
+      "record_name": "114600102_0016",
+      "start_event_idx": 4623,
+      "end_event_idx": 4850,
+      "n_events": 227,
+      "start_t": 1240524594.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240524594.319,
+      "block_end_epoch": 1240526153.253
+    },
+    {
+      "block_id": 11,
+      "record_name": "114600102_0017",
+      "start_event_idx": 4850,
+      "end_event_idx": 4935,
+      "n_events": 85,
+      "start_t": 1240526546.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240526552.016,
+      "block_end_epoch": 1240530115.67
+    },
+    {
+      "block_id": 12,
+      "record_name": "114600102_0018",
+      "start_event_idx": 4935,
+      "end_event_idx": 4956,
+      "n_events": 21,
+      "start_t": 1240530147.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240530422.823,
+      "block_end_epoch": 1240533651.865
+    },
+    {
+      "block_id": 13,
+      "record_name": "114600102_0019",
+      "start_event_idx": 4956,
+      "end_event_idx": 4971,
+      "n_events": 15,
+      "start_t": 1240533748.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240535331.377,
+      "block_end_epoch": 1240536719.048
+    },
+    {
+      "block_id": 14,
+      "record_name": "114600102_0020",
+      "start_event_idx": 4971,
+      "end_event_idx": 5079,
+      "n_events": 108,
+      "start_t": 1240537349.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240537405.499,
+      "block_end_epoch": 1240540753.473
+    },
+    {
+      "block_id": 15,
+      "record_name": "114600102_0021",
+      "start_event_idx": 5079,
+      "end_event_idx": 5222,
+      "n_events": 143,
+      "start_t": 1240540950.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240542029.715,
+      "block_end_epoch": 1240544411.965
+    },
+    {
+      "block_id": 16,
+      "record_name": "114600102_0022",
+      "start_event_idx": 5222,
+      "end_event_idx": 5287,
+      "n_events": 65,
+      "start_t": 1240544551.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240544647.912,
+      "block_end_epoch": 1240546559.577
+    },
+    {
+      "block_id": 17,
+      "record_name": "114600102_0023",
+      "start_event_idx": 5287,
+      "end_event_idx": 5298,
+      "n_events": 11,
+      "start_t": 1240548152.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240549161.954,
+      "block_end_epoch": 1240551666.887
+    },
+    {
+      "block_id": 18,
+      "record_name": "114600102_0024",
+      "start_event_idx": 5298,
+      "end_event_idx": 5365,
+      "n_events": 67,
+      "start_t": 1240551753.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240551861.635,
+      "block_end_epoch": 1240555170.7
+    },
+    {
+      "block_id": 19,
+      "record_name": "114600102_0025",
+      "start_event_idx": 5365,
+      "end_event_idx": 6074,
+      "n_events": 709,
+      "start_t": 1240555354.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240555735.947,
+      "block_end_epoch": 1240558330.607
+    },
+    {
+      "block_id": 20,
+      "record_name": "114600102_0026",
+      "start_event_idx": 6074,
+      "end_event_idx": 6423,
+      "n_events": 349,
+      "start_t": 1240558955.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240559111.427,
+      "block_end_epoch": 1240562398.947
+    },
+    {
+      "block_id": 21,
+      "record_name": "114600102_0027",
+      "start_event_idx": 6423,
+      "end_event_idx": 6724,
+      "n_events": 301,
+      "start_t": 1240562556.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240562792.864,
+      "block_end_epoch": 1240565095.891
+    },
+    {
+      "block_id": 22,
+      "record_name": "114600102_0028",
+      "start_event_idx": 6724,
+      "end_event_idx": 7017,
+      "n_events": 293,
+      "start_t": 1240566156.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240567714.486,
+      "block_end_epoch": 1240569628.123
+    },
+    {
+      "block_id": 23,
+      "record_name": "114600102_0029",
+      "start_event_idx": 7017,
+      "end_event_idx": 7457,
+      "n_events": 440,
+      "start_t": 1240569757.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240569978.696,
+      "block_end_epoch": 1240572892.698
+    },
+    {
+      "block_id": 24,
+      "record_name": "114600102_0030",
+      "start_event_idx": 7457,
+      "end_event_idx": 7772,
+      "n_events": 315,
+      "start_t": 1240573358.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240574493.408,
+      "block_end_epoch": 1240575855.089
+    },
+    {
+      "block_id": 25,
+      "record_name": "114600102_0031",
+      "start_event_idx": 7772,
+      "end_event_idx": 7828,
+      "n_events": 56,
+      "start_t": 1240576958.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240578980.26,
+      "block_end_epoch": 1240579013.573
+    },
+    {
+      "block_id": 26,
+      "record_name": "114600102_0032",
+      "start_event_idx": 7828,
+      "end_event_idx": 11279,
+      "n_events": 3451,
+      "start_t": 1240580559.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240581426.398,
+      "block_end_epoch": 1240583651.955
+    },
+    {
+      "block_id": 27,
+      "record_name": "114600102_0033",
+      "start_event_idx": 11279,
+      "end_event_idx": 15393,
+      "n_events": 4114,
+      "start_t": 1240584160.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240584728.868,
+      "block_end_epoch": 1240587759.406
+    },
+    {
+      "block_id": 28,
+      "record_name": "114600102_0034",
+      "start_event_idx": 15393,
+      "end_event_idx": 17830,
+      "n_events": 2437,
+      "start_t": 1240587761.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240587761.442,
+      "block_end_epoch": 1240591325.468
+    },
+    {
+      "block_id": 29,
+      "record_name": "114600102_0035",
+      "start_event_idx": 17830,
+      "end_event_idx": 21097,
+      "n_events": 3267,
+      "start_t": 1240591362.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240591717.549,
+      "block_end_epoch": 1240594961.496
+    },
+    {
+      "block_id": 30,
+      "record_name": "114600102_0036",
+      "start_event_idx": 21097,
+      "end_event_idx": 22456,
+      "n_events": 1359,
+      "start_t": 1240594963.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240594963.263,
+      "block_end_epoch": 1240598561.285
+    },
+    {
+      "block_id": 31,
+      "record_name": "114600102_0037",
+      "start_event_idx": 22456,
+      "end_event_idx": 26090,
+      "n_events": 3634,
+      "start_t": 1240598564.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240598564.402,
+      "block_end_epoch": 1240602059.258
+    },
+    {
+      "block_id": 32,
+      "record_name": "114600102_0038",
+      "start_event_idx": 26090,
+      "end_event_idx": 28024,
+      "n_events": 1934,
+      "start_t": 1240602165.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240602261.392,
+      "block_end_epoch": 1240605764.671
+    },
+    {
+      "block_id": 33,
+      "record_name": "114600102_0039",
+      "start_event_idx": 28024,
+      "end_event_idx": 29174,
+      "n_events": 1150,
+      "start_t": 1240605766.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240605777.265,
+      "block_end_epoch": 1240609365.911
+    },
+    {
+      "block_id": 34,
+      "record_name": "114600102_0040",
+      "start_event_idx": 29174,
+      "end_event_idx": 29971,
+      "n_events": 797,
+      "start_t": 1240609367.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240609367.262,
+      "block_end_epoch": 1240612913.483
+    },
+    {
+      "block_id": 35,
+      "record_name": "114600102_0041",
+      "start_event_idx": 29971,
+      "end_event_idx": 30148,
+      "n_events": 177,
+      "start_t": 1240612967.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240613072.898,
+      "block_end_epoch": 1240616467.121
+    },
+    {
+      "block_id": 36,
+      "record_name": "114600102_0043",
+      "start_event_idx": 30148,
+      "end_event_idx": 30416,
+      "n_events": 268,
+      "start_t": 1240616636.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240616728.726,
+      "block_end_epoch": 1240620228.091
+    },
+    {
+      "block_id": 37,
+      "record_name": "114600102_0044",
+      "start_event_idx": 30416,
+      "end_event_idx": 30698,
+      "n_events": 282,
+      "start_t": 1240620236.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240620295.296,
+      "block_end_epoch": 1240623790.403
+    },
+    {
+      "block_id": 38,
+      "record_name": "114600102_0045",
+      "start_event_idx": 30698,
+      "end_event_idx": 31032,
+      "n_events": 334,
+      "start_t": 1240623837.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240624022.711,
+      "block_end_epoch": 1240627383.564
+    },
+    {
+      "block_id": 39,
+      "record_name": "114600102_0046",
+      "start_event_idx": 31032,
+      "end_event_idx": 31054,
+      "n_events": 22,
+      "start_t": 1240627438.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240627520.379,
+      "block_end_epoch": 1240627573.462
+    },
+    {
+      "block_id": 40,
+      "record_name": "114600102_0047",
+      "start_event_idx": 31054,
+      "end_event_idx": 31258,
+      "n_events": 204,
+      "start_t": 1240631039.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240631523.904,
+      "block_end_epoch": 1240634626.065
+    },
+    {
+      "block_id": 41,
+      "record_name": "114600102_0048",
+      "start_event_idx": 31258,
+      "end_event_idx": 31520,
+      "n_events": 262,
+      "start_t": 1240634639.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240634657.408,
+      "block_end_epoch": 1240638235.723
+    },
+    {
+      "block_id": 42,
+      "record_name": "114600102_0049",
+      "start_event_idx": 31520,
+      "end_event_idx": 32061,
+      "n_events": 541,
+      "start_t": 1240638240.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240638243.633,
+      "block_end_epoch": 1240641796.324
+    },
+    {
+      "block_id": 43,
+      "record_name": "114600102_0050",
+      "start_event_idx": 32061,
+      "end_event_idx": 32127,
+      "n_events": 66,
+      "start_t": 1240641841.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240641846.443,
+      "block_end_epoch": 1240642332.703
+    },
+    {
+      "block_id": 44,
+      "record_name": "114600102_0054",
+      "start_event_idx": 32127,
+      "end_event_idx": 32149,
+      "n_events": 22,
+      "start_t": 1240656244.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240657920.247,
+      "block_end_epoch": 1240659153.544
+    },
+    {
+      "block_id": 45,
+      "record_name": "114600102_0055",
+      "start_event_idx": 32149,
+      "end_event_idx": 32155,
+      "n_events": 6,
+      "start_t": 1240659337.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240662479.424,
+      "block_end_epoch": 1240662570.979
+    },
+    {
+      "block_id": 46,
+      "record_name": "114600102_0057",
+      "start_event_idx": 32155,
+      "end_event_idx": 32484,
+      "n_events": 329,
+      "start_t": 1240666491.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240667158.825,
+      "block_end_epoch": 1240670088.779
+    },
+    {
+      "block_id": 47,
+      "record_name": "114600102_0058",
+      "start_event_idx": 32484,
+      "end_event_idx": 33741,
+      "n_events": 1257,
+      "start_t": 1240670092.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240670093.27,
+      "block_end_epoch": 1240673690.185
+    },
+    {
+      "block_id": 48,
+      "record_name": "114600102_0059",
+      "start_event_idx": 33741,
+      "end_event_idx": 34709,
+      "n_events": 968,
+      "start_t": 1240673693.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240673693.232,
+      "block_end_epoch": 1240677279.323
+    },
+    {
+      "block_id": 49,
+      "record_name": "114600102_0060",
+      "start_event_idx": 34709,
+      "end_event_idx": 35538,
+      "n_events": 829,
+      "start_t": 1240677293.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240677296.193,
+      "block_end_epoch": 1240680886.524
+    },
+    {
+      "block_id": 50,
+      "record_name": "114600102_0061",
+      "start_event_idx": 35538,
+      "end_event_idx": 36128,
+      "n_events": 590,
+      "start_t": 1240680894.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240680900.171,
+      "block_end_epoch": 1240684487.743
+    },
+    {
+      "block_id": 51,
+      "record_name": "114600102_0062",
+      "start_event_idx": 36128,
+      "end_event_idx": 36590,
+      "n_events": 462,
+      "start_t": 1240684495.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240684497.269,
+      "block_end_epoch": 1240688093.417
+    },
+    {
+      "block_id": 52,
+      "record_name": "114600102_0063",
+      "start_event_idx": 36590,
+      "end_event_idx": 36936,
+      "n_events": 346,
+      "start_t": 1240688096.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240688096.987,
+      "block_end_epoch": 1240691676.287
+    },
+    {
+      "block_id": 53,
+      "record_name": "114600102_0064",
+      "start_event_idx": 36936,
+      "end_event_idx": 37258,
+      "n_events": 322,
+      "start_t": 1240691697.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240691765.302,
+      "block_end_epoch": 1240695288.678
+    },
+    {
+      "block_id": 54,
+      "record_name": "114600102_0065",
+      "start_event_idx": 37258,
+      "end_event_idx": 37543,
+      "n_events": 285,
+      "start_t": 1240695298.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240695334.314,
+      "block_end_epoch": 1240698895.925
+    },
+    {
+      "block_id": 55,
+      "record_name": "114600102_0066",
+      "start_event_idx": 37543,
+      "end_event_idx": 37730,
+      "n_events": 187,
+      "start_t": 1240698899.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240698902.687,
+      "block_end_epoch": 1240701465.998
+    },
+    {
+      "block_id": 56,
+      "record_name": "114600102_0074",
+      "start_event_idx": 37730,
+      "end_event_idx": 37734,
+      "n_events": 4,
+      "start_t": 1240725542.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240725930.303,
+      "block_end_epoch": 1240725961.627
+    },
+    {
+      "block_id": 57,
+      "record_name": "114600102_0076",
+      "start_event_idx": 37734,
+      "end_event_idx": 37740,
+      "n_events": 6,
+      "start_t": 1240732744.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240734376.821,
+      "block_end_epoch": 1240734478.405
+    },
+    {
+      "block_id": 58,
+      "record_name": "114600102_0082",
+      "start_event_idx": 37740,
+      "end_event_idx": 37976,
+      "n_events": 236,
+      "start_t": 1240754350.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240755685.4,
+      "block_end_epoch": 1240757913.149
+    },
+    {
+      "block_id": 59,
+      "record_name": "114600102_0083",
+      "start_event_idx": 37976,
+      "end_event_idx": 38454,
+      "n_events": 478,
+      "start_t": 1240757951.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240758000.423,
+      "block_end_epoch": 1240761429.766
+    },
+    {
+      "block_id": 60,
+      "record_name": "114600102_0084",
+      "start_event_idx": 38454,
+      "end_event_idx": 39093,
+      "n_events": 639,
+      "start_t": 1240761552.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240761598.039,
+      "block_end_epoch": 1240765136.257
+    },
+    {
+      "block_id": 61,
+      "record_name": "114600102_0085",
+      "start_event_idx": 39093,
+      "end_event_idx": 39727,
+      "n_events": 634,
+      "start_t": 1240765153.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240765154.331,
+      "block_end_epoch": 1240768724.861
+    },
+    {
+      "block_id": 62,
+      "record_name": "114600102_0086",
+      "start_event_idx": 39727,
+      "end_event_idx": 40434,
+      "n_events": 707,
+      "start_t": 1240768754.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240768768.219,
+      "block_end_epoch": 1240772353.878
+    },
+    {
+      "block_id": 63,
+      "record_name": "114600102_0087",
+      "start_event_idx": 40434,
+      "end_event_idx": 40854,
+      "n_events": 420,
+      "start_t": 1240772355.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240772371.274,
+      "block_end_epoch": 1240775818.744
+    },
+    {
+      "block_id": 64,
+      "record_name": "114600102_0088",
+      "start_event_idx": 40854,
+      "end_event_idx": 41309,
+      "n_events": 455,
+      "start_t": 1240775955.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240775991.413,
+      "block_end_epoch": 1240779552.683
+    },
+    {
+      "block_id": 65,
+      "record_name": "114600102_0089",
+      "start_event_idx": 41309,
+      "end_event_idx": 41772,
+      "n_events": 463,
+      "start_t": 1240779556.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240779561.183,
+      "block_end_epoch": 1240783060.078
+    },
+    {
+      "block_id": 66,
+      "record_name": "114600102_0090",
+      "start_event_idx": 41772,
+      "end_event_idx": 42390,
+      "n_events": 618,
+      "start_t": 1240783157.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240783193.197,
+      "block_end_epoch": 1240785622.738
+    },
+    {
+      "block_id": 67,
+      "record_name": "114600102_0091",
+      "start_event_idx": 42390,
+      "end_event_idx": 42904,
+      "n_events": 514,
+      "start_t": 1240785942.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240785965.197,
+      "block_end_epoch": 1240789540.668
+    },
+    {
+      "block_id": 68,
+      "record_name": "114600102_0092",
+      "start_event_idx": 42904,
+      "end_event_idx": 43263,
+      "n_events": 359,
+      "start_t": 1240789543.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240789543.696,
+      "block_end_epoch": 1240792442.604
+    },
+    {
+      "block_id": 69,
+      "record_name": "114600102_0093",
+      "start_event_idx": 43263,
+      "end_event_idx": 43266,
+      "n_events": 3,
+      "start_t": 1240793144.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240793345.336,
+      "block_end_epoch": 1240793348.421
+    },
+    {
+      "block_id": 70,
+      "record_name": "114600102_0103",
+      "start_event_idx": 43266,
+      "end_event_idx": 43267,
+      "n_events": 1,
+      "start_t": 1240829153.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240830261.619,
+      "block_end_epoch": 1240830261.869
+    },
+    {
+      "block_id": 71,
+      "record_name": "114600102_0107",
+      "start_event_idx": 43267,
+      "end_event_idx": 43465,
+      "n_events": 198,
+      "start_t": 1240843557.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240845762.028,
+      "block_end_epoch": 1240847124.039
+    },
+    {
+      "block_id": 72,
+      "record_name": "114600102_0108",
+      "start_event_idx": 43465,
+      "end_event_idx": 43908,
+      "n_events": 443,
+      "start_t": 1240847158.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240847174.381,
+      "block_end_epoch": 1240850590.595
+    },
+    {
+      "block_id": 73,
+      "record_name": "114600102_0109",
+      "start_event_idx": 43908,
+      "end_event_idx": 44193,
+      "n_events": 285,
+      "start_t": 1240850759.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240850900.908,
+      "block_end_epoch": 1240854323.44
+    },
+    {
+      "block_id": 74,
+      "record_name": "114600102_0110",
+      "start_event_idx": 44193,
+      "end_event_idx": 44596,
+      "n_events": 403,
+      "start_t": 1240854360.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240854545.978,
+      "block_end_epoch": 1240857705.851
+    },
+    {
+      "block_id": 75,
+      "record_name": "114600102_0111",
+      "start_event_idx": 44596,
+      "end_event_idx": 44966,
+      "n_events": 370,
+      "start_t": 1240857961.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240858310.554,
+      "block_end_epoch": 1240861544.381
+    },
+    {
+      "block_id": 76,
+      "record_name": "114600102_0112",
+      "start_event_idx": 44966,
+      "end_event_idx": 45441,
+      "n_events": 475,
+      "start_t": 1240861562.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240861564.182,
+      "block_end_epoch": 1240865081.582
+    },
+    {
+      "block_id": 77,
+      "record_name": "114600102_0113",
+      "start_event_idx": 45441,
+      "end_event_idx": 45986,
+      "n_events": 545,
+      "start_t": 1240865163.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240865199.652,
+      "block_end_epoch": 1240868762.259
+    },
+    {
+      "block_id": 78,
+      "record_name": "114600102_0114",
+      "start_event_idx": 45986,
+      "end_event_idx": 46262,
+      "n_events": 276,
+      "start_t": 1240868764.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240868794.746,
+      "block_end_epoch": 1240872028.382
+    },
+    {
+      "block_id": 79,
+      "record_name": "114600102_0115",
+      "start_event_idx": 46262,
+      "end_event_idx": 46683,
+      "n_events": 421,
+      "start_t": 1240872255.0,
+      "has_packed_times": true,
+      "block_start_epoch": 1240872274.813,
+      "block_end_epoch": 1240875703.891
+    }
+  ],
+  "folds": [
+    {
+      "fold": 0,
+      "split": "alternating",
+      "n_train": 21985,
+      "n_test": 24698,
+      "n_direction_test": 24698,
+      "n_common_test": 24698,
+      "train_blocks": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78
+      ],
+      "test_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35,
+        37,
+        39,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61,
+        63,
+        65,
+        67,
+        69,
+        71,
+        73,
+        75,
+        77,
+        79
+      ],
+      "single_vmf_nll": 2.294809845893193,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 1.7656868320374108,
+          "conditional_nll": 1.3907469949942588,
+          "angular_mae_deg": 33.651261385723345,
+          "legacy_direction_score": 0.7099709835436597,
+          "n_test_assigned": 24698
+        },
+        "rank_trajectory": {
+          "nll": 1.7667878612583157,
+          "conditional_nll": 1.4053202154270776,
+          "angular_mae_deg": 33.35713983051454,
+          "legacy_direction_score": 0.7181793894554342,
+          "n_test_assigned": 24698
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              6.008422234699608,
+              2.9443500424808837,
+              1.9205571318029404,
+              0.6243295019157088,
+              13.225533684502356,
+              13.281656287555993,
+              12.786972033605709,
+              11.697656351158875,
+              10.03823088455772,
+              8.325082091437231,
+              7.080215101949361,
+              4.000910539494651,
+              0.9574508320726173,
+              3.0005767012687428,
+              0.907179269328802
+            ],
+            [
+              9.00818553888131,
+              10.00257234726688,
+              6.96448087431694,
+              0.7122861586314152,
+              0.825547206795165,
+              1.0125189681335356,
+              2.8769230769230774,
+              2.0708349821923226,
+              4.898154042011457,
+              8.031954887218046,
+              10.986979166666666,
+              13.008567511994517,
+              13.2011322011322,
+              10.015318334131162,
+              11.03328804347826
+            ]
+          ],
+          "axes": [
+            [
+              0.8884839499023176,
+              0.3123331803091713,
+              -0.33622054554106995
+            ],
+            [
+              -0.8605863976870305,
+              -0.4132027405339604,
+              -0.2977491348959467
+            ]
+          ],
+          "train_counts": [
+            14274,
+            7711
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              6.014872904272579,
+              2.953994144709327,
+              1.9159248269040554,
+              0.6322556943423953,
+              13.225111743193825,
+              13.27721817402486,
+              12.784721424468696,
+              11.695174019924957,
+              10.034444649106648,
+              8.31433506044905,
+              7.085597240189737,
+              4.012438916037317,
+              0.9598655964159044,
+              2.9980043541364294,
+              0.9072525763173246
+            ],
+            [
+              9.004819277108433,
+              10.987189148455162,
+              6.966360856269114,
+              0.6902071563088512,
+              0.8182421227197347,
+              1.009619084263178,
+              2.0693240901213175,
+              2.084201388888889,
+              4.881552076242341,
+              8.048453608247423,
+              10.988351776354106,
+              13.01478743068392,
+              13.215130871280028,
+              10.030545818728092,
+              12.985839514497641
+            ]
+          ],
+          "axes": [
+            [
+              0.8885878218435654,
+              0.31244366966548626,
+              -0.3358431719676203
+            ],
+            [
+              -0.867230281377448,
+              -0.4126020070000071,
+              -0.27869557384637167
+            ]
+          ],
+          "train_counts": [
+            15134,
+            6851
+          ],
+          "spatial_scale": 1.1237224455420145
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              0.8884839499023176,
+              0.3123331803091713,
+              -0.33622054554106995
+            ],
+            [
+              -0.8605863976870305,
+              -0.4132027405339604,
+              -0.2977491348959467
+            ]
+          ],
+          "kappas": [
+            6.712658768767037,
+            1.8728669765941994
+          ],
+          "weights": [
+            0.6492608596770525,
+            0.35073914032294745
+          ],
+          "spatial_counts": [
+            14274,
+            7711
+          ],
+          "train_mean_cosines": [
+            0.8510306866990557,
+            0.5144384590514919
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              0.8885878218435654,
+              0.31244366966548626,
+              -0.3358431719676203
+            ],
+            [
+              -0.867230281377448,
+              -0.4126020070000071,
+              -0.27869557384637167
+            ]
+          ],
+          "kappas": [
+            6.597942730353598,
+            3.298556492159949
+          ],
+          "weights": [
+            0.6883784398453491,
+            0.3116215601546509
+          ],
+          "spatial_counts": [
+            15134,
+            6851
+          ],
+          "train_mean_cosines": [
+            0.8484413218157743,
+            0.6995694153942249
+          ]
+        }
+      }
+    },
+    {
+      "fold": 1,
+      "split": "alternating",
+      "n_train": 24698,
+      "n_test": 21985,
+      "n_direction_test": 21985,
+      "n_common_test": 21985,
+      "train_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        35,
+        37,
+        39,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61,
+        63,
+        65,
+        67,
+        69,
+        71,
+        73,
+        75,
+        77,
+        79
+      ],
+      "test_blocks": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38,
+        40,
+        42,
+        44,
+        46,
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78
+      ],
+      "single_vmf_nll": 2.286156138947525,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 1.795736026001618,
+          "conditional_nll": 1.3999676778295729,
+          "angular_mae_deg": 34.272966143722755,
+          "legacy_direction_score": 0.704459207607195,
+          "n_test_assigned": 21985
+        },
+        "rank_trajectory": {
+          "nll": 1.7501883948912453,
+          "conditional_nll": 1.378110893932962,
+          "angular_mae_deg": 33.275728685064166,
+          "legacy_direction_score": 0.7175484691183556,
+          "n_test_assigned": 21985
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              8.038869257950529,
+              8.019251925192519,
+              7.000545256270447,
+              0.6808367071524966,
+              0.8069180606747945,
+              0.9970578620464204,
+              2.0425321463897133,
+              2.0792804796802136,
+              4.028381642512077,
+              6.02233676975945,
+              11.029619181946403,
+              12.973970345963755,
+              13.236040609137056,
+              11.001257334450964,
+              10.010925819436459
+            ],
+            [
+              3.014429270806493,
+              2.0315809028422813,
+              1.9332728098048118,
+              0.618837740777016,
+              13.223278488726386,
+              13.272682687591956,
+              12.785947884797974,
+              11.722301814708691,
+              10.052567661346288,
+              8.949709864603483,
+              7.09993766881363,
+              4.98840579710145,
+              0.9296360485268631,
+              2.982889048991354,
+              0.9276466108149276
+            ]
+          ],
+          "axes": [
+            [
+              -0.8473544540438416,
+              -0.41387052925766904,
+              -0.3327185210114403
+            ],
+            [
+              0.8460044987615535,
+              0.27292128178199504,
+              -0.45802877859986646
+            ]
+          ],
+          "train_counts": [
+            8762,
+            15936
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              8.03758389261745,
+              8.986512524084779,
+              7.0,
+              0.6645316253002402,
+              0.8061926605504588,
+              0.9933377748167888,
+              2.0337790288529205,
+              2.0829741379310347,
+              4.038240917782026,
+              6.008249312557287,
+              11.04065469904963,
+              12.973600844772967,
+              13.242250978031898,
+              11.010221465076661,
+              10.023161551823971
+            ],
+            [
+              6.01279799247177,
+              2.9561239731142646,
+              1.9328325231992929,
+              0.6243119987419405,
+              13.22251340083383,
+              13.266918020108275,
+              12.781498357528875,
+              11.718895661527428,
+              10.05173890697276,
+              8.952874646559849,
+              7.098770409191695,
+              4.993206793206793,
+              0.9336064174773853,
+              2.982345951451366,
+              0.9174757281553398
+            ]
+          ],
+          "axes": [
+            [
+              -0.8563974576586394,
+              -0.4134843753248942,
+              -0.309215241988491
+            ],
+            [
+              0.8828604303587207,
+              0.3064966105627559,
+              -0.35583323091071273
+            ]
+          ],
+          "train_counts": [
+            7869,
+            16829
+          ],
+          "spatial_scale": 1.128595107115739
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              -0.8473544540438416,
+              -0.41387052925766904,
+              -0.3327185210114403
+            ],
+            [
+              0.8460044987615535,
+              0.27292128178199504,
+              -0.45802877859986646
+            ]
+          ],
+          "kappas": [
+            1.836197147600213,
+            6.454241776476815
+          ],
+          "weights": [
+            0.3547655680621913,
+            0.6452344319378087
+          ],
+          "spatial_counts": [
+            8762,
+            15936
+          ],
+          "train_mean_cosines": [
+            0.507552849449256,
+            0.845068086862249
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              -0.8563974576586394,
+              -0.4134843753248942,
+              -0.309215241988491
+            ],
+            [
+              0.8828604303587207,
+              0.3064966105627559,
+              -0.35583323091071273
+            ]
+          ],
+          "kappas": [
+            3.1778694167853425,
+            6.5493773879459445
+          ],
+          "weights": [
+            0.31860879423435096,
+            0.681391205765649
+          ],
+          "spatial_counts": [
+            7869,
+            16829
+          ],
+          "train_mean_cosines": [
+            0.6888033059904658,
+            0.8473178262057706
+          ]
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "split": "chronological",
+      "n_train": 31054,
+      "n_test": 15629,
+      "n_direction_test": 15629,
+      "n_common_test": 15629,
+      "train_blocks": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "test_blocks": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79
+      ],
+      "single_vmf_nll": 2.3781893458332535,
+      "uniform_nll": 2.5310242469692907,
+      "metrics": {
+        "rank_sequence": {
+          "nll": 1.8631983588800896,
+          "conditional_nll": 1.5182892919443323,
+          "angular_mae_deg": 35.34341895924962,
+          "legacy_direction_score": 0.705074638408333,
+          "n_test_assigned": 15629
+        },
+        "rank_trajectory": {
+          "nll": 1.8622255654323263,
+          "conditional_nll": 1.5103528953416683,
+          "angular_mae_deg": 34.897166343124574,
+          "legacy_direction_score": 0.7142864785406442,
+          "n_test_assigned": 15629
+        }
+      },
+      "models": {
+        "rank_sequence": {
+          "templates": [
+            [
+              1.9814328582145537,
+              2.020717463848721,
+              7.007940617987226,
+              0.6545757498077416,
+              13.253376847067356,
+              13.299863240480818,
+              12.739811657736645,
+              11.688482825265746,
+              10.055882352941175,
+              8.934599504541701,
+              7.115549005158438,
+              4.0041052151436825,
+              0.9937990905332783,
+              3.009186706295596,
+              0.9010095344924285
+            ],
+            [
+              8.006913580246913,
+              8.983870967741936,
+              6.999571367338191,
+              0.7624398073836276,
+              0.8068264342774147,
+              1.0268178048106165,
+              2.0197260273972604,
+              2.08781622564699,
+              4.905937683715462,
+              6.977346278317151,
+              10.990487514863258,
+              12.076305220883533,
+              13.222123302915648,
+              10.022545959070413,
+              10.017006802721088
+            ]
+          ],
+          "axes": [
+            [
+              0.8854249628308816,
+              0.3091243523805826,
+              -0.3470803508716931
+            ],
+            [
+              -0.8559354290900514,
+              -0.4135112167523841,
+              -0.3104561399753472
+            ]
+          ],
+          "train_counts": [
+            20441,
+            10613
+          ],
+          "spatial_scale": null
+        },
+        "rank_trajectory": {
+          "templates": [
+            [
+              1.9884594248030774,
+              2.9482424577913093,
+              7.00707702435813,
+              0.663284020051351,
+              13.252713315097504,
+              13.292004798532215,
+              12.001051524710832,
+              11.68828104518046,
+              10.055003146633101,
+              8.937006605445465,
+              7.1155157715260025,
+              4.015131482297635,
+              0.9964764873289064,
+              3.0080848913592724,
+              0.8940296615540626
+            ],
+            [
+              8.005363528009536,
+              8.9875,
+              7.0009756097560985,
+              0.7419571045576407,
+              0.8009852216748768,
+              1.0259301014656144,
+              1.1112742219612448,
+              2.0972400513478817,
+              4.900128040973112,
+              6.013648771610555,
+              10.9981718464351,
+              12.959949542731,
+              13.234083756959574,
+              11.00362056480811,
+              10.995119570522206
+            ]
+          ],
+          "axes": [
+            [
+              0.8924279848522968,
+              0.31660611904269825,
+              -0.32145428483252425
+            ],
+            [
+              -0.8555845290053948,
+              -0.4135310615290653,
+              -0.3113955280302868
+            ]
+          ],
+          "train_counts": [
+            21870,
+            9184
+          ],
+          "spatial_scale": 1.1452783223710672
+        }
+      },
+      "densities": {
+        "rank_sequence": {
+          "axes": [
+            [
+              0.8854249628308816,
+              0.3091243523805826,
+              -0.3470803508716931
+            ],
+            [
+              -0.8559354290900514,
+              -0.4135112167523841,
+              -0.3104561399753472
+            ]
+          ],
+          "kappas": [
+            7.2991586676299125,
+            1.6651279192236164
+          ],
+          "weights": [
+            0.6582404843176403,
+            0.34175951568235974
+          ],
+          "spatial_counts": [
+            20441,
+            10613
+          ],
+          "train_mean_cosines": [
+            0.8629988232435932,
+            0.47366946206425736
+          ]
+        },
+        "rank_trajectory": {
+          "axes": [
+            [
+              0.8924279848522968,
+              0.31660611904269825,
+              -0.32145428483252425
+            ],
+            [
+              -0.8555845290053948,
+              -0.4135310615290653,
+              -0.3113955280302868
+            ]
+          ],
+          "kappas": [
+            6.897558290900691,
+            3.1112739518177457
+          ],
+          "weights": [
+            0.7042571005345527,
+            0.2957428994654473
+          ],
+          "spatial_counts": [
+            21870,
+            9184
+          ],
+          "train_mean_cosines": [
+            0.8550232011866338,
+            0.6825645079425284
+          ]
+        }
+      }
+    }
+  ],
+  "training_shuffle_failures": [],
+  "rank_sequence_nll": 1.7807114290195143,
+  "rank_sequence_conditional_nll": 1.3953573364119158,
+  "rank_sequence_angular_mae_deg": 33.96211376472305,
+  "rank_sequence_legacy_direction_score": 0.7072150955754274,
+  "rank_sequence_event_weighted_nll": 1.7798382689481298,
+  "rank_sequence_chronological_nll": 1.8631983588800896,
+  "rank_sequence_legacy_difference": 0.0,
+  "rank_trajectory_nll": 1.7584881280747804,
+  "rank_trajectory_conditional_nll": 1.3917155546800197,
+  "rank_trajectory_angular_mae_deg": 33.31643425778935,
+  "rank_trajectory_legacy_direction_score": 0.7178639292868949,
+  "rank_trajectory_event_weighted_nll": 1.758970470172052,
+  "rank_trajectory_chronological_nll": 1.8622255654323263,
+  "rank_trajectory_legacy_difference": 0.0,
+  "single_vmf_nll": 2.290482992420359,
+  "nll_improvement": 0.022223300944733904,
+  "kappa_cap_hits": 0,
+  "training_shuffle_complete_draws": 20,
+  "training_shuffle_nll": [
+    1.9424290890767797,
+    1.9484931614624146,
+    1.937032004921304,
+    1.9486225841266112,
+    1.9572615523078891,
+    1.9488324573420561,
+    1.9385164124645016,
+    1.9527460911693328,
+    1.9488681739803635,
+    1.9481858229024267,
+    1.9480863240122646,
+    1.9443275628770071,
+    1.9528530990911155,
+    1.949453800808236,
+    1.948972791133816,
+    1.9440796506168212,
+    1.943551076698879,
+    1.939343841352061,
+    1.9469701323524453,
+    1.9394423442336706
+  ],
+  "training_shuffle_median_nll": 1.9481360734573456
+}

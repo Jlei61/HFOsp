@@ -1,0 +1,42 @@
+{
+  "subjects": [
+    "epilepsiae_1077",
+    "epilepsiae_1084",
+    "epilepsiae_1096",
+    "epilepsiae_1125",
+    "epilepsiae_1146",
+    "epilepsiae_1150",
+    "epilepsiae_253",
+    "epilepsiae_384",
+    "epilepsiae_442",
+    "epilepsiae_548",
+    "epilepsiae_583",
+    "epilepsiae_590",
+    "epilepsiae_620",
+    "epilepsiae_635",
+    "epilepsiae_922",
+    "epilepsiae_958",
+    "yuquan_chengshuai",
+    "yuquan_huanghanwen",
+    "yuquan_litengsheng",
+    "yuquan_liyouran",
+    "yuquan_pengzihang",
+    "yuquan_songzishuo",
+    "yuquan_xuxinyi",
+    "yuquan_zhangbichen",
+    "yuquan_zhangkexuan",
+    "yuquan_zhaochenxi"
+  ],
+  "seed": 20261023,
+  "n_null_draws": 200,
+  "analysis_parent": "/home/honglab/leijiaxin/HFOsp/results/topic1/rank_direction_holdout_20261022",
+  "frozen_training_root": "/home/honglab/leijiaxin/HFOsp/results/topic1/direction_distribution_holdout_20261022",
+  "main_direction_assignment": "nearest_3d_angle",
+  "direction_null_description": "training-template rank-contact permutation, fixed patient geometry, refitted axes and nearest-angle reassignment",
+  "rose_event_label": "Fold-1 projection",
+  "source_sha256": {
+    "scripts/run_fig2b_nearest_direction_holdout.py": "caca70ed4d47dacdd62feb850d80c213c971537f258914bbdd061b62a9c48074",
+    "src/interictal_nearest_direction_holdout.py": "92b71500f6a28cf81d3b3d37474cae1e48728ee4ccb578c506a7d8da87832675",
+    "docs/fig2b_nearest_direction_holdout.md": "4e89a22bbc5d359860f8598a4f2098390176a9244efe63fa36e04c973330fcd0"
+  }
+}
