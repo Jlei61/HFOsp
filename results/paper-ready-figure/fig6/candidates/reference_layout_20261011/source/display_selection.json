@@ -1,0 +1,58 @@
+{
+  "times_s": [
+    14.6,
+    15.045,
+    15.075,
+    15.11,
+    15.3
+  ],
+  "labels": [
+    "Interictal",
+    "Local",
+    "Spread",
+    "Entry",
+    "Ictal"
+  ],
+  "colors": [
+    "#267ba8",
+    "#9b8d32",
+    "#bd6c35",
+    "#ab4255",
+    "#ba263c"
+  ],
+  "map_state_numbers": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "map_window_ms": 20,
+  "recruitment_start_s": 14.9,
+  "window_s": [
+    14.3,
+    15.4
+  ],
+  "trajectory_window_s": [
+    0.0,
+    18.1
+  ],
+  "method": "Relabel the five visible states consecutively1–5, retaining their exact times/colors/data. Rename the first spatial state Local.",
+  "entry_distinction": "State2 at15.045s shows local reactivation, distinct from the operational high-rate entry marker.",
+  "F_window_decision": "Preserve the confirmed15.051–16.051s energy window and its visible grey underlay in E; remove the F window legend per latest author request.",
+  "source_duration_s": 18.1,
+  "new_simulations": 0,
+  "model_patient_time_mapping": "Phase correspondence only; no calibrated1-to10 second equivalence.",
+  "map_description": "2（Local）为15.045 s局部再次激活，3（Spread）为15.075 s继续扩大的招募，4（Entry）和5（Ictal）为15.110/15.300 s的进入后阶段与全场高活动。",
+  "revision": {
+    "previous_version": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_fig4f_historical_zm_20260930/aligned_ef_width_20261008",
+    "change": "Translate E/F/G column0.60 inches right; preserve panel sizes and all data.",
+    "new_simulations": 0
+  },
+  "hidden_state_numbers": [],
+  "raster_zoom_state_numbers": [
+    1,
+    2
+  ],
+  "field_display_mode": "minmax_z",
+  "field_normalization_decision": "Use requested0–1 normalization for a spatial-shape preview; preserve signed-z companion and audit. Await any author preference override."
+}

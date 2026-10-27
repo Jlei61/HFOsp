@@ -1,0 +1,386 @@
+{
+  "workpoint": {
+    "candidate": "xy_left_20",
+    "stage": 11,
+    "N": 151,
+    "rank_error": 0.03359394901843452,
+    "within_rod_order_error": 0.072227621700557,
+    "participation_error": 0.1800901403162254,
+    "J": 1.5545141416636123,
+    "J_joint": 1.4556526062005162,
+    "vector": "[2.9492143200000003, 12.12890135, 16.47920304, 5.46551153, 1.25, 0.0]",
+    "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+    "source_sha256": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "display_mean_error": 0.09530390367840563,
+    "panel": "E"
+  },
+  "topology_seed": 2511,
+  "dynamics_seed": 847401,
+  "n_networks": 1,
+  "duration_ms": 60000,
+  "burnin_ms": 1500,
+  "n_model_events": 151,
+  "model_counts_TA_TB": [
+    105,
+    46
+  ],
+  "patient_n_events": 30049,
+  "patient_counts_TA_TB": [
+    20853,
+    9196
+  ],
+  "patient_n_blocks": 56,
+  "patient_pool": "Existing 30049 qualified development events, with exact global-ID relabeling from the all-event Timing+Space discovery. Not an independent validation patient or block split.",
+  "patient_discovery_n_events": 46683,
+  "patient_label_change_vs_timing_only": 1861,
+  "model_labels": "Frozen trajectory event_mode (1=TA,0=TB); same labels as D/E. No reclustering for G or F.",
+  "profile_definition": "Finite-participant event ranks rescaled to 0..1; each contact averages over events participating at that contact, then multiplied by 14 for display. No missing-contact rank imputation.",
+  "G_grouping": "Frozen model labels; patient labels are Timing+Space. This differs from legacy G using frozen KMeans model clusters.",
+  "H_grouping": "Assign each model event to the patient profiles using one alternating-contact fold; evaluate Spearman on the disjoint fold; swap and average. H groups need not equal G frozen labels.",
+  "H_statistical_unit": "One topology/noise trajectory. Conditional post-selection correspondence check, not search-corrected inference or out-of-patient generalization.",
+  "H_null": "1000 within-shaft contact-identity permutations; each permutation is shared by all events and repeats both assignment/evaluation steps. Fresh one-sided diagonal tests, unadjusted for two tests and workpoint selection.",
+  "contact_order_top_to_bottom": [
+    "SCL9",
+    "SCL8",
+    "SCL7",
+    "SCL6",
+    "ICL11",
+    "ICL10",
+    "ICL9",
+    "ICL8",
+    "ICL7",
+    "ICL6",
+    "ICL5",
+    "ICL4",
+    "ICL3",
+    "ICL2",
+    "ICL1"
+  ],
+  "crossfit": {
+    "folds": [
+      {
+        "assignment_contacts": [
+          0,
+          1,
+          4,
+          5,
+          8,
+          10,
+          12,
+          14
+        ],
+        "evaluation_contacts": [
+          2,
+          3,
+          6,
+          7,
+          9,
+          11,
+          13
+        ],
+        "mode_counts": [
+          46,
+          105
+        ],
+        "matrix": [
+          [
+            0.4642857142857144,
+            -0.7500000000000002
+          ],
+          [
+            -0.5357142857142858,
+            0.8214285714285715
+          ]
+        ],
+        "signed_margin": 0.4642857142857144,
+        "n_assigned": 151,
+        "mean_assignment_margin": 0.30390382466826266
+      },
+      {
+        "assignment_contacts": [
+          2,
+          3,
+          6,
+          7,
+          9,
+          11,
+          13
+        ],
+        "evaluation_contacts": [
+          0,
+          1,
+          4,
+          5,
+          8,
+          10,
+          12,
+          14
+        ],
+        "mode_counts": [
+          45,
+          106
+        ],
+        "matrix": [
+          [
+            0.5714285714285715,
+            -0.9285714285714287
+          ],
+          [
+            -0.5714285714285715,
+            0.9285714285714287
+          ]
+        ],
+        "signed_margin": 0.5714285714285715,
+        "n_assigned": 151,
+        "mean_assignment_margin": 0.26641016405306517
+      }
+    ],
+    "matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "signed_margin": 0.517857142857143,
+    "consensus_labels": [
+      1,
+      0,
+      -1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1
+    ],
+    "consensus_count": 150,
+    "consensus_fraction": 0.9933774834437086
+  },
+  "diagonal_tests": {
+    "MTA_vs_TA": {
+      "observed": 0.8750000000000001,
+      "p_one_sided": 0.001998001998001998,
+      "n_draws": 1000,
+      "null_quantiles": [
+        -0.5,
+        0.11309523809523811,
+        0.5714285714285714
+      ],
+      "stars": "**"
+    },
+    "MTB_vs_TB": {
+      "observed": 0.517857142857143,
+      "p_one_sided": 0.03496503496503497,
+      "n_draws": 1000,
+      "null_quantiles": [
+        -0.50625,
+        -0.03571428571428571,
+        0.4821428571428571
+      ],
+      "stars": "*"
+    }
+  },
+  "sources": {
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91",
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1146.json": "b5b0d65823f13caed389c890295887bcea5ca3f79fbfd27c4814962a2f962c1b"
+  },
+  "waveform": {
+    "selection": {
+      "ta": 10,
+      "tb": 8,
+      "gap": 576.0,
+      "n1": 15,
+      "n2": 15
+    },
+    "selection_rule": "All eligible TA/TB pairs, prefer 250–1200 ms gap; maximize min contact count, then sum contact count, then minimize gap distance to 550 ms; event-ID tie break. No patient-distance criterion.",
+    "absolute_window_ms": [
+      3647.0,
+      4503.0
+    ],
+    "spans": [
+      {
+        "event": 10,
+        "mode": "TA",
+        "recruitment_onset_span_ms": [
+          4341.0,
+          4385.0
+        ],
+        "shaded_span_ms": [
+          4329.0,
+          4397.0
+        ]
+      },
+      {
+        "event": 8,
+        "mode": "TB",
+        "recruitment_onset_span_ms": [
+          3747.0,
+          3793.0
+        ],
+        "shaded_span_ms": [
+          3735.0,
+          3805.0
+        ]
+      }
+    ],
+    "common_amplitude_scale": 0.10400202312561753,
+    "all_primary_ids_visible": [
+      8,
+      9,
+      10
+    ],
+    "quantity": "30–80 Hz fourth-order Butterworth zero-phase filtering of the full continuous virtual-contact firing-density envelope before cropping. Not raw SEEG, LFP, or patient HFO.",
+    "dt_ms": 2.0,
+    "normalization": "One q99 absolute amplitude for all contacts in the displayed continuous segment; no per-contact rescaling.",
+    "onset_shading": "Actual participating-contact recruitment-onset span plus 12 ms on each side; not centroid times."
+  }
+}

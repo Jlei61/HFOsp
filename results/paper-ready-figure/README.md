@@ -1,5 +1,7 @@
 # Paper-ready figure outputs
 
+> **2026-10-27：** 新 [Figure 5](../../docs/current_figure5.md) 已登记为 `vertical_legend_20261027`；原 Figure 5 已改为 [Figure 6](../../docs/current_figure6.md)。
+
 > **论文公开代码整理入口：** [图件、Methods 与代码精简指南](../../docs/paper_code_and_methods.md)汇总逐图来源、复现命令、最小保留范围及终稿对齐事项。
 
 > **独立代码与 notebook：** [paper_code](../../paper_code/README.md) · [基础图件复现 notebook](../../paper_code/notebooks/01_reproduce_paper_figures.ipynb)。数据处理、分析、建模和绘图分目录，项目代码不依赖原工作区；衍生输入与输出分别存放。
@@ -11,7 +13,7 @@
 > **Figure 1当前为作者定稿（2026-10-10）。** [完整图、A–F和PPTX](fig1/figures/README.md)，[代码与数据说明](../../docs/current_figure1.md)。当前指针为`fig1/current_revision.json`，旧版移至`archive/2026-10-10_fig1_finalization/fig1/`。
 
 
-这里的顶层只保存当前主图组装包 `fig1/`–`fig5/`、正式补图包 `supp_fig1_*`–`supp_fig7_*`，
+这里的顶层只保存当前主图组装包 `fig1/`–`fig6/`、正式补图包 `supp_fig1_*`–`supp_fig7_*`，
 以及投稿级补充视频文件。source、候选、诊断和历史模型包放入 `archive/`，不与正式稿件入口并列。
 
 唯一登记入口：[`docs/paper_figure_registry.md`](../../docs/paper_figure_registry.md)。
@@ -35,11 +37,12 @@
 | Fig2-A–F | `interictal_spatial_scaffold` | `CANDIDATE` | `fig2/figures/` |
 | Fig3-A–E | `ictal_phenotype_to_field_layout` | `AUTHOR_ACCEPTED_FINAL` | `fig3/figures/` |
 | Fig4-A–I | `patient_geometry_prior_snn_compact_a_i` | `AUTHOR_ACCEPTED_FINAL` | `fig4/figures/` |
-| Fig5-A–F | `single_seed_zm_entry_and_onset_field` | `CURRENT_AUTHOR_DESIGNATED` | `fig5/figures/` |
+| Fig5-A–F（F：shared axis 患者，偏 TA 单 core / 双 core 的 TA/TB 对照） | `spatial_snn_propagation_and_core_count` | `PENDING_AUTHOR_VISUAL_REVIEW` | `fig5/figures/` |
+| Fig6-A–F（原 Fig5） | `single_seed_zm_entry_and_onset_field` | `CANDIDATE` | `fig6/figures/` |
 Fig1-A 为作者接受的 Y1 脑投影、A杆与波形；冻结图层及科学输入见[当前版本说明](../../docs/current_figure1.md)。Fig1/2/3 的独立 panel 均不含左上角字母；完整排版分别为
 `fig1-complete-layout`、`fig2-complete-layout` 和 `fig3-complete-layout`，仅完整排版带 panel 字母。
 旧素材与 producer/source 包不作为论文组装入口，正式引用只回到 `fig1/figures/`、`fig2/figures/`、
-`fig3/figures/`、`fig4/figures/` 或 `fig5/figures/`。
+`fig3/figures/`、`fig4/figures/`、`fig5/figures/` 或 `fig6/figures/`。
 
 Fig1-F 自 2026-09-02 起以 `fig1/figures/fig1-panelf.{png,pdf}` 的 v5 配对 inset 版为唯一
 canonical 输出：主散点右下比较 single-template 与 multi-cluster MI，显示患者配对连线、均值柱和
@@ -79,7 +82,7 @@ Supplementary Video 2 于 **2026-10-15 作者确认定稿**，版本 `paired_row
 FigS7 位于 `supp_fig7_nlc_pathway_confirmation/`；其 A–D 是从旧 Fig4 supporting source 标准化出来的
 连接路径消融图，E 是从主 Fig4 移入的 KMeans heatmap/rank-distribution panel；上游冻结仿真和统计结果不迁移。
 
-尚有编号冲突或未锁定的计算材料继续保存在归档中。当前 `fig5/` 只保留 v5 最新完整候选；其 metadata 的科学边界仍是单 seed operational model transition，且形态闸门为 `NOT_SUSTAINED_ICTAL_MORPHOLOGY`，不能写成临床发作起始或多 seed 确认。
+当前 [Fig5](../../docs/current_figure5.md) 为作者指定的空间 SNN 传播与单/双 core 对照。原 Z/M Fig5 现为 [Fig6](../../docs/current_figure6.md)，旧内部文件名只记录历史身份，不能替代新 Fig5。
 
 ## 归档
 

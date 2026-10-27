@@ -1,0 +1,14 @@
+{
+  "schema": "fig5_ta_preferred_selection_v1",
+  "author_request_date": "2026-10-27",
+  "core1_constraint": "signed rho_TA > signed rho_TB + 1e-12; both finite",
+  "core1_objective": "minimum original training J among eligible candidates",
+  "core2_selection": "unchanged minimum original training J",
+  "no_template_relabelling": true,
+  "no_absolute_correlations": true,
+  "no_extra_rho_threshold": true,
+  "no_TB_ceiling": true,
+  "no_new_simulations": true,
+  "infeasible_subject": "retained with missing 1-core readout",
+  "inference": "Post-hoc asymmetric selection-policy comparison; selection includes TB, so weaker TB is partly conditioned by design, not independent evidence of a core-count mechanism"
+}

@@ -1,27 +1,21 @@
-# Figure 5：单种子Z/M进入与早期能量场
+# Figure 5：偏 TA 的单 core 与双 core 模板匹配
 
-2026-09-18按作者指示设为新的paper-ready Fig5；替换旧seed1801 A–D版本。独立A–F不含左上角字母，完整拼版保留字母；见[文件与说明](figures/README.md)。
+**本次显示调整：** F 改为显著性符号：TA 不标注显著性，TB 保留 *；按未舍入的 Holm 校正 P 判断，* P<0.05、** P<0.01、*** P<0.001，不显著时不标文字或括号。精确 P=0.050537/0.018677 仍保留于统计文件和图注。F 横轴刻度标签 TA–MTA、TB–MTB 分别居中对齐两组点，右上方竖排显示“空心点 1 core／实心点 2 cores”图例；显著性星号及括号下移，与图例留开间距；其余数据、统计和 A–E 均不变。
 
-2026-09-28纳入已完成的19条长时补充（8条续跑、11个新参数组合），E更新为70个唯一参数点的冻结连续色面。所有既定任务已结束；colorbar仍为viridis、log 1–1000秒。
+[完整 PDF](figures/fig5-complete-layout.pdf) · [PNG](figures/fig5-complete-layout.png) · [各图说明](figures/README.md)
 
-E纳入原59点和11个新参数组合，共70个固定seed9108401的参数点；长时补充19/19条完成（8条续跑、11条新参数），7条进入，12条至3000秒仍未进入。全部70点中33点在1000秒内进入，另1点在1535.03秒确认进入（τM=10秒，ηM=0.004216965034）；其余24点仅有1000秒未进入证据，12点有3000秒未进入证据。为保持共同观察口径，先将逐点确认时间截断于1000秒，再在双log参数空间对log时间作三角网格分片线性插值。仅显示连续色面，色条仍为viridis、log 1–1000秒及1/10/100/1000刻度；1000秒后的进入与观察期内未进入均显示顶端颜色，真实时间和随访下界保存在逐点表。不叠加采样点或边界，不在采样凸包外外推；本图不是全域3000秒图、进入概率或严格分岔图。
+当前版本 `vertical_legend_20261027`，状态 `PENDING_AUTHOR_VISUAL_REVIEW`；旧 Figure 5 仍登记为 Figure 6。
 
-F保留Fig3C算法和真实robust-z色条；模型采用0.5–3.5秒短基线与1秒早期窗，患者为30秒远端基线与0–10秒窗。模型短基线不确立模型/临床时间尺度等价，最近似患者病例只是示例。
+保留患者真实 TA/TB 身份，单 core 在两项有符号相关均有效且 ρTA>ρTB 的候选中选择原训练损失 J 最低的工作点（并列时取更早 epoch）；双 core 保持原无约束最低 J 工作点。每位患者每组的 TA–MTA、TB–MTB 来自同一个工作点，不互换模板名，不取绝对相关，不增加 TB 上限或其他相关阈值。
 
-来源和可重建快照：`source_snapshot.json`、`fig5_metadata.json`、`panel_manifest.json`。作者已指定本图为新的Fig5，当前单panel导出仍待人工目视检查，科学状态维持CANDIDATE。
+继续使用 2026-10-27 09:42 冻结快照，每人每组前 16/32 次搜索；同一 17 位 shared axis 患者均有合格单 core 候选。7 位单 core 换点，10 位不变，全部双 core 不变。TA 中位数：单 core 0.725、双 core 0.557；TB：单 core −0.150、双 core 0.282，13/17 位患者的 TB 在双 core 中更高。
 
-重建（写入另一个目录）：
+统计单位为患者，采用配对双侧 Wilcoxon 符号秩检验；差值舍入至 12 位小数、零差值不计秩，以平均秩的精确符号置换分布计算 P，跨本版 TA、TB 两项作 Holm 校正。TA：原始 P=0.050537，校正 P=0.050537；TB：原始 P=0.009338，校正 P=0.018677。此处 P 值已重新计算，不沿用原无约束 TB 的 P=0.380 或 Stronger/Weaker 的 P=0.033；这是另一次探索性分析的两项校正，并非覆盖此前所有分析及多次中期查看的全局校正。
 
-```bash
-LD_LIBRARY_PATH=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib /home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/paper_figures/build_fig5_single_seed_panels.py --snapshot results/paper-ready-figure/fig5/source_snapshot.json --output /tmp/fig5-rebuild
-```
+本次是在查看中期结果后提出的非对称选点策略对照，模板相关同时参与单 core 的入选条件和评分；TB 相对较弱部分由约束决定。因此 P 值描述的是这两种选点策略的配对差异，不是独立于选点的纯 core 数量检验，也不能证明单 core 无法同时匹配 TA/TB。新工作点尚未使用独立噪声复测，原工作点的复测不能代替新选点。
 
-## 长时补充与本次验证
+约束带来训练拟合代价：例如 E1（epilepsiae_1096）的 J 从 2.885 升至 13.862；原单 core 点的 TA/TB 相关为 0.643/0.893，新点为 0.929/−0.607。故不能把被排除的原点描述为不能拟合两种模板。逐患者选点与 J 变化保留在 candidates/vertical_legend_20261027/selection_costs.csv；无合格候选时保留该患者并将单 core 读出记为缺失，不因模型结果排除患者。
 
-19条长时补充已于2026-09-26北京时间完成，7条进入、12条至3000秒未进入；其中τM=10秒、ηM=0.004216965034在1535.03秒首次确认进入。8个原未进入点的续跑均至3000秒未进入。已重新核对原始放电计数、19条终点和网络身份。70点色面仍采用共同1000秒截断时间；色条顶端同时包含更晚进入与未进入，不将只观察到1000秒的24点视为3000秒未进入。
+当前配对数据、统计、核验及选点审计位于 `candidates/vertical_legend_20261027/`。图内不显示 n=17 或 Interim；两者仍保留于说明及元数据。
 
-单图E的PNG/PDF和完整拼版PDF已目视自查；A/B/C/D/F的PNG与前版逐字节一致。旧59点色面版完整保存在 `../archive/2026-09-28_pre_long_followup_fig5/fig5/`。作者目视检查仍待完成。
-
-[详细中文图注](fig5_caption_detailed_zh.md) · [长时实验结论与解释](long_followup_summary.md) · [70点逐点结果](entry_points.csv) · [1000/3000秒实测夹区](boundary_brackets.csv) · [原始计数审计](long_followup_audit.json) · [全部单panel下载](fig5-single-panels-png-pdf-svg.zip) · [导出自查](publication_qa.json)
-
-实验原始结果及冻结协议：[3000秒补充](../../topic4_sef_hfo/fig5_long_boundary_20260923/README.md)。本次没有增加种子、参数或仿真时长。
+校验：`python scripts/paper_figures/build_fig5_current.py`；重绘：`python scripts/paper_figures/build_fig5_aligned_layout.py`。后台完成管线沿用同一约束在完整 32 次预算内重新选点，另存候选，不自动覆盖当前入口，也不把旧工作点复测记作新点验证。

@@ -1,0 +1,252 @@
+{
+  "status": "PASS_DATA_EXPORT_AND_AGENT_VISUAL_REVIEW",
+  "formats": {
+    "complete": {
+      "png_pixels": [
+        7192,
+        5033
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 151
+    },
+    "A": {
+      "png_pixels": [
+        3541,
+        2001
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 30
+    },
+    "B": {
+      "png_pixels": [
+        3501,
+        968
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 18
+    },
+    "C": {
+      "png_pixels": [
+        3501,
+        1017
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 14
+    },
+    "D": {
+      "png_pixels": [
+        3744,
+        1103
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 40
+    },
+    "E": {
+      "png_pixels": [
+        3031,
+        2584
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 24
+    },
+    "F": {
+      "png_pixels": [
+        3229,
+        1394
+      ],
+      "pdf_readable": true,
+      "svg_text_elements": 27
+    }
+  },
+  "same_source_trajectory": true,
+  "source_raster_unchanged": true,
+  "original_sample_neurons_unchanged": true,
+  "late_interictal_window_inside_AB": true,
+  "preictal_zoom_unchanged": true,
+  "old_preictal_and_onset_spatial_counts_identical": true,
+  "new_spatial_frames_from_native_counts": true,
+  "F_entire_comparison_and_display_metadata_unchanged": true,
+  "all15_contacts_preserved": true,
+  "AB_three_axes_same_time_mapping": true,
+  "variables_encode_color_populations_encode_linestyle": true,
+  "raw_mean_strip_removed": true,
+  "pre_recruitment_p95_fixed_scaling": true,
+  "unfiltered_DC_preserved": true,
+  "E_trajectory_markers_match_all_state_times": true,
+  "no_rest_or_interictal_spatial_frame": true,
+  "no_parameter_scan_in_complete_figure": true,
+  "state_mapping": [
+    {
+      "number": 1,
+      "time_s": 8.42,
+      "color": "#267ba8",
+      "label": "Interictal",
+      "previous_state": null
+    },
+    {
+      "number": 2,
+      "time_s": 9.42,
+      "color": "#dd871c",
+      "label": "Pre-ictal",
+      "previous_state": 3
+    },
+    {
+      "number": 3,
+      "time_s": 9.48,
+      "color": "#bd6c35",
+      "label": "",
+      "previous_state": null
+    },
+    {
+      "number": 4,
+      "time_s": 9.6,
+      "color": "#ab4255",
+      "label": "",
+      "previous_state": null
+    },
+    {
+      "number": 5,
+      "time_s": 10.37,
+      "color": "#ba263c",
+      "label": "Onset",
+      "previous_state": 4
+    }
+  ],
+  "caption_sha256": "df91be1f40f32a6e7a6c43ec1432b90d83bdca22e9061c17aee9df7d061e23e3",
+  "human_review": "PENDING",
+  "agent_visual_review": "PASS",
+  "visual_review": {
+    "complete_and_A_pdf_rasters": "Inspected same-state PDF renders; single A axis; sustained levels preserved; all15 contacts visible; no label occlusion; aligned A/B time axes; unchanged B–F."
+  },
+  "raw_data_check": {
+    "status": "PASS",
+    "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_preentry_event_audit_20260914/runs/eta0.0005_s9108401",
+    "windows_s": [
+      [
+        8,
+        9.37
+      ],
+      [
+        10.2,
+        11
+      ]
+    ],
+    "contact_order": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "raw_mean_per_window": [
+      [
+        262.614324812237,
+        237.97185044128523,
+        216.53338656188689,
+        192.7617398776175,
+        275.395437859408,
+        249.58810093212495,
+        241.27976263397144,
+        275.0828362241085,
+        289.05604111658994,
+        303.3237185063498,
+        312.51480797522026,
+        322.49567841180584,
+        351.83047138461177,
+        355.104228643653,
+        349.6614129686592
+      ],
+      [
+        2734.7283841444087,
+        2602.5330361272254,
+        2517.40755926268,
+        2399.9559026803995,
+        2823.7367137993992,
+        2920.036487590112,
+        2942.5705272339346,
+        2971.2449688353436,
+        2976.2968934622872,
+        2987.0963961298066,
+        2988.224730573884,
+        2992.322942920353,
+        3009.5791566624057,
+        3017.651908936547,
+        3001.6865539192386
+      ]
+    ],
+    "raw_SD_per_window": [
+      [
+        528.8634579415244,
+        503.49362190563704,
+        467.32308022471284,
+        422.42523129385233,
+        582.8352622214984,
+        491.13392220528004,
+        448.12929711215605,
+        489.12464294647725,
+        504.7986983196935,
+        553.5648468737559,
+        592.1503901495468,
+        588.2877242585965,
+        637.5985273928087,
+        634.6777153054262,
+        635.6533675997553
+      ],
+      [
+        210.5805180370073,
+        317.0961438610574,
+        436.41221064728813,
+        549.3827756297849,
+        135.44997233512922,
+        63.30276726507651,
+        54.50368309118292,
+        66.21936423678652,
+        64.34406378740923,
+        59.65419748954313,
+        61.14315761836239,
+        59.34481769337349,
+        51.314446808597474,
+        48.24449321150353,
+        53.391048260727096
+      ]
+    ],
+    "median_within_contact_late_early_mean_ratio": 10.296608512194375,
+    "median_within_contact_late_early_SD_ratio": 0.127464797357024,
+    "population_order": [
+      "All E",
+      "All I"
+    ],
+    "mean_rates_Hz_per_window": [
+      [
+        29.295095802919725,
+        59.64717153284674
+      ],
+      [
+        335.7722656249997,
+        432.59296874999956
+      ]
+    ],
+    "recovered_raw_samples_max_absolute_error": 3.637978807091713e-12,
+    "all_stored_samples_in_window_plotted": true,
+    "samples_per_contact": 6001,
+    "DC_preserved": true,
+    "B_to_F_PNG_bitwise_unchanged": {
+      "b": true,
+      "c": true,
+      "d": true,
+      "e": true,
+      "f": true
+    },
+    "unit": "Same trajectory; within-contact temporal comparison, not independent replications."
+  }
+}

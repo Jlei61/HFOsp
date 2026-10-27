@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "n_subjects": 17,
+  "feasible_single_core": 17,
+  "changed_single_core": 7,
+  "single_core_candidate_readouts_checked": 50,
+  "all_constrained_minimum_J_verified": true,
+  "common_frozen_budget": 16,
+  "double_core_rows_unchanged": true,
+  "independent_Spearman_recalculations": 68,
+  "patient_template_names_and_profiles_unchanged": true,
+  "event_exports_checked": 34,
+  "exhaustive_sign_assignments_per_test": 131072,
+  "holm_family_size": 2,
+  "descriptive_statistics": [
+    {
+      "mode": "TA–MTA",
+      "median_core1": 0.7252173913043478,
+      "median_core2": 0.5565217391304348,
+      "core2_higher": 6,
+      "median_paired_difference": -0.20347826087
+    },
+    {
+      "mode": "TB–MTB",
+      "median_core1": -0.15,
+      "median_core2": 0.2823529411764706,
+      "core2_higher": 13,
+      "median_paired_difference": 0.457142857143
+    }
+  ],
+  "A_to_E_pixel_identical": true,
+  "exports_verified": 22,
+  "no_sample_size_or_stage_on_F": true,
+  "independent_noise_validation_used": false,
+  "human_visual_acceptance": "PENDING",
+  "interpretation": "Post-hoc asymmetric selection-policy comparison; the same template correlations enter core1 eligibility and scoring; no independent validation"
+}

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "all_panels_inside_canvas": true,
+  "panel_boxes_nonoverlapping": true,
+  "A_B_axis_alignment_error_pt": 0.0,
+  "single_panel_pdfs_byte_identical": true,
+  "source_files_unchanged": true,
+  "all_panel_aspect_ratios_preserved": true,
+  "A_crop": "Redundant standalone x tick labels and title only; waveform axes retained",
+  "agent_visual_review": "PASS",
+  "human_visual_acceptance": "PENDING",
+  "visual_review_renderers": [
+    "PyMuPDF PNG",
+    "Poppler independent PDF rasterization"
+  ],
+  "visual_review_checks": [
+    "A/B time-axis alignment",
+    "all six panel letters",
+    "complete field and trajectory colorbars",
+    "spatial map physical aspect ratios",
+    "all statistic labels and paired points visible",
+    "no text clipped at page boundary"
+  ]
+}

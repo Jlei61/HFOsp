@@ -1,0 +1,613 @@
+{
+  "figure": "Fig5",
+  "asset_id": "spatial_snn_propagation_and_core_count",
+  "version": "early_core_16ms_20261026",
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "human_visual_acceptance": "PENDING",
+  "producer": "scripts/paper_figures/build_fig5_aligned_layout.py",
+  "workpoint": "xy_left_20",
+  "previous_version": "early_core_10ms_20261026",
+  "panel_a": {
+    "workpoint": "xy_left_20",
+    "core_centers_mm": [
+      [
+        2.9492143200000003,
+        12.12890135
+      ],
+      [
+        16.47920304,
+        5.46551153
+      ]
+    ],
+    "core_radii_mm": [
+      1.7525782905619196,
+      1.7525782905619196
+    ],
+    "coordinate_translation_mm": [
+      -10,
+      -10
+    ],
+    "actual_EE_angle_deg": -22.80538396505847,
+    "ellipse_axis_ratio": 1.3333333333333337,
+    "ellipse_scope": "Schematic magnification of the actual EE kernel aspect ratio and orientation, not its spatial length scale.",
+    "core_boundaries": "Exact physical circular core membership boundaries; dashed outline.",
+    "working_point_scope": "Author selected the same accepted demonstration as panels B/C/E on 2026-10-24; not the later global J_joint minimum."
+  },
+  "panel_d": {
+    "events": [
+      {
+        "mode": "MTA",
+        "event": 39,
+        "window_ms": [
+          13342.0,
+          13592.0
+        ],
+        "first_frame_ms": 13420.0,
+        "onset_index": 6710,
+        "end_relative_ms": 106.0,
+        "end_index_exclusive": 6796,
+        "peak_total_spikes": 4012.2,
+        "normalization_denominator": 82.0,
+        "relative_times_ms": [
+          0.0,
+          16.0,
+          32.0,
+          64.0,
+          96.0
+        ],
+        "absolute_times_ms": [
+          13420.0,
+          13436.0,
+          13452.0,
+          13484.0,
+          13516.0
+        ],
+        "frame_indices": [
+          6710,
+          6718,
+          6726,
+          6742,
+          6758
+        ],
+        "total_spikes_at_frames": [
+          67.2,
+          1398.8,
+          2162.2,
+          3924.4000000000005,
+          789.9999999999999
+        ],
+        "final_to_peak_fraction": 0.19689945665719552
+      },
+      {
+        "mode": "MTB",
+        "event": 151,
+        "window_ms": [
+          46756.0,
+          47006.0
+        ],
+        "first_frame_ms": 46816.0,
+        "onset_index": 23408,
+        "end_relative_ms": 124.0,
+        "end_index_exclusive": 23503,
+        "peak_total_spikes": 4714.6,
+        "normalization_denominator": 87.0,
+        "relative_times_ms": [
+          0.0,
+          16.0,
+          32.0,
+          64.0,
+          96.0
+        ],
+        "absolute_times_ms": [
+          46816.0,
+          46832.0,
+          46848.0,
+          46880.0,
+          46912.0
+        ],
+        "frame_indices": [
+          23408,
+          23416,
+          23424,
+          23440,
+          23456
+        ],
+        "total_spikes_at_frames": [
+          67.19999999999999,
+          1037.8,
+          1570.8,
+          3481.8,
+          4152.6
+        ],
+        "final_to_peak_fraction": 0.88079582573283
+      }
+    ],
+    "shared_relative_times_ms": [
+      0.0,
+      16.0,
+      32.0,
+      64.0,
+      96.0
+    ],
+    "frame_intervals_ms": [
+      16.0,
+      16.0,
+      32.0,
+      32.0
+    ],
+    "equally_spaced": false,
+    "native_bin_ms": 2.0,
+    "temporal_display_average_ms": 10,
+    "spatial_bin_mm": 1,
+    "spatial_interpolation": "none",
+    "spatial_smoothing": "none",
+    "color_range": [
+      0,
+      1
+    ],
+    "normalization": "Each event uses its maximum spatial-bin activity over its full frozen event window; one denominator per row, shared across all times.",
+    "normalization_denominators": {
+      "MTA": 82.0,
+      "MTB": 87.0
+    },
+    "per_frame_normalization": false,
+    "between_event_absolute_amplitude_comparable": false,
+    "color_mapping": "linear",
+    "selection": "Same two historical events; author requested the 16-ms native activity frame instead of the 10-ms frame. Common elapsed milliseconds in both rows; nonuniform intervals explicitly labelled.",
+    "early_frame_scope": "The 16-ms frame displays early propagation around the initiating core. Activity is not required to remain strictly inside the core disk.",
+    "end_of_event_shown": false,
+    "time_origin": "Separate 1%-total-peak initiation times; identical relative elapsed milliseconds in corresponding columns; no time rescaling.",
+    "raw_frame_unit": "E spikes per 2 ms per 1 mm², averaged across five consecutive native bins; omitted from normalized display."
+  },
+  "panel_map": {
+    "A": "Same-workpoint core geometry and EE axis",
+    "B": "Accepted old Fig4F",
+    "C": "Accepted old Fig4G",
+    "D": "Same-workpoint MTA/MTB, five shared elapsed-time frames, normalized within each event",
+    "E": "Accepted old Fig4H",
+    "F": "Accepted old Fig4I; 1-core comparison pending"
+  },
+  "layout": {
+    "axes_bounds_mm_bottom_origin": {
+      "A": [
+        [
+          18.0,
+          86.0,
+          50.0,
+          50.0
+        ]
+      ],
+      "B": [
+        [
+          95.0,
+          86.0,
+          133.0,
+          50.0
+        ]
+      ],
+      "C": [
+        [
+          255.00000000000003,
+          86.0,
+          49.99999999999999,
+          50.0
+        ]
+      ],
+      "E": [
+        [
+          174.0,
+          12.000000000000009,
+          49.99999999999999,
+          49.999999999999986
+        ],
+        [
+          226.0,
+          12.0,
+          2.0000000000000053,
+          50.0
+        ]
+      ],
+      "F": [
+        [
+          255.00000000000003,
+          12.0,
+          49.99999999999999,
+          50.0
+        ]
+      ],
+      "D": [
+        [
+          13.000000000000002,
+          39.5,
+          22.500000000000007,
+          22.500000000000004
+        ],
+        [
+          40.5,
+          39.5,
+          22.500000000000007,
+          22.500000000000004
+        ],
+        [
+          68.0,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          95.5,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          123.0,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          13.000000000000005,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          40.50000000000001,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          68.0,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          95.5,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          123.0,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          148.0,
+          12.0,
+          2.0000000000000053,
+          50.0
+        ]
+      ]
+    },
+    "top_row_axes_equal_height": true,
+    "both_rows_equal_height": true,
+    "C_and_F_equal_width": true,
+    "D_frame_columns_aligned": true,
+    "D_frame_count_per_row": 5,
+    "D_identical_elapsed_ms_per_column": true,
+    "D_frame_time_labels": "inside_each_frame",
+    "D_separate_time_axis": false,
+    "D_row_gap_mm": 5,
+    "lower_row_plot_top_and_bottom_equal": true,
+    "top_row_xlabel_baseline_equal": true,
+    "text_outside_canvas": [],
+    "label_font_pt": 11.0,
+    "tick_font_pt": 11.0,
+    "contact_font_pt": 11.0,
+    "legend_font_pt": 11.0,
+    "D_title": null,
+    "gray_pending_caption": false,
+    "D_bottom_unit_label": null
+  },
+  "data_checks": {
+    "waveform_exact_array_parity": true,
+    "waveform_metadata_exact_parity": true,
+    "A_axis_label_position_mm": [
+      0.0,
+      -3.1167376406770995
+    ],
+    "A_axis_label_gap_below_ellipse_mm": 0.65,
+    "additional_shading": [
+      {
+        "event": 9,
+        "mode": 0,
+        "span_ms": [
+          336.0,
+          426.0
+        ]
+      }
+    ],
+    "rank_profiles": [
+      [
+        0.7899948888320981,
+        0.7523183338400727,
+        0.8260989010989013,
+        0.7416550840463884,
+        0.7124500499500501,
+        0.6794889892715981,
+        0.5477547814504335,
+        0.5874650711607238,
+        0.52220605481475,
+        0.4600200524113568,
+        0.3363556733121951,
+        0.19226968683490428,
+        0.1266311208171674,
+        0.062123360510457276,
+        0.08519017214669387
+      ],
+      [
+        0.05875457875457876,
+        0.12002679859822718,
+        0.31070889894419296,
+        0.2700149057291914,
+        0.15419836573682727,
+        0.3265234765234763,
+        0.35074370074370054,
+        0.2693956836813979,
+        0.49517149517149517,
+        0.5972043829186693,
+        0.6938799295942153,
+        0.7783192997478713,
+        0.8491793920365341,
+        0.9092818945760122,
+        0.9731371802800376
+      ]
+    ],
+    "patient_rank_profiles": [
+      [
+        0.47607494979767817,
+        0.6117432102691637,
+        0.49008698135422135,
+        0.6502323881302011,
+        0.5377034279358444,
+        0.7540825399180965,
+        0.7401839782792329,
+        0.5183718269925174,
+        0.6742295226776345,
+        0.5506748233228321,
+        0.44867495101807436,
+        0.3251182600249016,
+        0.3197075457261781,
+        0.27230177490341484,
+        0.22203036772188162
+      ],
+      [
+        0.2630805586597356,
+        0.28377068176355746,
+        0.3814443303299519,
+        0.28908286712387077,
+        0.3257778528719189,
+        0.2811024968131705,
+        0.37164044567339266,
+        0.3752614305852414,
+        0.45711670351574724,
+        0.5532736627537139,
+        0.6625984081269136,
+        0.7399547519041791,
+        0.8089562333621142,
+        0.8700175390387249,
+        0.8273934838090473
+      ]
+    ],
+    "crossfit_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "cohort": {
+      "groups": [
+        {
+          "mode": "TA–MTA",
+          "n": 25,
+          "subjects": [
+            "epilepsiae_1077",
+            "epilepsiae_1084",
+            "epilepsiae_1096",
+            "epilepsiae_1125",
+            "epilepsiae_1146",
+            "epilepsiae_1150",
+            "epilepsiae_253",
+            "epilepsiae_384",
+            "epilepsiae_442",
+            "epilepsiae_548",
+            "epilepsiae_583",
+            "epilepsiae_590",
+            "epilepsiae_620",
+            "epilepsiae_635",
+            "epilepsiae_922",
+            "epilepsiae_958",
+            "yuquan_chengshuai",
+            "yuquan_huanghanwen",
+            "yuquan_litengsheng",
+            "yuquan_liyouran",
+            "yuquan_pengzihang",
+            "yuquan_xuxinyi",
+            "yuquan_zhangbichen",
+            "yuquan_zhangkexuan",
+            "yuquan_zhaochenxi"
+          ],
+          "points": [
+            0.02857142857142857,
+            0.14545454545454545,
+            -0.07142857142857142,
+            0.8571428571428571,
+            0.5071428571428571,
+            0.7166666666666667,
+            0.30952380952380953,
+            -0.21428571428571427,
+            0.575,
+            0.12727272727272726,
+            0.6,
+            0.8251748251748252,
+            0.7666666666666667,
+            0.32142857142857145,
+            0.4523809523809524,
+            0.17058823529411765,
+            -0.09523809523809523,
+            0.47878787878787876,
+            0.4591304347826087,
+            0.6764705882352942,
+            0.48951048951048953,
+            0.11785714285714285,
+            0.69785708187484,
+            0.7935042735042735,
+            0.5692307692307692
+          ],
+          "q25_q50_q75": [
+            0.14545454545454545,
+            0.47878787878787876,
+            0.6764705882352942
+          ]
+        },
+        {
+          "mode": "TB–MTB",
+          "n": 25,
+          "subjects": [
+            "epilepsiae_1077",
+            "epilepsiae_1084",
+            "epilepsiae_1096",
+            "epilepsiae_1125",
+            "epilepsiae_1146",
+            "epilepsiae_1150",
+            "epilepsiae_253",
+            "epilepsiae_384",
+            "epilepsiae_442",
+            "epilepsiae_548",
+            "epilepsiae_583",
+            "epilepsiae_590",
+            "epilepsiae_620",
+            "epilepsiae_635",
+            "epilepsiae_922",
+            "epilepsiae_958",
+            "yuquan_chengshuai",
+            "yuquan_huanghanwen",
+            "yuquan_litengsheng",
+            "yuquan_liyouran",
+            "yuquan_pengzihang",
+            "yuquan_xuxinyi",
+            "yuquan_zhangbichen",
+            "yuquan_zhangkexuan",
+            "yuquan_zhaochenxi"
+          ],
+          "points": [
+            0.37142857142857144,
+            -0.01818181818181818,
+            0.9428571428571428,
+            0.8571428571428571,
+            0.7357142857142858,
+            0.45,
+            0.16666666666666666,
+            0.6333333333333333,
+            0.6107142857142858,
+            0.5181818181818182,
+            0.5,
+            0.6588235294117647,
+            0.23333333333333334,
+            0.6785714285714286,
+            0.5952380952380952,
+            0.34705882352941175,
+            0.7857142857142857,
+            0.40606060606060607,
+            0.4617391304347826,
+            -0.2107843137254902,
+            0.7902097902097902,
+            0.28214285714285714,
+            0.38359088192606505,
+            0.26,
+            0.07829059829059828
+          ],
+          "q25_q50_q75": [
+            0.28214285714285714,
+            0.4617391304347826,
+            0.6588235294117647
+          ]
+        }
+      ],
+      "legend_present": true,
+      "legend_location": "upper right",
+      "legend_columns": 1,
+      "summary_interval": "interquartile range, not confidence interval",
+      "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
+    },
+    "cohort_comparison_complete": false
+  },
+  "cohort_experiment": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024",
+  "cohort_comparison_complete": false,
+  "sources_sha256": {
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/build_fig4_geometry_patient_comparison.py": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/build_fig5_aligned_layout.py": "bd6aa35beec240644142ebb609f41edad1922b7795c28b59c77d8af688b4eb3b",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/overview_neuron_samples.npz": "cd6be55347fb8d5f8d707821514d7b757e9421040b0ec2f2e0410af89e4a8203",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/build_fig5_current.py": "b4aade5d5ce061490dec337dd8f3a5bfca797d94f6aa57410212429cb16386f9",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/shared_time_propagation_frames.npz": "21562e22d0a1b490e145f34e746b879eb72aaf02c23abc55084af2ffa348920a",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/selected_propagation_frames.npz": "98754fdf61172eb5af30169676f2a7600ea4db2a61f7fff0c61572843256f7de",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/previous_figure5_manifest.json": "5ab2380c3547fcc72c8d3ed8819b95a2791664698e54dde4f3863f4f5ad10f5c",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/finalize_fig5_core_count.py": "63ec0a7955fc3a6f4e31033b236be3d302e75b4d0917d41a417c9925a738bf9a",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/applied_physics.json": "d907e6035e8d168a1d749cd7e481aea9b78c913e95499eb3adadc3a71cbd9e75",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/old_fig4_current_version.json": "9fc9fdd5b4683e3a0c1597dea7f3789a4ca8656777decd4b5c63c9c35d05acf0",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/accepted_waveform_arrays.npz": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/waveform_arrays.npz": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/rigid_contact_geometry.npz": "def9839d19bcb9e85a7c680435613ec5d30e2a183b9cd28fbf340db78c25e552",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/build_fig4_template_recovery_by_mode.py": "b0ccea3b99bcd7086469fb7d4464fa82afb0fa5ae2c2682b324eaa1e1f234dff",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/template_recovery_summary.json": "eb6f481d442642f9e4ac32c9c1d9109630277185a4312c1d0150186986f8cf47",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/source/build_fig5_propagation_split.py": "cf41bae493e7541c24a4d994bfcd6ef4368fd78d840f5769867c410cd698b30a"
+  },
+  "outputs_sha256": {
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-complete-layout.png": "d5f0573bb3005b6e479d54c37ffa9a7b6fd27d9a71ed8d93acada0c810c28916",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelb.svg": "3cd5bd7ba706e2e738bce174fc63762dc1ef7826d2091c30f38feb6adab6f188",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panela.svg": "e889e5dcc56b131e3edb8d2c012b093f6a3c60092d7d051f7ac1add91a5504c0",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-complete-layout.pdf": "d031f2832f905deadfc4ae2abd5f11497abc3bed4e9b1ed8bb812d7346ad97e8",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-paneld.png": "b8dcecbd4aa128efdd0b7e66f08a700048bcf58f59996252f4f04ccfc44c49e8",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelf.pdf": "33222750e1d7c6306cab4a7ccfb32ed08b4b353c288e46522796ceadcc9e6907",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panele.pdf": "97fd251656e9fbc03ed86a86da1340c9be03c06ec680d79def39e27d38f110bb",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelf.svg": "25b0077c5c44fd084cb8e038b5482e2e825aa57afc87104b4796cd2e4becfcc9",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelf.png": "ff34a2b1b5f40df2d78bc3e81a4bb664f284383d86522b84b030ed1df08de2bd",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelc.png": "209cf60e7c8ec5582d48517da5395c5e78dfd11109fb7fe7887d00e692344244",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panele.svg": "6a488020abc47cf1c5c428a7777a3f4a46988bab5884f4070e18166710158dea",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelb.png": "7535d87f3f106b2ea9ca82328e208bb2485602daccad7cea86e7852e589e2167",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panele.png": "d7ada5a1b6517c92c255d26b6454d7a1c0db30ee75ad403ffac9886bf7930254",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-complete-layout-preview.png": "52c0135eb37ac96aa47778b8e9d9b03103c06b1e4f9aeb3151c2c46ba8454b1c",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-complete-layout.svg": "c2f229255752a2b3cc4e97aaa26784dc1adb3a8cf07debbc93a49d86a12274b6",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelc.pdf": "0329c8d286b924e93f473470aa90a489a2da43bdc130404929c9c6c6570ad92f",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panela.png": "f19ed7d379ec5728d295a8d00cb0d3ec3babaae7eef5fc27de5f986f06688f3f",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-paneld.pdf": "b17d6816e7b7d77c21b465552a882cd211e84aac99fdb2e1cced77f6ba3411df",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelb.pdf": "f25d4e2eb4fb9694c22989b2e77302f4e2f23a4dae2419abbba7562332692ad2",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-paneld.svg": "1354662378552e6c83bab33ea703c24b3bb109f16271f626e7fa7bcc9d60b2d2",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panela.pdf": "4d83ced6903dd327e22a3cc078f001f3f865bcedbfc0e0597d35c60b525757b7",
+    "results/paper-ready-figure/fig5/candidates/early_core_16ms_20261026/figures/fig5-panelc.svg": "16e473dad05c33c627c5e75b0f952e3e39abeb90a4dac92821df8c87d971075b"
+  },
+  "cohort_execution_at_render": {
+    "status": "RUNNING",
+    "train_complete": 579,
+    "train_planned": 1600,
+    "confirmation_complete": 0,
+    "confirmation_planned": 100,
+    "updated_unix": 1792981707.6658688
+  }
+}

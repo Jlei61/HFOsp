@@ -1,0 +1,1751 @@
+{
+  "figure": "Fig5",
+  "asset_id": "spatial_snn_propagation_and_core_count",
+  "version": "template_ticks_20261027",
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "human_visual_acceptance": "PENDING",
+  "producer": "scripts/paper_figures/build_fig5_aligned_layout.py",
+  "workpoint": "xy_left_20",
+  "previous_version": "significant_only_20261027",
+  "panel_a": {
+    "workpoint": "xy_left_20",
+    "core_centers_mm": [
+      [
+        2.9492143200000003,
+        12.12890135
+      ],
+      [
+        16.47920304,
+        5.46551153
+      ]
+    ],
+    "core_radii_mm": [
+      1.7525782905619196,
+      1.7525782905619196
+    ],
+    "coordinate_translation_mm": [
+      -10,
+      -10
+    ],
+    "actual_EE_angle_deg": -22.80538396505847,
+    "ellipse_axis_ratio": 1.3333333333333337,
+    "ellipse_scope": "Schematic magnification of the actual EE kernel aspect ratio and orientation, not its spatial length scale.",
+    "core_boundaries": "Exact physical circular core membership boundaries; dashed outline.",
+    "working_point_scope": "Author selected the same accepted demonstration as panels B/C/E on 2026-10-24; not the later global J_joint minimum."
+  },
+  "panel_d": {
+    "events": [
+      {
+        "mode": "MTA",
+        "event": 39,
+        "window_ms": [
+          13342.0,
+          13592.0
+        ],
+        "first_frame_ms": 13420.0,
+        "onset_index": 6710,
+        "end_relative_ms": 106.0,
+        "end_index_exclusive": 6796,
+        "peak_total_spikes": 4012.2,
+        "normalization_denominator": 82.0,
+        "relative_times_ms": [
+          0.0,
+          16.0,
+          32.0,
+          64.0,
+          96.0
+        ],
+        "absolute_times_ms": [
+          13420.0,
+          13436.0,
+          13452.0,
+          13484.0,
+          13516.0
+        ],
+        "frame_indices": [
+          6710,
+          6718,
+          6726,
+          6742,
+          6758
+        ],
+        "total_spikes_at_frames": [
+          67.2,
+          1398.8,
+          2162.2,
+          3924.4000000000005,
+          789.9999999999999
+        ],
+        "final_to_peak_fraction": 0.19689945665719552
+      },
+      {
+        "mode": "MTB",
+        "event": 151,
+        "window_ms": [
+          46756.0,
+          47006.0
+        ],
+        "first_frame_ms": 46816.0,
+        "onset_index": 23408,
+        "end_relative_ms": 124.0,
+        "end_index_exclusive": 23503,
+        "peak_total_spikes": 4714.6,
+        "normalization_denominator": 87.0,
+        "relative_times_ms": [
+          0.0,
+          16.0,
+          32.0,
+          64.0,
+          96.0
+        ],
+        "absolute_times_ms": [
+          46816.0,
+          46832.0,
+          46848.0,
+          46880.0,
+          46912.0
+        ],
+        "frame_indices": [
+          23408,
+          23416,
+          23424,
+          23440,
+          23456
+        ],
+        "total_spikes_at_frames": [
+          67.19999999999999,
+          1037.8,
+          1570.8,
+          3481.8,
+          4152.6
+        ],
+        "final_to_peak_fraction": 0.88079582573283
+      }
+    ],
+    "shared_relative_times_ms": [
+      0.0,
+      16.0,
+      32.0,
+      64.0,
+      96.0
+    ],
+    "frame_intervals_ms": [
+      16.0,
+      16.0,
+      32.0,
+      32.0
+    ],
+    "equally_spaced": false,
+    "native_bin_ms": 2.0,
+    "temporal_display_average_ms": 10,
+    "spatial_bin_mm": 1,
+    "spatial_interpolation": "none",
+    "spatial_smoothing": "none",
+    "color_range": [
+      0,
+      1
+    ],
+    "normalization": "Each event uses its maximum spatial-bin activity over its full frozen event window; one denominator per row, shared across all times.",
+    "normalization_denominators": {
+      "MTA": 82.0,
+      "MTB": 87.0
+    },
+    "per_frame_normalization": false,
+    "between_event_absolute_amplitude_comparable": false,
+    "color_mapping": "linear",
+    "colorbar_label": "Norm. Firing rate",
+    "selection": "Same two historical events; author requested the 16-ms native activity frame instead of the 10-ms frame. Common elapsed milliseconds in both rows; nonuniform intervals explicitly labelled.",
+    "early_frame_scope": "The 16-ms frame displays early propagation around the initiating core. Activity is not required to remain strictly inside the core disk.",
+    "end_of_event_shown": false,
+    "time_origin": "Separate 1%-total-peak initiation times; identical relative elapsed milliseconds in corresponding columns; no time rescaling.",
+    "raw_frame_unit": "E spikes per 2 ms per 1 mm², averaged across five consecutive native bins; omitted from normalized display."
+  },
+  "panel_map": {
+    "A": "Same-workpoint core geometry and EE axis",
+    "B": "Accepted old Fig4F",
+    "C": "Accepted old Fig4G",
+    "D": "Same-workpoint MTA/MTB, five shared elapsed-time frames, normalized within each event",
+    "E": "Accepted old Fig4H",
+    "F": "Author-requested interim 17-patient shared-axis 1/2-core comparison at common completed search budget; TA-preferred constrained core1 versus unconstrained core2; true TA/TB labels"
+  },
+  "layout": {
+    "axes_bounds_mm_bottom_origin": {
+      "A": [
+        [
+          18.0,
+          86.0,
+          50.0,
+          50.0
+        ]
+      ],
+      "B": [
+        [
+          95.0,
+          86.0,
+          133.0,
+          50.0
+        ]
+      ],
+      "C": [
+        [
+          255.00000000000003,
+          86.0,
+          49.99999999999999,
+          50.0
+        ]
+      ],
+      "E": [
+        [
+          174.0,
+          12.000000000000009,
+          49.99999999999999,
+          49.999999999999986
+        ],
+        [
+          226.0,
+          12.0,
+          2.0000000000000053,
+          50.0
+        ]
+      ],
+      "F": [
+        [
+          255.00000000000003,
+          12.0,
+          49.99999999999999,
+          50.0
+        ]
+      ],
+      "D": [
+        [
+          13.000000000000002,
+          39.5,
+          22.500000000000007,
+          22.500000000000004
+        ],
+        [
+          40.5,
+          39.5,
+          22.500000000000007,
+          22.500000000000004
+        ],
+        [
+          68.0,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          95.5,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          123.0,
+          39.5,
+          22.499999999999996,
+          22.500000000000004
+        ],
+        [
+          13.000000000000005,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          40.50000000000001,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          68.0,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          95.5,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          123.0,
+          12.0,
+          22.499999999999996,
+          22.5
+        ],
+        [
+          148.0,
+          12.0,
+          2.0000000000000053,
+          50.0
+        ]
+      ]
+    },
+    "top_row_axes_equal_height": true,
+    "both_rows_equal_height": true,
+    "C_and_F_equal_width": true,
+    "D_frame_columns_aligned": true,
+    "D_frame_count_per_row": 5,
+    "D_identical_elapsed_ms_per_column": true,
+    "D_frame_time_labels": "inside_each_frame",
+    "D_separate_time_axis": false,
+    "D_row_gap_mm": 5,
+    "lower_row_plot_top_and_bottom_equal": true,
+    "top_row_xlabel_baseline_equal": true,
+    "text_outside_canvas": [],
+    "label_font_pt": 11.0,
+    "tick_font_pt": 11.0,
+    "contact_font_pt": 11.0,
+    "legend_font_pt": 11.0,
+    "D_title": null,
+    "gray_pending_caption": false,
+    "D_bottom_unit_label": null,
+    "F_sample_size_annotation": false,
+    "F_stage_annotation": false,
+    "F_xaxis_label": "",
+    "F_xaxis_tick_labels": [
+      "TA–MTA",
+      "TB–MTB"
+    ],
+    "F_xaxis_tick_positions": [
+      0.5,
+      3.5
+    ],
+    "F_legend_significance_nonoverlap": true,
+    "F_legend_above_significance_gap_mm": 4.384691358024694,
+    "F_significance_label_positions": [
+      [
+        3.5,
+        1.04
+      ]
+    ],
+    "F_legend_labels": [
+      "1 core",
+      "2 cores"
+    ]
+  },
+  "data_checks": {
+    "waveform_exact_array_parity": true,
+    "waveform_metadata_exact_parity": true,
+    "A_axis_label_position_mm": [
+      0.0,
+      -3.1167376406770995
+    ],
+    "A_axis_label_gap_below_ellipse_mm": 0.65,
+    "additional_shading": [
+      {
+        "event": 9,
+        "mode": 0,
+        "span_ms": [
+          336.0,
+          426.0
+        ]
+      }
+    ],
+    "rank_profiles": [
+      [
+        0.7899948888320981,
+        0.7523183338400727,
+        0.8260989010989013,
+        0.7416550840463884,
+        0.7124500499500501,
+        0.6794889892715981,
+        0.5477547814504335,
+        0.5874650711607238,
+        0.52220605481475,
+        0.4600200524113568,
+        0.3363556733121951,
+        0.19226968683490428,
+        0.1266311208171674,
+        0.062123360510457276,
+        0.08519017214669387
+      ],
+      [
+        0.05875457875457876,
+        0.12002679859822718,
+        0.31070889894419296,
+        0.2700149057291914,
+        0.15419836573682727,
+        0.3265234765234763,
+        0.35074370074370054,
+        0.2693956836813979,
+        0.49517149517149517,
+        0.5972043829186693,
+        0.6938799295942153,
+        0.7783192997478713,
+        0.8491793920365341,
+        0.9092818945760122,
+        0.9731371802800376
+      ]
+    ],
+    "patient_rank_profiles": [
+      [
+        0.47607494979767817,
+        0.6117432102691637,
+        0.49008698135422135,
+        0.6502323881302011,
+        0.5377034279358444,
+        0.7540825399180965,
+        0.7401839782792329,
+        0.5183718269925174,
+        0.6742295226776345,
+        0.5506748233228321,
+        0.44867495101807436,
+        0.3251182600249016,
+        0.3197075457261781,
+        0.27230177490341484,
+        0.22203036772188162
+      ],
+      [
+        0.2630805586597356,
+        0.28377068176355746,
+        0.3814443303299519,
+        0.28908286712387077,
+        0.3257778528719189,
+        0.2811024968131705,
+        0.37164044567339266,
+        0.3752614305852414,
+        0.45711670351574724,
+        0.5532736627537139,
+        0.6625984081269136,
+        0.7399547519041791,
+        0.8089562333621142,
+        0.8700175390387249,
+        0.8273934838090473
+      ]
+    ],
+    "crossfit_matrix": [
+      [
+        0.517857142857143,
+        -0.8392857142857144
+      ],
+      [
+        -0.5535714285714286,
+        0.8750000000000001
+      ]
+    ],
+    "cohort": {
+      "subjects": [
+        "epilepsiae_1077",
+        "epilepsiae_1084",
+        "epilepsiae_1096",
+        "epilepsiae_1146",
+        "epilepsiae_1150",
+        "epilepsiae_253",
+        "epilepsiae_384",
+        "epilepsiae_590",
+        "epilepsiae_620",
+        "epilepsiae_635",
+        "epilepsiae_958",
+        "yuquan_chengshuai",
+        "yuquan_huanghanwen",
+        "yuquan_litengsheng",
+        "yuquan_liyouran",
+        "yuquan_xuxinyi",
+        "yuquan_zhaochenxi"
+      ],
+      "source": "displayed_core_count_summary.json",
+      "cohort_selection": {
+        "schema": "fig5_shared_axis_patient_selection_v1",
+        "author_decision": "2026-10-27: use shared-axis eligibility, update Fig5 first; identical Fig3/Fig5 patient list is not required",
+        "rule": "status=ok; geometry_2d_supported=true; saved shared_a and shared_b field models; intersect with the original 25-patient model cohort",
+        "source_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
+        "selection_independent_of_core_model_outcomes": true,
+        "strict_stability_gate": false,
+        "signed_axis_cosine_gate": false,
+        "shared_axis_n": 18,
+        "parent_model_n": 25,
+        "included_subjects": [
+          "epilepsiae_1077",
+          "epilepsiae_1084",
+          "epilepsiae_1096",
+          "epilepsiae_1146",
+          "epilepsiae_1150",
+          "epilepsiae_253",
+          "epilepsiae_384",
+          "epilepsiae_590",
+          "epilepsiae_620",
+          "epilepsiae_635",
+          "epilepsiae_958",
+          "yuquan_chengshuai",
+          "yuquan_huanghanwen",
+          "yuquan_litengsheng",
+          "yuquan_liyouran",
+          "yuquan_xuxinyi",
+          "yuquan_zhaochenxi"
+        ],
+        "excluded_model_subjects": [
+          "epilepsiae_1125",
+          "epilepsiae_442",
+          "epilepsiae_548",
+          "epilepsiae_583",
+          "epilepsiae_922",
+          "yuquan_pengzihang",
+          "yuquan_zhangbichen",
+          "yuquan_zhangkexuan"
+        ],
+        "eligible_without_model": [
+          "yuquan_songzishuo"
+        ],
+        "records": [
+          {
+            "subject": "epilepsiae_1073",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1073.json",
+            "source_sha256": "a4d5b72f5d311500693bf070e611fbb7025d90e9f03918514fddf2c750e7c4ac",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_1077",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1077.json",
+            "source_sha256": "bfa8ded89fad2b1e53e1e9537b2e017dda46bfbcc784bbc4f99a7c7b0d72101a",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_1084",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1084.json",
+            "source_sha256": "26bb3bb820baef940e28d88261f4bb11531268e2886af27c15e18f77e811b3fc",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_1096",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1096.json",
+            "source_sha256": "0874faad38610ff767d9f8472e38180b9b7f2bced4b890223603291a9ecaa6c5",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_1125",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1125.json",
+            "source_sha256": "d5fab06a25a33a8e3f8a7155ad63bf679076c4af4144b52941bdbc8c46f226ce",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_1146",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1146.json",
+            "source_sha256": "b5b0d65823f13caed389c890295887bcea5ca3f79fbfd27c4814962a2f962c1b",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_1150",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1150.json",
+            "source_sha256": "01ac43f5516fd325a0681280aede8138916c0b850c51e37c67ad5426d3b6120b",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_139",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_139.json",
+            "source_sha256": "a7227828310d1ed4ab1d32d29b3e2adeb6f81372db4a02edc9b07756995b27c7",
+            "geometry_2d_supported": false,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_253",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_253.json",
+            "source_sha256": "6c04f405cb90e5b9dc78d78e507f7b59368ac819195b6fd1eda0f6762d2e57b4",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_384",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_384.json",
+            "source_sha256": "f7ab5c358cd57ca797f88677431ad2fb44cd44f615f7f2aba0c38090aa755811",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_442",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_442.json",
+            "source_sha256": "7511342a22928321d5a6b35f50410409fdb1647d8c6df50a1da4a4223fbeda6e",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_548",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_548.json",
+            "source_sha256": "ec9934d41ea36f000f87862c44d83f62713aad6be347217c3aeefdf59bc61384",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_583",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_583.json",
+            "source_sha256": "1c465536dc193785c2afb195a5f28b979af97f88c09b62fd9b8f3a6f9d06c9f0",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_590",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_590.json",
+            "source_sha256": "6045121381f10d3b3e0cd06a0a123f97f68fdc3c560e156474a97e060f675dbe",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_620",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_620.json",
+            "source_sha256": "267fea6954fb2df35d294d2d9c35738877d6bee25728c468d0af8c3520e9a441",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_635",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_635.json",
+            "source_sha256": "9432f92416ed3d12ff7789a8b8df1befde70eb579b29acef092a0affb9a937a9",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "epilepsiae_922",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_922.json",
+            "source_sha256": "502eea8588d30f6858c7f1daafb196744f32aea071805399287bff73fe8fbcaf",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "epilepsiae_958",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_958.json",
+            "source_sha256": "e18885343c1e18c766f4fbff89f1c24ce9e07e8f3a40fc9872998980a6cf41dc",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_chengshuai",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_chengshuai.json",
+            "source_sha256": "b1005c57db566c62433c634fee07617a4d72df0fe73f1574bd5ffc03ff9e7490",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_chenziyang",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_chenziyang.json",
+            "source_sha256": "fb2095f296bf9f7a465da118579baa07c549cd95730815d407f781e265ef709d",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_gaolan",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_gaolan.json",
+            "source_sha256": "3d3fc09e028cfbbd2e83f69b8451cfa3fe0da6a4cf62ffaf31845fb903e7fc62",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_hanyuxuan",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_hanyuxuan.json",
+            "source_sha256": "7c57cbb7388dd58ece745507922cd93d3847f62e7172070756fce18419ff5021",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_huanghanwen",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_huanghanwen.json",
+            "source_sha256": "2dfc0ae3271480fdaca79aca3cd64a84c28d5e9639866d9f65852346e0da2fba",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_litengsheng",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_litengsheng.json",
+            "source_sha256": "9288240b0d23e1f8dfbda3db8249377377a86300a4617fb52073769bb6a32c49",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_liyouran",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_liyouran.json",
+            "source_sha256": "7725a4ad136764a9a4f9a89f6adfdff99a47fea678bf70f3a8805d618b6fb65d",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_pengzihang",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_pengzihang.json",
+            "source_sha256": "1616d1b716df5bd6313f303cb23c8f1d4700ea99bd70ecf45de18c9bc9e3a9aa",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_songzishuo",
+            "shared_axis_eligible": true,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_songzishuo.json",
+            "source_sha256": "ae75718f5dbea7ff6501c7235fce43f8d0fb341668efac9c5b8756429182fce9",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_sunyuanxin",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_sunyuanxin.json",
+            "source_sha256": "8ac635bad00804dde378c52d455c868024eb3b21208557eb31ea1536c07d37e4",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_wangyiyang",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_wangyiyang.json",
+            "source_sha256": "840e679eb327a10e8f431ebefcc22064d32343038583b4ca2e1a44c668d1d2d2",
+            "geometry_2d_supported": null,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_xuxinyi",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_xuxinyi.json",
+            "source_sha256": "0513df6646a55a06f70535e8c21369213cdff14cbb54f9fd713b32ba0d4fe1a0",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_zhangbichen",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangbichen.json",
+            "source_sha256": "30112d301b4486b1b220a492b40aa818723d37a2628d5a21fcb46dd3575034d4",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_zhangjiaqi",
+            "shared_axis_eligible": false,
+            "in_model_cohort": false,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangjiaqi.json",
+            "source_sha256": "0226b479dd0e5ecb24e779bea004ed3180675c78f925e47acbd8b626c1e988b8",
+            "geometry_2d_supported": false,
+            "has_shared_a": true,
+            "has_shared_b": true
+          },
+          {
+            "subject": "yuquan_zhangkexuan",
+            "shared_axis_eligible": false,
+            "in_model_cohort": true,
+            "included": false,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangkexuan.json",
+            "source_sha256": "aab4618860c33eaff7c6a903a577b9e6a605e5657dbd1fb37b68e36c3689d0a0",
+            "geometry_2d_supported": true,
+            "has_shared_a": false,
+            "has_shared_b": false
+          },
+          {
+            "subject": "yuquan_zhaochenxi",
+            "shared_axis_eligible": true,
+            "in_model_cohort": true,
+            "included": true,
+            "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhaochenxi.json",
+            "source_sha256": "9a44cf28130a78027e52d01e1da7467bd004a94e0a64476d23b70f2b10ce2cee",
+            "geometry_2d_supported": true,
+            "has_shared_a": true,
+            "has_shared_b": true
+          }
+        ],
+        "fig3_audit": {
+          "current_version": "visual_alignment_compact_rows_20261010",
+          "panel_c_source": "results/topic5_ictal_recruitment/clinical_onset_gradient_field_all_events_timing_plus_space/clinical_onset_gradient_field_cohort_stat_subject.csv",
+          "panel_c_source_sha256": "c4a890ef0aaeb5503671ad5d1563044fc04d5398dc9f4e837ad508e5683b6459",
+          "panel_c_n": 17,
+          "panel_c_shared_plane_n": 13,
+          "panel_c_own_fallback_subjects": [
+            "epilepsiae_1125",
+            "epilepsiae_442",
+            "epilepsiae_548",
+            "epilepsiae_922"
+          ],
+          "panel_e_includes_noncollinear_patients": true,
+          "fig3_modified": false,
+          "identical_patient_list_claim": false
+        }
+      },
+      "common_budget": 16,
+      "interim": true,
+      "display_contract": {
+        "view": "named_templates",
+        "displayed_metric_order": [
+          "TA–MTA",
+          "TB–MTB"
+        ],
+        "statistical_family": [
+          "TA–MTA",
+          "TB–MTB"
+        ],
+        "family_size": 2,
+        "selection_policy": "1 core: minimum training J among finite rho_TA > rho_TB; 2 cores: original minimum training J",
+        "true_patient_template_identity_retained": true,
+        "template_relabelling": false,
+        "analysis_status": "POST_HOC_ASYMMETRIC_SELECTION",
+        "author_request_date": "2026-10-27",
+        "sample_size_and_stage_in_caption_only": true,
+        "independent_replay_for_reselected_points": "NOT_YET_USED",
+        "core_labels": "shared_legend",
+        "core_legend": [
+          "1 core",
+          "2 cores"
+        ],
+        "significance_style": "stars",
+        "significance_thresholds": {
+          "*": 0.05,
+          "**": 0.01,
+          "***": 0.001
+        },
+        "significance_based_on": "Holm-adjusted P; strict less-than threshold; nonsignificant annotation and bracket omitted",
+        "show_nonsignificant": false,
+        "template_label_position": "x_ticks",
+        "template_tick_positions": [
+          0.5,
+          3.5
+        ],
+        "core_legend_position": "upper_right",
+        "significance_bracket_bottom": 0.94
+      },
+      "displayed_metrics": [
+        "TA–MTA",
+        "TB–MTB"
+      ],
+      "selection_policy": {
+        "schema": "fig5_ta_preferred_selection_v1",
+        "author_request_date": "2026-10-27",
+        "core1_constraint": "signed rho_TA > signed rho_TB + 1e-12; both finite",
+        "core1_objective": "minimum original training J among eligible candidates",
+        "core2_selection": "unchanged minimum original training J",
+        "no_template_relabelling": true,
+        "no_absolute_correlations": true,
+        "no_extra_rho_threshold": true,
+        "no_TB_ceiling": true,
+        "no_new_simulations": true,
+        "infeasible_subject": "retained with missing 1-core readout",
+        "inference": "Post-hoc asymmetric selection-policy comparison; selection includes TB, so weaker TB is partly conditioned by design, not independent evidence of a core-count mechanism"
+      },
+      "statistics": [
+        {
+          "core_count": 1,
+          "mode": "TA–MTA",
+          "n": 17,
+          "missing": 0,
+          "median": 0.7252173913043478,
+          "q25_q75": [
+            0.5759803921568627,
+            0.8333333333333334
+          ]
+        },
+        {
+          "core_count": 1,
+          "mode": "TB–MTB",
+          "n": 17,
+          "missing": 0,
+          "median": -0.15,
+          "q25_q75": [
+            -0.6071428571428571,
+            0.10350877192982456
+          ]
+        },
+        {
+          "core_count": 2,
+          "mode": "TA–MTA",
+          "n": 17,
+          "missing": 0,
+          "median": 0.5565217391304348,
+          "q25_q75": [
+            0.2818181818181818,
+            0.7294117647058823
+          ]
+        },
+        {
+          "core_count": 2,
+          "mode": "TB–MTB",
+          "n": 17,
+          "missing": 0,
+          "median": 0.2823529411764706,
+          "q25_q75": [
+            0.07878787878787878,
+            0.5357142857142857
+          ]
+        }
+      ],
+      "paired_statistics": {
+        "test": "Two-sided paired Wilcoxon signed-rank test",
+        "p_method": "Exact conditional sign-permutation distribution of average ranks; dynamic programming",
+        "zero_method": "wilcox: omit zero differences",
+        "difference_rounding_decimals": 12,
+        "multiple_comparison": "Holm correction across the two template comparisons",
+        "family_size": 2,
+        "statistical_unit": "patient",
+        "view": "named_templates",
+        "interpretation": "Post-hoc asymmetric selection-policy comparison; the same template correlations enter core1 eligibility and scoring; no independent validation",
+        "null": "Patient-paired differences are symmetric about zero",
+        "comparisons": [
+          {
+            "mode": "TA–MTA",
+            "n_pairs": 17,
+            "missing_pairs": 0,
+            "paired_subjects": [
+              "epilepsiae_1077",
+              "epilepsiae_1084",
+              "epilepsiae_1096",
+              "epilepsiae_1146",
+              "epilepsiae_1150",
+              "epilepsiae_253",
+              "epilepsiae_384",
+              "epilepsiae_590",
+              "epilepsiae_620",
+              "epilepsiae_635",
+              "epilepsiae_958",
+              "yuquan_chengshuai",
+              "yuquan_huanghanwen",
+              "yuquan_litengsheng",
+              "yuquan_liyouran",
+              "yuquan_xuxinyi",
+              "yuquan_zhaochenxi"
+            ],
+            "difference": "2 cores minus 1 core",
+            "paired_differences": [
+              0.1,
+              0.036363636364,
+              -0.392857142857,
+              -0.310714285714,
+              0.066666666667,
+              -0.666666666667,
+              -0.216666666667,
+              -0.037254901961,
+              -0.252380952381,
+              0.3,
+              -0.51974789916,
+              0.047619047619,
+              -0.242424242424,
+              -0.20347826087,
+              0.178921568627,
+              -0.060714285714,
+              -0.275644741732
+            ],
+            "median_paired_difference": -0.20347826087,
+            "zero_differences": 0,
+            "absolute_rank_ties": 0,
+            "W": 35.0,
+            "p_raw": 0.050537109375,
+            "p_holm": 0.050537109375,
+            "rank_biserial": -0.5424836601307189
+          },
+          {
+            "mode": "TB–MTB",
+            "n_pairs": 17,
+            "missing_pairs": 0,
+            "paired_subjects": [
+              "epilepsiae_1077",
+              "epilepsiae_1084",
+              "epilepsiae_1096",
+              "epilepsiae_1146",
+              "epilepsiae_1150",
+              "epilepsiae_253",
+              "epilepsiae_384",
+              "epilepsiae_590",
+              "epilepsiae_620",
+              "epilepsiae_635",
+              "epilepsiae_958",
+              "yuquan_chengshuai",
+              "yuquan_huanghanwen",
+              "yuquan_litengsheng",
+              "yuquan_liyouran",
+              "yuquan_xuxinyi",
+              "yuquan_zhaochenxi"
+            ],
+            "difference": "2 cores minus 1 core",
+            "paired_differences": [
+              0.457142857143,
+              0.836363636364,
+              1.428571428571,
+              1.167857142857,
+              0.2,
+              -0.261904761905,
+              0.85,
+              1.351960784314,
+              1.4,
+              -0.142857142857,
+              0.664705882353,
+              0.464285714286,
+              0.266666666667,
+              0.373012967201,
+              -1.197268907563,
+              0.082142857143,
+              -0.056068376068
+            ],
+            "median_paired_difference": 0.457142857143,
+            "zero_differences": 0,
+            "absolute_rank_ties": 0,
+            "W": 23.0,
+            "p_raw": 0.00933837890625,
+            "p_holm": 0.0186767578125,
+            "rank_biserial": 0.6993464052287581
+          }
+        ]
+      },
+      "named_template_paired_statistics": {
+        "test": "Two-sided paired Wilcoxon signed-rank test",
+        "p_method": "Exact conditional sign-permutation distribution of average ranks; dynamic programming",
+        "zero_method": "wilcox: omit zero differences",
+        "difference_rounding_decimals": 12,
+        "multiple_comparison": "Holm correction across the two template comparisons",
+        "family_size": 2,
+        "statistical_unit": "patient",
+        "view": "named_templates",
+        "interpretation": "Post-hoc asymmetric selection-policy comparison; the same template correlations enter core1 eligibility and scoring; no independent validation",
+        "null": "Patient-paired differences are symmetric about zero",
+        "comparisons": [
+          {
+            "mode": "TA–MTA",
+            "n_pairs": 17,
+            "missing_pairs": 0,
+            "paired_subjects": [
+              "epilepsiae_1077",
+              "epilepsiae_1084",
+              "epilepsiae_1096",
+              "epilepsiae_1146",
+              "epilepsiae_1150",
+              "epilepsiae_253",
+              "epilepsiae_384",
+              "epilepsiae_590",
+              "epilepsiae_620",
+              "epilepsiae_635",
+              "epilepsiae_958",
+              "yuquan_chengshuai",
+              "yuquan_huanghanwen",
+              "yuquan_litengsheng",
+              "yuquan_liyouran",
+              "yuquan_xuxinyi",
+              "yuquan_zhaochenxi"
+            ],
+            "difference": "2 cores minus 1 core",
+            "paired_differences": [
+              0.1,
+              0.036363636364,
+              -0.392857142857,
+              -0.310714285714,
+              0.066666666667,
+              -0.666666666667,
+              -0.216666666667,
+              -0.037254901961,
+              -0.252380952381,
+              0.3,
+              -0.51974789916,
+              0.047619047619,
+              -0.242424242424,
+              -0.20347826087,
+              0.178921568627,
+              -0.060714285714,
+              -0.275644741732
+            ],
+            "median_paired_difference": -0.20347826087,
+            "zero_differences": 0,
+            "absolute_rank_ties": 0,
+            "W": 35.0,
+            "p_raw": 0.050537109375,
+            "p_holm": 0.050537109375,
+            "rank_biserial": -0.5424836601307189
+          },
+          {
+            "mode": "TB–MTB",
+            "n_pairs": 17,
+            "missing_pairs": 0,
+            "paired_subjects": [
+              "epilepsiae_1077",
+              "epilepsiae_1084",
+              "epilepsiae_1096",
+              "epilepsiae_1146",
+              "epilepsiae_1150",
+              "epilepsiae_253",
+              "epilepsiae_384",
+              "epilepsiae_590",
+              "epilepsiae_620",
+              "epilepsiae_635",
+              "epilepsiae_958",
+              "yuquan_chengshuai",
+              "yuquan_huanghanwen",
+              "yuquan_litengsheng",
+              "yuquan_liyouran",
+              "yuquan_xuxinyi",
+              "yuquan_zhaochenxi"
+            ],
+            "difference": "2 cores minus 1 core",
+            "paired_differences": [
+              0.457142857143,
+              0.836363636364,
+              1.428571428571,
+              1.167857142857,
+              0.2,
+              -0.261904761905,
+              0.85,
+              1.351960784314,
+              1.4,
+              -0.142857142857,
+              0.664705882353,
+              0.464285714286,
+              0.266666666667,
+              0.373012967201,
+              -1.197268907563,
+              0.082142857143,
+              -0.056068376068
+            ],
+            "median_paired_difference": 0.457142857143,
+            "zero_differences": 0,
+            "absolute_rank_ties": 0,
+            "W": 23.0,
+            "p_raw": 0.00933837890625,
+            "p_holm": 0.0186767578125,
+            "rank_biserial": 0.6993464052287581
+          }
+        ]
+      }
+    },
+    "cohort_comparison_complete": false,
+    "cohort_interim": true
+  },
+  "cohort_experiment": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024",
+  "cohort_comparison_complete": false,
+  "cohort_interim": true,
+  "scientific_status": "AUTHOR_REQUESTED_INTERIM",
+  "sources_sha256": {
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/interim_core_count_summary.json": "96e414073be4f52b1ab8ac95ebea69393395b0f81d76524474799951c80b08ed",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/displayed_core_count_summary.json": "cb2f81034494f5fba4e1c77e54f35f417fbab6dd77d5919e0b851f352057db7c",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/select_fig5_ta_preferred_workpoints.py": "4421786d1070196ed393f47e4250810dc715a741a748ff9414d3cc280f410066",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_fig4_geometry_patient_comparison.py": "d5b392c9733be19406efaf5e21228f99e2bead834d476a294f0e74730f2231f6",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_fig5_aligned_layout.py": "e5086ce58e272db1dd570b97b8d8a295d7ff70bf91b621dab2ff8f649bdc1d29",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/overview_neuron_samples.npz": "cd6be55347fb8d5f8d707821514d7b757e9421040b0ec2f2e0410af89e4a8203",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_fig5_current.py": "b4aade5d5ce061490dec337dd8f3a5bfca797d94f6aa57410212429cb16386f9",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/export_selected_mode_events.py": "98c245214f8623e7d4522c08d83c8411875ce03982efcc6356f6fe9b5e33d3b0",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/shared_time_propagation_frames.npz": "21562e22d0a1b490e145f34e746b879eb72aaf02c23abc55084af2ffa348920a",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/propagation_manifest.json": "0f4f42e350bbe38e2326b971150668b110ab1f48e27e51be9c7cdc00fd2e152e",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/ta_preferred_selection_audit.json": "43d4b4eeaa36213bac18840b6b2cd3f1c04ec7c14f33a2d097f10ab5866c9ceb",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/cohort_selection.json": "9686480825c265043c52803f6c5722bf7115c931bac1356091599af53f1b0059",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/selected_propagation_frames.npz": "98754fdf61172eb5af30169676f2a7600ea4db2a61f7fff0c61572843256f7de",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/previous_figure5_manifest.json": "22ff4949d88b38c63d63bf5df021086cc58049abde253d8c421e822ed7f9ac18",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/unconstrained_interim_selection.json": "cdec94d407a97325ad5ecccb4cffa78c4009c45e6fdcb076b0ce2feea4af78a9",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/finalize_fig5_core_count.py": "ee6affd441f1e6f82a3efe0ae25456b13f6931c48d8e40c523104a1bc92994ed",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/applied_physics.json": "d907e6035e8d168a1d749cd7e481aea9b78c913e95499eb3adadc3a71cbd9e75",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/joint_matching_reference_statistics.json": "0ac99a07be26be82b2f05effd5b6586c27d6cfa7d1a0377a5dc16a9797ea8ab9",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig3_panelc_cohort_source.csv": "c4a890ef0aaeb5503671ad5d1563044fc04d5398dc9f4e837ad508e5683b6459",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/old_fig4_current_version.json": "9fc9fdd5b4683e3a0c1597dea7f3789a4ca8656777decd4b5c63c9c35d05acf0",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/accepted_waveform_arrays.npz": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/interim_subjects.csv": "915e8d6c6da2c5bbb1ce1fc9abc48a9fed28a54164aab3bde009ac816226bbf7",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/waveform_arrays.npz": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/rigid_contact_geometry.npz": "def9839d19bcb9e85a7c680435613ec5d30e2a183b9cd28fbf340db78c25e552",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_fig4_template_recovery_by_mode.py": "b0ccea3b99bcd7086469fb7d4464fa82afb0fa5ae2c2682b324eaa1e1f234dff",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/template_recovery_summary.json": "eb6f481d442642f9e4ac32c9c1d9109630277185a4312c1d0150186986f8cf47",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/ta_preferred_policy.json": "0794866a432ff3b596b23d564ceb5fba801278721d926dd0a8bee11212154b8e",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_interim_snapshot.py": "9f1fa926d67d40db52f2ebca28f840cec43c5005cb8ef8eac6b424e4139d5b66",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/README.md": "69bdf874ff9657b6883484721cab973a2b4d1e5f63196c7410d64744f0b21d81",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/interim_selection.json": "5154da606859e15f7d4adc0f445dba9a602b5c9ddd83405ec4566c70526414fe",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/unconstrained_core_count_summary.json": "a509a47701192266d6b506b69e6790e4eac6db6230c4c5b92765dae0abd35edf",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/build_fig5_propagation_split.py": "cf41bae493e7541c24a4d994bfcd6ef4368fd78d840f5769867c410cd698b30a",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/source/cohort_display.json": "e6a273edcaa4f5a9099350ceb8d26c666ae1aa7ef1dc5b4e4d6d571b04f07434"
+  },
+  "outputs_sha256": {
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-complete-layout.png": "6e23739896db32111a07b14061f1fe64466100c385dfcdf4beff362be4889c0e",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelb.svg": "afa34fbd7740f353e0f4c2b0ea21fe94f5e852b94a86e16e16754ef4e07823f7",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panela.svg": "8dca7f346a4439b5e7ffa0cda54deb0ee6a41c6e8887a8a43dc2384a428b572f",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-complete-layout.pdf": "ddda3de6e0f68da9c06bf96ff7b132deca50ffac7c553ecfc3913d230d01a986",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-paneld.png": "d5c4d33e62757d45fe8c1bb949189bcfd216f7d18c55301ee4de4bbff3d91b02",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelf.pdf": "61b5ea3dde5346118cdf2b3721dcbcfcae47b28906ad137421eba61b85d0695a",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panele.pdf": "ae1f712548cfa5e0ca15123a31c80601a455002dbd679d6374f232c136c0586b",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelf.svg": "1f82f2fc581310bd0037d75079039acd8769cbf9493f38ca9313c2e35c9c78d4",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelf.png": "1e2ed6aca2bd4760679a0ce2086f7f335907fbbdc3f184a6d3ab1d7f94f12f8f",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelc.png": "209cf60e7c8ec5582d48517da5395c5e78dfd11109fb7fe7887d00e692344244",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panele.svg": "fb389372fc76dbc15230a36d3c036b2b6cb4ea8264b088ef54453d21e9a961c1",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelb.png": "7535d87f3f106b2ea9ca82328e208bb2485602daccad7cea86e7852e589e2167",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panele.png": "d7ada5a1b6517c92c255d26b6454d7a1c0db30ee75ad403ffac9886bf7930254",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-complete-layout-preview.png": "8db46d03ac560d4d583ad2757eb57ed4d95ef3833954107ba2787723724c0e07",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-complete-layout.svg": "a3fbdad9524f546a1206da7b82c67245cad60e246fca8f89975233950708381d",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelc.pdf": "8a922a7de6664a71da24961883ee98d443a17549db221601b4c155a31e51d4fe",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panela.png": "f19ed7d379ec5728d295a8d00cb0d3ec3babaae7eef5fc27de5f986f06688f3f",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-paneld.pdf": "0861c96cc669bceaf5e6f0113ad65d8c2a0462dca2fc41bc1620569bbfa3ff3a",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelb.pdf": "4f2f9de3a0d895123eb34978b3a0309e0ab77dac2923660dc29130cc6eed0859",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-paneld.svg": "e82953ed8eee59fe44d5b68d499c83606d7ef8eda82b6a83f80ff9b6ae393b67",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panela.pdf": "a87dca7adeeefee15d860c4177b688e3ac8c13bbde634c722b7904df86570fbd",
+    "results/paper-ready-figure/fig5/candidates/template_ticks_20261027/figures/fig5-panelc.svg": "d624a98a200cb3b96ed546fe282c466ce4a60cc80d3bd82f1d2f0e083829a4d2"
+  },
+  "cohort_selection": {
+    "schema": "fig5_shared_axis_patient_selection_v1",
+    "author_decision": "2026-10-27: use shared-axis eligibility, update Fig5 first; identical Fig3/Fig5 patient list is not required",
+    "rule": "status=ok; geometry_2d_supported=true; saved shared_a and shared_b field models; intersect with the original 25-patient model cohort",
+    "source_root": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space",
+    "selection_independent_of_core_model_outcomes": true,
+    "strict_stability_gate": false,
+    "signed_axis_cosine_gate": false,
+    "shared_axis_n": 18,
+    "parent_model_n": 25,
+    "included_subjects": [
+      "epilepsiae_1077",
+      "epilepsiae_1084",
+      "epilepsiae_1096",
+      "epilepsiae_1146",
+      "epilepsiae_1150",
+      "epilepsiae_253",
+      "epilepsiae_384",
+      "epilepsiae_590",
+      "epilepsiae_620",
+      "epilepsiae_635",
+      "epilepsiae_958",
+      "yuquan_chengshuai",
+      "yuquan_huanghanwen",
+      "yuquan_litengsheng",
+      "yuquan_liyouran",
+      "yuquan_xuxinyi",
+      "yuquan_zhaochenxi"
+    ],
+    "excluded_model_subjects": [
+      "epilepsiae_1125",
+      "epilepsiae_442",
+      "epilepsiae_548",
+      "epilepsiae_583",
+      "epilepsiae_922",
+      "yuquan_pengzihang",
+      "yuquan_zhangbichen",
+      "yuquan_zhangkexuan"
+    ],
+    "eligible_without_model": [
+      "yuquan_songzishuo"
+    ],
+    "records": [
+      {
+        "subject": "epilepsiae_1073",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1073.json",
+        "source_sha256": "a4d5b72f5d311500693bf070e611fbb7025d90e9f03918514fddf2c750e7c4ac",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_1077",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1077.json",
+        "source_sha256": "bfa8ded89fad2b1e53e1e9537b2e017dda46bfbcc784bbc4f99a7c7b0d72101a",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_1084",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1084.json",
+        "source_sha256": "26bb3bb820baef940e28d88261f4bb11531268e2886af27c15e18f77e811b3fc",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_1096",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1096.json",
+        "source_sha256": "0874faad38610ff767d9f8472e38180b9b7f2bced4b890223603291a9ecaa6c5",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_1125",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1125.json",
+        "source_sha256": "d5fab06a25a33a8e3f8a7155ad63bf679076c4af4144b52941bdbc8c46f226ce",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_1146",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1146.json",
+        "source_sha256": "b5b0d65823f13caed389c890295887bcea5ca3f79fbfd27c4814962a2f962c1b",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_1150",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_1150.json",
+        "source_sha256": "01ac43f5516fd325a0681280aede8138916c0b850c51e37c67ad5426d3b6120b",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_139",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_139.json",
+        "source_sha256": "a7227828310d1ed4ab1d32d29b3e2adeb6f81372db4a02edc9b07756995b27c7",
+        "geometry_2d_supported": false,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_253",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_253.json",
+        "source_sha256": "6c04f405cb90e5b9dc78d78e507f7b59368ac819195b6fd1eda0f6762d2e57b4",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_384",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_384.json",
+        "source_sha256": "f7ab5c358cd57ca797f88677431ad2fb44cd44f615f7f2aba0c38090aa755811",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_442",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_442.json",
+        "source_sha256": "7511342a22928321d5a6b35f50410409fdb1647d8c6df50a1da4a4223fbeda6e",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_548",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_548.json",
+        "source_sha256": "ec9934d41ea36f000f87862c44d83f62713aad6be347217c3aeefdf59bc61384",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_583",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_583.json",
+        "source_sha256": "1c465536dc193785c2afb195a5f28b979af97f88c09b62fd9b8f3a6f9d06c9f0",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_590",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_590.json",
+        "source_sha256": "6045121381f10d3b3e0cd06a0a123f97f68fdc3c560e156474a97e060f675dbe",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_620",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_620.json",
+        "source_sha256": "267fea6954fb2df35d294d2d9c35738877d6bee25728c468d0af8c3520e9a441",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_635",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_635.json",
+        "source_sha256": "9432f92416ed3d12ff7789a8b8df1befde70eb579b29acef092a0affb9a937a9",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "epilepsiae_922",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_922.json",
+        "source_sha256": "502eea8588d30f6858c7f1daafb196744f32aea071805399287bff73fe8fbcaf",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "epilepsiae_958",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/epilepsiae_958.json",
+        "source_sha256": "e18885343c1e18c766f4fbff89f1c24ce9e07e8f3a40fc9872998980a6cf41dc",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_chengshuai",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_chengshuai.json",
+        "source_sha256": "b1005c57db566c62433c634fee07617a4d72df0fe73f1574bd5ffc03ff9e7490",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_chenziyang",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_chenziyang.json",
+        "source_sha256": "fb2095f296bf9f7a465da118579baa07c549cd95730815d407f781e265ef709d",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_gaolan",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_gaolan.json",
+        "source_sha256": "3d3fc09e028cfbbd2e83f69b8451cfa3fe0da6a4cf62ffaf31845fb903e7fc62",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_hanyuxuan",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_hanyuxuan.json",
+        "source_sha256": "7c57cbb7388dd58ece745507922cd93d3847f62e7172070756fce18419ff5021",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_huanghanwen",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_huanghanwen.json",
+        "source_sha256": "2dfc0ae3271480fdaca79aca3cd64a84c28d5e9639866d9f65852346e0da2fba",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_litengsheng",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_litengsheng.json",
+        "source_sha256": "9288240b0d23e1f8dfbda3db8249377377a86300a4617fb52073769bb6a32c49",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_liyouran",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_liyouran.json",
+        "source_sha256": "7725a4ad136764a9a4f9a89f6adfdff99a47fea678bf70f3a8805d618b6fb65d",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_pengzihang",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_pengzihang.json",
+        "source_sha256": "1616d1b716df5bd6313f303cb23c8f1d4700ea99bd70ecf45de18c9bc9e3a9aa",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_songzishuo",
+        "shared_axis_eligible": true,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_songzishuo.json",
+        "source_sha256": "ae75718f5dbea7ff6501c7235fce43f8d0fb341668efac9c5b8756429182fce9",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_sunyuanxin",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_sunyuanxin.json",
+        "source_sha256": "8ac635bad00804dde378c52d455c868024eb3b21208557eb31ea1536c07d37e4",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_wangyiyang",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_wangyiyang.json",
+        "source_sha256": "840e679eb327a10e8f431ebefcc22064d32343038583b4ca2e1a44c668d1d2d2",
+        "geometry_2d_supported": null,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_xuxinyi",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_xuxinyi.json",
+        "source_sha256": "0513df6646a55a06f70535e8c21369213cdff14cbb54f9fd713b32ba0d4fe1a0",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_zhangbichen",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangbichen.json",
+        "source_sha256": "30112d301b4486b1b220a492b40aa818723d37a2628d5a21fcb46dd3575034d4",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_zhangjiaqi",
+        "shared_axis_eligible": false,
+        "in_model_cohort": false,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangjiaqi.json",
+        "source_sha256": "0226b479dd0e5ecb24e779bea004ed3180675c78f925e47acbd8b626c1e988b8",
+        "geometry_2d_supported": false,
+        "has_shared_a": true,
+        "has_shared_b": true
+      },
+      {
+        "subject": "yuquan_zhangkexuan",
+        "shared_axis_eligible": false,
+        "in_model_cohort": true,
+        "included": false,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhangkexuan.json",
+        "source_sha256": "aab4618860c33eaff7c6a903a577b9e6a605e5657dbd1fb37b68e36c3689d0a0",
+        "geometry_2d_supported": true,
+        "has_shared_a": false,
+        "has_shared_b": false
+      },
+      {
+        "subject": "yuquan_zhaochenxi",
+        "shared_axis_eligible": true,
+        "in_model_cohort": true,
+        "included": true,
+        "source": "results/interictal_propagation_masked/template_gradient_fields_all_events_timing_plus_space/per_subject/yuquan_zhaochenxi.json",
+        "source_sha256": "9a44cf28130a78027e52d01e1da7467bd004a94e0a64476d23b70f2b10ce2cee",
+        "geometry_2d_supported": true,
+        "has_shared_a": true,
+        "has_shared_b": true
+      }
+    ],
+    "fig3_audit": {
+      "current_version": "visual_alignment_compact_rows_20261010",
+      "panel_c_source": "results/topic5_ictal_recruitment/clinical_onset_gradient_field_all_events_timing_plus_space/clinical_onset_gradient_field_cohort_stat_subject.csv",
+      "panel_c_source_sha256": "c4a890ef0aaeb5503671ad5d1563044fc04d5398dc9f4e837ad508e5683b6459",
+      "panel_c_n": 17,
+      "panel_c_shared_plane_n": 13,
+      "panel_c_own_fallback_subjects": [
+        "epilepsiae_1125",
+        "epilepsiae_442",
+        "epilepsiae_548",
+        "epilepsiae_922"
+      ],
+      "panel_e_includes_noncollinear_patients": true,
+      "fig3_modified": false,
+      "identical_patient_list_claim": false
+    }
+  },
+  "analysis_status": "POST_HOC_ASYMMETRIC_SELECTION",
+  "cohort_execution_at_render": {
+    "status": "RUNNING",
+    "train_complete": 971,
+    "train_planned": 1600,
+    "confirmation_complete": 0,
+    "confirmation_planned": 100,
+    "updated_unix": 1793084194.6612108
+  }
+}

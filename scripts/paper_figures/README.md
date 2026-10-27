@@ -1,5 +1,11 @@
 # Paper Figure Scripts
 
+## 当前 Figure 5 / Figure 6（2026-10-27）
+
+新 Fig5 为 `spatial_snn_propagation_and_core_count`，当前 `vertical_legend_20261027`。先读 `docs/current_figure5.md` 与 `results/paper-ready-figure/fig5/current_version.json`；`build_fig5_current.py` 校验冻结导出，`build_fig5_aligned_layout.py` 从随包数据重绘。F 为作者指定的 shared-axis 中期约束选点对照，不能把发布状态当作独立实验完成。
+
+旧 Z/M Fig5 已登记为 Fig6，用 `build_fig6_current.py` 校验；旧 `build_fig5_single_seed_panels.py` 等属于历史 Z/M producer，不可输出至新 `fig5/`。新 Fig4 是其他任务，本次不替换。
+
 This directory contains scripts used to generate manuscript-facing figures.
 Keep final figure scripts here rather than scattering one-off plotting code in
 the top-level `scripts/` directory.

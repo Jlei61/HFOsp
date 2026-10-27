@@ -1,0 +1,2391 @@
+{
+  "status": "AUTHOR_REQUESTED_INTERIM",
+  "cohort_comparison_complete": false,
+  "common_budget": 16,
+  "planned_budget": 32,
+  "subject_denominator": 25,
+  "training_used": 800,
+  "subject_arms": [
+    {
+      "subject": "epilepsiae_1077",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.2,
+        0.08571428571428572
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1077/runs/core1/restart00/units/bo02_04",
+      "trajectory_sha256": "add00a9d71cc2a107ffa9f15eecdfc32dfbb398b627837c61c604c53e08e121e",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        6,
+        6
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.8285714285714286,
+          0.08571428571428572
+        ],
+        [
+          0.2,
+          0.5428571428571428
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 132,
+      "mode_counts": [
+        99,
+        33
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_04",
+      "training_J": 4.387010378265174,
+      "selected_epoch": 14,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1077/core1"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.3,
+        0.5428571428571428
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1077/runs/core2/restart00/units/initial_03",
+      "trajectory_sha256": "47f2f9d60bb075c5430356165b4d33f35bba41d0472943c32214d0c70b9554f5",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        5,
+        6
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.3,
+          -1.0
+        ],
+        [
+          -0.8857142857142857,
+          0.5428571428571428
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 161,
+      "mode_counts": [
+        48,
+        113
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_03",
+      "training_J": 5.572163732395431,
+      "selected_epoch": 4,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1077/core2"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.24545454545454545,
+        -0.5727272727272728
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1084/runs/core1/restart00/units/initial_06",
+      "trajectory_sha256": "182a593de01aeffa4306d695682a3da8ea3129ef98c2c50cb866319c86a9a6a0",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        11,
+        11
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.03636363636363636,
+          -0.5727272727272728
+        ],
+        [
+          0.24545454545454545,
+          -0.42727272727272725
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 134,
+      "mode_counts": [
+        47,
+        87
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_06",
+      "training_J": 4.271745969838984,
+      "selected_epoch": 7,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1084/core1"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.2818181818181818,
+        0.2636363636363636
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1084/runs/core2/restart00/units/initial_02",
+      "trajectory_sha256": "e36a6c978e35d44c578e5a3d1debaf96487f24fc045f53f5ca389ef302b1e2e4",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        11,
+        11
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.12727272727272726,
+          0.2636363636363636
+        ],
+        [
+          0.2818181818181818,
+          -0.33636363636363636
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 99,
+      "mode_counts": [
+        40,
+        59
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_02",
+      "training_J": 3.19050965229134,
+      "selected_epoch": 3,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1084/core2"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.9285714285714286,
+        -0.6071428571428571
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1096/runs/core1/restart00/units/initial_02",
+      "trajectory_sha256": "10712d6bc250444638c7718b4c46bb7246189fd31570dd5c3cac5471d1736ef5",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        7,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.9285714285714286,
+          -0.5714285714285714
+        ],
+        [
+          0.8571428571428571,
+          -0.6071428571428571
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 143,
+      "mode_counts": [
+        123,
+        20
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_02",
+      "training_J": 13.862437318305128,
+      "selected_epoch": 3,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/epilepsiae_1096/core1"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.5357142857142857,
+        0.8214285714285714
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1096/runs/core2/restart00/units/initial_05",
+      "trajectory_sha256": "47de1e2703c95fb6e8eb77cfb597c4ef31b296f3257db06263234c21dfb9f61f",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        7,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.35714285714285715,
+          0.8214285714285714
+        ],
+        [
+          0.5357142857142857,
+          -0.7142857142857143
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 124,
+      "mode_counts": [
+        97,
+        27
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_05",
+      "training_J": 2.7110321537230244,
+      "selected_epoch": 6,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1096/core2"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.8285714285714286,
+        -0.6
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1125/runs/core1/restart00/units/bo01_07",
+      "trajectory_sha256": "1292537ddb7d7e2c91d62732729069f4d183ce55ba03fb6bb97266e50125c58c",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        6,
+        6
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.4857142857142857,
+          -0.6
+        ],
+        [
+          0.8285714285714286,
+          -0.9428571428571428
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 16,
+      "mode_counts": [
+        5,
+        11
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_07",
+      "training_J": 6.244738036557827,
+      "selected_epoch": 16,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1125/core1"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.10714285714285714,
+        0.25
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1125/runs/core2/restart00/units/bo02_04",
+      "trajectory_sha256": "523b4032a922a2382111177fa500504b5164ef8c6a42cae861eefe0cf939951a",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        7,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.03571428571428571,
+          0.25
+        ],
+        [
+          0.10714285714285714,
+          -0.25
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 113,
+      "mode_counts": [
+        60,
+        53
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_04",
+      "training_J": 2.44242741721558,
+      "selected_epoch": 14,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1125/core2"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.9357142857142857,
+        -0.8214285714285714
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1146/runs/core1/restart00/units/initial_01",
+      "trajectory_sha256": "40da9b1131e5f157d4845022c4059a3b0b94a5b7e601c39fb418b407d6cbe6a1",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        15,
+        15
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.8214285714285714,
+          -0.8214285714285714
+        ],
+        [
+          0.9357142857142857,
+          -0.75
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 146,
+      "mode_counts": [
+        104,
+        42
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_01",
+      "training_J": 4.399889699529008,
+      "selected_epoch": 2,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1146/core1"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.625,
+        0.3464285714285714
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1146/runs/core2/restart00/units/bo01_01",
+      "trajectory_sha256": "a33981661816697161124cf79416f644f7af6f03546af423ef391860619fab7d",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        15,
+        15
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.625,
+          -0.8642857142857143
+        ],
+        [
+          -0.6571428571428571,
+          0.3464285714285714
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 96,
+      "mode_counts": [
+        46,
+        50
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_01",
+      "training_J": 2.3077506186118657,
+      "selected_epoch": 10,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1146/core2"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 19,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.65,
+        -0.15
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1150/runs/core1/restart00/units/bo02_02",
+      "trajectory_sha256": "c50aa9fbffb963c7d69ac5f955d46349bec8457dc7176c34493bae93d088f1ae",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.45,
+          -0.15
+        ],
+        [
+          0.65,
+          -0.25
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 98,
+      "mode_counts": [
+        13,
+        85
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_02",
+      "training_J": 5.215432952783831,
+      "selected_epoch": 13,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1150/core1"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7166666666666667,
+        0.05
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_1150/runs/core2/restart00/units/bo01_00",
+      "trajectory_sha256": "447f65b1307140905dce916814ac82d091aeb8d2b359c90735f1985bc7431646",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7166666666666667,
+          0.03333333333333333
+        ],
+        [
+          -0.4,
+          0.05
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 139,
+      "mode_counts": [
+        106,
+        33
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_00",
+      "training_J": 11.75495417933636,
+      "selected_epoch": 9,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_1150/core2"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.8333333333333334,
+        0.38095238095238093
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_253/runs/core1/restart00/units/initial_03",
+      "trajectory_sha256": "8d4ecff563e3b77c868990c3f762c8b5497cf5c6df8871db726f42a631917461",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        8,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.3333333333333333,
+          0.38095238095238093
+        ],
+        [
+          0.8333333333333334,
+          -0.40476190476190477
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 88,
+      "mode_counts": [
+        53,
+        35
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_03",
+      "training_J": 5.646236402129276,
+      "selected_epoch": 4,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/epilepsiae_253/core1"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.16666666666666666,
+        0.11904761904761904
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_253/runs/core2/restart00/units/bo01_01",
+      "trajectory_sha256": "e9e0bca602bab6c876a3fa83d853deadee89293268dd4723ab5fbeffd1906f9e",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        8,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.16666666666666666,
+          -0.023809523809523808
+        ],
+        [
+          -0.23809523809523808,
+          0.11904761904761904
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 132,
+      "mode_counts": [
+        55,
+        77
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_01",
+      "training_J": 3.6320524205330464,
+      "selected_epoch": 10,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_253/core2"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.48333333333333334,
+        -0.6666666666666666
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_384/runs/core1/restart00/units/bo02_02",
+      "trajectory_sha256": "24e13cf08aa77a00b23277b5710726eeb4fa3d9043ff1575135b42fd1977ff72",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.48333333333333334,
+          -0.5333333333333333
+        ],
+        [
+          -0.23333333333333334,
+          -0.6666666666666666
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 84,
+      "mode_counts": [
+        39,
+        45
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_02",
+      "training_J": 2.0833636017598844,
+      "selected_epoch": 12,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_384/core1"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.26666666666666666,
+        0.18333333333333332
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_384/runs/core2/restart00/units/initial_04",
+      "trajectory_sha256": "40c5b418a87faf58d1d30636ae7f5cd57a05a78a487305ecb49f6e5f4174c60c",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.05,
+          0.18333333333333332
+        ],
+        [
+          0.26666666666666666,
+          0.3
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 106,
+      "mode_counts": [
+        62,
+        44
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 2.502788387990546,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_384/core2"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.15384615384615385,
+        -0.3892857142857143
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_442/runs/core1/restart00/units/initial_05",
+      "trajectory_sha256": "aa7a3c5dcb75d5373bca5b500c71bc23aae467e0959d87fb8791749b6e49c1a3",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        12,
+        15
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.15384615384615385,
+          -0.7692307692307693
+        ],
+        [
+          0.40714285714285714,
+          -0.3892857142857143
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 143,
+      "mode_counts": [
+        60,
+        83
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_05",
+      "training_J": 4.33001815264002,
+      "selected_epoch": 6,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_442/core1"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.45714285714285713,
+        -0.31785714285714284
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_442/runs/core2/restart00/units/bo01_02",
+      "trajectory_sha256": "a3786ce611e0f4767505c66d365a0d3f7f0355fea86e5741951ff56c3a332f5d",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        15,
+        15
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.5035714285714286,
+          -0.31785714285714284
+        ],
+        [
+          0.45714285714285713,
+          0.20714285714285716
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 137,
+      "mode_counts": [
+        90,
+        47
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_02",
+      "training_J": 2.8154066099520634,
+      "selected_epoch": 11,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_442/core2"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.8363636363636363,
+        0.6818181818181818
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_548/runs/core1/restart00/units/bo02_04",
+      "trajectory_sha256": "e23bf0d29afc559737ae1867f9f8340e508d25d77a1e2247b8bbaee444af694d",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        11,
+        11
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.8,
+          0.6818181818181818
+        ],
+        [
+          0.8363636363636363,
+          0.5363636363636364
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 126,
+      "mode_counts": [
+        42,
+        84
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_04",
+      "training_J": 1.822315618630561,
+      "selected_epoch": 14,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_548/core1"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.6272727272727273,
+        -0.3090909090909091
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_548/runs/core2/restart00/units/initial_04",
+      "trajectory_sha256": "2eda16e734c12043587acee00673f50f58dfffe0b470441a62b8203f46be3294",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        11,
+        11
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.6272727272727273,
+          0.3181818181818182
+        ],
+        [
+          -0.6636363636363637,
+          -0.3090909090909091
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 115,
+      "mode_counts": [
+        64,
+        51
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 1.4825582277348917,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_548/core2"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.42857142857142855,
+        0.6571428571428571
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_583/runs/core1/restart00/units/initial_07",
+      "trajectory_sha256": "36601cc3fbfc922ac6cbe70d7100839f616ccfaf6ca2c22db8fcf305e263d2a3",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        6,
+        6
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.42857142857142855,
+          0.42857142857142855
+        ],
+        [
+          -0.6571428571428571,
+          0.6571428571428571
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 96,
+      "mode_counts": [
+        74,
+        22
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_07",
+      "training_J": 5.879932067677058,
+      "selected_epoch": 8,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_583/core1"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        -0.2571428571428571,
+        -0.07142857142857142
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_583/runs/core2/restart00/units/bo02_04",
+      "trajectory_sha256": "adf8ec25cb5119c45fcd0ab1b86fbcf504beaa5dfb86c62e9c9088385a512868",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        6,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.42857142857142855,
+          -0.07142857142857142
+        ],
+        [
+          -0.2571428571428571,
+          -0.42857142857142855
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 107,
+      "mode_counts": [
+        63,
+        44
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_04",
+      "training_J": 4.428162247924995,
+      "selected_epoch": 15,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_583/core2"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7666666666666667,
+        -0.7666666666666667
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_590/runs/core1/restart00/units/initial_04",
+      "trajectory_sha256": "7c09b63c1ebcdf834a039b61a0658e3da183228df9f7f6657eebd20c9fe76b0d",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7166666666666667,
+          -0.7666666666666667
+        ],
+        [
+          0.7666666666666667,
+          -0.7166666666666667
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 54,
+      "mode_counts": [
+        22,
+        32
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 1.4742363533034633,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_590/core1"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7294117647058823,
+        0.5852941176470589
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_590/runs/core2/restart00/units/bo01_05",
+      "trajectory_sha256": "08889b33febdf97266d65a7699da033e4dd31d0622224a5507d30eb79a49b57d",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        16,
+        16
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7294117647058823,
+          -0.4764705882352941
+        ],
+        [
+          0.18529411764705883,
+          0.5852941176470589
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 75,
+      "mode_counts": [
+        64,
+        11
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_05",
+      "training_J": 0.789106186517608,
+      "selected_epoch": 14,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_590/core2"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.9523809523809523,
+        -0.7833333333333333
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_620/runs/core1/restart00/units/bo01_04",
+      "trajectory_sha256": "ef5534b4ae07bdb5feadd64d478d91fcdea4221ff1a5fb10834011b1e222265a",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        8,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.6833333333333333,
+          -0.7833333333333333
+        ],
+        [
+          0.9523809523809523,
+          -0.9285714285714286
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 145,
+      "mode_counts": [
+        103,
+        42
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_04",
+      "training_J": 2.3351290558527125,
+      "selected_epoch": 13,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_620/core1"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7,
+        0.6166666666666667
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_620/runs/core2/restart00/units/bo01_00",
+      "trajectory_sha256": "c991da0084a86075b4a049e11b65cf00c5977766b7f634c02f33222c0ce3c1a5",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        9,
+        9
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.55,
+          0.6166666666666667
+        ],
+        [
+          0.7,
+          -0.65
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 139,
+      "mode_counts": [
+        93,
+        46
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_00",
+      "training_J": 1.6413503206398785,
+      "selected_epoch": 9,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_620/core2"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.6428571428571429,
+        0.17857142857142858
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_635/runs/core1/restart00/units/bo02_01",
+      "trajectory_sha256": "1f28bd9271de81340fad75beaaa8a444dccc1cc2beb30c7294358228a275fd0e",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        7,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.03571428571428571,
+          0.17857142857142858
+        ],
+        [
+          0.6428571428571429,
+          -0.6785714285714286
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 69,
+      "mode_counts": [
+        16,
+        53
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_01",
+      "training_J": 2.023601716012156,
+      "selected_epoch": 12,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_635/core1"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.9428571428571428,
+        0.03571428571428571
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_635/runs/core2/restart00/units/bo01_04",
+      "trajectory_sha256": "25d92de455e703bd56fe68fdf7872718ce3e2dd52038ee7e019ce730e4650a10",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        6,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.21428571428571427,
+          0.03571428571428571
+        ],
+        [
+          0.9428571428571428,
+          -0.5428571428571428
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 101,
+      "mode_counts": [
+        32,
+        69
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_04",
+      "training_J": 4.9537473157040175,
+      "selected_epoch": 13,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_635/core2"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.6,
+        -0.2857142857142857
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_922/runs/core1/restart00/units/initial_07",
+      "trajectory_sha256": "2c4493766e18d15259ba2551d86bac9ebfc3b9c381e7df0f2a194a4822c400c7",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        6,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.6,
+          0.42857142857142855
+        ],
+        [
+          -0.30952380952380953,
+          -0.2857142857142857
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 26,
+      "mode_counts": [
+        23,
+        3
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_07",
+      "training_J": 2.6125159318235722,
+      "selected_epoch": 8,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_922/core1"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        -0.21428571428571427,
+        0.4523809523809524
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_922/runs/core2/restart00/units/bo01_03",
+      "trajectory_sha256": "e4c1abf7bb124cdf712d2d04f1bd926a099c5337b2ecc7d7d0998ea7581e4e97",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        8,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.5476190476190477,
+          0.4523809523809524
+        ],
+        [
+          -0.21428571428571427,
+          -0.5
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 144,
+      "mode_counts": [
+        26,
+        118
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_03",
+      "training_J": 1.5258101355227798,
+      "selected_epoch": 12,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_922/core2"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.6785714285714286,
+        -0.38235294117647056
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_958/runs/core1/restart00/units/bo01_05",
+      "trajectory_sha256": "065190e72f7a33a5c3980a4400bf1a8afcf42065042d5e95ae0a630e4fa9848f",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        15,
+        16
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.6785714285714286,
+          -0.48928571428571427
+        ],
+        [
+          0.19117647058823528,
+          -0.38235294117647056
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 76,
+      "mode_counts": [
+        32,
+        44
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_05",
+      "training_J": 3.8420601640350633,
+      "selected_epoch": 14,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/epilepsiae_958/core1"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.1588235294117647,
+        0.2823529411764706
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/epilepsiae_958/runs/core2/restart00/units/initial_01",
+      "trajectory_sha256": "eae6f21e2426b15d97b88b52690575f87cf11585f27a78c1c351a96648c86a1d",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        16,
+        16
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.2852941176470588,
+          0.2823529411764706
+        ],
+        [
+          0.1588235294117647,
+          -0.6529411764705882
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 111,
+      "mode_counts": [
+        45,
+        66
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_01",
+      "training_J": 2.4089427557363963,
+      "selected_epoch": 2,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/epilepsiae_958/core2"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7380952380952381,
+        0.07142857142857142
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_chengshuai/runs/core1/restart00/units/initial_03",
+      "trajectory_sha256": "703535ddc7394a10a416c8c81714b775cbf31caf761e68ff4649d6450ba20a63",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        8,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7380952380952381,
+          -0.5952380952380952
+        ],
+        [
+          0.4523809523809524,
+          0.07142857142857142
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 92,
+      "mode_counts": [
+        53,
+        39
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_03",
+      "training_J": 13.974455107208653,
+      "selected_epoch": 4,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/yuquan_chengshuai/core1"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7857142857142857,
+        0.5357142857142857
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_chengshuai/runs/core2/restart00/units/initial_07",
+      "trajectory_sha256": "a042ce050ec2deeacb23ebb29c335abff190bee7160feeb34bae7fcbefb7540f",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        8,
+        7
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.39285714285714285,
+          0.5357142857142857
+        ],
+        [
+          0.7857142857142857,
+          -0.40476190476190477
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 157,
+      "mode_counts": [
+        66,
+        91
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_07",
+      "training_J": 4.816329500218208,
+      "selected_epoch": 8,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_chengshuai/core2"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.3575757575757576,
+        -0.18787878787878787
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_huanghanwen/runs/core1/restart00/units/initial_00",
+      "trajectory_sha256": "e183d6912507b49ea2b212f36f8c5486f94d29721db414a26e81d32f465fd8ad",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        10,
+        10
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.17575757575757575,
+          -0.18787878787878787
+        ],
+        [
+          0.3575757575757576,
+          -0.7212121212121212
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 48,
+      "mode_counts": [
+        37,
+        11
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_00",
+      "training_J": 2.874765718437308,
+      "selected_epoch": 1,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_huanghanwen/core1"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 17,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.11515151515151516,
+        0.07878787878787878
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_huanghanwen/runs/core2/restart00/units/initial_04",
+      "trajectory_sha256": "6abeb18152bf97f1f4f14c63582824c6e45ea2fb80b0063827b4afb87e292331",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        10,
+        10
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.11515151515151516,
+          0.10303030303030303
+        ],
+        [
+          -0.22424242424242424,
+          0.07878787878787878
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 117,
+      "mode_counts": [
+        58,
+        59
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 2.691461387141081,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_huanghanwen/core2"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.76,
+        0.10350877192982456
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_litengsheng/runs/core1/restart00/units/initial_02",
+      "trajectory_sha256": "597e21d7747d787a0d1d78d7f28dba985a5ebbe9f5863fa27591c07b305d5c86",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        24,
+        19
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.76,
+          0.025217391304347827
+        ],
+        [
+          0.7719298245614035,
+          0.10350877192982456
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 128,
+      "mode_counts": [
+        94,
+        34
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_02",
+      "training_J": 5.602958423252335,
+      "selected_epoch": 3,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/yuquan_litengsheng/core1"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.5565217391304348,
+        0.4765217391304348
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_litengsheng/runs/core2/restart00/units/initial_05",
+      "trajectory_sha256": "65bf1c983194ca3e1cdad446521cd3583b6ee298b3818c454186775d7c25de17",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        24,
+        24
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.5565217391304348,
+          -0.27391304347826084
+        ],
+        [
+          0.8060869565217391,
+          0.4765217391304348
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 149,
+      "mode_counts": [
+        63,
+        86
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_05",
+      "training_J": 3.0375363761082927,
+      "selected_epoch": 6,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_litengsheng/core2"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.5759803921568627,
+        0.5428571428571428
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_liyouran/runs/core1/restart00/units/bo02_03",
+      "trajectory_sha256": "cdd0ddb67aea0c5b34dce1d3940ecf93d9d93e47dea335668e0a886cd8b498ce",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        17,
+        14
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.5759803921568627,
+          -0.18872549019607843
+        ],
+        [
+          0.03296703296703297,
+          0.5428571428571428
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 49,
+      "mode_counts": [
+        37,
+        12
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo02_03",
+      "training_J": 4.948071560687716,
+      "selected_epoch": 13,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/yuquan_liyouran/core1"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7549019607843137,
+        -0.6544117647058824
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_liyouran/runs/core2/restart00/units/bo01_03",
+      "trajectory_sha256": "42d25d8b43fdbdc0922c9267c5d7fb26280bf4a2005a3fbc1c096ba1dd875f7f",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        17,
+        17
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.25980392156862747,
+          -0.6544117647058824
+        ],
+        [
+          0.7549019607843137,
+          -0.6495098039215687
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 120,
+      "mode_counts": [
+        60,
+        60
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_03",
+      "training_J": 3.011928033610508,
+      "selected_epoch": 12,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_liyouran/core2"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.3006993006993007,
+        0.4818181818181818
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_pengzihang/runs/core1/restart00/units/initial_00",
+      "trajectory_sha256": "789281f1bd7df92cdd1e17f591d8fee4088247364c2d01afd8d507f5dc9148d9",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        12,
+        11
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.3006993006993007,
+          0.5804195804195804
+        ],
+        [
+          -0.06363636363636363,
+          0.4818181818181818
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 60,
+      "mode_counts": [
+        30,
+        30
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_00",
+      "training_J": 2.470714248231199,
+      "selected_epoch": 1,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_pengzihang/core1"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        -0.03496503496503497,
+        0.1888111888111888
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_pengzihang/runs/core2/restart00/units/bo01_00",
+      "trajectory_sha256": "00467b5e5c20436d8edc23d904f3cf7914a3b9e86927516a8094ced61f6a1a5b",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        12,
+        12
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.03496503496503497,
+          0.18181818181818182
+        ],
+        [
+          -0.13986013986013987,
+          0.1888111888111888
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 85,
+      "mode_counts": [
+        37,
+        48
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_00",
+      "training_J": 2.609653654969143,
+      "selected_epoch": 9,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_pengzihang/core2"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.9,
+        0.21428571428571427
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_xuxinyi/runs/core1/restart00/units/initial_01",
+      "trajectory_sha256": "207f7d211097ac46f57d432c7f9d3dcc4469bb86d554e067a0a4a17002cf023f",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        9,
+        8
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.9,
+          0.1
+        ],
+        [
+          1.0,
+          0.21428571428571427
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 152,
+      "mode_counts": [
+        151,
+        1
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_01",
+      "training_J": 14.45023273642722,
+      "selected_epoch": 2,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/per_subject/yuquan_xuxinyi/core1"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.8392857142857143,
+        0.29642857142857143
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_xuxinyi/runs/core2/restart00/units/initial_00",
+      "trajectory_sha256": "953270c12ad77a5bb9405548b7c2c90891d93be9fab6e7ba5338160b1e494e0a",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        15,
+        15
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.45,
+          0.29642857142857143
+        ],
+        [
+          0.8392857142857143,
+          0.6357142857142857
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 140,
+      "mode_counts": [
+        71,
+        69
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_00",
+      "training_J": 4.092578989359072,
+      "selected_epoch": 1,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_xuxinyi/core2"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.6218367346938776,
+        -0.5834542815674891
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhangbichen/runs/core1/restart00/units/initial_05",
+      "trajectory_sha256": "3dfb51fdb6ed96d7b4372ff95c3a381ccccdb8f125754a0d1b795a379cdf3001",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        49,
+        52
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          -0.1874839921454794,
+          -0.5834542815674891
+        ],
+        [
+          0.6218367346938776,
+          -0.45448979591836736
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 100,
+      "mode_counts": [
+        43,
+        57
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_05",
+      "training_J": 5.740774214592804,
+      "selected_epoch": 6,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhangbichen/core1"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.3130709468112354,
+        0.41475283872620167
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhangbichen/runs/core2/restart00/units/initial_04",
+      "trajectory_sha256": "af10e9f6a2b6f9308551026bde7a63b1c9091c1da6fb453702e2e8b21b628e11",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        52,
+        52
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.3130709468112354,
+          -0.46708785110560913
+        ],
+        [
+          0.22786647314949202,
+          0.41475283872620167
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 121,
+      "mode_counts": [
+        49,
+        72
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 3.226429641122611,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhangbichen/core2"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 16,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7586324786324786,
+        0.4447863247863248
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhangkexuan/runs/core1/restart00/units/initial_07",
+      "trajectory_sha256": "f31b8e594908f1bc03c515489529fceccb0f4718f2e74d7e6eed20aab1db8d3f",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        26,
+        26
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7586324786324786,
+          0.2676923076923077
+        ],
+        [
+          0.3217094017094017,
+          0.4447863247863248
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 113,
+      "mode_counts": [
+        77,
+        36
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_07",
+      "training_J": 5.008260930286839,
+      "selected_epoch": 8,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhangkexuan/core1"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 17,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.8311111111111111,
+        0.4434188034188034
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhangkexuan/runs/core2/restart00/units/bo01_00",
+      "trajectory_sha256": "3bfab23ee8c5411b56755b28cfdc6aabfeb3401e481034f28f4b8b3e23477421",
+      "model_cluster_for_TA_TB": [
+        1,
+        0
+      ],
+      "shared_contact_counts": [
+        26,
+        26
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.18700854700854702,
+          0.4434188034188034
+        ],
+        [
+          0.8311111111111111,
+          0.07145299145299146
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 112,
+      "mode_counts": [
+        57,
+        55
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "bo01_00",
+      "training_J": 3.1408955004717214,
+      "selected_epoch": 9,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhangkexuan/core2"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "core_count": 1,
+      "interim": true,
+      "training_completed": 18,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.7252173913043478,
+        -0.0735042735042735
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhaochenxi/runs/core1/restart00/units/initial_04",
+      "trajectory_sha256": "3ec74f460ef62f45982fcab18b5b739c23e5bdd4ba0d6d2552daa1023b699706",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        24,
+        26
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.7252173913043478,
+          -0.5808695652173913
+        ],
+        [
+          0.27111111111111114,
+          -0.0735042735042735
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 94,
+      "mode_counts": [
+        57,
+        37
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_04",
+      "training_J": 4.051187068477766,
+      "selected_epoch": 5,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhaochenxi/core1"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "core_count": 2,
+      "interim": true,
+      "training_completed": 17,
+      "training_used": 16,
+      "training_planned": 32,
+      "matched_rhos": [
+        0.4495726495726496,
+        -0.12957264957264958
+      ],
+      "status": "ESTIMABLE",
+      "source": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/per_subject/yuquan_zhaochenxi/runs/core2/restart00/units/initial_01",
+      "trajectory_sha256": "b47114faf35d8cac7b27d097d472a8861944afb5a441d68b3073886834909251",
+      "model_cluster_for_TA_TB": [
+        0,
+        1
+      ],
+      "shared_contact_counts": [
+        26,
+        26
+      ],
+      "raw_cluster_patient_matrix": [
+        [
+          0.4495726495726496,
+          -0.1617094017094017
+        ],
+        [
+          0.3162393162393162,
+          -0.12957264957264958
+        ]
+      ],
+      "matching_rule": "maximum sum of signed matched Spearman rhos; complete matching first; no absolute values",
+      "alignment_is_descriptive": true,
+      "n_events": 121,
+      "mode_counts": [
+        54,
+        67
+      ],
+      "definition": "Historical F propagation-order modes: model-only masked K=2 then one-to-one naming. These are not independently fitted geometric propagation angles.",
+      "statistical_unit": "patient; individual events are within-patient observations",
+      "candidate": "initial_01",
+      "training_J": 2.9166386545668623,
+      "selected_epoch": 2,
+      "event_export": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/interim_snapshots/common_prefix_20261027_0942/per_subject/yuquan_zhaochenxi/core2"
+    }
+  ],
+  "statistics": [
+    {
+      "core_count": 1,
+      "mode": "TA\u2013MTA",
+      "n": 25,
+      "missing": 0,
+      "median": 0.6785714285714286,
+      "q25_q75": [
+        0.48333333333333334,
+        0.8285714285714286
+      ]
+    },
+    {
+      "core_count": 1,
+      "mode": "TB\u2013MTB",
+      "n": 25,
+      "missing": 0,
+      "median": -0.15,
+      "q25_q75": [
+        -0.5834542815674891,
+        0.21428571428571427
+      ]
+    },
+    {
+      "core_count": 2,
+      "mode": "TA\u2013MTA",
+      "n": 25,
+      "missing": 0,
+      "median": 0.45714285714285713,
+      "q25_q75": [
+        0.16666666666666666,
+        0.7166666666666667
+      ]
+    },
+    {
+      "core_count": 2,
+      "mode": "TB\u2013MTB",
+      "n": 25,
+      "missing": 0,
+      "median": 0.2636363636363636,
+      "q25_q75": [
+        0.05,
+        0.4523809523809524
+      ]
+    }
+  ],
+  "confirmations": [],
+  "independent_noise_confirmations_used": 0,
+  "statistical_unit": "patient",
+  "mode_order": [
+    "TA\u2013MTA",
+    "TB\u2013MTB"
+  ],
+  "selection_sha256": "5154da606859e15f7d4adc0f445dba9a602b5c9ddd83405ec4566c70526414fe",
+  "snapshot_unix": 1793065348.211824,
+  "comparison": "TA-preferred constrained single-core workpoint versus unconstrained minimum-J two-core workpoint",
+  "limitations": [
+    "Interim training-selected working points; optimization and independent-noise confirmation remain in progress.",
+    "Fixed model-only K=2 readout is descriptive; it does not demonstrate two natural modes.",
+    "One workpoint per patient and core count supplies both template correlations."
+  ],
+  "training_search_complete": false,
+  "constraint_applied_unix": 1793071808.026704,
+  "selection_policy": {
+    "schema": "fig5_ta_preferred_selection_v1",
+    "author_request_date": "2026-10-27",
+    "core1_constraint": "signed rho_TA > signed rho_TB + 1e-12; both finite",
+    "core1_objective": "minimum original training J among eligible candidates",
+    "core2_selection": "unchanged minimum original training J",
+    "no_template_relabelling": true,
+    "no_absolute_correlations": true,
+    "no_extra_rho_threshold": true,
+    "no_TB_ceiling": true,
+    "no_new_simulations": true,
+    "infeasible_subject": "retained with missing 1-core readout",
+    "inference": "Post-hoc asymmetric selection-policy comparison; selection includes TB, so weaker TB is partly conditioned by design, not independent evidence of a core-count mechanism"
+  },
+  "selection_audit": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/selection_audit.json",
+  "parent_selection_sha256": "cdec94d407a97325ad5ecccb4cffa78c4009c45e6fdcb076b0ce2feea4af78a9",
+  "analysis_status": "POST_HOC_ASYMMETRIC_SELECTION",
+  "confirmation_scope": "No new-noise replays are used in this conditional training readout; original nominations do not validate reselected core1 workpoints"
+}

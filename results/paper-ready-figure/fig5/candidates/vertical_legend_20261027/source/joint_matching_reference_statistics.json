@@ -1,0 +1,122 @@
+{
+  "status": "POST_HOC_EXPLORATORY_INTERIM",
+  "source": "results/paper-ready-figure/fig5/candidates/shared_axis_clean_labels_20261027/source/displayed_core_count_summary.json",
+  "source_sha256": "08975591f466736cccd96af9bf24ca701127d0fb8609d1e8d1b603158dfecad8",
+  "scientific_question": "Does a two-core model improve simultaneous matching to both patient templates at one workpoint?",
+  "statistical_unit": "patient",
+  "common_search_budget": 16,
+  "workpoint_selection": "Original minimum training J; no workpoint reselection and no patient filtering by template scores",
+  "definitions": {
+    "weaker": "min(signed rho_TA, signed rho_TB)",
+    "stronger": "max(signed rho_TA, signed rho_TB)",
+    "gap": "abs(rho_TA - rho_TB)"
+  },
+  "test": "Two-sided paired Wilcoxon; exact sign enumeration of average ranks; differences rounded to 12 decimals; zero differences omitted",
+  "multiple_comparison": "Holm across all three post-hoc diagnostic comparisons; separate from existing Fig5F tests; no sequential adjustment",
+  "inference_scope": "Hypothesis generation from a viewed interim snapshot; not a new confirmatory primary endpoint and not evidence that two cores are necessary",
+  "comparisons": {
+    "weaker": {
+      "n_pairs": 17,
+      "medians": [
+        -0.24642857142857144,
+        0.2636363636363636
+      ],
+      "median_paired_difference": 0.5,
+      "two_core_greater": 12,
+      "two_core_lower": 5,
+      "ties": 0,
+      "p_raw": 0.010986328125,
+      "p_holm": 0.032958984375,
+      "difference": "2 cores minus 1 core"
+    },
+    "stronger": {
+      "n_pairs": 17,
+      "medians": [
+        0.65,
+        0.625
+      ],
+      "median_paired_difference": -0.037254901961,
+      "two_core_greater": 8,
+      "two_core_lower": 9,
+      "ties": 0,
+      "p_raw": 0.926513671875,
+      "p_holm": 0.926513671875,
+      "difference": "2 cores minus 1 core"
+    },
+    "gap": {
+      "n_pairs": 17,
+      "medians": [
+        0.7987216648086213,
+        0.24285714285714283
+      ],
+      "median_paired_difference": -0.482142857143,
+      "two_core_greater": 5,
+      "two_core_lower": 12,
+      "ties": 0,
+      "p_raw": 0.0144805908203125,
+      "p_holm": 0.032958984375,
+      "difference": "2 cores minus 1 core"
+    }
+  },
+  "highest_TB_points": {
+    "1": [
+      {
+        "patient": "Y3",
+        "rho_TA": -0.8928571428571429,
+        "rho_TB": 0.9047619047619048
+      },
+      {
+        "patient": "E1",
+        "rho_TA": 0.6428571428571429,
+        "rho_TB": 0.8928571428571429
+      },
+      {
+        "patient": "Y15",
+        "rho_TA": 0.7765217391304348,
+        "rho_TB": 0.7817391304347826
+      },
+      {
+        "patient": "Y16",
+        "rho_TA": -0.24642857142857144,
+        "rho_TB": 0.7785714285714286
+      }
+    ],
+    "2": [
+      {
+        "patient": "E1",
+        "rho_TA": 0.5357142857142857,
+        "rho_TB": 0.8214285714285714
+      },
+      {
+        "patient": "E12",
+        "rho_TA": 0.7,
+        "rho_TB": 0.6166666666666667
+      },
+      {
+        "patient": "E5",
+        "rho_TA": 0.7294117647058823,
+        "rho_TB": 0.5852941176470589
+      },
+      {
+        "patient": "E18",
+        "rho_TA": 0.3,
+        "rho_TB": 0.5428571428571428
+      }
+    ]
+  },
+  "descriptives": {
+    "1": {
+      "TA_greater": 10,
+      "TB_greater": 7,
+      "both_positive": 4,
+      "both_above_point5": 2
+    },
+    "2": {
+      "TA_greater": 14,
+      "TB_greater": 3,
+      "both_positive": 15,
+      "both_above_point5": 4
+    }
+  },
+  "descriptive_thresholds_not_acceptance_tests": true
+}

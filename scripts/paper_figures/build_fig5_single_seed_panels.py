@@ -111,6 +111,8 @@ def main():
     parser.add_argument('--surface-only', action='store_true',
                         help='Hide Fig5E sampling points, boundary, hatching, working point and legend.')
     args = parser.parse_args()
+    if args.output.resolve() == (ROOT / 'results/paper-ready-figure/fig5').resolve():
+        parser.error('This historical Z/M painter belongs to Fig6; use build_fig5_current.py for the new Fig5 or choose a separate output directory.')
     args.output.mkdir(parents=True, exist_ok=True)
     if args.snapshot:
         snapshot = json.loads(args.snapshot.read_text())
@@ -196,7 +198,7 @@ def main():
         'F保留Fig3C算法和真实robust-z色条；模型采用0.5–3.5秒短基线与1秒早期窗，患者为30秒远端基线与0–10秒窗。模型短基线不确立模型/临床时间尺度等价，最近似患者病例只是示例。\n\n'
         '来源和可重建快照：`source_snapshot.json`、`fig5_metadata.json`、`panel_manifest.json`。作者已指定本图为新的Fig5，当前单panel导出仍待人工目视检查，科学状态维持CANDIDATE。\n\n'
         '重建（写入另一个目录）：\n\n```bash\n'
-        'LD_LIBRARY_PATH=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib /home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/paper_figures/build_fig5_single_seed_panels.py --snapshot results/paper-ready-figure/fig5/source_snapshot.json --output /tmp/fig5-rebuild\n```\n')
+        'LD_LIBRARY_PATH=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/lib /home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python scripts/paper_figures/build_fig5_single_seed_panels.py --snapshot results/paper-ready-figure/fig6/source_snapshot.json --output /tmp/fig5-rebuild\n```\n')
     print(json.dumps(dict(output=str(args.output), panels=list(exported), progress=p), ensure_ascii=False))
 
 

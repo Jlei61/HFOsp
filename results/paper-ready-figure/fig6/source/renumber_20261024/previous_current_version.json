@@ -1,0 +1,28 @@
+{
+  "version": "2026-09-30_unfiltered_readout",
+  "asset_id": "single_seed_zm_entry_and_onset_field",
+  "producer": "scripts/paper_figures/build_fig5_transition_focus.py",
+  "main_figure": "figures/fig5-complete-layout.pdf",
+  "time_window_s": [
+    8,
+    11
+  ],
+  "panels": {
+    "A": "Unfiltered virtual-contact current proxy, DC preserved, fixed pre-entry P95 scaling",
+    "B": "Blue Z, orange adaptation; All E solid, Core A dashed",
+    "C": "Raster windows",
+    "D": "Spatial sequence",
+    "E": "State trajectory",
+    "F": "Model and patient fields"
+  },
+  "simulation": "historical_manual_cores",
+  "parameter_scan": "parameter_scan/README.md",
+  "human_review": "PENDING",
+  "readout_normalization_window_s": [
+    0,
+    9.42
+  ],
+  "raw_mean_strip_displayed": false,
+  "readout_filter": null,
+  "readout_DC_preserved": true
+}

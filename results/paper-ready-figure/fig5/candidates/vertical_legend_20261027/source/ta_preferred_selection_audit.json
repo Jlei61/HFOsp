@@ -1,0 +1,980 @@
+{
+  "policy": {
+    "schema": "fig5_ta_preferred_selection_v1",
+    "author_request_date": "2026-10-27",
+    "core1_constraint": "signed rho_TA > signed rho_TB + 1e-12; both finite",
+    "core1_objective": "minimum original training J among eligible candidates",
+    "core2_selection": "unchanged minimum original training J",
+    "no_template_relabelling": true,
+    "no_absolute_correlations": true,
+    "no_extra_rho_threshold": true,
+    "no_TB_ceiling": true,
+    "no_new_simulations": true,
+    "infeasible_subject": "retained with missing 1-core readout",
+    "inference": "Post-hoc asymmetric selection-policy comparison; selection includes TB, so weaker TB is partly conditioned by design, not independent evidence of a core-count mechanism"
+  },
+  "subjects": [
+    {
+      "subject": "epilepsiae_1077",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_04",
+          "epoch": 14,
+          "J": 4.387010378265174,
+          "matched_rhos": [
+            0.2,
+            0.08571428571428572
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1077/bo02_04.json"
+        }
+      ],
+      "untested_higher_J_candidates": 14,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_04",
+      "selected_candidate": "bo02_04",
+      "previous_rhos": [
+        0.2,
+        0.08571428571428572
+      ],
+      "selected_rhos": [
+        0.2,
+        0.08571428571428572
+      ],
+      "previous_J": 4.387010378265174,
+      "selected_J": 4.387010378265174,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_06",
+          "epoch": 7,
+          "J": 4.271745969838984,
+          "matched_rhos": [
+            0.24545454545454545,
+            -0.5727272727272728
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1084/initial_06.json"
+        }
+      ],
+      "untested_higher_J_candidates": 14,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_06",
+      "selected_candidate": "initial_06",
+      "previous_rhos": [
+        0.24545454545454545,
+        -0.5727272727272728
+      ],
+      "selected_rhos": [
+        0.24545454545454545,
+        -0.5727272727272728
+      ],
+      "previous_J": 4.271745969838984,
+      "selected_J": 4.271745969838984,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 14,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 2.8852747444294047,
+          "matched_rhos": [
+            0.6428571428571429,
+            0.8928571428571429
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/initial_03.json"
+        },
+        {
+          "candidate": "bo02_06",
+          "epoch": 16,
+          "J": 3.459270179664879,
+          "matched_rhos": [
+            0.7857142857142857,
+            0.8571428571428571
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/bo02_06.json"
+        },
+        {
+          "candidate": "bo02_02",
+          "epoch": 12,
+          "J": 3.619110804778485,
+          "matched_rhos": [
+            0.7857142857142857,
+            0.8468812149338254
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/bo02_02.json"
+        },
+        {
+          "candidate": "bo02_04",
+          "epoch": 14,
+          "J": 3.877288454161794,
+          "matched_rhos": [
+            0.4857142857142857,
+            0.8285714285714286
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/bo02_04.json"
+        },
+        {
+          "candidate": "initial_04",
+          "epoch": 5,
+          "J": 5.61913185329258,
+          "matched_rhos": [
+            0.0,
+            0.2857142857142857
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/initial_04.json"
+        },
+        {
+          "candidate": "bo02_01",
+          "epoch": 11,
+          "J": 5.918622305259828,
+          "matched_rhos": [
+            -0.8214285714285714,
+            0.8928571428571429
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/bo02_01.json"
+        },
+        {
+          "candidate": "initial_00",
+          "epoch": 1,
+          "J": 11.843165498889386,
+          "matched_rhos": [
+            0.32142857142857145,
+            0.75
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/initial_00.json"
+        },
+        {
+          "candidate": "bo02_00",
+          "epoch": 10,
+          "J": 13.400932291706674,
+          "matched_rhos": [
+            -0.2857142857142857,
+            0.8571428571428571
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/bo02_00.json"
+        },
+        {
+          "candidate": "initial_02",
+          "epoch": 3,
+          "J": 13.862437318305128,
+          "matched_rhos": [
+            0.9285714285714286,
+            -0.6071428571428571
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1096/initial_02.json"
+        }
+      ],
+      "untested_higher_J_candidates": 5,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_03",
+      "selected_candidate": "initial_02",
+      "previous_rhos": [
+        0.6428571428571429,
+        0.8928571428571429
+      ],
+      "selected_rhos": [
+        0.9285714285714286,
+        -0.6071428571428571
+      ],
+      "previous_J": 2.8852747444294047,
+      "selected_J": 13.862437318305128,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_01",
+          "epoch": 2,
+          "J": 4.399889699529008,
+          "matched_rhos": [
+            0.9357142857142857,
+            -0.8214285714285714
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1146/initial_01.json"
+        }
+      ],
+      "untested_higher_J_candidates": 14,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_01",
+      "selected_candidate": "initial_01",
+      "previous_rhos": [
+        0.9357142857142857,
+        -0.8214285714285714
+      ],
+      "selected_rhos": [
+        0.9357142857142857,
+        -0.8214285714285714
+      ],
+      "previous_J": 4.399889699529008,
+      "selected_J": 4.399889699529008,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 14,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_02",
+          "epoch": 13,
+          "J": 5.215432952783831,
+          "matched_rhos": [
+            0.65,
+            -0.15
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_1150/bo02_02.json"
+        }
+      ],
+      "untested_higher_J_candidates": 13,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_02",
+      "selected_candidate": "bo02_02",
+      "previous_rhos": [
+        0.65,
+        -0.15
+      ],
+      "selected_rhos": [
+        0.65,
+        -0.15
+      ],
+      "previous_J": 5.215432952783831,
+      "selected_J": 5.215432952783831,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_253",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_00",
+          "epoch": 1,
+          "J": 3.456643752057238,
+          "matched_rhos": [
+            -0.38095238095238093,
+            -0.2
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_253/initial_00.json"
+        },
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 5.646236402129276,
+          "matched_rhos": [
+            0.8333333333333334,
+            0.38095238095238093
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_253/initial_03.json"
+        }
+      ],
+      "untested_higher_J_candidates": 13,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_00",
+      "selected_candidate": "initial_03",
+      "previous_rhos": [
+        -0.38095238095238093,
+        -0.2
+      ],
+      "selected_rhos": [
+        0.8333333333333334,
+        0.38095238095238093
+      ],
+      "previous_J": 3.456643752057238,
+      "selected_J": 5.646236402129276,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_384",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_02",
+          "epoch": 12,
+          "J": 2.0833636017598844,
+          "matched_rhos": [
+            0.48333333333333334,
+            -0.6666666666666666
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_384/bo02_02.json"
+        }
+      ],
+      "untested_higher_J_candidates": 14,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_02",
+      "selected_candidate": "bo02_02",
+      "previous_rhos": [
+        0.48333333333333334,
+        -0.6666666666666666
+      ],
+      "selected_rhos": [
+        0.48333333333333334,
+        -0.6666666666666666
+      ],
+      "previous_J": 2.0833636017598844,
+      "selected_J": 2.0833636017598844,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_590",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 14,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_04",
+          "epoch": 5,
+          "J": 1.4742363533034633,
+          "matched_rhos": [
+            0.7666666666666667,
+            -0.7666666666666667
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_590/initial_04.json"
+        }
+      ],
+      "untested_higher_J_candidates": 13,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_04",
+      "selected_candidate": "initial_04",
+      "previous_rhos": [
+        0.7666666666666667,
+        -0.7666666666666667
+      ],
+      "selected_rhos": [
+        0.7666666666666667,
+        -0.7666666666666667
+      ],
+      "previous_J": 1.4742363533034633,
+      "selected_J": 1.4742363533034633,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_620",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 16,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo01_04",
+          "epoch": 13,
+          "J": 2.3351290558527125,
+          "matched_rhos": [
+            0.9523809523809523,
+            -0.7833333333333333
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_620/bo01_04.json"
+        }
+      ],
+      "untested_higher_J_candidates": 15,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo01_04",
+      "selected_candidate": "bo01_04",
+      "previous_rhos": [
+        0.9523809523809523,
+        -0.7833333333333333
+      ],
+      "selected_rhos": [
+        0.9523809523809523,
+        -0.7833333333333333
+      ],
+      "previous_J": 2.3351290558527125,
+      "selected_J": 2.3351290558527125,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_635",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 13,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_01",
+          "epoch": 12,
+          "J": 2.023601716012156,
+          "matched_rhos": [
+            0.6428571428571429,
+            0.17857142857142858
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_635/bo02_01.json"
+        }
+      ],
+      "untested_higher_J_candidates": 12,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_01",
+      "selected_candidate": "bo02_01",
+      "previous_rhos": [
+        0.6428571428571429,
+        0.17857142857142858
+      ],
+      "selected_rhos": [
+        0.6428571428571429,
+        0.17857142857142858
+      ],
+      "previous_J": 2.023601716012156,
+      "selected_J": 2.023601716012156,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "epilepsiae_958",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 3.819052750601365,
+          "matched_rhos": [
+            -0.46176470588235297,
+            0.23529411764705882
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_958/initial_03.json"
+        },
+        {
+          "candidate": "bo01_05",
+          "epoch": 14,
+          "J": 3.8420601640350633,
+          "matched_rhos": [
+            0.6785714285714286,
+            -0.38235294117647056
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/epilepsiae_958/bo01_05.json"
+        }
+      ],
+      "untested_higher_J_candidates": 13,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_03",
+      "selected_candidate": "bo01_05",
+      "previous_rhos": [
+        -0.46176470588235297,
+        0.23529411764705882
+      ],
+      "selected_rhos": [
+        0.6785714285714286,
+        -0.38235294117647056
+      ],
+      "previous_J": 3.819052750601365,
+      "selected_J": 3.8420601640350633,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_03",
+          "epoch": 13,
+          "J": 6.304677636417083,
+          "matched_rhos": [
+            -0.8928571428571429,
+            0.9047619047619048
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/bo02_03.json"
+        },
+        {
+          "candidate": "initial_06",
+          "epoch": 7,
+          "J": 6.784619877603987,
+          "matched_rhos": [
+            0.19047619047619047,
+            0.7142857142857143
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/initial_06.json"
+        },
+        {
+          "candidate": "bo02_01",
+          "epoch": 11,
+          "J": 8.186951421233955,
+          "matched_rhos": [
+            -0.21428571428571427,
+            0.9047619047619048
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/bo02_01.json"
+        },
+        {
+          "candidate": "bo02_02",
+          "epoch": 12,
+          "J": 11.223324949980503,
+          "matched_rhos": [
+            -0.6428571428571429,
+            0.9285714285714286
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/bo02_02.json"
+        },
+        {
+          "candidate": "bo02_00",
+          "epoch": 10,
+          "J": 12.559012903021658,
+          "matched_rhos": [
+            -0.7380952380952381,
+            0.9285714285714286
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/bo02_00.json"
+        },
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 13.974455107208653,
+          "matched_rhos": [
+            0.7380952380952381,
+            0.07142857142857142
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_chengshuai/initial_03.json"
+        }
+      ],
+      "untested_higher_J_candidates": 9,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_03",
+      "selected_candidate": "initial_03",
+      "previous_rhos": [
+        -0.8928571428571429,
+        0.9047619047619048
+      ],
+      "selected_rhos": [
+        0.7380952380952381,
+        0.07142857142857142
+      ],
+      "previous_J": 6.304677636417083,
+      "selected_J": 13.974455107208653,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 16,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_00",
+          "epoch": 1,
+          "J": 2.874765718437308,
+          "matched_rhos": [
+            0.3575757575757576,
+            -0.18787878787878787
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_huanghanwen/initial_00.json"
+        }
+      ],
+      "untested_higher_J_candidates": 15,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_00",
+      "selected_candidate": "initial_00",
+      "previous_rhos": [
+        0.3575757575757576,
+        -0.18787878787878787
+      ],
+      "selected_rhos": [
+        0.3575757575757576,
+        -0.18787878787878787
+      ],
+      "previous_J": 2.874765718437308,
+      "selected_J": 2.874765718437308,
+      "changed": false,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 14,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "bo02_05",
+          "epoch": 15,
+          "J": 4.614430259395404,
+          "matched_rhos": [
+            0.7765217391304348,
+            0.7817391304347826
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_litengsheng/bo02_05.json"
+        },
+        {
+          "candidate": "bo02_03",
+          "epoch": 13,
+          "J": 4.923666754568489,
+          "matched_rhos": [
+            -0.1582608695652174,
+            0.4678260869565217
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_litengsheng/bo02_03.json"
+        },
+        {
+          "candidate": "initial_06",
+          "epoch": 7,
+          "J": 5.580986851769289,
+          "matched_rhos": [
+            -0.5017391304347826,
+            0.6026086956521739
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_litengsheng/initial_06.json"
+        },
+        {
+          "candidate": "initial_02",
+          "epoch": 3,
+          "J": 5.602958423252335,
+          "matched_rhos": [
+            0.76,
+            0.10350877192982456
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_litengsheng/initial_02.json"
+        }
+      ],
+      "untested_higher_J_candidates": 10,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "bo02_05",
+      "selected_candidate": "initial_02",
+      "previous_rhos": [
+        0.7765217391304348,
+        0.7817391304347826
+      ],
+      "selected_rhos": [
+        0.76,
+        0.10350877192982456
+      ],
+      "previous_J": 4.614430259395404,
+      "selected_J": 5.602958423252335,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 12,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 4.680867894301388,
+          "matched_rhos": [
+            -0.0024509803921568627,
+            0.07598039215686274
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_liyouran/initial_03.json"
+        },
+        {
+          "candidate": "bo02_03",
+          "epoch": 13,
+          "J": 4.948071560687716,
+          "matched_rhos": [
+            0.5759803921568627,
+            0.5428571428571428
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_liyouran/bo02_03.json"
+        }
+      ],
+      "untested_higher_J_candidates": 10,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_03",
+      "selected_candidate": "bo02_03",
+      "previous_rhos": [
+        -0.0024509803921568627,
+        0.07598039215686274
+      ],
+      "selected_rhos": [
+        0.5759803921568627,
+        0.5428571428571428
+      ],
+      "previous_J": 4.680867894301388,
+      "selected_J": 4.948071560687716,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 15,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_02",
+          "epoch": 3,
+          "J": 5.891485055613338,
+          "matched_rhos": [
+            -0.24642857142857144,
+            0.7785714285714286
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_02.json"
+        },
+        {
+          "candidate": "bo01_04",
+          "epoch": 13,
+          "J": 6.557647187020945,
+          "matched_rhos": [
+            -0.03571428571428571,
+            0.578021978021978
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_04.json"
+        },
+        {
+          "candidate": "bo01_01",
+          "epoch": 10,
+          "J": 6.727244945821492,
+          "matched_rhos": [
+            0.08214285714285714,
+            0.95
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_01.json"
+        },
+        {
+          "candidate": "bo01_05",
+          "epoch": 14,
+          "J": 7.61444601670469,
+          "matched_rhos": [
+            0.10714285714285714,
+            0.9636363636363636
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_05.json"
+        },
+        {
+          "candidate": "initial_04",
+          "epoch": 5,
+          "J": 8.173466415025807,
+          "matched_rhos": [
+            -0.7964285714285714,
+            0.1
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_04.json"
+        },
+        {
+          "candidate": "initial_05",
+          "epoch": 6,
+          "J": 8.446470032994482,
+          "matched_rhos": [
+            0.5607142857142857,
+            0.9384615384615385
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_05.json"
+        },
+        {
+          "candidate": "initial_03",
+          "epoch": 4,
+          "J": 9.105995989562944,
+          "matched_rhos": [
+            -0.025,
+            0.6175824175824176
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_03.json"
+        },
+        {
+          "candidate": "bo01_02",
+          "epoch": 11,
+          "J": 9.758050321768751,
+          "matched_rhos": [
+            -0.09285714285714286,
+            0.4153846153846154
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_02.json"
+        },
+        {
+          "candidate": "initial_07",
+          "epoch": 8,
+          "J": 11.150217416805736,
+          "matched_rhos": [
+            0.2392857142857143,
+            0.525
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_07.json"
+        },
+        {
+          "candidate": "bo01_00",
+          "epoch": 9,
+          "J": 11.616472197779927,
+          "matched_rhos": [
+            0.06428571428571428,
+            0.7107142857142857
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_00.json"
+        },
+        {
+          "candidate": "bo01_07",
+          "epoch": 16,
+          "J": 13.321475613647882,
+          "matched_rhos": [
+            -0.4785714285714286,
+            0.05
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_07.json"
+        },
+        {
+          "candidate": "bo01_06",
+          "epoch": 15,
+          "J": 13.356638082887132,
+          "matched_rhos": [
+            null,
+            null
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/bo01_06.json"
+        },
+        {
+          "candidate": "initial_00",
+          "epoch": 1,
+          "J": 13.48003550623475,
+          "matched_rhos": [
+            -0.5071428571428571,
+            0.1357142857142857
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_00.json"
+        },
+        {
+          "candidate": "initial_06",
+          "epoch": 7,
+          "J": 14.367127136094764,
+          "matched_rhos": [
+            -0.85,
+            0.17575757575757575
+          ],
+          "eligible": false,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_06.json"
+        },
+        {
+          "candidate": "initial_01",
+          "epoch": 2,
+          "J": 14.45023273642722,
+          "matched_rhos": [
+            0.9,
+            0.21428571428571427
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_xuxinyi/initial_01.json"
+        }
+      ],
+      "untested_higher_J_candidates": 0,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_02",
+      "selected_candidate": "initial_01",
+      "previous_rhos": [
+        -0.24642857142857144,
+        0.7785714285714286
+      ],
+      "selected_rhos": [
+        0.9,
+        0.21428571428571427
+      ],
+      "previous_J": 5.891485055613338,
+      "selected_J": 14.45023273642722,
+      "changed": true,
+      "feasible": true
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "rule": "finite signed rho_TA > rho_TB + 1e-12; minimum J then epoch",
+      "candidate_budget": 16,
+      "scorable_candidates": 16,
+      "evaluated_in_increasing_J": [
+        {
+          "candidate": "initial_04",
+          "epoch": 5,
+          "J": 4.051187068477766,
+          "matched_rhos": [
+            0.7252173913043478,
+            -0.0735042735042735
+          ],
+          "eligible": true,
+          "readout": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024/ta_preferred_snapshots/prefix16_20261027/readouts/yuquan_zhaochenxi/initial_04.json"
+        }
+      ],
+      "untested_higher_J_candidates": 15,
+      "early_stop": "First eligible candidate is the constrained minimum because candidates are ordered by (J, epoch)",
+      "previous_candidate": "initial_04",
+      "selected_candidate": "initial_04",
+      "previous_rhos": [
+        0.7252173913043478,
+        -0.0735042735042735
+      ],
+      "selected_rhos": [
+        0.7252173913043478,
+        -0.0735042735042735
+      ],
+      "previous_J": 4.051187068477766,
+      "selected_J": 4.051187068477766,
+      "changed": false,
+      "feasible": true
+    }
+  ],
+  "n_subjects": 17,
+  "n_feasible": 17,
+  "n_changed": 7,
+  "budget": 16
+}

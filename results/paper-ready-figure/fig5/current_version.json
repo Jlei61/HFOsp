@@ -1,0 +1,66 @@
+{
+  "figure": "Fig5",
+  "asset_id": "spatial_snn_propagation_and_core_count",
+  "version": "vertical_legend_20261027",
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "human_visual_acceptance": "PENDING",
+  "package": "results/paper-ready-figure/fig5",
+  "candidate": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027",
+  "manifest": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/figure5_manifest.json",
+  "producer": "scripts/paper_figures/build_fig5_current.py",
+  "renderer": "scripts/paper_figures/build_fig5_aligned_layout.py",
+  "documentation": "docs/current_figure5.md",
+  "complete_layout": {
+    "png": "results/paper-ready-figure/fig5/figures/fig5-complete-layout.png",
+    "pdf": "results/paper-ready-figure/fig5/figures/fig5-complete-layout.pdf",
+    "svg": "results/paper-ready-figure/fig5/figures/fig5-complete-layout.svg"
+  },
+  "cohort_experiment": "/data/hfosp/topic4_sef_hfo/cohort_core_count_20261024",
+  "cohort_comparison_complete": false,
+  "previous_fig5_reassigned_to": "Fig6",
+  "author_same_workpoint_decision": "2026-10-24",
+  "supersedes_layout": "template_ticks_20261027",
+  "cohort_interim": true,
+  "scientific_status": "AUTHOR_REQUESTED_INTERIM",
+  "interim_common_budget": 16,
+  "interim_planned_budget": 32,
+  "cohort_statistics": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/core_count_statistics.json",
+  "interim_snapshot": "2026-10-27 09:42",
+  "displayed_patient_n": 17,
+  "cohort_selection": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/source/cohort_selection.json",
+  "cohort_definition": "shared axis eligible patients intersected with original model cohort",
+  "F_sample_size_annotation": false,
+  "F_stage_annotation": false,
+  "cohort_display": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/source/cohort_display.json",
+  "displayed_metrics": [
+    "TA–MTA",
+    "TB–MTB"
+  ],
+  "statistical_family": [
+    "TA–MTA",
+    "TB–MTB"
+  ],
+  "analysis_status": "POST_HOC_ASYMMETRIC_SELECTION",
+  "selection_policy": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/source/ta_preferred_policy.json",
+  "selection_audit": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/source/ta_preferred_selection_audit.json",
+  "selection_costs": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/selection_costs.csv",
+  "new_workpoint_independent_replay": "NOT_YET_USED",
+  "layout_validation": "results/paper-ready-figure/fig5/candidates/vertical_legend_20261027/layout_validation.json",
+  "F_core_labels": "upper-right vertical legend: 1 core, 2 cores",
+  "F_xaxis_title": "",
+  "F_xaxis_ticks": [
+    0.5,
+    3.5
+  ],
+  "F_significance_display": "Significant comparisons only: Holm-adjusted stars; nonsignificant annotation and bracket omitted",
+  "F_xaxis_tick_labels": [
+    "TA–MTA",
+    "TB–MTB"
+  ],
+  "F_star_y": 1.04,
+  "F_legend_significance_gap_mm": 3.354552469135786,
+  "F_legend_columns": 1,
+  "author_designated_current": true,
+  "author_registration_date": "2026-10-27",
+  "publication_authorized_on": "2026-10-27"
+}

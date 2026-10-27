@@ -1,3 +1,7 @@
+<!-- CURRENT_FIGURE5_20261027 -->
+> **新 Figure 5（作者指定，2026-10-27）：** 当前为 `spatial_snn_propagation_and_core_count`、`vertical_legend_20261027`，先读 [当前 Fig5](docs/current_figure5.md) 与 `results/paper-ready-figure/fig5/current_version.json`。这是从旧 Fig4 拆出的空间 SNN 传播 A–F：A–E 为同一 `xy_left_20` 工作点；F 为 17 位 shared axis 患者前 16/32 次搜索、TA 偏好约束下的单 core 与原最低 J 双 core 对照。此中期科学状态不因发布而升级。当前布局保留 TA/TB 身份、下方模板刻度、右上角竖排 core 图例、只标显著星号。校验 `build_fig5_current.py`，重绘 `build_fig5_aligned_layout.py`；不得用旧 Z/M producer 覆盖。**原 Figure 5 的 Z/M 图现为 Figure 6**，见 [当前 Fig6](docs/current_figure6.md) 与 `fig6/current_version.json`。共享机器旧 worktree 以 `/home/honglab/leijiaxin/HFOsp/` 的这些入口为准；其他机器先更新 checkout。新 Fig4 属于另一任务，不由本次发布替换。
+<!-- /CURRENT_FIGURE5_20261027 -->
+
 <!-- WORKSPACE_STATUS_20261015 -->
 > **当前4个工作区（2026-10-15）：** 主目录、RNN开发区、统一SNN开发区、`main-cherry`整合检查区。见 [工作区状态](docs/workspace_status.md) 和 [SNN维护入口](docs/snn_workspace.md)。SNN新工作统一在 `topic4-continuous-core-state-r1`；`topic4-substrate-autapse-fix`已退出worktree登记，仅保留冻结代码/结果依赖，不再继续开发。旧发布区已关闭；主目录的并行工作和既存冲突保留。
 <!-- /WORKSPACE_STATUS_20261015 -->
