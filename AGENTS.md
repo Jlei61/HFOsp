@@ -23,7 +23,7 @@
 ## 当前 Figure 4 入口
 
 - **Fig4当前数据版本**：以 `docs/current_figure4.md` 和正式 registry 为准。C 为优化目标示意，D/E 为原生无 core／单 core 活动，F 为 1–4 core 各 4 次重复、共同前 31 epoch；G/H/I 使用实际三分量训练 J，其中 H 为 83/413 低 J 前 20%位置密度。旧 D 方向响应移至 I、旧 E 位置密度移至 H，不能按旧字母回退。
-- **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panel_b/c/d/e/i`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
+- **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panels.A`–`panels.I`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
 
 # Agent Guide
 
