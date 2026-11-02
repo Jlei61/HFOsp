@@ -74,11 +74,24 @@
   "simplification_boundary": "One fewer intrinsic adaptation state versus separate M/K; omits independent M/K timescales and voltage-dependent K conductance. No claim of improved patient fit or isolated causal contribution based on the continuous trajectory alone.",
   "validation": {
     "mathjax_version": "3.2.2",
-    "formula_expressions_rendered": 94,
-    "display_equations": 4,
+    "formula_expressions_rendered": 102,
+    "display_equations": 5,
     "math_errors": 0,
-    "display_equations_unchanged": true,
+    "original_four_display_equations_unchanged": true,
+    "separate_Hill_equation_added": true,
     "panel_caption_paragraphs_unchanged": 35,
-    "historical_supplement_unchanged": true
+    "figure6_recorded_q_samples_checked": 6000,
+    "smooth_run_recorded_adaptation_q_samples_checked": 3000
+  },
+  "feedback_function_audit": "fig6_feedback_function_audit.json",
+  "figure6_feedback_function": "Both G target and adaptation q use clip((R-200)/300,0,1).",
+  "separate_smooth_feedback_analysis": {
+    "model": "ZGM_UNIFIED_CURRENT_SMOOTH_G_V1",
+    "producer_copy": "fig6_smooth_feedback_campaign.py",
+    "producer_sha256": "8a79bec42dfddf3f169e4c86061bc2bfd6e9626eeaa04fb1dae3d70b719ee7fd",
+    "G_target": "H(R)=30*(R/350)^(14/3)/(1+(R/350)^(14/3))",
+    "adaptation_q": "clip((R-200)/300,0,1), unchanged",
+    "figure6_replaced": false,
+    "run": "/data/hfosp/topic4_sef_hfo/unified_feedback_phase_20261030/runs/smooth_tg0p5_lm1_s9108405"
   }
 }

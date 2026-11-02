@@ -1,0 +1,80 @@
+{
+  "checked_on": "2026-11-02",
+  "displayed_figure": {
+    "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.png",
+    "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2",
+    "source_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+    "source_simulation_rerun": false
+  },
+  "runs": {
+    "figure6_clip": {
+      "run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+      "model": "ZGM_UNIFIED_CURRENT_ADAPTATION_V1",
+      "status": "COMPLETE",
+      "end_s": 120.0,
+      "producer": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/source/run_topic4_unified_current_adaptation.py",
+      "producer_sha256": "9fbd0374933a296eb1b851cca6f646a10ced6f0274afa79642b14a3fdbc62000",
+      "producer_matches_protocol": true,
+      "global_feedback_equation": "G=30*s; 0.5s sdot=q-s; q=clip((R-200)/300,0,1); R filter15ms",
+      "adaptation_q_samples": 6000,
+      "recorded_q_max_error_vs_clip": 0.0,
+      "recorded_q_max_error_vs_hill": 0.11543329010706094,
+      "G_equals_30s_max_error": 0.0,
+      "sample_at_1s": {
+        "time_s": 1.0,
+        "R_Hz": 34.35263872049705,
+        "recorded_q": 0.0,
+        "raw_G": 0.0
+      }
+    },
+    "smooth_analysis": {
+      "run": "/data/hfosp/topic4_sef_hfo/unified_feedback_phase_20261030/runs/smooth_tg0p5_lm1_s9108405",
+      "model": "ZGM_UNIFIED_CURRENT_SMOOTH_G_V1",
+      "status": "COMPLETE",
+      "end_s": 60.0,
+      "producer": "/data/hfosp/topic4_sef_hfo/unified_feedback_phase_20261030/source/campaign.py",
+      "producer_sha256": "8a79bec42dfddf3f169e4c86061bc2bfd6e9626eeaa04fb1dae3d70b719ee7fd",
+      "producer_matches_protocol": true,
+      "global_feedback_equation": "tauG dG/dt=30 R^(14/3)/(R^(14/3)+350^(14/3))-G; R filter15ms",
+      "adaptation_q_samples": 3000,
+      "recorded_q_max_error_vs_clip": 0.0,
+      "recorded_q_max_error_vs_hill": 0.07445286297033327,
+      "G_equals_30s_max_error": 0.0,
+      "sample_at_1s": {
+        "time_s": 1.0,
+        "R_Hz": 15.934939735406354,
+        "recorded_q": 0.0,
+        "raw_G": 0.0007839251155357919
+      }
+    }
+  },
+  "conclusion": "The displayed Figure 6 uses the clip gate for both G and adaptation. The separate smooth-analysis model uses a Hill sigmoid only for G; adaptation q remains clip.",
+  "smooth_baseline_validation": {
+    "status": "PASS_NATIVE_WORKPOINT_VALIDATION",
+    "completed_epoch": 1793377969.2429812,
+    "model": "ZGM_UNIFIED_CURRENT_SMOOTH_G_V1",
+    "network_changed": false,
+    "noise_seed": 9108405,
+    "observed_s": 60,
+    "independent_trajectories": 1,
+    "entry_s": 11.02,
+    "exit_s": 18.05,
+    "both_core_Z_reference_recovery_s": 25.36,
+    "first_returned_short_event_s": 49.98,
+    "first_returned_two_core_short_event_s": 50.22,
+    "initial_brief_events": 40,
+    "returned_brief_events": 39,
+    "returned_two_core_brief_events": 31,
+    "returned_brief_span_s": 9.89,
+    "formal_Hopf_established": false,
+    "figure_human_acceptance": "PENDING",
+    "figure6_replaced": false,
+    "figures": [
+      "figures/native_workpoint_validation.png",
+      "figures/native_workpoint_validation.pdf",
+      "return_correspondence/smooth_tg0p5_lm1_s9108405/figures/native_short_event_return.png",
+      "return_correspondence/smooth_tg0p5_lm1_s9108405/figures/native_short_event_return.pdf"
+    ]
+  },
+  "frozen_smooth_producer_copy": "fig6_smooth_feedback_campaign.py"
+}
