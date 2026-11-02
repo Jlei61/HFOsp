@@ -67,15 +67,18 @@
       "decay_time": "tau_M(R)",
       "spike_jump": "Delta M(R)=[a0/tau_M(R)+a1*q(R)]/eta_M",
       "source_mapping": "tau_M in the report denotes the unchanged tauA / tau_A time constant in the frozen producer and protocol."
-    }
+    },
+    "narrative": "Author voice: prior scientific obstacle, concrete model changes, physiological rationale, then achieved continuous-run behavior; preserve attribution to collaboration with 邹晓龙老师.",
+    "potassium_wording": "Slow potassium-current adaptation effects are incorporated into M; potassium concentration is not explicitly simulated."
   },
   "simplification_boundary": "One fewer intrinsic adaptation state versus separate M/K; omits independent M/K timescales and voltage-dependent K conductance. No claim of improved patient fit or isolated causal contribution based on the continuous trajectory alone.",
   "validation": {
     "mathjax_version": "3.2.2",
-    "formula_expressions_rendered": 93,
+    "formula_expressions_rendered": 94,
     "display_equations": 4,
     "math_errors": 0,
-    "figure_sections_content_unchanged": true,
-    "equation_content_unchanged_after_reordering": true
+    "display_equations_unchanged": true,
+    "panel_caption_paragraphs_unchanged": 35,
+    "historical_supplement_unchanged": true
   }
 }
