@@ -1,0 +1,68 @@
+{
+  "N": 125,
+  "status": "SCORABLE",
+  "J": 4.023601451029074,
+  "groups": {
+    "rank_pattern": {
+      "N": 125,
+      "A": 0.1306253036663823,
+      "B": 0.002172426421284722,
+      "D_off": 0.12845287724509757,
+      "D16": 0.14542495866138447,
+      "scaled": 2.8635017557140157
+    },
+    "participation": {
+      "N": 125,
+      "A": 0.0641464809411972,
+      "B": 0.0017751744166292118,
+      "D_off": 0.06237130652456798,
+      "D16": 0.0762398566544837,
+      "scaled": 1.3680191329681
+    },
+    "local_and_interrod_timing": {
+      "N": 125,
+      "A": 0.34119449593861845,
+      "B": 0.003099759548242203,
+      "D_off": 0.33809473639037624,
+      "D16": 0.36231160786101846,
+      "scaled": 7.8392834644051055
+    }
+  },
+  "candidate": "dense_axis4_01",
+  "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_01/2511_847401/workers/trajectory.json",
+  "source_sha256": "ce12278607f6bf44b933b20b1d6587c135930cb7b07b4ef6c5ab8591a0e1d228",
+  "vector": [
+    3.4492143200000003,
+    12.12890135,
+    16.47920304,
+    4.715511530000001,
+    1.0416666666666667,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "components": [
+    2.8635017557140157,
+    7.8392834644051055,
+    1.3680191329681
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "time": 1789491748.6826565,
+  "J_joint": 5.1662153365812475,
+  "joint": {
+    "N": 125,
+    "A": 0.27926358215831293,
+    "B": 0.0032176446575886194,
+    "D_off": 0.2760459375007243,
+    "scaled": 5.1662153365812475
+  },
+  "search_role": "historical_compatible",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/dense_axis4_01.json",
+  "historical_score_sha256": "5ecf421ce87807cb7113c19c5881505eb6e6cc6cd7f7698e7826714e16679067",
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/dense_axis4_01.json",
+  "reused_from_score_sha256": "f46e85f4f389416f0e93cc542e5998923fd6a2b14595fc62cad4c98933953460",
+  "previous_search_role": "historical"
+}

@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "current_version": "core_search_final_20261011",
+  "current_version": "snn_network_optimization_final_20261102",
   "archive_root": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization",
   "policy": "All archived packages are historical; only current_version.json selects the formal Figure 4. Original registrations remain intact as provenance.",
   "previous_formal": {
+    "version": "core_search_final_20261011",
+    "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
     "status": "HISTORICAL_SUPERSEDED",
-    "layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
-    "path": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4"
+    "path": "results/paper-ready-figure/archive/2026-11-02_fig4_reorganization/fig4"
   },
   "candidates": [
     {
@@ -496,5 +497,12 @@
     "results/paper-ready-figure/archive/2026-10-09_pre_square_axes_left_zoom_fig4/fig4",
     "results/paper-ready-figure/archive/2026-10-09_pre_tighter_columns_fig4/fig4",
     "results/paper-ready-figure/archive/2026-10-10_pre_mechanism_fig4/fig4"
+  ],
+  "promotions": [
+    {
+      "version": "snn_network_optimization_final_20261102",
+      "source": "results/paper-ready-figure/fig4/candidates/snn_layout_ei_labels_20261031",
+      "accepted_on": "2026-11-02"
+    }
   ]
 }

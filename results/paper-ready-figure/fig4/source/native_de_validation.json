@@ -1,0 +1,80 @@
+{
+  "checks": {
+    "resolved_duration_matches_execution": true,
+    "export_hashes": true,
+    "diagnostic_exact_input_pairing": true,
+    "historical_native_prefix": true,
+    "complete_events_not_terminal_censored": true,
+    "terminal_global_event_retained_as_censored": true,
+    "26_local_short_bursts": true,
+    "local_burst_durations_20_to_40ms": true,
+    "D_all_ROI_spikes_plotted": true,
+    "D_LFP_exact_native_samples": true,
+    "D_E_spike_count": true,
+    "D_45mm_square": true,
+    "E_all_ROI_spikes_plotted": true,
+    "E_LFP_exact_native_samples": true,
+    "E_E_spike_count": true,
+    "E_45mm_square": true,
+    "identical_raster_y": true,
+    "independent_LFP_limits_explicit": true,
+    "LFP_labels_requested": true,
+    "matched_time_window": true,
+    "E_red_I_blue": true,
+    "shared_threshold_scale_covers_actual_field": true,
+    "D_sparse_nonzero": true,
+    "D_no_population_bursts": true,
+    "D_no_core_circle": true,
+    "D_white_field": true,
+    "D_uniform_background_threshold": true,
+    "E_trajectory_byte_unchanged": true,
+    "D_trajectory_byte_unchanged": true,
+    "matched_1400ms_display": true,
+    "three_complete_local_bursts_displayed": true,
+    "core_overlay_exact_thresholds": true,
+    "core_overlay_exact_positions": true
+  },
+  "all_pass": true,
+  "displayed_E_bursts": [
+    {
+      "start_ms": 1660.0,
+      "end_ms": 1690.0,
+      "duration_ms": 30.0,
+      "peak_active_fraction": 0.6375442739079102,
+      "short_burst": true
+    },
+    {
+      "start_ms": 2260.0,
+      "end_ms": 2290.0,
+      "duration_ms": 30.0,
+      "peak_active_fraction": 0.7095631641086186,
+      "short_burst": true
+    },
+    {
+      "start_ms": 2710.0,
+      "end_ms": 2740.0,
+      "duration_ms": 30.0,
+      "peak_active_fraction": 0.6765053128689492,
+      "short_burst": true
+    }
+  ],
+  "counts": {
+    "E": 847,
+    "I": 191
+  },
+  "window_ms": [
+    1500.0,
+    2900.0
+  ],
+  "lfp_ylim": {
+    "D": [
+      10.084456707882953,
+      18.49069119153396
+    ],
+    "E": [
+      -65.3618721606485,
+      1143.7893516127006
+    ]
+  },
+  "acceptance": "PENDING_AUTHOR_VISUAL_REVIEW"
+}

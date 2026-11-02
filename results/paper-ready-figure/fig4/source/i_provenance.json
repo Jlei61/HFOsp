@@ -1,0 +1,532 @@
+{
+  "formal_version": "core_search_final_20261011",
+  "formal_panel_d": {
+    "version": "angle_three_error_response_v1",
+    "source_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
+    "source_table": "source/D_connection_response.csv",
+    "parent_panel": "D",
+    "parameter": "EE_angle_offset_deg",
+    "conditions": 13,
+    "showcase_references": false
+  },
+  "source_csv": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/source/D_connection_response.csv",
+  "source_csv_sha256": "bf4b0eddab800bf30a0752dbd4c31cee395fbe8c1697573af26570087cb8ffb7",
+  "target_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/analysis/diagnostic_observables.json",
+  "target_source_sha256": "2680956be7db9e3614bb9acae2c2dbe57a82b3fd45d6a209da4365be1fdf16b4",
+  "patient_fit_events": 19770,
+  "fixed_parameters": {
+    "centers_mm": [
+      [
+        3.4492143200000003,
+        12.12890135
+      ],
+      [
+        16.47920304,
+        4.715511530000001
+      ]
+    ],
+    "radii_mm": [
+      1.7525782905619196,
+      1.7525782905619196
+    ],
+    "core_mean_rate_scale": 0.95,
+    "core_ou_correlation": 0.0,
+    "shape": {},
+    "outgoing": {},
+    "parameters": {
+      "EE_same_core_scale": 0.85,
+      "EE_core_to_out_scale": 1.25,
+      "EE_out_to_out_scale": 1.0,
+      "EI_same_core_scale": 1.0,
+      "IE_same_core_scale": 1.0,
+      "II_same_core_scale": 1.0,
+      "depth_A_scale": 1.0,
+      "depth_B_scale": 1.0,
+      "radius_A_mm": 1.7525782905619196,
+      "radius_B_mm": 1.7525782905619196,
+      "EE_core_to_out_degree_scale": 1.0,
+      "EE_kernel_perp_scale": 1.5,
+      "EE_kernel_parallel_scale": 1.0
+    }
+  },
+  "source_code": [
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/report_topic4_label_free_dense.py",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/report_topic4_three_observable_raw.py",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_three_observable_objective.py",
+    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/source/fig4_parameter_response_assets.py"
+  ],
+  "records": [
+    {
+      "candidate": "dense_axis5_00",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_00/2511_847401/workers/trajectory.json",
+      "source_sha256": "6c829cb2bd8278b2d423cfdbeabf711e63f3909962d8b857afb990514365141e",
+      "npz_sha256": "977a24c71a1cd7cab05f0025e7c246d7a39f3677c8819403a1735d467136c386",
+      "design_sha256": "b283df916c0bd05a5d1b6913ef8516187a75a5922e0af16125febf58ba5d5263",
+      "applied_sha256": "8680d77ba75fb563e38be4a6526575494b91c6393ef5f44b337ec8fb36304fcc",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 2.0698564360094998,
+      "J_components": [
+        1.58577079525203,
+        3.5004923945188224,
+        1.1233061182576471
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_00.json",
+      "score_sha256": "d9435611fa5cb5a9fd2faa2a43f7433471d8a25db62cfe2427de9a036936ea05",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -42.80538396505847,
+        "theta_rad": -0.7470948877706557,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -20.0,
+        "is_reference": false
+      },
+      "N": 138
+    },
+    {
+      "candidate": "dense_axis5_01",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_01/2511_847401/workers/trajectory.json",
+      "source_sha256": "18b0de7da924b2122feeebc3ab953ccb9ad0f1a6040f0629bb81f42daaf381cb",
+      "npz_sha256": "f66406f9139fa14cd10fc63d17778eef8a0daa23cbb9657694c97052c0a6f33d",
+      "design_sha256": "b9c6144c7704eecf9c6278e5d46cdde7908bc5a3b40c180aa36e5fb392356159",
+      "applied_sha256": "b61059c5a2bc0bff44275216dec35b73fc59161acaa00bbe860d0bdc9933f422",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.7712146879453219,
+      "J_components": [
+        1.321332479822196,
+        2.841089165056054,
+        1.151222418957716
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_01.json",
+      "score_sha256": "5cedea5de0d05ef2c05a00b3d86a145a890d75e5ea4a0b299dc4c7bf11fdd146",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -39.47205063172514,
+        "theta_rad": -0.6889172460375114,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -16.666666666666668,
+        "is_reference": false
+      },
+      "N": 140
+    },
+    {
+      "candidate": "dense_axis5_02",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_02/2511_847401/workers/trajectory.json",
+      "source_sha256": "d79563a86d4a02522eda084aef81a0e1ca3f39156a8367cc79107fd26fcacde0",
+      "npz_sha256": "09f338dd831d7fa79a9b32d2e259eca894cc1d8cc8112b5dabecb185763d7e0d",
+      "design_sha256": "28c40d26f90b99309742e281f65518977d42fcc3bc06d88535e62551d9645f4d",
+      "applied_sha256": "a2080cd8d55d1288c791db3ba8c3b52dd3985eb3ce9d1745e424cf8f20c49404",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.8520605102646606,
+      "J_components": [
+        1.3158117521889945,
+        3.2039336056119656,
+        1.0364361729930214
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_02.json",
+      "score_sha256": "ff0e2edc526dfe1fb60d48addcaf21bdd212578659533aa2ecdf7f94070c4fbc",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -36.1387172983918,
+        "theta_rad": -0.630739604304367,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -13.333333333333332,
+        "is_reference": false
+      },
+      "N": 149
+    },
+    {
+      "candidate": "dense_axis5_03",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_03/2511_847401/workers/trajectory.json",
+      "source_sha256": "6f1fdc4e652ffefd0eea5740d672ceac79d9f0e7d5ce2690c51571cadbef741f",
+      "npz_sha256": "d159f38dfa994bc96c7aa3a0bd96a58ecc78f360e5ed3db81386f8fd5661a6b1",
+      "design_sha256": "27a1cefc0832bc76caa594505bf4245bebef0aa2d37c993b7d592c66332134db",
+      "applied_sha256": "b2b4befbcb2b7748fcf1ef6246169faa79a0320f03dead0260af1fb875562604",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 2.8664323695612937,
+      "J_components": [
+        2.008951525773005,
+        5.352654933682255,
+        1.237690649228622
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_03.json",
+      "score_sha256": "a216210ba6a908fff168e2934aae13bce8c96ec078c671d5cb3166740b823e64",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -32.80538396505847,
+        "theta_rad": -0.5725619625712227,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -10.0,
+        "is_reference": false
+      },
+      "N": 137
+    },
+    {
+      "candidate": "dense_axis5_04",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_04/2511_847401/workers/trajectory.json",
+      "source_sha256": "d4f4ae7afd5bdbda43afbe9bfc01584e235d7efdfff29ec85e0519b489f5ecc3",
+      "npz_sha256": "7bd5b6ba15c5b96461a855dce4358d6270c380544ffd1452fbd18b0e1b072f61",
+      "design_sha256": "a356d38737522627446eaf55fb5e48bb6e6dfa6ff579dd6b2933e8c8b03281d9",
+      "applied_sha256": "50975e0825f841ee7a9f57b9687a362d5014af7ce38fc40c22e70b1bc322fbe9",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 3.3336952868431986,
+      "J_components": [
+        2.3638178574911275,
+        6.086849616053034,
+        1.5504183869854338
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_04.json",
+      "score_sha256": "81d8d08d11e9f206c407cc00b0751d7e4ee4f6aa9085e7660de1e087deae251c",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -29.47205063172514,
+        "theta_rad": -0.5143843208380785,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -6.666666666666666,
+        "is_reference": false
+      },
+      "N": 137
+    },
+    {
+      "candidate": "dense_axis5_05",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_05/2511_847401/workers/trajectory.json",
+      "source_sha256": "f823273a85860183ccc61c472fca6772bb1d05357c6337c6570a4b5865201068",
+      "npz_sha256": "e7c67c57241a56ee335c5b1fb2193df8101be5f886dd94b22284cc1297a16eb2",
+      "design_sha256": "c51b63c27fe6e7a664e5e996fa5531e2e964607149be8ee702c48d88f24bd9e5",
+      "applied_sha256": "c0270e904eeebab890542c5cd741077ac5270067dd07a959bbff20bd12b79e29",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 2.7764549588702567,
+      "J_components": [
+        2.1260921028021356,
+        4.367022338439799,
+        1.8362504353688345
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_05.json",
+      "score_sha256": "5ac092e8da277e35b1ec7cc54feb02213a71c5419b426114e3a963c858df37a7",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -26.138717298391803,
+        "theta_rad": -0.45620667910493407,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": -3.333333333333332,
+        "is_reference": false
+      },
+      "N": 133
+    },
+    {
+      "candidate": "g1_axis3_plus",
+      "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/initial/units/g1_axis3_plus/2511_847401/workers/trajectory.json",
+      "source_sha256": "c72ee65afa623d75e8c30b874ef67259c0edee8034001448dcded09340e7953a",
+      "npz_sha256": "bd3b74bace1d0a0d0cf37cac4b9f595a18f7aa2635629a48f1862c2db625ec13",
+      "design_sha256": "9659d2eac00ca2ba3521e7afa9cec3d704f1065e24a20c2e29425dd2255698b5",
+      "applied_sha256": "1d4e2b84b37fdfd62d359b8ba9c1b87c2c753b63f428abb7e2f1b2a165ceb5b4",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401",
+        "2511_847402"
+      ],
+      "J": 1.621877257961985,
+      "J_components": [
+        1.4558870861151019,
+        1.8092116556686222,
+        1.6005330321022309
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/g1_axis3_plus.json",
+      "score_sha256": "2e3717e603a85ec84b27644bb30c61f2e6a8b7e92e5f20cd240451f209577675",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -22.80538396505847,
+        "theta_rad": -0.3980290373717898,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 0.0,
+        "is_reference": false
+      },
+      "N": 148
+    },
+    {
+      "candidate": "dense_axis5_07",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_07/2511_847401/workers/trajectory.json",
+      "source_sha256": "21f1b87ee78ee1ed98e32e0f1e33e1db00bf9a708024230cd77802aeccd4179a",
+      "npz_sha256": "a97708a82e13d05dc6c4af4ed11bb54158b66fb4e2383fb41269bc6e73a1a041",
+      "design_sha256": "6334ae4ee814234fd06fe5bb3a1c47bb17d3a6172bcd77815af68f5c3c1a216b",
+      "applied_sha256": "bb21e47f7e42ef2770c14a2d6173c7f2c470d8bddf9ac4eff818a03d0c9a8814",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.658793028860802,
+      "J_components": [
+        1.3944065313908383,
+        2.138431690344478,
+        1.4435408648470893
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_07.json",
+      "score_sha256": "61168cdeb68e2b1d534c7ed213a6c03db408b5f5f55a4e9b6307b357c851fe23",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -19.472050631725136,
+        "theta_rad": -0.3398513956386454,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 3.3333333333333357,
+        "is_reference": false
+      },
+      "N": 144
+    },
+    {
+      "candidate": "dense_axis5_08",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_08/2511_847401/workers/trajectory.json",
+      "source_sha256": "2d4b03d1622d75b54f127a950f8ca1c63f6b5b6aa4dd3c6412075e5c7e2cd63e",
+      "npz_sha256": "d50fde5f0261a0d2ba5491626c44d8ce0d05d115c53660b671974c182790bc55",
+      "design_sha256": "9e67ca661b77b85f54dbf86529f8f5ba5538346d016a31ae09ca662033cf8b37",
+      "applied_sha256": "cc0ec9654a72793b48250ebea718eddeb16e3b45e407534be55e1f3a92ed76b4",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.8165073864585206,
+      "J_components": [
+        1.5431402979343045,
+        2.2313304580568216,
+        1.6750514033844355
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_08.json",
+      "score_sha256": "a8b7b0c12ba76216d316a90f7f44fee8a1f28ceb0bb474e4ac23b24cb6f289d9",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -16.138717298391803,
+        "theta_rad": -0.28167375390550115,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 6.666666666666668,
+        "is_reference": false
+      },
+      "N": 149
+    },
+    {
+      "candidate": "dense_axis5_09",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_09/2511_847401/workers/trajectory.json",
+      "source_sha256": "11f8109ac5f0dfd0f4dd5e80cdb76ce93bc09740a095e70ab8461393ff36ba7b",
+      "npz_sha256": "6832ae0657afe7cd181868146d406f83fa39d447887fbee2abcc530bc6033067",
+      "design_sha256": "ca0351fe84d82f6c2ab894d47f122dac437dece7a65baf7772377d4f61dfc336",
+      "applied_sha256": "e1086f431289c36ec8930c00b0322f65c8249720a93044deb6868e66032b9a1b",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.851226952080865,
+      "J_components": [
+        1.4274168078721112,
+        2.6164628873771814,
+        1.509801160993303
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_09.json",
+      "score_sha256": "32fad62e194002ef6a6537ab737ca5a859b7ad2a9eab324946c167e93fcf9b44",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -12.805383965058471,
+        "theta_rad": -0.22349611217235685,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 10.0,
+        "is_reference": false
+      },
+      "N": 153
+    },
+    {
+      "candidate": "dense_axis5_10",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_10/2511_847401/workers/trajectory.json",
+      "source_sha256": "899c3f2d988ac9743d02e32fa8ea74f7a8e14b88550af06651f4e67708c7b006",
+      "npz_sha256": "d8caa4110d9cc1919088e9620b4d742addc322c3fe5ad0bd9c24000cb03bedbb",
+      "design_sha256": "c3048d530cf12427c75f677a6816c32ee3fd2bff01454a7fbd053857fb462858",
+      "applied_sha256": "646dee5f0151ac24ba69ae528e0eff2934689c8bc6ce92736fe9dd417e64b072",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.9299460102770247,
+      "J_components": [
+        1.5016290352739354,
+        2.62151576335451,
+        1.6666932322026293
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_10.json",
+      "score_sha256": "c3f7ca46e56bed48dc16cede542a71ea9808ab2202f203a516b1162bf1fbd0d7",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -9.472050631725136,
+        "theta_rad": -0.16531847043921247,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 13.333333333333336,
+        "is_reference": false
+      },
+      "N": 158
+    },
+    {
+      "candidate": "dense_axis5_11",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_11/2511_847401/workers/trajectory.json",
+      "source_sha256": "9f6c904220e0dc40708696ae9d0151d986d86aee18a4623246c29e139c834ae0",
+      "npz_sha256": "712ea0ce1d8e35779d58346694ee04e025a8fba25f00e10655a489e8d27f9c1c",
+      "design_sha256": "3b4bcf0aea8e943dfe9734a2e6b43334c40de28e84fe33b03e3cd3ad02157de0",
+      "applied_sha256": "7ef5e3996ae6b971e6e7e875ad17118b7efdd3d13fc8c0e4010931f9ac8b74f9",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 1.826132788307877,
+      "J_components": [
+        1.307088072129949,
+        2.7697688269445746,
+        1.4015414658491072
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_11.json",
+      "score_sha256": "3752663c624b64ff2762f8ae287eac25f07263cebd6a5cf15cd576fa9c44641b",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -6.1387172983918,
+        "theta_rad": -0.10714082870606811,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 16.66666666666667,
+        "is_reference": false
+      },
+      "N": 161
+    },
+    {
+      "candidate": "dense_axis5_12",
+      "source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_12/2511_847401/workers/trajectory.json",
+      "source_sha256": "6a378b26affe88b0fcac501b4023250542c09d36c256cf6717274297e0bf77a4",
+      "npz_sha256": "ccd66cfe18c405ae065925ea0e239aefd535cab39bd013ffd70152ab33e1d8ab",
+      "design_sha256": "f1821d8af186cf3e1c6aeba0cbc4a647f159a5cc5fbd1af5074f8b0951870461",
+      "applied_sha256": "0719fbba341e48927bb486ffeb90e8d5989eb72b6480c3ee7d9a977155405853",
+      "topology_seed": 2511,
+      "dynamics_seed": 847401,
+      "duration_ms": 60000,
+      "observed_unit_seed_directories": [
+        "2511_847401"
+      ],
+      "J": 2.073708969360195,
+      "J_components": [
+        1.4130050099185485,
+        3.2940890132384673,
+        1.514032884923569
+      ],
+      "J_joint": null,
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_12.json",
+      "score_sha256": "927553496032ac8badb5cfb1c2073652eba4a21ea0653e9cfdb91d9404cdfb76",
+      "actual_kernel": {
+        "l_par": 0.5374011537017762,
+        "l_perp": 0.40305086527633205,
+        "theta_deg": -2.8053839650584713,
+        "theta_rad": -0.04896318697292388,
+        "reference_theta_deg": -22.80538396505847,
+        "reference_ar": 2.0,
+        "perp_scale": 1.5,
+        "parallel_scale": 1.0,
+        "angle_offset_deg": 20.0,
+        "is_reference": false
+      },
+      "N": 157
+    }
+  ],
+  "repeat_variance_status": "NOT_ESTIMABLE: complete 13-angle sweep has one seed pair per angle",
+  "event_selection": "primary_event_indices AND window_start >= 1500 ms AND window_end <= 60000 ms",
+  "no_new_simulations": true
+}

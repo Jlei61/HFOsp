@@ -1,0 +1,187 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "panel": "I",
+  "primary_metric": "Three actual normalized training-loss components and their mean J",
+  "render_api": "render_i(fig, rect); one shared Loss axis",
+  "intended_data_axis_mm": [
+    51,
+    51
+  ],
+  "compatible_width_mm": [
+    53,
+    55,
+    57
+  ],
+  "font_pt": {
+    "label": 10.5,
+    "tick": 9.5,
+    "legend": 8.3
+  },
+  "parameter": "EE_angle_offset_deg",
+  "angle_is_offset": true,
+  "subject": "epilepsiae_1146",
+  "aggregate": {
+    "formula": "J=(1/3) sum_g D_off,g/s_g",
+    "groups": [
+      "rank_pattern",
+      "local_and_interrod_timing",
+      "participation"
+    ],
+    "D_off_formula": "(S_g dot S_g-Q_g)/(n*(n-1)) - 2*(S_g dot mu_patient,g)/n + mu_patient,g dot mu_patient,g",
+    "S_g": "Sum of event feature vectors phi_g(x_i)",
+    "Q_g": "Sum of squared norms of individual event feature vectors",
+    "equivalent": "A_g-B_g; A_g=||S_g/n-mu_patient,g||^2; B_g=(Q_g/n-||S_g/n||^2)/(n-1)",
+    "normalization": "Ordered distinct event-occurrence pairs n*(n-1); n changes with resampled block event counts",
+    "scales": {
+      "rank_pattern": 0.04485866893176316,
+      "local_and_interrod_timing": 0.043128270322858264,
+      "participation": 0.04559242266535053
+    },
+    "scales_fixed_during_bootstrap": true,
+    "patient_targets_fixed": true,
+    "feature_maps_fixed": true,
+    "negative_values_clipped": false,
+    "minimum_events": 16,
+    "no_new_display_objective": true,
+    "J_joint": "Not evaluated for this historical scan"
+  },
+  "uncertainty": {
+    "statistical_unit": "A 4.5 s physical-time block of events within one 60 s simulated trajectory",
+    "independent_runs_per_angle": 1,
+    "seed_pair": [
+      2511,
+      847401
+    ],
+    "patient_fit_events": 19770,
+    "burnin_ms": 1500,
+    "end_ms": 60000,
+    "blocks": 13,
+    "draws": 4000,
+    "ddof": 1,
+    "same_block_weights_across_angles": true,
+    "rng": "numpy.default_rng(2026102404+block_count)",
+    "duplicate_handling": "Repeated blocks create repeated event occurrences; subtract Q with LINEAR multiplicities. Distinct copies remain in off-diagonal pairs, matching the original scorer on a materialized bootstrap sample.",
+    "covariance": "Variance of jointly recomputed J, including covariance of its three calibrated components",
+    "limitations": "Conditional finite-event uncertainty; no independent seed/network variance or patient uncertainty. Block exchangeability and finite temporal dependence are assumptions; block-size sensitivity retained.",
+    "all_draws_have_minimum_events": true,
+    "shown_bands": "Each actual training component and total J plus/minus its own 13-block-bootstrap SD; total uses the joint draws and includes component covariance."
+  },
+  "optimum": {
+    "J_argmin_deg": 0.0,
+    "J_min": 1.621877257961985,
+    "candidate": "g1_axis3_plus",
+    "J_min_bootstrap_sd": 0.12800482582296754,
+    "J_min_bootstrap_variance": 0.01638523543396826,
+    "runner_up_angle_deg": 3.3333333333333357,
+    "runner_up_J": 1.658793028860802,
+    "empirical_gap": 0.036915770898817035,
+    "variance_argmin_deg": 20.0,
+    "minimum_variance": 0.0038897139878161834,
+    "J_variance_pareto_angles": [
+      0.0,
+      3.3333333333333357,
+      16.66666666666667,
+      20.0
+    ],
+    "individual_scaled_component_argmin_deg": {
+      "rank_pattern": 16.66666666666667,
+      "local_and_interrod_timing": 0.0,
+      "participation": -13.333333333333332
+    },
+    "claim": "Empirical minimum within 13 tested angles; neither unique population optimum nor joint minimum of all components and variance.",
+    "marker": "Vertical dashed line computed from original J argmin; no arrow or star"
+  },
+  "panel_C_F_integration": "Same algebraic definition J=(1/3)sum D_off,g/s_g. Frozen maps/scales may differ across experiments: do not assert identical calibration without checking parent sources. C repeats optimizations; I resamples within one run.",
+  "diagnostic": {
+    "renderer": "i_display_panel.py",
+    "data": "i_display_angle_response.csv",
+    "metadata": "i_display_metadata.json",
+    "empirical_display_argmin_deg": 16.66666666666667,
+    "display_mean_is_not_training_loss": true,
+    "displayed_in_main_figure": false
+  },
+  "validation": {
+    "all_39_raw_errors_preserved": true,
+    "all_13_J_and_39_actual_scaled_components_recomputed": true,
+    "original_scorer_and_explicit_event_pair_kernel_agree": true,
+    "materialized_unequal_block_bootstrap_agrees": true,
+    "source": "i_j_scorer_validation.json"
+  },
+  "block_sensitivity": [
+    {
+      "blocks": 13,
+      "block_ms": 4500.0,
+      "J_argmin_deg": 0.0,
+      "minimum_J_sd": 0.12800482582296754,
+      "runner_up_J_sd": 0.10389263173988675,
+      "variance_argmin_deg": 20.0,
+      "best_minus_runner_up_q025": -0.2094341328086953,
+      "best_minus_runner_up_q975": 0.17397134534901784,
+      "best_lower_fraction": 0.6155
+    },
+    {
+      "blocks": 26,
+      "block_ms": 2250.0,
+      "J_argmin_deg": 0.0,
+      "minimum_J_sd": 0.14921768821558182,
+      "runner_up_J_sd": 0.16727203540116292,
+      "variance_argmin_deg": 20.0,
+      "best_minus_runner_up_q025": -0.2749540145150073,
+      "best_minus_runner_up_q975": 0.15676440108954456,
+      "best_lower_fraction": 0.63775
+    },
+    {
+      "blocks": 6,
+      "block_ms": 9750.0,
+      "J_argmin_deg": 0.0,
+      "minimum_J_sd": 0.14692963819351992,
+      "runner_up_J_sd": 0.17513688399466854,
+      "variance_argmin_deg": 20.0,
+      "best_minus_runner_up_q025": -0.22258367452136385,
+      "best_minus_runner_up_q975": 0.10503181161408004,
+      "best_lower_fraction": 0.7135
+    }
+  ],
+  "frozen_training_parameters": {
+    "spec": "i_j_frozen_spec.json",
+    "arrays": "i_j_frozen_parameters.npz",
+    "original_pickle_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464"
+  },
+  "parent_rect_mm": [
+    255,
+    15,
+    51,
+    51
+  ],
+  "parent_canvas_mm": [
+    320,
+    232.52
+  ],
+  "display_revision": {
+    "black_line_label": "Total loss",
+    "quantity": "optimizer_J = mean(L_r, L_o, L_p)",
+    "data_unchanged": true
+  },
+  "historical_descriptive_errors": {
+    "label": "Error",
+    "metrics": [
+      "mean_rank_error",
+      "within_shaft_order_error",
+      "participation_error"
+    ],
+    "meaning": "Original raw descriptive MAEs; preserved exactly; NOT literal additive summands of J.",
+    "shade": "Each raw error plus/minus its own conditional physical-time block bootstrap SD, same 13-block draw scheme."
+  },
+  "axis": {
+    "label": "Loss",
+    "groups": [
+      "rank_pattern",
+      "local_and_interrod_timing",
+      "participation"
+    ],
+    "total": "optimizer_J",
+    "formula": "J = (L_r + L_o + L_p) / 3",
+    "all_curves_share_scale": true,
+    "descriptive_MAEs_displayed": false
+  }
+}

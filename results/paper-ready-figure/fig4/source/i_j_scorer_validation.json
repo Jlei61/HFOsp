@@ -1,0 +1,133 @@
+{
+  "checks": [
+    {
+      "candidate": "dense_axis5_00",
+      "J": 2.0698564360094998,
+      "recomputed_J": 2.069856436009498,
+      "absolute_error": 1.7763568394002505e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_01",
+      "J": 1.7712146879453219,
+      "recomputed_J": 1.7712146879453226,
+      "absolute_error": 6.661338147750939e-16,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_02",
+      "J": 1.8520605102646606,
+      "recomputed_J": 1.852060510264667,
+      "absolute_error": 6.439293542825908e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_03",
+      "J": 2.8664323695612937,
+      "recomputed_J": 2.8664323695612914,
+      "absolute_error": 2.220446049250313e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_04",
+      "J": 3.3336952868431986,
+      "recomputed_J": 3.3336952868431964,
+      "absolute_error": 2.220446049250313e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_05",
+      "J": 2.7764549588702567,
+      "recomputed_J": 2.7764549588702567,
+      "absolute_error": 0.0,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "g1_axis3_plus",
+      "J": 1.621877257961985,
+      "recomputed_J": 1.6218772579619856,
+      "absolute_error": 6.661338147750939e-16,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_07",
+      "J": 1.658793028860802,
+      "recomputed_J": 1.658793028860801,
+      "absolute_error": 8.881784197001252e-16,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_08",
+      "J": 1.8165073864585206,
+      "recomputed_J": 1.816507386458518,
+      "absolute_error": 2.6645352591003757e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_09",
+      "J": 1.851226952080865,
+      "recomputed_J": 1.8512269520808686,
+      "absolute_error": 3.552713678800501e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_10",
+      "J": 1.9299460102770247,
+      "recomputed_J": 1.929946010277029,
+      "absolute_error": 4.218847493575595e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_11",
+      "J": 1.826132788307877,
+      "recomputed_J": 1.8261327883078822,
+      "absolute_error": 5.10702591327572e-15,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    },
+    {
+      "candidate": "dense_axis5_12",
+      "J": 2.073708969360195,
+      "recomputed_J": 2.073708969360196,
+      "absolute_error": 8.881784197001252e-16,
+      "feature_map_agreement": true,
+      "explicit_offdiagonal_kernel_agreement": true,
+      "duplicated_blocks_materialized_scorer_agreement": true
+    }
+  ],
+  "scales": {
+    "rank_pattern": 0.04485866893176316,
+    "local_and_interrod_timing": 0.043128270322858264,
+    "participation": 0.04559242266535053
+  },
+  "source_code_sha256": {
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_three_observable_objective.py": "5a875c1cdb43410865f41f7b77aa0dcbf41256ce5c4ab8eb48febb5bc711a7b7",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_three_observable_label_free.py": "cb9efa999b1de5e99700d6d8ce1f5018747954a55fb9614684ce27e9ce5752c6"
+  },
+  "original_pickle_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "all_13_historical_J_and_39_scaled_components_reproduced": true,
+  "maximum_J_absolute_error": 6.439293542825908e-15
+}

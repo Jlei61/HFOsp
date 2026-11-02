@@ -1,0 +1,57 @@
+{
+  "core_count": 0,
+  "n_lowered": 0,
+  "n_raised": 0,
+  "n_stochastic": 0,
+  "n_deterministic": 40000,
+  "core_specific_weight_multipliers": {
+    "EE_same_core_scale": 1.0,
+    "EE_core_to_out_scale": 1.0
+  },
+  "identity": {
+    "ampa_topology_sha256": "da19e6822404c9ea7280bc5e2f86e6fc5f5ee2dfd8cf57a62ae8e5d7c28ec77e",
+    "ampa_values_sha256": "bd7b6050d1fa7ad73e844e8d4a3aff167e1d750a7939d6f20a01f03f65616375",
+    "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a",
+    "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e"
+  },
+  "retained_global_kernel": {
+    "stage": "kernel",
+    "kernel": {
+      "l_par": 0.5374011537017762,
+      "l_perp": 0.40305086527633205,
+      "theta_deg": -43.52767763255372,
+      "theta_rad": -0.7597012904347529,
+      "reference_theta_deg": -22.80538396505847,
+      "reference_ar": 2.0,
+      "perp_scale": 1.5,
+      "parallel_scale": 1.0,
+      "angle_offset_deg": -20.72229366749525,
+      "is_reference": false
+    },
+    "topology_seed": 2511,
+    "rng_label": 1,
+    "n_ee_edges": 25600000,
+    "n_e_to_i_edges": 6400000,
+    "indegree_preserved": true,
+    "adjacency_identical_to_baseline": false,
+    "partner_spread_along_axis_mm": 1.3157001146715832,
+    "partner_spread_across_axis_mm": 1.0086128603016569,
+    "mean_partner_distance_mm": 1.4679139357239206,
+    "max_partner_distance_mm": 9.764014557456173,
+    "mean_delay_ms": 4.9930464524130835,
+    "max_delay_steps": 326,
+    "total_ee_weight": 115200000.0,
+    "baseline_total_ee_weight": 115200000.0
+  },
+  "reference_identity": {
+    "positions_E_sha256": "a00b2c75b5e9a2784065c3b7bdbc66eef02eef1e077f8d7d10d3e9c45f39010e",
+    "vtheta_sha256": "bc823f257aedcdfcb24d666aa6ae73cf8b611e3e954edac8d433e66dde9ac33c",
+    "vtheta_float64_sha256": "0bbb4c2638591b84c6fbf5bc17245a6a3089fc771c6b5e26998348c479ebfa54",
+    "h_sha256": "442a67b53b57b5e9baa94db1d8093c9de340517afd45c21c178bcb34b1a58032",
+    "core_index_sha256": "48090a1ccc8a9950f14c2353b366d713281709c0c65f6e61b46e42e33c50d57e",
+    "ampa_topology_sha256": "da19e6822404c9ea7280bc5e2f86e6fc5f5ee2dfd8cf57a62ae8e5d7c28ec77e",
+    "ampa_values_sha256": "2d097b49df6a66a58a0064d070ccb3bc18b121a0b00f88f72cf261e7b15583bb",
+    "gaba_topology_sha256": "e8a90e54178aa8de7d0ea30e5995d1d4c920b738e4320cc48c5e81db0da4f38d",
+    "gaba_values_sha256": "d5dc8cebeb752e4e464a3945fb595c5996521635eb40c0a6fd42c844d6bf3a6a"
+  }
+}

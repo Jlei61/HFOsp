@@ -1,0 +1,171 @@
+{
+  "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+  "parent_panel": "formal D",
+  "new_panel": "I",
+  "render_api": "render_i(fig, rect), rect=(left,bottom,width,height) in normalized figure coordinates; returns Axes",
+  "requested_data_axis_mm": [
+    65,
+    53
+  ],
+  "fontsize_pt": {
+    "label": 9,
+    "tick": 8,
+    "legend": 7
+  },
+  "scientific_question": "Which sampled EE angle balances three patient-summary errors, and how stable is the ranking to within-run sampling?",
+  "parameter": "EE_angle_offset_deg",
+  "angle_is_offset_not_absolute_orientation": true,
+  "subject": "epilepsiae_1146",
+  "n_conditions": 13,
+  "simulation_seconds": 60,
+  "patient_fit_events": 19770,
+  "aggregate": {
+    "name": "Mean display error",
+    "symbol": "L_display",
+    "formula": "(mean_rank_error + within_shaft_order_error + participation_error) / 3",
+    "weights": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "units": "dimensionless",
+    "range": [
+      0,
+      1
+    ],
+    "justification": "All three errors are absolute discrepancies of quantities on [0,1]; equal component weights are an explicit post hoc display convention, not a fitted or historically optimized loss.",
+    "shaft_weighting": "Equal SCL/ICL weight within each component; contacts or within-shaft pairs equally weighted within a shaft.",
+    "mean_rank": "Absolute difference of conditional mean normalized within-event ranks, averaged across contacts within each shaft, then across shafts.",
+    "order": "Absolute difference of P(t_j>t_i)+0.5 P(t_j=t_i), conditional on joint participation; averaged within each shaft, then across shafts.",
+    "participation": "Absolute difference of event participation probability, averaged within each shaft, then across shafts.",
+    "no_minmax_rescaling": true,
+    "not_optimizer_J": true,
+    "not_optimizer_J_joint": true
+  },
+  "uncertainty": {
+    "kind": "Paired nonoverlapping physical-time-block bootstrap, model side only",
+    "resampling_unit": "All qualified model events within one 4.5 s block of the same trajectory",
+    "inferential_unit": "One simulated network/noise realization at each angle; NOT 13 independent networks",
+    "fixed_reference": "19770 patient FIT events summarized once, no patient resampling",
+    "start_ms": 1500,
+    "end_ms": 60000,
+    "n_blocks": 13,
+    "block_ms": 4500,
+    "draws": 4000,
+    "rng": "numpy.default_rng(2026102404 + block_count)",
+    "ddof": 1,
+    "displayed_band": "Original full-sample L_display plus/minus one bootstrap SD; not a confidence interval",
+    "variance_definition": "sample variance over recomputed aggregate scores; all component covariance retained",
+    "pairing": "Same drawn physical-time-block indices across all angles; no event-index pairing",
+    "assumptions": "Post-burnin blocks treated as exchangeable; block-length sensitivity recorded. Longer dependencies and nonstationarity are not identified from one 60 s run.",
+    "limitations": "Does not estimate independent seed/topology variance, patient sampling uncertainty, or independent validation error.",
+    "full_support_checks": {
+      "13": {
+        "valid_draws": 4000,
+        "rejected_draws": 0
+      },
+      "26": {
+        "valid_draws": 4000,
+        "rejected_draws": 0
+      },
+      "6": {
+        "valid_draws": 4000,
+        "rejected_draws": 0
+      }
+    }
+  },
+  "optimum": {
+    "empirical_display_minimum": {
+      "angle_deg": 16.66666666666667,
+      "value": 0.13113010990872265,
+      "candidate": "dense_axis5_11"
+    },
+    "runner_up": {
+      "angle_deg": 3.3333333333333357,
+      "value": 0.13203373767362325,
+      "candidate": "dense_axis5_07"
+    },
+    "absolute_gap": 0.0009036277649006053,
+    "individual_component_minima": {
+      "mean_rank_error": 16.66666666666667,
+      "within_shaft_order_error": 0.0,
+      "participation_error": -20.0
+    },
+    "bootstrap_variance_minimum": {
+      "angle_deg": 20.0,
+      "value": 2.4775106170364566e-05
+    },
+    "mean_variance_pareto_angles": [
+      16.66666666666667,
+      20.0
+    ],
+    "simultaneous_minimum_of_all_components_and_variance": false,
+    "optimizer_J_minimum": {
+      "angle_deg": 0.0,
+      "value": 1.621877257961985
+    },
+    "J_joint_available": false,
+    "uniqueness": "Empirical argmin on the sampled grid, not a unique population optimum; inspect paired gap and block sensitivity.",
+    "no_variance_penalty_selected": "Variance has squared-error units. No unrequested tradeoff coefficient is imposed to force one robust optimum."
+  },
+  "optimizer_contract": {
+    "J": "Equal mean of calibrated signed D_off terms: rank_pattern, local_and_interrod_timing, participation; full distribution features, not these three display MAEs.",
+    "J_joint": "Joint event-cooccurrence objective from a later stage; unavailable for this frozen scan.",
+    "panel_C_integration": "If C retains optimization best-training loss, label C as Training loss J and I as Display error. A common C/I definition requires recomputing one entire series, not relabeling."
+  },
+  "validation": {
+    "original_39_values_recomputed": true,
+    "original_values_preserved_in_csv_and_artists": true,
+    "maximum_absolute_reconstruction_error": 0.0,
+    "fixed_parameters_audited": true,
+    "complete_repeat_variance_available": false,
+    "no_new_simulations": true
+  },
+  "block_sensitivity": [
+    {
+      "blocks": 13,
+      "block_duration_ms": 4500.0,
+      "valid_draws": 4000,
+      "empirical_min_angle_deg": 16.66666666666667,
+      "min_variance_angle_deg": 20.0,
+      "min_mean_variance": 3.215873958236728e-05,
+      "min_mean_sd": 0.005670867621657843,
+      "runner_up_sd": 0.014870897604577507,
+      "best_minus_runner_up_q025": -0.02169121543667279,
+      "best_minus_runner_up_q975": 0.03017051601679559,
+      "best_lower_fraction": 0.48675
+    },
+    {
+      "blocks": 26,
+      "block_duration_ms": 2250.0,
+      "valid_draws": 4000,
+      "empirical_min_angle_deg": 16.66666666666667,
+      "min_variance_angle_deg": 20.0,
+      "min_mean_variance": 6.684756941203248e-05,
+      "min_mean_sd": 0.008176036289794247,
+      "runner_up_sd": 0.022673913966009037,
+      "best_minus_runner_up_q025": -0.03147080495797625,
+      "best_minus_runner_up_q975": 0.034731727346915764,
+      "best_lower_fraction": 0.47375
+    },
+    {
+      "blocks": 6,
+      "block_duration_ms": 9750.0,
+      "valid_draws": 4000,
+      "empirical_min_angle_deg": 16.66666666666667,
+      "min_variance_angle_deg": 20.0,
+      "min_mean_variance": 0.00013548519648421862,
+      "min_mean_sd": 0.011639810844005095,
+      "runner_up_sd": 0.0248113822190907,
+      "best_minus_runner_up_q025": -0.02242210992418278,
+      "best_minus_runner_up_q975": 0.040837281131208915,
+      "best_lower_fraction": 0.46225
+    }
+  ],
+  "provenance": "i_provenance.json",
+  "source_snapshot_sha256": {
+    "i_events.npz": "38b48c5560d28631dbfbd79e9f1f7c477a189efc8c927002645968b86a24c3bf",
+    "i_target.json": "90d53dcc75d6edc8c29e0703d62eba8588d58be988061483806380f5fa5e108a",
+    "i_original_angle_response.csv": "f444f9bcc6684027a5c4d1d6499df45972e27f1ce611880bb3b819f5208afea9"
+  }
+}

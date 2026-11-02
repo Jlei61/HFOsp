@@ -15,8 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / 'results/paper-ready-figure/fig4'
-VERSION = 'core_search_final_20261011'
-LAYOUT = 'compact_ai_v4_a_core_search_central_shading_v15'
+VERSION = 'snn_network_optimization_final_20261102'
+LAYOUT = 'snn_layout_ei_labels_20261031'
 
 
 def digest(path):
@@ -42,16 +42,17 @@ def verify(package):
         path = package / name
         if not path.is_file() or digest(path) != expected['sha256']:
             raise ValueError(f'Missing or changed Figure 4 release file: {name}')
-    for key in ('panel_a', 'panel_b', 'panel_c', 'panel_d', 'panel_e', 'panel_i'):
-        if pointer[key] != registry[key]:
-            raise ValueError(f'Figure 4 data contract mismatch: {key}')
-    spec = registry['panel_a']['schematic_core_optimization']
-    if (spec['candidate_region_count'], spec['updated_core_count']) != (3, 2):
-        raise ValueError('The accepted schematic has three candidate regions and two cores.')
-    if len(spec['search_direction_arrows_mm']) != 2 or spec['arrow_target_core_indices'] != [0, 1]:
-        raise ValueError('Only the two upper OPTM arrows are accepted.')
-    if spec['sampling_frame_shading']['locations'] != ['Central zoom-location frame']:
-        raise ValueError('Whole-frame green shading belongs only in the central source frame.')
+    if pointer['panels'] != registry['panels']:
+        raise ValueError('Figure 4 panel/data contracts disagree.')
+    if set(pointer['panels']) != set('ABCDEFGHI'):
+        raise ValueError('The accepted Figure 4 must contain A-I.')
+    if pointer['panels']['D']['version'] != 'native_no_core_background':
+        raise ValueError('Legacy Figure 4 D cannot replace the native no-core panel.')
+    if pointer['panels']['E']['version'] != 'native_single_core_bursts':
+        raise ValueError('Legacy Figure 4 E cannot replace the native core panel.')
+    for name, expected in manifest.get('repo_files', {}).items():
+        if digest(ROOT / name) != expected:
+            raise ValueError(f'Figure 4 producer changed: {name}')
     actual = {str(p.relative_to(package)) for p in (package / 'figures').iterdir()
               if p.suffix in ('.png', '.pdf', '.svg')}
     if actual != set(registry['outputs']):
@@ -59,9 +60,6 @@ def verify(package):
     for name, expected in registry['outputs'].items():
         if digest(package / name) != expected:
             raise ValueError(f'Current output hash changed: {name}')
-        frozen = package / 'source/native_exports' / Path(name).name
-        if digest(frozen) != expected:
-            raise ValueError(f'Frozen export hash changed: {name}')
     return dict(status='PASS', version=VERSION, layout_version=LAYOUT,
                 author_acceptance='CONFIRMED', files_verified=len(manifest['files']),
                 export_files_verified=len(registry['outputs']))
@@ -76,7 +74,7 @@ def restore(package, output):
     (output / 'figures').mkdir(parents=True, exist_ok=True)
     registry = read(package / 'figure4_panel_registry.json')
     for name, expected in registry['outputs'].items():
-        shutil.copy2(package / 'source/native_exports' / Path(name).name, output / name)
+        shutil.copy2(package / name, output / name)
         if digest(output / name) != expected:
             raise ValueError(f'Restored output differs: {name}')
     shutil.copy2(package / 'figures/README.md', output / 'figures/README.md')

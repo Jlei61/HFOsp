@@ -1,0 +1,678 @@
+{
+  "schema": "fig4.native_de.observables.v1",
+  "native_run": "experiments/fig4_native_de_20261024/run02",
+  "statistical_unit": "One 10 s native trajectory per condition on the same topology; E unchanged; not independent seed replication.",
+  "analysis_and_display_window_ms": [
+    1500.0,
+    10000.0
+  ],
+  "primary_D_identity": "Zero core; all background thresholds and global weights; independent Poisson afferents to every E/I neuron at the previous silent-D mean; no local input patch or OU drive",
+  "diagnostic_D_identity": "Threshold-ablation only, NOT no-core; identical input stream to E",
+  "primary_D_run": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/experiments/fig4_native_de_20261024/run04_d0_poisson",
+  "input_mean_boundary": "D: independent Poisson at nu throughout; E: unchanged local max(0.95*nu+OU,0) Poisson patch and deterministic exterior. D/E are different working regimes, not a one-factor causal test.",
+  "n_E": 32000,
+  "n_I": 8000,
+  "n_patch_E": 847,
+  "n_patch_I": 191,
+  "all_neurons_shown_in_raster": false,
+  "raster": "All cells of the same fixed circular ROI, E then I, ascending original ID within type; no active-cell selection; E red and I blue.",
+  "lfp_definition": "LFPRecorder spatially weighted mean of abs(I_E)+abs(I_I) over E near the fixed original core centre; unfiltered native current proxy, not measured extracellular voltage.",
+  "current_units": "Voltage-equivalent model current (mV in LIF equation), not nA or extracellular mV.",
+  "EI_balance_definition": "Separate mean excitatory/inhibitory magnitudes, ratio I_I/I_E, signed residual and mean per-cell abs(I_E-I_I)/(mean I_E + mean I_I); read-only 1 ms samples. No balance inference from sparsity.",
+  "event_definition": "Non-overlapping 10 ms bins: >=1% distinct E cells globally or >=10% distinct E cells in fixed input patch; adjacent supra-threshold bins merged across <=100 ms gaps; report duration, do not equate with patient HFO.",
+  "arms": {
+    "D": {
+      "E_spikes": 25521,
+      "I_spikes": 21639,
+      "E_rate_hz": 0.09382720588235294,
+      "I_rate_hz": 0.3182205882352941,
+      "patch_E_rate_hz": 0.09709007569970138,
+      "patch_I_rate_hz": 0.3067446874037573,
+      "patch_E_spikes": 699,
+      "patch_I_spikes": 498,
+      "outside_E_rate_hz": 0.0937384936961977,
+      "fraction_E_ever_active": 0.55053125,
+      "mean_E_active_fraction_10ms": 0.0009382720588235296,
+      "peak_E_active_fraction_10ms": 0.0016875,
+      "no_spikes": false,
+      "native_population_events": {
+        "global_E": {
+          "threshold_distinct_fraction": 0.01,
+          "count": 0,
+          "short_burst_count": 0,
+          "prolonged_count": 0,
+          "events": [],
+          "boundary_excluded_count": 0,
+          "right_censored_events": [],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        },
+        "input_patch_E": {
+          "threshold_distinct_fraction": 0.1,
+          "count": 0,
+          "short_burst_count": 0,
+          "prolonged_count": 0,
+          "events": [],
+          "boundary_excluded_count": 0,
+          "right_censored_events": [],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        }
+      },
+      "frozen_contact_events_detected": 0,
+      "frozen_contact_events_primary": 0,
+      "current_balance": {
+        "allE": {
+          "I_E": 13.119182625904232,
+          "I_I": 0.8120861398313703,
+          "abs_net_I": 12.307101069413159,
+          "V": 12.292059296790626,
+          "inhibitory_to_excitatory_ratio": 0.06190066584086429,
+          "mean_signed_net_current": 12.307096486072862,
+          "cancellation_residual": 0.8834156656056241
+        },
+        "patchE": {
+          "I_E": 13.120121033764319,
+          "I_I": 0.8211362178528563,
+          "abs_net_I": 12.298988798084237,
+          "V": 12.282531078116117,
+          "inhibitory_to_excitatory_ratio": 0.06258602460599881,
+          "mean_signed_net_current": 12.298984815911462,
+          "cancellation_residual": 0.8822008356999196
+        },
+        "outsideE": {
+          "I_E": 13.119157112102753,
+          "I_I": 0.8118400827555126,
+          "abs_net_I": 12.307321629032316,
+          "V": 12.292318353742356,
+          "inhibitory_to_excitatory_ratio": 0.061882030668461895,
+          "mean_signed_net_current": 12.30731702934724,
+          "cancellation_residual": 0.8834487192040189
+        },
+        "allI": {
+          "I_E": 12.22841373381037,
+          "I_I": 0.6323429809588824,
+          "abs_net_I": 11.59607222890978,
+          "V": 11.570533729892885,
+          "inhibitory_to_excitatory_ratio": 0.05171095734277585,
+          "mean_signed_net_current": 11.596070752851489,
+          "cancellation_residual": 0.9016632913670536
+        }
+      },
+      "pathway_currents": {
+        "recurrent_E_to_E_mean": 0.2539757490158081,
+        "recurrent_E_to_I_mean": 0.21165964007377625,
+        "GABA_to_E_mean": 0.8120861649513245
+      },
+      "LFP_proxy_min": 10.234967023238706,
+      "LFP_proxy_max": 18.056268000558312,
+      "input_ROI_afferent_mean_per_ms": 1.3174634224662056,
+      "input_ROI_afferent_sd_per_ms": 0.0,
+      "input_ROI_zero_rate_fraction": 0.0,
+      "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+      "full_trajectory_sha256": "f0121db56f28d6eb19dc1ab062bc61a1334e620ae42e4b2437b91dd434844bef",
+      "low_rate_by_stated_thresholds": true,
+      "sparse_by_stated_definition": true
+    },
+    "E": {
+      "E_spikes": 2865864,
+      "I_spikes": 1564326,
+      "E_rate_hz": 10.536264705882353,
+      "I_rate_hz": 23.00479411764706,
+      "patch_E_rate_hz": 6.617265087853323,
+      "patch_I_rate_hz": 19.27071142593163,
+      "patch_E_spikes": 47641,
+      "patch_I_spikes": 31286,
+      "outside_E_rate_hz": 10.642816006767358,
+      "fraction_E_ever_active": 0.9968125,
+      "mean_E_active_fraction_10ms": 0.04742779411764706,
+      "peak_E_active_fraction_10ms": 0.3203125,
+      "no_spikes": false,
+      "native_population_events": {
+        "global_E": {
+          "threshold_distinct_fraction": 0.01,
+          "count": 25,
+          "short_burst_count": 25,
+          "prolonged_count": 0,
+          "events": [
+            {
+              "start_ms": 1660.0,
+              "end_ms": 1750.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.3203125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2260.0,
+              "end_ms": 2350.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.30840625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2720.0,
+              "end_ms": 2810.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.28678125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2960.0,
+              "end_ms": 3070.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.3058125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 3360.0,
+              "end_ms": 3480.0,
+              "duration_ms": 120.0,
+              "peak_active_fraction": 0.2884375,
+              "short_burst": true
+            },
+            {
+              "start_ms": 3760.0,
+              "end_ms": 3850.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.30615625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4030.0,
+              "end_ms": 4120.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.31025,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4290.0,
+              "end_ms": 4400.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.28025,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4540.0,
+              "end_ms": 4650.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.30534375,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4870.0,
+              "end_ms": 4990.0,
+              "duration_ms": 120.0,
+              "peak_active_fraction": 0.25675,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5160.0,
+              "end_ms": 5250.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.31034375,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5420.0,
+              "end_ms": 5510.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.29065625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5860.0,
+              "end_ms": 5980.0,
+              "duration_ms": 120.0,
+              "peak_active_fraction": 0.29778125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6200.0,
+              "end_ms": 6290.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.29015625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6450.0,
+              "end_ms": 6560.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.3000625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6730.0,
+              "end_ms": 6820.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.28,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6980.0,
+              "end_ms": 7070.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.30628125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7300.0,
+              "end_ms": 7400.0,
+              "duration_ms": 100.0,
+              "peak_active_fraction": 0.2985,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7580.0,
+              "end_ms": 7690.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.3079375,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7850.0,
+              "end_ms": 7960.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.29565625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8270.0,
+              "end_ms": 8360.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.26140625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8590.0,
+              "end_ms": 8680.0,
+              "duration_ms": 90.0,
+              "peak_active_fraction": 0.28115625,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8840.0,
+              "end_ms": 8960.0,
+              "duration_ms": 120.0,
+              "peak_active_fraction": 0.31059375,
+              "short_burst": true
+            },
+            {
+              "start_ms": 9270.0,
+              "end_ms": 9350.0,
+              "duration_ms": 80.0,
+              "peak_active_fraction": 0.2988125,
+              "short_burst": true
+            },
+            {
+              "start_ms": 9570.0,
+              "end_ms": 9680.0,
+              "duration_ms": 110.0,
+              "peak_active_fraction": 0.30478125,
+              "short_burst": true
+            }
+          ],
+          "boundary_excluded_count": 6,
+          "right_censored_events": [
+            {
+              "start_ms": 9900.0,
+              "end_ms": 10000.0,
+              "duration_ms": 100.0,
+              "peak_active_fraction": 0.26303125,
+              "short_burst": true
+            }
+          ],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        },
+        "input_patch_E": {
+          "threshold_distinct_fraction": 0.1,
+          "count": 26,
+          "short_burst_count": 26,
+          "prolonged_count": 0,
+          "events": [
+            {
+              "start_ms": 1660.0,
+              "end_ms": 1690.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.6375442739079102,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2260.0,
+              "end_ms": 2290.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.7095631641086186,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2710.0,
+              "end_ms": 2740.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.6765053128689492,
+              "short_burst": true
+            },
+            {
+              "start_ms": 2950.0,
+              "end_ms": 2980.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.8134592680047226,
+              "short_burst": true
+            },
+            {
+              "start_ms": 3360.0,
+              "end_ms": 3400.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.5017709563164109,
+              "short_burst": true
+            },
+            {
+              "start_ms": 3760.0,
+              "end_ms": 3790.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.551357733175915,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4030.0,
+              "end_ms": 4060.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.6269185360094451,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4280.0,
+              "end_ms": 4320.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.4639905548996458,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4540.0,
+              "end_ms": 4570.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.5938606847697757,
+              "short_burst": true
+            },
+            {
+              "start_ms": 4870.0,
+              "end_ms": 4910.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.42739079102715466,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5160.0,
+              "end_ms": 5190.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.6033057851239669,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5410.0,
+              "end_ms": 5440.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.8240850059031877,
+              "short_burst": true
+            },
+            {
+              "start_ms": 5850.0,
+              "end_ms": 5890.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.8370720188902007,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6200.0,
+              "end_ms": 6230.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.4427390791027155,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6440.0,
+              "end_ms": 6480.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.45690672963400236,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6720.0,
+              "end_ms": 6750.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.7119244391971665,
+              "short_burst": true
+            },
+            {
+              "start_ms": 6980.0,
+              "end_ms": 7000.0,
+              "duration_ms": 20.0,
+              "peak_active_fraction": 0.8488783943329398,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7290.0,
+              "end_ms": 7330.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.5289256198347108,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7570.0,
+              "end_ms": 7600.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.9374262101534829,
+              "short_burst": true
+            },
+            {
+              "start_ms": 7850.0,
+              "end_ms": 7880.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.48288075560802834,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8260.0,
+              "end_ms": 8300.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.3990554899645809,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8590.0,
+              "end_ms": 8620.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.5914994096812278,
+              "short_burst": true
+            },
+            {
+              "start_ms": 8840.0,
+              "end_ms": 8870.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.7036599763872491,
+              "short_burst": true
+            },
+            {
+              "start_ms": 9260.0,
+              "end_ms": 9300.0,
+              "duration_ms": 40.0,
+              "peak_active_fraction": 0.5596221959858324,
+              "short_burst": true
+            },
+            {
+              "start_ms": 9560.0,
+              "end_ms": 9590.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.6446280991735537,
+              "short_burst": true
+            },
+            {
+              "start_ms": 9900.0,
+              "end_ms": 9930.0,
+              "duration_ms": 30.0,
+              "peak_active_fraction": 0.5336481700118064,
+              "short_burst": true
+            }
+          ],
+          "boundary_excluded_count": 5,
+          "right_censored_events": [],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        }
+      },
+      "frozen_contact_events_detected": 25,
+      "frozen_contact_events_primary": 21,
+      "current_balance": {
+        "allE": {
+          "I_E": 41.284476045694554,
+          "I_I": 58.37801621476576,
+          "abs_net_I": 45.966351209094256,
+          "V": -21.910825512794563,
+          "inhibitory_to_excitatory_ratio": 1.4140428026784622,
+          "mean_signed_net_current": -17.093540169071204,
+          "cancellation_residual": 0.46122016584699393
+        },
+        "patchE": {
+          "I_E": 39.922973813308126,
+          "I_I": 60.82524406678394,
+          "abs_net_I": 41.19659013555534,
+          "V": -22.21091411677419,
+          "inhibitory_to_excitatory_ratio": 1.5235649616489277,
+          "mean_signed_net_current": -20.902270253475812,
+          "cancellation_residual": 0.40890639062803535
+        },
+        "outsideE": {
+          "I_E": 41.32149310314748,
+          "I_I": 58.31148002272456,
+          "abs_net_I": 46.09603334658623,
+          "V": -21.902666585963416,
+          "inhibitory_to_excitatory_ratio": 1.4111658520462065,
+          "mean_signed_net_current": -16.989986919577078,
+          "cancellation_residual": 0.46265841418132203
+        },
+        "allI": {
+          "I_E": 35.67321052430163,
+          "I_I": 45.38602609757392,
+          "abs_net_I": 37.98731576165398,
+          "V": -14.701682375432751,
+          "inhibitory_to_excitatory_ratio": 1.2722719775013138,
+          "mean_signed_net_current": -9.712815573272287,
+          "cancellation_residual": 0.4686364854243187
+        }
+      },
+      "pathway_currents": {
+        "recurrent_E_to_E_mean": 28.43744659423828,
+        "recurrent_E_to_I_mean": 23.655841827392578,
+        "GABA_to_E_mean": 58.378013610839844
+      },
+      "LFP_proxy_min": 8.884255614908026,
+      "LFP_proxy_max": 1069.543223837144,
+      "input_ROI_afferent_mean_per_ms": 1.2454144235081108,
+      "input_ROI_afferent_sd_per_ms": 0.02710080890415732,
+      "input_ROI_zero_rate_fraction": 0.0,
+      "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+      "full_trajectory_sha256": "e7dcd1c139490350f2146d2695d1c457a606c6cc17b4e6424b92ceb0b0aebcc1",
+      "low_rate_by_stated_thresholds": false,
+      "sparse_by_stated_definition": false
+    },
+    "diagnostic_threshold_D": {
+      "E_spikes": 459,
+      "I_spikes": 0,
+      "E_rate_hz": 0.0016875,
+      "I_rate_hz": 0.0,
+      "patch_E_rate_hz": 0.06375442739079103,
+      "patch_I_rate_hz": 0.0,
+      "patch_E_spikes": 459,
+      "patch_I_spikes": 0,
+      "outside_E_rate_hz": 0.0,
+      "fraction_E_ever_active": 0.011375,
+      "mean_E_active_fraction_10ms": 1.6875e-05,
+      "peak_E_active_fraction_10ms": 0.00015625,
+      "no_spikes": false,
+      "native_population_events": {
+        "global_E": {
+          "threshold_distinct_fraction": 0.01,
+          "count": 0,
+          "short_burst_count": 0,
+          "prolonged_count": 0,
+          "events": [],
+          "boundary_excluded_count": 0,
+          "right_censored_events": [],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        },
+        "input_patch_E": {
+          "threshold_distinct_fraction": 0.1,
+          "count": 0,
+          "short_burst_count": 0,
+          "prolonged_count": 0,
+          "events": [],
+          "boundary_excluded_count": 0,
+          "right_censored_events": [],
+          "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+        }
+      },
+      "frozen_contact_events_detected": 0,
+      "frozen_contact_events_primary": 0,
+      "current_balance": {
+        "allE": {
+          "I_E": 12.852346065225372,
+          "I_I": 0.0,
+          "abs_net_I": 12.852346065225372,
+          "V": 12.852085909641264,
+          "inhibitory_to_excitatory_ratio": 0.0,
+          "mean_signed_net_current": 12.852346065225372,
+          "cancellation_residual": 1.0
+        },
+        "patchE": {
+          "I_E": 12.239557892102358,
+          "I_I": 0.0,
+          "abs_net_I": 12.239557892102358,
+          "V": 12.229726923171505,
+          "inhibitory_to_excitatory_ratio": 0.0,
+          "mean_signed_net_current": 12.239557892102358,
+          "cancellation_residual": 1.0
+        },
+        "outsideE": {
+          "I_E": 12.869006790761764,
+          "I_I": 0.0,
+          "abs_net_I": 12.869006790761764,
+          "V": 12.869006850210067,
+          "inhibitory_to_excitatory_ratio": 0.0,
+          "mean_signed_net_current": 12.869006790761764,
+          "cancellation_residual": 1.0
+        },
+        "allI": {
+          "I_E": 12.021086009020877,
+          "I_I": 0.0,
+          "abs_net_I": 12.021086009020877,
+          "V": 12.02108827400228,
+          "inhibitory_to_excitatory_ratio": 0.0,
+          "mean_signed_net_current": 12.021086009020877,
+          "cancellation_residual": 1.0
+        }
+      },
+      "pathway_currents": {
+        "recurrent_E_to_E_mean": 0.005316386464983225,
+        "recurrent_E_to_I_mean": 0.003719921922311187,
+        "GABA_to_E_mean": 0.0
+      },
+      "LFP_proxy_min": 8.30171752599948,
+      "LFP_proxy_max": 16.55822841048499,
+      "input_ROI_afferent_mean_per_ms": 1.2454144235081108,
+      "input_ROI_afferent_sd_per_ms": 0.02710080890415732,
+      "input_ROI_zero_rate_fraction": 0.0,
+      "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+      "full_trajectory_sha256": "8968fc9db7e41c96b5f1f7efdd7f7709e5c32e861dcad5da7312ee333d4cde30",
+      "low_rate_by_stated_thresholds": true,
+      "sparse_by_stated_definition": true
+    }
+  },
+  "expectations": {
+    "D_low_rate_sparse": true,
+    "D_low_rate_including_silence": true,
+    "D_completely_silent": false,
+    "D_no_global_population_events": true,
+    "D_no_patch_population_events": true,
+    "E_short_global_bursts": true,
+    "E_short_patch_bursts": true,
+    "E_run_under_stochastic_input_without_kick": true,
+    "noise_necessity_tested": false,
+    "EI_balance_claim": "Measured currents reported; sparse background alone is not evidence of balanced E/I currents.",
+    "author_visual_acceptance": "PENDING_AUTHOR_VISUAL_REVIEW"
+  }
+}

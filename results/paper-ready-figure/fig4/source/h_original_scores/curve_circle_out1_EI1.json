@@ -1,0 +1,67 @@
+{
+  "candidate": "curve_circle_out1_EI1",
+  "J": 4.990430289452423,
+  "N": 113,
+  "groups": {
+    "rank_pattern": {
+      "N": 113,
+      "A": 0.16592378540801936,
+      "B": 0.0020096266670801615,
+      "D_off": 0.1639141587409392,
+      "D16": 0.17810714707719283,
+      "scaled": 3.6540129844306684
+    },
+    "participation": {
+      "N": 113,
+      "A": 0.05766965289628977,
+      "B": 0.0016342704914581452,
+      "D_off": 0.05603538240483163,
+      "D16": 0.06757741775075478,
+      "scaled": 1.2290503361958338
+    },
+    "local_and_interrod_timing": {
+      "N": 113,
+      "A": 0.4379505108331944,
+      "B": 0.002862706076156449,
+      "D_off": 0.43508780475703795,
+      "D16": 0.4553056664198929,
+      "scaled": 10.088227547730765
+    }
+  },
+  "components": [
+    3.6540129844306684,
+    10.088227547730765,
+    1.2290503361958338
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/initial/units/curve_circle_out1_EI1/2511_847401/workers/trajectory.json",
+  "source_sha256": "9b61ed9225f192e22315cc0f7a02bbc6f567e0a1a7e8cb12636b9a8c0faa05a9",
+  "reused": true,
+  "vector": [
+    4.19921432,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.0,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 6.555265582569526,
+  "joint": {
+    "N": 113,
+    "A": 0.3532818158129549,
+    "B": 0.0030148765908448658,
+    "D_off": 0.35026693922211005,
+    "scaled": 6.555265582569526
+  },
+  "search_role": "historical_compatible",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/curve_circle_out1_EI1.json",
+  "historical_score_sha256": "7f547fd6d606944541a679744e7004ad11d0e3ab4c79c9eb50c09c792937a27a",
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/curve_circle_out1_EI1.json",
+  "reused_from_score_sha256": "494fa03a83210b78e359e4aa99e2f93be462212542a56b3da147f6b47e808d0f",
+  "previous_search_role": "historical"
+}

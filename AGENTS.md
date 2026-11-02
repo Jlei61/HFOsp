@@ -2,13 +2,13 @@
 > **新 Figure 5（作者指定，2026-10-27）：** 当前为 `spatial_snn_propagation_and_core_count`、`vertical_legend_20261027`，先读 [当前 Fig5](docs/current_figure5.md) 与 `results/paper-ready-figure/fig5/current_version.json`。这是从旧 Fig4 拆出的空间 SNN 传播 A–F：A–E 为同一 `xy_left_20` 工作点；F 为 17 位 shared axis 患者前 16/32 次搜索、TA 偏好约束下的单 core 与原最低 J 双 core 对照。此中期科学状态不因发布而升级。当前布局保留 TA/TB 身份、下方模板刻度、右上角竖排 core 图例、只标显著星号。校验 `build_fig5_current.py`，重绘 `build_fig5_aligned_layout.py`；不得用旧 Z/M producer 覆盖。**原 Figure 5 的 Z/M 图现为 Figure 6**，见 [当前 Fig6](docs/current_figure6.md) 与 `fig6/current_version.json`。共享机器旧 worktree 以 `/home/honglab/leijiaxin/HFOsp/` 的这些入口为准；其他机器先更新 checkout。新 Fig4 属于另一任务，不由本次发布替换。
 <!-- /CURRENT_FIGURE5_20261027 -->
 
-<!-- WORKSPACE_STATUS_20261015 -->
-> **当前4个工作区（2026-10-15）：** 主目录、RNN开发区、统一SNN开发区、`main-cherry`整合检查区。见 [工作区状态](docs/workspace_status.md) 和 [SNN维护入口](docs/snn_workspace.md)。SNN新工作统一在 `topic4-continuous-core-state-r1`；`topic4-substrate-autapse-fix`已退出worktree登记，仅保留冻结代码/结果依赖，不再继续开发。旧发布区已关闭；主目录的并行工作和既存冲突保留。
-<!-- /WORKSPACE_STATUS_20261015 -->
+<!-- WORKSPACE_STATUS_20261102 -->
+> **当前 5 个工作区（2026-11-02）：** 主目录、统一 SNN、Topic 5 RNN、Topic 5 双流网络、main-cherry。见 [工作区状态](docs/workspace_status.md)。图件临时发布区在提交推送后移除；保留开发分支、冻结依赖、并行更改与运行任务。
+<!-- /WORKSPACE_STATUS_20261102 -->
 
-<!-- CURRENT_FIGURE4_20261011 -->
-> **Figure 4已定稿（2026-10-11）：** 先读`docs/current_figure4.md`与`results/paper-ready-figure/fig4/current_version.json`；共享机器的旧worktree以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`core_search_final_20261011`、`AUTHOR_ACCEPTED_FINAL`，布局`compact_ai_v4_a_core_search_central_shading_v15`，正式完整图和A–I单图在`fig4/figures/`。A保留三个问号区域、两个core及上方两条OPTM箭头；下方无箭头，浅绿底纹仅在中央取样框，右侧只有局部高斯采样权重。正式入口`build_fig4_current.py`验证并恢复冻结导出；原始数值和绘图代码在`source/`，不需重跑实验。旧正式v10、58个候选、旧动画和重复导出均在`archive/2026-10-11_fig4_finalization/`，历史身份以`fig4/historical_versions.json`为准。后续修改先输出独立修订，禁止用旧producer或候选目录覆盖定稿。
-<!-- /CURRENT_FIGURE4_20261011 -->
+<!-- CURRENT_FIGURE4_20261102 -->
+> **当前 Figure 4（作者确认，2026-11-02）：** 先读 [当前 Fig4](docs/current_figure4.md) 与 `results/paper-ready-figure/fig4/current_version.json`。正式版本 `snn_network_optimization_final_20261102`，布局 `snn_layout_ei_labels_20261031`，状态 `AUTHOR_ACCEPTED_FINAL`。A/B 为局部回路、空间网络与采样；C 为事件及三分量损失优化示意；D/E 为无 core 背景与单 core 簇发；F/G/H/I 为 core 数量、训练损失、低 J 位置密度及方向响应。B/D/E 共享间距筛选显示坐标；D 白底，E 仅 core 内紫色，Neuron ID/LFP 对齐，E/I 标签红蓝。正式图及单面板在 `fig4/figures/`；校验／精确恢复用 `build_fig4_current.py`，原生重绘用 `render_fig4_current.py`。原 Fig4 的传播部分独立为 Fig5，原 Fig5 的状态动力学现为 Fig6。旧正式版归档于 `archive/2026-11-02_fig4_reorganization/fig4/`，不可按旧 D/E 图号覆盖当前图。
+<!-- /CURRENT_FIGURE4_20261102 -->
 
 <!-- CURRENT_FIGURE3_20261010 -->
 > **Figure 3已定稿（2026-10-10）：** 先读`docs/current_figure3.md`与`results/paper-ready-figure/fig3/current_revision.json`；共享机器上的旧worktree也以`/home/honglab/leijiaxin/HFOsp/`下这两个文件为准，远端使用更新后checkout的同名文件。当前为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`，正式完整图和A–E单panel统一在`fig3/figures/`。A是E10/SZ3 broadband，B是Y1/SZ6固定0–10 s、30–80 Hz gamma及自身TA平面（非shared axis）；C/D/E为原D、原E右半、原F。列宽包含色条与标签，三行可见间距4.064 mm。正式入口`build_fig3_current.py`可验证并从冻结原生图层重建；旧`build_main_figure_3.py`已转到同一入口。旧A–F及旧代码在`archive/2026-10-10_pre_current_fig3_ae/`，不得从旧producer或候选目录覆盖正式图；后续修改先输出独立修订。
@@ -22,7 +22,7 @@
 
 ## 当前 Figure 4 入口
 
-- **Fig4当前数据版本**：C保留E1146一至四core、每组4次重复、共同前31个epoch的均值±样本标准差。新D为`angle_three_error_response_v1`，沿用旧D的13点方向响应；新E为`completed_position_density_standalone_v1`，保留83/413低J_joint前20%配置的位置密度。旧D版本`three_error_responses_density_v1`只作为归档来源；旧向外EE/核内EE扫描及showcase引用随本次草图简化移出，不能自动恢复。
+- **Fig4当前数据版本**：以 `docs/current_figure4.md` 和正式 registry 为准。C 为优化目标示意，D/E 为原生无 core／单 core 活动，F 为 1–4 core 各 4 次重复、共同前 31 epoch；G/H/I 使用实际三分量训练 J，其中 H 为 83/413 低 J 前 20%位置密度。旧 D 方向响应移至 I、旧 E 位置密度移至 H，不能按旧字母回退。
 - **更新任一Fig4面板时保留其他面板的当前版本**：先核对主目录指针、说明与registry的`layout_version`及`panel_b/c/d/e/i`，运行登记的producer；缺失或不一致先修复登记，不能从旧字母、目录日期、candidate字样或`D_candidate_right_axis`回退版本。发布前核对未改数据与来源；旧worktree也以`/home/honglab/leijiaxin/HFOsp/docs/current_figure4.md`为共享入口。
 
 # Agent Guide

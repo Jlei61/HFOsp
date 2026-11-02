@@ -1,0 +1,18 @@
+{
+  "schema": "fig4.native_de.v1",
+  "topology_seed": 2511,
+  "dynamics_seed": 847401,
+  "duration_ms": 10000.0,
+  "burnin_ms": 1500.0,
+  "source_candidate": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/canary_candidates/core1.json",
+  "source_candidate_sha256": "8769f67dcfd6fe2d0b3f30da1904e01b661d96440d1fe0de0d808d7d2b8d52dc",
+  "selection": "Pre-existing K=1 physical canary, before inspecting its long response; no search.",
+  "contrast": "Only E threshold lowering removed in D; graph, weights, delays, initial voltage, stochastic support and all external realizations held fixed.",
+  "D": "No lowered-threshold core; retains identical localized stochastic afferent patch and region-specific graph weights.",
+  "E": "Original one-core canary physics; no kick, prescribed events, Z/M or slow I.",
+  "statistical_unit": "One paired 10 s realization on one topology; events are not independent network replicates.",
+  "operational_burst": "Non-overlapping 10 ms bins: >=1% distinct E cells globally or >=10% distinct E cells in fixed input patch; adjacent supra-threshold bins merged across <=100 ms gaps; report duration, do not equate with patient HFO.",
+  "sparse_definition": "Descriptive E mean <1 Hz and mean distinct-E fraction per 10 ms <1%; report values and events separately.",
+  "graph_cache_source": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/global_graph_cache/3a041ec3fc3854051a51396d71c72c81b9304c8ec4fbd8210d070767a57a2955.pkl",
+  "graph_cache_sha256": "471ea6559eedb168c010fc9eba0940529cd9c449d824dd68ad5edb060c41a799"
+}

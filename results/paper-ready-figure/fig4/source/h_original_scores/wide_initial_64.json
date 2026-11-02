@@ -1,0 +1,62 @@
+{
+  "N": 160,
+  "status": "SCORABLE",
+  "J": 3.181167704233624,
+  "groups": {
+    "rank_pattern": {
+      "N": 160,
+      "A": 0.0968420228116536,
+      "B": 0.0011868519903431543,
+      "D_off": 0.09565517082131045,
+      "D16": 0.107523690724742,
+      "scaled": 2.1323675690604302
+    },
+    "participation": {
+      "N": 160,
+      "A": 0.10809602527532959,
+      "B": 0.0004476278190952379,
+      "D_off": 0.10764839745623435,
+      "D16": 0.11212467564718673,
+      "scaled": 2.3611028140876864
+    },
+    "local_and_interrod_timing": {
+      "N": 160,
+      "A": 0.22018862098098158,
+      "B": 0.0023894442815485368,
+      "D_off": 0.21779917669943305,
+      "D16": 0.2416936195149184,
+      "scaled": 5.050032729552756
+    }
+  },
+  "candidate": "wide_initial_64",
+  "source": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/search/units/wide_initial_64/2511_847401/workers/trajectory.json",
+  "source_sha256": "d36b9907cdb9229f58afee47f515823d2807816139b062db54885fa81f2befce",
+  "vector": [
+    6.588640272153002,
+    15.590863204249239,
+    14.261293454229898,
+    3.902015263903732,
+    1.4617567472159863,
+    -34.880512319505215
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "J_joint": 3.006557912967968,
+  "joint": {
+    "N": 160,
+    "A": 0.16276845263004933,
+    "B": 0.0021193035597971708,
+    "D_off": 0.16064914907025216,
+    "D16": 0.18184218466822386,
+    "scaled": 3.006557912967968
+  },
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "device": "cuda:0",
+  "time": 1790730697.840629,
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/wide_initial_64.json",
+  "reused_from_score_sha256": "a18402045f20948616f813c829a255d642e5e661029c19fcc738b5db71732392",
+  "previous_search_role": null,
+  "search_role": "historical_compatible"
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "fig4.native_d0_poisson.v2",
+  "topology_seed": 2511,
+  "dynamics_seed": 847401,
+  "duration_ms": 10000.0,
+  "burnin_ms": 1500.0,
+  "source_candidate": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/canary_candidates/core1.json",
+  "source_candidate_sha256": "8769f67dcfd6fe2d0b3f30da1904e01b661d96440d1fe0de0d808d7d2b8d52dc",
+  "selection": "Pre-existing K=1 physical canary, before inspecting its long response; no search.",
+  "contrast": "Homogeneous noisy zero-core background versus localized one-core noisy bursting regime; not a one-factor core ablation",
+  "D": "Zero-core network; uniform background threshold and weights; independent Poisson arrivals to every cell at background nu; no local OU/input patch",
+  "E": "Unchanged original one-core E; retained as separate reference trajectory",
+  "statistical_unit": "One 10 s trajectory on one topology; no independent seed repetition",
+  "operational_burst": "Non-overlapping 10 ms bins: >=1% distinct E cells globally or >=10% distinct E cells in fixed input patch; adjacent supra-threshold bins merged across <=100 ms gaps; report duration, do not equate with patient HFO.",
+  "sparse_definition": "Descriptive E mean <1 Hz and mean distinct-E fraction per 10 ms <1%; report values and events separately.",
+  "graph_cache_source": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/global_graph_cache/3a041ec3fc3854051a51396d71c72c81b9304c8ec4fbd8210d070767a57a2955.pkl",
+  "graph_cache_sha256": "471ea6559eedb168c010fc9eba0940529cd9c449d824dd68ad5edb060c41a799",
+  "reference_run": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/experiments/fig4_native_de_20261024/run02",
+  "removed": {
+    "threshold_lowering": "all E thresholds restored to background 18 mV",
+    "stochastic_input": "all cells receive independent Poisson arrivals at background nu; no localized patch; global OU loading zero",
+    "EE_same_core_scale": [
+      0.85,
+      1.0
+    ],
+    "EE_core_to_out_scale": [
+      1.4534495921805501,
+      1.0
+    ]
+  },
+  "retained": "Neuron positions, connection partners/delays, global kernel, GABA weights and kinetics match E; D mean external drive matches the earlier silent D, not the local E patch.",
+  "pairing_boundary": "Same seed and network topology. External streams intentionally differ because the local OU patch is replaced by uniform independent Poisson input; not a pure threshold intervention.",
+  "zero_core_count": 0,
+  "source_candidate_role": "Global topology provenance only; no core masks/thresholds/weight blocks active in D0",
+  "background_selection": "First condition: restore native independent Poisson shot noise globally at unchanged background mean; no output-dependent seed or window choice.",
+  "metadata_correction": "Inherited D/E field text in frozen execution design described the earlier threshold-only diagnostic. Corrected here using actual zeroed core masks, uniform thresholds, restored global weights and all-stochastic external mask; no trajectory modification."
+}

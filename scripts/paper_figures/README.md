@@ -1,3 +1,5 @@
+> **2026-11-02 Figure 4 更新：** `snn_network_optimization_final_20261102` 已经作者确认，当前 A–I 为网络、优化与无／有 core 活动；完整说明见 `docs/current_figure4.md`。旧 D/E 数据分别对应新 I/H，传播部分见当前 Fig5。校验用 `build_fig4_current.py`，独立重绘用 `render_fig4_current.py`。
+
 # Paper Figure Scripts
 
 ## 当前 Figure 5 / Figure 6（2026-10-27）

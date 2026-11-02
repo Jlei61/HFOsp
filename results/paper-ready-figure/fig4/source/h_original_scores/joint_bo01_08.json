@@ -1,0 +1,64 @@
+{
+  "N": 163,
+  "status": "SCORABLE",
+  "J": 1.709378077755493,
+  "groups": {
+    "rank_pattern": {
+      "N": 163,
+      "A": 0.06744388897943575,
+      "B": 0.001675323742067829,
+      "D_off": 0.06576856523736792,
+      "D16": 0.08283592585968393,
+      "scaled": 1.4661283271113525
+    },
+    "participation": {
+      "N": 163,
+      "A": 0.06939298086300054,
+      "B": 0.0012260246201402606,
+      "D_off": 0.06816695624286027,
+      "D16": 0.08065708206053918,
+      "scaled": 1.4951378377764077
+    },
+    "local_and_interrod_timing": {
+      "N": 163,
+      "A": 0.09589439245803899,
+      "B": 0.002441120651031856,
+      "D_off": 0.09345327180700713,
+      "D16": 0.11832218843939417,
+      "scaled": 2.166868068378719
+    }
+  },
+  "candidate": "joint_bo01_08",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_08/2511_847401/workers/trajectory.json",
+  "source_sha256": "1415fdd14ebe1b8f58595fe4be6552151fc66a541fd0ff2422451726f3cb1e32",
+  "vector": [
+    3.2134361041766484,
+    11.848641801747606,
+    14.998909859986808,
+    4.498672303498653,
+    1.5,
+    -20.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "reused": true,
+  "J_joint": 1.828086766290603,
+  "joint": {
+    "N": 163,
+    "A": 0.10022088602599158,
+    "B": 0.002540883866557637,
+    "D_off": 0.09768000215943394,
+    "D16": 0.12356525654998987,
+    "scaled": 1.828086766290603
+  },
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "device": "cuda:0",
+  "time": 1789598663.5178947,
+  "search_role": "historical_compatible",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_08.json",
+  "historical_score_sha256": "be906f94f7a0a095213b6480ab6bcc22f8a49882726c5009a7a3013b3b307a6a",
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/joint_bo01_08.json",
+  "reused_from_score_sha256": "d18781019939a2d8bc465df5c5bdb463ae25d4411e930170f824a2e298556c76",
+  "previous_search_role": "historical"
+}

@@ -1,0 +1,33 @@
+{
+  "centroid_ms": [],
+  "recruitment_ms": [],
+  "primary_event_indices": [],
+  "n_primary_events": 0,
+  "primary_selection": "isolated 250 ms windows; both overlapping windows excluded as in frozen patient table; prolonged activity audited separately",
+  "events": [],
+  "windows_ms": [],
+  "n_groups": 0,
+  "boundary_or_low_window_support": [],
+  "threshold": [
+    0.06383456295728693,
+    0.05756779652833954,
+    0.0630299171209337,
+    0.05205175742506989,
+    0.062342106431725886,
+    0.05372808566689509,
+    0.04400833407044413,
+    0.062223956614732776,
+    0.04583957780897634,
+    0.05813617169857025,
+    0.06584100073575974,
+    0.06809289544820787,
+    0.06932647794485093,
+    0.07098095443844797,
+    0.07194970604777337
+  ],
+  "required_unique_contacts": 8,
+  "threshold_scale": 1.0,
+  "time_units": "ms, bin centers",
+  "recruitment_role": "auxiliary first sustained threshold crossing; not patient centroid ground truth",
+  "prolonged_or_multiburst_events_retained": true
+}

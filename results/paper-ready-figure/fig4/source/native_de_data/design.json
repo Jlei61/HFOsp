@@ -1,0 +1,36 @@
+{
+  "schema": "fig4.native_de.primary_delivery.v1",
+  "duration_ms": 10000.0,
+  "burnin_ms": 1500.0,
+  "topology_seed": 2511,
+  "dynamics_seed": 847401,
+  "primary_D": "D_native.npz = zero-core native network with homogeneous independent Poisson background",
+  "primary_E": "E_native.npz unchanged from first candidate",
+  "diagnostic": "diagnostic_threshold_D_native.npz = threshold-only ablation with exact stochastic-input pairing to E; never label this no-core",
+  "removed_from_D": {
+    "threshold_lowering": "all E thresholds restored to background 18 mV",
+    "stochastic_input": "Local OU/Poisson patch removed; globally uniform independent Poisson background now active.",
+    "EE_same_core_scale": [
+      0.85,
+      1.0
+    ],
+    "EE_core_to_out_scale": [
+      1.4534495921805501,
+      1.0
+    ],
+    "local_input_mean": "E: max(0.95*nu+OU,0) rate driving Poisson arrivals; D0: nu deterministic expected arrivals; mean is not matched"
+  },
+  "retained": "Shared positions, global topology/delays and GABA weights; D uniform background mean matches earlier silent D; core-specific AMPA weights and local input differ from E.",
+  "metadata_correction": "D: independent Poisson at nu throughout; E: unchanged local max(0.95*nu+OU,0) Poisson patch and deterministic exterior. D/E are different working regimes, not a one-factor causal test.",
+  "pairing_boundary": "D has independent Poisson input globally; E retains its original local OU/Poisson patch. No identical external spike stream between D and E.",
+  "source_candidate": "/data/hfosp/topic4_sef_hfo/e1146_core_count_optimization_20260928/canary_candidates/core1.json",
+  "source_candidate_sha256": "8769f67dcfd6fe2d0b3f30da1904e01b661d96440d1fe0de0d808d7d2b8d52dc",
+  "selection": "Pre-existing K=1 physical canary, before inspecting its long response; no search.",
+  "source_runs": {
+    "D": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/experiments/fig4_native_de_20261024/run04_d0_poisson/D0",
+    "E": "experiments/fig4_native_de_20261024/run02/E",
+    "diagnostic_threshold_D": "experiments/fig4_native_de_20261024/run02/D"
+  },
+  "contrast": "Homogeneous noisy background vs localized one-core bursting regime; not an exactly input-paired core ablation.",
+  "D_background_rate_matched_to_previous_silent_D": true
+}

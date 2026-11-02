@@ -1,3 +1,5 @@
+> **2026-11-02 Figure 4 更新：** `snn_network_optimization_final_20261102` 已经作者确认，当前 A–I 为网络、优化与无／有 core 活动；完整说明见 `docs/current_figure4.md`。旧 D/E 数据分别对应新 I/H，传播部分见当前 Fig5。校验用 `build_fig4_current.py`，独立重绘用 `render_fig4_current.py`。
+
 # Paper-ready figure outputs
 
 > **2026-10-27：** 新 [Figure 5](../../docs/current_figure5.md) 已登记为 `vertical_legend_20261027`；原 Figure 5 已改为 [Figure 6](../../docs/current_figure6.md)。
@@ -6,7 +8,7 @@
 
 > **独立代码与 notebook：** [paper_code](../../paper_code/README.md) · [基础图件复现 notebook](../../paper_code/notebooks/01_reproduce_paper_figures.ipynb)。数据处理、分析、建模和绘图分目录，项目代码不依赖原工作区；衍生输入与输出分别存放。
 
-当前Figure 4已于2026-10-11由作者确认定稿，版本`core_search_final_20261011`、状态`AUTHOR_ACCEPTED_FINAL`；[正式整图及A–I单图](fig4/figures/README.md)、[版本说明](../../docs/current_figure4.md)和[机器入口](fig4/current_version.json)统一指向本版。
+当前 Figure 4 已于 2026-11-02 由作者确认，版本 `snn_network_optimization_final_20261102`、状态 `AUTHOR_ACCEPTED_FINAL`；[完整图及 A–I 单图](fig4/figures/README.md)、[版本说明](../../docs/current_figure4.md)和[机器入口](fig4/current_version.json)统一指向本版。
 
 > **当前Fig3已定稿（2026-10-10）：** 正式[完整图和A–E单panel](fig3/figures/README.md)为`visual_alignment_compact_rows_20261010`、`AUTHOR_ACCEPTED_FINAL`。统一入口：[版本说明](../../docs/current_figure3.md)、[机器指针](fig3/current_revision.json)；`build_fig3_current.py`可在远端从随包原生图层重建。旧A–F及旧代码已归档。
 

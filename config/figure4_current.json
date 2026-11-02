@@ -1,12 +1,13 @@
 {
   "figure": "Fig4",
-  "version": "core_search_final_20261011",
-  "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
+  "version": "snn_network_optimization_final_20261102",
+  "layout_version": "snn_layout_ei_labels_20261031",
   "status": "AUTHOR_ACCEPTED_FINAL",
+  "producer": "scripts/paper_figures/build_fig4_current.py",
+  "documentation": "docs/current_figure4.md",
   "pointer": "results/paper-ready-figure/fig4/current_version.json",
   "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
-  "documentation": "docs/current_figure4.md",
-  "producer": "scripts/paper_figures/build_fig4_current.py",
   "history_registry": "results/paper-ready-figure/fig4/historical_versions.json",
-  "fallback_to_historical_layout": false
+  "fallback_to_historical_layout": false,
+  "redraw_producer": "scripts/paper_figures/render_fig4_current.py"
 }

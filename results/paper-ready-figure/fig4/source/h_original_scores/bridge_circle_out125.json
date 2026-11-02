@@ -1,0 +1,67 @@
+{
+  "candidate": "bridge_circle_out125",
+  "J": 2.373664910903342,
+  "N": 139,
+  "groups": {
+    "rank_pattern": {
+      "N": 139,
+      "A": 0.09148901504278986,
+      "B": 0.0020514320513099235,
+      "D_off": 0.08943758299147994,
+      "D16": 0.1072593989372349,
+      "scaled": 1.993763638585177
+    },
+    "participation": {
+      "N": 139,
+      "A": 0.0801997486830422,
+      "B": 0.0015022910818776787,
+      "D_off": 0.07869745760116452,
+      "D16": 0.09174861137497685,
+      "scaled": 1.7261082653757123
+    },
+    "local_and_interrod_timing": {
+      "N": 139,
+      "A": 0.14964036389692342,
+      "B": 0.002955819137386301,
+      "D_off": 0.14668454475953713,
+      "D16": 0.17236322351558062,
+      "scaled": 3.4011228287491364
+    }
+  },
+  "components": [
+    1.993763638585177,
+    3.4011228287491364,
+    1.7261082653757123
+  ],
+  "status": "SCORABLE",
+  "source": "/data/hfosp/topic4_sef_hfo/geometry_ee_axis_three_observable_optimization_20260914/initial/units/bridge_circle_out125/2511_847401/workers/trajectory.json",
+  "source_sha256": "fd53f9f0a3db12728b6deac4d830d37e790c5d42bc5d3a484d876658c2364fc7",
+  "reused": true,
+  "vector": [
+    4.19921432,
+    12.12890135,
+    16.47920304,
+    3.96551153,
+    1.25,
+    0.0
+  ],
+  "topology": 2511,
+  "noise": 847401,
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "J_joint": 2.7739506618116825,
+  "joint": {
+    "N": 139,
+    "A": 0.15126678774246144,
+    "B": 0.0030465218161694484,
+    "D_off": 0.14822026592629198,
+    "scaled": 2.7739506618116825
+  },
+  "search_role": "historical_compatible",
+  "joint_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/joint_feature_audit",
+  "physical_status": "COMPLETE_NO_RUNAWAY",
+  "historical_score": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/bridge_circle_out125.json",
+  "historical_score_sha256": "6fb2e77dc8dcbc5dfdf0df0c6db5f045b658f790b2ca9606876696fdde740a09",
+  "reused_from_score": "/data/hfosp/topic4_sef_hfo/joint_position_expansion_20260928/scores/bridge_circle_out125.json",
+  "reused_from_score_sha256": "c36f0b29cc793282b8331fc4df4e9226e21025c01e5733074eeefc6bdf3a7122",
+  "previous_search_role": "historical"
+}

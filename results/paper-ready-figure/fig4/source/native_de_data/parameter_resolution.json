@@ -1,0 +1,5 @@
+{
+  "T_ms_before_runner_override": 20000.0,
+  "T_ms_executed": 10000.0,
+  "explanation": "The runner records inherited base params before assigning params.T=duration_ms; params.json resolves the actually executed value and frozen_base_params.json retains the original record. Execution duration is independently confirmed by both native arrays and execution.json."
+}

@@ -1,3 +1,7 @@
+<!-- CURRENT_FIGURE4_20261102 -->
+> **当前 Figure 4（作者确认，2026-11-02）：** 先读 [当前 Fig4](docs/current_figure4.md) 与 `results/paper-ready-figure/fig4/current_version.json`。正式版本 `snn_network_optimization_final_20261102`，布局 `snn_layout_ei_labels_20261031`，状态 `AUTHOR_ACCEPTED_FINAL`。A/B 为局部回路、空间网络与采样；C 为事件及三分量损失优化示意；D/E 为无 core 背景与单 core 簇发；F/G/H/I 为 core 数量、训练损失、低 J 位置密度及方向响应。B/D/E 共享间距筛选显示坐标；D 白底，E 仅 core 内紫色，Neuron ID/LFP 对齐，E/I 标签红蓝。正式图及单面板在 `fig4/figures/`；校验／精确恢复用 `build_fig4_current.py`，原生重绘用 `render_fig4_current.py`。原 Fig4 的传播部分独立为 Fig5，原 Fig5 的状态动力学现为 Fig6。旧正式版归档于 `archive/2026-11-02_fig4_reorganization/fig4/`，不可按旧 D/E 图号覆盖当前图。
+<!-- /CURRENT_FIGURE4_20261102 -->
+
 # CLAUDE.md
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.

@@ -1,9 +1,8 @@
 {
+  "figure": "Fig4",
+  "version": "snn_network_optimization_final_20261102",
+  "layout_version": "snn_layout_ei_labels_20261031",
   "status": "AUTHOR_ACCEPTED_FINAL",
-  "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
-  "producer": "scripts/paper_figures/build_fig4_current.py",
-  "layout_version": "compact_ai_v4_a_core_search_central_shading_v15",
-  "updated_on": "2026-10-11",
   "panel_letters": [
     "A",
     "B",
@@ -15,2172 +14,1500 @@
     "H",
     "I"
   ],
-  "titles": {
-    "A": "局部E/I回路、二维多core优化示意、局部采样与SEEG读出",
-    "B": "先验开发后的三类误差：原第6–16阶段194个工作点",
-    "C": "E1146一至四core最佳训练loss：4次优化重复均值±样本标准差",
-    "D": "E→E角度的Mean rank／Order／Participation误差响应",
-    "E": "413个可评分配置中低J_joint前20%（83个）的位置密度",
-    "F": "连续30–80 Hz虚拟接触活动及MTA／MTB事件标记",
-    "G": "模型与患者的平均传播rank",
-    "H": "模型—患者触点交叉匹配矩阵",
-    "I": "25位患者TA–MTA／TB–MTB模板相似度"
+  "panels": {
+    "A": {
+      "description": "new 3D local circuit"
+    },
+    "B": {
+      "description": "spatial sheet with local Gaussian electrode sampling inset"
+    },
+    "C": {
+      "description": "model/patient TFR and loss",
+      "objective": "J = (L_r + L_o + L_p) / 3",
+      "unit": "Eligible event distributions from the fixed 60-s run; the displayed event is illustrative."
+    },
+    "D": {
+      "description": "native SNN without core",
+      "version": "native_no_core_background",
+      "data": "source/native_de_data/D_native.npz",
+      "map_background": "white",
+      "circle": "unfilled dashed readout ROI"
+    },
+    "E": {
+      "description": "native SNN with one core",
+      "version": "native_single_core_bursts",
+      "data": "source/native_de_data/E_native.npz",
+      "map_background": "white outside purple core",
+      "readout": "Native current-LFP proxy, independently scaled from D"
+    },
+    "F": {
+      "description": "old C",
+      "core_counts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "repeats": 4,
+      "epochs": 31,
+      "band": "sample standard deviation"
+    },
+    "G": {
+      "description": "old B workpoints, actual three training-loss components"
+    },
+    "H": {
+      "description": "same old E pool, position density reselected by three-component training J",
+      "selection": "lowest 20% of the three-component training J",
+      "selected": 83,
+      "scored_pool": 413
+    },
+    "I": {
+      "description": "old D angles, actual three training-loss components and total J with SD",
+      "angles": 13,
+      "objective": "three-component training J",
+      "band": "time-block bootstrap standard deviation"
+    }
   },
-  "whole_canvas_mm": [
-    300.0,
-    232.0
-  ],
-  "parent_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-  "base_published_complete_sha256": "f4a04af30257596a960826e2a9ebb7b7d7323a437057682f9cb54158af28d201",
-  "panel_mapping": {
-    "A": "A",
-    "B": "B",
-    "C": "C",
-    "D": "D angle response",
-    "E": "D position density",
-    "F": "G",
-    "G": "H",
-    "H": "I",
-    "I": "J"
-  },
-  "omitted_parent_panels": [
-    "E propagation showcase",
-    "F propagation showcase",
-    "D outward EE response",
-    "D within-core EE response"
-  ],
-  "panel_a": {
-    "status": "AUTHOR_ACCEPTED_FINAL",
-    "original_left_circuit_structure_preserved": true,
-    "overview_neuron_samples_preserved": true,
-    "left_circuit_detail_revision": {
-      "native_producer": "local_circuit_native_source.py",
-      "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-      "central_offset_schematic_units": 0.11,
-      "previous_central_offset_schematic_units": 0.04,
-      "z_border_linewidth_pt": 0.6,
-      "previous_z_border_linewidth_pt": 1.6,
-      "z_border_dash_pattern": [
-        1.5,
-        1.5
-      ],
-      "previous_z_border_dash_pattern": [
-        2.0,
-        1.7
-      ],
-      "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-    },
-    "left_circuit_artwork_scale": 1.2,
-    "left_circuit_axes_mm": [
-      7.000000000000009,
-      155.926988,
-      77.39701199999993,
-      60.87614399999996
-    ],
-    "left_circuit_original_axes_mm": [
-      7.000000000000009,
-      161.0,
-      64.49750999999995,
-      50.73011999999997
-    ],
-    "sheet_axes_mm": [
-      109.564528,
-      156.727718,
-      70.639884,
-      70.63988399999998
-    ],
-    "sheet_scale_from_v6": 1.06,
-    "electrode_shafts_are_straight": true,
-    "shaft_collinearity_residual_mm": {
-      "SCL": 4.440892098500626e-16,
-      "ICL": 1.2212453270876722e-15
-    },
-    "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
-    "electrode_display": {
-      "source": "D_position_straight_electrodes.json",
-      "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
-      "geometry_snapshot": "rigid_contact_geometry.npz",
-      "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
-      "maximum_collinearity_residual_mm": 7.788908407135864e-16,
-      "maximum_display_displacement_mm": 0.20730072911893763,
-      "overview_and_sampling_use_identical_contacts": true
-    },
-    "original_left_title_and_internal_labels_preserved": true,
-    "combined_third_component": true,
-    "formulas_and_lower_explanations_removed": true,
-    "zoom_center_mm": [
-      -8.5,
-      0.0
-    ],
-    "zoom_field_of_view_mm": [
-      1.6754742547425474,
-      1.3143631436314362
-    ],
-    "left_zoom_connector_minimum_contact_distance_mm": 3.2585021053195193,
-    "left_zoom_connectors_clear_of_electrode_footprints": true,
-    "actual_workpoint_kernel": {
-      "l_par": 0.5374011537017762,
-      "l_perp": 0.40305086527633205,
-      "theta_deg": -22.80538396505847,
-      "theta_rad": -0.3980290373717898,
-      "reference_theta_deg": -22.80538396505847,
-      "reference_ar": 2.0,
-      "perp_scale": 1.5,
-      "parallel_scale": 1.0,
-      "angle_offset_deg": 0.0,
-      "is_reference": false
-    },
-    "kernel_centres_E_coordinates_mm": [
-      [
-        12.151403427124023,
-        4.944769382476807
-      ],
-      [
-        13.909762382507324,
-        4.9577555656433105
-      ],
-      [
-        11.787443161010742,
-        3.968081474304199
-      ],
-      [
-        13.032197952270508,
-        3.884768486022949
-      ],
-      [
-        14.045100212097168,
-        3.9619879722595215
-      ]
-    ],
-    "layout_refinement": {
-      "sheet_shift_x_mm": 24.0,
-      "sampling_axes_mm": [
-        218.5,
-        190.0,
-        60.0,
-        30.0
-      ],
-      "previous_sampling_axes_mm": [
-        203.0,
-        190.0,
-        68.0,
-        34.0
-      ],
-      "readout_axes_mm": [
-        [
-          207.0,
-          155.0,
-          34.0,
-          22.0
-        ],
-        [
-          256.0,
-          155.0,
-          34.0,
-          22.0
-        ]
-      ],
-      "previous_readout_axes_mm": [
-        [
-          179.0,
-          155.0,
-          47.0,
-          22.0
-        ],
-        [
-          245.0,
-          155.0,
-          47.0,
-          22.0
-        ]
-      ],
-      "left_circuit_scale": 1.2,
-      "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
-      "sheet_scale": 1.06,
-      "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
-    },
-    "local_population_coordinates_mm": [
-      {
-        "E": [
-          [
-            12.151403427124023,
-            4.944769382476807
-          ],
-          [
-            12.304140090942383,
-            4.9625444412231445
-          ],
-          [
-            12.395358085632324,
-            4.898394584655762
-          ],
-          [
-            12.275625228881836,
-            4.794172286987305
-          ],
-          [
-            12.227322578430176,
-            5.0637688636779785
-          ],
-          [
-            12.034781455993652,
-            4.771931171417236
-          ]
-        ],
-        "I": [
-          [
-            11.971738952223859,
-            4.926103714872796
-          ],
-          [
-            11.953223930433865,
-            5.1074732206518085
-          ]
-        ]
-      },
-      {
-        "E": [
-          [
-            13.909762382507324,
-            4.9577555656433105
-          ],
-          [
-            14.016875267028809,
-            4.808532238006592
-          ],
-          [
-            13.70569896697998,
-            4.8910017013549805
-          ],
-          [
-            13.792451858520508,
-            4.987637996673584
-          ],
-          [
-            14.155109405517578,
-            4.876069068908691
-          ],
-          [
-            13.95798110961914,
-            5.150943279266357
-          ],
-          [
-            13.701952934265137,
-            5.07421350479126
-          ]
-        ],
-        "I": [
-          [
-            14.069424793465144,
-            5.037958340919517
-          ],
-          [
-            13.837128616656454,
-            5.111711940660591
-          ]
-        ]
-      },
-      {
-        "E": [
-          [
-            11.787443161010742,
-            3.968081474304199
-          ],
-          [
-            11.984225273132324,
-            3.79966402053833
-          ],
-          [
-            11.564770698547363,
-            4.10961389541626
-          ],
-          [
-            11.862934112548828,
-            3.8602023124694824
-          ],
-          [
-            11.947848320007324,
-            4.065094947814941
-          ],
-          [
-            11.678738594055176,
-            4.014657020568848
-          ]
-        ],
-        "I": [
-          [
-            11.763234933014688,
-            4.157546046048493
-          ],
-          [
-            11.774906009994329,
-            3.798027401525916
-          ]
-        ]
-      },
-      {
-        "E": [
-          [
-            13.032197952270508,
-            3.884768486022949
-          ],
-          [
-            13.224488258361816,
-            3.8485240936279297
-          ],
-          [
-            13.181347846984863,
-            3.715062141418457
-          ],
-          [
-            13.12874984741211,
-            3.952385425567627
-          ],
-          [
-            13.081881523132324,
-            4.10737943649292
-          ],
-          [
-            13.00422191619873,
-            3.704172134399414
-          ]
-        ],
-        "I": [
-          [
-            12.930556066091496,
-            4.088410408328311
-          ],
-          [
-            12.801061207277563,
-            4.003966101489869
-          ]
-        ]
-      },
-      {
-        "E": [
-          [
-            14.045100212097168,
-            3.9619879722595215
-          ],
-          [
-            13.838899612426758,
-            4.0432329177856445
-          ],
-          [
-            13.814152717590332,
-            3.9273929595947266
-          ],
-          [
-            14.1874361038208,
-            3.7812366485595703
-          ],
-          [
-            14.132532119750977,
-            4.063586711883545
-          ],
-          [
-            13.912890434265137,
-            3.968815803527832
-          ]
-        ],
-        "I": [
-          [
-            14.31302613950283,
-            3.8759139608328024
-          ]
-        ]
-      }
-    ],
-    "local_population_counts": [
-      {
-        "E": 6,
-        "I": 2
-      },
-      {
-        "E": 7,
-        "I": 2
-      },
-      {
-        "E": 6,
-        "I": 2
-      },
-      {
-        "E": 6,
-        "I": 2
-      },
-      {
-        "E": 6,
-        "I": 1
-      }
-    ],
-    "all_local_E_markers_hollow": true,
-    "all_ellipses_contain_fewer_I_than_E": true,
-    "local_synaptic_arrowheads_removed": true,
-    "ellipse_rows": [
-      2,
-      3
-    ],
-    "labeled_sampling_contacts": [
-      "ICL3",
-      "ICL4",
-      "ICL5"
-    ],
-    "displayed_sampling_labels": [
-      "SL3",
-      "SL4",
-      "SL5"
-    ],
-    "display_label_to_source_contact": {
-      "SL3": "ICL3",
-      "SL4": "ICL4",
-      "SL5": "ICL5"
-    },
-    "exactly_three_consecutive_contacts": true,
-    "sampling_weights_shown_only_in_right_zoom": true,
-    "sampling_weight_display": {
-      "location": "Right Local sampling only",
-      "sigma_mm": 0.25,
-      "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
-      "maximum_alpha": 0.67,
-      "render_extent_sigma": 4.0,
-      "clipped_at_zoom_boundary": true,
-      "central_sheet": "Light-green zoom-frame background only; Gaussian sampling weights remain in the right inset."
-    },
-    "sampling_weight_sigma_mm": 0.25,
-    "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
-    "sampling_footprint_boundary_rings_removed": true,
-    "sampling_contact_coordinates_overview_mm": [
-      [
-        4.887288107598678,
-        -5.82446371225047
-      ],
-      [
-        3.022935542047014,
-        -5.579826094279083
-      ],
-      [
-        1.52689879808878,
-        -5.383518339940077
-      ]
-    ],
-    "local_sampling_labels_match_both_readouts": true,
-    "tiny_readout_arrow_removed": true,
-    "local_circuit_count": 5,
-    "sampling_zoom_center_overview_mm": [
-      3.207093452843729,
-      -5.603991026095273
-    ],
-    "sampling_zoom_field_of_view_mm": [
-      3.8,
-      1.9
-    ],
-    "sampling_frame_is_a_coordinate_exact_enlargement": true,
-    "two_distinct_zoom_roles": true,
-    "mode_readouts_below_sampling": true,
-    "physical_xy_equal_scale": true,
-    "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
-    "readout": {
-      "type": "normalized Gaussian average of smoothed E spike density",
-      "sigma_mm": 0.25,
-      "bin_ms": 2.0,
-      "smooth_ms": 5.0,
-      "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
-      "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
-      "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
-      "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
-      "display_title": "SEEG readout",
-      "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
-    },
-    "mode_showcases": {
-      "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
-      "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
-      "events": [
-        {
-          "mode": "MTA",
-          "event_index": 10,
-          "frozen_mode_label": 1,
-          "window_absolute_ms": [
-            4310,
-            4430
-          ],
-          "peak_absolute_ms": [
-            4386.0,
-            4378.0,
-            4372.0
-          ],
-          "peak_relative_ms": [
-            76.0,
-            68.0,
-            62.0
-          ],
-          "contact_order": [
-            "ICL3",
-            "ICL4",
-            "ICL5"
-          ],
-          "display_labels": [
-            "SL3",
-            "SL4",
-            "SL5"
-          ]
-        },
-        {
-          "mode": "MTB",
-          "event_index": 8,
-          "frozen_mode_label": 0,
-          "window_absolute_ms": [
-            3710,
-            3830
-          ],
-          "peak_absolute_ms": [
-            3756.0,
-            3756.0,
-            3762.0
-          ],
-          "peak_relative_ms": [
-            46.0,
-            46.0,
-            52.0
-          ],
-          "contact_order": [
-            "ICL3",
-            "ICL4",
-            "ICL5"
-          ],
-          "display_labels": [
-            "SL3",
-            "SL4",
-            "SL5"
-          ]
-        }
-      ],
-      "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
-      "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
-      "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
-      "snapshot": "burst_readout_arrays.npz",
-      "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
-      "waveform_source": "waveform_arrays.npz",
-      "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
-      "exact_frozen_F_waveform_crops_verified": true,
-      "no_artificial_peak_sharpening_or_time_warping": true,
-      "peak_relative_ms": [
-        [
-          76.0,
-          68.0,
-          62.0
-        ],
-        [
-          46.0,
-          46.0,
-          52.0
-        ]
-      ],
-      "display_label_to_source_contact": {
-        "SL3": "ICL3",
-        "SL4": "ICL4",
-        "SL5": "ICL5"
-      }
-    },
-    "readout_peak_times_relative_ms": [
-      [
-        76.0,
-        68.0,
-        62.0
-      ],
-      [
-        46.0,
-        46.0,
-        52.0
-      ]
-    ],
-    "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
-    "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-    "central_gaussian_sampling_weights_removed": true,
-    "sampling_frame_background_shading": {
-      "color": "#93C4A7",
-      "alpha": 0.22,
-      "locations": [
-        "Central zoom-location frame"
-      ],
-      "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
-    },
-    "right_sampling_whole_frame_shading": false,
-    "schematic_core_optimization": {
-      "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
-      "candidate_region_count": 3,
-      "updated_core_count": 2,
-      "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
-      "candidate_centres_mm": [
-        [
-          -6.4,
-          7.0
-        ],
-        [
-          6.65,
-          3.6
-        ],
-        [
-          -3.85,
-          -7.2
-        ]
-      ],
-      "updated_centres_mm": [
-        [
-          -6.6875,
-          2.0625
-        ],
-        [
-          6.4375,
-          -4.5625
-        ]
-      ],
-      "candidate_radius_mm": 1.15,
-      "updated_radius_mm": 1.05,
-      "candidate_fill": "#AC8BC9",
-      "candidate_fill_alpha": 0.32,
-      "candidate_edge": "#B8A3CF",
-      "updated_fill": "#805AA6",
-      "updated_edge": "#76519D",
-      "arrow_color": "#9479B2",
-      "arrow_dash_pattern": [
-        3.0,
-        2.5
-      ],
-      "search_direction_arrows_mm": [
-        [
-          [
-            -6.4,
-            5.7
-          ],
-          [
-            -6.6875,
-            3.3125
-          ]
-        ],
-        [
-          [
-            6.65,
-            2.3000000000000003
-          ],
-          [
-            6.4375,
-            -3.3125
-          ]
-        ]
-      ],
-      "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
-      "arrow_label": "OPTM",
-      "arrow_label_xy_mm": [
-        [
-          -4.7,
-          4.35
-        ],
-        [
-          8.15,
-          -0.4
-        ]
-      ],
-      "arrow_target_core_indices": [
-        0,
-        1
-      ],
-      "sampling_frame_shading": {
-        "color": "#93C4A7",
-        "alpha": 0.22,
-        "locations": [
-          "Central zoom-location frame"
-        ],
-        "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
-      },
-      "question_mark_in_each_candidate_region": true,
-      "candidate_regions_have_light_purple_shading": true,
-      "regions_and_question_marks_below_neuron_markers": true,
-      "update_arrows_are_not_propagation_paths": true,
-      "simulations_and_readout_unchanged": true,
-      "core_position_source": {
-        "panel": "E",
-        "snapshot": "source/D_position_density.npz",
-        "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-        "reference_centres_mm": [
-          [
-            3.3125,
-            12.0625
-          ],
-          [
-            16.4375,
-            5.4375
-          ]
-        ],
-        "coordinate_shift_mm": [
-          -10.0,
-          -10.0
-        ],
-        "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
-        "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
-      }
-    },
-    "author_accepted_on": "2026-10-11"
-  },
-  "panel_b": {
-    "version": "post_prior_stages_6_16_v1",
-    "included_original_stages": [
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16
-    ],
-    "excluded_original_stages": [
-      1,
-      2,
-      3,
-      4,
-      5
-    ],
-    "visible_workpoints": 194,
-    "prior_workpoints": 32,
-    "original_workpoints": 226,
-    "stage_numbers_renumbered": false,
-    "prior_interpretation": "Stages 1-5 belong to the preceding label-informed development phase and are omitted from B. Subsequent searches inherit its candidate pool and patient geometry as development priors; their scoring objectives omit TA/TB labels. This display restriction does not establish independence from development data or remove historical information use.",
-    "visible_source": "source/B_visible_workpoints.csv",
-    "prior_source": "source/B_prior_workpoints.csv",
-    "requested_on": "2026-10-09",
-    "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
-    "showcase_labels": false
-  },
-  "panel_c": {
-    "preview_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_count_mean_sd_20261008",
-    "core_counts": [
-      1,
-      2,
-      3,
-      4
-    ],
-    "summary_style": "mean_std",
-    "std_ddof": 1,
-    "statistical_unit": "optimization_restart_within_E1146",
-    "restarts": 4,
-    "common_epoch": 31,
-    "comparison": {
-      "subject": "epilepsiae_1146",
-      "display_id": "E1146",
-      "common_epoch": 31,
-      "planned_epochs": 96,
-      "restarts": 4,
-      "core_counts": "1,2,3,4",
-      "single_core_mean": 3.310180135792793,
-      "single_core_std": 0.612009454297094,
-      "dual_core_mean": 1.7035437461176952,
-      "dual_core_std": 0.20555287828006355,
-      "three_core_mean": 1.264872097960017,
-      "three_core_std": 0.18293680164782206,
-      "four_core_mean": 1.4364581504388079,
-      "four_core_std": 0.15851642446091144,
-      "std_ddof": 1,
-      "mean_reduction_percent": 48.53622231317952,
-      "stage": "adaptive_search"
-    },
-    "author_accepted_on": "2026-10-08",
-    "snapshot_sha256": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97"
-  },
-  "panel_d": {
-    "version": "angle_three_error_response_v1",
-    "source_package": "results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4",
-    "source_table": "source/D_connection_response.csv",
-    "parent_panel": "D",
-    "parameter": "EE_angle_offset_deg",
-    "conditions": 13,
-    "showcase_references": false
-  },
-  "panel_e": {
-    "version": "completed_position_density_standalone_v1",
-    "source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_count_panel_c_20260929",
-    "requested_on": "2026-10-08",
-    "source_registry_sha256": "efec3ef3cefe614e91ff11e39ee3a32b9228205b4c525704061abd14703e9fc9",
-    "source_panel_png_sha256": "b1382021545e630415108e4b1dd35af64f165899ee0edf316bae9f9f48a54429",
-    "source_data_and_panel_pixels_verified": false,
-    "column_reflow_promoted": false,
-    "density_version": "completed_joint_densification_top20_relief_v1",
-    "density_source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009",
-    "density_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
-    "density_source_png_sha256": "9e004997f220ed3e42d1c1cd2ef6adfcf21238d3f9ff4b4751b63fba48d72973",
-    "density_selected": 83,
-    "density_scorable": 413,
-    "density_completed": 418,
-    "density_author_accepted_on": "2026-10-09",
-    "response_curve_sources_verified_unchanged": true,
-    "parent_panel": "D"
-  },
-  "panel_i": {
-    "groups": [
-      {
-        "mode": "TA–MTA",
-        "n": 25,
-        "subjects": [
-          "epilepsiae_1077",
-          "epilepsiae_1084",
-          "epilepsiae_1096",
-          "epilepsiae_1125",
-          "epilepsiae_1146",
-          "epilepsiae_1150",
-          "epilepsiae_253",
-          "epilepsiae_384",
-          "epilepsiae_442",
-          "epilepsiae_548",
-          "epilepsiae_583",
-          "epilepsiae_590",
-          "epilepsiae_620",
-          "epilepsiae_635",
-          "epilepsiae_922",
-          "epilepsiae_958",
-          "yuquan_chengshuai",
-          "yuquan_huanghanwen",
-          "yuquan_litengsheng",
-          "yuquan_liyouran",
-          "yuquan_pengzihang",
-          "yuquan_xuxinyi",
-          "yuquan_zhangbichen",
-          "yuquan_zhangkexuan",
-          "yuquan_zhaochenxi"
-        ],
-        "points": [
-          0.02857142857142857,
-          0.14545454545454545,
-          -0.07142857142857142,
-          0.8571428571428571,
-          0.5071428571428571,
-          0.7166666666666667,
-          0.30952380952380953,
-          -0.21428571428571427,
-          0.575,
-          0.12727272727272726,
-          0.6,
-          0.8251748251748252,
-          0.7666666666666667,
-          0.32142857142857145,
-          0.4523809523809524,
-          0.17058823529411765,
-          -0.09523809523809523,
-          0.47878787878787876,
-          0.4591304347826087,
-          0.6764705882352942,
-          0.48951048951048953,
-          0.11785714285714285,
-          0.69785708187484,
-          0.7935042735042735,
-          0.5692307692307692
-        ],
-        "q25_q50_q75": [
-          0.14545454545454545,
-          0.47878787878787876,
-          0.6764705882352942
-        ]
-      },
-      {
-        "mode": "TB–MTB",
-        "n": 25,
-        "subjects": [
-          "epilepsiae_1077",
-          "epilepsiae_1084",
-          "epilepsiae_1096",
-          "epilepsiae_1125",
-          "epilepsiae_1146",
-          "epilepsiae_1150",
-          "epilepsiae_253",
-          "epilepsiae_384",
-          "epilepsiae_442",
-          "epilepsiae_548",
-          "epilepsiae_583",
-          "epilepsiae_590",
-          "epilepsiae_620",
-          "epilepsiae_635",
-          "epilepsiae_922",
-          "epilepsiae_958",
-          "yuquan_chengshuai",
-          "yuquan_huanghanwen",
-          "yuquan_litengsheng",
-          "yuquan_liyouran",
-          "yuquan_pengzihang",
-          "yuquan_xuxinyi",
-          "yuquan_zhangbichen",
-          "yuquan_zhangkexuan",
-          "yuquan_zhaochenxi"
-        ],
-        "points": [
-          0.37142857142857144,
-          -0.01818181818181818,
-          0.9428571428571428,
-          0.8571428571428571,
-          0.7357142857142858,
-          0.45,
-          0.16666666666666666,
-          0.6333333333333333,
-          0.6107142857142858,
-          0.5181818181818182,
-          0.5,
-          0.6588235294117647,
-          0.23333333333333334,
-          0.6785714285714286,
-          0.5952380952380952,
-          0.34705882352941175,
-          0.7857142857142857,
-          0.40606060606060607,
-          0.4617391304347826,
-          -0.2107843137254902,
-          0.7902097902097902,
-          0.28214285714285714,
-          0.38359088192606505,
-          0.26,
-          0.07829059829059828
-        ],
-        "q25_q50_q75": [
-          0.28214285714285714,
-          0.4617391304347826,
-          0.6588235294117647
-        ]
-      }
-    ],
-    "legend_present": true,
-    "legend_location": "upper right",
-    "legend_columns": 1,
-    "summary_interval": "interquartile range, not confidence interval",
-    "metric": "two separate signed Spearman correlations; no minimum or cross-match penalty"
+  "outputs": {
+    "figures/fig4-complete-layout-preview.png": "f022f17027d608d530fe07227a954aae7c8e7da34ac22a36f90ea41e0841c046",
+    "figures/fig4-complete-layout.pdf": "eb2a4a2f80c617ef4f798a26537668a3de49aa8f559257729472363a7e349d95",
+    "figures/fig4-complete-layout.png": "51f24ed643ead850cbba3170523ebff49363afc2610b4767caba4d285e6be0b0",
+    "figures/fig4-complete-layout.svg": "64841cfc55c237d2dc3998e6ae48be1978954d67301deed7b69c629220ee1e42",
+    "figures/fig4-panela.pdf": "745185d349f5153484562f7ba788c70cbcfd86433c8d3f89fafbff5365e0d2f7",
+    "figures/fig4-panela.png": "caf1ee5ab7014ef76fbf3f05da33583a59d35effaea081c9361007e1e565fb0b",
+    "figures/fig4-panela.svg": "b2f165a3de3e95e3c241b3f296b3749ce3dd063bb14e1fabd95d0c8f733e7af9",
+    "figures/fig4-panelb.pdf": "e93cf2c92e5baa408a0d353e2dafb7e74fdd29109becfe53cc3f03d66ef0532f",
+    "figures/fig4-panelb.png": "39a777af7b765133988e23a3f3dec3b56e38bfd8cece73b6eb5065b5741f6437",
+    "figures/fig4-panelb.svg": "4ce9b7f33d12a8db2893100eb7d5b1b32f5eee5497a31a3e2bd5ffe1f659da4a",
+    "figures/fig4-panelc.pdf": "c98c268b51dc4b38263f0dc75eebc6c11477ad4c2744be7fde21778dd4ff021f",
+    "figures/fig4-panelc.png": "473e6c06bc0687be74ce76a3970ee142e4ff7a589412139835cfcff6662f7b07",
+    "figures/fig4-panelc.svg": "0e0b4a9c4f420cfa45691757ccb68bbe43401fc7bd3e682cb371814b9745e2d7",
+    "figures/fig4-paneld.pdf": "c6e4476bd6d5a0b1c27239f3c05b250ac20aaaee9df8955ad1ed5cc6fcde450b",
+    "figures/fig4-paneld.png": "a2d3ab1edbb650f418f56f7f38beac8a5dc518ca69ffc5e6b643b7cc76105ef2",
+    "figures/fig4-paneld.svg": "cb4fdb6bee16d27e8822d11ddaf21fbf5394c3f57caa581c402721b68f8bdb63",
+    "figures/fig4-panele.pdf": "629b9bcdb2390a7083e41b646c3f017d7786c9b32b0074e45cd3c903cd6f5462",
+    "figures/fig4-panele.png": "5f70f5bc060e27cc85022b52972eea862fd7d2e2d795203ffe0370c799692a56",
+    "figures/fig4-panele.svg": "5b59e844bad197f01ce0d142044cf518787e893fa2986ac42785f6b679d14902",
+    "figures/fig4-panelf.pdf": "10279664ba209f8924e3068cd71d813061be565cd3354488c0585bf636edd0e9",
+    "figures/fig4-panelf.png": "ece15eb1568fe30e13f1e76e002b4af48487a25ad4747c7c04ed09451c522fd3",
+    "figures/fig4-panelf.svg": "4abc22417d917504777422e8ae597c98a9bfe1fc7743b9cc0071b3f834480913",
+    "figures/fig4-panelg.pdf": "71eb4e2988f78a30ef838893cde3c52c82322b2bef3b82706f8bafd4848126c9",
+    "figures/fig4-panelg.png": "fcfa953e53b283a3c2f7cc905365300b03a912e4f3fdb1aef098a77dbd676196",
+    "figures/fig4-panelg.svg": "c5035301f56b79b777efd8d74efcb71b5833a4c603f76cb9c8e3d32b49563418",
+    "figures/fig4-panelh.pdf": "0b5c4679f19f40c4f75db7354f16d08c6ef64720c0596fe1615e681235d57d1e",
+    "figures/fig4-panelh.png": "02281c29334752e2c73f3bc514bf64f05a07e92a3cadb57ba9929ea74057274e",
+    "figures/fig4-panelh.svg": "2a3b9a17be45fa532ef5ed91d1e0b5157358dcafa06003c13a28a618d09bd657",
+    "figures/fig4-paneli.pdf": "6076dd27ece8f32f3b5fcc908823a54f6614649a40462f88069b7b5403d38102",
+    "figures/fig4-paneli.png": "0e2e3b5457f27f406f9ba8f1291b56c907c94bc07182adbd54460cecb99d0c74",
+    "figures/fig4-paneli.svg": "7168c51d5e603e6612231fc1b6b221a9e67bfc24b714904734b3cbc352a3eeaf",
+    "figures/fig4-panels-de.pdf": "db784f57ce271d27822dc94034125c9d1042495c3b2e6094a8ded685f0ac335b",
+    "figures/fig4-panels-de.png": "0a444dbeb598d4e9aff04aea5bacb8a790a1ce37131908c63b7eeba99ead368d",
+    "figures/fig4-panels-de.svg": "59857e3a77181cbafe6c5cb092cc5416184ed644745e4fae0836311e4ab933eb"
   },
   "checks": {
-    "A_revision": {
-      "status": "AUTHOR_ACCEPTED_FINAL",
-      "original_left_circuit_structure_preserved": true,
-      "overview_neuron_samples_preserved": true,
-      "left_circuit_detail_revision": {
-        "native_producer": "local_circuit_native_source.py",
-        "builder": "scripts/paper_figures/build_fig4_left_circuit_detail.py",
-        "central_offset_schematic_units": 0.11,
-        "previous_central_offset_schematic_units": 0.04,
-        "z_border_linewidth_pt": 0.6,
-        "previous_z_border_linewidth_pt": 1.6,
-        "z_border_dash_pattern": [
-          1.5,
-          1.5
-        ],
-        "previous_z_border_dash_pattern": [
-          2.0,
-          1.7
-        ],
-        "change_scope": "Central reciprocal edge shafts/T-bar and the z node dashed outline only; all neurons and other diagram content preserved."
-      },
-      "left_circuit_artwork_scale": 1.2,
-      "left_circuit_axes_mm": [
-        7.000000000000009,
-        155.926988,
-        77.39701199999993,
-        60.87614399999996
+    "A": {
+      "representation": "Two tilted E/I sheets; regular neuron rows; schematic only",
+      "E_to_I_start": [
+        40.0,
+        46.32
       ],
-      "left_circuit_original_axes_mm": [
-        7.000000000000009,
-        161.0,
-        64.49750999999995,
-        50.73011999999997
+      "E_triangle_base_midpoint": [
+        40.0,
+        46.32
       ],
-      "sheet_axes_mm": [
-        109.564528,
-        156.727718,
-        70.639884,
-        70.63988399999998
+      "E_to_I_target": [
+        39.46,
+        18.72
       ],
-      "sheet_scale_from_v6": 1.06,
-      "electrode_shafts_are_straight": true,
-      "shaft_collinearity_residual_mm": {
-        "SCL": 4.440892098500626e-16,
-        "ICL": 1.2212453270876722e-15
-      },
-      "rigid_geometry_is_shared_with_E_and_sampling_zoom": true,
-      "electrode_display": {
-        "source": "D_position_straight_electrodes.json",
-        "source_sha256": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
-        "geometry_snapshot": "rigid_contact_geometry.npz",
-        "rule": "Reuse current E panel rigid rod projections; schematic display only, no simulation coordinates or readout traces changed.",
-        "maximum_collinearity_residual_mm": 7.788908407135864e-16,
-        "maximum_display_displacement_mm": 0.20730072911893763,
-        "overview_and_sampling_use_identical_contacts": true
-      },
-      "original_left_title_and_internal_labels_preserved": true,
-      "combined_third_component": true,
-      "formulas_and_lower_explanations_removed": true,
-      "zoom_center_mm": [
-        -8.5,
-        0.0
+      "I_center": [
+        40.0,
+        18.0
       ],
-      "zoom_field_of_view_mm": [
-        1.6754742547425474,
-        1.3143631436314362
+      "I_radius_mm": 0.9,
+      "I_I_edges": 2,
+      "inhibitory_T_lengths_mm": [
+        1.44,
+        1.44,
+        1.44
       ],
-      "left_zoom_connector_minimum_contact_distance_mm": 3.2585021053195193,
-      "left_zoom_connectors_clear_of_electrode_footprints": true,
-      "actual_workpoint_kernel": {
-        "l_par": 0.5374011537017762,
-        "l_perp": 0.40305086527633205,
-        "theta_deg": -22.80538396505847,
-        "theta_rad": -0.3980290373717898,
-        "reference_theta_deg": -22.80538396505847,
-        "reference_ar": 2.0,
-        "perp_scale": 1.5,
-        "parallel_scale": 1.0,
-        "angle_offset_deg": 0.0,
-        "is_reference": false
-      },
-      "kernel_centres_E_coordinates_mm": [
-        [
-          12.151403427124023,
-          4.944769382476807
+      "neuron_distribution": "regular rows and symmetric cross",
+      "zoom_region_in_B_mm": [
+        -9.3,
+        -0.4,
+        3.0,
+        3.0
+      ]
+    },
+    "B": {
+      "E_points": 396,
+      "I_points": 114,
+      "min_center_spacing_mm": 0.52,
+      "edge_margin_mm": 0.25,
+      "original_indices": {
+        "E": [
+          5,
+          7,
+          9,
+          10,
+          11,
+          16,
+          17,
+          21,
+          22,
+          23,
+          24,
+          25,
+          27,
+          29,
+          30,
+          31,
+          32,
+          33,
+          40,
+          41,
+          42,
+          45,
+          48,
+          50,
+          59,
+          63,
+          65,
+          66,
+          68,
+          69,
+          71,
+          78,
+          80,
+          82,
+          86,
+          89,
+          93,
+          95,
+          96,
+          98,
+          100,
+          102,
+          104,
+          108,
+          109,
+          110,
+          112,
+          118,
+          120,
+          121,
+          122,
+          124,
+          126,
+          129,
+          131,
+          134,
+          135,
+          136,
+          137,
+          139,
+          140,
+          142,
+          143,
+          145,
+          146,
+          150,
+          153,
+          154,
+          156,
+          160,
+          161,
+          165,
+          167,
+          170,
+          176,
+          181,
+          182,
+          188,
+          193,
+          194,
+          195,
+          204,
+          209,
+          210,
+          213,
+          215,
+          216,
+          217,
+          219,
+          220,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          235,
+          236,
+          238,
+          243,
+          245,
+          246,
+          247,
+          248,
+          251,
+          253,
+          255,
+          260,
+          262,
+          263,
+          265,
+          268,
+          275,
+          276,
+          277,
+          280,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287,
+          288,
+          293,
+          295,
+          298,
+          302,
+          305,
+          306,
+          308,
+          309,
+          310,
+          313,
+          317,
+          319,
+          323,
+          328,
+          330,
+          331,
+          334,
+          336,
+          339,
+          340,
+          342,
+          347,
+          348,
+          350,
+          351,
+          353,
+          365,
+          368,
+          369,
+          372,
+          376,
+          377,
+          379,
+          380,
+          381,
+          382,
+          383,
+          386,
+          389,
+          391,
+          396,
+          402,
+          407,
+          412,
+          413,
+          416,
+          417,
+          419,
+          420,
+          421,
+          423,
+          426,
+          428,
+          437,
+          440,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          449,
+          452,
+          453,
+          456,
+          457,
+          458,
+          462,
+          463,
+          464,
+          465,
+          469,
+          471,
+          472,
+          477,
+          486,
+          488,
+          489,
+          490,
+          492,
+          493,
+          495,
+          498,
+          500,
+          501,
+          502,
+          505,
+          506,
+          507,
+          513,
+          514,
+          517,
+          520,
+          521,
+          522,
+          524,
+          527,
+          528,
+          529,
+          532,
+          536,
+          537,
+          538,
+          540,
+          543,
+          545,
+          552,
+          554,
+          555,
+          556,
+          557,
+          558,
+          559,
+          561,
+          562,
+          565,
+          569,
+          571,
+          572,
+          575,
+          579,
+          581,
+          585,
+          587,
+          588,
+          590,
+          591,
+          596,
+          597,
+          599,
+          600,
+          607,
+          609,
+          615,
+          616,
+          618,
+          619,
+          620,
+          624,
+          625,
+          628,
+          629,
+          631,
+          632,
+          633,
+          634,
+          637,
+          640,
+          642,
+          645,
+          648,
+          649,
+          651,
+          653,
+          655,
+          657,
+          659,
+          664,
+          668,
+          674,
+          682,
+          684,
+          688,
+          690,
+          693,
+          697,
+          702,
+          703,
+          707,
+          708,
+          709,
+          710,
+          712,
+          717,
+          718,
+          719,
+          721,
+          725,
+          726,
+          728,
+          730,
+          732,
+          735,
+          736,
+          738,
+          741,
+          746,
+          748,
+          749,
+          752,
+          755,
+          757,
+          761,
+          762,
+          771,
+          773,
+          774,
+          776,
+          777,
+          778,
+          779,
+          782,
+          783,
+          785,
+          786,
+          789,
+          792,
+          793,
+          794,
+          795,
+          796,
+          797,
+          799,
+          800,
+          804,
+          805,
+          806,
+          808,
+          812,
+          815,
+          819,
+          820,
+          822,
+          826,
+          829,
+          835,
+          836,
+          841,
+          843,
+          846,
+          850,
+          852,
+          853,
+          856,
+          857,
+          858,
+          860,
+          865,
+          866,
+          870,
+          871,
+          873,
+          874,
+          876,
+          878,
+          879,
+          880,
+          882,
+          885,
+          886,
+          887,
+          888,
+          889,
+          892,
+          894,
+          895,
+          901,
+          903,
+          904,
+          909,
+          910,
+          911,
+          913,
+          915,
+          916,
+          919,
+          925,
+          926,
+          927,
+          930
         ],
-        [
-          13.909762382507324,
-          4.9577555656433105
-        ],
-        [
-          11.787443161010742,
-          3.968081474304199
-        ],
-        [
-          13.032197952270508,
-          3.884768486022949
-        ],
-        [
-          14.045100212097168,
-          3.9619879722595215
+        "I": [
+          2,
+          4,
+          5,
+          7,
+          8,
+          11,
+          13,
+          19,
+          20,
+          24,
+          25,
+          27,
+          28,
+          32,
+          35,
+          38,
+          42,
+          43,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          55,
+          57,
+          58,
+          61,
+          62,
+          64,
+          71,
+          72,
+          75,
+          77,
+          85,
+          88,
+          89,
+          92,
+          93,
+          94,
+          96,
+          97,
+          101,
+          103,
+          105,
+          106,
+          107,
+          110,
+          112,
+          113,
+          116,
+          118,
+          119,
+          123,
+          125,
+          127,
+          128,
+          131,
+          136,
+          138,
+          139,
+          141,
+          142,
+          150,
+          155,
+          159,
+          164,
+          171,
+          173,
+          174,
+          177,
+          178,
+          180,
+          183,
+          185,
+          188,
+          191,
+          192,
+          193,
+          196,
+          198,
+          199,
+          200,
+          202,
+          204,
+          205,
+          206,
+          207,
+          216,
+          222,
+          223,
+          225,
+          231,
+          233,
+          234,
+          235,
+          236,
+          239,
+          240,
+          243,
+          244,
+          245,
+          247,
+          248,
+          249,
+          251,
+          255,
+          256,
+          257,
+          260,
+          263,
+          264,
+          266,
+          268
         ]
-      ],
-      "layout_refinement": {
-        "sheet_shift_x_mm": 24.0,
-        "sampling_axes_mm": [
-          218.5,
-          190.0,
-          60.0,
-          30.0
-        ],
-        "previous_sampling_axes_mm": [
-          203.0,
-          190.0,
-          68.0,
-          34.0
-        ],
-        "readout_axes_mm": [
-          [
-            207.0,
-            155.0,
-            34.0,
-            22.0
-          ],
-          [
-            256.0,
-            155.0,
-            34.0,
-            22.0
-          ]
-        ],
-        "previous_readout_axes_mm": [
-          [
-            179.0,
-            155.0,
-            47.0,
-            22.0
-          ],
-          [
-            245.0,
-            155.0,
-            47.0,
-            22.0
-          ]
-        ],
-        "left_circuit_scale": 1.2,
-        "left_circuit_anchor": "Preserve left edge and vertical center; scale original artwork uniformly by 1.20. Recenter title above the enlarged frame.",
-        "sheet_scale": 1.06,
-        "sheet_scale_anchor": "Preserve the v6 sheet center; uniformly enlarge width and height by 1.06."
       },
-      "local_population_coordinates_mm": [
-        {
-          "E": [
-            [
-              12.151403427124023,
-              4.944769382476807
-            ],
-            [
-              12.304140090942383,
-              4.9625444412231445
-            ],
-            [
-              12.395358085632324,
-              4.898394584655762
-            ],
-            [
-              12.275625228881836,
-              4.794172286987305
-            ],
-            [
-              12.227322578430176,
-              5.0637688636779785
-            ],
-            [
-              12.034781455993652,
-              4.771931171417236
-            ]
-          ],
-          "I": [
-            [
-              11.971738952223859,
-              4.926103714872796
-            ],
-            [
-              11.953223930433865,
-              5.1074732206518085
-            ]
-          ]
-        },
-        {
-          "E": [
-            [
-              13.909762382507324,
-              4.9577555656433105
-            ],
-            [
-              14.016875267028809,
-              4.808532238006592
-            ],
-            [
-              13.70569896697998,
-              4.8910017013549805
-            ],
-            [
-              13.792451858520508,
-              4.987637996673584
-            ],
-            [
-              14.155109405517578,
-              4.876069068908691
-            ],
-            [
-              13.95798110961914,
-              5.150943279266357
-            ],
-            [
-              13.701952934265137,
-              5.07421350479126
-            ]
-          ],
-          "I": [
-            [
-              14.069424793465144,
-              5.037958340919517
-            ],
-            [
-              13.837128616656454,
-              5.111711940660591
-            ]
-          ]
-        },
-        {
-          "E": [
-            [
-              11.787443161010742,
-              3.968081474304199
-            ],
-            [
-              11.984225273132324,
-              3.79966402053833
-            ],
-            [
-              11.564770698547363,
-              4.10961389541626
-            ],
-            [
-              11.862934112548828,
-              3.8602023124694824
-            ],
-            [
-              11.947848320007324,
-              4.065094947814941
-            ],
-            [
-              11.678738594055176,
-              4.014657020568848
-            ]
-          ],
-          "I": [
-            [
-              11.763234933014688,
-              4.157546046048493
-            ],
-            [
-              11.774906009994329,
-              3.798027401525916
-            ]
-          ]
-        },
-        {
-          "E": [
-            [
-              13.032197952270508,
-              3.884768486022949
-            ],
-            [
-              13.224488258361816,
-              3.8485240936279297
-            ],
-            [
-              13.181347846984863,
-              3.715062141418457
-            ],
-            [
-              13.12874984741211,
-              3.952385425567627
-            ],
-            [
-              13.081881523132324,
-              4.10737943649292
-            ],
-            [
-              13.00422191619873,
-              3.704172134399414
-            ]
-          ],
-          "I": [
-            [
-              12.930556066091496,
-              4.088410408328311
-            ],
-            [
-              12.801061207277563,
-              4.003966101489869
-            ]
-          ]
-        },
-        {
-          "E": [
-            [
-              14.045100212097168,
-              3.9619879722595215
-            ],
-            [
-              13.838899612426758,
-              4.0432329177856445
-            ],
-            [
-              13.814152717590332,
-              3.9273929595947266
-            ],
-            [
-              14.1874361038208,
-              3.7812366485595703
-            ],
-            [
-              14.132532119750977,
-              4.063586711883545
-            ],
-            [
-              13.912890434265137,
-              3.968815803527832
-            ]
-          ],
-          "I": [
-            [
-              14.31302613950283,
-              3.8759139608328024
-            ]
-          ]
-        }
+      "coordinates": "Original frozen overview coordinates; display subset only",
+      "shared_by": [
+        "B",
+        "D",
+        "E"
       ],
-      "local_population_counts": [
-        {
-          "E": 6,
-          "I": 2
-        },
-        {
-          "E": 7,
-          "I": 2
-        },
-        {
-          "E": 6,
-          "I": 2
-        },
-        {
-          "E": 6,
-          "I": 2
-        },
-        {
-          "E": 6,
-          "I": 1
-        }
+      "zoom_region_mm": [
+        -9.3,
+        -0.4,
+        3.0,
+        3.0
       ],
-      "all_local_E_markers_hollow": true,
-      "all_ellipses_contain_fewer_I_than_E": true,
-      "local_synaptic_arrowheads_removed": true,
-      "ellipse_rows": [
-        2,
-        3
-      ],
-      "labeled_sampling_contacts": [
-        "ICL3",
-        "ICL4",
-        "ICL5"
-      ],
-      "displayed_sampling_labels": [
-        "SL3",
-        "SL4",
-        "SL5"
-      ],
-      "display_label_to_source_contact": {
-        "SL3": "ICL3",
-        "SL4": "ICL4",
-        "SL5": "ICL5"
-      },
-      "exactly_three_consecutive_contacts": true,
-      "sampling_weights_shown_only_in_right_zoom": true,
-      "sampling_weight_display": {
-        "location": "Right Local sampling only",
+      "sampling": {
+        "center_overview_mm": [
+          3.207093452843729,
+          -5.603991026095273
+        ],
+        "field_of_view_mm": [
+          3.8,
+          1.9
+        ],
+        "contacts": [
+          "ICL3",
+          "ICL4",
+          "ICL5"
+        ],
         "sigma_mm": 0.25,
-        "style": "Smooth green Gaussian alpha, no boundary ring or hard sampling cutoff",
-        "maximum_alpha": 0.67,
-        "render_extent_sigma": 4.0,
-        "clipped_at_zoom_boundary": true,
-        "central_sheet": "Light-green zoom-frame background only; Gaussian sampling weights remain in the right inset."
-      },
-      "sampling_weight_sigma_mm": 0.25,
-      "gaussian_95_percent_mass_radius_mm": 0.6119367076702041,
-      "sampling_footprint_boundary_rings_removed": true,
-      "sampling_contact_coordinates_overview_mm": [
-        [
-          4.887288107598678,
-          -5.82446371225047
-        ],
-        [
-          3.022935542047014,
-          -5.579826094279083
-        ],
-        [
-          1.52689879808878,
-          -5.383518339940077
-        ]
-      ],
-      "local_sampling_labels_match_both_readouts": true,
-      "tiny_readout_arrow_removed": true,
-      "local_circuit_count": 5,
-      "sampling_zoom_center_overview_mm": [
-        3.207093452843729,
-        -5.603991026095273
-      ],
-      "sampling_zoom_field_of_view_mm": [
-        3.8,
-        1.9
-      ],
-      "sampling_frame_is_a_coordinate_exact_enlargement": true,
-      "two_distinct_zoom_roles": true,
-      "mode_readouts_below_sampling": true,
-      "physical_xy_equal_scale": true,
-      "kernel_arrows": "Removed to distinguish neuronal symbols from arrows; ellipse orientation conveys anisotropy.",
-      "readout": {
-        "type": "normalized Gaussian average of smoothed E spike density",
-        "sigma_mm": 0.25,
-        "bin_ms": 2.0,
-        "smooth_ms": 5.0,
-        "quantity": "Firing-density proxy, not an electric/magnetic field or synaptic-current LFP.",
-        "source": "src/sef_hfo_snn_adapter.py:snn_event_envelope; src/sef_hfo_observation.py:sample_envelopes",
-        "waveform_source": "results/paper-ready-figure/fig4/source/waveform_arrays.npz",
-        "waveform_quantity": "Actual frozen F-panel 30-80 Hz traces; all contacts share the same amplitude scale.",
-        "display_title": "SEEG readout",
-        "display_title_meaning": "Virtual SEEG contact readout of underlying SNN propagation; firing-density proxy, not measured clinical voltage or a newly computed potential forward model."
-      },
-      "mode_showcases": {
-        "source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
-        "source_arrays_sha256": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
-        "events": [
+        "kernel": {
+          "l_par": 0.5374011537017762,
+          "l_perp": 0.40305086527633205,
+          "theta_deg": -22.80538396505847,
+          "theta_rad": -0.3980290373717898,
+          "reference_theta_deg": -22.80538396505847,
+          "reference_ar": 2.0,
+          "perp_scale": 1.5,
+          "parallel_scale": 1.0,
+          "angle_offset_deg": 0.0,
+          "is_reference": false
+        },
+        "neuron_groups": [
           {
-            "mode": "MTA",
-            "event_index": 10,
-            "frozen_mode_label": 1,
-            "window_absolute_ms": [
-              4310,
-              4430
+            "E": [
+              [
+                12.151403427124023,
+                4.944769382476807
+              ],
+              [
+                12.395358085632324,
+                4.898394584655762
+              ],
+              [
+                12.034781455993652,
+                4.771931171417236
+              ]
             ],
-            "peak_absolute_ms": [
-              4386.0,
-              4378.0,
-              4372.0
-            ],
-            "peak_relative_ms": [
-              76.0,
-              68.0,
-              62.0
-            ],
-            "contact_order": [
-              "ICL3",
-              "ICL4",
-              "ICL5"
-            ],
-            "display_labels": [
-              "SL3",
-              "SL4",
-              "SL5"
+            "I": [
+              [
+                11.971738952223859,
+                4.926103714872796
+              ],
+              [
+                11.953223930433865,
+                5.1074732206518085
+              ]
             ]
           },
           {
-            "mode": "MTB",
-            "event_index": 8,
-            "frozen_mode_label": 0,
-            "window_absolute_ms": [
-              3710,
-              3830
+            "E": [
+              [
+                13.909762382507324,
+                4.9577555656433105
+              ],
+              [
+                13.70569896697998,
+                4.8910017013549805
+              ],
+              [
+                14.155109405517578,
+                4.876069068908691
+              ]
             ],
-            "peak_absolute_ms": [
-              3756.0,
-              3756.0,
-              3762.0
+            "I": [
+              [
+                14.069424793465144,
+                5.037958340919517
+              ],
+              [
+                13.837128616656454,
+                5.111711940660591
+              ]
+            ]
+          },
+          {
+            "E": [
+              [
+                11.787443161010742,
+                3.968081474304199
+              ],
+              [
+                11.984225273132324,
+                3.79966402053833
+              ],
+              [
+                11.564770698547363,
+                4.10961389541626
+              ],
+              [
+                11.947848320007324,
+                4.065094947814941
+              ]
             ],
-            "peak_relative_ms": [
-              46.0,
-              46.0,
-              52.0
+            "I": [
+              [
+                11.763234933014688,
+                4.157546046048493
+              ],
+              [
+                11.774906009994329,
+                3.798027401525916
+              ]
+            ]
+          },
+          {
+            "E": [
+              [
+                13.032197952270508,
+                3.884768486022949
+              ],
+              [
+                13.224488258361816,
+                3.8485240936279297
+              ]
             ],
-            "contact_order": [
-              "ICL3",
-              "ICL4",
-              "ICL5"
+            "I": [
+              [
+                12.930556066091496,
+                4.088410408328311
+              ],
+              [
+                12.801061207277563,
+                4.003966101489869
+              ]
+            ]
+          },
+          {
+            "E": [
+              [
+                14.045100212097168,
+                3.9619879722595215
+              ],
+              [
+                13.838899612426758,
+                4.0432329177856445
+              ]
             ],
-            "display_labels": [
-              "SL3",
-              "SL4",
-              "SL5"
+            "I": [
+              [
+                14.31302613950283,
+                3.8759139608328024
+              ]
             ]
           }
         ],
-        "observable": "Frozen 30-80 Hz contact activity from the F source arrays, cropped to two 120-ms three-contact burst sequences.",
-        "distinction_from_F": "A: two short three-contact mechanism readouts, fixed channel order, shared gain; F: continuous 15-contact long record and event marks.",
-        "selection": "Reuse F events 10/8 and their existing 120-ms windows; use the three consecutive contacts ICL3/ICL4/ICL5. SL3/SL4/SL5 are author-requested display aliases, identically mapped in the sampling view and readouts; no time shifting or per-channel gain.",
-        "snapshot": "burst_readout_arrays.npz",
-        "snapshot_sha256": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
-        "waveform_source": "waveform_arrays.npz",
-        "waveform_source_sha256": "55d61f27ded8bb46dfc89248c955b65654c7e4bb1b6be711a2b20dccc073f73d",
-        "exact_frozen_F_waveform_crops_verified": true,
-        "no_artificial_peak_sharpening_or_time_warping": true,
-        "peak_relative_ms": [
-          [
-            76.0,
-            68.0,
-            62.0
-          ],
-          [
-            46.0,
-            46.0,
-            52.0
-          ]
-        ],
-        "display_label_to_source_contact": {
-          "SL3": "ICL3",
-          "SL4": "ICL4",
-          "SL5": "ICL5"
+        "source": "accepted draw_fig4_a_spatial_readout.py local sampling body",
+        "waveforms": false,
+        "minimum_glyph_gap_pt": 0.6,
+        "retained_schematic_glyphs": {
+          "sampling_group_0_I": 2,
+          "sampling_group_1_I": 2,
+          "sampling_group_2_I": 2,
+          "sampling_group_3_I": 2,
+          "sampling_group_4_I": 1,
+          "sampling_group_0_E": 3,
+          "sampling_group_1_E": 3,
+          "sampling_group_2_E": 4,
+          "sampling_group_3_E": 2,
+          "sampling_group_4_E": 2,
+          "sampling_background_I": 6,
+          "sampling_background_E": 16
         }
       },
-      "readout_peak_times_relative_ms": [
-        [
-          76.0,
-          68.0,
-          62.0
-        ],
-        [
-          46.0,
-          46.0,
-          52.0
-        ]
-      ],
-      "readout_peak_order": "MTA strictly descending; MTB ascending with an ICL3/ICL4 tie at the original 2-ms sampling resolution.",
-      "data_lineage": "Overview and sampling zoom share frozen illustrative neurons and E-panel rigid rod display coordinates. SEEG readout means virtual-contact SNN activity; both bursts are exact 120-ms waveform crops from F events 10 and 8, not measured voltage or graph recovery.",
-      "central_gaussian_sampling_weights_removed": true,
-      "sampling_frame_background_shading": {
-        "color": "#93C4A7",
-        "alpha": 0.22,
-        "locations": [
-          "Central zoom-location frame"
-        ],
-        "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
-      },
-      "right_sampling_whole_frame_shading": false,
-      "schematic_core_optimization": {
-        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
-        "candidate_region_count": 3,
-        "updated_core_count": 2,
-        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
-        "candidate_centres_mm": [
-          [
-            -6.4,
-            7.0
-          ],
-          [
-            6.65,
-            3.6
-          ],
-          [
-            -3.85,
-            -7.2
-          ]
-        ],
-        "updated_centres_mm": [
-          [
-            -6.6875,
-            2.0625
-          ],
-          [
-            6.4375,
-            -4.5625
-          ]
-        ],
-        "candidate_radius_mm": 1.15,
-        "updated_radius_mm": 1.05,
-        "candidate_fill": "#AC8BC9",
-        "candidate_fill_alpha": 0.32,
-        "candidate_edge": "#B8A3CF",
-        "updated_fill": "#805AA6",
-        "updated_edge": "#76519D",
-        "arrow_color": "#9479B2",
-        "arrow_dash_pattern": [
-          3.0,
-          2.5
-        ],
-        "search_direction_arrows_mm": [
-          [
-            [
-              -6.4,
-              5.7
-            ],
-            [
-              -6.6875,
-              3.3125
-            ]
-          ],
-          [
-            [
-              6.65,
-              2.3000000000000003
-            ],
-            [
-              6.4375,
-              -3.3125
-            ]
-          ]
-        ],
-        "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
-        "arrow_label": "OPTM",
-        "arrow_label_xy_mm": [
-          [
-            -4.7,
-            4.35
-          ],
-          [
-            8.15,
-            -0.4
-          ]
-        ],
-        "arrow_target_core_indices": [
-          0,
-          1
-        ],
-        "sampling_frame_shading": {
-          "color": "#93C4A7",
-          "alpha": 0.22,
-          "locations": [
-            "Central zoom-location frame"
-          ],
-          "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
-        },
-        "question_mark_in_each_candidate_region": true,
-        "candidate_regions_have_light_purple_shading": true,
-        "regions_and_question_marks_below_neuron_markers": true,
-        "update_arrows_are_not_propagation_paths": true,
-        "simulations_and_readout_unchanged": true,
-        "core_position_source": {
-          "panel": "E",
-          "snapshot": "source/D_position_density.npz",
-          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-          "reference_centres_mm": [
-            [
-              3.3125,
-              12.0625
-            ],
-            [
-              16.4375,
-              5.4375
-            ]
-          ],
-          "coordinate_shift_mm": [
-            -10.0,
-            -10.0
-          ],
-          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
-          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
-        }
-      },
-      "author_accepted_on": "2026-10-11"
-    },
-    "B_workpoints": 194,
-    "B_stages": [
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16
-    ],
-    "B_profile_only": true,
-    "B_error_label_colors": {
-      "rank_error": "#3D5C6F",
-      "within_rod_order_error": "#E47159",
-      "participation_error": "#6B7546"
-    },
-    "B_iteration_palette": "Reference purple gradient #B1A9DA -> #7367BE -> #483D8B across the same 16 stages",
-    "B_values_colors_exact_no_showcase_labels": true,
-    "B_horizontal_spacing": {
-      "x_limits": [
-        0,
-        2
-      ],
-      "first_category_at_left_axis": true,
-      "last_category_at_right_axis": true,
-      "data_to_axis_padding_mm": [
-        0,
-        0
-      ],
-      "axis_to_colorbar_mm": 1.5
-    },
-    "C_frozen_mean_sample_sd_exact": true,
-    "D_angle_values_exact_no_dangling_showcase_references": true,
-    "D_position_density": {
-      "selection": {
-        "fraction": 0.2,
-        "nominal_count": 83,
-        "count": 83,
-        "cutoff_J_joint": 1.485977988620093,
-        "candidate_ids": [
-          "dens_bo01_01",
-          "joint_bo03_01",
-          "wide_bo01_05",
-          "joint_bo03_04",
-          "dens_bo02_07",
-          "wide_bo01_07",
-          "dens_bo02_02",
-          "dens_broad_16",
-          "dens_bo02_05",
-          "joint_bo02_03",
-          "wide_initial_46",
-          "dens_bo01_10",
-          "dens_bo01_03",
-          "lf_bo02_01",
-          "wide_bo01_01",
-          "wide_bo01_10",
-          "xy_combined_01",
-          "joint_bo03_02",
-          "lf_bo02_04",
-          "dens_bo01_09",
-          "joint_bo02_05",
-          "dens_main_46",
-          "dens_remote_14",
-          "xy_right_04",
-          "joint_bo03_08",
-          "xy_combined_03",
-          "dense_axis3_12",
-          "xy_left_31",
-          "joint_bo02_02",
-          "xy_right_33",
-          "xy_right_40",
-          "joint_bo03_06",
-          "lf_bo04_01",
-          "g2_b04_p01",
-          "dense_axis0_02",
-          "lf_bo03_01",
-          "dens_remote_10",
-          "dens_main_48",
-          "xy_right_42",
-          "joint_bo03_03",
-          "dense_axis3_02",
-          "dense_axis0_01",
-          "xy_right_41",
-          "lf_bo02_02",
-          "xy_right_23",
-          "lf_bo04_03",
-          "xy_right_01",
-          "dens_main_34",
-          "lf_bo03_04",
-          "dens_bo02_01",
-          "dens_bo02_12",
-          "interaction_y1_a1_g0",
-          "interaction_y3_a1_g0",
-          "xy_right_10",
-          "xy_right_43",
-          "xy_right_11",
-          "xy_left_11",
-          "interaction_y3_a0_g0",
-          "xy_right_00",
-          "lf_bo04_05",
-          "xy_left_20",
-          "wide_bo01_11",
-          "interaction_y1_a2_g0",
-          "xy_combined_02",
-          "xy_right_44",
-          "dens_bo02_04",
-          "dens_bo02_03",
-          "dense_axis2_08",
-          "dense_axis2_02",
-          "g2_b01_p01",
-          "xy_right_03",
-          "g2_b03_p01",
-          "xy_right_20",
-          "xy_left_21",
-          "lf_bo01_04",
-          "lf_bo01_01",
-          "dens_bo01_06",
-          "xy_right_13",
-          "xy_left_10",
-          "joint_bo02_04",
-          "wide_bo01_04",
-          "dense_axis2_03",
-          "interaction_y2_a2_g0"
-        ],
-        "historical": 59,
-        "new": 24
-      },
-      "pool_scorable": 413,
-      "asof": "2026-10-09T09:44:52+08:00",
-      "sigma_mm": 0.35,
-      "density_integral": 0.999999999768181,
-      "selection_metric": "J_joint",
-      "unit": "mm^-2",
-      "interpretation": "Descriptive density of the lowest 20% J_joint in the evaluated search pool; deliberate local densification affects concentration. Secondary good regions remain; not unique convergence or a posterior.",
-      "source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009",
-      "source_snapshot_sha256": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
-      "pool_completed": 418,
-      "new_completed": 128,
-      "new_scorable": 125,
-      "straight_electrodes": true,
-      "contacts_overlay_above_surface": true
-    },
-    "G_legend_position": "upper right, straddling the upper edge; model MTA/MTB solid, patient TA/TB dashed; raised 3 mm without changing axis bounds",
-    "G_legend_upward_shift_mm": 3.0,
-    "G_legend_font_pt": 7.0,
-    "H_patient_template_labels_bold": true,
-    "H_model_template_labels_bold": true,
-    "F_additional_event_shading": [
-      {
-        "event": 9,
-        "mode": "MTB",
-        "center_relative_ms": 396.0,
-        "shaded_span_relative_ms": [
-          336.0,
-          426.0
-        ],
-        "color": "#287FA1",
-        "alpha": 0.14
-      }
-    ],
-    "F_legend_position": "inside upper right, overlaying traces without adding y-axis headroom",
-    "F_legend_font_pt": 8.0,
-    "F_extra_legend_headroom_fraction": 0.0,
-    "F_waveform_exact_array_parity": true,
-    "GH_frozen_matrix": [
-      [
-        0.517857142857143,
-        -0.8392857142857144
-      ],
-      [
-        -0.5535714285714286,
-        0.8750000000000001
+      "local_sampling_inset": true,
+      "readout_waveforms": false,
+      "removed": [
+        "purple regions",
+        "OPTM",
+        "MTA/MTB waveform inset"
       ]
-    ],
-    "I_all_50_subject_values_and_quartiles_unchanged": true,
-    "layout": {
-      "axis_boxes_mm": {
-        "B": [
-          18.0,
-          89.0,
-          50.0,
-          50.0
-        ],
-        "C": [
-          93.0,
-          89.0,
-          50.00000000000001,
-          50.0
-        ],
-        "D": [
-          159.0,
-          89.0,
-          49.999999999999986,
-          50.0
-        ],
-        "E": [
-          232.99999999999997,
-          89.0,
-          49.999999999999986,
-          50.0
-        ],
-        "F": [
-          18.0,
-          17.0,
-          84.00000000000001,
-          50.0
-        ],
-        "G": [
-          116.0,
-          17.0,
-          27.000000000000007,
-          50.0
-        ],
-        "H": [
-          159.0,
-          17.0,
-          49.999999999999986,
-          50.0
-        ],
-        "I": [
-          232.99999999999997,
-          17.0,
-          49.999999999999986,
-          50.0
-        ]
-      },
-      "visible_bounds_mm": {
-        "A": [
-          7.000000000000008,
-          145.99999999999997,
-          292.67890625,
-          228.55822699999996
-        ],
-        "B": [
-          6.697881944444444,
-          80.25640277777775,
-          81.40993055555555,
-          139.0
-        ],
-        "C": [
-          84.71413194444445,
-          79.72194444444443,
-          144.53145166256155,
-          139.0
-        ],
-        "D": [
-          148.4034375,
-          80.07472222222219,
-          209.00000000000003,
-          139.0
-        ],
-        "E": [
-          222.6900694444444,
-          79.72194444444443,
-          297.7867847222222,
-          139.79712337814604
-        ],
-        "G": [
-          106.98652777777775,
-          7.721944444444441,
-          144.46926797945207,
-          70.75
-        ],
-        "H": [
-          149.66902777777779,
-          12.431527777777774,
-          218.8353472222222,
-          72.32694444444444
-        ],
-        "F": [
-          4.276944444444444,
-          7.721944444444441,
-          102.00000000000001,
-          66.99999999999999
-        ],
-        "I": [
-          222.05506944444437,
-          12.378611111111107,
-          283.0,
-          67.0
-        ]
-      },
-      "row_edges_aligned": true,
-      "paired_column_edges_aligned": true,
-      "no_panel_overlap": true,
-      "all_text_inside_canvas": true,
-      "square_axis_panels": [
-        "B",
-        "C",
-        "D",
-        "E",
-        "H",
-        "I"
-      ],
-      "square_axis_side_mm": 50,
-      "horizontal_visible_gaps_mm": {
-        "BC": 3.304201388888899,
-        "CD": 3.8719858374384444,
-        "DE": 13.690069444444362,
-        "FG": 4.986527777777738,
-        "GH": 5.199759798325715,
-        "HI": 3.219722222222174
-      },
-      "previous_horizontal_visible_gaps_mm": {
-        "BC": 6.304201388888899,
-        "CD": 15.82272475369453,
-        "DE": 17.69006944444439,
-        "FG": 7.986527777777795,
-        "GH": 17.199759798325687,
-        "HI": 7.219722222222231
-      },
-      "horizontal_gaps_measured_including_labels_and_colorbars": true,
-      "all_adjacent_horizontal_gaps_reduced": true,
-      "BC_outer_edges_match_FG": true,
-      "DH_and_EI_both_edges_aligned": true,
-      "row_gaps_mm": [
-        6.202876621853932,
-        7.394999999999996
-      ],
-      "previous_row_gaps_mm": [
-        9.612430904113012,
-        7.394999999999982
-      ],
-      "row_gap_change_mm": [
-        0.03935016218537157,
-        1.4210854715202004e-14
-      ],
-      "compact_row_gaps_preserved": true,
-      "approved_v4_B_through_I_bounds_preserved": true,
-      "A_uses_previously_reserved_mechanism_space": true
     },
-    "core_optimization_revision": {
-      "status": "PASS",
-      "unchanged_panels": {
-        "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-        "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
+    "C": {
+      "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+      "panel": "new C",
+      "interface": "render_c(fig, rect), normalized figure coordinates [left,bottom,width,height]",
+      "nominal_size_mm": [
+        151,
+        73
+      ],
+      "contacts_top_to_bottom": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3",
+        "ICL2",
+        "ICL1"
+      ],
+      "purpose": "Show genuine model and patient contact timing; explain event-distribution fitting, not a paired-event waveform loss.",
+      "model": {
+        "subject": "epilepsiae_1146",
+        "public_label": "E10",
+        "workpoint": "xy_left_20",
+        "event_index": 10,
+        "frozen_mode": 1,
+        "mode": "MTA",
+        "window_absolute_ms": [
+          4238.0,
+          4488.0
+        ],
+        "seed_topology": 2511,
+        "seed_dynamics": 847401,
+        "trajectory_duration_ms": 60000,
+        "signal": "Gaussian contact average of E-spike counts in 2-ms bins, Gaussian temporal sigma=5 ms; no voltage forward model.",
+        "TFR_input": "Unfiltered frozen firing-density trace, NOT its 30-80 Hz plotting derivative.",
+        "native_centroid": "sum_t t*max(envelope_t-max(reference_baseline,q10_event),0)/sum_t max(envelope_t-max(reference_baseline,q10_event),0); 250-ms window, bin-center times.",
+        "native_centroid_reconstruction_max_abs_error_ms": 6.457321433117613e-08,
+        "existing_A_markers": "Peaks of the 30-80 Hz derivative at 76/68/62 ms in the 4310-4430 ms crop; neither observer centroid nor TFR centroid.",
+        "spectrum_limit": "Temporal smoothing and pulse shape dominate this low-frequency rate spectrum. It does not establish a model HFO oscillation."
       },
-      "all_pixels_outside_central_sheet_identical_to_v10": true,
-      "right_local_sampling_identical_to_v10": true,
-      "changed_pixels_in_central_sheet": 55848,
-      "previous_formal_unchanged_during_candidate_generation": true,
-      "candidate_coordinates_are_illustrative": true,
-      "updated_core_coordinates_match_E_density_modes": true,
-      "schematic_core_optimization": {
-        "interpretation": "Author-requested optimization schematic. Updated core locations match the two E-panel density modes; candidate regions and the update arrow are illustrative.",
-        "candidate_region_count": 3,
-        "updated_core_count": 2,
-        "core_count_context": "C compares one through four cores. Three possible regions and two resulting cores here are schematic, not a demonstrated three-to-two count optimization.",
-        "candidate_centres_mm": [
-          [
-            -6.4,
-            7.0
+      "patient": {
+        "subject": "epilepsiae_1146",
+        "mode": "TA",
+        "event_pos": 6344,
+        "block": "114600102_0026",
+        "packed_start_in_block_sec": 3378.15700006485,
+        "sample_rate_hz": 1024.0,
+        "source_signal": "Actual SEEG: CAR, 50/100/150/200/250-Hz notch, 80-250-Hz bandpass; frozen 250-ms band_tile.",
+        "membership": "Exact event ID in the 30049-event development target. Do not infer membership of the later 19770-event FIT split from this alone.",
+        "selection": "Reuse previously selected Fig2 TA exemplar; not selected here for closest model similarity.",
+        "previous_cache_centroid": "Peak enhancement connected-component centroid, threshold 0.70. Not reused as the new S^3 centroid.",
+        "original_fitting_centroid": "Legacy lagPatRaw S^3 time-frequency centroid on a stitched event timeline; stored seconds converted to milliseconds. Its rank is preserved.",
+        "fitting_marker_time_recovery": {
+          "block_packed_row": 270,
+          "preprocessing_segment_seconds": [
+            3200.0,
+            3400.0
           ],
-          [
-            6.65,
-            3.6
+          "event_slot_in_segment": 5,
+          "stitched_start_ms": 1250.0,
+          "sample_counts": [
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256,
+            256
           ],
-          [
-            -3.85,
-            -7.2
+          "rule": "Original producer selects inclusive sample endpoints, stitches packed tiles per 200-s segment. Sum preceding tile sample counts / 1024, subtract this from stored fitting centroid; then subtract 125 ms for centered display.",
+          "legacy_code_boundary": "The legacy source has a 500-ms default, but these actual packed artifacts are 250 ms. Window size is taken from artifacts, not the legacy default.",
+          "plotted_ms": [
+            -13.565659523010254,
+            -5.307555198669434,
+            -6.79469108581543,
+            0.9577274322509766,
+            -9.942889213562012,
+            -5.628108978271484,
+            -7.394671440124512,
+            -4.189848899841309,
+            -0.6186962127685547,
+            4.09388542175293,
+            9.604811668395996,
+            15.169143676757812,
+            17.7304744720459,
+            22.423863410949707,
+            28.720974922180176
           ]
-        ],
-        "updated_centres_mm": [
-          [
-            -6.6875,
-            2.0625
-          ],
-          [
-            6.4375,
-            -4.5625
-          ]
-        ],
-        "candidate_radius_mm": 1.15,
-        "updated_radius_mm": 1.05,
-        "candidate_fill": "#AC8BC9",
-        "candidate_fill_alpha": 0.32,
-        "candidate_edge": "#B8A3CF",
-        "updated_fill": "#805AA6",
-        "updated_edge": "#76519D",
-        "arrow_color": "#9479B2",
-        "arrow_dash_pattern": [
-          3.0,
-          2.5
-        ],
-        "search_direction_arrows_mm": [
-          [
-            [
-              -6.4,
-              5.7
-            ],
-            [
-              -6.6875,
-              3.3125
-            ]
-          ],
-          [
-            [
-              6.65,
-              2.3000000000000003
-            ],
-            [
-              6.4375,
-              -3.3125
-            ]
-          ]
-        ],
-        "arrows": "Two illustrative dashed OPTM arrows: the upper candidates point to Core A and Core B; the bottom candidate remains unconnected.",
-        "arrow_label": "OPTM",
-        "arrow_label_xy_mm": [
-          [
-            -4.7,
-            4.35
-          ],
-          [
-            8.15,
-            -0.4
-          ]
-        ],
-        "arrow_target_core_indices": [
-          0,
-          1
-        ],
-        "sampling_frame_shading": {
-          "color": "#93C4A7",
-          "alpha": 0.22,
-          "locations": [
-            "Central zoom-location frame"
-          ],
-          "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
         },
-        "question_mark_in_each_candidate_region": true,
-        "candidate_regions_have_light_purple_shading": true,
-        "regions_and_question_marks_below_neuron_markers": true,
-        "update_arrows_are_not_propagation_paths": true,
-        "simulations_and_readout_unchanged": true,
-        "core_position_source": {
-          "panel": "E",
-          "snapshot": "source/D_position_density.npz",
-          "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-          "reference_centres_mm": [
-            [
-              3.3125,
-              12.0625
-            ],
-            [
-              16.4375,
-              5.4375
-            ]
-          ],
-          "coordinate_shift_mm": [
-            -10.0,
-            -10.0
-          ],
-          "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
-          "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
-        }
+        "native_target_row": 3233
       },
-      "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL"
-    }
-  },
-  "source_files": {
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-09_pre_compact_ai_fig4/fig4/source/core_count_input_snapshot.json": "ab2807b67729faba6594ea02d2aa79f97f08576fb326639007ae0b32b2b03f97",
-    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_core_count_optimization/report.py": "87291d461a2f9fd709b9318c29df3abc3f6dbc7765dab45fada653017fdf9284",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/snapshot.json": "a318af8f26e0f296b98d649581b0741f397e935dfd3f1dbfe03a238adb14836f",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/figure_registry.json": "0b0879919914d4804eebe783b7ea28d9af1913fa3f25d2ddfc40f78dd9b000c4",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/core-position-search-context.npz": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/electrode_geometry.json": "494c87f6d5bba572c7089be7db489e1b2963580d3a06cceb04304d2442742c69",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/source/electrode_straight_display.json": "662c407fe502321b8d8daeed2a54badbfe118928af8f25b0446286a93c5c1278",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/core_position_densification_complete_20261009/density_contours.json": "be1aabdadf7760032481d5350c6393e11262ccea1b4d851fd3f08ebf299b8519",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/geometry_prior_patient_comparison_20260918/source/comparison_arrays.npz": "a5cd2a2ab60e3450438e578f0ada9407d4263f16c81650186d5c9b41f1ba18c2",
-    "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/geometry_prior_patient_comparison_20260918/comparison_metadata.json": "37830503929ff4f3e37e624f655ad5ec20bc122967d54d32c428bff3f7747c7c",
-    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
-    "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6"
-  },
-  "scientific_claims": "Unchanged frozen observations; no new simulations.",
-  "source_metadata_correction": "The frozen source summary incorrectly states that patient data do not enter workpoint selection; this registry interpretation supersedes that sentence without changing source arrays or scores.",
-  "cohort_interpretation": "Descriptive full-template similarities at patient FIT-selected workpoints, not a significance test or held-out recovery. Patient FIT data enter training/workpoint selection; model KMeans alone excludes patient profiles.",
-  "outputs": {
-    "figures/fig4-panela.pdf": "7301ff0bf0d6d87ebd2e863f02db6e13e74cfccc7e60b746bbe5e2c20da04983",
-    "figures/fig4-panelf.svg": "bec03e9a9bf76901dee94ae4fcb46d0711cc7ed70c90a983002228e9833e894a",
-    "figures/fig4-panelh.pdf": "f8f0ce71d35356d9c787caf6f1f1ed0942db04ef2bbce84a0cbfa946fecbc55d",
-    "figures/fig4-panelf.pdf": "5ae476b5a3740fd4c02a4f951b2c83a89dfb8a4e7f5382c01d2f8690cdc3c073",
-    "figures/fig4-complete-layout.svg": "f747e69390357784fe94c5bb94677c4b4ebec79624696794f92749126e6f68b4",
-    "figures/fig4-panelg.pdf": "4ade90673aa9c7d3db5448c5c6078734f4924360587aaf6026779215c85395d2",
-    "figures/fig4-complete-layout.png": "6a18e5e6f69a67dd1b9930951eb5a77523964390b84cf8f31695a86b60de3ea5",
-    "figures/fig4-panelf.png": "cda4ea2779b443866c310aa7d4728e881bed834a269224a9eb0b5006ccc63dfa",
-    "figures/fig4-panelc.png": "1e82314644ca077e89b77b6d80e4f8880f81187e6f7557e3956f8a057112ee63",
-    "figures/fig4-panela.svg": "d1f34662f4fe81dc47b88f7b0cec88efd4daea451686438b06e9e824cfe68a3b",
-    "figures/fig4-paneld.pdf": "e4bc79df071408c80096a81d972c84392bbecebb34fe81fc2af31d960b202595",
-    "figures/fig4-panelb.pdf": "82d11b25fe64eb6293832fd13ee11f946bf5f6e32726f2da0cea8079eae7fc57",
-    "figures/fig4-paneld.svg": "29d9f2c1a5ccbc792e9a6b6c3ee781db94718e2556625d29a8c67358f430a6b5",
-    "figures/fig4-panelh.svg": "f93dadbe0119460210dfbd27d1fe7b324fc0c8c6b5137c11ba97893cfa682910",
-    "figures/fig4-panelg.svg": "e9636159ea9b5c56ae5c98c545e0463768319a6e7ef0af5562d27145bedfe7e3",
-    "figures/fig4-panelb.svg": "aa78bb6195f3fd65e3cb8992d4e9ca9ef9a13b6310c6a432848423df5f1a78d4",
-    "figures/fig4-complete-layout-preview.png": "13e91ac9ad251f7f9e65302612fd4f39497c51163d57689ba902aa5c2ccf4f4b",
-    "figures/fig4-complete-layout.pdf": "f37c3ee7390ec87271c6ddc7788e25abd751beb628ccf21f1e164867907bb75d",
-    "figures/fig4-panelc.pdf": "b2aa7a9daabec70b0ba8a4060c3e7dc0dab1eef3006f3b09559dda8e7c85b178",
-    "figures/fig4-paneld.png": "936d499cdeb46e5b365ebd6f27f31119ae8e4d999e49d4532d4f3c6549f8bd9a",
-    "figures/fig4-panela.png": "7097f9c02077209addbf0cfa4fad6d4a643492541ffa32035c4cf5c030a0044a",
-    "figures/fig4-panelh.png": "5b331df7ba201adf982f886b76cd3137a8544bae4d33f49b807f0be4aad32850",
-    "figures/fig4-panelc.svg": "747021382dda973c73840c9d0ad37dddc200e729cef89109dca37a2e3b1c8cf0",
-    "figures/fig4-paneli.png": "4b96744aa4500fed90cd5661bbd297b6b4d4e9ae5c90996c3c69b1fe55f13697",
-    "figures/fig4-panele.svg": "509295de8e35a4a6b9971abb065fd53a60ec4f0b7812a476f2f0399ac73bf498",
-    "figures/fig4-panelb.png": "d01f589b1718c232aecf194233f7c122efbe243a7a23e56babda45089f34a312",
-    "figures/fig4-panelg.png": "7d2fe309c38074f5826fb1922b314fc0d862c27dfdb723dd01cc10d2f72d41f2",
-    "figures/fig4-panele.pdf": "4f99e2bc211cd7445fee58dacac1391cc77a6ab4f29eba71b6f02756b7aec4e8",
-    "figures/fig4-paneli.svg": "151e102722708746631f220e2ff02728497c7695a2fa69f4e586b6421df1dde1",
-    "figures/fig4-paneli.pdf": "3d12f2e26f5e379a6979cdf109200742e7f5d68cc684c05e33f813d73e32cdd9",
-    "figures/fig4-panele.png": "229078229d1c056ca2f5f4035885f8093d782a8ea834ac32cf3dd665c489f8dc"
-  },
-  "base_layout_version": "compact_ai_v4_a_left_circuit_spacing_v10",
-  "canonical_figure_replaced": true,
-  "unchanged_panels": {
-    "B": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "C": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "D": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "E": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "F": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "G": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "H": "PIXEL_IDENTICAL_TO_CURRENT_V10",
-    "I": "PIXEL_IDENTICAL_TO_CURRENT_V10"
-  },
-  "version": "core_search_final_20261011",
-  "author_accepted_on": "2026-10-11",
-  "original_render_producer": "source/build_fig4_a_core_optimization_candidate.py",
-  "published_from": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/a_core_search_central_shading_20261011",
-  "previous_version_archive": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4",
-  "accepted_panel_a_revision": {
-    "status": "AUTHOR_ACCEPTED_FINAL",
-    "version": "a_core_search_central_shading_v15",
-    "updated_on": "2026-10-11",
-    "package": "results/paper-ready-figure/fig4",
-    "producer": "scripts/paper_figures/build_fig4_current.py",
-    "preview": "results/paper-ready-figure/fig4/figures/fig4-complete-layout-preview.png",
-    "registry": "results/paper-ready-figure/fig4/figure4_panel_registry.json",
-    "canonical_figure_replaced": true,
-    "candidate_region_count": 3,
-    "updated_core_count": 2,
-    "representation": "Two upper OPTM arrows point to the two cores. The bottom question region has no arrow or label. Light-green frame shading appears only in the central source frame; the right inset retains its original background and local Gaussian sampling weights.",
-    "core_position_source": {
-      "panel": "E",
-      "snapshot": "source/D_position_density.npz",
-      "snapshot_sha256": "0e6049117858a9992aadb8c848f53d3117fe965ba302bd371c918f3e98b7e359",
-      "reference_centres_mm": [
+      "TFR": {
+        "algorithm": "magnitude STFT, Hamming 50 ms, 80% overlap, nfft=nperseg, constant detrend; Gaussian sigma=1.5 in frequency/time bins BEFORE crop; W=S^3.",
+        "model_nperseg": 25,
+        "model_noverlap": 20,
+        "patient_nperseg": 51,
+        "patient_noverlap": 40,
+        "model_frequency_support_hz": [
+          20,
+          200
+        ],
+        "model_display_frequency_limits_hz": [
+          0,
+          80
+        ],
+        "model_available_spectrum_hz": [
+          0,
+          200
+        ],
+        "patient_frequency_support_hz": [
+          50,
+          300
+        ],
+        "time_centroid_formula": "t_c=sum_tf t*S(t,f)^3 / sum_tf S(t,f)^3",
+        "frequency_centroid_formula": "f_c=sum_tf f*S(t,f)^3 / sum_tf S(t,f)^3",
+        "normalization": "Each channel/event magnitude divided by its own maximum; not power or cross-contact amplitude.",
+        "time_origin": "Each 250-ms event window center; no channel-specific shifts, no event-specific time stretch.",
+        "relation_to_current_Fig1": "Same full-window S^3 rule, but isolated 250-ms tiles rather than full stitched preprocessing segments; newly derived display, not exact legacy lagPatRaw replay.",
+        "new_centroid_used_by_optimizer": false,
+        "marker_legend": "Legend omitted on canvas per author. Amber circle: newly calculated full-tile S^3 TFR centroid. Black top tick: stored timing used for rank. Thin amber lines connect adjacent contacts only within the same shaft.",
+        "model_centroid_ms": [
+          -16.558703546241887,
+          -14.187833513212325,
+          -11.639811017678596,
+          -4.559246721413729,
+          -5.067639835137484,
+          0.6715015603208911,
+          -4.917654871924412,
+          -3.153260065188533,
+          2.6830838849583927,
+          5.873396085395115,
+          10.129311942986106,
+          16.287691571184297,
+          23.573217618164904,
+          29.092644147441916,
+          35.28165429263919
+        ],
+        "patient_centroid_ms": [
+          -14.53566373850326,
+          -4.958211755149989,
+          -6.780290239390226,
+          1.2601963281903608,
+          -10.021797561750745,
+          -5.685730833115215,
+          -7.259444993040773,
+          -4.483608570633436,
+          -0.695781732857867,
+          4.181671116503708,
+          11.627348905627144,
+          15.807611610674087,
+          17.931844027309694,
+          22.76327032447,
+          28.691455339034235
+        ],
+        "model_centroid_hz": [
+          31.559848799913805,
+          30.800981612986938,
+          30.429128036248063,
+          29.564671636348084,
+          30.846782877575098,
+          30.027249233418853,
+          30.6372586047413,
+          29.841852451882218,
+          29.56722378407375,
+          29.477298708554045,
+          29.552758493436762,
+          29.368883036574424,
+          29.269079923136427,
+          29.34543004169771,
+          29.138311855571462
+        ],
+        "patient_centroid_hz": [
+          117.05826180350036,
+          148.1833292062651,
+          137.46544256229507,
+          122.00290117886054,
+          123.14722217385632,
+          127.16560837422861,
+          112.17797072404848,
+          142.9150982723516,
+          119.03405112546653,
+          143.95343136255576,
+          119.35592567926336,
+          148.76593394507913,
+          115.76167275085788,
+          114.1639449462517,
+          93.43058367884764
+        ]
+      },
+      "rank": {
+        "display": "Original fitting-readout rank among all 15 participating contacts, 1-based; all 15 contacts shown in SCL9–6 then ICL11–1 anatomical shaft order. Not reranked in this subset.",
+        "model": [
+          1.0,
+          2.0,
+          3.0,
+          6.0,
+          4.0,
+          8.0,
+          5.0,
+          7.0,
+          9.0,
+          10.0,
+          11.0,
+          12.0,
+          13.0,
+          14.0,
+          15.0
+        ],
+        "patient": [
+          1.0,
+          6.0,
+          4.0,
+          9.0,
+          2.0,
+          5.0,
+          3.0,
+          7.0,
+          8.0,
+          10.0,
+          11.0,
+          12.0,
+          13.0,
+          14.0,
+          15.0
+        ],
+        "TFR_centroid_rank_is_stored_separately": true
+      },
+      "loss": {
+        "plotted_formula": "Loss = (1/3) [L_r(r_hat,r) + L_o(o_hat,o) + L_p(p_hat,p)]",
+        "groups": [
+          "rank_pattern",
+          "local_and_interrod_timing",
+          "participation"
+        ],
+        "D_off": "||mean(phi_model)-mean(phi_patient_FIT)||^2 - [mean(||phi_model||^2)-||mean(phi_model)||^2]/(N-1)",
+        "scales": "Frozen positive medians of squared embedding distances in patient CAL draws of 16 events; never re-estimated from this example.",
+        "feature_map": "Frozen multiscale random Fourier features; rank/participation additionally include linear features; timing includes within-ICL, within-SCL and intershaft delays.",
+        "N_model": 151,
+        "J": 1.5545141416636123,
+        "J_joint": 1.4556526062005162,
+        "J_joint_role": "Offline joint-feature diagnostic for xy_left_20, NOT its optimization loss. Later stages 13-16 jointly optimize J and J_joint.",
+        "current_panel_mapping": "F: optimization progress; G: actual loss profiles; H: position density; I: actual loss components and total J",
+        "display_errors": {
+          "mean_rank": 0.03359394901843452,
+          "within_rod_order": 0.072227621700557,
+          "participation": 0.1800901403162254
+        },
+        "display_average": 0.09530390367840563,
+        "display_average_formula": "L_display=(epsilon_rank+epsilon_order+epsilon_participation)/3; descriptive summary, not optimizer J.",
+        "display_error_definition": "Each error first averages absolute model-patient differences within SCL and ICL, then averages the two shafts equally. Rank: conditional participating normalized mean ranks; order: within-shaft co-participating pair precedence probabilities; participation: contact participation probabilities.",
+        "statistical_unit": "A full 60-s native trajectory (151 eligible events after 1500-ms burnin), not the one illustrated event; comparator is the frozen patient FIT event distribution.",
+        "stages": "1-5 label-conditioned development; 6-12 label-free J; 13-16 J and J_joint multiobjective. No single sum of the three displayed errors is the universal optimization objective.",
+        "caption_formula": "L_g(x_hat_g,x_g) = D_off,g/s_g; Loss = J = (L_r + L_o + L_p)/3. Same component definitions and symbols in C/G/I.",
+        "display_symbol_definitions": {
+          "hat": "Model event-level readouts; unhatted quantities are patient FIT readouts",
+          "r": "Rank-related readout distribution, fitted using frozen rank_pattern features",
+          "o": "Order/timing readout distribution, fitted using frozen local_and_interrod_timing features including within- and between-shaft timing",
+          "p": "Participation readout distribution, fitted using frozen participation features",
+          "L_g": "Actual normalized training component; same definition and r/o/p colors in G/I."
+        },
+        "display_errors_role": "Historical auxiliary MAEs retained in source metadata only; no longer plotted in C/G/I."
+      },
+      "provenance": {
+        "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.npz": "badea5e8ffca4ba3c9bc77cd6a4a51ece86d7bbcf584053073f50a9fcfd052d6",
+        "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+        "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+        "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/1146/all_recs/114600102_0026_packedTimes_withFreqCent.npy": "0f74906a6e57f5382c949a18e0f6ff56f951c99c0855e447ffcb6d84e2e2ba2a",
+        "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/1146/all_recs/114600102_0026_lagPat_withFreqCent.npz": "5f2463bdb56771bf792b58c2de6921d274a782b84d78bb1338207520db847186",
+        "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/candidates/exemplar_rank_trajectory_20261009/source_snapshot/event_cache.npz": "d2fd193cbb30c7cd30a8c173c955ed300d08e657bac8eb43f0d29c7b9a0a9a8b",
+        "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig2/candidates/exemplar_rank_trajectory_20261009/source_snapshot/fig2_panelc_metadata.json": "6fcbb90fe7ba012eec81b5956d0f97ea705380373d6e8b8ae7ed6c8faa683b81",
+        "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/source/burst_readout_arrays.npz": "946ec5145d3acc1ed3196d717dcb1dfcedd2b3ce4c2e256340719df58050e56a",
+        "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig4/source/B_visible_workpoints.csv": "5a058de72bda0d703c318cd1d98cd5f319d762d9cd6584beabc8fee264c4effe",
+        "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_20.json": "b6c032f7ca707323f393325e8973097cb2a3f07b3aea12b5707526ec48b70157",
+        "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/plan.json": "ef14e8c5b8bdf04b98826cf9228c14bbe7579387ca9fb68c9df7bd7f8db9d0d6",
+        "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/analysis/training_objective.pkl": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/results/topic4_sef_hfo/multidimensional_interictal_observation_repair_v2/observation_contract.json": "eca7e125bcf535a5ce6a41536818c8ea1de51c34f2569c4b195a49458436854c",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_observation_repaired.py": "089a2a414c3c270708d99862cc94ba5aa1864cd881170abf3165a8d77ec9894a",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_streaming_spike_readout.py": "a493db8a8516599f2169e9baada36288169e98416d726d27eebf6d04efc00314",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_three_observable_label_free.py": "cb9efa999b1de5e99700d6d8ce1f5018747954a55fb9614684ce27e9ce5752c6",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/src/topic4_three_observable_objective.py": "5a875c1cdb43410865f41f7b77aa0dcbf41256ce5c4ab8eb48febb5bc711a7b7",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/report_topic4_label_free_dense.py": "5b57ce6bba8ed968f180ff405cfdc05d59505afa99f13a4c7bc8cbb41e713bca",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/audit_topic4_joint_observation.py": "b8107d44c8e8c97d1f158826f661ae963ba4d1279f1ba5025227257dbdc4bd9a",
+        "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic5_interictal_event_envelope_field.py": "c548340781764ef27f3eae0c90267dd40e79de5b7307abea64de16c0c55ecc6c",
+        "/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/epilepsiae_interictal/epilepsiae_packGroupEvents_supressAllSyn_withFreqCenter.py": "6f095b4acd55a62ba3bbb06f34d3b14eccd8a37c165c8dab6e2678c4371eae89",
+        "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig1/source/code_snapshot/scripts/paper_figures/restore_fig1_legacy_spectrum.py": "6167cf763d9a189672600ca42e18e1e3aea9d130b41dda4f9c75ff03df74f0d3"
+      },
+      "data_sha256": "642b847428d4d08e323d0cf80c8c3c345da76742f7bf7700a35fa2a777a8678d",
+      "validation": {
+        "real_patient_and_native_model": true,
+        "shared_contact_order": true,
+        "no_time_warp_or_waveform_synthesis": true,
+        "no_legacy_imports": true,
+        "observer_centroid_is_not_peak": true,
+        "observer_centroid_is_not_TFR_centroid": true,
+        "frozen_rank_arrays_preserved": true,
+        "frozen_optimizer_score_arithmetic_verified": true,
+        "frozen_objective_artifact_identity_verified": true,
+        "current_artifacts_edited": false
+      },
+      "display_revision": "A left vertical curly brace groups the three unchanged training-loss terms; no right bracket; leading plus signs on rows two and three.",
+      "display": {
+        "event_titles": {
+          "model": "Model Events",
+          "patient": "Data Events"
+        },
+        "event_subtitles": {},
+        "patient_title_color": "#000000",
+        "patient_title_weight": "bold",
+        "all_15_contacts": true,
+        "vertical_colorbar": true,
+        "frequency_limits_hz": {
+          "model": [
+            0,
+            80
+          ],
+          "patient": [
+            50,
+            300
+          ]
+        },
+        "no_horizontal_white_padding": true,
+        "TFR_centroid_legend": false,
+        "rank_is_frozen_fitting_rank": true,
+        "patient_rank_left_of_heatmap": true,
+        "arrows_point_to_rank_columns": true,
+        "colorbar_location": "right of patient heatmaps",
+        "signal_and_frequency_subtitles": false,
+        "frequency_scalebars": [
+          {
+            "side": "model",
+            "frequency_limits_hz": [
+              0,
+              80
+            ],
+            "span_hz": 80,
+            "height_in_panel": 0.04,
+            "label": "0–80 Hz",
+            "location": "Inside ICL1 heatmap, left blue baseline region",
+            "anchor_axes_fraction": [
+              0.055,
+              0,
+              1
+            ],
+            "label_axes_fraction": [
+              0.1,
+              0.5
+            ],
+            "meaning": "A single channel TFR height; not the full electrode stack",
+            "color": "black",
+            "outline": "thin white keyline; no opaque label background"
+          },
+          {
+            "side": "patient",
+            "frequency_limits_hz": [
+              50,
+              300
+            ],
+            "span_hz": 250,
+            "height_in_panel": 0.04,
+            "label": "50–300 Hz",
+            "location": "Inside ICL1 heatmap, left blue baseline region",
+            "anchor_axes_fraction": [
+              0.055,
+              0,
+              1
+            ],
+            "label_axes_fraction": [
+              0.1,
+              0.5
+            ],
+            "meaning": "A single channel TFR height; not the full electrode stack",
+            "color": "black",
+            "outline": "thin white keyline; no opaque label background"
+          }
+        ],
+        "time_scalebars": [
+          {
+            "side": "model",
+            "span_ms": 50.0,
+            "data_endpoints_ms": [
+              -93.45,
+              -43.45
+            ],
+            "axis_limits_ms": [
+              -105.0,
+              105.0
+            ],
+            "length_axes_fraction": 0.23809523809523808,
+            "location": "Joined to lower foot of ICL1 frequency ruler in left blue region",
+            "label": "50 ms",
+            "label_position": "below horizontal ruler",
+            "color": "black"
+          },
+          {
+            "side": "patient",
+            "span_ms": 50.0,
+            "data_endpoints_ms": [
+              -94.2431640625,
+              -44.2431640625
+            ],
+            "axis_limits_ms": [
+              -105.46875,
+              98.6328125
+            ],
+            "length_axes_fraction": 0.24497607655502393,
+            "location": "Joined to lower foot of ICL1 frequency ruler in left blue region",
+            "label": "50 ms",
+            "label_position": "below horizontal ruler",
+            "color": "black"
+          }
+        ],
+        "scalebar_label_font_pt": 5.0,
+        "time_axis_style": "compact 50-ms ruler",
+        "loss_display": "Loss = (1/3) [L_r(r_hat,r) + L_o(o_hat,o) + L_p(p_hat,p)]; the same actual normalized training components displayed in G and I",
+        "formula_location": "Three vertical rows below central Loss arrow, between rank columns",
+        "formula_layout": "vertical",
+        "formula_enclosure": "left curly brace only",
+        "formula_plus_positions": "left of second and third rows",
+        "formula_prefactor": 0.3333333333333333,
+        "formula_term_font_pt": 11,
+        "formula_label_font_pt": 9,
+        "loss_terms": [
+          {
+            "symbol": "$\\mathcal{L}_r(\\hat{r},r)$",
+            "label": "Rank",
+            "color": "#3D5C6F",
+            "center": 0.53,
+            "row_y": 0.615,
+            "term_font_pt": 11,
+            "label_font_pt": 9
+          },
+          {
+            "symbol": "$\\mathcal{L}_o(\\hat{o},o)$",
+            "label": "Order",
+            "color": "#E47159",
+            "center": 0.53,
+            "row_y": 0.46,
+            "term_font_pt": 11,
+            "label_font_pt": 9
+          },
+          {
+            "symbol": "$\\mathcal{L}_p(\\hat{p},p)$",
+            "label": "Participation",
+            "color": "#6B7546",
+            "center": 0.53,
+            "row_y": 0.305,
+            "term_font_pt": 11,
+            "label_font_pt": 9
+          }
+        ]
+      }
+    },
+    "F": {
+      "old_panel": "C",
+      "core_counts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "replicates": 4,
+      "epochs": 31,
+      "band": "sample SD ddof=1",
+      "values_unchanged": true
+    },
+    "G": {
+      "old_panel": "B",
+      "profiles": 194,
+      "stages": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "metric": "Actual normalized training components L_r/L_o/L_p",
+      "formula": "J = (L_r + L_o + L_p) / 3",
+      "source": "source/g_training_loss_profiles.csv",
+      "validation": "source/g_loss_validation.json",
+      "display_stages": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "display_stage_rule": "original stage minus 6",
+      "color_order": {
+        "stages": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "normalized_positions": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "rgba": [
+          [
+            0.8784313725490196,
+            0.8392156862745098,
+            0.9490196078431372,
+            1.0
+          ],
+          [
+            0.8288350634371395,
+            0.7700115340253748,
+            0.9224913494809688,
+            1.0
+          ],
+          [
+            0.7772549019607843,
+            0.6980392156862745,
+            0.8949019607843137,
+            1.0
+          ],
+          [
+            0.7276585928489043,
+            0.6288350634371396,
+            0.8683737024221453,
+            1.0
+          ],
+          [
+            0.6698039215686274,
+            0.5584313725490195,
+            0.8282352941176471,
+            1.0
+          ],
+          [
+            0.6086274509803922,
+            0.48885813148788926,
+            0.7814532871972318,
+            1.0
+          ],
+          [
+            0.5498039215686275,
+            0.42196078431372547,
+            0.7364705882352941,
+            1.0
+          ],
+          [
+            0.4877970011534025,
+            0.3532179930795848,
+            0.6838754325259516,
+            1.0
+          ],
+          [
+            0.42666666666666664,
+            0.28862745098039216,
+            0.6227450980392157,
+            1.0
+          ],
+          [
+            0.3630911188004613,
+            0.2214532871972318,
+            0.5591695501730104,
+            1.0
+          ],
+          [
+            0.30196078431372547,
+            0.1568627450980392,
+            0.4980392156862745,
+            1.0
+          ]
+        ],
+        "mapping": "(stage - 6) / (16 - 6)",
+        "marker_alpha": 1.0,
+        "marker_face_equals_colorbar": true,
+        "draw_order": "all gray connectors, then markers light to dark",
+        "marker_size_pt": 2.7,
+        "marker_edge_width_pt": 0.3,
+        "marker_edge_color": "#65508A",
+        "connector_color": "#A0A0AA",
+        "connector_width_pt": 0.5,
+        "connector_alpha": 0.75,
+        "x_axis_limits": [
+          -0.18,
+          2.12
+        ],
+        "first_category_inset_mm": 3.7565217391304353
+      },
+      "stage_interpretation": "Historical search stages, not independent optimization repeats or a monotone learning curve. Stages 13-16 also optimized J_joint; this panel shows only their common three-component J."
+    },
+    "H": {
+      "old_panel": "E",
+      "renderer": "unchanged completed_density_layer with ground-coordinate peak registration",
+      "selected": 83,
+      "scorable": 413,
+      "selection_metric": "J",
+      "formula": "J = (L_r + L_o + L_p) / 3",
+      "values_unchanged": false,
+      "selection_source": "source/H_position_selection.json",
+      "validation": "source/h_loss_density_validation.json",
+      "cutoff_J": 1.5545141416636123,
+      "retained_from_previous": 66,
+      "ground_peaks_mm": [
         [
-          3.3125,
+          3.375,
           12.0625
         ],
         [
@@ -2188,41 +1515,2573 @@
           5.4375
         ]
       ],
-      "coordinate_shift_mm": [
-        -10.0,
-        -10.0
-      ],
-      "rule": "Maxima of the two frozen per-core position-density fields, in physical ground-plane coordinates; exclude the display height of the E relief.",
-      "interpretation": "Two marginal density modes used as schematic locations, not a jointly selected fit or proof of unique recovery."
+      "relief_note": "Raised summits shift under oblique projection; added crosses mark true XY density modes and dashed stems distinguish height from position."
     },
-    "updated_centres_in_A_mm": [
-      [
-        -6.6875,
-        2.0625
+    "I": {
+      "status": "CANDIDATE_PENDING_AUTHOR_VISUAL_REVIEW",
+      "panel": "I",
+      "primary_metric": "Three actual normalized training-loss components and their mean J",
+      "render_api": "render_i(fig, rect); one shared Loss axis",
+      "intended_data_axis_mm": [
+        51,
+        51
       ],
-      [
-        6.4375,
-        -4.5625
-      ]
-    ],
-    "arrow_target_core_indices": [
-      0,
-      1
-    ],
-    "sampling_frame_shading": {
-      "color": "#93C4A7",
-      "alpha": 0.22,
-      "locations": [
-        "Central zoom-location frame"
+      "compatible_width_mm": [
+        53,
+        55,
+        57
       ],
-      "interpretation": "Central zoom-frame background only. The right inset retains its original localized Gaussian sampling weights without a whole-frame background."
+      "font_pt": {
+        "label": 10.5,
+        "tick": 9.5,
+        "legend": 8.3
+      },
+      "parameter": "EE_angle_offset_deg",
+      "angle_is_offset": true,
+      "subject": "epilepsiae_1146",
+      "aggregate": {
+        "formula": "J=(1/3) sum_g D_off,g/s_g",
+        "groups": [
+          "rank_pattern",
+          "local_and_interrod_timing",
+          "participation"
+        ],
+        "D_off_formula": "(S_g dot S_g-Q_g)/(n*(n-1)) - 2*(S_g dot mu_patient,g)/n + mu_patient,g dot mu_patient,g",
+        "S_g": "Sum of event feature vectors phi_g(x_i)",
+        "Q_g": "Sum of squared norms of individual event feature vectors",
+        "equivalent": "A_g-B_g; A_g=||S_g/n-mu_patient,g||^2; B_g=(Q_g/n-||S_g/n||^2)/(n-1)",
+        "normalization": "Ordered distinct event-occurrence pairs n*(n-1); n changes with resampled block event counts",
+        "scales": {
+          "rank_pattern": 0.04485866893176316,
+          "local_and_interrod_timing": 0.043128270322858264,
+          "participation": 0.04559242266535053
+        },
+        "scales_fixed_during_bootstrap": true,
+        "patient_targets_fixed": true,
+        "feature_maps_fixed": true,
+        "negative_values_clipped": false,
+        "minimum_events": 16,
+        "no_new_display_objective": true,
+        "J_joint": "Not evaluated for this historical scan"
+      },
+      "uncertainty": {
+        "statistical_unit": "A 4.5 s physical-time block of events within one 60 s simulated trajectory",
+        "independent_runs_per_angle": 1,
+        "seed_pair": [
+          2511,
+          847401
+        ],
+        "patient_fit_events": 19770,
+        "burnin_ms": 1500,
+        "end_ms": 60000,
+        "blocks": 13,
+        "draws": 4000,
+        "ddof": 1,
+        "same_block_weights_across_angles": true,
+        "rng": "numpy.default_rng(2026102404+block_count)",
+        "duplicate_handling": "Repeated blocks create repeated event occurrences; subtract Q with LINEAR multiplicities. Distinct copies remain in off-diagonal pairs, matching the original scorer on a materialized bootstrap sample.",
+        "covariance": "Variance of jointly recomputed J, including covariance of its three calibrated components",
+        "limitations": "Conditional finite-event uncertainty; no independent seed/network variance or patient uncertainty. Block exchangeability and finite temporal dependence are assumptions; block-size sensitivity retained.",
+        "all_draws_have_minimum_events": true,
+        "shown_bands": "Each actual training component and total J plus/minus its own 13-block-bootstrap SD; total uses the joint draws and includes component covariance."
+      },
+      "optimum": {
+        "J_argmin_deg": 0.0,
+        "J_min": 1.621877257961985,
+        "candidate": "g1_axis3_plus",
+        "J_min_bootstrap_sd": 0.12800482582296754,
+        "J_min_bootstrap_variance": 0.01638523543396826,
+        "runner_up_angle_deg": 3.3333333333333357,
+        "runner_up_J": 1.658793028860802,
+        "empirical_gap": 0.036915770898817035,
+        "variance_argmin_deg": 20.0,
+        "minimum_variance": 0.0038897139878161834,
+        "J_variance_pareto_angles": [
+          0.0,
+          3.3333333333333357,
+          16.66666666666667,
+          20.0
+        ],
+        "individual_scaled_component_argmin_deg": {
+          "rank_pattern": 16.66666666666667,
+          "local_and_interrod_timing": 0.0,
+          "participation": -13.333333333333332
+        },
+        "claim": "Empirical minimum within 13 tested angles; neither unique population optimum nor joint minimum of all components and variance.",
+        "marker": "Vertical dashed line computed from original J argmin; no arrow or star"
+      },
+      "panel_C_F_integration": "Same algebraic definition J=(1/3)sum D_off,g/s_g. Frozen maps/scales may differ across experiments: do not assert identical calibration without checking parent sources. C repeats optimizations; I resamples within one run.",
+      "diagnostic": {
+        "renderer": "i_display_panel.py",
+        "data": "i_display_angle_response.csv",
+        "metadata": "i_display_metadata.json",
+        "empirical_display_argmin_deg": 16.66666666666667,
+        "display_mean_is_not_training_loss": true,
+        "displayed_in_main_figure": false
+      },
+      "validation": {
+        "all_39_raw_errors_preserved": true,
+        "all_13_J_and_39_actual_scaled_components_recomputed": true,
+        "original_scorer_and_explicit_event_pair_kernel_agree": true,
+        "materialized_unequal_block_bootstrap_agrees": true,
+        "source": "i_j_scorer_validation.json"
+      },
+      "block_sensitivity": [
+        {
+          "blocks": 13,
+          "block_ms": 4500.0,
+          "J_argmin_deg": 0.0,
+          "minimum_J_sd": 0.12800482582296754,
+          "runner_up_J_sd": 0.10389263173988675,
+          "variance_argmin_deg": 20.0,
+          "best_minus_runner_up_q025": -0.2094341328086953,
+          "best_minus_runner_up_q975": 0.17397134534901784,
+          "best_lower_fraction": 0.6155
+        },
+        {
+          "blocks": 26,
+          "block_ms": 2250.0,
+          "J_argmin_deg": 0.0,
+          "minimum_J_sd": 0.14921768821558182,
+          "runner_up_J_sd": 0.16727203540116292,
+          "variance_argmin_deg": 20.0,
+          "best_minus_runner_up_q025": -0.2749540145150073,
+          "best_minus_runner_up_q975": 0.15676440108954456,
+          "best_lower_fraction": 0.63775
+        },
+        {
+          "blocks": 6,
+          "block_ms": 9750.0,
+          "J_argmin_deg": 0.0,
+          "minimum_J_sd": 0.14692963819351992,
+          "runner_up_J_sd": 0.17513688399466854,
+          "variance_argmin_deg": 20.0,
+          "best_minus_runner_up_q025": -0.22258367452136385,
+          "best_minus_runner_up_q975": 0.10503181161408004,
+          "best_lower_fraction": 0.7135
+        }
+      ],
+      "frozen_training_parameters": {
+        "spec": "i_j_frozen_spec.json",
+        "arrays": "i_j_frozen_parameters.npz",
+        "original_pickle_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464"
+      },
+      "parent_rect_mm": [
+        255,
+        15,
+        51,
+        51
+      ],
+      "parent_canvas_mm": [
+        320,
+        232.52
+      ],
+      "display_revision": {
+        "black_line_label": "Total loss",
+        "quantity": "optimizer_J = mean(L_r, L_o, L_p)",
+        "data_unchanged": true
+      },
+      "historical_descriptive_errors": {
+        "label": "Error",
+        "metrics": [
+          "mean_rank_error",
+          "within_shaft_order_error",
+          "participation_error"
+        ],
+        "meaning": "Original raw descriptive MAEs; preserved exactly; NOT literal additive summands of J.",
+        "shade": "Each raw error plus/minus its own conditional physical-time block bootstrap SD, same 13-block draw scheme."
+      },
+      "axis": {
+        "label": "Loss",
+        "groups": [
+          "rank_pattern",
+          "local_and_interrod_timing",
+          "participation"
+        ],
+        "total": "optimizer_J",
+        "formula": "J = (L_r + L_o + L_p) / 3",
+        "all_curves_share_scale": true,
+        "descriptive_MAEs_displayed": false
+      }
     },
-    "geometry": "Candidate regions and arrows are illustrative. Final locations are E marginal density modes; central green frame shading is only a zoom-location cue. The sigma=0.25 mm Gaussian readout weights are unchanged.",
-    "preservation": "All pixels outside the central sheet, including the right Local sampling inset, match formal v10; B-I pixel-identical; canonical export hashes unchanged.",
-    "supersedes": "a_core_search_sampling_links_v14",
-    "human_visual_acceptance": "AUTHOR_ACCEPTED_FINAL",
-    "author_accepted_on": "2026-10-11",
-    "archived_source_package": "results/paper-ready-figure/archive/2026-10-11_fig4_finalization/fig4/candidates/a_core_search_central_shading_20261011"
+    "DE": {
+      "raster_group_labels": {
+        "font_size_pt": 11.5,
+        "font_weight": "bold",
+        "pad_pt": 6.5,
+        "colors": {
+          "E": "#D84840",
+          "I": "#347FB3"
+        }
+      },
+      "core_colorbar_shown": false,
+      "core_mask_shown": true,
+      "core_outline_shown": true,
+      "D_readout_ROI_outline_shown": true,
+      "field_background": {
+        "D": "white",
+        "E": "white"
+      },
+      "E_core_fill": "#B8A1CF",
+      "shared_neuron_layout": {
+        "E_points": 396,
+        "I_points": 114,
+        "min_center_spacing_mm": 0.52,
+        "edge_margin_mm": 0.25,
+        "original_indices": {
+          "E": [
+            5,
+            7,
+            9,
+            10,
+            11,
+            16,
+            17,
+            21,
+            22,
+            23,
+            24,
+            25,
+            27,
+            29,
+            30,
+            31,
+            32,
+            33,
+            40,
+            41,
+            42,
+            45,
+            48,
+            50,
+            59,
+            63,
+            65,
+            66,
+            68,
+            69,
+            71,
+            78,
+            80,
+            82,
+            86,
+            89,
+            93,
+            95,
+            96,
+            98,
+            100,
+            102,
+            104,
+            108,
+            109,
+            110,
+            112,
+            118,
+            120,
+            121,
+            122,
+            124,
+            126,
+            129,
+            131,
+            134,
+            135,
+            136,
+            137,
+            139,
+            140,
+            142,
+            143,
+            145,
+            146,
+            150,
+            153,
+            154,
+            156,
+            160,
+            161,
+            165,
+            167,
+            170,
+            176,
+            181,
+            182,
+            188,
+            193,
+            194,
+            195,
+            204,
+            209,
+            210,
+            213,
+            215,
+            216,
+            217,
+            219,
+            220,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230,
+            231,
+            232,
+            233,
+            235,
+            236,
+            238,
+            243,
+            245,
+            246,
+            247,
+            248,
+            251,
+            253,
+            255,
+            260,
+            262,
+            263,
+            265,
+            268,
+            275,
+            276,
+            277,
+            280,
+            282,
+            283,
+            284,
+            285,
+            286,
+            287,
+            288,
+            293,
+            295,
+            298,
+            302,
+            305,
+            306,
+            308,
+            309,
+            310,
+            313,
+            317,
+            319,
+            323,
+            328,
+            330,
+            331,
+            334,
+            336,
+            339,
+            340,
+            342,
+            347,
+            348,
+            350,
+            351,
+            353,
+            365,
+            368,
+            369,
+            372,
+            376,
+            377,
+            379,
+            380,
+            381,
+            382,
+            383,
+            386,
+            389,
+            391,
+            396,
+            402,
+            407,
+            412,
+            413,
+            416,
+            417,
+            419,
+            420,
+            421,
+            423,
+            426,
+            428,
+            437,
+            440,
+            442,
+            443,
+            444,
+            445,
+            446,
+            447,
+            449,
+            452,
+            453,
+            456,
+            457,
+            458,
+            462,
+            463,
+            464,
+            465,
+            469,
+            471,
+            472,
+            477,
+            486,
+            488,
+            489,
+            490,
+            492,
+            493,
+            495,
+            498,
+            500,
+            501,
+            502,
+            505,
+            506,
+            507,
+            513,
+            514,
+            517,
+            520,
+            521,
+            522,
+            524,
+            527,
+            528,
+            529,
+            532,
+            536,
+            537,
+            538,
+            540,
+            543,
+            545,
+            552,
+            554,
+            555,
+            556,
+            557,
+            558,
+            559,
+            561,
+            562,
+            565,
+            569,
+            571,
+            572,
+            575,
+            579,
+            581,
+            585,
+            587,
+            588,
+            590,
+            591,
+            596,
+            597,
+            599,
+            600,
+            607,
+            609,
+            615,
+            616,
+            618,
+            619,
+            620,
+            624,
+            625,
+            628,
+            629,
+            631,
+            632,
+            633,
+            634,
+            637,
+            640,
+            642,
+            645,
+            648,
+            649,
+            651,
+            653,
+            655,
+            657,
+            659,
+            664,
+            668,
+            674,
+            682,
+            684,
+            688,
+            690,
+            693,
+            697,
+            702,
+            703,
+            707,
+            708,
+            709,
+            710,
+            712,
+            717,
+            718,
+            719,
+            721,
+            725,
+            726,
+            728,
+            730,
+            732,
+            735,
+            736,
+            738,
+            741,
+            746,
+            748,
+            749,
+            752,
+            755,
+            757,
+            761,
+            762,
+            771,
+            773,
+            774,
+            776,
+            777,
+            778,
+            779,
+            782,
+            783,
+            785,
+            786,
+            789,
+            792,
+            793,
+            794,
+            795,
+            796,
+            797,
+            799,
+            800,
+            804,
+            805,
+            806,
+            808,
+            812,
+            815,
+            819,
+            820,
+            822,
+            826,
+            829,
+            835,
+            836,
+            841,
+            843,
+            846,
+            850,
+            852,
+            853,
+            856,
+            857,
+            858,
+            860,
+            865,
+            866,
+            870,
+            871,
+            873,
+            874,
+            876,
+            878,
+            879,
+            880,
+            882,
+            885,
+            886,
+            887,
+            888,
+            889,
+            892,
+            894,
+            895,
+            901,
+            903,
+            904,
+            909,
+            910,
+            911,
+            913,
+            915,
+            916,
+            919,
+            925,
+            926,
+            927,
+            930
+          ],
+          "I": [
+            2,
+            4,
+            5,
+            7,
+            8,
+            11,
+            13,
+            19,
+            20,
+            24,
+            25,
+            27,
+            28,
+            32,
+            35,
+            38,
+            42,
+            43,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            55,
+            57,
+            58,
+            61,
+            62,
+            64,
+            71,
+            72,
+            75,
+            77,
+            85,
+            88,
+            89,
+            92,
+            93,
+            94,
+            96,
+            97,
+            101,
+            103,
+            105,
+            106,
+            107,
+            110,
+            112,
+            113,
+            116,
+            118,
+            119,
+            123,
+            125,
+            127,
+            128,
+            131,
+            136,
+            138,
+            139,
+            141,
+            142,
+            150,
+            155,
+            159,
+            164,
+            171,
+            173,
+            174,
+            177,
+            178,
+            180,
+            183,
+            185,
+            188,
+            191,
+            192,
+            193,
+            196,
+            198,
+            199,
+            200,
+            202,
+            204,
+            205,
+            206,
+            207,
+            216,
+            222,
+            223,
+            225,
+            231,
+            233,
+            234,
+            235,
+            236,
+            239,
+            240,
+            243,
+            244,
+            245,
+            247,
+            248,
+            249,
+            251,
+            255,
+            256,
+            257,
+            260,
+            263,
+            264,
+            266,
+            268
+          ]
+        },
+        "coordinates": "Original frozen overview coordinates; display subset only",
+        "shared_by": [
+          "B",
+          "D",
+          "E"
+        ]
+      },
+      "readout_ylabel_x_mm": {
+        "D": 88.44337301587301,
+        "E": 244.1798015873016
+      },
+      "core_fill_meaning": "Categorical purple fill inside E core only; complement unshaded",
+      "field_raster_baselines_aligned": true,
+      "axis_label_font_pt": 10.5,
+      "axis_tick_font_pt": 9.5,
+      "raster_marker_area_pt2": {
+        "D": 5.0,
+        "E": 3.0
+      },
+      "window_ms": [
+        1500.0,
+        2900.0
+      ],
+      "lfp_ylim": {
+        "D": [
+          10.084456707882953,
+          18.49069119153396
+        ],
+        "E": [
+          -65.3618721606485,
+          1143.7893516127006
+        ]
+      },
+      "lfp_axes_independently_scaled": true,
+      "neuron_counts": {
+        "E": 847,
+        "I": 191
+      },
+      "whole_network_counts": {
+        "E": 32000,
+        "I": 8000
+      },
+      "raster_neuron_ids": [
+        11,
+        19,
+        96,
+        119,
+        176,
+        177,
+        306,
+        390,
+        395,
+        495,
+        513,
+        526,
+        538,
+        553,
+        598,
+        623,
+        638,
+        649,
+        656,
+        695,
+        701,
+        728,
+        739,
+        756,
+        769,
+        776,
+        786,
+        837,
+        873,
+        890,
+        942,
+        1009,
+        1015,
+        1034,
+        1052,
+        1116,
+        1128,
+        1211,
+        1215,
+        1232,
+        1265,
+        1318,
+        1333,
+        1398,
+        1407,
+        1416,
+        1434,
+        1435,
+        1502,
+        1503,
+        1517,
+        1532,
+        1534,
+        1616,
+        1625,
+        1630,
+        1640,
+        1668,
+        1721,
+        1741,
+        1743,
+        1755,
+        1814,
+        1836,
+        1860,
+        1878,
+        1916,
+        1918,
+        1941,
+        1974,
+        2033,
+        2081,
+        2088,
+        2131,
+        2220,
+        2396,
+        2436,
+        2446,
+        2503,
+        2528,
+        2544,
+        2619,
+        2620,
+        2628,
+        2680,
+        2699,
+        2728,
+        2757,
+        2792,
+        2798,
+        2816,
+        2854,
+        2861,
+        2884,
+        3051,
+        3186,
+        3193,
+        3257,
+        3270,
+        3297,
+        3300,
+        3340,
+        3406,
+        3415,
+        3496,
+        3568,
+        3599,
+        3610,
+        3626,
+        3679,
+        3699,
+        3734,
+        3808,
+        3912,
+        3930,
+        4022,
+        4089,
+        4172,
+        4252,
+        4267,
+        4268,
+        4290,
+        4359,
+        4378,
+        4389,
+        4465,
+        4482,
+        4485,
+        4532,
+        4542,
+        4557,
+        4634,
+        4799,
+        4828,
+        4839,
+        4919,
+        4920,
+        4921,
+        4946,
+        4957,
+        4992,
+        5013,
+        5190,
+        5242,
+        5249,
+        5251,
+        5321,
+        5406,
+        5433,
+        5480,
+        5513,
+        5572,
+        5581,
+        5678,
+        5725,
+        5730,
+        5734,
+        5762,
+        5775,
+        5777,
+        5778,
+        5795,
+        5819,
+        5844,
+        5866,
+        5913,
+        5935,
+        6049,
+        6050,
+        6154,
+        6211,
+        6214,
+        6254,
+        6288,
+        6418,
+        6426,
+        6445,
+        6486,
+        6554,
+        6588,
+        6609,
+        6614,
+        6639,
+        6676,
+        6686,
+        6691,
+        6723,
+        6766,
+        6781,
+        6795,
+        6798,
+        6833,
+        6919,
+        6978,
+        6979,
+        7041,
+        7092,
+        7125,
+        7140,
+        7147,
+        7185,
+        7188,
+        7189,
+        7267,
+        7291,
+        7308,
+        7328,
+        7425,
+        7434,
+        7435,
+        7459,
+        7542,
+        7554,
+        7642,
+        7701,
+        7704,
+        7708,
+        7768,
+        7787,
+        7821,
+        7842,
+        7902,
+        7948,
+        7993,
+        8024,
+        8095,
+        8144,
+        8255,
+        8392,
+        8414,
+        8483,
+        8516,
+        8520,
+        8580,
+        8593,
+        8607,
+        8617,
+        8667,
+        8705,
+        8794,
+        8843,
+        8876,
+        8898,
+        8930,
+        9026,
+        9170,
+        9182,
+        9193,
+        9233,
+        9272,
+        9314,
+        9332,
+        9383,
+        9394,
+        9406,
+        9415,
+        9435,
+        9436,
+        9523,
+        9552,
+        9555,
+        9556,
+        9696,
+        9709,
+        9812,
+        9822,
+        9834,
+        9912,
+        9977,
+        9982,
+        9989,
+        10012,
+        10027,
+        10060,
+        10110,
+        10164,
+        10195,
+        10212,
+        10291,
+        10298,
+        10331,
+        10359,
+        10369,
+        10377,
+        10427,
+        10463,
+        10466,
+        10560,
+        10574,
+        10587,
+        10603,
+        10627,
+        10655,
+        10702,
+        10746,
+        10753,
+        10755,
+        10813,
+        10869,
+        10881,
+        10914,
+        10954,
+        11018,
+        11029,
+        11031,
+        11074,
+        11088,
+        11099,
+        11114,
+        11173,
+        11200,
+        11280,
+        11299,
+        11472,
+        11476,
+        11493,
+        11503,
+        11546,
+        11548,
+        11570,
+        11573,
+        11592,
+        11627,
+        11634,
+        11741,
+        11873,
+        11919,
+        11933,
+        11949,
+        11971,
+        11999,
+        12029,
+        12053,
+        12089,
+        12154,
+        12199,
+        12224,
+        12246,
+        12312,
+        12320,
+        12336,
+        12368,
+        12369,
+        12371,
+        12397,
+        12411,
+        12416,
+        12491,
+        12505,
+        12568,
+        12587,
+        12630,
+        12637,
+        12648,
+        12653,
+        12703,
+        12742,
+        12761,
+        12780,
+        12804,
+        12838,
+        12847,
+        12884,
+        12895,
+        12903,
+        12958,
+        12979,
+        13000,
+        13036,
+        13088,
+        13228,
+        13274,
+        13338,
+        13363,
+        13399,
+        13486,
+        13567,
+        13599,
+        13632,
+        13654,
+        13690,
+        13693,
+        13723,
+        13738,
+        13742,
+        13811,
+        13816,
+        13823,
+        13863,
+        13948,
+        13971,
+        13982,
+        14063,
+        14069,
+        14099,
+        14166,
+        14205,
+        14259,
+        14285,
+        14303,
+        14313,
+        14329,
+        14423,
+        14482,
+        14536,
+        14553,
+        14588,
+        14610,
+        14618,
+        14634,
+        14718,
+        14803,
+        14808,
+        14811,
+        14869,
+        15037,
+        15076,
+        15107,
+        15117,
+        15126,
+        15175,
+        15218,
+        15385,
+        15388,
+        15521,
+        15543,
+        15562,
+        15576,
+        15599,
+        15615,
+        15723,
+        15733,
+        15763,
+        15799,
+        15821,
+        15852,
+        15860,
+        15933,
+        15948,
+        15965,
+        15973,
+        16207,
+        16278,
+        16320,
+        16447,
+        16468,
+        16519,
+        16642,
+        16669,
+        16670,
+        16703,
+        16705,
+        16758,
+        16779,
+        16808,
+        16817,
+        16882,
+        16914,
+        16929,
+        17090,
+        17121,
+        17222,
+        17232,
+        17241,
+        17261,
+        17332,
+        17353,
+        17434,
+        17451,
+        17470,
+        17521,
+        17537,
+        17573,
+        17619,
+        17661,
+        17707,
+        17859,
+        17944,
+        17955,
+        17977,
+        17990,
+        18076,
+        18086,
+        18134,
+        18139,
+        18142,
+        18170,
+        18191,
+        18272,
+        18295,
+        18318,
+        18349,
+        18366,
+        18397,
+        18490,
+        18536,
+        18587,
+        18602,
+        18669,
+        18744,
+        18747,
+        18803,
+        18859,
+        18885,
+        18914,
+        18978,
+        18981,
+        18985,
+        19002,
+        19009,
+        19015,
+        19016,
+        19048,
+        19058,
+        19136,
+        19178,
+        19179,
+        19197,
+        19242,
+        19257,
+        19457,
+        19461,
+        19477,
+        19498,
+        19551,
+        19556,
+        19668,
+        19693,
+        19704,
+        19784,
+        19792,
+        19793,
+        19825,
+        19827,
+        19915,
+        19947,
+        20017,
+        20047,
+        20079,
+        20135,
+        20176,
+        20258,
+        20266,
+        20444,
+        20533,
+        20554,
+        20563,
+        20603,
+        20642,
+        20653,
+        20661,
+        20697,
+        20698,
+        20776,
+        20816,
+        20854,
+        20861,
+        20892,
+        20908,
+        20938,
+        20953,
+        20976,
+        21007,
+        21027,
+        21037,
+        21055,
+        21082,
+        21106,
+        21148,
+        21194,
+        21262,
+        21378,
+        21399,
+        21419,
+        21471,
+        21530,
+        21545,
+        21625,
+        21634,
+        21649,
+        21650,
+        21676,
+        21711,
+        21771,
+        21833,
+        21880,
+        21907,
+        22008,
+        22192,
+        22256,
+        22294,
+        22332,
+        22353,
+        22358,
+        22571,
+        22595,
+        22623,
+        22719,
+        22722,
+        22743,
+        22861,
+        22909,
+        22991,
+        23054,
+        23176,
+        23233,
+        23234,
+        23255,
+        23262,
+        23271,
+        23304,
+        23324,
+        23372,
+        23391,
+        23423,
+        23424,
+        23425,
+        23446,
+        23457,
+        23504,
+        23519,
+        23579,
+        23613,
+        23618,
+        23633,
+        23655,
+        23682,
+        23721,
+        23726,
+        23728,
+        23730,
+        23777,
+        23785,
+        23831,
+        23869,
+        23872,
+        23936,
+        23963,
+        23982,
+        24022,
+        24071,
+        24078,
+        24106,
+        24116,
+        24136,
+        24175,
+        24234,
+        24244,
+        24276,
+        24337,
+        24396,
+        24412,
+        24444,
+        24455,
+        24484,
+        24494,
+        24523,
+        24565,
+        24575,
+        24616,
+        24674,
+        24703,
+        24737,
+        24828,
+        24842,
+        24915,
+        24932,
+        24969,
+        24978,
+        24995,
+        25010,
+        25035,
+        25083,
+        25109,
+        25205,
+        25238,
+        25248,
+        25283,
+        25305,
+        25318,
+        25356,
+        25392,
+        25416,
+        25419,
+        25458,
+        25524,
+        25560,
+        25613,
+        25617,
+        25667,
+        25681,
+        25770,
+        25778,
+        25789,
+        25813,
+        25849,
+        25888,
+        25951,
+        25955,
+        25958,
+        26087,
+        26200,
+        26205,
+        26283,
+        26331,
+        26333,
+        26357,
+        26415,
+        26439,
+        26536,
+        26582,
+        26655,
+        26717,
+        26729,
+        26732,
+        26816,
+        26864,
+        26894,
+        26895,
+        26971,
+        26985,
+        26995,
+        27005,
+        27020,
+        27032,
+        27033,
+        27063,
+        27109,
+        27151,
+        27180,
+        27203,
+        27228,
+        27280,
+        27331,
+        27361,
+        27529,
+        27570,
+        27580,
+        27599,
+        27627,
+        27628,
+        27665,
+        27674,
+        27694,
+        27725,
+        27734,
+        27744,
+        27763,
+        27859,
+        27943,
+        28031,
+        28057,
+        28070,
+        28073,
+        28076,
+        28143,
+        28149,
+        28204,
+        28233,
+        28241,
+        28255,
+        28284,
+        28319,
+        28385,
+        28396,
+        28420,
+        28440,
+        28473,
+        28768,
+        28783,
+        28830,
+        28837,
+        28848,
+        28901,
+        29001,
+        29023,
+        29041,
+        29048,
+        29244,
+        29308,
+        29322,
+        29355,
+        29392,
+        29411,
+        29434,
+        29440,
+        29466,
+        29653,
+        29677,
+        29730,
+        29746,
+        29748,
+        29801,
+        29802,
+        29842,
+        29848,
+        29894,
+        29942,
+        30019,
+        30042,
+        30068,
+        30149,
+        30152,
+        30153,
+        30221,
+        30261,
+        30271,
+        30354,
+        30356,
+        30422,
+        30448,
+        30480,
+        30483,
+        30522,
+        30560,
+        30577,
+        30654,
+        30670,
+        30733,
+        30840,
+        30848,
+        30904,
+        30970,
+        30998,
+        31037,
+        31063,
+        31082,
+        31115,
+        31131,
+        31194,
+        31283,
+        31309,
+        31392,
+        31428,
+        31464,
+        31472,
+        31502,
+        31543,
+        31552,
+        31614,
+        31621,
+        31626,
+        31634,
+        31638,
+        31848,
+        31862,
+        31999,
+        32099,
+        32105,
+        32124,
+        32150,
+        32194,
+        32216,
+        32268,
+        32303,
+        32323,
+        32386,
+        32451,
+        32472,
+        32569,
+        32590,
+        32628,
+        32701,
+        32718,
+        32734,
+        32808,
+        32888,
+        32918,
+        32997,
+        33013,
+        33040,
+        33071,
+        33082,
+        33185,
+        33255,
+        33357,
+        33434,
+        33442,
+        33515,
+        33522,
+        33544,
+        33683,
+        33705,
+        33742,
+        33753,
+        33760,
+        33770,
+        33826,
+        33856,
+        33889,
+        33908,
+        33909,
+        33919,
+        33972,
+        34162,
+        34171,
+        34215,
+        34219,
+        34269,
+        34280,
+        34309,
+        34490,
+        34499,
+        34512,
+        34544,
+        34548,
+        34580,
+        34587,
+        34690,
+        34700,
+        34704,
+        34738,
+        34757,
+        34877,
+        34940,
+        34973,
+        34989,
+        34999,
+        35053,
+        35059,
+        35125,
+        35136,
+        35163,
+        35197,
+        35244,
+        35296,
+        35317,
+        35325,
+        35352,
+        35388,
+        35399,
+        35419,
+        35484,
+        35488,
+        35540,
+        35542,
+        35561,
+        35579,
+        35628,
+        35644,
+        35732,
+        35762,
+        35786,
+        35815,
+        35978,
+        35985,
+        36020,
+        36066,
+        36098,
+        36222,
+        36224,
+        36227,
+        36242,
+        36274,
+        36282,
+        36360,
+        36422,
+        36504,
+        36520,
+        36529,
+        36595,
+        36607,
+        36657,
+        36675,
+        36676,
+        36684,
+        36704,
+        36723,
+        36731,
+        36767,
+        36794,
+        36915,
+        36941,
+        36965,
+        37081,
+        37091,
+        37106,
+        37236,
+        37243,
+        37385,
+        37403,
+        37418,
+        37519,
+        37530,
+        37560,
+        37571,
+        37586,
+        37596,
+        37703,
+        37776,
+        37842,
+        37862,
+        37864,
+        37949,
+        37964,
+        37991,
+        38003,
+        38069,
+        38115,
+        38122,
+        38129,
+        38139,
+        38189,
+        38226,
+        38255,
+        38276,
+        38385,
+        38446,
+        38516,
+        38571,
+        38576,
+        38578,
+        38598,
+        38608,
+        38627,
+        38649,
+        38674,
+        38706,
+        38736,
+        38760,
+        38764,
+        38811,
+        38824,
+        38897,
+        38966,
+        38976,
+        39141,
+        39160,
+        39240,
+        39265,
+        39388,
+        39401,
+        39452,
+        39555,
+        39650,
+        39656,
+        39740,
+        39840
+      ],
+      "all_ROI_spikes_displayed": true,
+      "same_neuron_order": true,
+      "display_window_rule": "Fixed 1500-2900 ms window after burn-in; first three complete local bursts in E; identical D/E interval",
+      "full_analysis_window_ms": [
+        1500.0,
+        10000.0
+      ],
+      "field_overlay": "Shared spaced E/I schematic in B/D/E; D unchanged white background and dashed ROI; E purple core interior with white complement",
+      "colors": {
+        "E": "#c84040",
+        "I": "#386c9d"
+      },
+      "measured_lowering_range_mV": {
+        "D": [
+          0.0,
+          0.0
+        ],
+        "E": [
+          0.0,
+          3.9072808134590993
+        ]
+      },
+      "metadata": {
+        "schema": "fig4.native_de.observables.v1",
+        "native_run": "experiments/fig4_native_de_20261024/run02",
+        "statistical_unit": "One 10 s native trajectory per condition on the same topology; E unchanged; not independent seed replication.",
+        "analysis_and_display_window_ms": [
+          1500.0,
+          10000.0
+        ],
+        "primary_D_identity": "Zero core; all background thresholds and global weights; independent Poisson afferents to every E/I neuron at the previous silent-D mean; no local input patch or OU drive",
+        "diagnostic_D_identity": "Threshold-ablation only, NOT no-core; identical input stream to E",
+        "primary_D_run": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/experiments/fig4_native_de_20261024/run04_d0_poisson",
+        "input_mean_boundary": "D: independent Poisson at nu throughout; E: unchanged local max(0.95*nu+OU,0) Poisson patch and deterministic exterior. D/E are different working regimes, not a one-factor causal test.",
+        "n_E": 32000,
+        "n_I": 8000,
+        "n_patch_E": 847,
+        "n_patch_I": 191,
+        "all_neurons_shown_in_raster": false,
+        "raster": "All cells of the same fixed circular ROI, E then I, ascending original ID within type; no active-cell selection; E red and I blue.",
+        "lfp_definition": "LFPRecorder spatially weighted mean of abs(I_E)+abs(I_I) over E near the fixed original core centre; unfiltered native current proxy, not measured extracellular voltage.",
+        "current_units": "Voltage-equivalent model current (mV in LIF equation), not nA or extracellular mV.",
+        "EI_balance_definition": "Separate mean excitatory/inhibitory magnitudes, ratio I_I/I_E, signed residual and mean per-cell abs(I_E-I_I)/(mean I_E + mean I_I); read-only 1 ms samples. No balance inference from sparsity.",
+        "event_definition": "Non-overlapping 10 ms bins: >=1% distinct E cells globally or >=10% distinct E cells in fixed input patch; adjacent supra-threshold bins merged across <=100 ms gaps; report duration, do not equate with patient HFO.",
+        "arms": {
+          "D": {
+            "E_spikes": 25521,
+            "I_spikes": 21639,
+            "E_rate_hz": 0.09382720588235294,
+            "I_rate_hz": 0.3182205882352941,
+            "patch_E_rate_hz": 0.09709007569970138,
+            "patch_I_rate_hz": 0.3067446874037573,
+            "patch_E_spikes": 699,
+            "patch_I_spikes": 498,
+            "outside_E_rate_hz": 0.0937384936961977,
+            "fraction_E_ever_active": 0.55053125,
+            "mean_E_active_fraction_10ms": 0.0009382720588235296,
+            "peak_E_active_fraction_10ms": 0.0016875,
+            "no_spikes": false,
+            "native_population_events": {
+              "global_E": {
+                "threshold_distinct_fraction": 0.01,
+                "count": 0,
+                "short_burst_count": 0,
+                "prolonged_count": 0,
+                "events": [],
+                "boundary_excluded_count": 0,
+                "right_censored_events": [],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              },
+              "input_patch_E": {
+                "threshold_distinct_fraction": 0.1,
+                "count": 0,
+                "short_burst_count": 0,
+                "prolonged_count": 0,
+                "events": [],
+                "boundary_excluded_count": 0,
+                "right_censored_events": [],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              }
+            },
+            "frozen_contact_events_detected": 0,
+            "frozen_contact_events_primary": 0,
+            "current_balance": {
+              "allE": {
+                "I_E": 13.119182625904232,
+                "I_I": 0.8120861398313703,
+                "abs_net_I": 12.307101069413159,
+                "V": 12.292059296790626,
+                "inhibitory_to_excitatory_ratio": 0.06190066584086429,
+                "mean_signed_net_current": 12.307096486072862,
+                "cancellation_residual": 0.8834156656056241
+              },
+              "patchE": {
+                "I_E": 13.120121033764319,
+                "I_I": 0.8211362178528563,
+                "abs_net_I": 12.298988798084237,
+                "V": 12.282531078116117,
+                "inhibitory_to_excitatory_ratio": 0.06258602460599881,
+                "mean_signed_net_current": 12.298984815911462,
+                "cancellation_residual": 0.8822008356999196
+              },
+              "outsideE": {
+                "I_E": 13.119157112102753,
+                "I_I": 0.8118400827555126,
+                "abs_net_I": 12.307321629032316,
+                "V": 12.292318353742356,
+                "inhibitory_to_excitatory_ratio": 0.061882030668461895,
+                "mean_signed_net_current": 12.30731702934724,
+                "cancellation_residual": 0.8834487192040189
+              },
+              "allI": {
+                "I_E": 12.22841373381037,
+                "I_I": 0.6323429809588824,
+                "abs_net_I": 11.59607222890978,
+                "V": 11.570533729892885,
+                "inhibitory_to_excitatory_ratio": 0.05171095734277585,
+                "mean_signed_net_current": 11.596070752851489,
+                "cancellation_residual": 0.9016632913670536
+              }
+            },
+            "pathway_currents": {
+              "recurrent_E_to_E_mean": 0.2539757490158081,
+              "recurrent_E_to_I_mean": 0.21165964007377625,
+              "GABA_to_E_mean": 0.8120861649513245
+            },
+            "LFP_proxy_min": 10.234967023238706,
+            "LFP_proxy_max": 18.056268000558312,
+            "input_ROI_afferent_mean_per_ms": 1.3174634224662056,
+            "input_ROI_afferent_sd_per_ms": 0.0,
+            "input_ROI_zero_rate_fraction": 0.0,
+            "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+            "full_trajectory_sha256": "f0121db56f28d6eb19dc1ab062bc61a1334e620ae42e4b2437b91dd434844bef",
+            "low_rate_by_stated_thresholds": true,
+            "sparse_by_stated_definition": true
+          },
+          "E": {
+            "E_spikes": 2865864,
+            "I_spikes": 1564326,
+            "E_rate_hz": 10.536264705882353,
+            "I_rate_hz": 23.00479411764706,
+            "patch_E_rate_hz": 6.617265087853323,
+            "patch_I_rate_hz": 19.27071142593163,
+            "patch_E_spikes": 47641,
+            "patch_I_spikes": 31286,
+            "outside_E_rate_hz": 10.642816006767358,
+            "fraction_E_ever_active": 0.9968125,
+            "mean_E_active_fraction_10ms": 0.04742779411764706,
+            "peak_E_active_fraction_10ms": 0.3203125,
+            "no_spikes": false,
+            "native_population_events": {
+              "global_E": {
+                "threshold_distinct_fraction": 0.01,
+                "count": 25,
+                "short_burst_count": 25,
+                "prolonged_count": 0,
+                "events": [
+                  {
+                    "start_ms": 1660.0,
+                    "end_ms": 1750.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.3203125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2260.0,
+                    "end_ms": 2350.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.30840625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2720.0,
+                    "end_ms": 2810.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.28678125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2960.0,
+                    "end_ms": 3070.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.3058125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 3360.0,
+                    "end_ms": 3480.0,
+                    "duration_ms": 120.0,
+                    "peak_active_fraction": 0.2884375,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 3760.0,
+                    "end_ms": 3850.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.30615625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4030.0,
+                    "end_ms": 4120.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.31025,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4290.0,
+                    "end_ms": 4400.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.28025,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4540.0,
+                    "end_ms": 4650.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.30534375,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4870.0,
+                    "end_ms": 4990.0,
+                    "duration_ms": 120.0,
+                    "peak_active_fraction": 0.25675,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5160.0,
+                    "end_ms": 5250.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.31034375,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5420.0,
+                    "end_ms": 5510.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.29065625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5860.0,
+                    "end_ms": 5980.0,
+                    "duration_ms": 120.0,
+                    "peak_active_fraction": 0.29778125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6200.0,
+                    "end_ms": 6290.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.29015625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6450.0,
+                    "end_ms": 6560.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.3000625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6730.0,
+                    "end_ms": 6820.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.28,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6980.0,
+                    "end_ms": 7070.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.30628125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7300.0,
+                    "end_ms": 7400.0,
+                    "duration_ms": 100.0,
+                    "peak_active_fraction": 0.2985,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7580.0,
+                    "end_ms": 7690.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.3079375,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7850.0,
+                    "end_ms": 7960.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.29565625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8270.0,
+                    "end_ms": 8360.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.26140625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8590.0,
+                    "end_ms": 8680.0,
+                    "duration_ms": 90.0,
+                    "peak_active_fraction": 0.28115625,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8840.0,
+                    "end_ms": 8960.0,
+                    "duration_ms": 120.0,
+                    "peak_active_fraction": 0.31059375,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 9270.0,
+                    "end_ms": 9350.0,
+                    "duration_ms": 80.0,
+                    "peak_active_fraction": 0.2988125,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 9570.0,
+                    "end_ms": 9680.0,
+                    "duration_ms": 110.0,
+                    "peak_active_fraction": 0.30478125,
+                    "short_burst": true
+                  }
+                ],
+                "boundary_excluded_count": 6,
+                "right_censored_events": [
+                  {
+                    "start_ms": 9900.0,
+                    "end_ms": 10000.0,
+                    "duration_ms": 100.0,
+                    "peak_active_fraction": 0.26303125,
+                    "short_burst": true
+                  }
+                ],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              },
+              "input_patch_E": {
+                "threshold_distinct_fraction": 0.1,
+                "count": 26,
+                "short_burst_count": 26,
+                "prolonged_count": 0,
+                "events": [
+                  {
+                    "start_ms": 1660.0,
+                    "end_ms": 1690.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.6375442739079102,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2260.0,
+                    "end_ms": 2290.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.7095631641086186,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2710.0,
+                    "end_ms": 2740.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.6765053128689492,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 2950.0,
+                    "end_ms": 2980.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.8134592680047226,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 3360.0,
+                    "end_ms": 3400.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.5017709563164109,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 3760.0,
+                    "end_ms": 3790.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.551357733175915,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4030.0,
+                    "end_ms": 4060.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.6269185360094451,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4280.0,
+                    "end_ms": 4320.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.4639905548996458,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4540.0,
+                    "end_ms": 4570.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.5938606847697757,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 4870.0,
+                    "end_ms": 4910.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.42739079102715466,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5160.0,
+                    "end_ms": 5190.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.6033057851239669,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5410.0,
+                    "end_ms": 5440.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.8240850059031877,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 5850.0,
+                    "end_ms": 5890.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.8370720188902007,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6200.0,
+                    "end_ms": 6230.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.4427390791027155,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6440.0,
+                    "end_ms": 6480.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.45690672963400236,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6720.0,
+                    "end_ms": 6750.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.7119244391971665,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 6980.0,
+                    "end_ms": 7000.0,
+                    "duration_ms": 20.0,
+                    "peak_active_fraction": 0.8488783943329398,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7290.0,
+                    "end_ms": 7330.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.5289256198347108,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7570.0,
+                    "end_ms": 7600.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.9374262101534829,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 7850.0,
+                    "end_ms": 7880.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.48288075560802834,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8260.0,
+                    "end_ms": 8300.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.3990554899645809,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8590.0,
+                    "end_ms": 8620.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.5914994096812278,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 8840.0,
+                    "end_ms": 8870.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.7036599763872491,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 9260.0,
+                    "end_ms": 9300.0,
+                    "duration_ms": 40.0,
+                    "peak_active_fraction": 0.5596221959858324,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 9560.0,
+                    "end_ms": 9590.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.6446280991735537,
+                    "short_burst": true
+                  },
+                  {
+                    "start_ms": 9900.0,
+                    "end_ms": 9930.0,
+                    "duration_ms": 30.0,
+                    "peak_active_fraction": 0.5336481700118064,
+                    "short_burst": true
+                  }
+                ],
+                "boundary_excluded_count": 5,
+                "right_censored_events": [],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              }
+            },
+            "frozen_contact_events_detected": 25,
+            "frozen_contact_events_primary": 21,
+            "current_balance": {
+              "allE": {
+                "I_E": 41.284476045694554,
+                "I_I": 58.37801621476576,
+                "abs_net_I": 45.966351209094256,
+                "V": -21.910825512794563,
+                "inhibitory_to_excitatory_ratio": 1.4140428026784622,
+                "mean_signed_net_current": -17.093540169071204,
+                "cancellation_residual": 0.46122016584699393
+              },
+              "patchE": {
+                "I_E": 39.922973813308126,
+                "I_I": 60.82524406678394,
+                "abs_net_I": 41.19659013555534,
+                "V": -22.21091411677419,
+                "inhibitory_to_excitatory_ratio": 1.5235649616489277,
+                "mean_signed_net_current": -20.902270253475812,
+                "cancellation_residual": 0.40890639062803535
+              },
+              "outsideE": {
+                "I_E": 41.32149310314748,
+                "I_I": 58.31148002272456,
+                "abs_net_I": 46.09603334658623,
+                "V": -21.902666585963416,
+                "inhibitory_to_excitatory_ratio": 1.4111658520462065,
+                "mean_signed_net_current": -16.989986919577078,
+                "cancellation_residual": 0.46265841418132203
+              },
+              "allI": {
+                "I_E": 35.67321052430163,
+                "I_I": 45.38602609757392,
+                "abs_net_I": 37.98731576165398,
+                "V": -14.701682375432751,
+                "inhibitory_to_excitatory_ratio": 1.2722719775013138,
+                "mean_signed_net_current": -9.712815573272287,
+                "cancellation_residual": 0.4686364854243187
+              }
+            },
+            "pathway_currents": {
+              "recurrent_E_to_E_mean": 28.43744659423828,
+              "recurrent_E_to_I_mean": 23.655841827392578,
+              "GABA_to_E_mean": 58.378013610839844
+            },
+            "LFP_proxy_min": 8.884255614908026,
+            "LFP_proxy_max": 1069.543223837144,
+            "input_ROI_afferent_mean_per_ms": 1.2454144235081108,
+            "input_ROI_afferent_sd_per_ms": 0.02710080890415732,
+            "input_ROI_zero_rate_fraction": 0.0,
+            "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+            "full_trajectory_sha256": "e7dcd1c139490350f2146d2695d1c457a606c6cc17b4e6424b92ceb0b0aebcc1",
+            "low_rate_by_stated_thresholds": false,
+            "sparse_by_stated_definition": false
+          },
+          "diagnostic_threshold_D": {
+            "E_spikes": 459,
+            "I_spikes": 0,
+            "E_rate_hz": 0.0016875,
+            "I_rate_hz": 0.0,
+            "patch_E_rate_hz": 0.06375442739079103,
+            "patch_I_rate_hz": 0.0,
+            "patch_E_spikes": 459,
+            "patch_I_spikes": 0,
+            "outside_E_rate_hz": 0.0,
+            "fraction_E_ever_active": 0.011375,
+            "mean_E_active_fraction_10ms": 1.6875e-05,
+            "peak_E_active_fraction_10ms": 0.00015625,
+            "no_spikes": false,
+            "native_population_events": {
+              "global_E": {
+                "threshold_distinct_fraction": 0.01,
+                "count": 0,
+                "short_burst_count": 0,
+                "prolonged_count": 0,
+                "events": [],
+                "boundary_excluded_count": 0,
+                "right_censored_events": [],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              },
+              "input_patch_E": {
+                "threshold_distinct_fraction": 0.1,
+                "count": 0,
+                "short_burst_count": 0,
+                "prolonged_count": 0,
+                "events": [],
+                "boundary_excluded_count": 0,
+                "right_censored_events": [],
+                "boundary_rule": "Events touching trajectory end are right-censored and excluded from complete burst counts; retain their observed interval as lower bound."
+              }
+            },
+            "frozen_contact_events_detected": 0,
+            "frozen_contact_events_primary": 0,
+            "current_balance": {
+              "allE": {
+                "I_E": 12.852346065225372,
+                "I_I": 0.0,
+                "abs_net_I": 12.852346065225372,
+                "V": 12.852085909641264,
+                "inhibitory_to_excitatory_ratio": 0.0,
+                "mean_signed_net_current": 12.852346065225372,
+                "cancellation_residual": 1.0
+              },
+              "patchE": {
+                "I_E": 12.239557892102358,
+                "I_I": 0.0,
+                "abs_net_I": 12.239557892102358,
+                "V": 12.229726923171505,
+                "inhibitory_to_excitatory_ratio": 0.0,
+                "mean_signed_net_current": 12.239557892102358,
+                "cancellation_residual": 1.0
+              },
+              "outsideE": {
+                "I_E": 12.869006790761764,
+                "I_I": 0.0,
+                "abs_net_I": 12.869006790761764,
+                "V": 12.869006850210067,
+                "inhibitory_to_excitatory_ratio": 0.0,
+                "mean_signed_net_current": 12.869006790761764,
+                "cancellation_residual": 1.0
+              },
+              "allI": {
+                "I_E": 12.021086009020877,
+                "I_I": 0.0,
+                "abs_net_I": 12.021086009020877,
+                "V": 12.02108827400228,
+                "inhibitory_to_excitatory_ratio": 0.0,
+                "mean_signed_net_current": 12.021086009020877,
+                "cancellation_residual": 1.0
+              }
+            },
+            "pathway_currents": {
+              "recurrent_E_to_E_mean": 0.005316386464983225,
+              "recurrent_E_to_I_mean": 0.003719921922311187,
+              "GABA_to_E_mean": 0.0
+            },
+            "LFP_proxy_min": 8.30171752599948,
+            "LFP_proxy_max": 16.55822841048499,
+            "input_ROI_afferent_mean_per_ms": 1.2454144235081108,
+            "input_ROI_afferent_sd_per_ms": 0.02710080890415732,
+            "input_ROI_zero_rate_fraction": 0.0,
+            "input_rate_sampling": "1 ms read-only samples of actual nonnegative applied rate; not raw Poisson counts",
+            "full_trajectory_sha256": "8968fc9db7e41c96b5f1f7efdd7f7709e5c32e861dcad5da7312ee333d4cde30",
+            "low_rate_by_stated_thresholds": true,
+            "sparse_by_stated_definition": true
+          }
+        },
+        "expectations": {
+          "D_low_rate_sparse": true,
+          "D_low_rate_including_silence": true,
+          "D_completely_silent": false,
+          "D_no_global_population_events": true,
+          "D_no_patch_population_events": true,
+          "E_short_global_bursts": true,
+          "E_short_patch_bursts": true,
+          "E_run_under_stochastic_input_without_kick": true,
+          "noise_necessity_tested": false,
+          "EI_balance_claim": "Measured currents reported; sparse background alone is not evidence of balanced E/I currents.",
+          "author_visual_acceptance": "PENDING_AUTHOR_VISUAL_REVIEW"
+        }
+      }
+    }
   },
-  "source_files_role": "Historical provenance; current package verification and export restoration use only bundled files."
+  "panel_boxes_mm": {
+    "A": [
+      5,
+      154.52,
+      76,
+      70
+    ],
+    "B": [
+      93,
+      160.52,
+      59,
+      59
+    ],
+    "C": [
+      164.43,
+      144.765915178571,
+      151,
+      80.790178571429
+    ],
+    "D": [
+      9,
+      71.05,
+      144,
+      78
+    ],
+    "E": [
+      171,
+      71.05,
+      144,
+      78
+    ],
+    "F": [
+      19,
+      15,
+      53,
+      51
+    ],
+    "G": [
+      95,
+      15,
+      48,
+      51
+    ],
+    "H": [
+      174,
+      15,
+      53,
+      51
+    ],
+    "I": [
+      255,
+      15,
+      51,
+      51
+    ]
+  }
 }

@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "same_418_configuration_pool": true,
+  "scorable": 413,
+  "selected": 83,
+  "frozen_score_files_verified": 413,
+  "same_objective_as_C_G_I": true,
+  "all_G_and_I_J_values_match": true,
+  "maximum_J_reconstruction_error": 0.0,
+  "unchanged_KDE_reproduces_previous_density": true,
+  "core_density_integrals": [
+    0.9999999995375294,
+    0.9999999999735889
+  ],
+  "combined_density_integral": 0.999999999755559,
+  "contour_masses": {
+    "A": 0.9001586834805678,
+    "B": 0.9000706411208712
+  },
+  "new_ground_peaks_mm": [
+    [
+      3.375,
+      12.0625
+    ],
+    [
+      16.4375,
+      5.4375
+    ]
+  ],
+  "old_ground_peaks_mm": [
+    [
+      3.3125,
+      12.0625
+    ],
+    [
+      16.4375,
+      5.4375
+    ]
+  ],
+  "retained": 66,
+  "replaced": 17,
+  "selection_cutoff_J": 1.5545141416636123,
+  "source_producers": {
+    "plot_fig4_core_position_search_context.py": "6e72e0434494a82115584ce92643b50515be0cbe652571aefcb8cda2bef73218",
+    "build_fig4_joint_core_density.py": "6c520b0a5290df178b7686392fbfb4e488a259714968e89a033eee8948284ccc"
+  }
+}

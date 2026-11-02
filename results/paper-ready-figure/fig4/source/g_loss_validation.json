@@ -1,0 +1,1767 @@
+{
+  "status": "PASS",
+  "profile_count": 194,
+  "all_components_recomputed": true,
+  "formula": "J = (L_r + L_o + L_p) / 3",
+  "component_definition": "L_g = D_off,g / s_g; original fixed feature map, patient target and CAL scale",
+  "groups": [
+    "rank_pattern",
+    "local_and_interrod_timing",
+    "participation"
+  ],
+  "objective_sha256": "7dfc4192163e94abe3214a5e0b6cbdc1c90463b24555061dcecd3a41e822b464",
+  "identical_objective_all_194_profiles": true,
+  "source_selection": "Same 194 visible workpoints, stages 6-16",
+  "statistical_unit": "One native-SNN trajectory per workpoint; selected primary events after 1.5-s burnin",
+  "stage_interpretation": "Historical search stages, not independent optimization repeats or a monotone learning curve. Stages 13-16 also optimized J_joint; this panel shows only their common three-component J.",
+  "no_new_simulations": true,
+  "maximum_component_error": 1.554312234475219e-14,
+  "records": [
+    {
+      "candidate": "dense_axis0_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "96ba9612e3ab5c79f39bcd5b816e8f1e0cde05f679a2f68a9e026206cd069979",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_00.json",
+      "score_sha256": "2dbbc3c79e037625f2ea21097dc3e4ce8fea854bf220e6eaab440b7fb1b9a657",
+      "maximum_component_error": 7.549516567451064e-15
+    },
+    {
+      "candidate": "dense_axis0_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "50f4de8d20e74752414795b9eb4e3823037eff2677adba173992362cf1f1af2d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_01.json",
+      "score_sha256": "2614e4117d8843f103749455500e56ac90c3270cc19337fb7caa4a6df0428948",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "dense_axis0_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d596af807477d10d6f3527e6506d83af05f545c6efa34b6a3eead25c60f396ae",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_02.json",
+      "score_sha256": "c035a7933e237e98a6117df191c372da8f185950b95b62e968cb8f781328bde6",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "dense_axis0_03",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "db88d6a141a0b32e08617bb0c8db0eff5bd529ffdd776f1a141b18bf33ab947a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_03.json",
+      "score_sha256": "92235a28a66d25ae0abf535b4b65f0ede41429050675bee3406284231cf27fc5",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "dense_axis0_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "cf5682492745d19f064d4e28795cda1a47bbd24219e8dc4d273ff643dd802344",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_04.json",
+      "score_sha256": "ce82315a7adaefd7c5f6f3f05cbc3f9d07f17129b053d293f0b18880716fd8a9",
+      "maximum_component_error": 6.661338147750939e-15
+    },
+    {
+      "candidate": "dense_axis0_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "593b7307c137f8d127a3b8c1550c08cccabe71186d9dd8272f83d1cb3a34f408",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_05.json",
+      "score_sha256": "8b0251ae74565603af47740c729fd4839076dd4b58ac882b96f7b9c6e30583ab",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "dense_axis0_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c856451cca75b4d5b23bd6776a6d92b5b81dd0166664774c97977432e97dcd8e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_07.json",
+      "score_sha256": "afd1a4f01ab43f39683d76cbf9476988b27531f8cbb0938c2f12264d29716416",
+      "maximum_component_error": 6.661338147750939e-15
+    },
+    {
+      "candidate": "dense_axis0_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "3b3750cc487dacea9dd450cf8c5b6ddfd47b35313082043ece4fb35939bfef4b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_08.json",
+      "score_sha256": "8f6e0951e293a995234e7db4d7a94a36a3b67c8d4910ac78215ed0f634d899e4",
+      "maximum_component_error": 1.1102230246251565e-15
+    },
+    {
+      "candidate": "dense_axis0_09",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_09/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1fcec3487cbf52a42a5780a73ed4eb6563578f658ed8fcab75aae08fa52ad461",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_09.json",
+      "score_sha256": "66b4f3cdf29ad0595debbab37f89b38f31e0c3417f8aaf8904061d7b391ed964",
+      "maximum_component_error": 9.325873406851315e-15
+    },
+    {
+      "candidate": "dense_axis0_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "8bc0e4cc4368593d2dccd21a26f7f4d6b087046c71054b883a35da53cc9ae50c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_10.json",
+      "score_sha256": "fb1adb354f8cf22bad0ae84cd068df06d38317368fc4d23db9a5fb0cdd2b6e18",
+      "maximum_component_error": 7.771561172376096e-15
+    },
+    {
+      "candidate": "dense_axis0_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e746071709b755580382909ec8bebc94afedf0c0ed263d3a2826eda68eac66cd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_11.json",
+      "score_sha256": "77015a98c6c6cf8fc4a7c1f6d5510275eae85ed312948aaddafd5e4b29104731",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "dense_axis0_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis0_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "07ca55f0b37e54342dea999e2125882ec938962dfeacff58efbce9fc04187a57",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis0_12.json",
+      "score_sha256": "249fe61fc89156e87ce336afcb791168148f0ff362835feb18508be8a5c8a0ae",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "dense_axis1_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "7928cb54b19d44d82d8d11b0ef724d9f62c352323b608beb6dbd66e08b68b855",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_00.json",
+      "score_sha256": "20ef630d981faab48b41bf704aee8b714803a05abd2b2378a98b5b1b2e60db25",
+      "maximum_component_error": 6.439293542825908e-15
+    },
+    {
+      "candidate": "dense_axis1_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "92cc1d8468e795b06ada23fc62a59af946f9984db5a0860f2104e1f11f417a16",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_01.json",
+      "score_sha256": "b82e80b06db45a763d6c4f6a54feace7ef3ae47e90b8aa738b041acc1d7bb3a0",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "dense_axis1_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "67742ef17fbf0b9425c807e57a467e6c42a4f140bc9f8a765467005fb8d9ae89",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_02.json",
+      "score_sha256": "578b2db4ff19263745ce2de12b34e0cad7a989cad562b9753120a2ff513fed11",
+      "maximum_component_error": 8.881784197001252e-15
+    },
+    {
+      "candidate": "dense_axis1_03",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "87037dbf0fb1085d9389f5cda7d829786c758a9e24f699d4f475da8acde7617d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_03.json",
+      "score_sha256": "b1a19f47eecd87f99ed38fc4c66bd42ef0e9090045d24711ac408879bf4aaf6f",
+      "maximum_component_error": 7.327471962526033e-15
+    },
+    {
+      "candidate": "dense_axis1_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "69fdee8dae7d46da5caf28b71336218fe3a1184355de379e980591b12b71c477",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_04.json",
+      "score_sha256": "3fb80caafbe62eb62d5878da9a59121222b5afaa9e5d977047d6b21995aa7fd0",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "dense_axis1_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6466670721f3f3d0bf360d829c52d62db93311c916264b345f922807821f6078",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_05.json",
+      "score_sha256": "fe6d3df62e74b9f3fce333729ef5395121e7d423f4336f72212a3ed49e7ab537",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "dense_axis1_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "44e8da11da351ba31c0865a28b89021e647f8bff25cdc6dbf4f350f6bc0d024e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_07.json",
+      "score_sha256": "2a85fb92268ba1d4d57426d478f400e9fc72bab62d4315a43a2e59cffd280615",
+      "maximum_component_error": 6.661338147750939e-15
+    },
+    {
+      "candidate": "dense_axis1_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "21fe832f7bc59b74850b6c15a00cad4e4a88533e1b6473f190b661c9f44347ab",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_08.json",
+      "score_sha256": "0a3593f5a41f748cd0c1ebf69c539a99b20757a6c238b47f9a331a995a65dc65",
+      "maximum_component_error": 2.220446049250313e-15
+    },
+    {
+      "candidate": "dense_axis1_09",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_09/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a128c16710d3b6aa69846355ced9329885a001e57740992b5853bf1cc66f6810",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_09.json",
+      "score_sha256": "4b56c0a4462e582f189fbe5247a1fcaf82ffcaa480e05f2689e91488e38d6be9",
+      "maximum_component_error": 5.995204332975845e-15
+    },
+    {
+      "candidate": "dense_axis1_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e58ef3e204aad2333cd4d083abc54b60f0643b1eb1d1c2e54e016d1f740940cd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_10.json",
+      "score_sha256": "9b51c4979aca22df7ad5ca93f301afa328c442347517cca328f8faad0396d9a8",
+      "maximum_component_error": 7.549516567451064e-15
+    },
+    {
+      "candidate": "dense_axis1_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "739296ac1e23bc20527c401234d002785f827b3a11d472b182c94895cd09a8ab",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_11.json",
+      "score_sha256": "5bd2793cd9048769ddf7d24862a1508c9d0179f7a7dff6fe2b55757aa28999f8",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "dense_axis1_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis1_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "230cf72b3cc8b5fb6d76127a1b1f867cb8d12234b43533ec35c40fdd7d8e38c5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis1_12.json",
+      "score_sha256": "091e0171a8f9d6720b1a6a75ac5f966586593ddfc1b50fc2a4704fa433cc63b8",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "dense_axis2_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "3019b170932c66cde33220c282408faa6fe046903f57d0b28fc9459d9b465c28",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_00.json",
+      "score_sha256": "f1e0b3b52fa19bbab1022c51cf2be32b7a7950f7df83fb92f014fe17ee0a16a8",
+      "maximum_component_error": 1.9984014443252818e-15
+    },
+    {
+      "candidate": "dense_axis2_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "3a5edd64a9997b7637aceb91abd771bffdd19a72c24848d31d346b4c077a053d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_01.json",
+      "score_sha256": "0f4703515497bf0aa821d028ca8cc307eae396bbc1039681b839b79f1ebed425",
+      "maximum_component_error": 2.4424906541753444e-15
+    },
+    {
+      "candidate": "dense_axis2_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0890bc7a028c414500614dc4c4bf103369a3a9384d472493e7eb25b97aab1fc4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_02.json",
+      "score_sha256": "ce27381adc57db1196fb604b90f3aabae50dccc20dc8857cbbe109a800b02d53",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "dense_axis2_03",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "13629634ee7db7dad788ba69ab8c2c8a15dde1d8c38a1e5bc0e1bd33921f2d89",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_03.json",
+      "score_sha256": "3a812fdc83f6c3a3f775941254c6d91a1202dfa796f86bb158459d25f8ecb776",
+      "maximum_component_error": 2.220446049250313e-15
+    },
+    {
+      "candidate": "dense_axis2_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1e6090b97138e150164b869d892ce9ce381815e1a26da7a29bdd1a6914ac156a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_04.json",
+      "score_sha256": "384f580d7b16a27fbfbef4dc1b486ca68e1a8f964932906ba56ae892824a480d",
+      "maximum_component_error": 9.325873406851315e-15
+    },
+    {
+      "candidate": "dense_axis2_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d4ec9904edd8a5aba78b1e9684b33c29630870ac2da4f37cb3fec3b8d400a4bf",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_05.json",
+      "score_sha256": "04e8731f9d916fbc51c7167a25ca69c9b955754232ebabaff8d417cb21a8b7b5",
+      "maximum_component_error": 7.771561172376096e-15
+    },
+    {
+      "candidate": "dense_axis2_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "04ebb3d9bbb18ebc7d7b7cfbbaf8ec084946661235fe1410a6005caba8858aeb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_07.json",
+      "score_sha256": "25a74b21f5d83355fe6bdcf1919f317d41ff94aa3b29ee010dbcd1025a326359",
+      "maximum_component_error": 8.215650382226158e-15
+    },
+    {
+      "candidate": "dense_axis2_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "568c2aad9af84fedf51fd91aa8cb83e5eb30f34b378ff6d2d8c1aa589f80deec",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_08.json",
+      "score_sha256": "130215f11bf57641a7a156bdc04222693e0299958cf52c1399f3181ec5ba3c56",
+      "maximum_component_error": 2.220446049250313e-15
+    },
+    {
+      "candidate": "dense_axis2_09",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_09/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9037b1a0cdc6ff9a1003d9b3f2dc551908b41db414204baa243011fa9e3810bd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_09.json",
+      "score_sha256": "55b4c58ef5462d88065b37f4e85cacf7ac97d60567dd36dae3f104c73def2e7f",
+      "maximum_component_error": 4.884981308350689e-15
+    },
+    {
+      "candidate": "dense_axis2_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "ca3e032cb656897ccb1cdb96bc96d6b22066a5828cf684584721757a634333d9",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_10.json",
+      "score_sha256": "0eb901821f79e667d0940ec10bada722ac5a3ad871550a2b4e7d477531ccd2f5",
+      "maximum_component_error": 7.771561172376096e-15
+    },
+    {
+      "candidate": "dense_axis2_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "035c46c2bb4c1fb4f2b7bd02f9ea9d074291b888c74b0026e64b5bbefaea48a7",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_11.json",
+      "score_sha256": "7edbef378671adf91dcbc7b8c5dde78765f9ac973fcaacc037a8f542fcd3ffa1",
+      "maximum_component_error": 9.325873406851315e-15
+    },
+    {
+      "candidate": "dense_axis2_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis2_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "fb60f9f99713af69fa4c72ef04d8e0b17af8922efee18f61d7040d9db215e59c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis2_12.json",
+      "score_sha256": "94b8792f258d862370446fac1ee6bc5e84bd90b40a2d6bad6ac864a4bd87c3df",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "dense_axis3_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5fdb207adf992ff49e5481eaf58ba7b6ee96f33f484089683794d66cac291bd6",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_00.json",
+      "score_sha256": "f85cdb34b84e0f35a08844d01faa0327e7afd99fc6db54a94673b400a2ee67cc",
+      "maximum_component_error": 9.769962616701378e-15
+    },
+    {
+      "candidate": "dense_axis3_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6006a78d97f65482b6803096d8d8bdf1832c26b015298596816e10c17af8a2de",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_01.json",
+      "score_sha256": "56b87dfa551ba575ce4ace35738d8bc1d2068074b31eca935f3bbaac19b1ee1f",
+      "maximum_component_error": 6.8833827526759706e-15
+    },
+    {
+      "candidate": "dense_axis3_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e531d16efe46cbf338c6f90a8bb9caa4d89f990be75d6ffda65e3628e99adc57",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_02.json",
+      "score_sha256": "ef504bbdcfd545efe1e50c093a6a8beaae9ba89a2a7933727b7933b55e2ef713",
+      "maximum_component_error": 9.103828801926284e-15
+    },
+    {
+      "candidate": "dense_axis3_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e84d0ce0d58c90420967fc521dd39c21116011398cf65f71379752ea8fefdee5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_04.json",
+      "score_sha256": "d67345cc5af144df880d4bf9464dde85b5ae8842a7a9bfaf53056242bab9a002",
+      "maximum_component_error": 9.769962616701378e-15
+    },
+    {
+      "candidate": "dense_axis3_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1abb5c269286e3c2e1d1113a747a4c30c23bd68234a07b90a03fd3b7cc992dfc",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_05.json",
+      "score_sha256": "ad8b132cf9b55e608f1c83628072df64f6de87fd7ffca4dca4b1239c644e7f03",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "dense_axis3_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "8e783db7d4968a3707be284f79d521d475c7dd19d7df1bb669aa5634739ebbab",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_07.json",
+      "score_sha256": "da0c0a98dc76fbd9c5d6d16414d6b8d629a22f47e23a2d7d66e01ff7d9079467",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "dense_axis3_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5d1a7ccb027abdcdd942e70fc3df318b51441990eb34076a52f988d94a761f47",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_08.json",
+      "score_sha256": "ee76554d837200a73b0d1f03cec359ff98349f5c0cac6d46c9558ca33d1a8873",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "dense_axis3_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "cbe8c78b4b979f008b0165bd4a9ff58b05c5c96212d984a7637ebb02f1e3d7bd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_10.json",
+      "score_sha256": "3646c3a6d069d623f5f2113ca1db479822d1e9fd9416db66cea145080c892933",
+      "maximum_component_error": 1.176836406102666e-14
+    },
+    {
+      "candidate": "dense_axis3_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a227f0ea9d5fdc0a4e58a24705363d6e01a3ed1867ec757bb6cc7ad42812803b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_11.json",
+      "score_sha256": "553d506df388858cfe087f1bf76f19de6329f2d71a8bafc67118dd870178f3cf",
+      "maximum_component_error": 8.43769498715119e-15
+    },
+    {
+      "candidate": "dense_axis3_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis3_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "38a3bde86e8e317823d865a1cee7ec4cdc9ebb6c216f16d6f8496f5639ab3b20",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis3_12.json",
+      "score_sha256": "3b10bff54781893ebe82efc2829d051e05ad09fe7593083f07f6f94caaeae3fd",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "dense_axis4_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0e616c5920e2939b45de72825b880c8c1e25e287eef135af1f3461051185f453",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_00.json",
+      "score_sha256": "2eadecbff457689b16555b9d60f61f97ad304b2865a223a6734dfcebdb30b9b1",
+      "maximum_component_error": 5.995204332975845e-15
+    },
+    {
+      "candidate": "dense_axis4_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "ce12278607f6bf44b933b20b1d6587c135930cb7b07b4ef6c5ab8591a0e1d228",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_01.json",
+      "score_sha256": "d1e972814723ada6958fb0ae4304a8f4e262925449fad170f005623d7e18e5da",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "dense_axis4_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1a7ab399aebe857b37a0179c0dfe1dcf690b3b77cafe65bb08e54da65a9bccb0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_02.json",
+      "score_sha256": "a1bdbece1ab404a01aed85bcc03cebb6160192d1c20e311adf0b7d9a750d38be",
+      "maximum_component_error": 6.217248937900877e-15
+    },
+    {
+      "candidate": "dense_axis4_03",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2a1171b97d1cfe73fd5018b3d48148b2798d319c5a87e225f7bf6d2e950663ee",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_03.json",
+      "score_sha256": "60e0cc0b26cee15876c31ec55e12826ce2f2a1351ef56f7057f7cd56332fa833",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "dense_axis4_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c350b61c4cf6d801d13bf3d475cee56bab68b47a596039c29eb17409950559b4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_04.json",
+      "score_sha256": "99aa73ed451e0e1b0d460c006635f167700062c88c0a3c50dad454b9ac7d6d46",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "dense_axis4_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "fa2b627309acb53b7de9478d8c5cfaa9977fb5ceaa74a933fb25e52ea30e3e4b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_05.json",
+      "score_sha256": "5f876189ece7102388260519b7a15d01173d2843836cf89630686bcf4fe98ab3",
+      "maximum_component_error": 6.439293542825908e-15
+    },
+    {
+      "candidate": "dense_axis4_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e6c70063de0ff0514c64ca35a1512358834215b160c8389db921a3122ba589bd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_07.json",
+      "score_sha256": "e7fd53b83e5a879d24d447afffdc5329d001dbd9c73979aff794ece9fa969148",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "dense_axis4_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "03d6f1900321620f85cc699765598875cc2147fa35459d06a8e9962672056ebe",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_08.json",
+      "score_sha256": "7201730ac023676c06999def98f8a55a7d62f8118cc51c9475fd861024f0a0c5",
+      "maximum_component_error": 8.881784197001252e-16
+    },
+    {
+      "candidate": "dense_axis4_09",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_09/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "51aa6c19ce3ec9d8b2687ea0a00b319a3adcc95f4ff3fa4bb8b850a3998f620e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_09.json",
+      "score_sha256": "7cb268bdd70ec985bac88361f90ec19827e757cdbcfbe58300fce41d26460945",
+      "maximum_component_error": 9.769962616701378e-15
+    },
+    {
+      "candidate": "dense_axis4_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "309843cf8f6e3c62dfb259beaa122e5014d557f255406dfe20edbc7b051abb77",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_10.json",
+      "score_sha256": "c3d291f00f2f884dc4f5ec12492dfdbed208c81d9f4d6fc81edfdf5a991ee9ec",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "dense_axis4_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "04584b48dc42c7c438e88406f9ee787f7d647588e508bdd1cd059db7204cac1c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_11.json",
+      "score_sha256": "19b0947ea4309814eee5349957d63f9a80006425828deb3832267c196fd3ccaa",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "dense_axis4_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis4_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6c85fc75144a7d980b2f08841c4e2af20094f56bd67413d191d3480008b0eb09",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis4_12.json",
+      "score_sha256": "dfc0e9a6a83876c9be708e6c27f17a13a715566e35fb57717dfb67382b9574ee",
+      "maximum_component_error": 1.021405182655144e-14
+    },
+    {
+      "candidate": "dense_axis5_00",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6c829cb2bd8278b2d423cfdbeabf711e63f3909962d8b857afb990514365141e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_00.json",
+      "score_sha256": "d9435611fa5cb5a9fd2faa2a43f7433471d8a25db62cfe2427de9a036936ea05",
+      "maximum_component_error": 8.43769498715119e-15
+    },
+    {
+      "candidate": "dense_axis5_01",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "18b0de7da924b2122feeebc3ab953ccb9ad0f1a6040f0629bb81f42daaf381cb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_01.json",
+      "score_sha256": "5cedea5de0d05ef2c05a00b3d86a145a890d75e5ea4a0b299dc4c7bf11fdd146",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "dense_axis5_02",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d79563a86d4a02522eda084aef81a0e1ca3f39156a8367cc79107fd26fcacde0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_02.json",
+      "score_sha256": "ff0e2edc526dfe1fb60d48addcaf21bdd212578659533aa2ecdf7f94070c4fbc",
+      "maximum_component_error": 1.199040866595169e-14
+    },
+    {
+      "candidate": "dense_axis5_03",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6f1fdc4e652ffefd0eea5740d672ceac79d9f0e7d5ce2690c51571cadbef741f",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_03.json",
+      "score_sha256": "a216210ba6a908fff168e2934aae13bce8c96ec078c671d5cb3166740b823e64",
+      "maximum_component_error": 9.325873406851315e-15
+    },
+    {
+      "candidate": "dense_axis5_04",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d4f4ae7afd5bdbda43afbe9bfc01584e235d7efdfff29ec85e0519b489f5ecc3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_04.json",
+      "score_sha256": "81d8d08d11e9f206c407cc00b0751d7e4ee4f6aa9085e7660de1e087deae251c",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "dense_axis5_05",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f823273a85860183ccc61c472fca6772bb1d05357c6337c6570a4b5865201068",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_05.json",
+      "score_sha256": "5ac092e8da277e35b1ec7cc54feb02213a71c5419b426114e3a963c858df37a7",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "dense_axis5_07",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "21f1b87ee78ee1ed98e32e0f1e33e1db00bf9a708024230cd77802aeccd4179a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_07.json",
+      "score_sha256": "61168cdeb68e2b1d534c7ed213a6c03db408b5f5f55a4e9b6307b357c851fe23",
+      "maximum_component_error": 2.6645352591003757e-15
+    },
+    {
+      "candidate": "dense_axis5_08",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2d4b03d1622d75b54f127a950f8ca1c63f6b5b6aa4dd3c6412075e5c7e2cd63e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_08.json",
+      "score_sha256": "a8b7b0c12ba76216d316a90f7f44fee8a1f28ceb0bb474e4ac23b24cb6f289d9",
+      "maximum_component_error": 4.884981308350689e-15
+    },
+    {
+      "candidate": "dense_axis5_09",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_09/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "11f8109ac5f0dfd0f4dd5e80cdb76ce93bc09740a095e70ab8461393ff36ba7b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_09.json",
+      "score_sha256": "32fad62e194002ef6a6537ab737ca5a859b7ad2a9eab324946c167e93fcf9b44",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "dense_axis5_10",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "899c3f2d988ac9743d02e32fa8ea74f7a8e14b88550af06651f4e67708c7b006",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_10.json",
+      "score_sha256": "c3f7ca46e56bed48dc16cede542a71ea9808ab2202f203a516b1162bf1fbd0d7",
+      "maximum_component_error": 8.215650382226158e-15
+    },
+    {
+      "candidate": "dense_axis5_11",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9f6c904220e0dc40708696ae9d0151d986d86aee18a4623246c29e139c834ae0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_11.json",
+      "score_sha256": "3752663c624b64ff2762f8ae287eac25f07263cebd6a5cf15cd576fa9c44641b",
+      "maximum_component_error": 8.43769498715119e-15
+    },
+    {
+      "candidate": "dense_axis5_12",
+      "stage": 6,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/dense_axis5_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6a378b26affe88b0fcac501b4023250542c09d36c256cf6717274297e0bf77a4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/dense_axis5_12.json",
+      "score_sha256": "927553496032ac8badb5cfb1c2073652eba4a21ea0653e9cfdb91d9404cdfb76",
+      "maximum_component_error": 4.884981308350689e-15
+    },
+    {
+      "candidate": "lf_bo01_01",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "3ff34c0164688baebee76be5d5f0953143f8cb2be9f3a5c99f6e20826011d4ac",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_01.json",
+      "score_sha256": "1a5ac17dd1e4c873934e8cf8fcc67377a6e2f962dce52ab2840e76b684e6d67e",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "lf_bo01_02",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "eb89c58c203fbf99d08270b1e38028e423b981af4ac6534cda66e4fcedbb8b2c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_02.json",
+      "score_sha256": "f912a6518c1c7f931355b3385a97bb1ad5fca4d7a6c37da24beba878906030e4",
+      "maximum_component_error": 1.0658141036401503e-14
+    },
+    {
+      "candidate": "lf_bo01_03",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "99004e9e69246f6644eefd99e0943710601800ac63ebc9743a6849b6f0fb93ef",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_03.json",
+      "score_sha256": "61a42582a93e347d2e6624e72a07f99750944c8d29b044d74904516da5d0fe3a",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "lf_bo01_04",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "53dc6b7314cbc4946167ab1e16c1aefb7af42b221120cf27b8b8ae24b4e69ed3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_04.json",
+      "score_sha256": "e207ceb79efa5fd1ddadce1dd5592a3509f74f9324a7b947f6bad572e86445c8",
+      "maximum_component_error": 7.105427357601002e-15
+    },
+    {
+      "candidate": "lf_bo01_05",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "337ca719611287e5a433237ac3eb72819b4d092dc6db5da06d835029cbb5fa5b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_05.json",
+      "score_sha256": "67d274eaf3f0fc81bbd10a689b4d191ba867dcdc31d7d793c9ab3769853ba45d",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "lf_bo01_06",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "33a03177dd73d963eda193953f313fd90ad428d344bcea3969adde84dcda62ec",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_06.json",
+      "score_sha256": "f92832304dc281205538051498f9df0dddd304e599009028cefe2d7c7acfe652",
+      "maximum_component_error": 6.8833827526759706e-15
+    },
+    {
+      "candidate": "lf_bo01_07",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "178a20285f1e177ef7192694d57d2159050cd345deeda298f84321286d99bf89",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_07.json",
+      "score_sha256": "797c2d4f86ddbaa33fad762bc86442299b2c70c1dddf5d525256f3a80b8673fd",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "lf_bo01_08",
+      "stage": 7,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo01_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6fdfccc9e870878b3a01273ec605485a5f794460c57536ff2ec51950626f921c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo01_08.json",
+      "score_sha256": "bde313bc7fa935ed33ef5d40127d5970b923c9165eb959a2be42583bd1f4908d",
+      "maximum_component_error": 1.7763568394002505e-15
+    },
+    {
+      "candidate": "lf_bo02_01",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "8abf33d107318b951edb6aeaa1d8b932cdcee2c2b64fc4fa190dfd45139b1c4c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_01.json",
+      "score_sha256": "3394ad485f5f81f96e523b793cf117814217bb8775e9fde2aaf4e2ca4bf28a60",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "lf_bo02_02",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "62075269d0672668d854ded9c2be97b275b421f03aa7050cde21d031fe5cc4d6",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_02.json",
+      "score_sha256": "724f45477ab68989be6c6aa9491de5534501893a13a7791c8ff50745cb14859f",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "lf_bo02_03",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "b45064e0626d9f391a2bb0debaf4094891338cb6ba06249a9a00493eced6d67e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_03.json",
+      "score_sha256": "aedc1ee2fa46e30bc4ddfe7290c46f6ff3724c0302f0d4e18ea54b01c78fdfbd",
+      "maximum_component_error": 8.659739592076221e-15
+    },
+    {
+      "candidate": "lf_bo02_04",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f160e084addade135d8d990e3d43de9d564a83f4bc7d4672df8333221791b0c4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_04.json",
+      "score_sha256": "d1e7fa0d511084deb8e134df14eb3805e85b7656e4d32cc71f5ae56eb3b0b37e",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "lf_bo02_05",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "89913f7a715b1790c9f394147f0dc97486d27d4cf71038258a973bbf5753c129",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_05.json",
+      "score_sha256": "328c07ece5252ccae81b6bfe989282d166a0b802b01438fc1084be1c1f7c25fb",
+      "maximum_component_error": 5.995204332975845e-15
+    },
+    {
+      "candidate": "lf_bo02_06",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "4c93bd3b4442989bc412e0edace2add194bfe4ea3f408f7378b6ee04b4fa1584",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_06.json",
+      "score_sha256": "ab50bdbf1ec5a20192169b2709f6a16f79ce80d5f537b4663efd3611f9510b8d",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "lf_bo02_07",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e2df010bb0ede44eadacadf5c54d11663a4afbb6cf97ff9de9b6c8dbf22231e3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_07.json",
+      "score_sha256": "5043d310683cfbb3933727ab163a8808a672e1fe0b9f8e1a1f2228dec4fb78da",
+      "maximum_component_error": 6.217248937900877e-15
+    },
+    {
+      "candidate": "lf_bo02_08",
+      "stage": 8,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo02_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "ecdcc1b971174e151696fd38846545b4a92466f91ef1a67ede713890c99aa860",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo02_08.json",
+      "score_sha256": "f1c21c5de0fcf36dca7db31cf849a53297a0dd7d502a24afb04d04326fac0602",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "lf_bo03_01",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "15e41ec1de9696d520295c348bf4ae56b1bb187a5478fd7dcaa6e231d1652271",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_01.json",
+      "score_sha256": "86406c8a98be9a60c526a9fccfe5ceb306f470fdb67ad52fc0fa852e3f457260",
+      "maximum_component_error": 7.105427357601002e-15
+    },
+    {
+      "candidate": "lf_bo03_02",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "b38875c7b2c3d4a773760660efa303f57c8902af8f52f9dfe0c3b5f3f6c1b8fb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_02.json",
+      "score_sha256": "1ee36f8a650a335a7c44e51cb78c346d7db46a82d96313414bf43f60b8c153a5",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "lf_bo03_03",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "95b79cbff5124dbf94e4e153f33c35df780901c6b5ce83c1117ee261cd7a5fe4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_03.json",
+      "score_sha256": "4c0c9fb0be2f3289666db65532a73b4197a53d9618d58f13e57d270da09e566e",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "lf_bo03_04",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "55a4b90d167c9d30f56e6f9291ef0d1603dafc5af9193772a6a0cd039d8eb5a0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_04.json",
+      "score_sha256": "03b7bda3307114c23c696ad26f90eaa18bfd6718eec534f0075057b514fa28ca",
+      "maximum_component_error": 1.5543122344752192e-15
+    },
+    {
+      "candidate": "lf_bo03_05",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "02259943fe00e3ba69193c4bd1f99cbfc91573ebc703475e29310d07d605b7eb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_05.json",
+      "score_sha256": "8652376f77829f4be25b1407a899fe678039589c0c034f3a36be93727f6509d2",
+      "maximum_component_error": 2.6645352591003757e-15
+    },
+    {
+      "candidate": "lf_bo03_06",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c744ce9b01274c9614e3bf9ad427b842852e46f40e1393c15353839e14e652db",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_06.json",
+      "score_sha256": "098eb666109e8588a0775dae2f2c84e631b44fab3afc87647883d2d9ffe99d8b",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "lf_bo03_07",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "fc74a2e3e9bbef7770a303a3b9054fe7a5606fb79e55d4315460a42dc217d808",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_07.json",
+      "score_sha256": "3e558fb803ac638c56c6b6cdc8f3c41a00ad96ae0b0206d2c159fbcae143b2ab",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "lf_bo03_08",
+      "stage": 9,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo03_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "30b46e5763a2bd2ab0750c702eded81f9c5ecec245fe09b859a380fff353d942",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo03_08.json",
+      "score_sha256": "56845fe1a18ef6d7af7a4f9867e537433b731a1c31eba0995b00ad0df1c4c1da",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "lf_bo04_01",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "30a4cce0f9a26981bebb3ad76cdbe145a71ee2564ecc67b265f5ad58d64924b5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_01.json",
+      "score_sha256": "35d94edfea130abfe805c4ca48cb30c139300f94281b4f4e59342716ef9bbe78",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "lf_bo04_02",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2d7e462b711b99848e722a486da31a20ef72072e15935c4a67cedd10c320d216",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_02.json",
+      "score_sha256": "f377887f0e0e600892c19934083684e1f42144fe205463f49d27a7cccce35351",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "lf_bo04_03",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "aec683d9f34ffc8258ca97f5b1ba227df5a4702424d597f761717c67e76accf2",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_03.json",
+      "score_sha256": "d43e21e6cb06d6090ca988a50c1bfb1976d394d017d41558abe0e99622ce4549",
+      "maximum_component_error": 4.884981308350689e-15
+    },
+    {
+      "candidate": "lf_bo04_04",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "914c84940b0bd22a5c44d91bc39930a7251332995f3c96995502d098c2633351",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_04.json",
+      "score_sha256": "d1498745dedf829de35ce2e4718e2cb8e8ab8ad7a2e51f5accb9cf7d69e00d40",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "lf_bo04_05",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "813cf0a09c7fed735eec6476ec128713de094883386334840c77bdf04c174b12",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_05.json",
+      "score_sha256": "335727ccf379d0f82793d4e9705c7ccb499f9e2768fe0231554a15ab2206ee37",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "lf_bo04_06",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "39b9743b81cef62e40a585abdc7523bd8ed8e432a7f92fbf47f67bce19044024",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_06.json",
+      "score_sha256": "a7e1e6ceb8bfe004e1a677538f32368d8b0bb64daa7c49e6653e6eaf680059f8",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "lf_bo04_07",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f76fa12fbe4e0df2a0d37193e36acd434ec26e6b26a2c21d736290a294a77a2c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_07.json",
+      "score_sha256": "b8d50cc388159a6ad41e4457af6aa1c85757978242c88f3eb77e147a82fd87d1",
+      "maximum_component_error": 1.7763568394002505e-15
+    },
+    {
+      "candidate": "lf_bo04_08",
+      "stage": 10,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/search/units/lf_bo04_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e4f3e3a4b7ff95148ecc0f8185db3e4704ab4c9ae3184db5f4411d48fdf00b26",
+      "score_source": "/data/hfosp/topic4_sef_hfo/label_free_dense_parameter_search_20260915/scores/lf_bo04_08.json",
+      "score_sha256": "768402f7ed7414cd17bd32f296ea8f9ea54c6d8605dcec198b5f1ace83a6ebca",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "xy_left_00",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5c9400dce260eb3b553aae9f62cb5ac1d82fd181132591513504400fe56b82f8",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_00.json",
+      "score_sha256": "76f8eb83b0bc84246010b7bcbc6895364ef7ce3e317490c748bba70a441d0571",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "xy_left_01",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1ac887775e8ffe9243909549d34e77c2374c6e4529a2106b9d542388e50dcb2d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_01.json",
+      "score_sha256": "59eb8c9d2aa9386464a1899770675f6224db2b0955b727d74bf52b44b488c2d5",
+      "maximum_component_error": 8.43769498715119e-15
+    },
+    {
+      "candidate": "xy_left_02",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "ce7593a8e3b2a30d9158ad6ea06b82d634ceccde8dadd896c8a4cc7c65e6ba2b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_02.json",
+      "score_sha256": "96c0b5819a04fb0c1240be3b5c830ed4e14d9d3e2ee62d7912650272f88a0949",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "xy_left_03",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d0920d7997eec2b4edc8c1e115334563a2a386d7e7d1c8d18c05401e2f7531f9",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_03.json",
+      "score_sha256": "04317a9c28f6f3bfeef604ee228f3ffcc3ec136a422f439d6f9894cc176a5cfa",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "xy_left_04",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "df5cfc9a2ce0fead841f7dcba847db6256adc711f209b1c91e3aa08b87eac1bc",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_04.json",
+      "score_sha256": "69976e94c88c19247bd48372b3b81c50a29caec92b0882694bce1ed559fedae4",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "xy_left_10",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "eee22f3fb37cf9c95ab6349e9d93392c21fb6585a20f6d0383470fc3339d6154",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_10.json",
+      "score_sha256": "a277fa865b03e7309bd86545199313c55bafa02f032d42751db3e0f62f6ea036",
+      "maximum_component_error": 7.327471962526033e-15
+    },
+    {
+      "candidate": "xy_left_11",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "112c56aa6b39147a309fc88826668dfc73ba1fc41df17f059171f9e64d56ded7",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_11.json",
+      "score_sha256": "79037b80f224d9f439f0d1e9301c9777dea98821ac9f100003dae39fbf48495d",
+      "maximum_component_error": 4.440892098500626e-15
+    },
+    {
+      "candidate": "xy_left_12",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_12/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "6edcb3d820a6a15ced2e30872e6a24de20d8dbc90cf3d96444d743d21da1531a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_12.json",
+      "score_sha256": "9d868bf24928df9b53f2dd633b7f16d06d1d9134415ef5b1308b7968e2a72b2b",
+      "maximum_component_error": 5.995204332975845e-15
+    },
+    {
+      "candidate": "xy_left_13",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_13/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e16896b45844949a7eddd6416f9d294f496fe77ef43f7729ac924898d26055d6",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_13.json",
+      "score_sha256": "d10f33de3a8622fb7ecc4516cdc1dea33efee5e9b3bb8de7237e936d85d8de4f",
+      "maximum_component_error": 6.439293542825908e-15
+    },
+    {
+      "candidate": "xy_left_14",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_14/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "adc2e6d552f05107e577d06e87c175e9abf6096100bd54426f15814565c82cc4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_14.json",
+      "score_sha256": "e158b89effa106d4dc812e31ce22a87b4616fc89c56c5e9eab0e483c33c7971b",
+      "maximum_component_error": 7.105427357601002e-15
+    },
+    {
+      "candidate": "xy_left_20",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_20/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c0af2008c01cfc8fec633920b430ca57c07bfe3a5ecd3e4b2d2485894b504473",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_20.json",
+      "score_sha256": "b6c032f7ca707323f393325e8973097cb2a3f07b3aea12b5707526ec48b70157",
+      "maximum_component_error": 6.439293542825908e-15
+    },
+    {
+      "candidate": "xy_left_21",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_21/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e88f396cb2396ac012017d5af3082ace9c90170e77f1bb14a06394101afb4e2e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_21.json",
+      "score_sha256": "b20f917c22c373548d529eb81c781899bf2e8ab78a7f65a98dcacaad533ffddf",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "xy_left_23",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_23/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "eb0b30909cb2eaf6801e324da50dc95bbc8a8a36931c42e78d803f8e6e727092",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_23.json",
+      "score_sha256": "ebd00f1e83bae4e5a08c63def1c209ff6869ec3b92cc5f967142e33ab56a13e8",
+      "maximum_component_error": 1.1546319456101628e-14
+    },
+    {
+      "candidate": "xy_left_24",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_24/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1f44f3edb9f0fa24b7d63647f962b120881e94dd57219046cfdec8a144a13d59",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_24.json",
+      "score_sha256": "dac99d10112370379c3b902dedbfec1c068f45f60b5f6b8ebce9cb9db4497f63",
+      "maximum_component_error": 1.1102230246251565e-15
+    },
+    {
+      "candidate": "xy_left_30",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_30/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "3c9839c6f83d41abb5b0bc21f89bc45ff4d3b169d741b360de72f30e0511bdb5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_30.json",
+      "score_sha256": "0be3e2212c6873b4cbb354a209a259b84da0a7a71fafcf3e3acf2c913b836fa9",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "xy_left_31",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_31/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "65e3b3e68e511957b7eb72d1f70a82fdb17e353dabaa3af6e033f9609c3e806a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_31.json",
+      "score_sha256": "d1da11b26aa12ef9477382147d48154e1607bf186146e3c2959a3e1d399bcc60",
+      "maximum_component_error": 9.325873406851315e-15
+    },
+    {
+      "candidate": "xy_left_32",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_32/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9bdbfc55bbcf649c73b88afe7aa29a27e18f5968aa658de3de70131b86a4fac1",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_32.json",
+      "score_sha256": "4801ce343640768a20a4550d8063228495dd16be1b6292c9196112b9dbcaaaf2",
+      "maximum_component_error": 6.661338147750939e-16
+    },
+    {
+      "candidate": "xy_left_33",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_33/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a43718f4191083653aa9371fb85802f1bd832b0f6b53e8d8e119961ffbd4bb3a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_33.json",
+      "score_sha256": "412a1ada1f3cbf0b463075e52ab51461195e6e7174964857afc4d0a3aec17813",
+      "maximum_component_error": 1.176836406102666e-14
+    },
+    {
+      "candidate": "xy_left_34",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_34/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "59f62b122a599249d831822d414b2612c608bde7269f2bcfcf777e988f2a60a6",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_34.json",
+      "score_sha256": "4638f5e330dd7a5689fcaecec9e7e6dfb686799f8ca8531720e31a696748fb6d",
+      "maximum_component_error": 1.7763568394002505e-15
+    },
+    {
+      "candidate": "xy_left_40",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_40/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "291a1aa99bf9e718b5cf1815eaf84317b96bc48b87bb3ddf1cdc215cff7597a4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_40.json",
+      "score_sha256": "eb78d291115c86cdc62d4b884113f99f19cc73953424f724b4d286a50e10a807",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "xy_left_41",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_41/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "8b87f32c9f1d87cc5221e1c2b20821c9c1cf2b7162633baaaab342c6511df5bb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_41.json",
+      "score_sha256": "5be868e89d3012c149b61b920b55986a85feccdf65d29934e65d6348b837c049",
+      "maximum_component_error": 3.774758283725532e-15
+    },
+    {
+      "candidate": "xy_left_42",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_42/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "14647789e7a979dc355358138f3e437ee08fe49a2e9a4eed9a3c14188a0a2d23",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_42.json",
+      "score_sha256": "0eb069b1413cbbc311fcb0c7219da762c117c8d2b74fe600d9a3bd01294597d9",
+      "maximum_component_error": 2.6645352591003757e-15
+    },
+    {
+      "candidate": "xy_left_43",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_43/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2717f86d4e4960941bd444006f717b93c29070bffb47cc884a67955ed091c75a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_43.json",
+      "score_sha256": "420ac3ac25a2c2533c9d1c21ec52dbb225f5f8f59b330a6c0e4d2cac1c1a37ad",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "xy_left_44",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_left_44/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f014ac7639ce918991c1d029312105cdca2bec93fe4b134ded5bf241e56f655d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_left_44.json",
+      "score_sha256": "bdc0e6197a6b69be4050e75ee25e429b0a64181864e9872cc48da8b8aaf97968",
+      "maximum_component_error": 9.769962616701378e-15
+    },
+    {
+      "candidate": "xy_right_00",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_00/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e5c428d35229995ebafb53222cba8094d154407329f38b27161a4568103d0ac4",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_00.json",
+      "score_sha256": "3f45cd06d6eaa0018130e3995f008416f14c2dcedd8dc58cf96c05b198a61e2d",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "xy_right_01",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "cc50c091481bd529f7beedf6afb7cd2c91620b0134ef366825897c5c50854703",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_01.json",
+      "score_sha256": "91416bd23f64205f74dd1ed6085980c9216be59e85e46086147ebfba272c5759",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "xy_right_03",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0842dabf849b7321ec37a6bb7b329f596b8b7c1c8353590142b721fb1a292d8e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_03.json",
+      "score_sha256": "c104675261dbeb146b58fc07af442338bfe4c156eac1ee17397092e121b18f59",
+      "maximum_component_error": 9.992007221626409e-15
+    },
+    {
+      "candidate": "xy_right_04",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "7729edecf1912e2780418b4d77b15121e35144fbe86439d4464da59cc5be55fb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_04.json",
+      "score_sha256": "3d39161bbdbe484fb00943671f9ccb96e53e8a0e17af51afcd3b0d66e6b85323",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "xy_right_10",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_10/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "fe4a0f647dc85fb8f8ae14f1be427760704b034501805f68559ce545277b5e26",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_10.json",
+      "score_sha256": "18787b84d5adb22132d709e5c5cf23ae0dabd0d2736822bf457e093ce658a078",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "xy_right_11",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_11/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "b1a4afd5261275c418c36869308b21a0bb0af16ea7dc981348998e1af9fbeb26",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_11.json",
+      "score_sha256": "d6f11760919ed130e5e397891ec9533bc217ba0ef448bb8a5665fdc0cc85b841",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "xy_right_13",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_13/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "965fe397f95918755021018e19f22aab102c31441743067308f8e274580664fd",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_13.json",
+      "score_sha256": "c6ab506926303cc926bac37a7af67762cc4b2e703179e14392698a1959c5c0d0",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "xy_right_14",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_14/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "cf77756ab17c7e35a7f60917ceff67af9b1218e7430efac44823727baceffca8",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_14.json",
+      "score_sha256": "9026b337f9633a4f055f083c0e2be9ee379f4c3323b3163f35dda341aea90138",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "xy_right_20",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_20/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f40b1836ade499cc9be67398d3cbea26e63ec419091a3acfe445cced6d1297f6",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_20.json",
+      "score_sha256": "a34374eb65cbaae81b94bdf389bd99c034098846e69295ee46dec10f6ee9c3f0",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "xy_right_21",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_21/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "dc3206ce30d17c764e1a404309fc6d04a03d4da2952e015f80d067157700689d",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_21.json",
+      "score_sha256": "10721f3794d8a26403943e130a849dbcc3c18b96751fdf9f2721d19d890c3039",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "xy_right_23",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_23/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "abd6cb8eec974ab07404f6ec9504e82bb856f8882ea3b61dc4a624ed9eff9f2c",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_23.json",
+      "score_sha256": "0705fd23c6763bb2038bb91519e2cd88760025fcc113e570ab8cedbca3bddf90",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "xy_right_24",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_24/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "ae77654ff13b75963e690c58745a3708ebc35b4fbea15e76f41e4bafb0d94959",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_24.json",
+      "score_sha256": "bda9dd8777651afa0c9580c4dec867335f682b4f50414ed60c87fff3d1784f4d",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "xy_right_30",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_30/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "4ee5d7a0d091cbb84a18fd2617ec05959c4781f24a3fbb2b3e3fe9625c0d9ddf",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_30.json",
+      "score_sha256": "942d213d5cf264fe3a4f29f495974467282b06c3b2b6080f85e712b4a3d33916",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "xy_right_31",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_31/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5830917a41863cef0aa08c8e342caaa6942093c45d89c7752275765af1a078ce",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_31.json",
+      "score_sha256": "a6c894688bf10df66244b00e3d40aa5edd581ba17965fa8a9c5bc0bac25782c5",
+      "maximum_component_error": 7.771561172376096e-15
+    },
+    {
+      "candidate": "xy_right_32",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_32/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "4845816a361a5f8b2c6c15517c284ccddc4dc33353c510cf7a4af8990eace670",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_32.json",
+      "score_sha256": "c587246efcacd2a241626617e793f2b9a5a6734b03ffd540d9dd1b95f088ff90",
+      "maximum_component_error": 5.10702591327572e-15
+    },
+    {
+      "candidate": "xy_right_33",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_33/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9fa8511342337fe9c811a91411234064bf507f6bcb5725e3c4033209f9761bcc",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_33.json",
+      "score_sha256": "103deb4ba9a8eceb6a0d6c79ebb5bf41f67bb6daae5886f87749c0ae77d31446",
+      "maximum_component_error": 7.105427357601002e-15
+    },
+    {
+      "candidate": "xy_right_34",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_34/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a3c767e66fe51fea7dbd584ec287607bb4c95233e49f98b03feb10a53669a29e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_34.json",
+      "score_sha256": "7612656026780af0047f790b19ce18bbc24afc5a7b1718ff8448311436171a39",
+      "maximum_component_error": 8.881784197001252e-15
+    },
+    {
+      "candidate": "xy_right_40",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_40/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "dfcb308a0f12889088b5beaefc2404e58e847924bd6a6773dde55ac5d25707b0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_40.json",
+      "score_sha256": "b6e49197755a6d64128d9b75b1c024a6b3d408d46efeb4464ff21ce4e40f04f6",
+      "maximum_component_error": 9.103828801926284e-15
+    },
+    {
+      "candidate": "xy_right_41",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_41/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d57a774196ae867e7a8245732333090e1ea1d18af9d5c333d8cd5d48f530e4c1",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_41.json",
+      "score_sha256": "c4a7e0aa1595e34602ba76576380aae6cfa1aac799183fce9163ee825d4271d6",
+      "maximum_component_error": 1.2878587085651816e-14
+    },
+    {
+      "candidate": "xy_right_42",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_42/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c34b7c01e50595309fa4751219e6071ca6f27bcfcee39304ead38acf7f31a1a1",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_42.json",
+      "score_sha256": "cf5424d48a182394fc4b46f71b05fb00a1eafa99172ec67a0898bc600653554b",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "xy_right_43",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_43/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "eb94becd357564eee544a9faaa8bb3c02d9aec3524f082909956dd03079b0d53",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_43.json",
+      "score_sha256": "008e8062e78602f6d8581d7dc25439b008e5b43ce70e8c41269df96236376adc",
+      "maximum_component_error": 7.327471962526033e-15
+    },
+    {
+      "candidate": "xy_right_44",
+      "stage": 11,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_right_44/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1982a8a16afc322aa572ce2efc842703fad602e69a5bf64fb31de64c87ba73fc",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_right_44.json",
+      "score_sha256": "82ef43f4d6e80c3fe4d1c5134e48b5367d0ccb7980072896caff923f719fe8b7",
+      "maximum_component_error": 6.217248937900877e-15
+    },
+    {
+      "candidate": "xy_combined_01",
+      "stage": 12,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_combined_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "4f7ce6a8796592f34c4a442ecd992de2f85bda10aa98c8826a735ecb5f0ec303",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_combined_01.json",
+      "score_sha256": "77af1690b99ee8ae30b669515514dcab339e0c046ffbb7be5659a958f58b35d5",
+      "maximum_component_error": 6.661338147750939e-15
+    },
+    {
+      "candidate": "xy_combined_02",
+      "stage": 12,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_combined_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5c2ea31fed86b926840c80fd183271339e04b4d95669b0a04cdec5f62a954465",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_combined_02.json",
+      "score_sha256": "40a6805fa3bca82b493d2a7d25071a02e00780d853e2a14e76a09384285fe4db",
+      "maximum_component_error": 8.215650382226158e-15
+    },
+    {
+      "candidate": "xy_combined_03",
+      "stage": 12,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_combined_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "7578d605d9ec4e86125980fbfed6b0f28f3c1af1c0c79b36aecca8df2a93c568",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_combined_03.json",
+      "score_sha256": "77fe4c762a7221c8e392e3dbd2b79631b6bb391cdc2f2b8f2973236aa3de2895",
+      "maximum_component_error": 3.774758283725532e-15
+    },
+    {
+      "candidate": "xy_combined_04",
+      "stage": 12,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/xy_block/units/xy_combined_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e16ae72ce4be3809e9a3cf3e58dd183047524cca8f504f04848f313b21c07c36",
+      "score_source": "/data/hfosp/topic4_sef_hfo/xy_block_joint_observation_pilot_20260916/scores/xy_combined_04.json",
+      "score_sha256": "6820be4b4748f46badcd58a99b79958629a47c8e0af76c75e423301a6fb6c76e",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "interaction_y0_a1_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y0_a1_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "899a460dd66ca0dfc506bc39512ea57b434c8490092df82ff272df332e878cf5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y0_a1_g1.json",
+      "score_sha256": "3a663df489c68a7916ca76760b4b5b1004880c85bb8fa3e830233c9feb895ea5",
+      "maximum_component_error": 2.220446049250313e-15
+    },
+    {
+      "candidate": "interaction_y0_a2_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y0_a2_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "94b3384583ec98c7b13a2c4b29a3fcc6bbc2d94d5c787d4bb5a1a078ea8b3e83",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y0_a2_g1.json",
+      "score_sha256": "11baf724949034353757128dcc3f6d854575db467a6281e6559f6a6b7c8e4334",
+      "maximum_component_error": 3.1086244689504383e-15
+    },
+    {
+      "candidate": "interaction_y1_a0_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y1_a0_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "41f2e16f343108a7f0cd97e06871b6dc40d89ace0272fa7ef3a685f064afdc83",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y1_a0_g1.json",
+      "score_sha256": "58620fa3f153ecee6cccd0d67208fa39b684b6f11c3ac5f8132ca53b48e81037",
+      "maximum_component_error": 5.551115123125783e-15
+    },
+    {
+      "candidate": "interaction_y1_a1_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y1_a1_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "87ff18c6755c38146028c7c145cfdd256a43ecf1e833be05e9172685f58ce8d0",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y1_a1_g0.json",
+      "score_sha256": "cd493dfb23dcc25ee018457543796a6a34d2729482931bc851555976bb479fd6",
+      "maximum_component_error": 1.0658141036401503e-14
+    },
+    {
+      "candidate": "interaction_y1_a1_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y1_a1_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0316ef9365733cbf8b24f71e28f41fcf608385513fde60b20d96aff4a0d640c7",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y1_a1_g1.json",
+      "score_sha256": "01fcb59858a4a2b79aaf1fa514446b73816d3e8fe87159788bba1e2473aed815",
+      "maximum_component_error": 1.0658141036401503e-14
+    },
+    {
+      "candidate": "interaction_y1_a2_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y1_a2_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c9422f98eb4e70e6fe541eff89dba25702b11eab951aca2ccbc7ef93cdcf815b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y1_a2_g0.json",
+      "score_sha256": "3f77802c9bd4bc1032a1133c6a703e07966ce8d37f3e46331dd4bf48124eb5d9",
+      "maximum_component_error": 4.884981308350689e-15
+    },
+    {
+      "candidate": "interaction_y1_a2_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y1_a2_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9cf922f3eae0f53cbbf3238728907f6d52faa826c74e962e46f1bb2cd153e6a7",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y1_a2_g1.json",
+      "score_sha256": "bba7a93e6422ad7fedad13937af10925c23853f1cd37a6a9bcb58b21bcb36e29",
+      "maximum_component_error": 3.774758283725532e-15
+    },
+    {
+      "candidate": "interaction_y2_a0_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y2_a0_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "530c08ee6847ed16335d1673370ff27949e09714c258f42dbeeb2242015be405",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y2_a0_g1.json",
+      "score_sha256": "6c051187f7296565402ae8ddf217fca4d09e0a6445f577f4b2682a09e0ed7505",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "interaction_y2_a1_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y2_a1_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2f45476d03ea94bbbfea2a69661dae58ef6760bb36e528505a5c6d81ae229f68",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y2_a1_g0.json",
+      "score_sha256": "a265cbfdecf32b9dc17b071d54ef3f8de17695469a7062d9bfde07c578c66017",
+      "maximum_component_error": 2.4424906541753444e-15
+    },
+    {
+      "candidate": "interaction_y2_a1_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y2_a1_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "86e8a2993002bd2b3910b276ce3ae862890f32c52d22cbfdc26baa867125fbbb",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y2_a1_g1.json",
+      "score_sha256": "11deb41437a80d50871e1659cd1d72ce2df83314c09ebf73028aa8ac19df1d41",
+      "maximum_component_error": 1.2434497875801753e-14
+    },
+    {
+      "candidate": "interaction_y2_a2_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y2_a2_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "e1e0a778384f98e29e84db49661235e4ea9531ae3d4799b8dc42d2e4bb4fd495",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y2_a2_g0.json",
+      "score_sha256": "5d7626d53be7b953c0af568c1a8e807b99c4c65e95a3c46c83e4cbdca144caf1",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "interaction_y2_a2_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y2_a2_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0118a9264fc73199141369e049609125bce13f747b6a393710c9b8cd9c5c2894",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y2_a2_g1.json",
+      "score_sha256": "0517f62db0fea645a2cdcc0f74fdfa5356819c6f079e9e822744a9fe3d93bf0b",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "interaction_y3_a0_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a0_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a97ce7da43eb42c83a18c7a417a4759b4716777a9f734a39f7ce7bab2dbd017e",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a0_g0.json",
+      "score_sha256": "540ff416f03351583dabcbabb944ab11d997eb2b36167683b72b752db6c9720a",
+      "maximum_component_error": 1.176836406102666e-14
+    },
+    {
+      "candidate": "interaction_y3_a0_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a0_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "01cc9249f9a9f1d18abf081364595f471102c410268babfc6a895d1e24a99c28",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a0_g1.json",
+      "score_sha256": "d34b49959b1ab54ab5fe569196b3837b46aa92e0297fe6ec7fc035453f7dde80",
+      "maximum_component_error": 1.554312234475219e-14
+    },
+    {
+      "candidate": "interaction_y3_a1_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a1_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2df152c87b4519d23c7aa21739ecf7d10fb2241f3222b86c39cb4e53c53a0991",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a1_g0.json",
+      "score_sha256": "b32ab4cc2cf9f8b53c457a0c499929612daebd199befe64ffb69dd3db1074202",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "interaction_y3_a1_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a1_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "099cb27b822e828d47b7f9aef512e8f0dbf4fbb168decca1f4c90a853d34ff95",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a1_g1.json",
+      "score_sha256": "299a9b17076a96f03eb1cfdc87c3a0d92b8a91bc3adcd591075f21c34bbd6139",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "interaction_y3_a2_g0",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a2_g0/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "16f5c70ea1e2c93878a78b694c353549e1201b4dc89d98e6130351676817b017",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a2_g0.json",
+      "score_sha256": "f97f109d9ad5006ce7cbde467a5b7246a518f3d72a6f7e537e8e386a02830bc9",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "interaction_y3_a2_g1",
+      "stage": 13,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/interaction_y3_a2_g1/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5bc4a4be6a031d0f9d0cfdaf03ef4804ab6c3787f9f81ed5b9551718ee6b452b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/interaction_y3_a2_g1.json",
+      "score_sha256": "d063d5051f8073f20b91fdeafee235b40c136c15ddca028b277ab3e47f67b549",
+      "maximum_component_error": 8.43769498715119e-15
+    },
+    {
+      "candidate": "joint_bo01_01",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "c7a4af728530550a153c54eb73bbf990c6b8c16d00f426dfb30d32ce8b7b99b5",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_01.json",
+      "score_sha256": "0d0635b14be8dbc06477b3fb9c162466a539979d029b4f33cde3cd5698f1a026",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "joint_bo01_02",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f00f22910e6deeec35e09428a3c3642aa1f727aca7a64e653b1f2734b82b0047",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_02.json",
+      "score_sha256": "08d1b3848167de7deb38a93bcfde8fb8780e62a310089fbf336fad1b42787cf6",
+      "maximum_component_error": 6.217248937900877e-15
+    },
+    {
+      "candidate": "joint_bo01_03",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "921e394c532c3cbbaf1d1b9991ce4151fcf2f8f9df1be6d1004e381b5c43606b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_03.json",
+      "score_sha256": "38b401c659c9b6b680e5998ff3791eea31228f6a6e972dfc83c2c330b43815ad",
+      "maximum_component_error": 2.4424906541753444e-15
+    },
+    {
+      "candidate": "joint_bo01_04",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "acf58ddbb079ea45812efa6112f5e0dc625381e12cd117816892840b07a60c4b",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_04.json",
+      "score_sha256": "e232edf61d7ddeb4e7949adb1f04ce20407b403e8caee875cde872d5251e7518",
+      "maximum_component_error": 4.6629367034256575e-15
+    },
+    {
+      "candidate": "joint_bo01_05",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "2552b343a57ea7816f0d14d7b04363d9f26c6f042223d237a0df27da0d9d542a",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_05.json",
+      "score_sha256": "a7b44cc30515e48b6ff8b7c78cdb1b8102bfc9a8579dba691723101ad6caf0ea",
+      "maximum_component_error": 1.9984014443252818e-15
+    },
+    {
+      "candidate": "joint_bo01_06",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "f71883cd08d639df5e2b10952b309ce2bcd403e6b7a24e3c231f051846ec0dd3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_06.json",
+      "score_sha256": "9e1b667531357d3317b8cdbcea9c485ca24dd163d5c2ebb5d0d1c0be58aa9a1e",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "joint_bo01_07",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "285017de78bc56634fdee967d7c163f596c9b236e807ce22370aadefa618f4c1",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_07.json",
+      "score_sha256": "5579949704385390311f02ed4b704e1bc72745c3900aba2b94bb00d020610c20",
+      "maximum_component_error": 1.0658141036401503e-14
+    },
+    {
+      "candidate": "joint_bo01_08",
+      "stage": 14,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo01_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "1415fdd14ebe1b8f58595fe4be6552151fc66a541fd0ff2422451726f3cb1e32",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo01_08.json",
+      "score_sha256": "be906f94f7a0a095213b6480ab6bcc22f8a49882726c5009a7a3013b3b307a6a",
+      "maximum_component_error": 7.549516567451064e-15
+    },
+    {
+      "candidate": "joint_bo02_01",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "79e7b9a81f5c553266af02a3604e36cfa18eb29ba75228d418ac16481791c377",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_01.json",
+      "score_sha256": "d9f77f1c42457d0748f82ccded59d51e966f47c14a406da7301de7a3b39b92ad",
+      "maximum_component_error": 6.8833827526759706e-15
+    },
+    {
+      "candidate": "joint_bo02_02",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5b18260f381cc7d95e6515ad73ef4e7876d83b8c8be83ffed8824f87a8fadb04",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_02.json",
+      "score_sha256": "c2f47dba2e72643589bfcac1f6329d3a7b142b44ec578fd40778ce5bdac318e1",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "joint_bo02_03",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "15ea21895528529f28cf919ba7818788f4f0d5aa12152a4f3689afa782a6da35",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_03.json",
+      "score_sha256": "2d5207b53cad80bf8cf02fafc0e4ed44fb54a541ad5ceb64f40d5ee016278513",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "joint_bo02_04",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "7678d9c0a75ae0b8c69ea88f134765fcbf809cf133d15a4ba3560044a8dc5922",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_04.json",
+      "score_sha256": "325bdee8225d966d7a07f1ea6b1fb28a03203d5e6b95e867f09875808ef5b759",
+      "maximum_component_error": 1.3988810110276972e-14
+    },
+    {
+      "candidate": "joint_bo02_05",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "91cdf345f0c67676a8d4031dda8cdfd54bee000c8a7aed2cd18e70ba94bc0f3f",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_05.json",
+      "score_sha256": "bdaa1331b5a65762994bea8393e233b8b71835cd7a065c0b3a3b6601342460a6",
+      "maximum_component_error": 1.9984014443252818e-15
+    },
+    {
+      "candidate": "joint_bo02_06",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "5209e408f9bf18e3a5eaef0252b8ce70ceda562087c75be2a7776760de6fb4ce",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_06.json",
+      "score_sha256": "3518250b2f164b906fbc48f8f575177b70f3c0b80d5d7f3e2fa1fecadbd0aea1",
+      "maximum_component_error": 3.3306690738754696e-15
+    },
+    {
+      "candidate": "joint_bo02_07",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "4445fd19e0b17c9464cf115d8676f9e0b103b48d68f3dd90d446c6a677a67897",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_07.json",
+      "score_sha256": "52c223ce214a6aa31edbcae9b7329581b125ed18a16681fcbc066b466cf1093a",
+      "maximum_component_error": 2.6645352591003757e-15
+    },
+    {
+      "candidate": "joint_bo02_08",
+      "stage": 15,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo02_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0d0823486d842a42deba6091bdfabedd0378ebcd24b2fdc1d8b19a910de0f9a7",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo02_08.json",
+      "score_sha256": "dfd13c63401e2d881d4276a6cd88b8535c07d932ff561d051c636033d976633c",
+      "maximum_component_error": 5.773159728050814e-15
+    },
+    {
+      "candidate": "joint_bo03_01",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_01/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "a15eff01774a958ec038b536dd9791d4891acadb09073bf3b2b257f7a678880f",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_01.json",
+      "score_sha256": "5039c561725ae1c8477575d8a1a2410a9bfa56a3f18273d9e6c8bd2e08a31fdc",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "joint_bo03_02",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_02/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "dbe10ddab4d1c82d4fc6c8392715517596733c3175a436ce073fff9c466f9db3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_02.json",
+      "score_sha256": "08c698d1b173a994f7074c6e622d369c87db5217fb3199812e767672aa51cf2b",
+      "maximum_component_error": 4.218847493575595e-15
+    },
+    {
+      "candidate": "joint_bo03_03",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_03/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "bfb7cb457a02a5b12f572467d94d6b842c7de2600ebd6dd88ad8b7e1caf5e2df",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_03.json",
+      "score_sha256": "8a1562e6727ad921fcbdb1eac866e922c1874200b48d1f04d28ab6d9a7b0961b",
+      "maximum_component_error": 3.9968028886505635e-15
+    },
+    {
+      "candidate": "joint_bo03_04",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_04/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "9a5175499163086305cc1c8b2ca9e47e53593aec0b84121c970ff49c6ac8f250",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_04.json",
+      "score_sha256": "6a40c9e8f0f4db251a4ffa19be0eccd4c97f5326057a3f78dd350582e012fce0",
+      "maximum_component_error": 5.329070518200751e-15
+    },
+    {
+      "candidate": "joint_bo03_05",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_05/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "06fcf9584d48fdb802880731ae03747ba3e4423033a0c0d7c490a9fb39282080",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_05.json",
+      "score_sha256": "0af0420fd56e2a516032f71150335de57bba710af5c1699596f5217591640c76",
+      "maximum_component_error": 3.552713678800501e-15
+    },
+    {
+      "candidate": "joint_bo03_06",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_06/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "43d0907ea6eb8f03ed9f400b8f2a4e78a713571bde552de96163cdc7a9f188a3",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_06.json",
+      "score_sha256": "67e46abe74f6a7f0c0dce385f1b7e5118cafa39b8ee2065d2f1e21e751198b8d",
+      "maximum_component_error": 2.886579864025407e-15
+    },
+    {
+      "candidate": "joint_bo03_07",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_07/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "d534533f8b49ed39f43fc36dfa91e2db008a629bf85660ffa95aae2d90f3f482",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_07.json",
+      "score_sha256": "26b9653b594b0ba57b20c919ea325046e979271591ede2cd139654f4df4dca60",
+      "maximum_component_error": 8.215650382226158e-15
+    },
+    {
+      "candidate": "joint_bo03_08",
+      "stage": 16,
+      "trajectory_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/search/units/joint_bo03_08/2511_847401/workers/trajectory.json",
+      "trajectory_sha256": "0565060f2977587d212d3b7a9e56ed01ce20ec8ec77e60e3cb7ef6c45faed2ed",
+      "score_source": "/data/hfosp/topic4_sef_hfo/geometry_axis_joint_distribution_20260917/scores/joint_bo03_08.json",
+      "score_sha256": "8c731baaf39392ac9044ad46e02560e3d95bc6fa054a88e8ff1dd873d93e793a",
+      "maximum_component_error": 4.440892098500626e-15
+    }
+  ]
+}
