@@ -1,0 +1,17 @@
+{
+  "report_section": "方法更新｜全局抑制与统一幅度适应",
+  "figure6_native_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+  "native_protocol_equations": {
+    "membrane": "tau_m Vdot=-V+IE-Z II-Z G(V-EG)-eta_M M",
+    "adaptation": "M*=exp(-dt/tauA); spike adds [0.0005*1s/tauA+7.68*q]/eta_M",
+    "tauA": "5s if causal global E R<=5Hz, otherwise0.5s",
+    "global_feedback": "G=30*s; 0.5s sdot=q-s; q=clip((R-200)/300,0,1); R filter15ms",
+    "resource": "5s Zdot=1{II+(18-EG)G<95.19851312666987}-Z",
+    "K_state": false,
+    "K_conductance": false
+  },
+  "frozen_producer_sha256": "9fbd0374933a296eb1b851cca6f646a10ced6f0274afa79642b14a3fdbc62000",
+  "old_model": "Original Z/M model before the added global feedback and separate K pathway",
+  "integration": "Reference-voltage phenomenological current matching; one intrinsic adaptation state; no independent K conductance",
+  "scope": "Same report figures and numerical data; text and organization only"
+}
