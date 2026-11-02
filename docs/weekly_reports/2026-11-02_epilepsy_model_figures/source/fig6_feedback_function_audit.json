@@ -1,10 +1,10 @@
 {
   "checked_on": "2026-11-02",
   "displayed_figure": {
-    "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.png",
-    "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2",
-    "source_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
-    "source_simulation_rerun": false
+    "source": "results/paper-ready-figure/fig6/candidates/shared_logistic_feedback_20261102/figures/fig6-complete-layout.png",
+    "sha256": "3f43c20efa3f5144b9725fc7e31608e1751d9a1547d1a13d4b5dd91eeb248a1b",
+    "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+    "source_simulation_rerun": true
   },
   "runs": {
     "figure6_clip": {
@@ -46,9 +46,85 @@
         "recorded_q": 0.0,
         "raw_G": 0.0007839251155357919
       }
+    },
+    "shared_logistic_current_figure": {
+      "name": "logistic_r350_k40_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "COMPLETE",
+      "observed_s": 120.0,
+      "initial_brief_count": 80,
+      "initial_8s_brief_count": 34,
+      "has_entry": true,
+      "has_exit": true,
+      "has_interictal_return": true,
+      "qualified_cycles": [
+        {
+          "first_entry_s": 22.04,
+          "exit_s": 27.09,
+          "Z_recovered_s": 34.4,
+          "returned_brief_count": 48,
+          "returned_brief_span_s": 14.54,
+          "first_returned_brief_s": 56.050000000000004,
+          "reentry_s": 71.81
+        }
+      ],
+      "complete_cycle": true,
+      "first_cycle_complete": true,
+      "entries": [
+        {
+          "onset_s": 22.04,
+          "confirmation_s": 22.24
+        },
+        {
+          "onset_s": 71.81,
+          "confirmation_s": 72.01
+        }
+      ],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 40.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 6000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 1200,
+      "external_input_bitwise_equal": true,
+      "producer": "fig6_shared_logistic_feedback.py",
+      "producer_sha256": "d5e9dca8382cbcbfe23204c5e0a7bdd5b7fe000a9e6355dea55e368a5cc7e133",
+      "equations": {
+        "sigmoid": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)), k>0",
+        "global_feedback": "tau_G*dG/dt=G_max*S(R)-G",
+        "adaptation": "dM_i/dt=-M_i/tau_M(R)+[a0/tau_M(R)+a1*S(R)]/eta_M*sum_n delta(t-t_i^n)",
+        "membrane": "tau_m*dV_i/dt=-V_i+IE_i-Z_i*II_i-Z_i*G*(V_i-EG)-eta_M*M_i",
+        "tau_M": "5s if causal all-E R<=5Hz, otherwise 0.5s (unchanged)",
+        "resource": "5s*dZ_i/dt=1{II_i+(18-EG)*G<95.19851312666987}-Z_i (unchanged)"
+      },
+      "parameters": {
+        "R0_Hz": 350.0,
+        "k_Hz": 40.0,
+        "G_max": 30,
+        "tau_G_s": 0.5,
+        "eta_M": 0.0005,
+        "a0_mV_s": 0.0005,
+        "a1_mV": 7.68,
+        "tau_M_active_s": 0.5,
+        "tau_M_quiet_s": 5,
+        "R_quiet_Hz": 5,
+        "tau_Z_s": 5,
+        "I_threshold_mV": 95.19851312666987,
+        "V_ref_mV": 18,
+        "E_G_mV": -17.662847938268442,
+        "rate_filter_ms": 15
+      }
     }
   },
-  "conclusion": "The displayed Figure 6 uses the clip gate for both G and adaptation. The separate smooth-analysis model uses a Hill sigmoid only for G; adaptation q remains clip.",
+  "conclusion": "Displayed Figure6 A-D now use the shared logistic for G and M. The prior clip figure and G-only Hill analysis are retained here as historical lineage.",
   "smooth_baseline_validation": {
     "status": "PASS_NATIVE_WORKPOINT_VALIDATION",
     "completed_epoch": 1793377969.2429812,
@@ -76,5 +152,11 @@
       "return_correspondence/smooth_tg0p5_lm1_s9108405/figures/native_short_event_return.pdf"
     ]
   },
-  "frozen_smooth_producer_copy": "fig6_smooth_feedback_campaign.py"
+  "frozen_smooth_producer_copy": "fig6_smooth_feedback_campaign.py",
+  "previous_displayed_figure": {
+    "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.png",
+    "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2",
+    "source_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+    "source_simulation_rerun": false
+  }
 }

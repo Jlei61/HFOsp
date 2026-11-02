@@ -1,19 +1,18 @@
 {
   "report_section": "方法更新｜全局抑制与统一幅度适应",
-  "figure6_native_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+  "figure6_native_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
   "native_protocol_equations": {
-    "membrane": "tau_m Vdot=-V+IE-Z II-Z G(V-EG)-eta_M M",
-    "adaptation": "M*=exp(-dt/tauA); spike adds [0.0005*1s/tauA+7.68*q]/eta_M",
-    "tauA": "5s if causal global E R<=5Hz, otherwise0.5s",
-    "global_feedback": "G=30*s; 0.5s sdot=q-s; q=clip((R-200)/300,0,1); R filter15ms",
-    "resource": "5s Zdot=1{II+(18-EG)G<95.19851312666987}-Z",
-    "K_state": false,
-    "K_conductance": false
+    "sigmoid": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)), k>0",
+    "global_feedback": "tau_G*dG/dt=G_max*S(R)-G",
+    "adaptation": "dM_i/dt=-M_i/tau_M(R)+[a0/tau_M(R)+a1*S(R)]/eta_M*sum_n delta(t-t_i^n)",
+    "membrane": "tau_m*dV_i/dt=-V_i+IE_i-Z_i*II_i-Z_i*G*(V_i-EG)-eta_M*M_i",
+    "tau_M": "5s if causal all-E R<=5Hz, otherwise 0.5s (unchanged)",
+    "resource": "5s*dZ_i/dt=1{II_i+(18-EG)*G<95.19851312666987}-Z_i (unchanged)"
   },
-  "frozen_producer_sha256": "9fbd0374933a296eb1b851cca6f646a10ced6f0274afa79642b14a3fdbc62000",
+  "frozen_producer_sha256": "d5e9dca8382cbcbfe23204c5e0a7bdd5b7fe000a9e6355dea55e368a5cc7e133",
   "old_model": "Original Z/M model before the added global feedback and separate K pathway",
   "integration": "Reference-voltage phenomenological current matching; one intrinsic adaptation state; no independent K conductance",
-  "scope": "Same report figures and numerical data; text and organization only",
+  "scope": "Shared logistic G/M native simulation and regenerated A-D; E is the unchanged historical cohort.",
   "model_lineage": [
     {
       "stage": "Original Z/M",
@@ -27,9 +26,10 @@
       "reference": "scripts/run_topic4_global_feedback_response.py; scripts/run_topic4_rhythm_preserving_feedback.py"
     },
     {
-      "stage": "Current unified Z/G/M",
+      "stage": "Current unified Z/G/M with shared logistic",
       "membrane_feedback": "-Z II-Z G(V-EG)-eta_M M",
-      "intrinsic_adaptation_states_per_E_cell": 1
+      "intrinsic_adaptation_states_per_E_cell": 1,
+      "activity_gate": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)); same S for G and M increments"
     }
   ],
   "literature": [
@@ -65,26 +65,87 @@
       "state": "M_i",
       "effective_strength": "eta_M M_i",
       "decay_time": "tau_M(R)",
-      "spike_jump": "Delta M(R)=[a0/tau_M(R)+a1*q(R)]/eta_M",
-      "source_mapping": "tau_M in the report denotes the unchanged tauA / tau_A time constant in the frozen producer and protocol."
+      "spike_jump": "Delta M(R)=[a0/tau_M(R)+a1*S(R;R0,k)]/eta_M",
+      "source_mapping": "tau_M in the report denotes the unchanged tauA / tau_A time constant in the frozen producer and protocol.",
+      "spike_index": "n, distinct from sigmoid width k"
     },
     "narrative": "Author voice: prior scientific obstacle, concrete model changes, physiological rationale, then achieved continuous-run behavior; preserve attribution to collaboration with 邹晓龙老师.",
     "potassium_wording": "Slow potassium-current adaptation effects are incorporated into M; potassium concentration is not explicitly simulated."
   },
   "simplification_boundary": "One fewer intrinsic adaptation state versus separate M/K; omits independent M/K timescales and voltage-dependent K conductance. No claim of improved patient fit or isolated causal contribution based on the continuous trajectory alone.",
   "validation": {
-    "mathjax_version": "3.2.2",
-    "formula_expressions_rendered": 102,
-    "display_equations": 5,
-    "math_errors": 0,
-    "original_four_display_equations_unchanged": true,
-    "separate_Hill_equation_added": true,
-    "panel_caption_paragraphs_unchanged": 35,
-    "figure6_recorded_q_samples_checked": 6000,
-    "smooth_run_recorded_adaptation_q_samples_checked": 3000
+    "mathjax": {
+      "status": "PASS",
+      "expressions": 99,
+      "display_equations": 4,
+      "math_errors": 0
+    },
+    "native": {
+      "name": "logistic_r350_k40_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "COMPLETE",
+      "observed_s": 120.0,
+      "initial_brief_count": 80,
+      "initial_8s_brief_count": 34,
+      "has_entry": true,
+      "has_exit": true,
+      "has_interictal_return": true,
+      "qualified_cycles": [
+        {
+          "first_entry_s": 22.04,
+          "exit_s": 27.09,
+          "Z_recovered_s": 34.4,
+          "returned_brief_count": 48,
+          "returned_brief_span_s": 14.54,
+          "first_returned_brief_s": 56.050000000000004,
+          "reentry_s": 71.81
+        }
+      ],
+      "complete_cycle": true,
+      "first_cycle_complete": true,
+      "entries": [
+        {
+          "onset_s": 22.04,
+          "confirmation_s": 22.24
+        },
+        {
+          "onset_s": 71.81,
+          "confirmation_s": 72.01
+        }
+      ],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 40.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 6000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 1200,
+      "external_input_bitwise_equal": true
+    },
+    "figure_QA": {
+      "PDF_text_inside_canvas": {
+        "fig6-panelb.pdf": true,
+        "fig6-panelc.pdf": true,
+        "fig6-paneld.pdf": true,
+        "fig6-complete-layout.pdf": true,
+        "fig6-panele.pdf": true,
+        "fig6-panela.pdf": true
+      },
+      "A_C_samples_match": true,
+      "complete_native_cycle": true,
+      "E_pdf_byte_identical": true,
+      "human_review": "PENDING"
+    }
   },
   "feedback_function_audit": "fig6_feedback_function_audit.json",
-  "figure6_feedback_function": "Both G target and adaptation q use clip((R-200)/300,0,1).",
+  "figure6_feedback_function": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)); same S for G and M increments",
   "separate_smooth_feedback_analysis": {
     "model": "ZGM_UNIFIED_CURRENT_SMOOTH_G_V1",
     "producer_copy": "fig6_smooth_feedback_campaign.py",
@@ -92,6 +153,9 @@
     "G_target": "H(R)=30*(R/350)^(14/3)/(1+(R/350)^(14/3))",
     "adaptation_q": "clip((R-200)/300,0,1), unchanged",
     "figure6_replaced": false,
-    "run": "/data/hfosp/topic4_sef_hfo/unified_feedback_phase_20261030/runs/smooth_tg0p5_lm1_s9108405"
-  }
+    "run": "/data/hfosp/topic4_sef_hfo/unified_feedback_phase_20261030/runs/smooth_tg0p5_lm1_s9108405",
+    "status": "Historical G-only Hill analysis; not the current Figure6 source"
+  },
+  "effective_model": "fig6_effective_model.json",
+  "logistic_validation": "fig6_logistic_validation.json"
 }

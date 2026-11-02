@@ -1,55 +1,53 @@
 {
-  "method": "One maximum across spatial cells and all 20-ms frames in each continuous Local-to-Ictal entry window; same denominator for all four displayed frames in a row.",
-  "fig5_convention_source": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_aligned_layout.py",
-  "normalization_domain": "Continuous illustrated entry window, not the entire ictal episode.",
+  "method": "One maximum across spatial cells and all 20-ms frames in each continuous illustrated entry window.",
   "denominators_Hz": [
-    453.7037037037037,
-    457.5757575757576
+    461.17647058823525,
+    453.04878048780483
   ],
   "rows": [
     {
       "row": 1,
       "center_time_window_s": [
-        8.85,
-        9.41
+        21.43,
+        22.1
       ],
       "native_support_window_s": [
-        8.84,
-        9.42
+        21.419999999999998,
+        22.110000000000003
       ],
       "sample_width_ms": 20,
       "center_step_ms": 5,
-      "n_continuous_frames": 113,
-      "denominator_Hz": 453.7037037037037,
+      "n_continuous_frames": 135,
+      "denominator_Hz": 461.17647058823525,
       "selected_frame_peak_normalized": [
-        0.9474489795918367,
-        0.951518168242907,
-        0.9500751879699249,
-        0.9599355531686359
+        0.8154282839896522,
+        0.9655612244897961,
+        0.9600731740064448,
+        0.9640444015444015
       ],
-      "peak_center_time_s": 8.935
+      "peak_center_time_s": 21.48
     },
     {
       "row": 2,
       "center_time_window_s": [
-        59.3,
-        60.24
+        70.82,
+        71.9
       ],
       "native_support_window_s": [
-        59.29,
-        60.25
+        70.80999999999999,
+        71.91000000000001
       ],
       "sample_width_ms": 20,
       "center_step_ms": 5,
-      "n_continuous_frames": 189,
-      "denominator_Hz": 457.5757575757576,
+      "n_continuous_frames": 217,
+      "denominator_Hz": 453.04878048780483,
       "selected_frame_peak_normalized": [
-        0.9768610867310299,
-        0.9567070593208397,
-        0.9684188741721853,
-        1.0
+        0.6069986541049799,
+        0.9856592565090269,
+        0.9507017881176697,
+        0.980536287400352
       ],
-      "peak_center_time_s": 60.24
+      "peak_center_time_s": 71.165
     }
   ],
   "per_frame_normalization": false,
