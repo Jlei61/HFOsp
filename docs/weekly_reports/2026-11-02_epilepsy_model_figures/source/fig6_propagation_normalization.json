@@ -1,0 +1,64 @@
+{
+  "method": "One maximum across spatial cells and all 20-ms frames in each continuous Local-to-Ictal entry window; same denominator for all four displayed frames in a row.",
+  "fig5_convention_source": "/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/build_fig5_aligned_layout.py",
+  "normalization_domain": "Continuous illustrated entry window, not the entire ictal episode.",
+  "denominators_Hz": [
+    453.7037037037037,
+    457.5757575757576
+  ],
+  "rows": [
+    {
+      "row": 1,
+      "center_time_window_s": [
+        8.85,
+        9.41
+      ],
+      "native_support_window_s": [
+        8.84,
+        9.42
+      ],
+      "sample_width_ms": 20,
+      "center_step_ms": 5,
+      "n_continuous_frames": 113,
+      "denominator_Hz": 453.7037037037037,
+      "selected_frame_peak_normalized": [
+        0.9474489795918367,
+        0.951518168242907,
+        0.9500751879699249,
+        0.9599355531686359
+      ],
+      "peak_center_time_s": 8.935
+    },
+    {
+      "row": 2,
+      "center_time_window_s": [
+        59.3,
+        60.24
+      ],
+      "native_support_window_s": [
+        59.29,
+        60.25
+      ],
+      "sample_width_ms": 20,
+      "center_step_ms": 5,
+      "n_continuous_frames": 189,
+      "denominator_Hz": 457.5757575757576,
+      "selected_frame_peak_normalized": [
+        0.9768610867310299,
+        0.9567070593208397,
+        0.9684188741721853,
+        1.0
+      ],
+      "peak_center_time_s": 60.24
+    }
+  ],
+  "per_frame_normalization": false,
+  "between_row_absolute_amplitude_comparable": false,
+  "color_limits": [
+    0,
+    1
+  ],
+  "color_mapping": "linear",
+  "colorbar_label": "Norm. Firing rate",
+  "native_rates_retained": true
+}
