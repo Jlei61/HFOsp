@@ -13,5 +13,61 @@
   "frozen_producer_sha256": "9fbd0374933a296eb1b851cca6f646a10ced6f0274afa79642b14a3fdbc62000",
   "old_model": "Original Z/M model before the added global feedback and separate K pathway",
   "integration": "Reference-voltage phenomenological current matching; one intrinsic adaptation state; no independent K conductance",
-  "scope": "Same report figures and numerical data; text and organization only"
+  "scope": "Same report figures and numerical data; text and organization only",
+  "model_lineage": [
+    {
+      "stage": "Original Z/M",
+      "membrane_feedback": "-Z II-eta_M M_old",
+      "intrinsic_adaptation_states_per_E_cell": 1
+    },
+    {
+      "stage": "Intermediate Z/M plus G/K",
+      "membrane_feedback": "-Z II-Z G(V-EG)-eta_M M_old-K(V-EK)",
+      "intrinsic_adaptation_states_per_E_cell": 2,
+      "reference": "scripts/run_topic4_global_feedback_response.py; scripts/run_topic4_rhythm_preserving_feedback.py"
+    },
+    {
+      "stage": "Current unified Z/G/M",
+      "membrane_feedback": "-Z II-Z G(V-EG)-A; A=eta_M M",
+      "intrinsic_adaptation_states_per_E_cell": 1
+    }
+  ],
+  "literature": [
+    {
+      "citation": "Liou et al. (2020), A model for focal seizure onset, propagation, evolution, and progression. eLife 9:e50927",
+      "doi": "10.7554/eLife.50927",
+      "url": "https://elifesciences.org/articles/50927",
+      "verified_author": "LF Abbott",
+      "support": [
+        "Eq.4: firing-driven slow afterhyperpolarization potassium conductance",
+        "Eq.5: local plus spatially uniform inhibitory kernel",
+        "Nonlocal inhibition and sAHP cooperate in wavefront annihilation; longer silent intervals permit inhibition recovery"
+      ],
+      "distinction": "Our global-rate gate, time constants, single current-state merger and reference-voltage conversion are implementation choices, not a literal reproduction of these equations."
+    },
+    {
+      "citation": "Liou et al. (2018), Role of inhibitory control in modulating focal seizure spread. Brain 141:2083-2097",
+      "doi": "10.1093/brain/awy116",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29757347/",
+      "support": [
+        "Rodent focal 4-AP model: widespread PV interneuron activity beyond restricted ictal bursts",
+        "Distant inhibition blockade permits distal recruitment"
+      ],
+      "distinction": "Evidence for broad inhibitory recruitment and propagation control, not direct proof of whole-seizure termination by our G variable."
+    }
+  ],
+  "presentation": {
+    "global_inhibition_color": "#0072B2",
+    "unified_adaptation_color": "#C35A00",
+    "math_format": "Markdown LaTeX with MathJax color groups",
+    "comparison": "Original baseline, intermediate separate M/K, and current single A are distinguished."
+  },
+  "simplification_boundary": "One fewer intrinsic adaptation state versus separate M/K; omits independent M/K timescales and voltage-dependent K conductance. No claim of improved patient fit or isolated causal contribution based on the continuous trajectory alone.",
+  "validation": {
+    "mathjax_version": "3.2.2",
+    "formula_expressions_rendered": 86,
+    "display_equations": 4,
+    "math_errors": 0,
+    "figure_caption_tail_unchanged": true
+  }
 }
