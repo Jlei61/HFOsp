@@ -1,0 +1,35 @@
+{
+  "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+  "producer": "fig6_shared_logistic_feedback.py",
+  "producer_sha256": "d5e9dca8382cbcbfe23204c5e0a7bdd5b7fe000a9e6355dea55e368a5cc7e133",
+  "equations": {
+    "sigmoid": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)), k>0",
+    "global_feedback": "tau_G*dG/dt=G_max*S(R)-G",
+    "adaptation": "dM_i/dt=-M_i/tau_M(R)+[a0/tau_M(R)+a1*S(R)]/eta_M*sum_n delta(t-t_i^n)",
+    "membrane": "tau_m*dV_i/dt=-V_i+IE_i-Z_i*II_i-Z_i*G*(V_i-EG)-eta_M*M_i",
+    "tau_M": "5s if causal all-E R<=5Hz, otherwise 0.5s (unchanged)",
+    "resource": "5s*dZ_i/dt=1{II_i+(18-EG)*G<95.19851312666987}-Z_i (unchanged)"
+  },
+  "parameters": {
+    "R0_Hz": 350.0,
+    "k_Hz": 40.0,
+    "G_max": 30,
+    "tau_G_s": 0.5,
+    "eta_M": 0.0005,
+    "a0_mV_s": 0.0005,
+    "a1_mV": 7.68,
+    "tau_M_active_s": 0.5,
+    "tau_M_quiet_s": 5,
+    "R_quiet_Hz": 5,
+    "tau_Z_s": 5,
+    "I_threshold_mV": 95.19851312666987,
+    "V_ref_mV": 18,
+    "E_G_mV": -17.662847938268442,
+    "rate_filter_ms": 15
+  },
+  "independent_K_state": false,
+  "independent_K_conductance": false,
+  "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+  "scope": "Both activity gates are logistic. The pre-existing Z threshold and M retention-time rule remain unchanged.",
+  "notation": "M is adaptation state; eta_M M is effective current. k denotes sigmoid width; n indexes spikes in the report."
+}

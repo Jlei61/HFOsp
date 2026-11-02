@@ -1,10 +1,11 @@
 {
   "checked_on": "2026-11-02",
   "displayed_figure": {
-    "source": "results/paper-ready-figure/fig6/candidates/shared_logistic_feedback_20261102/figures/fig6-complete-layout.png",
-    "sha256": "3f43c20efa3f5144b9725fc7e31608e1751d9a1547d1a13d4b5dd91eeb248a1b",
-    "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
-    "source_simulation_rerun": true
+    "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.png",
+    "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2",
+    "source_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+    "source_simulation_rerun": false,
+    "restored_by_author_request": true
   },
   "runs": {
     "figure6_clip": {
@@ -124,7 +125,7 @@
       }
     }
   },
-  "conclusion": "Displayed Figure6 A-D now use the shared logistic for G and M. The prior clip figure and G-only Hill analysis are retained here as historical lineage.",
+  "conclusion": "The report restores the previous clip-based Figure6 and its original captions by author request. Shared-logistic model equations and native validation are retained separately; the restored image is not relabeled as logistic.",
   "smooth_baseline_validation": {
     "status": "PASS_NATIVE_WORKPOINT_VALIDATION",
     "completed_epoch": 1793377969.2429812,
@@ -158,5 +159,11 @@
     "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2",
     "source_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
     "source_simulation_rerun": false
+  },
+  "logistic_candidate_not_selected_for_report": {
+    "source": "results/paper-ready-figure/fig6/candidates/shared_logistic_feedback_20261102/figures/fig6-complete-layout.png",
+    "sha256": "3f43c20efa3f5144b9725fc7e31608e1751d9a1547d1a13d4b5dd91eeb248a1b",
+    "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+    "source_simulation_rerun": true
   }
 }

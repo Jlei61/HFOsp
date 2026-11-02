@@ -24,12 +24,12 @@
       "sha256": "10fc67183e23b6a088ba4b999d62eeb604444dea83cfe05d05747d7f705fb702"
     },
     "figures/current/Figure6.png": {
-      "source": "results/paper-ready-figure/fig6/candidates/shared_logistic_feedback_20261102/figures/fig6-complete-layout.png",
-      "sha256": "3f43c20efa3f5144b9725fc7e31608e1751d9a1547d1a13d4b5dd91eeb248a1b"
+      "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.png",
+      "sha256": "f7ebd35a305c53dc9832a73dfaac05374bf0bf51b3a75ecfa085642691ebf5b2"
     },
     "figures/current/Figure6.pdf": {
-      "source": "results/paper-ready-figure/fig6/candidates/shared_logistic_feedback_20261102/figures/fig6-complete-layout.pdf",
-      "sha256": "4e7eaaee9332ff651e74234a8bfc89eb884dcdb9a5765c0a38e4cdf41fd0e3ea"
+      "source": "results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-complete-layout.pdf",
+      "sha256": "34069bc6a0457d3f3af2b13aea13265bb9c1facc15f685822ed0bc4a49daf423"
     },
     "figures/previous/Figure4.png": {
       "source": "docs/weekly_reports/2026-10-23_epilepsy_figures/figures/current/Figure4.png",
@@ -48,14 +48,14 @@
       "sha256": "fe535071eeb26c95d11c3294b0288f270dc5a8e7f418bff7f94553c9ec65a1a7"
     }
   },
-  "figure6_display_version": "shared_logistic_feedback_20261102",
+  "figure6_display_version": "selected_r08_r09_normalized_onsets_20261102",
   "figure6_historical_E_not_recomputed": true,
   "figures_not_promoted_by_report": [
     "Figure5",
     "Figure6"
   ],
   "methods_sources": "source/fig6_methods_sources.json",
-  "report_sha256": "432fc610d650232c9868f678736d9678a925e9b54c1677c668b5509a43742fca",
+  "report_sha256": "10018802abe7bb16b36e58fc604c4f3d4ee603446dd70f70a6b07b150c27f143",
   "reader_order": [
     "one_sentence_overview",
     "part1_model_methods_and_equations",
@@ -67,5 +67,8 @@
   ],
   "report_title": "癫痫模型更新与Figure4到6重排",
   "feedback_function_audit": "source/fig6_feedback_function_audit.json",
-  "logistic_validation": "source/fig6_logistic_validation.json"
+  "logistic_validation": "source/fig6_logistic_validation.json",
+  "figure6_author_direction": "Restore the previous Figure6 and its captions; the logistic replacement changed the intended semantics.",
+  "model_text": "Shared logistic G/M formulation retained; its validation is distinct from the restored figure data.",
+  "updated_model_effective": "source/shared_logistic_effective_model.json"
 }

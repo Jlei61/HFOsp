@@ -1,5 +1,7 @@
 # Figure 6：共享 logistic 连续仿真候选
 
+> **作者展示决定（2026-11-02）**：本候选改变了原有展示语义，不用于当前周报。周报已恢复此前 Figure 6 及图注；本目录保留共享 logistic 的仿真和绘图结果。
+
 全局抑制 G 与适应增量 M 共用参数化 logistic，替换此前两处 clip。采用同一网络、同一噪声种子 9108404 的 120 s 原生轨迹；R0=350 Hz、k=40 Hz，其余参数保持。
 
 [完整 PNG](figures/fig6-complete-layout.png) · [PDF](figures/fig6-complete-layout.pdf) · [详细图注](caption_zh.md) · [显示配置](display_configuration.json)
