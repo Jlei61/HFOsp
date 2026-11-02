@@ -1,0 +1,811 @@
+{
+  "patient": "E1146",
+  "n_candidate_seizures": 25,
+  "n_model_examples": 2,
+  "selection": "For each fixed model window, maximize signed Pearson correlation across all 25 complete exact-band patient seizure fields; lower seizure index breaks ties.",
+  "candidate_support": "Complete 15-contact clinical-onset 0-10 s, CAR, 1-150 Hz, EEG -120 to -90 s robust-z baseline.",
+  "positive_mean_gate_changes_selection": false,
+  "template_type_restriction": false,
+  "field_scoring": "Frozen shared-A identity-kernel contact-evaluated fields; no mirroring or sign flipping.",
+  "matches": [
+    {
+      "model": "A",
+      "reference": "A",
+      "winner": {
+        "model": "A",
+        "seizure_idx": 12,
+        "public_seizure": "SZ13",
+        "existing_type": "TB",
+        "signed_field_r": 0.8504053085220714,
+        "signed_contact_r": 0.6269464032783231,
+        "mean_robust_z": 6.84711613612522,
+        "positive_mean_enhancement": true,
+        "rank": 1
+      },
+      "patient": {
+        "seizure_idx": 12,
+        "public_seizure": "SZ13",
+        "existing_type": "TB",
+        "values": [
+          7.516083755653014,
+          8.725836520977673,
+          7.0263108968741905,
+          4.910784173530594,
+          5.1199405544015875,
+          4.288399817927517,
+          4.8130238018504805,
+          6.681475977272445,
+          6.725205234038724,
+          5.858265138131489,
+          6.622493366435354,
+          10.383639995724362,
+          9.361982887898812,
+          7.518573172335132,
+          7.1547267488269215
+        ],
+        "mean_robust_z": 6.84711613612522,
+        "field": [
+          7.818575337929005,
+          7.918048555291717,
+          7.286838375819511,
+          5.6787632526024225,
+          4.791353511711199,
+          4.701065122954238,
+          5.155449605608425,
+          6.195764708821824,
+          6.477533261960452,
+          6.594372201450781,
+          7.7274719891042185,
+          9.056675619569953,
+          8.93947565569963,
+          7.921604557468789,
+          7.422204806196258
+        ],
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_manual_core_release_v1/patient_readout_v1/per_seizure/seizure_012.json",
+        "source_sha256": "1f03634484ef6415143e74fbe8bb2b5bcce1894e10230b607ab5f3163a12a0c4",
+        "checkpoint": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/tspectral_field_concordance/per_subject/clinical_onset_shared_field/epilepsiae_1146/seizure_012.json",
+        "checkpoint_max_error": 0.0,
+        "extraction": {
+          "seizure_id": "114601200102",
+          "reference": "car",
+          "sample_rate_hz": 1024.0,
+          "eeg_onset_minus_clinical_sec": -1.6708979606628418,
+          "extraction_pre_sec": 122.67089796066284,
+          "extraction_post_sec": 11.0,
+          "band_hz": [
+            1.0,
+            150.0
+          ],
+          "is_exact_1_150": true,
+          "spectral_window_sec": 1.0,
+          "spectral_hop_sec": 0.5,
+          "baseline_reference": "EEG onset",
+          "baseline_eeg_sec": [
+            -120.0,
+            -90.0
+          ],
+          "baseline_clinical_sec": [
+            -121.67089796066284,
+            -91.67089796066284
+          ],
+          "clinical_window_sec": [
+            0.0,
+            10.0
+          ],
+          "n_baseline_frames": 61,
+          "n_target_contacts": 15,
+          "n_matched_contacts": 15,
+          "n_finite_contacts": 15,
+          "missing_contacts": []
+        }
+      },
+      "model_robust_z": [
+        1.1042666930126295,
+        0.4871419565625353,
+        0.6989076273364798,
+        2.7557435849532173,
+        -15.521480562833124,
+        -6.581767433900968,
+        -5.569821868067657,
+        -5.760592045066909,
+        -11.060978954911468,
+        -4.221168755612005,
+        -1.1244534377503688,
+        3.1013513094174043,
+        16.31153004416725,
+        3.2691270601545384,
+        -3.20311799099721
+      ],
+      "model_window_s": [
+        8.85,
+        9.85
+      ]
+    },
+    {
+      "model": "B",
+      "reference": "B",
+      "winner": {
+        "model": "B",
+        "seizure_idx": 13,
+        "public_seizure": "SZ14",
+        "existing_type": "TA",
+        "signed_field_r": 0.9195597617527679,
+        "signed_contact_r": 0.8252292889422721,
+        "mean_robust_z": 0.9585474065584926,
+        "positive_mean_enhancement": true,
+        "rank": 1
+      },
+      "patient": {
+        "seizure_idx": 13,
+        "public_seizure": "SZ14",
+        "existing_type": "TA",
+        "values": [
+          0.6546528620552305,
+          0.5105146984086213,
+          1.0158703360999495,
+          0.5261653527231985,
+          1.4557383489123246,
+          1.170983248801463,
+          0.9254265974739853,
+          1.4596803726422096,
+          2.1707542803843385,
+          1.341692662476731,
+          0.9608783759969189,
+          0.47583405712964566,
+          0.4176534984921225,
+          0.6770542465810183,
+          0.61531216019963
+        ],
+        "mean_robust_z": 0.9585474065584926,
+        "field": [
+          0.6309063723397931,
+          0.6904552809000123,
+          0.7682627021814978,
+          0.6620523236122938,
+          1.3124923196460752,
+          1.1860333409444097,
+          1.1478741665999008,
+          1.485197362545539,
+          1.6810833608084774,
+          1.4313845365108477,
+          0.9182473308328843,
+          0.6139052277106154,
+          0.5175743610435731,
+          0.5942049977923136,
+          0.6255327513916883
+        ],
+        "source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_manual_core_release_v1/patient_readout_v1/per_seizure/seizure_013.json",
+        "source_sha256": "63dc35577b5497e12fa1dc47f9fa814aa1188837f390a8d1932fff4a185ad6dc",
+        "checkpoint": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/tspectral_field_concordance/per_subject/clinical_onset_shared_field/epilepsiae_1146/seizure_013.json",
+        "checkpoint_max_error": 0.0,
+        "extraction": {
+          "seizure_id": "114601300102",
+          "reference": "car",
+          "sample_rate_hz": 1024.0,
+          "eeg_onset_minus_clinical_sec": -0.8261721134185791,
+          "extraction_pre_sec": 121.82617211341858,
+          "extraction_post_sec": 11.0,
+          "band_hz": [
+            1.0,
+            150.0
+          ],
+          "is_exact_1_150": true,
+          "spectral_window_sec": 1.0,
+          "spectral_hop_sec": 0.5,
+          "baseline_reference": "EEG onset",
+          "baseline_eeg_sec": [
+            -120.0,
+            -90.0
+          ],
+          "baseline_clinical_sec": [
+            -120.82617211341858,
+            -90.82617211341858
+          ],
+          "clinical_window_sec": [
+            0.0,
+            10.0
+          ],
+          "n_baseline_frames": 61,
+          "n_target_contacts": 15,
+          "n_matched_contacts": 15,
+          "n_finite_contacts": 15,
+          "missing_contacts": []
+        }
+      },
+      "model_robust_z": [
+        2.365632153682675,
+        0.9110408861034436,
+        0.8000277703909017,
+        1.8056997579246552,
+        9.617359809675992,
+        4.065166387244317,
+        2.905547075888293,
+        6.882465274362421,
+        19.7566716107781,
+        4.723612384687925,
+        2.976602890426845,
+        5.1085143608358425,
+        3.998511357571816,
+        1.0559561487290365,
+        1.1482746486039865
+      ],
+      "model_window_s": [
+        59.3,
+        60.3
+      ]
+    }
+  ],
+  "all_candidates": [
+    {
+      "model": "A",
+      "seizure_idx": 12,
+      "public_seizure": "SZ13",
+      "existing_type": "TB",
+      "signed_field_r": 0.8504053085220714,
+      "signed_contact_r": 0.6269464032783231,
+      "mean_robust_z": 6.84711613612522,
+      "positive_mean_enhancement": true,
+      "rank": 1
+    },
+    {
+      "model": "A",
+      "seizure_idx": 10,
+      "public_seizure": "SZ11",
+      "existing_type": "TA",
+      "signed_field_r": 0.8058593893008794,
+      "signed_contact_r": 0.6403898437919255,
+      "mean_robust_z": 7.797380608510647,
+      "positive_mean_enhancement": true,
+      "rank": 2
+    },
+    {
+      "model": "A",
+      "seizure_idx": 8,
+      "public_seizure": "SZ9",
+      "existing_type": "TA",
+      "signed_field_r": 0.7359384376843191,
+      "signed_contact_r": 0.43667582099677116,
+      "mean_robust_z": 6.149450852726355,
+      "positive_mean_enhancement": true,
+      "rank": 3
+    },
+    {
+      "model": "A",
+      "seizure_idx": 15,
+      "public_seizure": "SZ16",
+      "existing_type": "TA",
+      "signed_field_r": 0.7276901603354372,
+      "signed_contact_r": 0.5164719871254418,
+      "mean_robust_z": -1.6256726389187903,
+      "positive_mean_enhancement": false,
+      "rank": 4
+    },
+    {
+      "model": "A",
+      "seizure_idx": 1,
+      "public_seizure": "SZ2",
+      "existing_type": "TA",
+      "signed_field_r": 0.7084253269495974,
+      "signed_contact_r": 0.5445858030184761,
+      "mean_robust_z": 3.2956223794709434,
+      "positive_mean_enhancement": true,
+      "rank": 5
+    },
+    {
+      "model": "A",
+      "seizure_idx": 9,
+      "public_seizure": "SZ10",
+      "existing_type": "TA",
+      "signed_field_r": 0.6656727933046623,
+      "signed_contact_r": 0.5873835329576977,
+      "mean_robust_z": 7.51058703460817,
+      "positive_mean_enhancement": true,
+      "rank": 6
+    },
+    {
+      "model": "A",
+      "seizure_idx": 2,
+      "public_seizure": "SZ3",
+      "existing_type": "TA",
+      "signed_field_r": 0.5729074764047812,
+      "signed_contact_r": 0.47429829110785826,
+      "mean_robust_z": 2.568671502998033,
+      "positive_mean_enhancement": true,
+      "rank": 7
+    },
+    {
+      "model": "A",
+      "seizure_idx": 4,
+      "public_seizure": "SZ5",
+      "existing_type": "TB",
+      "signed_field_r": 0.5683470598561196,
+      "signed_contact_r": 0.5250864558326619,
+      "mean_robust_z": 8.312195521181225,
+      "positive_mean_enhancement": true,
+      "rank": 8
+    },
+    {
+      "model": "A",
+      "seizure_idx": 6,
+      "public_seizure": "SZ7",
+      "existing_type": "TB",
+      "signed_field_r": 0.5676314372185594,
+      "signed_contact_r": 0.3365663845431861,
+      "mean_robust_z": 7.646809709864643,
+      "positive_mean_enhancement": true,
+      "rank": 9
+    },
+    {
+      "model": "A",
+      "seizure_idx": 0,
+      "public_seizure": "SZ1",
+      "existing_type": "TB",
+      "signed_field_r": 0.4281277223232402,
+      "signed_contact_r": 0.5001161367899474,
+      "mean_robust_z": 4.149646574232501,
+      "positive_mean_enhancement": true,
+      "rank": 10
+    },
+    {
+      "model": "A",
+      "seizure_idx": 23,
+      "public_seizure": "SZ24",
+      "existing_type": "TA",
+      "signed_field_r": 0.4238484146000651,
+      "signed_contact_r": 0.17080065684178464,
+      "mean_robust_z": 1.5548905373167368,
+      "positive_mean_enhancement": true,
+      "rank": 11
+    },
+    {
+      "model": "A",
+      "seizure_idx": 11,
+      "public_seizure": "SZ12",
+      "existing_type": "TB",
+      "signed_field_r": 0.3190255062405938,
+      "signed_contact_r": -0.02429925746293445,
+      "mean_robust_z": 8.680138135974337,
+      "positive_mean_enhancement": true,
+      "rank": 12
+    },
+    {
+      "model": "A",
+      "seizure_idx": 7,
+      "public_seizure": "SZ8",
+      "existing_type": "TA",
+      "signed_field_r": 0.25280317547473374,
+      "signed_contact_r": -0.028439786379590815,
+      "mean_robust_z": 8.920760259585224,
+      "positive_mean_enhancement": true,
+      "rank": 13
+    },
+    {
+      "model": "A",
+      "seizure_idx": 19,
+      "public_seizure": "SZ20",
+      "existing_type": "TA",
+      "signed_field_r": 0.23458079281718172,
+      "signed_contact_r": 0.15497119407499213,
+      "mean_robust_z": 0.7606914665227065,
+      "positive_mean_enhancement": true,
+      "rank": 14
+    },
+    {
+      "model": "A",
+      "seizure_idx": 24,
+      "public_seizure": "SZ25",
+      "existing_type": "TA",
+      "signed_field_r": 0.19913263808329973,
+      "signed_contact_r": -0.19068529238949966,
+      "mean_robust_z": -1.6373034469336347,
+      "positive_mean_enhancement": false,
+      "rank": 15
+    },
+    {
+      "model": "A",
+      "seizure_idx": 3,
+      "public_seizure": "SZ4",
+      "existing_type": "TA",
+      "signed_field_r": 0.14754541633412743,
+      "signed_contact_r": 0.21735392744970417,
+      "mean_robust_z": 4.088493133029344,
+      "positive_mean_enhancement": true,
+      "rank": 16
+    },
+    {
+      "model": "A",
+      "seizure_idx": 5,
+      "public_seizure": "SZ6",
+      "existing_type": "TA",
+      "signed_field_r": 0.1003447463554618,
+      "signed_contact_r": 0.3081715043408116,
+      "mean_robust_z": 4.522303107544466,
+      "positive_mean_enhancement": true,
+      "rank": 17
+    },
+    {
+      "model": "A",
+      "seizure_idx": 25,
+      "public_seizure": "SZ26",
+      "existing_type": "TA",
+      "signed_field_r": 0.044642416775380334,
+      "signed_contact_r": -0.2760698646206325,
+      "mean_robust_z": 1.5558162974122973,
+      "positive_mean_enhancement": true,
+      "rank": 18
+    },
+    {
+      "model": "A",
+      "seizure_idx": 14,
+      "public_seizure": "SZ15",
+      "existing_type": "TA",
+      "signed_field_r": -0.053419954016150836,
+      "signed_contact_r": 0.049453242093854224,
+      "mean_robust_z": -3.242270236465674,
+      "positive_mean_enhancement": false,
+      "rank": 19
+    },
+    {
+      "model": "A",
+      "seizure_idx": 20,
+      "public_seizure": "SZ21",
+      "existing_type": "TA",
+      "signed_field_r": -0.5248019566855021,
+      "signed_contact_r": -0.3557415406276692,
+      "mean_robust_z": -0.3207957295253279,
+      "positive_mean_enhancement": false,
+      "rank": 20
+    },
+    {
+      "model": "A",
+      "seizure_idx": 16,
+      "public_seizure": "SZ17",
+      "existing_type": "TA",
+      "signed_field_r": -0.6882615378295475,
+      "signed_contact_r": -0.6157598098213064,
+      "mean_robust_z": 1.3987198820245899,
+      "positive_mean_enhancement": true,
+      "rank": 21
+    },
+    {
+      "model": "A",
+      "seizure_idx": 21,
+      "public_seizure": "SZ22",
+      "existing_type": "TB",
+      "signed_field_r": -0.76853116599563,
+      "signed_contact_r": -0.607914234323463,
+      "mean_robust_z": 1.361856238099284,
+      "positive_mean_enhancement": true,
+      "rank": 22
+    },
+    {
+      "model": "A",
+      "seizure_idx": 18,
+      "public_seizure": "SZ19",
+      "existing_type": "TB",
+      "signed_field_r": -0.7908877108380944,
+      "signed_contact_r": -0.6254948731092383,
+      "mean_robust_z": 1.618743448425711,
+      "positive_mean_enhancement": true,
+      "rank": 23
+    },
+    {
+      "model": "A",
+      "seizure_idx": 22,
+      "public_seizure": "SZ23",
+      "existing_type": "TA",
+      "signed_field_r": -0.8041042064361327,
+      "signed_contact_r": -0.569688496401122,
+      "mean_robust_z": -0.3246341706281267,
+      "positive_mean_enhancement": false,
+      "rank": 24
+    },
+    {
+      "model": "A",
+      "seizure_idx": 13,
+      "public_seizure": "SZ14",
+      "existing_type": "TA",
+      "signed_field_r": -0.8715619646082544,
+      "signed_contact_r": -0.7682874575337746,
+      "mean_robust_z": 0.9585474065584926,
+      "positive_mean_enhancement": true,
+      "rank": 25
+    },
+    {
+      "model": "B",
+      "seizure_idx": 13,
+      "public_seizure": "SZ14",
+      "existing_type": "TA",
+      "signed_field_r": 0.9195597617527679,
+      "signed_contact_r": 0.8252292889422721,
+      "mean_robust_z": 0.9585474065584926,
+      "positive_mean_enhancement": true,
+      "rank": 1
+    },
+    {
+      "model": "B",
+      "seizure_idx": 16,
+      "public_seizure": "SZ17",
+      "existing_type": "TA",
+      "signed_field_r": 0.7650857840676639,
+      "signed_contact_r": 0.5770211987910554,
+      "mean_robust_z": 1.3987198820245899,
+      "positive_mean_enhancement": true,
+      "rank": 2
+    },
+    {
+      "model": "B",
+      "seizure_idx": 22,
+      "public_seizure": "SZ23",
+      "existing_type": "TA",
+      "signed_field_r": 0.47751396129648627,
+      "signed_contact_r": 0.23756084797053761,
+      "mean_robust_z": -0.3246341706281267,
+      "positive_mean_enhancement": false,
+      "rank": 3
+    },
+    {
+      "model": "B",
+      "seizure_idx": 5,
+      "public_seizure": "SZ6",
+      "existing_type": "TA",
+      "signed_field_r": 0.47312342585886275,
+      "signed_contact_r": 0.049212462106433416,
+      "mean_robust_z": 4.522303107544466,
+      "positive_mean_enhancement": true,
+      "rank": 4
+    },
+    {
+      "model": "B",
+      "seizure_idx": 18,
+      "public_seizure": "SZ19",
+      "existing_type": "TB",
+      "signed_field_r": 0.30308036825695367,
+      "signed_contact_r": 0.24427066358400779,
+      "mean_robust_z": 1.618743448425711,
+      "positive_mean_enhancement": true,
+      "rank": 5
+    },
+    {
+      "model": "B",
+      "seizure_idx": 21,
+      "public_seizure": "SZ22",
+      "existing_type": "TB",
+      "signed_field_r": 0.29231989611886106,
+      "signed_contact_r": 0.14590293646037278,
+      "mean_robust_z": 1.361856238099284,
+      "positive_mean_enhancement": true,
+      "rank": 6
+    },
+    {
+      "model": "B",
+      "seizure_idx": 7,
+      "public_seizure": "SZ8",
+      "existing_type": "TA",
+      "signed_field_r": 0.13259911699447538,
+      "signed_contact_r": -0.07472415039689888,
+      "mean_robust_z": 8.920760259585224,
+      "positive_mean_enhancement": true,
+      "rank": 7
+    },
+    {
+      "model": "B",
+      "seizure_idx": 20,
+      "public_seizure": "SZ21",
+      "existing_type": "TA",
+      "signed_field_r": 0.11849923983199517,
+      "signed_contact_r": 0.11130412804248892,
+      "mean_robust_z": -0.3207957295253279,
+      "positive_mean_enhancement": false,
+      "rank": 8
+    },
+    {
+      "model": "B",
+      "seizure_idx": 0,
+      "public_seizure": "SZ1",
+      "existing_type": "TB",
+      "signed_field_r": 0.014759272903862272,
+      "signed_contact_r": -0.11531367009191679,
+      "mean_robust_z": 4.149646574232501,
+      "positive_mean_enhancement": true,
+      "rank": 9
+    },
+    {
+      "model": "B",
+      "seizure_idx": 3,
+      "public_seizure": "SZ4",
+      "existing_type": "TA",
+      "signed_field_r": -0.014041110684827347,
+      "signed_contact_r": 0.03806396819426973,
+      "mean_robust_z": 4.088493133029344,
+      "positive_mean_enhancement": true,
+      "rank": 10
+    },
+    {
+      "model": "B",
+      "seizure_idx": 4,
+      "public_seizure": "SZ5",
+      "existing_type": "TB",
+      "signed_field_r": -0.0804785320473722,
+      "signed_contact_r": -0.11322322447584787,
+      "mean_robust_z": 8.312195521181225,
+      "positive_mean_enhancement": true,
+      "rank": 11
+    },
+    {
+      "model": "B",
+      "seizure_idx": 9,
+      "public_seizure": "SZ10",
+      "existing_type": "TA",
+      "signed_field_r": -0.10842241295676314,
+      "signed_contact_r": -0.08342476712686903,
+      "mean_robust_z": 7.51058703460817,
+      "positive_mean_enhancement": true,
+      "rank": 12
+    },
+    {
+      "model": "B",
+      "seizure_idx": 11,
+      "public_seizure": "SZ12",
+      "existing_type": "TB",
+      "signed_field_r": -0.12503314328372403,
+      "signed_contact_r": 0.06307194051810279,
+      "mean_robust_z": 8.680138135974337,
+      "positive_mean_enhancement": true,
+      "rank": 13
+    },
+    {
+      "model": "B",
+      "seizure_idx": 19,
+      "public_seizure": "SZ20",
+      "existing_type": "TA",
+      "signed_field_r": -0.1657807688756795,
+      "signed_contact_r": -0.16470511051024006,
+      "mean_robust_z": 0.7606914665227065,
+      "positive_mean_enhancement": true,
+      "rank": 14
+    },
+    {
+      "model": "B",
+      "seizure_idx": 14,
+      "public_seizure": "SZ15",
+      "existing_type": "TA",
+      "signed_field_r": -0.2017445582035567,
+      "signed_contact_r": -0.051982374404110396,
+      "mean_robust_z": -3.242270236465674,
+      "positive_mean_enhancement": false,
+      "rank": 15
+    },
+    {
+      "model": "B",
+      "seizure_idx": 12,
+      "public_seizure": "SZ13",
+      "existing_type": "TB",
+      "signed_field_r": -0.3938095381691833,
+      "signed_contact_r": -0.10761851166503408,
+      "mean_robust_z": 6.84711613612522,
+      "positive_mean_enhancement": true,
+      "rank": 16
+    },
+    {
+      "model": "B",
+      "seizure_idx": 2,
+      "public_seizure": "SZ3",
+      "existing_type": "TA",
+      "signed_field_r": -0.47275330453058706,
+      "signed_contact_r": -0.44655606617433014,
+      "mean_robust_z": 2.568671502998033,
+      "positive_mean_enhancement": true,
+      "rank": 17
+    },
+    {
+      "model": "B",
+      "seizure_idx": 15,
+      "public_seizure": "SZ16",
+      "existing_type": "TA",
+      "signed_field_r": -0.48782236090597403,
+      "signed_contact_r": -0.27853275643113046,
+      "mean_robust_z": -1.6256726389187903,
+      "positive_mean_enhancement": false,
+      "rank": 18
+    },
+    {
+      "model": "B",
+      "seizure_idx": 6,
+      "public_seizure": "SZ7",
+      "existing_type": "TB",
+      "signed_field_r": -0.5365892624005357,
+      "signed_contact_r": -0.2912606218777816,
+      "mean_robust_z": 7.646809709864643,
+      "positive_mean_enhancement": true,
+      "rank": 19
+    },
+    {
+      "model": "B",
+      "seizure_idx": 1,
+      "public_seizure": "SZ2",
+      "existing_type": "TA",
+      "signed_field_r": -0.5502419135285566,
+      "signed_contact_r": -0.33633853623427246,
+      "mean_robust_z": 3.2956223794709434,
+      "positive_mean_enhancement": true,
+      "rank": 20
+    },
+    {
+      "model": "B",
+      "seizure_idx": 10,
+      "public_seizure": "SZ11",
+      "existing_type": "TA",
+      "signed_field_r": -0.5589664940500925,
+      "signed_contact_r": -0.46148665531745603,
+      "mean_robust_z": 7.797380608510647,
+      "positive_mean_enhancement": true,
+      "rank": 21
+    },
+    {
+      "model": "B",
+      "seizure_idx": 25,
+      "public_seizure": "SZ26",
+      "existing_type": "TA",
+      "signed_field_r": -0.5796644104949908,
+      "signed_contact_r": -0.23897170849503355,
+      "mean_robust_z": 1.5558162974122973,
+      "positive_mean_enhancement": true,
+      "rank": 22
+    },
+    {
+      "model": "B",
+      "seizure_idx": 24,
+      "public_seizure": "SZ25",
+      "existing_type": "TA",
+      "signed_field_r": -0.6700366379250767,
+      "signed_contact_r": -0.16464154265674938,
+      "mean_robust_z": -1.6373034469336347,
+      "positive_mean_enhancement": false,
+      "rank": 23
+    },
+    {
+      "model": "B",
+      "seizure_idx": 8,
+      "public_seizure": "SZ9",
+      "existing_type": "TA",
+      "signed_field_r": -0.751923014294454,
+      "signed_contact_r": -0.3821460347202519,
+      "mean_robust_z": 6.149450852726355,
+      "positive_mean_enhancement": true,
+      "rank": 24
+    },
+    {
+      "model": "B",
+      "seizure_idx": 23,
+      "public_seizure": "SZ24",
+      "existing_type": "TA",
+      "signed_field_r": -0.8162601727924123,
+      "signed_contact_r": -0.42722165416609226,
+      "mean_robust_z": 1.5548905373167368,
+      "positive_mean_enhancement": true,
+      "rank": 25
+    }
+  ],
+  "signed_similarity_matrix": [
+    [
+      0.8504053085220714,
+      -0.8715619646082544
+    ],
+    [
+      -0.3938095381691833,
+      0.9195597617527679
+    ]
+  ],
+  "matrix_rows": [
+    "Model Onset A",
+    "Model Onset B"
+  ],
+  "matrix_columns": [
+    "Reference seizure A",
+    "Reference seizure B"
+  ],
+  "interpretation": "Model-selected descriptive examples; correlations are selection maxima, not held-out validation or a new cohort result.",
+  "reference_A_B_meaning": "Paired example identifiers; patient frozen TA/TB labels are reported separately.",
+  "model_fields_and_windows_unchanged": true
+}

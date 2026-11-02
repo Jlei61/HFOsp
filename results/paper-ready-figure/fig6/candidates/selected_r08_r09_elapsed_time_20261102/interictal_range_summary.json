@@ -1,0 +1,91 @@
+{
+  "observable": "All-E mean Z, eta_M M, and 5-ms-binned rate smoothed with sigma=5 ms",
+  "statistical_unit": "One continuous seed 9108404 realization; three descriptive interictal intervals",
+  "previous_viewport": [
+    [
+      0.7,
+      1.0
+    ],
+    [
+      0.0,
+      0.1
+    ],
+    [
+      0.0,
+      250.0
+    ]
+  ],
+  "viewport": [
+    [
+      0.75,
+      1.0
+    ],
+    [
+      0.0,
+      1.5
+    ],
+    [
+      0.0,
+      200.0
+    ]
+  ],
+  "intervals": [
+    {
+      "time_s": [
+        0.0,
+        8.71
+      ],
+      "samples": 1742,
+      "minimum_Z_etaM_rate": [
+        0.7732724701656897,
+        7.810625413999143e-10,
+        0.0
+      ],
+      "maximum_Z_etaM_rate": [
+        1.0,
+        0.024217245188024854,
+        182.8279984374667
+      ],
+      "all_sample_rate_percentile95_Hz": 87.45504403172559,
+      "fraction_within_interictal_viewport": 1.0
+    },
+    {
+      "time_s": [
+        46.95,
+        59.109
+      ],
+      "samples": 2432,
+      "minimum_Z_etaM_rate": [
+        0.7711707748885807,
+        0.01510751555393476,
+        0.0
+      ],
+      "maximum_Z_etaM_rate": [
+        0.9974194945685831,
+        1.3868565990186783,
+        166.0331376993612
+      ],
+      "all_sample_rate_percentile95_Hz": 74.04062402195412,
+      "fraction_within_interictal_viewport": 1.0
+    },
+    {
+      "time_s": [
+        107.35,
+        118.0
+      ],
+      "samples": 2130,
+      "minimum_Z_etaM_rate": [
+        0.7824069924888171,
+        0.017665052626443384,
+        0.0
+      ],
+      "maximum_Z_etaM_rate": [
+        0.9979477900607424,
+        0.9503495994737222,
+        177.89411637719178
+      ],
+      "all_sample_rate_percentile95_Hz": 90.00464633503479,
+      "fraction_within_interictal_viewport": 1.0
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "unchanged_panel_files": [
+    "fig6-panela.png",
+    "fig6-panela.pdf",
+    "fig6-panela.svg",
+    "fig6-panelc.png",
+    "fig6-panelc.pdf",
+    "fig6-panelc.svg",
+    "fig6-paneld.png",
+    "fig6-paneld.pdf",
+    "fig6-paneld.svg",
+    "fig6-panele.png",
+    "fig6-panele.pdf",
+    "fig6-panele.svg"
+  ],
+  "unchanged_data_files": [
+    "trajectory_data.npz",
+    "stage_readouts.npz",
+    "normalized_propagation_fields.npz",
+    "model_selected_patient_arrays.npz",
+    "cohort_statistics_selected.json"
+  ],
+  "absolute_sample_times_verified": {
+    "fig6-panelb": {
+      "segment_counts": [
+        23999,
+        667
+      ],
+      "color_quantity": "simulation time",
+      "color_units": "s",
+      "color_limits": [
+        0,
+        120.0
+      ],
+      "manual_black_override": false
+    },
+    "fig6-panelb-interictal": {
+      "segment_counts": [
+        667
+      ],
+      "color_quantity": "simulation time",
+      "color_units": "s",
+      "color_limits": [
+        0,
+        120.0
+      ],
+      "manual_black_override": false
+    }
+  },
+  "PDF_text_inside_canvas": {
+    "fig6-panelb": true,
+    "fig6-panelb-interictal": true,
+    "fig6-panelb-full-trajectory": true,
+    "fig6-complete-layout": true
+  },
+  "formal_pointer_unchanged": true,
+  "human_visual_acceptance": "PENDING"
+}

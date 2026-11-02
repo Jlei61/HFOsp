@@ -1,0 +1,650 @@
+{
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "selected_candidates": [
+    "R08",
+    "R09"
+  ],
+  "source_manifest": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig6/candidates/seizure_selection_history_20261031/manifest.json",
+  "native_run": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+  "producer": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/build_fig6_selected_r08_r09_panela.py",
+  "same_continuous_run": true,
+  "filter": {
+    "band_Hz": [
+      80.0,
+      1000.0
+    ],
+    "order": 4,
+    "zero_phase": true,
+    "sampling_Hz": 10000,
+    "scope": "Full 120-s native readout before windowing",
+    "common_average_reference": false,
+    "baseline_subtraction": false
+  },
+  "normalization": {
+    "percentile": 99.5,
+    "cutoff_s": 9.39,
+    "gain_floor_fraction": 0.15,
+    "display_gain": 0.65,
+    "same_fixed_gain_for_both_segments": true
+  },
+  "channels": {
+    "analysis": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "display": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3"
+    ],
+    "hidden_display_only": [
+      "ICL2",
+      "ICL1"
+    ]
+  },
+  "segments": [
+    {
+      "candidate_id": "R08",
+      "seed": 9108404,
+      "cycle": 1,
+      "visible_window_s": [
+        8.1,
+        13.8
+      ],
+      "displayed_onset_s": 8.85,
+      "shaded_window_s": [
+        8.85,
+        13.8
+      ],
+      "original_statistical_process_start_s": 8.71,
+      "global_high_threshold_s": 9.39,
+      "observed_termination_s": 17.2,
+      "termination_visible": false,
+      "original_energy_classification": {
+        "type": "TB",
+        "stable_offsets": true,
+        "windows": [
+          {
+            "shift_s": 0.0,
+            "start_s": 8.71,
+            "type": "TB",
+            "r_TA": 0.6955505117874482,
+            "r_TB": -0.8274060363406339,
+            "abs_r_TA": 0.6955505117874482,
+            "abs_r_TB": 0.8274060363406339,
+            "robust_z": [
+              2.0328857328507604,
+              1.3069191451289994,
+              1.637127125641381,
+              5.344657601829401,
+              -0.9372910409090497,
+              -2.1148234037795905,
+              -3.0723694769803482,
+              -1.2433265402189027,
+              2.256432228067432,
+              0.7029448899343188,
+              2.7042536496288716,
+              7.0797603089164305,
+              18.610750211712272,
+              3.7876356219772562,
+              0.3756953399819216
+            ]
+          },
+          {
+            "shift_s": -0.02,
+            "start_s": 8.69,
+            "type": "TB",
+            "r_TA": 0.720818608836532,
+            "r_TB": -0.825209502448826,
+            "abs_r_TA": 0.720818608836532,
+            "abs_r_TB": 0.825209502448826,
+            "robust_z": [
+              2.2455751933304455,
+              1.452861923875838,
+              1.7820870581997836,
+              5.670773144456371,
+              -0.4384606023783462,
+              -1.750429295259732,
+              -2.4709849831109296,
+              -0.6119577883085763,
+              4.6049675109012425,
+              1.5290449111738431,
+              3.1241322051492633,
+              7.404052921551879,
+              18.834118484240445,
+              3.9919763509497677,
+              0.8538669980557175
+            ]
+          },
+          {
+            "shift_s": 0.02,
+            "start_s": 8.73,
+            "type": "TB",
+            "r_TA": 0.7185361345036616,
+            "r_TB": -0.8245881947861446,
+            "abs_r_TA": 0.7185361345036616,
+            "abs_r_TB": 0.8245881947861446,
+            "robust_z": [
+              1.8108168336369785,
+              1.1170536627419874,
+              1.419570170859678,
+              4.723759168011632,
+              -1.7002922647186784,
+              -2.6831923548307755,
+              -3.8415303142695594,
+              -1.9122375661027842,
+              -0.7017149513156669,
+              -0.553905811246018,
+              2.152787812556588,
+              6.7342202609888275,
+              18.484056935278595,
+              3.5992764166257127,
+              -0.4527701158153511
+            ]
+          },
+          {
+            "shift_s": 0.05,
+            "start_s": 8.76,
+            "type": "TB",
+            "r_TA": 0.7529226745519958,
+            "r_TB": -0.8170538314531262,
+            "abs_r_TA": 0.7529226745519958,
+            "abs_r_TB": 0.8170538314531262,
+            "robust_z": [
+              1.5353670840696432,
+              0.8469563653349969,
+              1.080506936394789,
+              3.6463421260410693,
+              -3.683579324638126,
+              -3.9055731051336084,
+              -4.796122019573985,
+              -2.728279131754287,
+              -4.517662665285398,
+              -2.8717189254988655,
+              1.1668266121307154,
+              6.0336467993055365,
+              18.337285796060794,
+              3.4600263616360527,
+              -1.8599672034719168
+            ]
+          }
+        ],
+        "preentry_baseline_sensitivity": {
+          "window_s": [
+            4.710000000000001,
+            7.710000000000001
+          ],
+          "brief_count": 16,
+          "type": "TB",
+          "r_TA": 0.8167050362711278,
+          "r_TB": -0.8287311230270338,
+          "agrees_with_primary": true
+        }
+      },
+      "samples_plotted": 57001,
+      "gain_per_contact": [
+        18.532180248926828,
+        17.719074123958155,
+        17.468183446921305,
+        17.961405588715756,
+        10.883689669373695,
+        9.581605259487404,
+        12.558270466030832,
+        21.137078967717,
+        24.006579165890546,
+        26.412047632072312,
+        28.97347819527075,
+        23.42604489286343,
+        21.63584672353728,
+        19.43987678249626,
+        21.33699898334523
+      ],
+      "display_contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3"
+      ],
+      "axes_fraction": [
+        0.075,
+        0.145,
+        0.6300000000000002,
+        0.775
+      ],
+      "trace_min": -0.33225350607500004,
+      "trace_max": 12.88483784285576
+    },
+    {
+      "candidate_id": "R09",
+      "seed": 9108404,
+      "cycle": 2,
+      "visible_window_s": [
+        58.5,
+        60.4
+      ],
+      "displayed_onset_s": 59.3,
+      "shaded_window_s": [
+        59.3,
+        60.4
+      ],
+      "original_statistical_process_start_s": 59.109,
+      "global_high_threshold_s": 60.22,
+      "observed_termination_s": 75.9,
+      "termination_visible": false,
+      "original_energy_classification": {
+        "type": "TA",
+        "stable_offsets": true,
+        "windows": [
+          {
+            "shift_s": 0.0,
+            "start_s": 59.109,
+            "type": "TA",
+            "r_TA": 0.6364800020063835,
+            "r_TB": -0.4486039004165285,
+            "abs_r_TA": 0.6364800020063835,
+            "abs_r_TB": 0.4486039004165285,
+            "robust_z": [
+              2.4354951392996784,
+              1.3340855672341314,
+              1.4627368459274652,
+              3.7368714412682795,
+              4.15231838889001,
+              2.489124686505287,
+              2.6977559683839525,
+              6.1913719267941705,
+              15.781434273745484,
+              2.7644878301955007,
+              1.1780336371760654,
+              2.436999446563025,
+              12.162642298803082,
+              5.1403968727124925,
+              6.293738709837197
+            ]
+          },
+          {
+            "shift_s": -0.02,
+            "start_s": 59.089,
+            "type": "TA",
+            "r_TA": 0.6529633391727522,
+            "r_TB": -0.4442980570279181,
+            "abs_r_TA": 0.6529633391727522,
+            "abs_r_TB": 0.4442980570279181,
+            "robust_z": [
+              2.5984416593344704,
+              1.5203791769882138,
+              1.6732280189847097,
+              4.304308397234796,
+              4.750315320962204,
+              2.748914661490299,
+              3.006761534630058,
+              6.294131132966563,
+              15.760080671656135,
+              2.7943491682278983,
+              1.4138623913669912,
+              3.0076337986299424,
+              13.277037456523967,
+              5.419841989290236,
+              6.3578310823617805
+            ]
+          },
+          {
+            "shift_s": 0.02,
+            "start_s": 59.129,
+            "type": "TA",
+            "r_TA": 0.5848769413203742,
+            "r_TB": -0.42572115652844555,
+            "abs_r_TA": 0.5848769413203742,
+            "abs_r_TB": 0.42572115652844555,
+            "robust_z": [
+              2.2886369964567157,
+              1.1655305202727075,
+              1.2838784160454222,
+              3.285802398414695,
+              3.9978228826831366,
+              2.3450114203104224,
+              2.399593732636162,
+              6.1615157651521955,
+              16.049356827098723,
+              2.8310420591334915,
+              0.9639589529382518,
+              1.777696746727799,
+              10.61344169020988,
+              4.695083016924217,
+              6.055492094483753
+            ]
+          },
+          {
+            "shift_s": 0.05,
+            "start_s": 59.159,
+            "type": "TA",
+            "r_TA": 0.46486797533730173,
+            "r_TB": -0.33247394027145355,
+            "abs_r_TA": 0.46486797533730173,
+            "abs_r_TB": 0.33247394027145355,
+            "robust_z": [
+              2.2522021512649495,
+              1.0477053327306995,
+              1.1547207528295833,
+              2.963750005623757,
+              4.736643921461817,
+              2.4494067835249886,
+              2.1733977806849167,
+              6.343041448694203,
+              16.99995918169776,
+              3.1769058087708992,
+              1.029126676210155,
+              1.466938260731975,
+              8.535364931500194,
+              3.9618636401289757,
+              5.4468246021990065
+            ]
+          }
+        ],
+        "preentry_baseline_sensitivity": {
+          "window_s": [
+            55.109,
+            58.109
+          ],
+          "brief_count": 13,
+          "type": "TB",
+          "r_TA": -0.15773140943648511,
+          "r_TB": -0.40528909110455286,
+          "agrees_with_primary": false
+        }
+      },
+      "samples_plotted": 19001,
+      "gain_per_contact": [
+        18.532180248926828,
+        17.719074123958155,
+        17.468183446921305,
+        17.961405588715756,
+        10.883689669373695,
+        9.581605259487404,
+        12.558270466030832,
+        21.137078967717,
+        24.006579165890546,
+        26.412047632072312,
+        28.97347819527075,
+        23.42604489286343,
+        21.63584672353728,
+        19.43987678249626,
+        21.33699898334523
+      ],
+      "display_contact_order": [
+        "SCL9",
+        "SCL8",
+        "SCL7",
+        "SCL6",
+        "ICL11",
+        "ICL10",
+        "ICL9",
+        "ICL8",
+        "ICL7",
+        "ICL6",
+        "ICL5",
+        "ICL4",
+        "ICL3"
+      ],
+      "axes_fraction": [
+        0.7700000000000002,
+        0.145,
+        0.20999999999999985,
+        0.775
+      ],
+      "trace_min": -0.5516576554821091,
+      "trace_max": 12.771916429655986
+    }
+  ],
+  "shared_ylim": [
+    -0.6716576554821091,
+    13.004837842855759
+  ],
+  "unequal_time_scales": false,
+  "inches_per_second": [
+    1.878947368421052,
+    1.8789473684210498
+  ],
+  "png_pixels_per_second": [
+    413.36842105263145,
+    413.36842105263094
+  ],
+  "time_axes": "Same linear time scale in both windows; widths proportional to 5.70 s and 1.90 s; 1-s tick spacing.",
+  "annotation": "Numbered stages and First seizure / Termination / Second seizure share one text baseline; connected X axis with a central smooth wave.",
+  "header": {
+    "baseline_figure_y": 0.945,
+    "descriptive_words_displace_numbers": false,
+    "text_overlap": false,
+    "termination_actual_time_s": 17.2,
+    "termination_label_location": "Schematic header near the right end of the first segment, left of the gap; actual 17.2 s lies in the omitted interval, not at the viewport edge 13.8 s.",
+    "right_window_extended_to_include_Ictal": true
+  },
+  "time_axis_connector": {
+    "style": "Straight connector with a smooth central wave",
+    "omitted_time_s": [
+      13.8,
+      58.5
+    ],
+    "endpoints_figure": [
+      [
+        0.7050000000000002,
+        0.145
+      ],
+      [
+        0.7700000000000002,
+        0.145
+      ]
+    ],
+    "wave_width_figure": 0.025,
+    "diagonal_corner_marks": false,
+    "connector_contains_data": false
+  },
+  "onset_source": "Author waveform review: exclude the transient near 8.7-8.8 s and near 59.2 s.",
+  "onset_effect": "Display shading only. The original event statistics and E/F labels were not recomputed.",
+  "original_energy_labels": [
+    "TB",
+    "TA"
+  ],
+  "no_energy_label_printed": true,
+  "four_stage_semantics": [
+    "Local",
+    "Spread",
+    "Entry",
+    "Ictal"
+  ],
+  "states": [
+    {
+      "number": 1,
+      "label": "Local",
+      "episode": 1,
+      "time_s": 8.85,
+      "label_anchor_time_s": 8.81,
+      "color": "#9b8d32",
+      "sample_window_s": [
+        8.84,
+        8.86
+      ],
+      "all_E_rate20ms_Hz": 31.5484375,
+      "core_A_B_surround_rate20ms_Hz": [
+        0.0,
+        148.02798982188295,
+        29.323703217334206
+      ],
+      "active_grid_fraction_above20Hz": 0.115
+    },
+    {
+      "number": 2,
+      "label": "Spread",
+      "episode": 1,
+      "time_s": 8.9,
+      "label_anchor_time_s": 8.9,
+      "color": "#bd6c35",
+      "sample_window_s": [
+        8.89,
+        8.91
+      ],
+      "all_E_rate20ms_Hz": 58.256249999999994,
+      "core_A_B_surround_rate20ms_Hz": [
+        257.7586206896552,
+        265.5852417302799,
+        47.96782665791201
+      ],
+      "active_grid_fraction_above20Hz": 0.2075
+    },
+    {
+      "number": 3,
+      "label": "Entry",
+      "episode": 1,
+      "time_s": 8.96,
+      "label_anchor_time_s": 8.99,
+      "color": "#ab4255",
+      "sample_window_s": [
+        8.950000000000001,
+        8.97
+      ],
+      "all_E_rate20ms_Hz": 122.13437499999999,
+      "core_A_B_surround_rate20ms_Hz": [
+        319.2307692307692,
+        400.0,
+        110.08535784635586
+      ],
+      "active_grid_fraction_above20Hz": 0.405
+    },
+    {
+      "number": 4,
+      "label": "Ictal",
+      "episode": 1,
+      "time_s": 9.41,
+      "label_anchor_time_s": 9.41,
+      "color": "#ba263c",
+      "sample_window_s": [
+        9.4,
+        9.42
+      ],
+      "all_E_rate20ms_Hz": 201.52968750000002,
+      "core_A_B_surround_rate20ms_Hz": [
+        407.1618037135279,
+        426.20865139949103,
+        190.6418253447144
+      ],
+      "active_grid_fraction_above20Hz": 0.555
+    },
+    {
+      "number": 5,
+      "label": "Local",
+      "episode": 2,
+      "time_s": 59.45,
+      "label_anchor_time_s": 59.45,
+      "color": "#9b8d32",
+      "sample_window_s": [
+        59.440000000000005,
+        59.46
+      ],
+      "all_E_rate20ms_Hz": 98.3078125,
+      "core_A_B_surround_rate20ms_Hz": [
+        144.42970822281166,
+        274.1730279898219,
+        92.62803676953382
+      ],
+      "active_grid_fraction_above20Hz": 0.4175
+    },
+    {
+      "number": 6,
+      "label": "Spread",
+      "episode": 2,
+      "time_s": 59.55,
+      "label_anchor_time_s": 59.55,
+      "color": "#bd6c35",
+      "sample_window_s": [
+        59.54,
+        59.559999999999995
+      ],
+      "all_E_rate20ms_Hz": 103.31406249999999,
+      "core_A_B_surround_rate20ms_Hz": [
+        278.9787798408488,
+        0.0,
+        101.63164806303348
+      ],
+      "active_grid_fraction_above20Hz": 0.38
+    },
+    {
+      "number": 7,
+      "label": "Entry",
+      "episode": 2,
+      "time_s": 59.67,
+      "label_anchor_time_s": 59.67,
+      "color": "#ab4255",
+      "sample_window_s": [
+        59.660000000000004,
+        59.68
+      ],
+      "all_E_rate20ms_Hz": 176.865625,
+      "core_A_B_surround_rate20ms_Hz": [
+        406.763925729443,
+        114.12213740458014,
+        172.79382797110964
+      ],
+      "active_grid_fraction_above20Hz": 0.615
+    },
+    {
+      "number": 8,
+      "label": "Ictal",
+      "episode": 2,
+      "time_s": 60.24,
+      "label_anchor_time_s": 60.24,
+      "color": "#ba263c",
+      "sample_window_s": [
+        60.230000000000004,
+        60.25
+      ],
+      "all_E_rate20ms_Hz": 215.7,
+      "core_A_B_surround_rate20ms_Hz": [
+        221.28647214854112,
+        420.22900763358774,
+        210.28397898883782
+      ],
+      "active_grid_fraction_above20Hz": 0.5725
+    }
+  ],
+  "stage_selection": "Illustrative native 20-ms frames after the author-selected onset, retaining Local/Spread/Entry/Ictal semantics.",
+  "stage_5_note": "Author moved stage 5 into early core recruitment; it is an illustrative sample, not a redefinition of first onset. Native core rates are retained.",
+  "numbered_stage_markers": "1-4 and 5-8 mark the two entries; no numbered termination state.",
+  "old_candidate_waveform_and_gain_exact_match": true,
+  "pdf_and_png_same_state": true,
+  "formal_figure_pointer_modified": false,
+  "files": {
+    "pdf": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig6/candidates/selected_r08_r09_recovery_references_20261031/figures/fig6-panela.pdf",
+    "png": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig6/candidates/selected_r08_r09_recovery_references_20261031/figures/fig6-panela.png"
+  }
+}

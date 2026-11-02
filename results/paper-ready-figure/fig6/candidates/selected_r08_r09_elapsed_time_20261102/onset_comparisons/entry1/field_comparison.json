@@ -1,0 +1,357 @@
+{
+  "contract": {
+    "question": "Compare onset-related broadband enhancement fields in the displayed model trajectory and one explicitly selected seizure from E1146.",
+    "model_baseline_s": [
+      0.5,
+      3.5
+    ],
+    "model_early_duration_s": 1.0,
+    "model_onset": "Author-selected local reactivation after last brief; same as A states 1/5; fixed one-second window.",
+    "model_signal": "Recorded pre-Z synaptic-current virtual-contact proxy, CAR across all15 available virtual contacts before PSD.",
+    "estimator": "Canonical Fig3C _extract_log_band_power: SciPy spectrogram Tukey0.25, constant detrend,1s window,0.5s hop; natural log of summed1-150Hz PSD.",
+    "normalization": "Canonical distal_baseline_robust_z: subtract baseline log-power median, divide by1.4826*MAD, then subtract baseline robust-z median.",
+    "short_baseline_adaptation": "Model baseline0.5-3.5s supplies5 complete1s spectral cells. Explicit min_frames=5 replaces clinical min_frames=50 for this model-only descriptive adapter.",
+    "time_interpretation": "The1s model early window and3s model baseline are phase-matched display choices; there is no validated10-fold model/patient time mapping and no rescaling of frequencies.",
+    "patient": "E1146 SZ26 fixed from reference Fig6, same cached CAR broadband activation and baseline.",
+    "selection": "No new patient selection or seizure search.",
+    "secondary": "Signed contact Pearson/Spearman for the fixed example only.",
+    "display": "Both fields use Fig3C right-panel painter: frozen shared-TA geometry/support,6mm display kernel,Blues,continuous min-max for painting with colorbars restored to actual robust-z. No rank transform.",
+    "statistical_unit": "One selected patient seizure per model realization;15 contacts and5 overlapping baseline spectral cells are not independent subjects.",
+    "boundary": "Selected illustration only. Model proxy and clinical EEG observation operators and baseline durations differ; matched field shape is not held-out validation, absolute amplitude equivalence, or seizure-mechanism proof.",
+    "model_source": "Same continuous 120-s unified-adaptation run; seed 9108404",
+    "patient_selection": "SZ26 fixed from reference Fig6; no selection against the new model",
+    "model_signal_sampling": "Native10kHz pre-Z proxy sampled every fifth point for canonical2kHz estimator"
+  },
+  "contact_names": [
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9",
+    "ICL1",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "ICL10",
+    "ICL11"
+  ],
+  "selected": {
+    "seizure_idx": 25,
+    "public_seizure": "SZ26",
+    "field_r": 0.044642416775380334,
+    "contact_r": -0.2760698646206325,
+    "contact_rho": -0.05357142857142857,
+    "patient_mean_z": 1.5558162974122973,
+    "patient_min_z": -0.23944299056609017,
+    "positive_contacts": 14,
+    "enhancement_eligible": true
+  },
+  "patient_robust_z": [
+    2.876361073414771,
+    2.6699401255951876,
+    2.2505867633745176,
+    1.3592644195240373,
+    1.8234545510636626,
+    1.5789751305143014,
+    1.3809189042485608,
+    0.05323114031805297,
+    1.5455179021294017,
+    1.441260003895861,
+    1.5686242070743315,
+    0.9543500307900052,
+    -0.23944299056609017,
+    1.939384683979198,
+    2.1348185158286626
+  ],
+  "patient_extraction": {
+    "seizure_id": "114602500102",
+    "reference": "car",
+    "sample_rate_hz": 1024.0,
+    "eeg_onset_minus_clinical_sec": -9.039062023162842,
+    "extraction_pre_sec": 130.03906202316284,
+    "extraction_post_sec": 11.0,
+    "band_hz": [
+      1.0,
+      150.0
+    ],
+    "is_exact_1_150": true,
+    "spectral_window_sec": 1.0,
+    "spectral_hop_sec": 0.5,
+    "baseline_reference": "EEG onset",
+    "baseline_eeg_sec": [
+      -120.0,
+      -90.0
+    ],
+    "baseline_clinical_sec": [
+      -129.03906202316284,
+      -99.03906202316284
+    ],
+    "clinical_window_sec": [
+      0.0,
+      10.0
+    ],
+    "n_baseline_frames": 61,
+    "n_target_contacts": 15,
+    "n_matched_contacts": 15,
+    "n_finite_contacts": 15,
+    "missing_contacts": []
+  },
+  "patient_source": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/fig5_manual_core_release_v1/patient_readout_v1/per_seizure/seizure_025.json",
+  "patient_source_sha256": "067084f5cd01f6ab34c9e5f0584189f5f3b844d30cf6755e7c6f823655c77309",
+  "patient_checkpoint_max_error": 0.0,
+  "frozen_fingerprint": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+  "field_scoring": "Signed Pearson at15 contact-evaluated fields with frozen shared-A identity weights; no mirror or sign flip.",
+  "display_geometry": "Frozen E1146 shared TA plane, exact name-matched model values; this is an observation-space projection, not native SNN XY.",
+  "name": "unified_current_adaptation",
+  "model_robust_z": [
+    1.1042666930126295,
+    0.4871419565625353,
+    0.6989076273364798,
+    2.7557435849532173,
+    -15.521480562833124,
+    -6.581767433900968,
+    -5.569821868067657,
+    -5.760592045066909,
+    -11.060978954911468,
+    -4.221168755612005,
+    -1.1244534377503688,
+    3.1013513094174043,
+    16.31153004416725,
+    3.2691270601545384,
+    -3.20311799099721
+  ],
+  "model_entry_s": 8.85,
+  "model_baseline_s": [
+    0.5,
+    3.5
+  ],
+  "model_early_s": [
+    8.85,
+    9.85
+  ],
+  "model_baseline_frames": 5,
+  "model_early_frames": 1,
+  "model_baseline_log_power": [
+    [
+      11.163007951605515,
+      11.250501969343457,
+      11.50971080490241,
+      11.99597531494955,
+      12.085093384737739
+    ],
+    [
+      11.253946460051955,
+      11.097443277444356,
+      11.618203575544914,
+      12.189022161105694,
+      12.15694700980223
+    ],
+    [
+      11.465162621771904,
+      11.097422448588546,
+      11.572269436525756,
+      12.171616818084246,
+      12.064883858785265
+    ],
+    [
+      11.729594238623775,
+      11.15993999041099,
+      11.584431379351084,
+      12.095103643388363,
+      11.78390316577159
+    ],
+    [
+      12.312807657712922,
+      12.231311716163958,
+      12.176251284381317,
+      12.05526158252055,
+      12.43167506815761
+    ],
+    [
+      12.114279636737056,
+      12.055570973648381,
+      11.860893928252771,
+      11.679629381699451,
+      12.247896010418598
+    ],
+    [
+      11.889775417794123,
+      11.86880880151326,
+      11.540029963102803,
+      11.277231101152264,
+      12.042669110665853
+    ],
+    [
+      11.64174290202026,
+      11.553106841831026,
+      11.43926298535611,
+      11.327949095890702,
+      11.826063214872386
+    ],
+    [
+      11.546687484452818,
+      11.313554617925696,
+      11.310693111399525,
+      11.364646216268,
+      11.892292895461042
+    ],
+    [
+      11.564572666459442,
+      11.259762791647805,
+      11.355291149898916,
+      11.150953028532308,
+      11.910162927569319
+    ],
+    [
+      11.3695072107224,
+      11.31145435020785,
+      11.565679232408458,
+      11.157237920568406,
+      11.779922729489156
+    ],
+    [
+      11.29048649843364,
+      11.28010013528371,
+      11.549530688515233,
+      11.385421441895895,
+      11.742144932265484
+    ],
+    [
+      10.919293449648356,
+      11.452723567954568,
+      11.496012306811323,
+      11.496344838818267,
+      11.093525046428246
+    ],
+    [
+      11.41608455233266,
+      11.682452723043058,
+      11.53273306804099,
+      11.54096656233193,
+      11.269561146141005
+    ],
+    [
+      12.124527805003108,
+      11.943984067023305,
+      11.69526215162934,
+      11.853524560457657,
+      11.975815349567217
+    ]
+  ],
+  "model_early_log_power": [
+    [
+      12.07732779281385
+    ],
+    [
+      11.994315756405115
+    ],
+    [
+      12.064306098295006
+    ],
+    [
+      12.322681115788127
+    ],
+    [
+      10.35591512261594
+    ],
+    [
+      10.178838570790388
+    ],
+    [
+      10.433102028215773
+    ],
+    [
+      10.580805880290734
+    ],
+    [
+      10.479868850355045
+    ],
+    [
+      10.076480904725932
+    ],
+    [
+      11.042465956152059
+    ],
+    [
+      11.86969549247699
+    ],
+    [
+      12.507637457079063
+    ],
+    [
+      12.098106001429855
+    ],
+    [
+      11.514397050646679
+    ]
+  ],
+  "model_baseline_log_power_median": [
+    11.50971080490241,
+    11.618203575544914,
+    11.572269436525756,
+    11.729594238623775,
+    12.231311716163958,
+    12.055570973648381,
+    11.86880880151326,
+    11.553106841831026,
+    11.364646216268,
+    11.355291149898916,
+    11.3695072107224,
+    11.385421441895895,
+    11.452723567954568,
+    11.53273306804099,
+    11.943984067023305
+  ],
+  "model_baseline_log_power_mad": [
+    0.5140216502979765,
+    0.7720792179638881,
+    0.7040081443157084,
+    0.215218455157692,
+    0.12082588294049336,
+    0.2851410995155243,
+    0.257765294349634,
+    0.16878490160970916,
+    0.0799908732780006,
+    0.30295169873813205,
+    0.2908446393517497,
+    0.15614936918322478,
+    0.0646728961825207,
+    0.17294308938917122,
+    0.13411526443422864
+  ],
+  "model_baseline_z_median": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "model_mean_z": -1.687687518235711,
+  "model_positive_contacts": 7,
+  "selection": "Patient SZ26 fixed from reference Fig6; no new seizure selection",
+  "n_candidates": 1,
+  "model_sampling_hz": 2000.0,
+  "exact_entry_s": 8.85,
+  "PSD_alignment_error_ms": 0.0,
+  "model_signal_sha256": "6a0c0144caf87a2f5d92f2c4f94e22489082d2f3068ac108e89509261f9363bb",
+  "producer": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/build_fig6_selected_r08_r09_complete.py",
+  "producer_sha256": "33d395cabf456ee40f359c0e797e5f505e0de79a34a6705f6b9f339e3464f44d",
+  "model_source": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+  "human_review": "PENDING",
+  "episode": 1,
+  "candidate_id": "R08"
+}

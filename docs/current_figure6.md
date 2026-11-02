@@ -8,6 +8,12 @@
 
 原包整体迁入 `fig6/`，历史文件中的 Fig5 编号只指迁移前身份。冻结正文未修改。新 Figure 5 专用于原 Fig4 拆出的传播复现与单/双 core 对照。`build_fig6_current.py` 校验或恢复已登记导出，不重跑仿真。
 
+## 2026-11-02 时间着色修订候选
+
+本次发布候选为 `selected_r08_r09_elapsed_time_20261102`：[完整 PNG](../results/paper-ready-figure/fig6/candidates/selected_r08_r09_elapsed_time_20261102/figures/fig6-complete-layout.png) · [PDF](../results/paper-ready-figure/fig6/candidates/selected_r08_r09_elapsed_time_20261102/figures/fig6-complete-layout.pdf) · [数据与源码说明](../results/paper-ready-figure/fig6/candidates/selected_r08_r09_elapsed_time_20261102/README.md)。B 的主轨迹、小窗及方向箭头统一按 0–120 s 原生仿真时间连续着色，色条顶部标 `Time (s)`；取消周期进度归一化和间期黑色覆盖。A/C 的八个阶段、D 的场图顺序、E 的原统计口径及布局保持本轮已确认版本。
+
+`python scripts/paper_figures/build_fig6_elapsed_time_snapshot.py` 可核验发布文件，附加 `--output-dir <目录>` 可导出冻结图件，无需原始数据盘。原始 Matplotlib producer 与其本地模块归档在候选的 `source/`，从原生数据重绘仍需原实验环境。此次提交不改正式版本指针，不将发布视为新的科学或人工验收。
+
 ## 2026-11-02 周报 Figure 6 与平滑反馈分析
 
 当前讨论及[周报](weekly_reports/2026-11-02_epilepsy_model_figures/2026-11-02_癫痫文章_Figure4-6周报.md)使用 `selected_r08_r09_normalized_onsets_20261102` 候选：A–D 来自 `/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404` 的同一 120 s 连续仿真，E 保留历史队列结果。该仿真的全局抑制与适应增量均使用 $q(R)=\mathrm{clip}[(R-200)/300,0,1]$；图件重新排版没有更换仿真来源。

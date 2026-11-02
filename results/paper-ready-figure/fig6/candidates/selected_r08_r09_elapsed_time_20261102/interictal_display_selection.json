@@ -1,0 +1,297 @@
+{
+  "time_s": [
+    5.9,
+    9.24
+  ],
+  "limits": [
+    [
+      0.735,
+      0.83
+    ],
+    [
+      0.015,
+      0.055
+    ],
+    [
+      0.0,
+      250.0
+    ]
+  ],
+  "samples": 668,
+  "segment_count": 667,
+  "selection": "Continuous original interval retaining previous nine-event slice and extending into first entry; no reordering, extrapolation or rescaling of time colors.",
+  "detected_preentry_brief_events": [
+    {
+      "event_detection_index": 32,
+      "start_s": 5.99,
+      "end_s": 6.07,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 33,
+      "start_s": 6.11,
+      "end_s": 6.17,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    },
+    {
+      "event_detection_index": 34,
+      "start_s": 6.22,
+      "end_s": 6.32,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 35,
+      "start_s": 6.42,
+      "end_s": 6.57,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 36,
+      "start_s": 6.69,
+      "end_s": 6.75,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    },
+    {
+      "event_detection_index": 37,
+      "start_s": 6.79,
+      "end_s": 6.93,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 38,
+      "start_s": 6.98,
+      "end_s": 7.04,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    },
+    {
+      "event_detection_index": 39,
+      "start_s": 7.0600000000000005,
+      "end_s": 7.17,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 40,
+      "start_s": 7.3,
+      "end_s": 7.390000000000001,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 41,
+      "start_s": 7.6000000000000005,
+      "end_s": 7.71,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 42,
+      "start_s": 7.8500000000000005,
+      "end_s": 7.96,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 43,
+      "start_s": 8.03,
+      "end_s": 8.08,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    },
+    {
+      "event_detection_index": 44,
+      "start_s": 8.13,
+      "end_s": 8.24,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 45,
+      "start_s": 8.28,
+      "end_s": 8.35,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    },
+    {
+      "event_detection_index": 46,
+      "start_s": 8.4,
+      "end_s": 8.52,
+      "phase": "initial_interictal",
+      "participation": "both_cores"
+    },
+    {
+      "event_detection_index": 47,
+      "start_s": 8.58,
+      "end_s": 8.67,
+      "phase": "initial_interictal",
+      "participation": "neither_core"
+    }
+  ],
+  "both_core_event_count": 10,
+  "previous_nine_event_slice_s": [
+    5.9,
+    8.27
+  ],
+  "previous_slice_preserved": true,
+  "entry_highlight_start_s": 8.85,
+  "entry_highlight_definition": "Existing A/C Local state 1",
+  "first_global_high_s": 9.39,
+  "end_is_before_global_high": true,
+  "all_native_segments_visible": true,
+  "direction_arrows": [
+    {
+      "from_time_s": 6.2275,
+      "to_time_s": 6.2375,
+      "kind": "brief ascent"
+    },
+    {
+      "from_time_s": 7.0675,
+      "to_time_s": 7.077500000000001,
+      "kind": "brief ascent"
+    },
+    {
+      "from_time_s": 7.867500000000001,
+      "to_time_s": 7.8775,
+      "kind": "brief ascent"
+    },
+    {
+      "from_time_s": 9.1975,
+      "to_time_s": 9.2375,
+      "kind": "first entry continuation"
+    }
+  ],
+  "time_color_scale_s": [
+    0,
+    120.0
+  ],
+  "minimum_Z_etaM_rate": [
+    0.7437660039873063,
+    0.016303670326634323,
+    0.0
+  ],
+  "maximum_Z_etaM_rate": [
+    0.8233135502743943,
+    0.0496787628298118,
+    200.249874092125
+  ],
+  "annotation_state_numbers": [
+    1,
+    2,
+    3
+  ],
+  "time_range_text_displayed": false,
+  "title": "Interictal",
+  "rate_bin_ms": 5,
+  "display_smoothing_sigma_ms": 5,
+  "states": [
+    {
+      "number": 1,
+      "label": "Local",
+      "episode": 1,
+      "time_s": 8.85,
+      "label_anchor_time_s": 8.81,
+      "color": "#9b8d32",
+      "sample_window_s": [
+        8.84,
+        8.86
+      ],
+      "all_E_rate20ms_Hz": 31.5484375,
+      "core_A_B_surround_rate20ms_Hz": [
+        0.0,
+        148.02798982188295,
+        29.323703217334206
+      ],
+      "active_grid_fraction_above20Hz": 0.115,
+      "Z_etaM_rate": [
+        0.7703547734809647,
+        0.02337872930021389,
+        31.506664902194732
+      ],
+      "label_offset_pt": [
+        12,
+        12
+      ]
+    },
+    {
+      "number": 2,
+      "label": "Spread",
+      "episode": 1,
+      "time_s": 8.9,
+      "label_anchor_time_s": 8.9,
+      "color": "#bd6c35",
+      "sample_window_s": [
+        8.89,
+        8.91
+      ],
+      "all_E_rate20ms_Hz": 58.256249999999994,
+      "core_A_B_surround_rate20ms_Hz": [
+        257.7586206896552,
+        265.5852417302799,
+        47.96782665791201
+      ],
+      "active_grid_fraction_above20Hz": 0.2075,
+      "Z_etaM_rate": [
+        0.7696103140012185,
+        0.023230288386789543,
+        58.263739077941366
+      ],
+      "label_offset_pt": [
+        -20,
+        12
+      ]
+    },
+    {
+      "number": 3,
+      "label": "Entry",
+      "episode": 1,
+      "time_s": 8.96,
+      "label_anchor_time_s": 8.99,
+      "color": "#ab4255",
+      "sample_window_s": [
+        8.950000000000001,
+        8.97
+      ],
+      "all_E_rate20ms_Hz": 122.13437499999999,
+      "core_A_B_surround_rate20ms_Hz": [
+        319.2307692307692,
+        400.0,
+        110.08535784635586
+      ],
+      "active_grid_fraction_above20Hz": 0.405,
+      "Z_etaM_rate": [
+        0.7679642787177463,
+        0.02551267650241688,
+        122.02271027062795
+      ],
+      "label_offset_pt": [
+        12,
+        12
+      ]
+    }
+  ],
+  "color_quantity": "elapsed simulation time",
+  "color_limits": [
+    0,
+    120.0
+  ],
+  "color_definition": {
+    "quantity": "elapsed simulation time",
+    "units": "s",
+    "range": [
+      0,
+      120.0
+    ],
+    "colormap": "viridis",
+    "segment_value": "Mean of the two native sample times bounding each segment.",
+    "cycle_reset": false,
+    "manual_color_override": false,
+    "scope": "Main trajectory, interictal inset, direction arrows and standalone trajectory exports."
+  }
+}

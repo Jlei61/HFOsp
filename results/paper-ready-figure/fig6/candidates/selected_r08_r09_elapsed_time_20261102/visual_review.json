@@ -1,0 +1,40 @@
+{
+  "reviewer": "Codex",
+  "reviewed_utc": "2026-11-02T07:34:06.771047+00:00",
+  "status": "AGENT_VISUAL_CHECK_COMPLETE_AUTHOR_REVIEW_PENDING",
+  "inspected_images": [
+    "fig6-panelb",
+    "fig6-complete-layout"
+  ],
+  "same_state_PNG_PDF_pixel_equality": {
+    "fig6-panelb": true,
+    "fig6-panelb-interictal": true,
+    "fig6-panelb-full-trajectory": true,
+    "fig6-complete-layout": true
+  },
+  "sha256": {
+    "fig6-panelb": {
+      "pdf": "b278d7127ce51081094c8a77929bfc899ceb5f3f80be20b8b41198c827119a5a",
+      "png": "0fd20c84632f50e4af417d3284dff2ccb38157a26ef19a243984758c2151d473"
+    },
+    "fig6-panelb-interictal": {
+      "pdf": "ee3f8aa970dd2961d7a5b94e6e4c1e5d6c36bf6a3e4723992bd4fdb1c8d0ff65",
+      "png": "fd16148fddcd9a2ebb8ae20d991baf892ca70bffe347f0d1685bc1fbe825494f"
+    },
+    "fig6-panelb-full-trajectory": {
+      "pdf": "7c9979759eec19df61d7fedd9f896d5773cf0b5f0c00c869d1de703e2a97d36c",
+      "png": "9ab377757328b3c8fc34e308252af032193615e03a56b501792a19b126bc843e"
+    },
+    "fig6-complete-layout": {
+      "pdf": "817b2f6607601bd221b9d0acedd603555cc6c2afbb06bb5c49812ac13f1579ab",
+      "png": "ae51965fcdb8ca5a7ad60a7d7daf5769f6753f656fe3ccc76fa375ac36fbefad"
+    }
+  },
+  "human_visual_acceptance": "PENDING",
+  "observations": [
+    "Time (s) above the 0–120 colorbar.",
+    "Inset is uniformly early-time dark purple without a black override.",
+    "Main trajectory has continuous elapsed-time colors rather than repeated yellow cycles.",
+    "A/C/D/E preserved exactly."
+  ]
+}
