@@ -1,0 +1,203 @@
+{
+  "identity": {
+    "positions_E_sha256": "efe3931e74bd04adb9b5b00435d227c5a7fe3905dee7b74fdbbc2262172f85f6",
+    "h_sha256": "774ddac3cbf22b89f6c170577f629a7cc28f3c737c588ba30c3af55fa1ab8799",
+    "delta_vtheta_sha256": "a7b1d3645439c4b467aed4a8de764acd36ef33d776c80a10556aa443d999c0c3",
+    "vtheta_sha256": "685a0fcdbfebe0409209aacd5006ef4feb182a3aea88601bd5d180c9e176b77b",
+    "ampa_topology_sha256": "1deba253dcfefa2a565b535dd03d07a4ffa41835be922203bed5cbaa4919a17e",
+    "ampa_values_sha256": "e1f834a7d35368fb2c96b4a1c36b8f7c326b89946fa273ca951b7bce6cef6baf",
+    "gaba_topology_sha256": "e64a0388d7d388b700fe88c93aa40f2511a5b76670bab58623dcc59ffe1a6c4c",
+    "gaba_values_sha256": "fa81f16c9c823598d32598913ba141d245878b449d850d3987e956c8e78e0166"
+  },
+  "source_hashes": {
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_m_parameter_modes.py": "d9c591dee748fb9850855fe5ce2b456ffced707ac2db16c3d245679a41403acc",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_weak_fast_recurrence.py": "01544f3ed63061dc2590696fafc1c424389b627d5ea7a13e1d01f8bee1ef5fda",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_reset_state_diagnosis.py": "75804a78fd08daa88a3b1422931c490245666f377784ed4d1ad7d70d27e030cd",
+    "/home/honglab/leijiaxin/HFOsp/scripts/topic4_historical_manual_z_common.py": "7d0e2a4d22c2207ac09964175e97fa3d9cd30e2153dab2e861f99f44068b8969",
+    "/home/honglab/leijiaxin/HFOsp/scripts/validate_topic4_fixed_rate_base.py": "137eca228f6f377528161aa9cd7d91b076f3fdd574cd5526869c3f634cf02d77",
+    "/home/honglab/leijiaxin/HFOsp/src/topic4_raster_protocol_engine.py": "66d464112c5ec8e13342aa1bb5786b3fb3fbd61db1be0452f3cb8640aa66bee6",
+    "/home/honglab/leijiaxin/HFOsp/src/snn_engine/mz_slow_vars.py": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3",
+    "/home/honglab/leijiaxin/HFOsp/config/topic4_rate_model_dynamics_validation_v1.json": "2160f7c58a06bd11f537dd8a0fd1de149f00fcb88672240fba72a2fc6910527d",
+    "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-substrate-autapse-fix/src/snn_engine/checkpoint.py": "fa08221ca9050657379b9aa77aa88cc1344a1f6711eec10665c25102f1f21538",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_z_recovery_exploration.py": "a1153933707a34c0f6b9624eb291fcae809643e7fbb70c4797d60e9b86e6ca0e",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_k100_recurrence.py": "ab17e6081106876077182fca1e7a73b149878ed2a253df93e406d95cfd79c839",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_zm_matched_spatial_termination.py": "1f5a1651f15c3dc59f4962c25987224434c54b6d88074f128fb156bef7cb207f",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_fixed_zm_termination.py": "c84238240b47bc7c35b73592bfc4a369c61e146b225b630b95e84e2cd706eb47",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_autonomous_recovery.py": "405d125a7ae19ffde8ccf8cadd9315c89c28213f479a532b87df6ffb6f37f7d1",
+    "/home/honglab/leijiaxin/HFOsp/scripts/analyze_topic4_interictal_recurrence.py": "661fa7d7f0583335f6b835abcc14f1211095a7c7bef6bedb9761682569027648",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_rhythm_preserving_feedback.py": "4359d21061aef8ae80801f64393814e1f4751655613aecad668e69822bf2326a",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_recovery_window.py": "c92faf1ec5a23510f5d8545467c5401f5b42e95595763088509fdee00c0f34da",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_quiet_tail_recovery.py": "60b50cc6d3fb43309bc2ace1cda08cec7bf944b526c62225c1c7362d7b5721f2",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_quiet_tail_confirmation.py": "ecb6f9ba3312f52f18e9e8dfed6051c345bda3c1c8b8b958ff0d62dd935fa416",
+    "/home/honglab/leijiaxin/HFOsp/scripts/run_topic4_global_feedback_response.py": "5da3e55cfe18294a6f76eeb03b5cce8dcec9605ac59764bfcf71170771c31763",
+    "/home/honglab/leijiaxin/HFOsp/scripts/report_topic4_global_feedback_response.py": "5e2fd7c8c9ac8e95eced227ed2f01ccc63acb75be00d59aaa1cb518c303b916f",
+    "/home/honglab/leijiaxin/HFOsp/scripts/qa_topic4_global_feedback_response.py": "0eee9fcf79fcac4f169d42831a492baec32639401c5573a3f1c65553ea16ac69",
+    "/home/honglab/leijiaxin/HFOsp/scripts/plot_topic4_recovery_rhythm_exit.py": "a3048615735a38778b3e2ce940fbfe05c7ebc31bcefb202565e2c2d722290f24"
+  },
+  "baseline": {
+    "eta_M": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "Ith": 95.19851312666987,
+    "Z_on": true,
+    "M_on": true
+  },
+  "reference_current_scale": 6.299613071787578,
+  "producer_sha256": "405d125a7ae19ffde8ccf8cadd9315c89c28213f479a532b87df6ffb6f37f7d1",
+  "wrapper_sha256": "c84238240b47bc7c35b73592bfc4a369c61e146b225b630b95e84e2cd706eb47",
+  "branch_jobs": [],
+  "created_epoch": 1790148926.1658483,
+  "deadline_epoch": 1793693549.9274168,
+  "wall_budget_hours": 24.0,
+  "min_available_memory_GiB": 70.0,
+  "disk_reserve_GiB": 50.0,
+  "exploration_sha256": "c92faf1ec5a23510f5d8545467c5401f5b42e95595763088509fdee00c0f34da",
+  "new_runner_sha256": "9fbd0374933a296eb1b851cca6f646a10ced6f0274afa79642b14a3fdbc62000",
+  "protected_global_authorized": false,
+  "source_round": "/data/hfosp/topic4_sef_hfo/fig5_quiet_tail_confirmation_20260918",
+  "confirmation_decided": true,
+  "question": "Can stronger and/or temporally accumulated global feedback cause reliable autonomous exit without losing native interictal events or Z recovery?",
+  "authorization": "2026-11-02 author: logistic, replacing both G and M clip gates",
+  "new_fixed_equation": {
+    "q": "clip((causal15ms_global_E_rate-200)/300,0,1)",
+    "G_state": "tau_G*ds/dt=q-s; s(0)=0; tau_G0 uses q directly. Exact exponential update with pre-step q at dt0.1ms.",
+    "G": "G500*s*Z_i",
+    "J": "Original local II_i+(18-EG)*G500*s for E; I unchanged",
+    "K": "K_i*=exp(-dt/tauK); each E spike adds0.16*q; tauK5s iff pre-step R_G<=5Hz, otherwise0.5s",
+    "unchanged": "Native Z/M equations, all physical substrate/input parameters, K gain, local inhibition; no protected pathway, forced quiet window, external intervention or Z target/reset."
+  },
+  "unchanged": [
+    "network and input statistics",
+    "seed9108404",
+    "Z load and recovery",
+    "M retention time rule",
+    "G kinetics",
+    "readout definitions"
+  ],
+  "experiment": "6new120s screens (3settings x2known failing noises);2reused controls. At most1setting passing both screens gets3cold-start240s confirmations (old seed9108401 and new9108404/9108405), plus2native8s reference jobs.",
+  "confirmation_policy": "Both development seeds must complete120s and pass full_sequence_screen. Rank by minimum returned-event span across seeds, then minimum brief-event count, then smaller gain and shorter tau. At most one setting; no later expansion.",
+  "acceptance": "Exact initial8s native rhythm; entry; autonomous exit; both cores regain their own8s native reference Z; >=10native-like brief events spanning>=5s AFTER that recovery. Also report bothZ>=0.8 duration. Human spatial/Fig5 review pending.",
+  "recovery_reference": "8s same-seed native reference (last stored sample<=8s). Values0.75/0.8 are readouts only, not imposed dynamics or proven bifurcation thresholds.",
+  "figure_contract": "Accepted five-row two-column interictal preservation / exit zoom; every exit separately. Native spatial GIFs of the first reference event and first return event, or failed-high window. Human review pending.",
+  "human_review": "PENDING",
+  "max_workers_per_device": 3,
+  "devices": [
+    0,
+    1
+  ],
+  "confirmation_runner_sha256": "ecb6f9ba3312f52f18e9e8dfed6051c345bda3c1c8b8b958ff0d62dd935fa416",
+  "scientific_scope": "One fixed manual two-core topology; new temporal G state is a hypothesis, not a reproduced Liou mechanism. New noises only confirm within this topology.",
+  "initial_screen_names": [
+    "G30_response0_s9108402",
+    "G30_response0_s9108403",
+    "G15_response0.5_s9108402",
+    "G15_response0.5_s9108403",
+    "G30_response0.5_s9108402",
+    "G30_response0.5_s9108403"
+  ],
+  "memory_reserve_GiB": 70.0,
+  "runner_sha256": "d5e9dca8382cbcbfe23204c5e0a7bdd5b7fe000a9e6355dea55e368a5cc7e133",
+  "dispatch_policy": "Keep both GPUs working with up to3workers/GPU;30s monitoring; stop new dispatch on failure or1h before24h deadline. Workers checkpoint and finish at deadline. No auto expansion beyond this protocol.",
+  "full_Fig5_acceptance": "NOT_ESTABLISHED",
+  "launched_epoch": 1790148982.7451458,
+  "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+  "equations": {
+    "sigmoid": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)), k>0",
+    "global_feedback": "tau_G*dG/dt=G_max*S(R)-G",
+    "adaptation": "dM_i/dt=-M_i/tau_M(R)+[a0/tau_M(R)+a1*S(R)]/eta_M*sum_k delta(t-t_i^k)",
+    "membrane": "tau_m*dV_i/dt=-V_i+IE_i-Z_i*II_i-Z_i*G*(V_i-EG)-eta_M*M_i",
+    "tau_M": "5s if causal all-E R<=5Hz, otherwise 0.5s (unchanged)",
+    "resource": "5s*dZ_i/dt=1{II_i+(18-EG)*G<95.19851312666987}-Z_i (unchanged)"
+  },
+  "interpretation": "Core recruitment order, not abs-correlation energy-template classification.",
+  "observation": "From zero adaptation and Z=1 at t=0, no reset or scheduled intervention.",
+  "independent_unit": "Eight input-noise realizations of ONE fixed patient-geometry network; events nested within realization. Development-selected model parameters.",
+  "original_figure_replaced": false,
+  "search_scope": "Every seed in the preceding eight-seed screen is included, including all first-B censored runs; fixed120s horizon, no type-dependent stop.",
+  "new_scan_runner_sha256": "67286653681d4b963d1c5148d0a0af7416caf3270265f04a6b25988231db007c",
+  "status": "REGISTERED_FIXED_HORIZON_HISTORY_ASSAY",
+  "horizon_s": 120.0,
+  "device": "0 and1, four workers each",
+  "continuation": "All neural, synaptic, delay, noise, RNG, Z, M and G states preserved. Existing prefix is the same trajectory, not another sample.",
+  "primary": "Postseizure regional Z asymmetry and pre-event Z/M/current state versus next core recruitment and interictal core propagation order.",
+  "type_contract": "Native initial50ms and sustained200ms core recruitment kept distinct from TA/TB max-absolute-correlation1s onset energy fields.",
+  "memory_contract": "For each recovery interval separate inherited deficit exp(-(t-exit)/5s)*(1-Z_exit) from subsequent inhibitory-load contribution.",
+  "statistical_contract": "Describe seed-level counts and paired within-seed changes first. No treating individual brief events as independent replicates. Association is not causal identification.",
+  "figure_redraw": false,
+  "source_root": "/data/hfosp/topic4_sef_hfo/unified_adaptation_entry_switch_20261030",
+  "scheduling_change": [
+    {
+      "seed": 9108401,
+      "resumed_step": 180000,
+      "device": 0,
+      "engine_unchanged": true,
+      "engine_sha256": "14c5f75e3e418f49ffa3f1a59b366cf92ee5fe05a7cdd2f6f068cff4fb203e3b"
+    },
+    {
+      "seed": 9108403,
+      "resumed_step": 160000,
+      "device": 0,
+      "engine_unchanged": true,
+      "engine_sha256": "0ec671c974346f4eeb81c7edbb84a0b06f89552499cb5a6d5e17eb639361ec3e"
+    },
+    {
+      "seed": 9108404,
+      "resumed_step": 140000,
+      "device": 0,
+      "engine_unchanged": true,
+      "engine_sha256": "c565bae7eec6e44e6876fd6cd9e58afa5dce5dd5833ed2802f5c671218053a9d"
+    },
+    {
+      "seed": 9108408,
+      "resumed_step": 120000,
+      "device": 0,
+      "engine_unchanged": true,
+      "engine_sha256": "7a7bc28533873dda0ea205bbb7858a9d178e334706d33b53d0c3fb5240c2f0fe"
+    }
+  ],
+  "scheduling_reason": "GPU0 became idle after independent validation finished; distribute same-state continuations across both devices.",
+  "second_scheduling_change": {
+    "epoch": 1793419290.526474,
+    "reason": "A-group completed120s; split remaining four workers evenly between identical GPUs. Fix supervisor Attached process polling only.",
+    "changes": [
+      {
+        "seed": 9108401,
+        "checkpoint_s": 76.0,
+        "from_device": 0,
+        "to_device": 1,
+        "engine_sha256": "bca41a57238596f1ea3ad7802e58b928df2c402f284b7d6e108e2801d35831fc",
+        "engine_unchanged": true,
+        "archived_uncommitted": []
+      },
+      {
+        "seed": 9108408,
+        "checkpoint_s": 72.0,
+        "from_device": 0,
+        "to_device": 1,
+        "engine_sha256": "23a50b82252a1e67960bada453bf3cafce86011e8fa5fe112b0a6bb6d04fd8c0",
+        "engine_unchanged": true,
+        "archived_uncommitted": []
+      }
+    ]
+  },
+  "paired_reference": "/data/hfosp/topic4_sef_hfo/adaptation_history_20261031/runs/seed9108404",
+  "parameters": {
+    "midpoint_Hz": 350.0,
+    "width_Hz": 75.0,
+    "global_gain": 30.0,
+    "global_tau_s": 0.5,
+    "eta_M": 0.0005,
+    "high_jump_mV": 7.68,
+    "seed": 9108404,
+    "horizon_s": 120.0
+  },
+  "parameter_rationale": "Match clip midpoint q=1/2 at R=350 Hz and local slope 1/300 Hz^-1; width=300/4. No trajectory-dependent fitting.",
+  "changed_mechanisms": [
+    "shared logistic rate gate for G and spike-triggered M increment"
+  ],
+  "qualification": "Complete native 120s; initial brief activity, high entry, autonomous exit, both-core Z recovery, >=10 complete short events spanning >=5s, then a new sustained high entry.",
+  "statistical_unit": "One fixed network and one paired noise realization; qualitative trajectory check, not population equivalence.",
+  "figure_replaced": false,
+  "formal_bifurcation": false
+}

@@ -1,0 +1,17 @@
+{
+  "status": "PILOT_STOPPED_NO_HIGH_ENTRY",
+  "observed_s": 60.0,
+  "original_planned_horizon_s": 120.0,
+  "first_60s_no_high_entry": true,
+  "reason": "No high entry during the completed60-s pilot; trajectory cannot demonstrate a full cycle in this pilot.",
+  "no_claim_about_later_entry": true,
+  "checkpoint_preserved": true,
+  "resume_command": [
+    "/home/honglab/leijiaxin/anaconda3/bin/python",
+    "-u",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_logistic_feedback.py",
+    "worker"
+  ],
+  "pid": 3770460,
+  "stopped_epoch": 1793609453.8379083
+}

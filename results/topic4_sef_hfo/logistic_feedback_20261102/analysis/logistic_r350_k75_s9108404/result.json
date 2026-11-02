@@ -1,0 +1,75 @@
+{
+  "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+  "name": "logistic_r350_k75_s9108404",
+  "observed_s": 60.0,
+  "run_status": "PILOT_STOPPED_NO_HIGH_ENTRY",
+  "temporal": {
+    "observed_s": 60.0,
+    "entries": [],
+    "low_activity_exits": [],
+    "preentry": {
+      "window_s": [
+        0.5,
+        60.0
+      ],
+      "finite_events": [],
+      "brief_events": [],
+      "finite_count": 0,
+      "brief_count": 0,
+      "event_span_s": 0.0,
+      "brief_fraction": 0.0,
+      "event_rate_Hz": 0.0
+    },
+    "interhigh_intervals": [],
+    "latest_postexit": null,
+    "events": [],
+    "temporal_loop_pass": false,
+    "preentry_brief_screen": false,
+    "classification": "NO_HIGH_OBSERVED",
+    "high_gate": "All E >=200Hz for200ms; unchanged",
+    "event_settings": {
+      "dt_s": 0.01,
+      "quiet_Hz": 5.0,
+      "max_duration_s": 0.2,
+      "minimum_events": 5
+    }
+  },
+  "episodes": [],
+  "initial_brief_events": [],
+  "reference_time_s": null,
+  "reference_allE_coreA_coreB_Z": null,
+  "has_high_entry": false,
+  "has_autonomous_exit": false,
+  "has_sustained_return": false,
+  "count_conservation": true,
+  "statistical_unit": "one network and one noise realization",
+  "no_scheduled_intervention": true,
+  "no_K_state": true,
+  "human_review": "PENDING",
+  "criteria": {
+    "high": "All E >=200 Hz continuously for200ms,10ms bins",
+    "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+    "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+    "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+  },
+  "scientific_limit": "Operational model high activity, not established clinical seizure or certified attractor.",
+  "pilot_stop": {
+    "status": "PILOT_STOPPED_NO_HIGH_ENTRY",
+    "observed_s": 60.0,
+    "original_planned_horizon_s": 120.0,
+    "first_60s_no_high_entry": true,
+    "reason": "No high entry during the completed60-s pilot; trajectory cannot demonstrate a full cycle in this pilot.",
+    "no_claim_about_later_entry": true,
+    "checkpoint_preserved": true,
+    "resume_command": [
+      "/home/honglab/leijiaxin/anaconda3/bin/python",
+      "-u",
+      "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/run_topic4_logistic_feedback.py",
+      "worker"
+    ],
+    "pid": 3770460,
+    "stopped_epoch": 1793609453.8379083
+  },
+  "feedback_kind": "logistic_shared",
+  "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k75_s9108404"
+}

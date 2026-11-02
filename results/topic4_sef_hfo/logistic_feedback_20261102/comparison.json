@@ -1,0 +1,242 @@
+{
+  "rows": [
+    {
+      "name": "clip_reference_s9108404",
+      "model": "ZGM_UNIFIED_CURRENT_ADAPTATION_V1",
+      "status": "COMPLETE",
+      "observed_s": 120.0,
+      "initial_brief_count": 43,
+      "initial_8s_brief_count": 38,
+      "has_entry": true,
+      "has_exit": true,
+      "has_interictal_return": true,
+      "qualified_cycles": [
+        {
+          "first_entry_s": 9.39,
+          "exit_s": 17.04,
+          "Z_recovered_s": 24.38,
+          "returned_brief_count": 45,
+          "returned_brief_span_s": 12.049999999999997,
+          "first_returned_brief_s": 46.95,
+          "reentry_s": 60.22
+        },
+        {
+          "first_entry_s": 60.22,
+          "exit_s": 75.55,
+          "Z_recovered_s": 83.56,
+          "returned_brief_count": 41,
+          "returned_brief_span_s": 11.269999999999996,
+          "first_returned_brief_s": 107.35000000000001,
+          "reentry_s": 119.27
+        }
+      ],
+      "complete_cycle": true,
+      "first_cycle_complete": true,
+      "entries": [
+        {
+          "onset_s": 9.39,
+          "confirmation_s": 9.59
+        },
+        {
+          "onset_s": 60.22,
+          "confirmation_s": 60.42
+        },
+        {
+          "onset_s": 119.27,
+          "confirmation_s": 119.47
+        }
+      ],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/clip_reference_s9108404",
+      "paired_noise_seed": 9108404
+    },
+    {
+      "name": "logistic_r350_k25_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "COMPLETE",
+      "observed_s": 120.0,
+      "initial_brief_count": 37,
+      "initial_8s_brief_count": 34,
+      "has_entry": true,
+      "has_exit": true,
+      "has_interictal_return": true,
+      "qualified_cycles": [
+        {
+          "first_entry_s": 17.06,
+          "exit_s": 18.99,
+          "Z_recovered_s": 24.08,
+          "returned_brief_count": 65,
+          "returned_brief_span_s": 19.33,
+          "first_returned_brief_s": 25.04,
+          "reentry_s": 45.16
+        },
+        {
+          "first_entry_s": 45.16,
+          "exit_s": 50.2,
+          "Z_recovered_s": 56.74,
+          "returned_brief_count": 49,
+          "returned_brief_span_s": 9.530000000000001,
+          "first_returned_brief_s": 79.79,
+          "reentry_s": 90.05
+        }
+      ],
+      "complete_cycle": true,
+      "first_cycle_complete": false,
+      "entries": [
+        {
+          "onset_s": 9.46,
+          "confirmation_s": 9.66
+        },
+        {
+          "onset_s": 17.06,
+          "confirmation_s": 17.26
+        },
+        {
+          "onset_s": 45.16,
+          "confirmation_s": 45.36
+        },
+        {
+          "onset_s": 90.05,
+          "confirmation_s": 90.25
+        },
+        {
+          "onset_s": 99.05,
+          "confirmation_s": 99.25
+        }
+      ],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k25_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 25.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 6000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 1200,
+      "external_input_bitwise_equal": true
+    },
+    {
+      "name": "logistic_r350_k40_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "COMPLETE",
+      "observed_s": 120.0,
+      "initial_brief_count": 80,
+      "initial_8s_brief_count": 34,
+      "has_entry": true,
+      "has_exit": true,
+      "has_interictal_return": true,
+      "qualified_cycles": [
+        {
+          "first_entry_s": 22.04,
+          "exit_s": 27.09,
+          "Z_recovered_s": 34.4,
+          "returned_brief_count": 48,
+          "returned_brief_span_s": 14.54,
+          "first_returned_brief_s": 56.050000000000004,
+          "reentry_s": 71.81
+        }
+      ],
+      "complete_cycle": true,
+      "first_cycle_complete": true,
+      "entries": [
+        {
+          "onset_s": 22.04,
+          "confirmation_s": 22.24
+        },
+        {
+          "onset_s": 71.81,
+          "confirmation_s": 72.01
+        }
+      ],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 40.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 6000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 1200,
+      "external_input_bitwise_equal": true
+    },
+    {
+      "name": "logistic_r350_k50_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "PILOT_STOPPED_NO_HIGH_ENTRY",
+      "observed_s": 60.0,
+      "initial_brief_count": 0,
+      "initial_8s_brief_count": 8,
+      "has_entry": false,
+      "has_exit": false,
+      "has_interictal_return": false,
+      "qualified_cycles": [],
+      "complete_cycle": false,
+      "first_cycle_complete": false,
+      "entries": [],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k50_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 50.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 3000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 600,
+      "external_input_bitwise_equal": true
+    },
+    {
+      "name": "logistic_r350_k75_s9108404",
+      "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+      "status": "PILOT_STOPPED_NO_HIGH_ENTRY",
+      "observed_s": 60.0,
+      "initial_brief_count": 0,
+      "initial_8s_brief_count": 0,
+      "has_entry": false,
+      "has_exit": false,
+      "has_interictal_return": false,
+      "qualified_cycles": [],
+      "complete_cycle": false,
+      "first_cycle_complete": false,
+      "entries": [],
+      "criteria": {
+        "high": "All E >=200 Hz continuously for200ms,10ms bins",
+        "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+        "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+        "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+      },
+      "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k75_s9108404",
+      "paired_noise_seed": 9108404,
+      "logistic_midpoint_Hz": 350.0,
+      "logistic_width_Hz": 75.0,
+      "recorded_gate_max_error": 0.0,
+      "gate_samples": 3000,
+      "G_equals_Gmax_s": true,
+      "input_samples": 600,
+      "external_input_bitwise_equal": true
+    }
+  ],
+  "statistical_unit": "one fixed network, paired noise seed9108404",
+  "any_logistic_complete_cycle": true,
+  "all_parameter_settings_reported": true,
+  "population_equivalence_tested": false
+}

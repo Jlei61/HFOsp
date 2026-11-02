@@ -1,0 +1,549 @@
+{
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+  "source_simulation_rerun": true,
+  "feedback": "shared parameterized logistic for G and M",
+  "same_run_panels": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "model_configuration": {
+    "name": "logistic_r350_k40_s9108404",
+    "seed": 9108404,
+    "eta_m": 0.0005,
+    "tau_M_s": 1.0,
+    "tau_Z_s": 5.0,
+    "threshold": 95.19851312666987,
+    "mode": "native",
+    "gamma": 0.0,
+    "global_gain": 30.0,
+    "global_resource": "native_z",
+    "phi_jump": 0.0,
+    "horizon_s": 120.0,
+    "checkpoint_s": 2.0,
+    "device": 0,
+    "qa": false,
+    "stop_after_second_entry": false,
+    "stage": "paired_logistic_G_M_validation",
+    "C_R": 0.0,
+    "feedback_form": "conductance",
+    "global_reversal_mV": -17.662847938268442,
+    "sahp_gain": 0.0,
+    "sahp_tau_s": 0.5,
+    "k100": 8.0,
+    "K500": 40.0,
+    "G500": 30.0,
+    "rate_start_Hz": 200.0,
+    "rate_full_Hz": 500.0,
+    "added_K_increment_when_gate1": 0.16,
+    "local_inhibition_multiplier": 1.0,
+    "mechanism": "One parameterized logistic drives both G and M increment; no K state.",
+    "global_tau_s": 0.5,
+    "off_tau_s": 5.0,
+    "on_tau_s": 0.5,
+    "retention_below_Hz": 5.0,
+    "full_state_snapshots": true,
+    "high_jump_mV": 7.68,
+    "backend": "cuda",
+    "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+    "K_state": false,
+    "feedback_kind": "logistic_shared",
+    "logistic_midpoint_Hz": 350.0,
+    "logistic_width_Hz": 40.0,
+    "no_intervention": true
+  },
+  "validation": {
+    "name": "logistic_r350_k40_s9108404",
+    "model": "ZGM_SHARED_LOGISTIC_G_M_V1",
+    "status": "COMPLETE",
+    "observed_s": 120.0,
+    "initial_brief_count": 80,
+    "initial_8s_brief_count": 34,
+    "has_entry": true,
+    "has_exit": true,
+    "has_interictal_return": true,
+    "qualified_cycles": [
+      {
+        "first_entry_s": 22.04,
+        "exit_s": 27.09,
+        "Z_recovered_s": 34.4,
+        "returned_brief_count": 48,
+        "returned_brief_span_s": 14.54,
+        "first_returned_brief_s": 56.050000000000004,
+        "reentry_s": 71.81
+      }
+    ],
+    "complete_cycle": true,
+    "first_cycle_complete": true,
+    "entries": [
+      {
+        "onset_s": 22.04,
+        "confirmation_s": 22.24
+      },
+      {
+        "onset_s": 71.81,
+        "confirmation_s": 72.01
+      }
+    ],
+    "criteria": {
+      "high": "All E >=200 Hz continuously for200ms,10ms bins",
+      "exit": "Original observer: two1s windows all/core means<50Hz and quiet fraction>=0.2",
+      "recovery": "Both cores recover their own initial-interictal reference at8s; not a bifurcation threshold",
+      "return_rule": "At least10 complete20-200ms events spanning>=5s after both-core recovery"
+    },
+    "source_run": "/data/hfosp/topic4_sef_hfo/logistic_feedback_20261102/runs/logistic_r350_k40_s9108404",
+    "paired_noise_seed": 9108404,
+    "logistic_midpoint_Hz": 350.0,
+    "logistic_width_Hz": 40.0,
+    "recorded_gate_max_error": 0.0,
+    "gate_samples": 6000,
+    "G_equals_Gmax_s": true,
+    "input_samples": 1200,
+    "external_input_bitwise_equal": true
+  },
+  "effective_equations": {
+    "sigmoid": "S(R;R0,k)=1/(1+exp(-(R-R0)/k)), k>0",
+    "global_feedback": "tau_G*dG/dt=G_max*S(R)-G",
+    "adaptation": "dM_i/dt=-M_i/tau_M(R)+[a0/tau_M(R)+a1*S(R)]/eta_M*sum_n delta(t-t_i^n)",
+    "membrane": "tau_m*dV_i/dt=-V_i+IE_i-Z_i*II_i-Z_i*G*(V_i-EG)-eta_M*M_i",
+    "tau_M": "5s if causal all-E R<=5Hz, otherwise 0.5s (unchanged)",
+    "resource": "5s*dZ_i/dt=1{II_i+(18-EG)*G<95.19851312666987}-Z_i (unchanged)"
+  },
+  "states": [
+    {
+      "number": 1,
+      "label": "Local",
+      "episode": 1,
+      "time_s": 21.43,
+      "sample_window_s": [
+        21.419999999999998,
+        21.44
+      ],
+      "color": "#9b8d32",
+      "native_spike_count": 14326,
+      "all_E_rate20ms_Hz": 22.384375,
+      "core_A_B_surround_rate20ms_Hz": [
+        0.2652519893899204,
+        0.6361323155216284,
+        23.49310571240972
+      ],
+      "active_grid_fraction_above20Hz": 0.1375
+    },
+    {
+      "number": 2,
+      "label": "Spread",
+      "episode": 1,
+      "time_s": 21.5,
+      "sample_window_s": [
+        21.49,
+        21.51
+      ],
+      "color": "#bd6c35",
+      "native_spike_count": 40182,
+      "all_E_rate20ms_Hz": 62.784375000000004,
+      "core_A_B_surround_rate20ms_Hz": [
+        3.7798408488063657,
+        364.31297709923666,
+        56.46421536441234
+      ],
+      "active_grid_fraction_above20Hz": 0.25
+    },
+    {
+      "number": 3,
+      "label": "Entry",
+      "episode": 1,
+      "time_s": 21.8,
+      "sample_window_s": [
+        21.79,
+        21.810000000000002
+      ],
+      "color": "#ab4255",
+      "native_spike_count": 91849,
+      "all_E_rate20ms_Hz": 143.5140625,
+      "core_A_B_surround_rate20ms_Hz": [
+        158.42175066312998,
+        430.27989821882954,
+        135.7452396585686
+      ],
+      "active_grid_fraction_above20Hz": 0.46
+    },
+    {
+      "number": 4,
+      "label": "Ictal",
+      "episode": 1,
+      "time_s": 22.1,
+      "sample_window_s": [
+        22.09,
+        22.110000000000003
+      ],
+      "color": "#ba263c",
+      "native_spike_count": 131686,
+      "all_E_rate20ms_Hz": 205.759375,
+      "core_A_B_surround_rate20ms_Hz": [
+        411.4721485411141,
+        439.69465648854964,
+        194.6306631648063
+      ],
+      "active_grid_fraction_above20Hz": 0.5625
+    },
+    {
+      "number": 5,
+      "label": "Local",
+      "episode": 2,
+      "time_s": 70.82,
+      "sample_window_s": [
+        70.80999999999999,
+        70.83
+      ],
+      "color": "#9b8d32",
+      "native_spike_count": 5351,
+      "all_E_rate20ms_Hz": 8.3609375,
+      "core_A_B_surround_rate20ms_Hz": [
+        44.56233421750663,
+        0.19083969465648853,
+        7.675640183847669
+      ],
+      "active_grid_fraction_above20Hz": 0.0625
+    },
+    {
+      "number": 6,
+      "label": "Spread",
+      "episode": 2,
+      "time_s": 70.9,
+      "sample_window_s": [
+        70.89,
+        70.91000000000001
+      ],
+      "color": "#bd6c35",
+      "native_spike_count": 66203,
+      "all_E_rate20ms_Hz": 103.4421875,
+      "core_A_B_surround_rate20ms_Hz": [
+        230.23872679045093,
+        363.42239185750634,
+        93.59487852921865
+      ],
+      "active_grid_fraction_above20Hz": 0.4575
+    },
+    {
+      "number": 7,
+      "label": "Entry",
+      "episode": 2,
+      "time_s": 71.25,
+      "sample_window_s": [
+        71.24,
+        71.26
+      ],
+      "color": "#ab4255",
+      "native_spike_count": 74418,
+      "all_E_rate20ms_Hz": 116.278125,
+      "core_A_B_surround_rate20ms_Hz": [
+        405.37135278514586,
+        389.94910941475825,
+        102.06007879185816
+      ],
+      "active_grid_fraction_above20Hz": 0.3575
+    },
+    {
+      "number": 8,
+      "label": "Ictal",
+      "episode": 2,
+      "time_s": 71.9,
+      "sample_window_s": [
+        71.89,
+        71.91000000000001
+      ],
+      "color": "#ba263c",
+      "native_spike_count": 132431,
+      "all_E_rate20ms_Hz": 206.9234375,
+      "core_A_B_surround_rate20ms_Hz": [
+        437.7320954907161,
+        426.20865139949103,
+        195.5515430072226
+      ],
+      "active_grid_fraction_above20Hz": 0.5475
+    }
+  ],
+  "waveform": {
+    "segments": [
+      {
+        "window_s": [
+          20.7,
+          26.4
+        ],
+        "displayed_onset_s": 21.43,
+        "shading_s": [
+          21.43,
+          26.4
+        ],
+        "samples": 57001
+      },
+      {
+        "window_s": [
+          70.1,
+          72.0
+        ],
+        "displayed_onset_s": 70.82,
+        "shading_s": [
+          70.82,
+          72.0
+        ],
+        "samples": 19001
+      }
+    ],
+    "contact_order": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "display_contacts": [
+      "SCL9",
+      "SCL8",
+      "SCL7",
+      "SCL6",
+      "ICL11",
+      "ICL10",
+      "ICL9",
+      "ICL8",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3"
+    ],
+    "filter_Hz": [
+      80,
+      1000
+    ],
+    "filter_order": 4,
+    "full_signal_filter_before_windowing": true,
+    "gain_percentile": 99.5,
+    "gain_baseline_end_s": 22.04,
+    "gain_per_contact": [
+      17.521980970074576,
+      16.67666748082074,
+      16.686626141144078,
+      16.157751948850542,
+      12.641349648369692,
+      12.22497444288758,
+      11.553623519893467,
+      16.12229999316772,
+      19.665213011137933,
+      23.947148175310616,
+      27.465221574128226,
+      23.433778672190964,
+      21.960018647602848,
+      19.117293058480904,
+      19.586037731725998
+    ],
+    "display_gain": 0.65,
+    "same_time_scale": true,
+    "same_gain_for_both_windows": true
+  },
+  "trajectory": {
+    "time_s": [
+      0,
+      120
+    ],
+    "rate_bin_ms": 5,
+    "rate_display_smoothing_sigma_ms": 5,
+    "limits": [
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        800.0
+      ],
+      [
+        0.0,
+        500.0
+      ]
+    ],
+    "segments": 23999,
+    "inset_window_s": [
+      18.5,
+      21.95
+    ],
+    "inset_bounds": [
+      [
+        0.7716550338069986,
+        0.8177605303041159
+      ],
+      [
+        0.04263130030421711,
+        1.7247669725942696
+      ],
+      [
+        0.0,
+        187.1379808060288
+      ]
+    ],
+    "inset_segments": 689,
+    "states": [
+      {
+        "number": 1,
+        "label": "Local",
+        "episode": 1,
+        "time_s": 21.43,
+        "sample_window_s": [
+          21.419999999999998,
+          21.44
+        ],
+        "color": "#9b8d32",
+        "native_spike_count": 14326,
+        "all_E_rate20ms_Hz": 22.384375,
+        "core_A_B_surround_rate20ms_Hz": [
+          0.2652519893899204,
+          0.6361323155216284,
+          23.49310571240972
+        ],
+        "active_grid_fraction_above20Hz": 0.1375,
+        "Z_etaM_rate": [
+          0.804986561887234,
+          0.18605509957697575,
+          22.4295500354594
+        ],
+        "label_offset_pt": [
+          12,
+          12
+        ]
+      },
+      {
+        "number": 2,
+        "label": "Spread",
+        "episode": 1,
+        "time_s": 21.5,
+        "sample_window_s": [
+          21.49,
+          21.51
+        ],
+        "color": "#bd6c35",
+        "native_spike_count": 40182,
+        "all_E_rate20ms_Hz": 62.784375000000004,
+        "core_A_B_surround_rate20ms_Hz": [
+          3.7798408488063657,
+          364.31297709923666,
+          56.46421536441234
+        ],
+        "active_grid_fraction_above20Hz": 0.25,
+        "Z_etaM_rate": [
+          0.8020192877342398,
+          0.19204578145186038,
+          62.82667029233207
+        ],
+        "label_offset_pt": [
+          -20,
+          12
+        ]
+      },
+      {
+        "number": 3,
+        "label": "Entry",
+        "episode": 1,
+        "time_s": 21.8,
+        "sample_window_s": [
+          21.79,
+          21.810000000000002
+        ],
+        "color": "#ab4255",
+        "native_spike_count": 91849,
+        "all_E_rate20ms_Hz": 143.5140625,
+        "core_A_B_surround_rate20ms_Hz": [
+          158.42175066312998,
+          430.27989821882954,
+          135.7452396585686
+        ],
+        "active_grid_fraction_above20Hz": 0.46,
+        "Z_etaM_rate": [
+          0.7855015317529301,
+          0.46619362216158156,
+          143.5313475749592
+        ],
+        "label_offset_pt": [
+          12,
+          12
+        ]
+      },
+      {
+        "number": 4,
+        "label": "Ictal",
+        "episode": 1,
+        "time_s": 22.1,
+        "sample_window_s": [
+          22.09,
+          22.110000000000003
+        ],
+        "color": "#ba263c",
+        "native_spike_count": 131686,
+        "all_E_rate20ms_Hz": 205.759375,
+        "core_A_B_surround_rate20ms_Hz": [
+          411.4721485411141,
+          439.69465648854964,
+          194.6306631648063
+        ],
+        "active_grid_fraction_above20Hz": 0.5625,
+        "Z_etaM_rate": [
+          0.7611946157689929,
+          5.186797160583218,
+          205.78776985760936
+        ],
+        "label_offset_pt": [
+          12,
+          12
+        ]
+      }
+    ],
+    "color": "elapsed time in seconds, same scale for both trajectories"
+  },
+  "normalization_denominators_Hz": [
+    461.17647058823525,
+    453.04878048780483
+  ],
+  "C_normalization": "Per-entry maximum across all20ms fields sampled every5ms from state1to4 or5to8; no per-frame normalization",
+  "D": {
+    "matches": [
+      {
+        "model": "A",
+        "seizure_idx": 5,
+        "public_seizure": "SZ6",
+        "existing_type": "TA",
+        "signed_field_r": 0.8242281031211266,
+        "signed_contact_r": 0.532002463770252,
+        "mean_robust_z": 4.522303107544466,
+        "positive_mean_enhancement": true,
+        "rank": 1
+      },
+      {
+        "model": "B",
+        "seizure_idx": 16,
+        "public_seizure": "SZ17",
+        "existing_type": "TA",
+        "signed_field_r": 0.7497202824445892,
+        "signed_contact_r": 0.4580501278678873,
+        "mean_robust_z": 1.3987198820245899,
+        "positive_mean_enhancement": true,
+        "rank": 1
+      }
+    ],
+    "n_candidates": 25
+  },
+  "E_scope": "Historical13patients140seizures; not rerun with this model",
+  "E_source": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig6/candidates/selected_r08_r09_normalized_onsets_20261102/figures/fig6-panele.pdf",
+  "producer": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-continuous-core-state-r1/scripts/paper_figures/build_fig6_logistic_feedback.py",
+  "formal_figure_pointer_modified": false
+}

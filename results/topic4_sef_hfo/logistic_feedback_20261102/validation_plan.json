@@ -1,0 +1,44 @@
+{
+  "created_epoch": 1793607262.421525,
+  "question": "Does replacing both activity gates by one logistic preserve a full autonomous cycle?",
+  "fixed": {
+    "seed": 9108404,
+    "midpoint_Hz": 350,
+    "horizon_s": 120,
+    "network": "current Figure6"
+  },
+  "widths_Hz": [
+    75,
+    25
+  ],
+  "rationale": {
+    "75": "matches prior clip midpoint and midpoint slope",
+    "25": "narrower transition limits low-rate sigmoid tails; distinguishes low-activity feedback from high-rate saturation"
+  },
+  "no_outcome_based_seed_selection": true,
+  "all_completed_results_reported": true,
+  "adaptive_followup": {
+    "created_epoch": 1793608195.106672,
+    "width_Hz": 40,
+    "reason": "k75 suppressed initial activity; k25 first exit13.39s followed by rebound17.06s before resource recovery. Test intermediate width without changing network, seed, gains or time constants.",
+    "no_population_inference": true
+  },
+  "bounded_width_check": {
+    "created_epoch": 1793608330.0652738,
+    "widths_Hz": [
+      25,
+      40,
+      50,
+      75
+    ],
+    "max_native_runs": 4,
+    "reason": "Bracket a width that preserves initial brief events while avoiding immediate rebound. Complete and report every run, do not search seeds or change gains/time constants."
+  },
+  "staged_horizon": {
+    "amended_epoch": 1793609383.0545025,
+    "pilot_s": 60,
+    "entered_trajectories_s": 120,
+    "no_entry_rule": "Stop only after a complete60-s checkpoint; report explicitly censored, preserve resumable state. Do not infer absence of entry after60s.",
+    "reason": "The question is preservation of a full cycle. No-entry pilots are reported as negative in-window; entering trajectories need longer recovery/re-entry observation."
+  }
+}
