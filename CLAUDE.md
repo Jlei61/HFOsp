@@ -1,3 +1,7 @@
+<!-- ADAPTATION_NOTATION_20261102 -->
+> **适应项符号（作者指定，2026-11-02）：** 后续论文、图注、周报及模型说明统一使用 $M$ 表示 adaptation 状态、$\eta_M M$ 表示有效适应强度／电流幅度，保留 $\eta_M$ 作为换算系数，不另记为 $A$。整合拟钾电流后仍沿用这些符号；适应时间常数写作 $\tau_M$。从电流增量写回 $M$ 的状态方程时保留 $1/\eta_M$ 换算。代码字段、冻结结果与引用文献中的原符号按原义保留。见 [SNN 核心公式](docs/snn_core_model_equations.md)。
+<!-- /ADAPTATION_NOTATION_20261102 -->
+
 <!-- CURRENT_FIGURE4_20261102 -->
 > **当前 Figure 4（作者确认，2026-11-02）：** 先读 [当前 Fig4](docs/current_figure4.md) 与 `results/paper-ready-figure/fig4/current_version.json`。正式版本 `snn_network_optimization_final_20261102`，布局 `snn_layout_ei_labels_20261031`，状态 `AUTHOR_ACCEPTED_FINAL`。A/B 为局部回路、空间网络与采样；C 为事件及三分量损失优化示意；D/E 为无 core 背景与单 core 簇发；F/G/H/I 为 core 数量、训练损失、低 J 位置密度及方向响应。B/D/E 共享间距筛选显示坐标；D 白底，E 仅 core 内紫色，Neuron ID/LFP 对齐，E/I 标签红蓝。正式图及单面板在 `fig4/figures/`；校验／精确恢复用 `build_fig4_current.py`，原生重绘用 `render_fig4_current.py`。原 Fig4 的传播部分独立为 Fig5，原 Fig5 的状态动力学现为 Fig6。旧正式版归档于 `archive/2026-11-02_fig4_reorganization/fig4/`，不可按旧 D/E 图号覆盖当前图。
 <!-- /CURRENT_FIGURE4_20261102 -->

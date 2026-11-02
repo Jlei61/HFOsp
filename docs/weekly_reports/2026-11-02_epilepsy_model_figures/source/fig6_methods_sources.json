@@ -28,7 +28,7 @@
     },
     {
       "stage": "Current unified Z/G/M",
-      "membrane_feedback": "-Z II-Z G(V-EG)-A; A=eta_M M",
+      "membrane_feedback": "-Z II-Z G(V-EG)-eta_M M",
       "intrinsic_adaptation_states_per_E_cell": 1
     }
   ],
@@ -60,12 +60,19 @@
     "global_inhibition_color": "#0072B2",
     "unified_adaptation_color": "#C35A00",
     "math_format": "Markdown LaTeX with MathJax color groups",
-    "comparison": "Original baseline, intermediate separate M/K, and current single A are distinguished."
+    "comparison": "Original baseline, intermediate separate M/K, and current single M with effective adaptation eta_M M are distinguished.",
+    "adaptation_notation": {
+      "state": "M_i",
+      "effective_strength": "eta_M M_i",
+      "decay_time": "tau_M(R)",
+      "spike_jump": "Delta M(R)=[a0/tau_M(R)+a1*q(R)]/eta_M",
+      "source_mapping": "tau_M in the report denotes the unchanged tauA / tau_A time constant in the frozen producer and protocol."
+    }
   },
   "simplification_boundary": "One fewer intrinsic adaptation state versus separate M/K; omits independent M/K timescales and voltage-dependent K conductance. No claim of improved patient fit or isolated causal contribution based on the continuous trajectory alone.",
   "validation": {
     "mathjax_version": "3.2.2",
-    "formula_expressions_rendered": 86,
+    "formula_expressions_rendered": 93,
     "display_equations": 4,
     "math_errors": 0,
     "figure_caption_tail_unchanged": true

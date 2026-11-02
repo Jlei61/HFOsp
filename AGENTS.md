@@ -1,3 +1,7 @@
+<!-- ADAPTATION_NOTATION_20261102 -->
+> **适应项符号（作者指定，2026-11-02）：** 后续论文、图注、周报及模型说明统一使用 $M$ 表示 adaptation 状态、$\eta_M M$ 表示有效适应强度／电流幅度，保留 $\eta_M$ 作为换算系数，不另记为 $A$。整合拟钾电流后仍沿用这些符号；适应时间常数写作 $\tau_M$。从电流增量写回 $M$ 的状态方程时保留 $1/\eta_M$ 换算。代码字段、冻结结果与引用文献中的原符号按原义保留。见 [SNN 核心公式](docs/snn_core_model_equations.md)。
+<!-- /ADAPTATION_NOTATION_20261102 -->
+
 <!-- CURRENT_FIGURE5_20261027 -->
 > **新 Figure 5（作者指定，2026-10-27）：** 当前为 `spatial_snn_propagation_and_core_count`、`vertical_legend_20261027`，先读 [当前 Fig5](docs/current_figure5.md) 与 `results/paper-ready-figure/fig5/current_version.json`。这是从旧 Fig4 拆出的空间 SNN 传播 A–F：A–E 为同一 `xy_left_20` 工作点；F 为 17 位 shared axis 患者前 16/32 次搜索、TA 偏好约束下的单 core 与原最低 J 双 core 对照。此中期科学状态不因发布而升级。当前布局保留 TA/TB 身份、下方模板刻度、右上角竖排 core 图例、只标显著星号。校验 `build_fig5_current.py`，重绘 `build_fig5_aligned_layout.py`；不得用旧 Z/M producer 覆盖。**原 Figure 5 的 Z/M 图现为 Figure 6**，见 [当前 Fig6](docs/current_figure6.md) 与 `fig6/current_version.json`。共享机器旧 worktree 以 `/home/honglab/leijiaxin/HFOsp/` 的这些入口为准；其他机器先更新 checkout。新 Fig4 属于另一任务，不由本次发布替换。
 <!-- /CURRENT_FIGURE5_20261027 -->
