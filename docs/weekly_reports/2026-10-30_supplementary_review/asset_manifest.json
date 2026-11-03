@@ -130,12 +130,12 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.png",
       "file": "figures/current/S6.png",
-      "sha256": "83fc334ced0a8b0e2ce95bc083eda73aec80d63744ef864dd947802aeda4dcc4"
+      "sha256": "70bb52ba23eb2f3a3059b858c105a06b3809de62dbd1d9834f39fd9323266d14"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.pdf",
       "file": "figures/current/S6.pdf",
-      "sha256": "79ac2dd61197a3a9190ad2a7d6c754ed911d9227792c996df848b320d4d6988e"
+      "sha256": "af2a3967bef85f25a9ae51ad226c5e3e6123949e3d85a3086d90c5af41097836"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.png",
@@ -171,6 +171,16 @@
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/caption_en.md",
       "file": "captions/S6_en.md",
       "sha256": "e301efd33dc1f2012e64f66e61551f6878175e49a08d573019ac0dabaf0abefe"
+    },
+    {
+      "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.png",
+      "file": "figures/current/S6_TFR.png",
+      "sha256": "e833e0359e093ffecc618a2eeef798005e42a37546ab76164b99e0cb1b33a0b3"
+    },
+    {
+      "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.pdf",
+      "file": "figures/current/S6_TFR.pdf",
+      "sha256": "7a6caa54097cdfff35d8153754a0a4f0f2946ccc302803333cec1a8bdbc624bf"
     }
   ],
   "caption_source": "docs/paper-draft/supplementary_figure_legends_s1_s8_zh.tex",
@@ -233,12 +243,32 @@
     ]
   },
   "S6_display_mode": "Two-line A/B labels; compact vertical legend inside upper-left corner of each E subplot; displayed phenotype label Gamma",
-  "S6_current_layout": "per_subplot_legends_gamma_label_20261103",
+  "S6_current_layout": "dual_tfr_colorbars_20261103",
   "S6_current_version": "results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json",
   "S6_caption_revision": "report_caption_sync_20261103",
   "S6_caption_sources": {
     "zh": "results/paper-ready-figure/supplementary_onset_spectral_features/caption_zh.md",
     "en": "results/paper-ready-figure/supplementary_onset_spectral_features/caption_en.md"
   },
-  "S6_shared_documentation": "docs/current_supplementary_figure6.md"
+  "S6_shared_documentation": "docs/current_supplementary_figure6.md",
+  "S6_TFR_colorbars": {
+    "panels": [
+      "C",
+      "D"
+    ],
+    "count": 2,
+    "label": "TFR (dB)",
+    "limits_db": [
+      -14,
+      14
+    ],
+    "ticks_db": [
+      -14,
+      0,
+      14
+    ],
+    "colormap": "RdBu_r",
+    "one_colorbar_per_patient": true,
+    "left_colorbar_clear_of_right_frequency_label": true
+  }
 }

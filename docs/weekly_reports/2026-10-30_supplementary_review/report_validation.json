@@ -31,7 +31,7 @@
   },
   "all_report_links_exist": true,
   "new_shared_document_links_checked": 22,
-  "assets_checked": 34,
+  "assets_checked": 36,
   "source_and_copy_sha256_match": false,
   "S6_cohort_classifications_reconstructed": 324,
   "S6_n_patients": 23,
@@ -84,9 +84,9 @@
   ],
   "latex_validation": "Structure checked; TeX engine unavailable. Native figure PDF independently rasterized.",
   "visual_review": "PNG and independently rasterized PDF inspected; stacked legend is inside the first subplot, with no data curve occlusion.",
-  "markdown_sha256": "e9a3104803b556fdca47d93421c289b4c7ef64a96b9280469b7b7921eda021c8",
+  "markdown_sha256": "89ae490437ed5762f8a32874ed06faf4ebb90994f35383eac281489f5330414e",
   "independent_zip_extraction": true,
-  "zip_files": 54,
+  "zip_files": 56,
   "S6_clinical_onset_verified_from_original_EDF": true,
   "S6_Yuquan_legacy_marker_to_clinical_offset_s": 4.968,
   "S6_panel_B_revision": {
@@ -176,35 +176,54 @@
   ],
   "concurrent_S6_update_preserved": true,
   "visual_review_S5": "TA red / TB blue with lightened, desaturated fills (alpha 0.96) and matching dark outlines; readable on dark and bright inferno regions. Contact markers remain on top.",
-  "visual_review_S6": "Full figure and focused E PNGs and independently rasterized PDFs inspected. Each E subplot has a compact 12 pt upper-left legend; no data curves or onset windows are covered. Gamma replaces Gamma-dominant in A, B, D and E. Author review pending.",
+  "visual_review_S6": "Full PNG, focused TFR PNG and independently rasterized TFR PDF inspected; both colorbars use the same scale, ticks and typography. Left colorbar is clear of the right frequency-axis label.",
   "S6_latest_render_revision": {
     "updated": "2026-11-03",
-    "version": "per_subplot_legends_gamma_label_20261103",
+    "version": "dual_tfr_colorbars_20261103",
     "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
-    "legend_position": {
-      "axes": "all four frequency-band subplots",
-      "count": 4,
-      "location": "upper left inside each axes",
-      "columns": 1,
-      "font_pt": 12,
-      "bbox_anchor_axes": [
-        0.02,
-        1
+    "tfr_colorbars": {
+      "panels": [
+        "C",
+        "D"
       ],
-      "background": "compact borderless white",
-      "inside_axes": true,
-      "no_intersection_with_data_curves_with_3px_margin": true,
-      "onset_and_early_window_unobscured": true
+      "count": 2,
+      "label": "TFR (dB)",
+      "limits_db": [
+        -14,
+        14
+      ],
+      "ticks_db": [
+        -14,
+        0,
+        14
+      ],
+      "colormap": "RdBu_r",
+      "one_colorbar_per_patient": true,
+      "left_colorbar_clear_of_right_frequency_label": true
     },
-    "display_label_mapping": {
-      "Gamma-dominant": "Gamma"
+    "source_data_hashes_unchanged": true,
+    "source_data_files_checked": 11,
+    "A_B_D_E_pixels_identical_to_previous_version": true,
+    "changed_png_bbox_xyxy": [
+      232,
+      777,
+      1881,
+      1899
+    ],
+    "unchanged_AB_B_E_exports_retained": true,
+    "full_and_focused_PDF_colorbar_title_counts": {
+      "full": 2,
+      "focused_TFR": 2
     },
-    "all_data_and_caption_hashes_unchanged": true,
-    "four_E_legends_verified_in_PDF": true,
-    "Gamma_dominant_removed_from_all_figure_exports": true,
     "PDF_text_within_canvas": true,
+    "agent_visual_review": "Full PNG, focused TFR PNG and independently rasterized TFR PDF inspected; both colorbars use the same scale, ticks and typography. Left colorbar is clear of the right frequency-axis label.",
     "human_visual_review": "PENDING",
-    "agent_visual_review": "Full figure and focused E PNGs and independently rasterized PDFs inspected. Each E subplot has a compact 12 pt upper-left legend; no data curves or onset windows are covered. Gamma replaces Gamma-dominant in A, B, D and E."
+    "isolated_checkout_replay": {
+      "all_five_PNG_exports_byte_identical": true,
+      "metadata_identical": true,
+      "packaged_input_data_unchanged": true,
+      "uses_packaged_data_without_original_raw_records": true
+    }
   },
   "S6_caption_sources_and_copies_match": true,
   "S5_patients": [

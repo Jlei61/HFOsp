@@ -115,32 +115,51 @@
   },
   "latest_render_revision": {
     "updated": "2026-11-03",
-    "version": "per_subplot_legends_gamma_label_20261103",
+    "version": "dual_tfr_colorbars_20261103",
     "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
-    "legend_position": {
-      "axes": "all four frequency-band subplots",
-      "count": 4,
-      "location": "upper left inside each axes",
-      "columns": 1,
-      "font_pt": 12,
-      "bbox_anchor_axes": [
-        0.02,
-        1
+    "tfr_colorbars": {
+      "panels": [
+        "C",
+        "D"
       ],
-      "background": "compact borderless white",
-      "inside_axes": true,
-      "no_intersection_with_data_curves_with_3px_margin": true,
-      "onset_and_early_window_unobscured": true
+      "count": 2,
+      "label": "TFR (dB)",
+      "limits_db": [
+        -14,
+        14
+      ],
+      "ticks_db": [
+        -14,
+        0,
+        14
+      ],
+      "colormap": "RdBu_r",
+      "one_colorbar_per_patient": true,
+      "left_colorbar_clear_of_right_frequency_label": true
     },
-    "display_label_mapping": {
-      "Gamma-dominant": "Gamma"
+    "source_data_hashes_unchanged": true,
+    "source_data_files_checked": 11,
+    "A_B_D_E_pixels_identical_to_previous_version": true,
+    "changed_png_bbox_xyxy": [
+      232,
+      777,
+      1881,
+      1899
+    ],
+    "unchanged_AB_B_E_exports_retained": true,
+    "full_and_focused_PDF_colorbar_title_counts": {
+      "full": 2,
+      "focused_TFR": 2
     },
-    "all_data_and_caption_hashes_unchanged": true,
-    "four_E_legends_verified_in_PDF": true,
-    "Gamma_dominant_removed_from_all_figure_exports": true,
     "PDF_text_within_canvas": true,
+    "agent_visual_review": "Full PNG, focused TFR PNG and independently rasterized TFR PDF inspected; both colorbars use the same scale, ticks and typography. Left colorbar is clear of the right frequency-axis label.",
     "human_visual_review": "PENDING",
-    "agent_visual_review": "Full figure and focused E PNGs and independently rasterized PDFs inspected. Each E subplot has a compact 12 pt upper-left legend; no data curves or onset windows are covered. Gamma replaces Gamma-dominant in A, B, D and E."
+    "isolated_checkout_replay": {
+      "all_five_PNG_exports_byte_identical": true,
+      "metadata_identical": true,
+      "packaged_input_data_unchanged": true,
+      "uses_packaged_data_without_original_raw_records": true
+    }
   },
   "latest_documentation_revision": {
     "updated": "2026-11-03",

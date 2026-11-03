@@ -10,7 +10,7 @@
 
 **E，** 同一代表触点在 1–30、30–80、80–150 和 1–150 Hz 的功率增幅，按 2 s 平滑。蓝、绿曲线分别对应 Y15/SZ3（Broadband）和 E20/SZ8（Gamma），各子图左上角分别给出图例。时间以临床起始为零；淡蓝、淡红区域分别为 −120 至 −90 s 基线和 0–10 s 早期窗口，功率增幅以相对基线的 dB 表示。
 
-[PNG](figures/supp_fig6_onset_spectral_features.png) · [PDF](figures/supp_fig6_onset_spectral_features.pdf) · [B 图 PNG](figures/supp_fig6_panelb_patient_distribution.png) · [B 图 PDF](figures/supp_fig6_panelb_patient_distribution.pdf) · [A/B 局部图](figures/supp_fig6_panels_ab.png) · [E 图](figures/supp_fig6_panele_power_curves.png)
+[PNG](figures/supp_fig6_onset_spectral_features.png) · [PDF](figures/supp_fig6_onset_spectral_features.pdf) · [B 图 PNG](figures/supp_fig6_panelb_patient_distribution.png) · [B 图 PDF](figures/supp_fig6_panelb_patient_distribution.pdf) · [A/B 局部图](figures/supp_fig6_panels_ab.png) · [E 图](figures/supp_fig6_panele_power_curves.png) · [TFR 局部图](figures/supp_fig6_tfr_panels.png)
 
 当前版本与修改说明见[共享入口](../../../docs/current_supplementary_figure6.md)及 [current_version.json](current_version.json)。
 

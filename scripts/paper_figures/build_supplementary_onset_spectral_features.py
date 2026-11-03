@@ -153,9 +153,9 @@ def main():
  composite_pie_checks=draw_patient_pie(fig,(.54,.79,.42,.17),patient)
  for ext in ('png','pdf'):fig.savefig(OUT/'figures'/f'supp_fig6_panels_ab.{ext}',dpi=220,bbox_inches='tight',pad_inches=.10)
  # C/D. Aligned raw signal and TFR examples.
- tfr_images=[]
+ tfr_images=[];tfr_axes=[];tfr_colorbars=[]
  for i,(arrays,m) in enumerate(cases):
-  x=.075+i*.475;w=.385;kind=m['kind'];color=COLORS[kind]
+  x=.075+i*.475;w=.370 if i==0 else .385;kind=m['kind'];color=COLORS[kind]
   fig.text(x-.045,.735,chr(67+i),weight='bold',fontsize=28);fig.text(x,.735,f"{m['public_label']} | {m['public_seizure_label']}   {DISPLAY_LABELS.get(kind,kind)}",color=color,fontsize=24,weight='bold')
   raw=fig.add_axes([x,.55,w,.15]);t=arrays['raw_times'];v=arrays['raw_signal'];v=v-np.median(v,axis=1,keepdims=True);scale=max(np.finfo(float).eps if m['subject'].startswith('yuquan_') else 40,float(np.nanpercentile(abs(v),95))*3)
   if m['subject'].startswith('yuquan_'):
@@ -166,11 +166,18 @@ def main():
   compact_axis(raw);shade(raw,True);raw.set_ylim(-.65,5.65);raw.invert_yaxis();raw.set_yticks(range(6),[str(n) for n in arrays['raw_names']],fontsize=16);raw.tick_params(axis='y',length=0);raw.set_xticklabels([])
   shown_width=native._compressed_position(DISPLAY[-1][-1],DISPLAY)
   raw.text(native._compressed_position(-100,DISPLAY)/shown_width,1.02,'Baseline',transform=raw.transAxes,color='#3C648C',fontsize=18,ha='center');raw.text(native._compressed_position(5,DISPLAY)/shown_width,1.02,'Onset',transform=raw.transAxes,color='#B2182B',fontsize=18,ha='center')
-  tfr=fig.add_axes([x,.365,w,.125])
+  tfr=fig.add_axes([x,.365,w,.125]);tfr_axes.append(tfr)
   for mask,mapped in native._compressed_segments(arrays['tfr_times'],DISPLAY):im=tfr.pcolormesh(mapped,arrays['tfr_freqs'],arrays['tfr_db'][:,mask],cmap='RdBu_r',vmin=-14,vmax=14,shading='auto',rasterized=True)
   compact_axis(tfr);tfr.set_ylim(1,150);tfr.set_yticks([1,50,100,150]);tfr.set_ylabel('Frequency (Hz)',fontsize=20);tfr.set_xlabel('Time from clinical onset (s)',fontsize=20,labelpad=3);tfr.set_title(m['spectral_channel'],fontsize=19,loc='left',pad=4)
   tfr.axvline(native._compressed_position(0,DISPLAY),color='black',ls='--',lw=1);tfr_images.append(im)
- cax=fig.add_axes([.951,.365,.009,.125]);cb=fig.colorbar(tfr_images[-1],cax=cax,ticks=[-14,0,14]);cb.ax.set_title('TFR (dB)',fontsize=16,pad=12);cb.ax.tick_params(labelsize=17,length=3)
+ for im,cbar_x in zip(tfr_images,[.451,.951]):
+  cax=fig.add_axes([cbar_x,.365,.009,.125]);cb=fig.colorbar(im,cax=cax,ticks=[-14,0,14]);cb.ax.set_title('TFR (dB)',fontsize=16,pad=12);cb.ax.tick_params(labelsize=17,length=3);tfr_colorbars.append(cb)
+ fig.canvas.draw();renderer=fig.canvas.get_renderer()
+ right_frequency_label=tfr_axes[1].yaxis.label.get_window_extent(renderer).padded(2)
+ assert all(not text.get_window_extent(renderer).overlaps(right_frequency_label) for text in [*tfr_colorbars[0].ax.get_yticklabels(),tfr_colorbars[0].ax.title])
+ assert all(cb.mappable.get_clim()==(-14,14) for cb in tfr_colorbars)
+ tfr_bounds=Bbox.union([ax.get_tightbbox(renderer) for ax in [*tfr_axes,*[cb.ax for cb in tfr_colorbars]]]).transformed(fig.dpi_scale_trans.inverted()).padded(.10)
+ for ext in ('png','pdf'):fig.savefig(OUT/'figures'/f'supp_fig6_tfr_panels.{ext}',dpi=220,bbox_inches=tfr_bounds)
  # E. The same two channels on continuous time axes in four frequency bands.
  fig.text(.03,.285,'E',weight='bold',fontsize=28)
  power_axes=[];power_legends=[];power_handles=[]
@@ -200,7 +207,8 @@ def main():
  plt.close(panel)
  metadata={'asset_id':'early_seizure_spectral_features','paper_slot':'FigS6','status':'PENDING_AUTHOR_VISUAL_REVIEW','producer':str(Path(__file__).relative_to(ROOT)),'cohort':{'state_source':str(STATE.relative_to(ROOT)),'source_sha256':sha(STATE_INPUT),'n_seizures':324,'n_patients':23,'counts':dict(zip(order,nums))},'examples':[m for a,m in cases],'panels':{'A':'Cohort spectral phenotype distribution','B':'Within-patient spectral phenotype distribution across all 17 classified seizures of E20','C':'Yuquan Y15/SZ3 broadband raw and D3 TFR','D':'E20/SZ8 gamma-dominant raw and HRB1 TFR','E':'Four frequency-band power trajectories from the same representative contacts'},'display':{'raw_TFR_windows':DISPLAY,'band_curve_window':XWINDOW,'baseline_sec':BASELINE,'early_window_sec':[0,10],'tfr_limits_db':[-14,14],'spectral_window_sec':1,'spectral_step_sec':.1,'band_curve_smoothing_sec':2},'feature_contract':'Broadband uses 1-150 Hz, non-broadband gamma uses 30-80 Hz. Downstream fields use contact-wise baseline-standardized log-band-power averaged over 0-10 s; displayed example traces are dB gains, not the field z-scores.','classification_contract':'At least 5 of 6 band hits, at least 2 low and 2 fast, defines broadband; otherwise gamma hit defines gamma-dominant. Exact frozen detection rule and source retained in methods note.','claim_scope':'Descriptive early spectra and frequency-band choice; no onset-detection performance estimate.'}
  metadata['display']['spectral_step_sec']=float(np.median(np.diff(cases[0][0]['tfr_times'])))
- metadata['layout_version']='per_subplot_legends_gamma_label_20261103'
+ metadata['layout_version']='dual_tfr_colorbars_20261103'
+ metadata['tfr_colorbars']={'panels':['C','D'],'count':2,'label':'TFR (dB)','limits_db':[-14,14],'ticks_db':[-14,0,14],'colormap':'RdBu_r','one_colorbar_per_patient':True,'left_colorbar_clear_of_right_frequency_label':True}
  metadata['panel_E_legend']={'axes':'all four frequency-band subplots','count':len(power_legends),'location':'upper left inside each axes','columns':1,'font_pt':12,'bbox_anchor_axes':[.02,1],'background':'compact borderless white','inside_axes':True,'no_intersection_with_data_curves_with_3px_margin':True,'onset_and_early_window_unobscured':True}
  metadata['display_label_mapping']=DISPLAY_LABELS
  metadata['panels']['A']='Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands'
@@ -218,6 +226,7 @@ def main():
  panel_description='E20 的患者内类型占比，分母为原分类表中该患者全部 17 次发作。宽带型与 gamma 优势型各占 35.3%，其他占 29.4%；仅低频型为 0 次，不绘制扇区。**关注点**：两种主要类型合计占 70.6%，未剔除其他类型后重新归一化。'
  ab_description='完整图 A/B 的同状态局部预览：A 将类型和频段分为两行；B 将类型和发作数分为两行。频段及发作数用较小灰字呈现，百分比保留在对应扇区内。**关注点**：缩短横向标签，保留频段、数量及百分比。'
  e_description='Y15/SZ3 与 E20/SZ8 示例触点的四频带功率变化，复用完整图中的曲线和坐标。每幅子图左上角均竖排两例的图例，使用 12 号字和紧凑白底，类型简称为 Broadband 和 Gamma。**关注点**：各子图可独立读取图例，且不遮挡曲线、起始线及 0–10 秒区域。'
- (OUT/'figures/README.md').write_text('\n\n'.join(f'### {name}.{ext}\n\n{desc}' for name,desc in [('supp_fig6_onset_spectral_features',description),('supp_fig6_panelb_patient_distribution',panel_description),('supp_fig6_panels_ab',ab_description),('supp_fig6_panele_power_curves',e_description)] for ext in ('png','pdf'))+'\n')
+ tfr_description='C、D 的代表触点时频谱局部图，与完整图保持同一状态。两位患者各有独立 TFR (dB) 色条，范围均为 −14 至 14 dB，刻度为 −14、0、14。**关注点**：左侧患者的颜色读出可直接由其右侧色条解释，两例使用相同色标。'
+ (OUT/'figures/README.md').write_text('\n\n'.join(f'### {name}.{ext}\n\n{desc}' for name,desc in [('supp_fig6_onset_spectral_features',description),('supp_fig6_panelb_patient_distribution',panel_description),('supp_fig6_panels_ab',ab_description),('supp_fig6_panele_power_curves',e_description),('supp_fig6_tfr_panels',tfr_description)] for ext in ('png','pdf'))+'\n')
  print(OUT/'figures/supp_fig6_onset_spectral_features.png',flush=True)
 if __name__=='__main__':main()

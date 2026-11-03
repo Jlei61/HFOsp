@@ -3,7 +3,7 @@
   "paper_slot": "FigS6",
   "display_name": "Supplementary Figure 6",
   "updated": "2026-11-03",
-  "layout_version": "per_subplot_legends_gamma_label_20261103",
+  "layout_version": "dual_tfr_colorbars_20261103",
   "caption_revision": "report_caption_sync_20261103",
   "status": "PENDING_AUTHOR_VISUAL_REVIEW",
   "path_base": "repository_root",
@@ -33,5 +33,27 @@
     "inside_axes": true,
     "no_intersection_with_data_curves_with_3px_margin": true,
     "onset_and_early_window_unobscured": true
-  }
+  },
+  "tfr_colorbars": {
+    "panels": [
+      "C",
+      "D"
+    ],
+    "count": 2,
+    "label": "TFR (dB)",
+    "limits_db": [
+      -14,
+      14
+    ],
+    "ticks_db": [
+      -14,
+      0,
+      14
+    ],
+    "colormap": "RdBu_r",
+    "one_colorbar_per_patient": true,
+    "left_colorbar_clear_of_right_frequency_label": true
+  },
+  "tfr_preview_png": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.png",
+  "tfr_preview_pdf": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.pdf"
 }

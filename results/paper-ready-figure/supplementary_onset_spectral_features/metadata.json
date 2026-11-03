@@ -225,7 +225,27 @@
   "feature_contract": "Broadband uses 1-150 Hz, non-broadband gamma uses 30-80 Hz. Downstream fields use contact-wise baseline-standardized log-band-power averaged over 0-10 s; displayed example traces are dB gains, not the field z-scores.",
   "classification_contract": "At least 5 of 6 band hits, at least 2 low and 2 fast, defines broadband; otherwise gamma hit defines gamma-dominant. Exact frozen detection rule and source retained in methods note.",
   "claim_scope": "Descriptive early spectra, within-patient coexistence and predominance of broadband/gamma types in E20, and frequency-band choice; no cohort-wide within-patient prevalence or onset-detection performance estimate.",
-  "layout_version": "per_subplot_legends_gamma_label_20261103",
+  "layout_version": "dual_tfr_colorbars_20261103",
+  "tfr_colorbars": {
+    "panels": [
+      "C",
+      "D"
+    ],
+    "count": 2,
+    "label": "TFR (dB)",
+    "limits_db": [
+      -14,
+      14
+    ],
+    "ticks_db": [
+      -14,
+      0,
+      14
+    ],
+    "colormap": "RdBu_r",
+    "one_colorbar_per_patient": true,
+    "left_colorbar_clear_of_right_frequency_label": true
+  },
   "panel_E_legend": {
     "axes": "all four frequency-band subplots",
     "count": 4,

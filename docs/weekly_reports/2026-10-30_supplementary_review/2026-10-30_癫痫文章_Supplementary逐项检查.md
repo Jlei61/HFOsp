@@ -132,6 +132,8 @@ tags:
 
 ![Supplementary Figure 6](figures/current/S6.png)
 
+**2026-11-03 色条更新：** 左侧 C 图 TFR 补上独立色条；C、D 均为 −14 至 14 dB，刻度为 −14、0、14。两例频谱数据及分类结果保持不变。
+
 **2026-11-03 修改：** A 将类型与频段分行；B 改为 E20 的患者内饼图并将百分比收进扇区；E 的四个子图各在左上角竖排 12 号字图例，避开曲线及起始窗口。图内与图注统一使用 Gamma。
 
 **发作早期频谱特征与能量频带的选择。**
@@ -144,7 +146,7 @@ tags:
 
 **E，** 同一代表触点在 1–30、30–80、80–150 和 1–150 Hz 的功率增幅，按 2 s 平滑。蓝、绿曲线分别对应 Y15/SZ3（Broadband）和 E20/SZ8（Gamma），各子图左上角分别给出图例。时间以临床起始为零；淡蓝、淡红区域分别为 −120 至 −90 s 基线和 0–10 s 早期窗口，功率增幅以相对基线的 dB 表示。
 
-[PNG](figures/current/S6.png) · [PDF](figures/current/S6.pdf) · [A/B 局部图](figures/current/S6_AB.png) · [E 图](figures/current/S6_E.png) · [中文图注](captions/S6_zh.md) · [English caption](captions/S6_en.md) · [分类、特征定义与病例核对](statistics/S6_spectral_features.md)
+[PNG](figures/current/S6.png) · [PDF](figures/current/S6.pdf) · [A/B 局部图](figures/current/S6_AB.png) · [E 图](figures/current/S6_E.png) · [TFR 局部图](figures/current/S6_TFR.png) · [中文图注](captions/S6_zh.md) · [English caption](captions/S6_en.md) · [分类、特征定义与病例核对](statistics/S6_spectral_features.md)
 
 **支持正文／主图：** 补充主图 3A–C 的频谱背景与能量场构建，展示 E20 内宽带型和 Gamma 型共存且占主要部分，并说明两类发作所采用频带的依据。
 
