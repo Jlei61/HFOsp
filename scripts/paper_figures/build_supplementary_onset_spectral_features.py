@@ -108,7 +108,7 @@ def within_patient_distribution():
  summary.to_csv(OUT/'data/panel_b_patient_distribution.csv',index=False)
  return {'public_label':public,'n_seizures':len(rows),'counts':{k:int(counts[k]) for k in PHENOTYPE_ORDER},'denominator':'All seizures for this patient in the frozen classification table; no phenotype exclusions.','statistical_unit':'Seizure within one patient','selection_reason':'The existing gamma example patient in panel D also has broadband seizures; both are the joint most frequent categories.','broadband_and_gamma_fraction':float(counts.iloc[:2].sum()/len(rows))}
 
-def draw_patient_pie(fig,bounds,patient):
+def draw_patient_pie(fig,bounds,patient,legend_fraction=.45):
  """Draw the same full-denominator patient distribution in both exports."""
  x,y,w,h=bounds
  ax=fig.add_axes([x,y,w*.40,h])
@@ -116,7 +116,7 @@ def draw_patient_pie(fig,bounds,patient):
  wedges,_,texts=ax.pie(nums[keep],colors=np.array(PHENOTYPE_COLORS)[keep],startangle=90,counterclock=False,radius=1.10,autopct=lambda pct:f'{pct:.1f}%',pctdistance=.56,textprops={'fontsize':14},wedgeprops={'edgecolor':'white','linewidth':1.6})
  for text,color in zip(texts,np.array(PHENOTYPE_COLORS)[keep]):text.set_color('#333333' if color in ('#A5A5A5','#D4D4D4') else 'white')
  ax.set_aspect('equal')
- legend=fig.add_axes([x+w*.45,y,w*.55,h]);legend.axis('off')
+ legend=fig.add_axes([x+w*legend_fraction,y,w*(1-legend_fraction),h]);legend.axis('off')
  for y0,label,n,color in zip([.80,.50,.20],np.array(PHENOTYPE_LABELS)[keep],nums[keep],np.array(PHENOTYPE_COLORS)[keep]):
   legend.add_patch(Rectangle((0,y0-.04),.065,.08,facecolor=color,edgecolor='none',transform=legend.transAxes))
   legend.text(.10,y0+.035,DISPLAY_LABELS.get(label,label),fontsize=18,va='center',transform=legend.transAxes)
@@ -137,20 +137,20 @@ def main():
  plt.rcParams.update({'font.family':'DejaVu Sans','font.size':20,'axes.labelsize':22,'xtick.labelsize':18,'ytick.labelsize':18,'pdf.fonttype':42,'axes.spines.top':False,'axes.spines.right':False})
  fig=plt.figure(figsize=(18,12.7),facecolor='white')
  # A. Directly labelled cohort distribution.
- ax=fig.add_axes([.20,.81,.25,.14]);order=['broadband_1_150','gamma_nonbroadband','low_frequency_only','other'];labels=['','','Low bands','Other'];cc=[COLORS['Broadband'],COLORS['Gamma-dominant'],'#A5A5A5','#D4D4D4']
+ ax=fig.add_axes([.155,.81,.295,.14]);order=['broadband_1_150','gamma_nonbroadband','low_frequency_only','other'];labels=['','','','Other'];cc=[COLORS['Broadband'],COLORS['Gamma-dominant'],'#A5A5A5','#D4D4D4']
  data=counts.set_index('phenotype');nums=[int(data.loc[k,'n_seizures']) for k in order];fractions=np.array(nums)/324
  ax.barh(np.arange(4),fractions*100,color=cc,height=.58);ax.set_yticks(range(4),labels);ax.invert_yaxis();ax.set_xlim(0,50);ax.set_xticks([0,20,40]);ax.set_xlabel('Seizures (%)',fontsize=20,labelpad=2)
  ax.tick_params(axis='y',length=0,pad=8,labelsize=18)
- for row,kind,band in [(0,'Broadband','1–150 Hz'),(1,'Gamma','30–80 Hz')]:
+ for row,kind,band in [(0,'Broadband','1–150 Hz'),(1,'Gamma','30–80 Hz'),(2,'Low bands','1–13 Hz')]:
   for label,offset,size,color in [(kind,6,18,'#222222'),(band,-10,14,'#666666')]:
    trans=ax.get_yaxis_transform()+ScaledTranslation(-8/72,offset/72,fig.dpi_scale_trans)
    ax.text(0,row,label,transform=trans,ha='right',va='center',fontsize=size,color=color)
  for i,(num,frac) in enumerate(zip(nums,fractions)):ax.text(frac*100+.8,i,f'{num} ({frac*100:.1f}%)',va='center',fontsize=18)
- fig.text(.035,.965,'A',weight='bold',fontsize=28);fig.text(.20,.965,'324 seizures  |  23 patients',fontsize=22,weight='bold')
+ fig.text(.03,.965,'A',weight='bold',fontsize=28);fig.text(.075,.965,'324 seizures  |  23 patients',fontsize=22,weight='bold')
  # B. All classified seizures from the same patient shown in panel D.
- fig.text(.50,.965,'B',weight='bold',fontsize=28)
- fig.text(.55,.965,f"{patient['public_label']}  |  {patient['n_seizures']} seizures",fontsize=20,weight='bold')
- composite_pie_checks=draw_patient_pie(fig,(.54,.79,.42,.17),patient)
+ fig.text(.505,.965,'B',weight='bold',fontsize=28)
+ fig.text(.55,.965,f"{patient['public_label']}  |  {patient['n_seizures']} seizures",fontsize=22,weight='bold')
+ composite_pie_checks=draw_patient_pie(fig,(.515,.79,.42,.17),patient,legend_fraction=.415)
  for ext in ('png','pdf'):fig.savefig(OUT/'figures'/f'supp_fig6_panels_ab.{ext}',dpi=220,bbox_inches='tight',pad_inches=.10)
  # C/D. Aligned raw signal and TFR examples.
  tfr_images=[];tfr_axes=[];tfr_colorbars=[]
@@ -207,15 +207,17 @@ def main():
  plt.close(panel)
  metadata={'asset_id':'early_seizure_spectral_features','paper_slot':'FigS6','status':'PENDING_AUTHOR_VISUAL_REVIEW','producer':str(Path(__file__).relative_to(ROOT)),'cohort':{'state_source':str(STATE.relative_to(ROOT)),'source_sha256':sha(STATE_INPUT),'n_seizures':324,'n_patients':23,'counts':dict(zip(order,nums))},'examples':[m for a,m in cases],'panels':{'A':'Cohort spectral phenotype distribution','B':'Within-patient spectral phenotype distribution across all 17 classified seizures of E20','C':'Yuquan Y15/SZ3 broadband raw and D3 TFR','D':'E20/SZ8 gamma-dominant raw and HRB1 TFR','E':'Four frequency-band power trajectories from the same representative contacts'},'display':{'raw_TFR_windows':DISPLAY,'band_curve_window':XWINDOW,'baseline_sec':BASELINE,'early_window_sec':[0,10],'tfr_limits_db':[-14,14],'spectral_window_sec':1,'spectral_step_sec':.1,'band_curve_smoothing_sec':2},'feature_contract':'Broadband uses 1-150 Hz, non-broadband gamma uses 30-80 Hz. Downstream fields use contact-wise baseline-standardized log-band-power averaged over 0-10 s; displayed example traces are dB gains, not the field z-scores.','classification_contract':'At least 5 of 6 band hits, at least 2 low and 2 fast, defines broadband; otherwise gamma hit defines gamma-dominant. Exact frozen detection rule and source retained in methods note.','claim_scope':'Descriptive early spectra and frequency-band choice; no onset-detection performance estimate.'}
  metadata['display']['spectral_step_sec']=float(np.median(np.diff(cases[0][0]['tfr_times'])))
- metadata['layout_version']='dual_tfr_colorbars_20261103'
+ metadata['layout_version']='aligned_ab_low_band_frequency_20261103'
+ metadata['panel_AB_layout']={'A_axes_bounds':[.155,.81,.295,.14],'title_x':[.075,.55],'title_y':.965,'title_font_pt':22,'panel_letter_x':[.03,.505],'aligned_with_C_D_headers':True,'B_bounds':[.515,.79,.42,.17],'B_legend_fraction':.415}
  metadata['tfr_colorbars']={'panels':['C','D'],'count':2,'label':'TFR (dB)','limits_db':[-14,14],'ticks_db':[-14,0,14],'colormap':'RdBu_r','one_colorbar_per_patient':True,'left_colorbar_clear_of_right_frequency_label':True}
  metadata['panel_E_legend']={'axes':'all four frequency-band subplots','count':len(power_legends),'location':'upper left inside each axes','columns':1,'font_pt':12,'bbox_anchor_axes':[.02,1],'background':'compact borderless white','inside_axes':True,'no_intersection_with_data_curves_with_3px_margin':True,'onset_and_early_window_unobscured':True}
  metadata['display_label_mapping']=DISPLAY_LABELS
- metadata['panels']['A']='Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands'
+ metadata['panels']['A']='Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands, and low-frequency classification bands 1-13 Hz'
  metadata['panel_A_band_labels_hz']={'Broadband':[1,150],'Gamma':[30,80]}
+ metadata['panel_A_classification_band_labels_hz']={'Low bands':[1,13]}
  metadata['panel_A_display_label_mapping']={'low_frequency_only':'Low bands'}
- metadata['pie_typography']={'title_pt':20,'legend_pt':18,'percentage_pt':14,'composite_checks':composite_pie_checks,'standalone_checks':standalone_pie_checks}
- metadata['label_display']={'A':'Type on first line; readout band on smaller grey second line','B':'Type on first line; seizure count on smaller grey second line','secondary_text_pt':14}
+ metadata['pie_typography']={'title_pt':22,'standalone_title_pt':20,'legend_pt':18,'percentage_pt':14,'composite_checks':composite_pie_checks,'standalone_checks':standalone_pie_checks}
+ metadata['label_display']={'A':'Type on first line; frequency range on smaller grey second line; Low bands indicates classification bands','B':'Type on first line; seizure count on smaller grey second line','secondary_text_pt':14}
  metadata['within_patient_distribution']=patient
  metadata['claim_scope']='Descriptive early spectra, within-patient coexistence and predominance of broadband/gamma types in E20, and frequency-band choice; no cohort-wide within-patient prevalence or onset-detection performance estimate.'
  metadata['display']['spectral_step_sec_by_case']={m['public_label']:float(np.median(np.diff(a['tfr_times']))) for a,m in cases}
@@ -225,7 +227,7 @@ def main():
  write(OUT/'metadata.json',metadata)
  description='A 展示 23 名患者、324 次发作的早期频谱类型，并在宽带型与 gamma 优势型标签中注明 1–150 Hz 和 30–80 Hz 能量读出频带。B 展示 E20 全部 17 次已分类发作的患者内分布：宽带型和 gamma 优势型各 6 次，其他 5 次。C、D 为玉泉 Y15/SZ3（D3）和 Epilepsiae E20/SZ8（HRB1）的脑电及时频谱，E 比较同一示例触点的四频带功率轨迹；两例均以临床起始为零点。**关注点**：E20 内宽带型和 gamma 优势型均存在，且是占比最高的两类。'
  panel_description='E20 的患者内类型占比，分母为原分类表中该患者全部 17 次发作。宽带型与 gamma 优势型各占 35.3%，其他占 29.4%；仅低频型为 0 次，不绘制扇区。**关注点**：两种主要类型合计占 70.6%，未剔除其他类型后重新归一化。'
- ab_description='完整图 A/B 的同状态局部预览：A 将类型和频段分为两行；B 将类型和发作数分为两行。频段及发作数用较小灰字呈现，百分比保留在对应扇区内。**关注点**：缩短横向标签，保留频段、数量及百分比。'
+ ab_description='完整图 A/B 的同状态局部预览：A 左移收紧，Broadband、Gamma、Low bands 均为类型与频段两行，Low bands 标示分类使用的 1–13 Hz。A/B 标题与字母分别对齐下方 C/D，B 饼图与图例间距收紧；百分比保留在对应扇区内。**关注点**：统一上排对齐与留白；Low bands 的分类频带不同于 E 中 1–30 Hz 功率读出。'
  e_description='Y15/SZ3 与 E20/SZ8 示例触点的四频带功率变化，复用完整图中的曲线和坐标。每幅子图左上角均竖排两例的图例，使用 12 号字和紧凑白底，类型简称为 Broadband 和 Gamma。**关注点**：各子图可独立读取图例，且不遮挡曲线、起始线及 0–10 秒区域。'
  tfr_description='C、D 的代表触点时频谱局部图，与完整图保持同一状态。两位患者各有独立 TFR (dB) 色条，范围均为 −14 至 14 dB，刻度为 −14、0、14。**关注点**：左侧患者的颜色读出可直接由其右侧色条解释，两例使用相同色标。'
  (OUT/'figures/README.md').write_text('\n\n'.join(f'### {name}.{ext}\n\n{desc}' for name,desc in [('supp_fig6_onset_spectral_features',description),('supp_fig6_panelb_patient_distribution',panel_description),('supp_fig6_panels_ab',ab_description),('supp_fig6_panele_power_curves',e_description),('supp_fig6_tfr_panels',tfr_description)] for ext in ('png','pdf'))+'\n')

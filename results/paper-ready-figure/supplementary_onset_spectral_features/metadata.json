@@ -172,7 +172,7 @@
     }
   ],
   "panels": {
-    "A": "Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands",
+    "A": "Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands, and low-frequency classification bands 1-13 Hz",
     "B": "Within-patient spectral phenotype distribution across all 17 classified seizures of E20",
     "C": "Yuquan Y15/SZ3 broadband raw and D3 TFR",
     "D": "E20/SZ8 gamma-dominant raw and HRB1 TFR",
@@ -225,7 +225,33 @@
   "feature_contract": "Broadband uses 1-150 Hz, non-broadband gamma uses 30-80 Hz. Downstream fields use contact-wise baseline-standardized log-band-power averaged over 0-10 s; displayed example traces are dB gains, not the field z-scores.",
   "classification_contract": "At least 5 of 6 band hits, at least 2 low and 2 fast, defines broadband; otherwise gamma hit defines gamma-dominant. Exact frozen detection rule and source retained in methods note.",
   "claim_scope": "Descriptive early spectra, within-patient coexistence and predominance of broadband/gamma types in E20, and frequency-band choice; no cohort-wide within-patient prevalence or onset-detection performance estimate.",
-  "layout_version": "dual_tfr_colorbars_20261103",
+  "layout_version": "aligned_ab_low_band_frequency_20261103",
+  "panel_AB_layout": {
+    "A_axes_bounds": [
+      0.155,
+      0.81,
+      0.295,
+      0.14
+    ],
+    "title_x": [
+      0.075,
+      0.55
+    ],
+    "title_y": 0.965,
+    "title_font_pt": 22,
+    "panel_letter_x": [
+      0.03,
+      0.505
+    ],
+    "aligned_with_C_D_headers": true,
+    "B_bounds": [
+      0.515,
+      0.79,
+      0.42,
+      0.17
+    ],
+    "B_legend_fraction": 0.415
+  },
   "tfr_colorbars": {
     "panels": [
       "C",
@@ -274,11 +300,18 @@
       80
     ]
   },
+  "panel_A_classification_band_labels_hz": {
+    "Low bands": [
+      1,
+      13
+    ]
+  },
   "panel_A_display_label_mapping": {
     "low_frequency_only": "Low bands"
   },
   "pie_typography": {
-    "title_pt": 20,
+    "title_pt": 22,
+    "standalone_title_pt": 20,
     "legend_pt": 18,
     "percentage_pt": 14,
     "composite_checks": [
@@ -317,7 +350,7 @@
     ]
   },
   "label_display": {
-    "A": "Type on first line; readout band on smaller grey second line",
+    "A": "Type on first line; frequency range on smaller grey second line; Low bands indicates classification bands",
     "B": "Type on first line; seizure count on smaller grey second line",
     "secondary_text_pt": 14
   },

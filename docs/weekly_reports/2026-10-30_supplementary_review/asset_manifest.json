@@ -130,22 +130,22 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.png",
       "file": "figures/current/S6.png",
-      "sha256": "cc5cdc8a472c2cba655243713f3c2596d418574aee8d4412519bc25dd5d0f53c"
+      "sha256": "9c9ab7f86e4b5edf24bc6b07d8d913594de77d35ccfe8aa4c807d860d2912864"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.pdf",
       "file": "figures/current/S6.pdf",
-      "sha256": "23f894431a3e63777e6994669f30963fdca1d80f0e26744de1c9e4badc332aaa"
+      "sha256": "47295b0080a3378e34f4b43df506b52d892bf0c78154e19089d4d20a95e058b4"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.png",
       "file": "figures/current/S6_AB.png",
-      "sha256": "0758e90d519d0caba1f04351d8e40f1c196b24e15675dd9d1c5a6b0f704af4f9"
+      "sha256": "1d3d5358a23b55056954c16c22e4fa36a668023d65d2040e31f6326daa4adf0c"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.pdf",
       "file": "figures/current/S6_AB.pdf",
-      "sha256": "e019b676fefc63aaee3ed88bdadbcdc53394401146fa6c574ee947d2a91ddcc7"
+      "sha256": "dc82aa0506d51821da722a1155e748a0fec25bd771b0eee34ad7056a9f88a489"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panele_power_curves.png",
@@ -243,7 +243,7 @@
     ]
   },
   "S6_display_mode": "Two-line A/B labels; compact vertical legend inside upper-left corner of each E subplot; displayed phenotype label Gamma",
-  "S6_current_layout": "dual_tfr_colorbars_20261103",
+  "S6_current_layout": "aligned_ab_low_band_frequency_20261103",
   "S6_current_version": "results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json",
   "S6_caption_revision": "report_caption_sync_20261103",
   "S6_caption_sources": {
@@ -274,5 +274,37 @@
   "S6_label_revision": "a_low_bands_20261103",
   "S6_panel_A_display_label_mapping": {
     "low_frequency_only": "Low bands"
+  },
+  "S6_panel_A_classification_band_labels_hz": {
+    "Low bands": [
+      1,
+      13
+    ]
+  },
+  "S6_panel_AB_layout": {
+    "A_axes_bounds": [
+      0.155,
+      0.81,
+      0.295,
+      0.14
+    ],
+    "title_x": [
+      0.075,
+      0.55
+    ],
+    "title_y": 0.965,
+    "title_font_pt": 22,
+    "panel_letter_x": [
+      0.03,
+      0.505
+    ],
+    "aligned_with_C_D_headers": true,
+    "B_bounds": [
+      0.515,
+      0.79,
+      0.42,
+      0.17
+    ],
+    "B_legend_fraction": 0.415
   }
 }
