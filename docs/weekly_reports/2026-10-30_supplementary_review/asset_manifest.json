@@ -130,32 +130,32 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.png",
       "file": "figures/current/S6.png",
-      "sha256": "7b10676cbf19c1261bdb6f3c75187b498f5efafc45ffb782c780ee631ef2e0c2"
+      "sha256": "d9f94ee27b1f15ea8103f7e8e8066b4e5c01e52b1e421075842c67ac532e5d35"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.pdf",
       "file": "figures/current/S6.pdf",
-      "sha256": "c7c665bfd8ca5e3fa72add725f82d46f17d7e667a90741b44b07c530ea817899"
+      "sha256": "361a63b51d46c056f78a765a3c442ed7758baaa8fc0ac5831afa1294c7177252"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.png",
       "file": "figures/current/S6_AB.png",
-      "sha256": "d315d1146a39d096b41a8e84f0ffc9378ed1caae357762cd1fa6ce2ac7bc5865"
+      "sha256": "92df08bff573c7b66ab9280f8f834340df2859bc4dec6fee2c587f5c14913d7a"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.pdf",
       "file": "figures/current/S6_AB.pdf",
-      "sha256": "f471b4ffe417893d56b595c691e6438815bc539fb09bbf835aff4d3faf287d6a"
+      "sha256": "1542790ae22ec8d24df9105282b3560e4abf5fbeda90509574433043a3f3d0f1"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panele_power_curves.png",
       "file": "figures/current/S6_E.png",
-      "sha256": "f13f24cb8a1e7c6f5986d3d79e1710cf9fe6ccf0880cfdea7ded71cb134a920b"
+      "sha256": "9337c1db12ea18bb992447e0ec211db14cb4764a4ebc477f02cd3236eb50c07c"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panele_power_curves.pdf",
       "file": "figures/current/S6_E.pdf",
-      "sha256": "b5ff2ba8114da52c011668ba23089b13eae1adcc6af0b586d9819d89ef19fe2e"
+      "sha256": "7b5906de2d9c9184de9d2ec9ee47d6ad10e94fa2665575523dd6d40d18d124a4"
     },
     {
       "file": "figures/current/S8_evaluation_error.png",
@@ -175,12 +175,12 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.png",
       "file": "figures/current/S6_TFR.png",
-      "sha256": "c7e0e491f369e2d9f0af64caf3b22396cf54f64e5c577802487eff22b223b23b"
+      "sha256": "77b89a3cfbb7cd23fbad8bd1bc92ee3ebbe8dd61af05351dbd696b0729e9d96b"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.pdf",
       "file": "figures/current/S6_TFR.pdf",
-      "sha256": "47ce0e08f87d07ca8d3ff1f00284a1b48b829cc3772d43bb5e76d33c9f06e65b"
+      "sha256": "20b7b55f6029ff49db8f897a446a78ee2d1070939001faa477fd4d6ef38c0ec0"
     }
   ],
   "caption_source": "docs/paper-draft/supplementary_figure_legends_s1_s8_zh.tex",
@@ -243,7 +243,7 @@
     ]
   },
   "S6_display_mode": "Two-line A/B labels; compact vertical legend inside upper-left corner of each E subplot; displayed phenotype label Gamma",
-  "S6_current_layout": "balanced_column_widths_20261103",
+  "S6_current_layout": "raw_endpoint_alignment_20261103",
   "S6_current_version": "results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json",
   "S6_caption_revision": "report_caption_sync_20261103",
   "S6_caption_sources": {
@@ -283,10 +283,10 @@
   },
   "S6_panel_AB_layout": {
     "A_axes_bounds": [
-      0.175,
-      0.75,
-      0.235,
-      0.195
+      0.16693672839506168,
+      0.785,
+      0.2331999652426695,
+      0.17000000000000004
     ],
     "title_x": [
       0.085,
@@ -299,14 +299,19 @@
       0.52
     ],
     "aligned_with_C_D_headers": true,
-    "B_bounds": [
-      0.55,
-      0.68,
-      0.42,
-      0.28
+    "B_pie_axes_bounds": [
+      0.6704770111884898,
+      0.765,
+      0.1340555555555556,
+      0.19000000000000006
     ],
-    "B_legend_fraction": 0.66,
-    "B_pie_fraction": 0.56,
+    "B_legend_axes_bounds": [
+      0.821489197530864,
+      0.765,
+      0.118,
+      0.19000000000000006
+    ],
+    "B_pie_legend_gap_inches": 0.45,
     "B_legend_swatch_pt": [
       16,
       10
@@ -315,33 +320,69 @@
   },
   "S6_column_layout": {
     "figure_inches": [
-      16.5,
-      13.7
+      18,
+      12.7
     ],
     "content_left_x": [
       0.085,
       0.565
     ],
-    "raw_TFR_width": 0.31,
+    "raw_endpoint_x": [
+      0.435,
+      0.9149999999999999
+    ],
+    "raw_TFR_width": 0.35,
     "raw_y_height": [
-      0.495,
-      0.14
+      0.525,
+      0.13
     ],
     "TFR_y_height": [
-      0.315,
+      0.335,
       0.125
     ],
     "TFR_colorbar_x": [
-      0.407,
-      0.887
+      0.447,
+      0.9269999999999999
     ],
-    "E_first_x": 0.085,
-    "E_step_x": 0.2265,
-    "E_width": 0.17,
+    "E_axes_bounds": [
+      [
+        0.085,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.2755902777777778,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.565,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.7555902777777778,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ]
+    ],
+    "E_pair_gap": 0.04,
+    "E_width": 0.15059027777777778,
     "E_y_height": [
       0.045,
       0.15
     ],
-    "pie_aspect": "equal"
+    "pie_aspect": "equal",
+    "alignment_reference": "Raw-trace time endpoint; A final parenthesis, B Broadband final letter, and E second/fourth final 20 tick right edges. Colorbars excluded.",
+    "alignment_offsets_mm": {
+      "A_38.3_percent_to_C_raw_end": 2.887645678129047e-14,
+      "B_Broadband_to_D_raw_end": 0.0,
+      "E_Gamma_20_to_C_raw_end": 0.0,
+      "E_Broadband_20_to_D_raw_end": 5.775291356258094e-14
+    }
   }
 }

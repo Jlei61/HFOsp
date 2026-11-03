@@ -84,7 +84,7 @@
   ],
   "latex_validation": "Structure checked; TeX engine unavailable. Native figure PDF independently rasterized.",
   "visual_review": "PNG and independently rasterized PDF inspected; stacked legend is inside the first subplot, with no data curve occlusion.",
-  "markdown_sha256": "2bd3f618df04e51ed84102bb23d74eadd922f79706770f394f28fe06b855b86f",
+  "markdown_sha256": "63d3cbed99849a956d2c65fb47b0225d4afd8dde05d93ce3d3a0ce37fa84b0e4",
   "independent_zip_extraction": true,
   "zip_files": 56,
   "S6_clinical_onset_verified_from_original_EDF": true,
@@ -176,31 +176,47 @@
   ],
   "concurrent_S6_update_preserved": true,
   "visual_review_S5": "TA red / TB blue with lightened, desaturated fills (alpha 0.96) and matching dark outlines; readable on dark and bright inferno regions. Contact markers remain on top.",
-  "visual_review_S6": "Complete PNG, focused A/B PNG and independently rasterized full PDF inspected. Upper/lower visible column edges align; the enlarged pie remains circular. Equal-width C/D spectrograms retain both colorbars; the four E plots have clear tick labels and legends.",
+  "visual_review_S6": "Complete PNG, A/B preview, independently rasterized full and A/B PDFs, and a diagnostic overlay using the two raw-trace endpoints inspected. A final parenthesis and E Gamma final 20 align with C; B Broadband final letter and E Broadband final 20 align with D. Compact circular B pie retains all percentage text inside its sectors. Both TFR colorbars and all four E legends remain clear.",
   "S6_latest_render_revision": {
     "updated": "2026-11-03",
-    "version": "balanced_column_widths_20261103",
+    "version": "raw_endpoint_alignment_20261103",
     "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
-    "alignment_offsets_mm": {
-      "A_C_left": 0.2575277777777842,
-      "A_C_right": 0.2724197037036863,
-      "B_D_left": 0.1285692970797095,
-      "B_D_right": -1.0104966666667006
+    "alignment_reference": "C/D first raw-trace time endpoint, aligned to A final parenthesis, B Broadband final letter, E second/fourth final 20 tick. TFR colorbars are outside this alignment reference.",
+    "native_alignment_offsets_mm": {
+      "A_count_to_C_raw_end": 2.887645678129047e-14,
+      "B_Broadband_to_D_raw_end": 0.0,
+      "E_Gamma_20_to_C_raw_end": 0.0,
+      "E_Broadband_20_to_D_raw_end": 5.775291356258094e-14
     },
-    "alignment_tolerance_mm": 4,
-    "pie_width_height_px": [
-      337.5677189948484,
-      337.5675767552548
+    "pie_diameter_mm": 53.93533110202813,
+    "pie_is_circular": true,
+    "all_percentages_inside_own_sector": true,
+    "E_ticks_and_legends_clear": true,
+    "PNG_220dpi_alignment_offsets_mm": {
+      "A_count_to_C_raw_end": 0.011545454545496546,
+      "B_Broadband_to_D_raw_end": -0.06061363636364686,
+      "E_Gamma_20_to_C_raw_end": 0.008659090909096159,
+      "E_Broadband_20_to_D_raw_end": 0.00865909090912241
+    },
+    "PDF_alignment_offsets_mm": {
+      "A_count_to_C_raw_end": 0.01298328055554268,
+      "B_Broadband_to_D_raw_end": -0.017129125000027695,
+      "E_Gamma_20_to_C_raw_end": 0.004825294444413922,
+      "E_Broadband_20_to_D_raw_end": 0.00456670833331398
+    },
+    "PDF_raw_endpoint_x_pt": [
+      529.142947,
+      1151.22368
     ],
-    "equal_C_D_raw_TFR_widths": true,
-    "E_adjacent_time_tick_labels_clear": true,
-    "input_data_and_captions_unchanged": true,
+    "alignment_tolerance_mm": 0.3,
+    "data_and_captions_unchanged": true,
     "cohort_examples_patient_counts_and_display_scales_unchanged": true,
     "both_TFR_colorbars_retained": true,
     "four_E_legends_fit_without_curve_or_onset_occlusion": true,
-    "PDF_text_within_canvas": true,
+    "all_five_PDF_exports_text_within_canvas": true,
     "human_visual_review": "PENDING",
-    "agent_visual_review": "Complete PNG, focused A/B PNG and independently rasterized full PDF inspected. Upper/lower visible column edges align; the enlarged pie remains circular. Equal-width C/D spectrograms retain both colorbars; the four E plots have clear tick labels and legends."
+    "agent_visual_review": "Complete PNG, A/B preview, independently rasterized full and A/B PDFs, and a diagnostic overlay using the two raw-trace endpoints inspected. A final parenthesis and E Gamma final 20 align with C; B Broadband final letter and E Broadband final 20 align with D. Compact circular B pie retains all percentage text inside its sectors. Both TFR colorbars and all four E legends remain clear.",
+    "isolated_checkout_replay": "All five PNG exports are byte-identical and metadata matches using packaged frozen inputs."
   },
   "S6_caption_sources_and_copies_match": true,
   "S5_patients": [

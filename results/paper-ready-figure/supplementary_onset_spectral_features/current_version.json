@@ -3,7 +3,7 @@
   "paper_slot": "FigS6",
   "display_name": "Supplementary Figure 6",
   "updated": "2026-11-03",
-  "layout_version": "balanced_column_widths_20261103",
+  "layout_version": "raw_endpoint_alignment_20261103",
   "caption_revision": "report_caption_sync_20261103",
   "status": "PENDING_AUTHOR_VISUAL_REVIEW",
   "path_base": "repository_root",
@@ -62,10 +62,10 @@
   },
   "panel_AB_layout": {
     "A_axes_bounds": [
-      0.175,
-      0.75,
-      0.235,
-      0.195
+      0.16693672839506168,
+      0.785,
+      0.2331999652426695,
+      0.17000000000000004
     ],
     "title_x": [
       0.085,
@@ -78,14 +78,19 @@
       0.52
     ],
     "aligned_with_C_D_headers": true,
-    "B_bounds": [
-      0.55,
-      0.68,
-      0.42,
-      0.28
+    "B_pie_axes_bounds": [
+      0.6704770111884898,
+      0.765,
+      0.1340555555555556,
+      0.19000000000000006
     ],
-    "B_legend_fraction": 0.66,
-    "B_pie_fraction": 0.56,
+    "B_legend_axes_bounds": [
+      0.821489197530864,
+      0.765,
+      0.118,
+      0.19000000000000006
+    ],
+    "B_pie_legend_gap_inches": 0.45,
     "B_legend_swatch_pt": [
       16,
       10
@@ -100,33 +105,69 @@
   },
   "column_layout": {
     "figure_inches": [
-      16.5,
-      13.7
+      18,
+      12.7
     ],
     "content_left_x": [
       0.085,
       0.565
     ],
-    "raw_TFR_width": 0.31,
+    "raw_endpoint_x": [
+      0.435,
+      0.9149999999999999
+    ],
+    "raw_TFR_width": 0.35,
     "raw_y_height": [
-      0.495,
-      0.14
+      0.525,
+      0.13
     ],
     "TFR_y_height": [
-      0.315,
+      0.335,
       0.125
     ],
     "TFR_colorbar_x": [
-      0.407,
-      0.887
+      0.447,
+      0.9269999999999999
     ],
-    "E_first_x": 0.085,
-    "E_step_x": 0.2265,
-    "E_width": 0.17,
+    "E_axes_bounds": [
+      [
+        0.085,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.2755902777777778,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.565,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ],
+      [
+        0.7555902777777778,
+        0.045,
+        0.15059027777777778,
+        0.15000000000000002
+      ]
+    ],
+    "E_pair_gap": 0.04,
+    "E_width": 0.15059027777777778,
     "E_y_height": [
       0.045,
       0.15
     ],
-    "pie_aspect": "equal"
+    "pie_aspect": "equal",
+    "alignment_reference": "Raw-trace time endpoint; A final parenthesis, B Broadband final letter, and E second/fourth final 20 tick right edges. Colorbars excluded.",
+    "alignment_offsets_mm": {
+      "A_38.3_percent_to_C_raw_end": 2.887645678129047e-14,
+      "B_Broadband_to_D_raw_end": 0.0,
+      "E_Gamma_20_to_C_raw_end": 0.0,
+      "E_Broadband_20_to_D_raw_end": 5.775291356258094e-14
+    }
   }
 }
