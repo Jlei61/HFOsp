@@ -1,0 +1,86 @@
+{
+  "public_label": "Y15",
+  "public_seizure_label": "SZ3",
+  "subject": "yuquan_litengsheng",
+  "zero_based_seizure_idx": 2,
+  "seizure_id": "litengsheng_sz_003",
+  "spectral_channel": "D3",
+  "kind": "Broadband",
+  "reference": "car",
+  "fs_hz": 2000.0,
+  "selected_source_contacts": [
+    "A5",
+    "A6",
+    "A9",
+    "A10",
+    "B7",
+    "B8",
+    "B9",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D8",
+    "D9",
+    "D10",
+    "H1"
+  ],
+  "shown_raw_contacts": [
+    "A5",
+    "A10",
+    "B9",
+    "D4",
+    "D8",
+    "D3"
+  ],
+  "channel_source": "lagpat:results/interictal_propagation_masked/rank_displacement/per_subject/yuquan_litengsheng.json",
+  "clinical_onset_epoch": 1574161553.9645,
+  "eeg_onset_relative_sec": null,
+  "baseline_sec": [
+    -120,
+    -90
+  ],
+  "early_window_sec": [
+    0,
+    10
+  ],
+  "phenotype": "broadband_1_150",
+  "phenotype_band_hits": {
+    "n_low_band_hits": 3,
+    "n_fast_band_hits": 3,
+    "n_total_band_hits": 6,
+    "strict_broadband_5of6": true
+  },
+  "mean_band_gain_0_10_db": {
+    "alpha": 8.690726801704425,
+    "beta": 10.175754767552853,
+    "low bands": 5.573065920448975,
+    "gamma": 5.48059741794291,
+    "high-gamma": 8.359185283805356,
+    "broadband": 5.620494817118448
+  },
+  "cache_sha256": "f0aa93e727b7d103c0c21f437f46ea44f96df942bcb8330aad47a14b00f27065",
+  "raw_display_sampling": "native",
+  "time_origin": "clinical onset",
+  "clinical_anchor_source": "results/topic5_extended_type_association/yuquan_episode_review_20261017/episode_map.csv",
+  "original_marker_minus_clinical_sec": -4.9679999351501465,
+  "original_annotation": "{'onset_in_edf_s': 2343.9645, 'duration_s': 0.0, 'label': 'clinical onset', 'kind': 'clinical'}",
+  "episode_id": "litengsheng_episode_003",
+  "spectral_contact_selection": {
+    "method": "max_min_95pct_db_across_alpha_beta_gamma_high_gamma_broadband_in_onset_to_early_ictal_window",
+    "selection_profile": "broadband",
+    "score_window_sec": [
+      0.0,
+      10.0
+    ],
+    "score": 14.002001470716905,
+    "score_min_band_95pct_db": 10.07848570024711,
+    "band_95pct_db": {
+      "alpha": 14.199416953400162,
+      "beta": 22.611908946706258,
+      "gamma": 18.218615266209245,
+      "high-gamma": 13.361888542833132,
+      "broadband": 10.07848570024711
+    }
+  }
+}

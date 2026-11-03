@@ -1,0 +1,315 @@
+{
+  "asset_id": "early_seizure_spectral_features",
+  "paper_slot": "FigS6",
+  "status": "PENDING_AUTHOR_VISUAL_REVIEW",
+  "producer": "scripts/paper_figures/build_supplementary_onset_spectral_features.py",
+  "cohort": {
+    "state_source": "results/topic5_ictal_recruitment/peri_onset_energy_timing/early_spectral_phenotype/per_seizure_spectral_overlap_state.csv",
+    "source_sha256": "f34495b7ba7a6515174fb00fcf4c5ea61b00c776fb74680d2df2a38851403b52",
+    "n_seizures": 324,
+    "n_patients": 23,
+    "counts": {
+      "broadband_1_150": 124,
+      "gamma_nonbroadband": 76,
+      "low_frequency_only": 7,
+      "other": 117
+    }
+  },
+  "examples": [
+    {
+      "public_label": "Y15",
+      "public_seizure_label": "SZ3",
+      "subject": "yuquan_litengsheng",
+      "zero_based_seizure_idx": 2,
+      "seizure_id": "litengsheng_sz_003",
+      "spectral_channel": "D3",
+      "kind": "Broadband",
+      "reference": "car",
+      "fs_hz": 2000.0,
+      "selected_source_contacts": [
+        "A5",
+        "A6",
+        "A9",
+        "A10",
+        "B7",
+        "B8",
+        "B9",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D8",
+        "D9",
+        "D10",
+        "H1"
+      ],
+      "shown_raw_contacts": [
+        "A5",
+        "A10",
+        "B9",
+        "D4",
+        "D8",
+        "D3"
+      ],
+      "channel_source": "lagpat:results/interictal_propagation_masked/rank_displacement/per_subject/yuquan_litengsheng.json",
+      "clinical_onset_epoch": 1574161553.9645,
+      "eeg_onset_relative_sec": null,
+      "baseline_sec": [
+        -120,
+        -90
+      ],
+      "early_window_sec": [
+        0,
+        10
+      ],
+      "phenotype": "broadband_1_150",
+      "phenotype_band_hits": {
+        "n_low_band_hits": 3,
+        "n_fast_band_hits": 3,
+        "n_total_band_hits": 6,
+        "strict_broadband_5of6": true
+      },
+      "mean_band_gain_0_10_db": {
+        "alpha": 8.690726801704425,
+        "beta": 10.175754767552853,
+        "low bands": 5.573065920448975,
+        "gamma": 5.48059741794291,
+        "high-gamma": 8.359185283805356,
+        "broadband": 5.620494817118448
+      },
+      "cache_sha256": "f0aa93e727b7d103c0c21f437f46ea44f96df942bcb8330aad47a14b00f27065",
+      "raw_display_sampling": "native",
+      "time_origin": "clinical onset",
+      "clinical_anchor_source": "results/topic5_extended_type_association/yuquan_episode_review_20261017/episode_map.csv",
+      "original_marker_minus_clinical_sec": -4.9679999351501465,
+      "original_annotation": "{'onset_in_edf_s': 2343.9645, 'duration_s': 0.0, 'label': 'clinical onset', 'kind': 'clinical'}",
+      "episode_id": "litengsheng_episode_003",
+      "spectral_contact_selection": {
+        "method": "max_min_95pct_db_across_alpha_beta_gamma_high_gamma_broadband_in_onset_to_early_ictal_window",
+        "selection_profile": "broadband",
+        "score_window_sec": [
+          0.0,
+          10.0
+        ],
+        "score": 14.002001470716905,
+        "score_min_band_95pct_db": 10.07848570024711,
+        "band_95pct_db": {
+          "alpha": 14.199416953400162,
+          "beta": 22.611908946706258,
+          "gamma": 18.218615266209245,
+          "high-gamma": 13.361888542833132,
+          "broadband": 10.07848570024711
+        }
+      }
+    },
+    {
+      "public_label": "E20",
+      "public_seizure_label": "SZ8",
+      "subject": "epilepsiae_635",
+      "zero_based_seizure_idx": 7,
+      "seizure_id": "63500800102",
+      "spectral_channel": "HRB1",
+      "kind": "Gamma-dominant",
+      "reference": "car",
+      "fs_hz": 1024.0,
+      "selected_source_contacts": [
+        "HL1",
+        "HL2",
+        "HL7",
+        "HL8",
+        "HL9",
+        "HL10",
+        "HL11",
+        "HL12",
+        "HL13",
+        "HRB1"
+      ],
+      "shown_raw_contacts": [
+        "HL1",
+        "HL7",
+        "HL9",
+        "HL10",
+        "HL12",
+        "HRB1"
+      ],
+      "channel_source": "lagpat:results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_635.json",
+      "clinical_onset_epoch": 1251049735.983398,
+      "eeg_onset_relative_sec": -2.2998039722442627,
+      "baseline_sec": [
+        -120.0,
+        -90.0
+      ],
+      "early_window_sec": [
+        0,
+        10
+      ],
+      "phenotype": "gamma_nonbroadband",
+      "phenotype_band_hits": {
+        "n_low_band_hits": 0,
+        "n_fast_band_hits": 2,
+        "n_total_band_hits": 2,
+        "strict_broadband_5of6": false
+      },
+      "mean_band_gain_0_10_db": {
+        "alpha": 0.29989061517312665,
+        "beta": 14.55025104380322,
+        "low bands": -1.4974095501091869,
+        "gamma": 12.545184009177522,
+        "high-gamma": 9.150841413823454,
+        "broadband": -1.1379957529401814
+      },
+      "cache_sha256": "eb6cb93aacd84bfde9ce2db2a950f5134afe6d45ea0448d2ed0d33147099155a",
+      "old_gamma_readout_differences_db": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "low bands": 0.0,
+        "gamma": 0.0,
+        "high-gamma": 0.0,
+        "broadband": 0.0
+      },
+      "label_correction": "Previous caption used index 7 as SZ7; the original record 63500800102 is public SZ8. Same seizure and channel retained.",
+      "raw_display_sampling": "native"
+    }
+  ],
+  "panels": {
+    "A": "Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands",
+    "B": "Within-patient spectral phenotype distribution across all 17 classified seizures of E20",
+    "C": "Yuquan Y15/SZ3 broadband raw and D3 TFR",
+    "D": "E20/SZ8 gamma-dominant raw and HRB1 TFR",
+    "E": "Four frequency-band power trajectories from the same representative contacts"
+  },
+  "display": {
+    "raw_TFR_windows": [
+      [
+        -110.0,
+        -90.0
+      ],
+      [
+        -10.0,
+        20.0
+      ]
+    ],
+    "band_curve_window": [
+      -120.0,
+      20.0
+    ],
+    "baseline_sec": [
+      -120.0,
+      -90.0
+    ],
+    "early_window_sec": [
+      0,
+      10
+    ],
+    "tfr_limits_db": [
+      -14,
+      14
+    ],
+    "spectral_window_sec": 1,
+    "spectral_step_sec": 0.09999999999999432,
+    "band_curve_smoothing_sec": 2,
+    "spectral_step_sec_by_case": {
+      "Y15": 0.09999999999999432,
+      "E20": 0.099609375
+    },
+    "band_curve_limits_db": [
+      -10,
+      30
+    ],
+    "raw_sampling_hz": {
+      "Y15": 2000.0,
+      "E20": 1024.0
+    },
+    "raw_amplitude_scaling": "Within-case scaling; native raw units retained, no between-patient amplitude comparison."
+  },
+  "feature_contract": "Broadband uses 1-150 Hz, non-broadband gamma uses 30-80 Hz. Downstream fields use contact-wise baseline-standardized log-band-power averaged over 0-10 s; displayed example traces are dB gains, not the field z-scores.",
+  "classification_contract": "At least 5 of 6 band hits, at least 2 low and 2 fast, defines broadband; otherwise gamma hit defines gamma-dominant. Exact frozen detection rule and source retained in methods note.",
+  "claim_scope": "Descriptive early spectra, within-patient coexistence and predominance of broadband/gamma types in E20, and frequency-band choice; no cohort-wide within-patient prevalence or onset-detection performance estimate.",
+  "layout_version": "per_subplot_legends_gamma_label_20261103",
+  "panel_E_legend": {
+    "axes": "all four frequency-band subplots",
+    "count": 4,
+    "location": "upper left inside each axes",
+    "columns": 1,
+    "font_pt": 12,
+    "bbox_anchor_axes": [
+      0.02,
+      1
+    ],
+    "background": "compact borderless white",
+    "inside_axes": true,
+    "no_intersection_with_data_curves_with_3px_margin": true,
+    "onset_and_early_window_unobscured": true
+  },
+  "display_label_mapping": {
+    "Gamma-dominant": "Gamma"
+  },
+  "panel_A_band_labels_hz": {
+    "Broadband": [
+      1,
+      150
+    ],
+    "Gamma": [
+      30,
+      80
+    ]
+  },
+  "pie_typography": {
+    "title_pt": 20,
+    "legend_pt": 18,
+    "percentage_pt": 14,
+    "composite_checks": [
+      {
+        "text": "35.3%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      },
+      {
+        "text": "35.3%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      },
+      {
+        "text": "29.4%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      }
+    ],
+    "standalone_checks": [
+      {
+        "text": "35.3%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      },
+      {
+        "text": "35.3%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      },
+      {
+        "text": "29.4%",
+        "font_pt": 14.0,
+        "text_box_inside_sector": true
+      }
+    ]
+  },
+  "label_display": {
+    "A": "Type on first line; readout band on smaller grey second line",
+    "B": "Type on first line; seizure count on smaller grey second line",
+    "secondary_text_pt": 14
+  },
+  "within_patient_distribution": {
+    "public_label": "E20",
+    "n_seizures": 17,
+    "counts": {
+      "broadband_1_150": 6,
+      "gamma_nonbroadband": 6,
+      "low_frequency_only": 0,
+      "other": 5
+    },
+    "denominator": "All seizures for this patient in the frozen classification table; no phenotype exclusions.",
+    "statistical_unit": "Seizure within one patient",
+    "selection_reason": "The existing gamma example patient in panel D also has broadband seizures; both are the joint most frequent categories.",
+    "broadband_and_gamma_fraction": 0.7058823529411765
+  }
+}

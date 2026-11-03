@@ -1,0 +1,27 @@
+{
+  "updated": "2026-11-03",
+  "base_commit": "0d86fd01ad02546bffcd4a0f93c3aa0b5dc058b5",
+  "publication_branch": "codex/supplementary-s6-20261103",
+  "status": "PASS_CLEAN_CHECKOUT_REPLAY",
+  "replay_command": "python scripts/paper_figures/build_supplementary_onset_spectral_features.py",
+  "packaged_classification_fallback_used": true,
+  "all_four_PNG_exports_byte_identical": {
+    "supp_fig6_onset_spectral_features.png": true,
+    "supp_fig6_panelb_patient_distribution.png": true,
+    "supp_fig6_panele_power_curves.png": true,
+    "supp_fig6_panels_ab.png": true
+  },
+  "original_delivered_PDF_and_metadata_restored_after_replay": [
+    "figures/supp_fig6_panele_power_curves.pdf",
+    "figures/supp_fig6_panelb_patient_distribution.pdf",
+    "figures/supp_fig6_onset_spectral_features.pdf",
+    "figures/supp_fig6_panels_ab.pdf"
+  ],
+  "frozen_manuscript_excluded": true,
+  "raw_data_scope": "Only the two selected plotting caches; original EEG extraction requires the source data volumes.",
+  "human_visual_review": "PENDING",
+  "report_zip_files_verified": 54,
+  "report_and_current_entry_local_links_verified": 96,
+  "report_manifest_hashes_match": true,
+  "report_snapshot_scope": "Full current reader-facing Supplementary report; other panels are copied report assets, with source paths retained as provenance."
+}

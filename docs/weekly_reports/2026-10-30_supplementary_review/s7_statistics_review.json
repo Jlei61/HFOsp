@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-30",
+  "source_npz": "results/topic5_ictal_recruitment/field_concordance_grid_method_sensitivity/n161_subject_fixed_timing_plus_3d_direction/multiband_subject_null_draws.npz",
+  "source_npz_sha256": "08024b898080ba8e550ffe34fdc5545dac3253e2e12b26361f245060420937e0",
+  "n_patients": 17,
+  "n_events": 167,
+  "n_bands": 7,
+  "null_draws": 1000,
+  "patient_delta_csv_match": true,
+  "cohort_p_csv_and_figure_metadata_match": true,
+  "maxT_p_csv_and_figure_metadata_match": true,
+  "omnibus_recomputed": {
+    "n_subjects": 17,
+    "n_bands": 7,
+    "friedman_statistic": 5.243697478991635,
+    "kendall_w": 0.05140879881364348,
+    "calibrated_p": 0.5217947820521794,
+    "n_permutations": 100000
+  },
+  "omnibus_matches_saved": true,
+  "analysis_methods_changed": false,
+  "figure_values_changed": false
+}

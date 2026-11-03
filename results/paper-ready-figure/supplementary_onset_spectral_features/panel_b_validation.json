@@ -1,0 +1,45 @@
+{
+  "updated": "2026-11-03",
+  "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+  "panel_B_patient": "E20",
+  "panel_B_n_seizures": 17,
+  "panel_B_counts": {
+    "broadband_1_150": 6,
+    "gamma_nonbroadband": 6,
+    "low_frequency_only": 0,
+    "other": 5
+  },
+  "panel_B_all_classified_seizures_retained": true,
+  "panel_B_broadband_and_gamma_percent": 70.58823529411765,
+  "panel_B_csv_matches_frozen_seizure_labels": true,
+  "cohort_examples_display_and_original_input_hashes_unchanged": true,
+  "png_changed_bbox_xyxy": [
+    88,
+    35,
+    3726,
+    655
+  ],
+  "PNG_and_PDF_counts_verified": true,
+  "PDF_text_within_canvas": true,
+  "human_visual_review": "PENDING",
+  "agent_visual_review": "Complete figure and A/B preview inspected in PNG and independently rasterized PDF; frequency labels are readable and percentage labels have clear margins within their sectors.",
+  "version": "band_labels_and_pie_typography_20261103",
+  "C_D_E_pixels_identical_to_previous_version": true,
+  "typography_checks": {
+    "updated": "2026-11-03",
+    "version": "band_labels_and_pie_typography_20261103",
+    "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+    "A_broadband_label": "Broadband (1–150 Hz)",
+    "A_gamma_label": "Gamma-dominant (30–80 Hz)",
+    "B_percentage_font_pt": 14,
+    "B_title_font_pt": 20,
+    "B_legend_font_pt": 18,
+    "B_composite_and_standalone_text_boxes_with_margin_inside_sectors": true,
+    "all_counts_and_inputs_unchanged": true,
+    "C_D_E_pixels_identical_to_previous_version": true,
+    "PDF_labels_present_and_within_canvas": true,
+    "human_visual_review": "PENDING",
+    "agent_visual_review": "Complete figure and A/B preview inspected in PNG and independently rasterized PDF; frequency labels are readable and percentage labels have clear margins within their sectors."
+  },
+  "superseded_display_validation": "compact_display_validation.json"
+}

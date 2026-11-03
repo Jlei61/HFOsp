@@ -1,0 +1,68 @@
+{
+  "public_label": "E20",
+  "public_seizure_label": "SZ8",
+  "subject": "epilepsiae_635",
+  "zero_based_seizure_idx": 7,
+  "seizure_id": "63500800102",
+  "spectral_channel": "HRB1",
+  "kind": "Gamma-dominant",
+  "reference": "car",
+  "fs_hz": 1024.0,
+  "selected_source_contacts": [
+    "HL1",
+    "HL2",
+    "HL7",
+    "HL8",
+    "HL9",
+    "HL10",
+    "HL11",
+    "HL12",
+    "HL13",
+    "HRB1"
+  ],
+  "shown_raw_contacts": [
+    "HL1",
+    "HL7",
+    "HL9",
+    "HL10",
+    "HL12",
+    "HRB1"
+  ],
+  "channel_source": "lagpat:results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_635.json",
+  "clinical_onset_epoch": 1251049735.983398,
+  "eeg_onset_relative_sec": -2.2998039722442627,
+  "baseline_sec": [
+    -120.0,
+    -90.0
+  ],
+  "early_window_sec": [
+    0,
+    10
+  ],
+  "phenotype": "gamma_nonbroadband",
+  "phenotype_band_hits": {
+    "n_low_band_hits": 0,
+    "n_fast_band_hits": 2,
+    "n_total_band_hits": 2,
+    "strict_broadband_5of6": false
+  },
+  "mean_band_gain_0_10_db": {
+    "alpha": 0.29989061517312665,
+    "beta": 14.55025104380322,
+    "low bands": -1.4974095501091869,
+    "gamma": 12.545184009177522,
+    "high-gamma": 9.150841413823454,
+    "broadband": -1.1379957529401814
+  },
+  "cache_sha256": "eb6cb93aacd84bfde9ce2db2a950f5134afe6d45ea0448d2ed0d33147099155a",
+  "old_gamma_readout_differences_db": {
+    "alpha": 0.0,
+    "beta": 0.0,
+    "low bands": 0.0,
+    "gamma": 0.0,
+    "high-gamma": 0.0,
+    "broadband": 0.0
+  },
+  "label_correction": "Previous caption used index 7 as SZ7; the original record 63500800102 is public SZ8. Same seizure and channel retained.",
+  "raw_display_sampling": "native"
+}

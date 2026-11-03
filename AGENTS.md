@@ -1,3 +1,7 @@
+<!-- CURRENT_SUPPLEMENTARY_FIGURE6_20261103 -->
+> **当前 Supplementary Figure 6（2026-11-03 修改）：** 先读 [当前 S6](docs/current_supplementary_figure6.md) 与 `results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json`。A 为类型与读出频段分行；B 为 E20 全部 17 次发作的患者内饼图；C/D 保留 Y15/SZ3、E20/SZ8；E 四个子图各在左上角竖排 12 号字图例；图内及图注统一显示 `Gamma`。当前布局 `per_subplot_legends_gamma_label_20261103`，待作者目视检查。已同步 Supplementary 检查报告与中英文图注，后续同步入口见当前 S6。共享机器旧 worktree 以主目录此入口为准；多频带空间相关为 S7，不得按旧 S6 编号覆盖本图。
+<!-- /CURRENT_SUPPLEMENTARY_FIGURE6_20261103 -->
+
 <!-- ADAPTATION_NOTATION_20261102 -->
 > **适应项符号（作者指定，2026-11-02）：** 后续论文、图注、周报及模型说明统一使用 $M$ 表示 adaptation 状态、$\eta_M M$ 表示有效适应强度／电流幅度，保留 $\eta_M$ 作为换算系数，不另记为 $A$。整合拟钾电流后仍沿用这些符号；适应时间常数写作 $\tau_M$。从电流增量写回 $M$ 的状态方程时保留 $1/\eta_M$ 换算。代码字段、冻结结果与引用文献中的原符号按原义保留。见 [SNN 核心公式](docs/snn_core_model_equations.md)。
 <!-- /ADAPTATION_NOTATION_20261102 -->

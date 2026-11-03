@@ -65,13 +65,16 @@
 | `soz_auc` | FigS2 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig2_soz_auc/figures/` | raw vs synchronized SOZ AUC；作者已锁定为正式补图入口 |
 | `k_scan_templates` | FigS3 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig3_k_scan_templates/figures/` | masked K=2–10 扫描与高阶示例；作者已锁定为正式补图入口 |
 | `axis_geometry` | FigS4-A–D | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig4_axis_geometry/figures/` | paired timing-versus-timing+space direction score / axis direction / held-out readback / clinical SOZ all-contact compactness；正式补图入口 |
-| `early_seizure_phenotypes` | absorbed into Fig3-A/B | `OMITTED_FROM_SUPPLEMENT` | `results/paper-ready-figure/supp_fig5_early_seizure_phenotypes/figures/` | early-ictal spectral phenotype + gamma example 已进入主图 Fig3，不再作为独立补图；旧产物仅保留追溯 |
-| `multiband_field_concordance` | FigS5 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig5_multiband_field_concordance/figures/` | 与 dense-grid method-sensitivity 输出同源；正式补图入口 |
-| `data_driven_snn_nlc_pathway_confirmation` | FigS7-A–E | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/` | A–D 为 1581--1592 共 12 张全新配对网络的冻结 local-connectivity ablation；E 为从主 Fig4 移入的 627-event masked-rank KMeans heatmap、逐触点 rank distribution 与共享色条。独立 panel 无角标，完整拼板带 A–E。定位仍是 development-only 的模型内部 pathway effect 与事件结构，不是患者因果连接机制或患者盲泛化 |
-| `static_contact_topography` | FigS6 computational | `SUPPLEMENT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_static_contact_topography/figures/` | manuscript-facing RNN 计算材料之一，当前不与主图并列 |
-| `ordered_history_architecture_audit` | FigS6 computational companion | `SUPPLEMENT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_ordered_history_architecture_audit/figures/` | bounded-history / architecture audit companion |
+| `early_seizure_phenotypes` | historical source for FigS6 | `HISTORICAL_SOURCE_ONLY` | `results/paper-ready-figure/supp_fig5_early_seizure_phenotypes/figures/` | 旧分类与 gamma 示例为新 S6 的来源，旧 E20 的索引 7 已在新图纠正为 SZ8。 |
+| `early_seizure_spectral_features` | FigS6 | `PENDING_AUTHOR_VISUAL_REVIEW` | `results/paper-ready-figure/supplementary_onset_spectral_features/figures/` | 2026-11-03：A 类型与频段分行；B 为 E20 全部 17 次发作的患者内饼图（Broadband/Gamma 各 6 次，Other 5 次）；C/D 保留 Y15/SZ3、E20/SZ8；E 每个子图左上角均有竖排 12 号字图例。图内及中英文图注统一使用 Gamma，布局 `per_subplot_legends_gamma_label_20261103`。已同步检查报告；见[当前 S6](current_supplementary_figure6.md)及包内 `current_version.json`。 |
+| `patient_interictal_propagation_frames` | FigS5 | `PENDING_AUTHOR_VISUAL_REVIEW` | `docs/weekly_reports/2026-10-30_supplementary_review/figures/current/S5.png` | 患者间期传播截图；此处登记检查报告内的当前阅读副本。原生来源为 `results/paper-ready-figure/supplementary_patient_propagation_frames/`，由对应图件任务维护。 |
+| `model_interictal_propagation_frames` | FigS8 | `PENDING_AUTHOR_VISUAL_REVIEW` | `docs/weekly_reports/2026-10-30_supplementary_review/figures/current/S8.png` | 模型传播对比；此处登记检查报告内的当前阅读副本。原生来源为 `results/paper-ready-figure/supplementary_model_propagation_frames/`，与 Video 2 配套，由对应图件任务维护。 |
+| `multiband_field_concordance` | FigS7 | `SUPPLEMENT` | `results/paper-ready-figure/supp_fig5_multiband_field_concordance/figures/` | 与 dense-grid method-sensitivity 输出同源；正式补图入口 |
+| `data_driven_snn_nlc_pathway_confirmation` | 旧 SNN 结果，原 S7 | `OMITTED_FROM_SUPPLEMENT` | `results/paper-ready-figure/supp_fig7_nlc_pathway_confirmation/figures/` | 原 12 网络连接消融与 627-event KMeans；2026-11-02 按作者要求移出本篇，身份仍为 SNN，不改写为 RNN。 |
+| `static_contact_topography` | 独立 RNN 文章，原 S6 | `EXCLUDED_FROM_THIS_MANUSCRIPT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_static_contact_topography/figures/` | 原图与数值保留；本篇不再引用或打包。 |
+| `ordered_history_architecture_audit` | 独立 RNN 文章，原 S6 companion | `EXCLUDED_FROM_THIS_MANUSCRIPT` | `results/paper-ready-figure/archive/2026-08-13_non_main_figure_packages/fig6_ordered_history_architecture_audit/figures/` | 有序历史与架构比较，随 RNN 部分移出。 |
 
-编号说明：empirical multiband figure 已前移为 FigS5；computational RNN account 保留 FigS6，原编号冲突已解除。
+编号说明（2026-11-03）：本篇当前为 S1–S8：患者传播截图为 S5，早期频谱特征与能量频带选择为 S6，多频带空间相关为 S7，模型传播静态图为 S8。原 RNN S6/companion 与旧 SNN 消融 S7 已移出本篇。S3 空间聚类候选与待更新的机制对照另行定号。见[逐图审阅](weekly_reports/2026-10-30_supplementary_review/Supplementary_正文与主图对应审阅.md)。
 
 ## 4. 不能由目录名直接升级的图
 

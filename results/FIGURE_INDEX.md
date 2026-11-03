@@ -204,3 +204,5 @@
 
 `_legacy_2021_readonly/`（1.6G 引用基线，只读）、`hfo_detection/` `hfo_detector_v2/`（检测产物/输入）、
 `interictal_synchrony/epilepsiae_ready_full_artifacts/`（2.9G 同步输入）、`_cold_archive/`（phantom-superseded 打包冷藏）。
+
+2026-11-03 S6 图文同步：E20 患者内饼图、A 的读出频段、E 各子图左上角独立图例及 Gamma 名称均已写入 Supplementary 检查报告。图件、图注和后续修改入口见[当前 Supplementary Figure 6](../docs/current_supplementary_figure6.md)。

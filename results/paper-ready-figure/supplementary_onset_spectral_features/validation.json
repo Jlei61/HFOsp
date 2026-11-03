@@ -1,0 +1,180 @@
+{
+  "updated": "2026-11-03",
+  "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+  "S6_cohort_classifications_reconstructed": 324,
+  "S6_n_patients": 23,
+  "S6_examples_mean_0_10_db": {
+    "Y15/SZ3": {
+      "alpha": 8.690726801704425,
+      "beta": 10.175754767552853,
+      "low bands": 5.573065920448975,
+      "gamma": 5.48059741794291,
+      "high-gamma": 8.359185283805356,
+      "broadband": 5.620494817118448
+    },
+    "E20/SZ8": {
+      "alpha": 0.29989061517312665,
+      "beta": 14.55025104380322,
+      "low bands": -1.4974095501091869,
+      "gamma": 12.545184009177522,
+      "high-gamma": 9.150841413823454,
+      "broadband": -1.1379957529401814
+    }
+  },
+  "S6_original_gamma_event_and_power_values_preserved": true,
+  "S6_gamma_label_corrected_from_zero_based_index_7_to_SZ8": true,
+  "S6_raw_native_sampling_hz": {
+    "Y15": 2000,
+    "E20": 1024
+  },
+  "S6_shared_band_power_limits_db": [
+    -10,
+    30
+  ],
+  "visual_review": "PASS_AGENT_VISUAL_REVIEW_PENDING_AUTHOR_VISUAL_REVIEW",
+  "S6_clinical_onset_verified_from_original_EDF": true,
+  "S6_Yuquan_legacy_marker_to_clinical_offset_s": 4.968,
+  "panel_B_revision": {
+    "updated": "2026-11-03",
+    "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+    "panel_B_patient": "E20",
+    "panel_B_n_seizures": 17,
+    "panel_B_counts": {
+      "broadband_1_150": 6,
+      "gamma_nonbroadband": 6,
+      "low_frequency_only": 0,
+      "other": 5
+    },
+    "panel_B_all_classified_seizures_retained": true,
+    "panel_B_broadband_and_gamma_percent": 70.58823529411765,
+    "panel_B_csv_matches_frozen_seizure_labels": true,
+    "cohort_examples_display_and_original_input_hashes_unchanged": true,
+    "png_changed_bbox_xyxy": [
+      88,
+      35,
+      3726,
+      655
+    ],
+    "PNG_and_PDF_counts_verified": true,
+    "PDF_text_within_canvas": true,
+    "human_visual_review": "PENDING",
+    "agent_visual_review": "Complete figure and A/B preview inspected in PNG and independently rasterized PDF; frequency labels are readable and percentage labels have clear margins within their sectors.",
+    "version": "band_labels_and_pie_typography_20261103",
+    "C_D_E_pixels_identical_to_previous_version": true,
+    "typography_checks": {
+      "updated": "2026-11-03",
+      "version": "band_labels_and_pie_typography_20261103",
+      "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+      "A_broadband_label": "Broadband (1–150 Hz)",
+      "A_gamma_label": "Gamma-dominant (30–80 Hz)",
+      "B_percentage_font_pt": 14,
+      "B_title_font_pt": 20,
+      "B_legend_font_pt": 18,
+      "B_composite_and_standalone_text_boxes_with_margin_inside_sectors": true,
+      "all_counts_and_inputs_unchanged": true,
+      "C_D_E_pixels_identical_to_previous_version": true,
+      "PDF_labels_present_and_within_canvas": true,
+      "human_visual_review": "PENDING",
+      "agent_visual_review": "Complete figure and A/B preview inspected in PNG and independently rasterized PDF; frequency labels are readable and percentage labels have clear margins within their sectors."
+    }
+  },
+  "latest_revision": {
+    "updated": "2026-11-03",
+    "version": "report_caption_sync_20261103",
+    "layout_version": "per_subplot_legends_gamma_label_20261103",
+    "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+    "caption_sources_and_report_copies_match": true,
+    "Chinese_LaTeX_matches_canonical_caption": true,
+    "S6_data_and_figure_hashes_unchanged": true,
+    "concurrent_S5_report_caption_updates_preserved": true,
+    "concurrent_other_asset_updates": [],
+    "other_figure_sections_and_captions_unchanged_except_concurrent_S5": true,
+    "preserved_files_verified": 53,
+    "frozen_manuscript_unchanged": true,
+    "all_report_and_current_entry_links_exist": true,
+    "links_by_document": {
+      "2026-10-30_癫痫文章_Supplementary逐项检查.md": 52,
+      "Supplementary_video_legends.md": 0,
+      "Supplementary_正文与主图对应审阅.md": 4,
+      "statistics/S6_spectral_features.md": 5,
+      "statistics/S8_evaluation_error.md": 3,
+      "statistics/S5_propagation_examples.md": 1,
+      "statistics/S3_spatial_clustering.md": 7,
+      "statistics/S7_multiband_statistics.md": 2,
+      "captions/S6_en.md": 0,
+      "captions/S6_zh.md": 0,
+      "docs/current_supplementary_figure6.md": 12,
+      "results/paper-ready-figure/supplementary_onset_spectral_features/README.md": 10
+    },
+    "canonical_caption_sha256": {
+      "zh": "ee25de88f078a616dd09e66260f65a3a61fc081ad3fb6b20a5a0825ae5cae898",
+      "en": "e301efd33dc1f2012e64f66e61551f6878175e49a08d573019ac0dabaf0abefe"
+    },
+    "shared_agent_entry": "docs/current_supplementary_figure6.md",
+    "human_visual_review": "PENDING"
+  },
+  "latest_render_revision": {
+    "updated": "2026-11-03",
+    "version": "per_subplot_legends_gamma_label_20261103",
+    "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+    "legend_position": {
+      "axes": "all four frequency-band subplots",
+      "count": 4,
+      "location": "upper left inside each axes",
+      "columns": 1,
+      "font_pt": 12,
+      "bbox_anchor_axes": [
+        0.02,
+        1
+      ],
+      "background": "compact borderless white",
+      "inside_axes": true,
+      "no_intersection_with_data_curves_with_3px_margin": true,
+      "onset_and_early_window_unobscured": true
+    },
+    "display_label_mapping": {
+      "Gamma-dominant": "Gamma"
+    },
+    "all_data_and_caption_hashes_unchanged": true,
+    "four_E_legends_verified_in_PDF": true,
+    "Gamma_dominant_removed_from_all_figure_exports": true,
+    "PDF_text_within_canvas": true,
+    "human_visual_review": "PENDING",
+    "agent_visual_review": "Full figure and focused E PNGs and independently rasterized PDFs inspected. Each E subplot has a compact 12 pt upper-left legend; no data curves or onset windows are covered. Gamma replaces Gamma-dominant in A, B, D and E."
+  },
+  "latest_documentation_revision": {
+    "updated": "2026-11-03",
+    "version": "report_caption_sync_20261103",
+    "layout_version": "per_subplot_legends_gamma_label_20261103",
+    "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+    "caption_sources_and_report_copies_match": true,
+    "Chinese_LaTeX_matches_canonical_caption": true,
+    "S6_data_and_figure_hashes_unchanged": true,
+    "concurrent_S5_report_caption_updates_preserved": true,
+    "concurrent_other_asset_updates": [],
+    "other_figure_sections_and_captions_unchanged_except_concurrent_S5": true,
+    "preserved_files_verified": 53,
+    "frozen_manuscript_unchanged": true,
+    "all_report_and_current_entry_links_exist": true,
+    "links_by_document": {
+      "2026-10-30_癫痫文章_Supplementary逐项检查.md": 52,
+      "Supplementary_video_legends.md": 0,
+      "Supplementary_正文与主图对应审阅.md": 4,
+      "statistics/S6_spectral_features.md": 5,
+      "statistics/S8_evaluation_error.md": 3,
+      "statistics/S5_propagation_examples.md": 1,
+      "statistics/S3_spatial_clustering.md": 7,
+      "statistics/S7_multiband_statistics.md": 2,
+      "captions/S6_en.md": 0,
+      "captions/S6_zh.md": 0,
+      "docs/current_supplementary_figure6.md": 12,
+      "results/paper-ready-figure/supplementary_onset_spectral_features/README.md": 10
+    },
+    "canonical_caption_sha256": {
+      "zh": "ee25de88f078a616dd09e66260f65a3a61fc081ad3fb6b20a5a0825ae5cae898",
+      "en": "e301efd33dc1f2012e64f66e61551f6878175e49a08d573019ac0dabaf0abefe"
+    },
+    "shared_agent_entry": "docs/current_supplementary_figure6.md",
+    "human_visual_review": "PENDING"
+  }
+}

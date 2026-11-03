@@ -1,0 +1,115 @@
+% 中文补图图注，更新于 2026-11-03。
+% 需要 graphicx、float、textcomp；使用 XeLaTeX/ctex 处理中文。
+% S3 空间候选见逐项检查稿，暂不占用新图号。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS1.png}
+\caption{
+\textbf{人工标注的 HFO、棘波与耦合事件具有不同的形态和频谱特征。}
+
+\textbf{A，} HFO（$n=178$）、棘波（$n=202$）和耦合事件（$n=296$）的对齐波形及平均波形（黄色），下方为平均原始与基线归一化时频谱。
+
+\textbf{B，} 三类事件的平均归一化频谱，阴影为均值标准误。HFO 与耦合事件的高频峰分别约为 80 Hz 和 120 Hz，棘波以低频成分为主。
+}
+\label{figS1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS2.pdf}
+\caption{
+\textbf{群体事件筛选前后的 HFO 负荷与临床 SOZ 的对应。}
+
+\textbf{A，} Yuquan（20 名患者）和 Epilepsiae（15 名患者）的群体事件窗内触点 HFO 负荷区分 SOZ 与非 SOZ 的 ROC 曲线。灰线为患者，彩线与阴影为队列均值及标准误；插图为患者 AUC，均值分别为 0.873 和 0.955。
+
+\textbf{B，} 全部HFO（Raw）与群体事件窗内 HFO（Synchronized）的患者 AUC 配对比较，均值分别为 0.837\ensuremath{\rightarrow}0.873 和 0.939\ensuremath{\rightarrow}0.955。连线连接同一患者，柱与黑线为均值。双侧配对 Wilcoxon 检验；$\ast$，$P<0.05$；n.s.，$P\geq0.05$。
+}
+\label{figS2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS3.pdf}
+\caption{
+\textbf{多数患者呈双模板结构，部分患者保留更高阶模板。}
+
+\textbf{A，} 40 名患者在 $K=2$–$10$ 扫描中选出的模板数分布，34/40 名患者选择 $K=2$。
+
+\textbf{B，} 各患者相对于 $K=2$ 的轮廓系数变化。灰线为患者，蓝线及阴影为队列中位数及四分位距。
+
+\textbf{C，} 各 K 下同时满足聚类稳定性和最小簇占比要求的患者比例：种子间中位调整互信息（AMI）\ensuremath{\geq}0.70，最小簇事件占比\ensuremath{\geq}0.10。在满足上述要求的解中，按中位轮廓系数选择 K。
+
+\textbf{D，} 自上而下为 E11（$K=4$）、E19（$K=4$）和 Y10（$K=6$）的间期 HFO 传播模板，每位患者展示 2,500 次群体事件。热图右侧色条表示由早至晚的传播顺序，灰色表示未参与触点，斜线间隔区分模板；右侧 Rank 图按相同触点顺序展示各模板的平均秩次及 \ensuremath{\pm}1 个标准差。
+}
+\label{figS3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS4.pdf}
+\caption{
+\textbf{HFO 传播模板的方向分离与跨记录块复现性。}
+
+\textbf{A，} 28 名患者的 TA–TB 三维轴夹角分布，蓝、橙分别表示 Rank SEQ 和 Spatial TRAJ.。菱形与弧线为均值\ensuremath{\pm}标准差，分别为 101.3\textdegree{}\ensuremath{\pm}45.0\textdegree{} 和 134.6\textdegree{}\ensuremath{\pm}34.4\textdegree{}；180\textdegree{} 表示反向。
+
+\textbf{B，} 交替记录块交叉验证中，仅依据招募 rank 将留出 HFO 事件分配至训练模板，再计算事件方向与模板轴的平均有符号余弦，两折、两模板等权。26 名患者中，Spatial TRAJ. 的方向得分中位数由 0.435 增至 0.479，22 名患者提高。点和连线表示患者及配对关系，箱体与黑线为四分位距和中位数。
+
+\textbf{C，} 保持训练模板和事件分配不变，在留出记录块内置换事件方向。空心、实心分别表示各患者的置换得分中位数与观测得分，连线连接同一患者。
+
+\textbf{D，} 临床 SOZ 触点的空间紧凑性：SOZ 触点的均方根（RMS）半径除以同患者等数量随机触点半径的中位数（20,000 次抽样）。Yuquan、Epilepsiae 分别为 15、14 名患者；虚线为 1，实心点表示患者内置换检验 $P<0.05$，横线与竖线为中位数和四分位距。B/C 采用单侧配对 Wilcoxon 检验，D 对 $\log_2$ 比值相对零采用单侧 Wilcoxon 检验；$\ast\ast\ast$，$P<0.001$。
+}
+\label{figS4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS5.pdf}
+\caption{
+\textbf{两队列患者的间期 HFO 空间传播。}
+
+\textbf{A，} 玉泉患者 Y9。\textbf{B，} Epilepsiae 患者 E15。各面板上、下行分别为 TA、TB 事件，显示 0–96 ms，间隔 24 ms。颜色表示经空间平滑、逐事件归一化的 HFO 包络；实心和空心圆分别表示参与及未参与触点。红、蓝箭头分别表示 TA、TB 模板由早至晚的空间轨迹。时间以各事件最早时频质心为零，x 沿患者的 TA 传播轴。
+}
+\label{figS5}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS6.pdf}
+\caption{
+\textbf{发作早期频谱特征与能量频带的选择。}
+
+\textbf{A，} 23 名患者、324 次发作的频谱分类：宽带型（Broadband）124 次（38.3\%）、Gamma 型 76 次（23.5\%）、仅低频型 7 次（2.2\%）和其他类型 117 次（36.1\%）。宽带型与 Gamma 型标签中的 1–150 Hz 和 30–80 Hz 表示相应的早期能量读出频带。
+
+\textbf{B，} 同一患者 E20 的全部 17 次已分类发作中，宽带型和 Gamma 型各 6 次（各 35.3\%），其他类型 5 次（29.4\%）。宽带型和 Gamma 型是该患者占比最高的两类，合计占 70.6\%，显示两种主要频谱类型可在同一患者内并存。
+
+\textbf{C、D，} 玉泉 Y15/SZ3（宽带型）和 Epilepsiae E20/SZ8（Gamma 型）的脑电及代表触点 D3、HRB1 的时频谱。
+
+\textbf{E，} 同一代表触点在 1–30、30–80、80–150 和 1–150 Hz 的功率增幅，按 2 s 平滑。蓝、绿曲线分别对应 Y15/SZ3（Broadband）和 E20/SZ8（Gamma），各子图左上角分别给出图例。时间以临床起始为零；淡蓝、淡红区域分别为 −120 至 −90 s 基线和 0–10 s 早期窗口，功率增幅以相对基线的 dB 表示。
+}
+\label{figS6}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS7.pdf}
+\caption{
+\textbf{发作早期能量场与间期传播场在不同频带中的空间相关。}
+
+\textbf{A，} 17 名患者中，发作早期能量场与间期 HFO 传播场（TA/TB）的空间相关。每次发作取与 TA/TB 中较匹配模板的 Pearson 相关系数绝对值 $|r|$，并在患者内对各次发作取中位数；纵轴 $\Delta$ 为该值减去 1,000 次触点置换零模型的中位数。点为患者，黑线为队列中位数；红色及星号表示逐频带队列置换检验 $P<0.05$。
+
+\textbf{B，} 各患者、各频带的 $\Delta$，底行为队列中位数；空心星号表示患者自身触点置换检验 $P<0.05$。A/B 星号均基于未校正的 $P$ 值。
+}
+\label{figS7}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS8.pdf}
+\caption{
+\textbf{不同拟合配置中的模型间期传播。}
+
+\textbf{A、B，} 分别为搜索早期与优化配置。左侧为 194 个参数配置的 Rank、Order、Participation 评估误差；每条细线代表一个配置，颜色表示 Epoch（搜索轮次 0–10，与主图 4 编号一致），黑色粗线及空心圆对应本行传播示例。中间为该配置下 MTA/MTB 代表事件的归一化触点包络及质心轨迹；右侧为 0、30、60 ms 的空间活动。白圈为 core，浅蓝符号为虚拟触点；空间场共用 0–75 个 E 细胞/mm\textsuperscript{2}/2 ms 色标。时间相对各事件最早有效质心。对应 Supplementary Video 2。
+}
+\label{figS8}
+\end{figure}

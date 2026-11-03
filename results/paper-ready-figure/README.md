@@ -77,12 +77,11 @@ Supplementary Video 2 于 **2026-10-15 作者确认定稿**，版本 `paired_row
 
 ## 补图与计算材料
 
-正式 empirical FigS1–FigS5 位于本目录顶层，分别为 `supp_fig1_interictal_event_phenotypes/`、
-`supp_fig2_soz_auc/`、`supp_fig3_k_scan_templates/`、`supp_fig4_axis_geometry/` 和
-`supp_fig5_multiband_field_concordance/`。原 `supp_fig5_early_seizure_phenotypes/` 已并入主图 Fig3，
-`supp_fig6_multiband_field_concordance/` 为编号调整前的历史导出，二者均不再是正式补图入口。
-FigS7 位于 `supp_fig7_nlc_pathway_confirmation/`；其 A–D 是从旧 Fig4 supporting source 标准化出来的
-连接路径消融图，E 是从主 Fig4 移入的 KMeans heatmap/rank-distribution panel；上游冻结仿真和统计结果不迁移。
+当前补图为 **S1–S8**。S1–S4 沿用各自图件入口；S5 为患者传播截图，
+[S6](supplementary_onset_spectral_features/README.md)为发作早期频谱特征与患者内类型分布，
+多频带空间相关顺延为 S7（来源目录仍为 `supp_fig5_multiband_field_concordance/`），S8 为模型传播对比。
+完整阅读快照及配套图注见[Supplementary 检查报告](../../docs/weekly_reports/2026-10-30_supplementary_review/2026-10-30_癫痫文章_Supplementary逐项检查.md)。
+原 RNN S6 与旧 SNN 连接消融 S7 不属于当前编号内容；其来源继续保留用于追溯。
 
 当前 [Fig5](../../docs/current_figure5.md) 为作者指定的空间 SNN 传播与单/双 core 对照。原 Z/M Fig5 现为 [Fig6](../../docs/current_figure6.md)，旧内部文件名只记录历史身份，不能替代新 Fig5。
 
@@ -102,3 +101,5 @@ FigS7 位于 `supp_fig7_nlc_pathway_confirmation/`；其 A–D 是从旧 Fig4 su
 - `archive/2026-09-03_pre_fig4_reserved_panel_b/`：B 预留为空之前的 A–F canonical 快照；原 B–F 内容在当前主图中原样顺延为 C–G。
 - `archive/2026-09-02_noncanonical_staging_qa_cleanup/`：本轮从顶层移走的 Fig2–4 producer staging、comparison、source 和 typography visual-QA 包。
 - 归档是路径迁移，不是删除；旧图只能用于 provenance，不再参与当前稿件组装。
+
+2026-11-03 S6 修改已同步检查报告与中英文图注：A 保留分行频段，B 为 E20 患者内饼图，E 每个子图左上角独立图例，显示名称统一为 Gamma。后续 agent 见[当前 S6 说明](../../docs/current_supplementary_figure6.md)及 [S6 版本记录](supplementary_onset_spectral_features/current_version.json)。

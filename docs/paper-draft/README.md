@@ -31,3 +31,8 @@
 2. 新定义若尚未重跑，只能写为待选方案，不能写成已经执行的方法。
 3. TBC 清零前，不把本目录文字视为投稿终稿。
 4. 慢变量 SNN 与当前主模型分开写；阴性或边界性探索不升级为已验证机制。
+
+
+## 当前 Supplementary 图注（2026-11-03）
+
+当前 S1–S8 图注见[中文 LaTeX](supplementary_figure_legends_s1_s8_zh.tex)与[英文图注](supplementary_figure_legends_s2_s8.md)。S6 为早期频谱特征图，完整报告见[Supplementary 逐项检查](../weekly_reports/2026-10-30_supplementary_review/2026-10-30_癫痫文章_Supplementary逐项检查.md)。此前同名编号材料仅用于追溯。

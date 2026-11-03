@@ -1,0 +1,29 @@
+{
+  "updated": "2026-11-03",
+  "version": "per_subplot_legends_gamma_label_20261103",
+  "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
+  "legend_position": {
+    "axes": "all four frequency-band subplots",
+    "count": 4,
+    "location": "upper left inside each axes",
+    "columns": 1,
+    "font_pt": 12,
+    "bbox_anchor_axes": [
+      0.02,
+      1
+    ],
+    "background": "compact borderless white",
+    "inside_axes": true,
+    "no_intersection_with_data_curves_with_3px_margin": true,
+    "onset_and_early_window_unobscured": true
+  },
+  "display_label_mapping": {
+    "Gamma-dominant": "Gamma"
+  },
+  "all_data_and_caption_hashes_unchanged": true,
+  "four_E_legends_verified_in_PDF": true,
+  "Gamma_dominant_removed_from_all_figure_exports": true,
+  "PDF_text_within_canvas": true,
+  "human_visual_review": "PENDING",
+  "agent_visual_review": "Full figure and focused E PNGs and independently rasterized PDFs inspected. Each E subplot has a compact 12 pt upper-left legend; no data curves or onset windows are covered. Gamma replaces Gamma-dominant in A, B, D and E."
+}
