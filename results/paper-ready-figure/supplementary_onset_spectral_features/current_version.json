@@ -3,7 +3,7 @@
   "paper_slot": "FigS6",
   "display_name": "Supplementary Figure 6",
   "updated": "2026-11-03",
-  "layout_version": "aligned_ab_low_band_frequency_20261103",
+  "layout_version": "balanced_column_widths_20261103",
   "caption_revision": "report_caption_sync_20261103",
   "status": "PENDING_AUTHOR_VISUAL_REVIEW",
   "path_base": "repository_root",
@@ -62,34 +62,71 @@
   },
   "panel_AB_layout": {
     "A_axes_bounds": [
-      0.155,
-      0.81,
-      0.295,
-      0.14
+      0.175,
+      0.75,
+      0.235,
+      0.195
     ],
     "title_x": [
-      0.075,
-      0.55
+      0.085,
+      0.565
     ],
     "title_y": 0.965,
     "title_font_pt": 22,
     "panel_letter_x": [
-      0.03,
-      0.505
+      0.04,
+      0.52
     ],
     "aligned_with_C_D_headers": true,
     "B_bounds": [
-      0.515,
-      0.79,
+      0.55,
+      0.68,
       0.42,
-      0.17
+      0.28
     ],
-    "B_legend_fraction": 0.415
+    "B_legend_fraction": 0.66,
+    "B_pie_fraction": 0.56,
+    "B_legend_swatch_pt": [
+      16,
+      10
+    ],
+    "B_legend_line_spacing_pt": 18
   },
   "panel_A_classification_band_labels_hz": {
     "Low bands": [
       1,
       13
     ]
+  },
+  "column_layout": {
+    "figure_inches": [
+      16.5,
+      13.7
+    ],
+    "content_left_x": [
+      0.085,
+      0.565
+    ],
+    "raw_TFR_width": 0.31,
+    "raw_y_height": [
+      0.495,
+      0.14
+    ],
+    "TFR_y_height": [
+      0.315,
+      0.125
+    ],
+    "TFR_colorbar_x": [
+      0.407,
+      0.887
+    ],
+    "E_first_x": 0.085,
+    "E_step_x": 0.2265,
+    "E_width": 0.17,
+    "E_y_height": [
+      0.045,
+      0.15
+    ],
+    "pie_aspect": "equal"
   }
 }

@@ -130,32 +130,32 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.png",
       "file": "figures/current/S6.png",
-      "sha256": "9c9ab7f86e4b5edf24bc6b07d8d913594de77d35ccfe8aa4c807d860d2912864"
+      "sha256": "7b10676cbf19c1261bdb6f3c75187b498f5efafc45ffb782c780ee631ef2e0c2"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_onset_spectral_features.pdf",
       "file": "figures/current/S6.pdf",
-      "sha256": "47295b0080a3378e34f4b43df506b52d892bf0c78154e19089d4d20a95e058b4"
+      "sha256": "c7c665bfd8ca5e3fa72add725f82d46f17d7e667a90741b44b07c530ea817899"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.png",
       "file": "figures/current/S6_AB.png",
-      "sha256": "1d3d5358a23b55056954c16c22e4fa36a668023d65d2040e31f6326daa4adf0c"
+      "sha256": "d315d1146a39d096b41a8e84f0ffc9378ed1caae357762cd1fa6ce2ac7bc5865"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panels_ab.pdf",
       "file": "figures/current/S6_AB.pdf",
-      "sha256": "dc82aa0506d51821da722a1155e748a0fec25bd771b0eee34ad7056a9f88a489"
+      "sha256": "f471b4ffe417893d56b595c691e6438815bc539fb09bbf835aff4d3faf287d6a"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panele_power_curves.png",
       "file": "figures/current/S6_E.png",
-      "sha256": "556db244705522102795d1e1bb0ab285e4a0c09798400ea38e5be706244e71d1"
+      "sha256": "f13f24cb8a1e7c6f5986d3d79e1710cf9fe6ccf0880cfdea7ded71cb134a920b"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_panele_power_curves.pdf",
       "file": "figures/current/S6_E.pdf",
-      "sha256": "ba11991c68da8a3080d413c3bbece85f99dde34b4ef71f365e26077f778e85a8"
+      "sha256": "b5ff2ba8114da52c011668ba23089b13eae1adcc6af0b586d9819d89ef19fe2e"
     },
     {
       "file": "figures/current/S8_evaluation_error.png",
@@ -175,12 +175,12 @@
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.png",
       "file": "figures/current/S6_TFR.png",
-      "sha256": "e833e0359e093ffecc618a2eeef798005e42a37546ab76164b99e0cb1b33a0b3"
+      "sha256": "c7e0e491f369e2d9f0af64caf3b22396cf54f64e5c577802487eff22b223b23b"
     },
     {
       "source": "results/paper-ready-figure/supplementary_onset_spectral_features/figures/supp_fig6_tfr_panels.pdf",
       "file": "figures/current/S6_TFR.pdf",
-      "sha256": "7a6caa54097cdfff35d8153754a0a4f0f2946ccc302803333cec1a8bdbc624bf"
+      "sha256": "47ce0e08f87d07ca8d3ff1f00284a1b48b829cc3772d43bb5e76d33c9f06e65b"
     }
   ],
   "caption_source": "docs/paper-draft/supplementary_figure_legends_s1_s8_zh.tex",
@@ -243,7 +243,7 @@
     ]
   },
   "S6_display_mode": "Two-line A/B labels; compact vertical legend inside upper-left corner of each E subplot; displayed phenotype label Gamma",
-  "S6_current_layout": "aligned_ab_low_band_frequency_20261103",
+  "S6_current_layout": "balanced_column_widths_20261103",
   "S6_current_version": "results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json",
   "S6_caption_revision": "report_caption_sync_20261103",
   "S6_caption_sources": {
@@ -283,28 +283,65 @@
   },
   "S6_panel_AB_layout": {
     "A_axes_bounds": [
-      0.155,
-      0.81,
-      0.295,
-      0.14
+      0.175,
+      0.75,
+      0.235,
+      0.195
     ],
     "title_x": [
-      0.075,
-      0.55
+      0.085,
+      0.565
     ],
     "title_y": 0.965,
     "title_font_pt": 22,
     "panel_letter_x": [
-      0.03,
-      0.505
+      0.04,
+      0.52
     ],
     "aligned_with_C_D_headers": true,
     "B_bounds": [
-      0.515,
-      0.79,
+      0.55,
+      0.68,
       0.42,
-      0.17
+      0.28
     ],
-    "B_legend_fraction": 0.415
+    "B_legend_fraction": 0.66,
+    "B_pie_fraction": 0.56,
+    "B_legend_swatch_pt": [
+      16,
+      10
+    ],
+    "B_legend_line_spacing_pt": 18
+  },
+  "S6_column_layout": {
+    "figure_inches": [
+      16.5,
+      13.7
+    ],
+    "content_left_x": [
+      0.085,
+      0.565
+    ],
+    "raw_TFR_width": 0.31,
+    "raw_y_height": [
+      0.495,
+      0.14
+    ],
+    "TFR_y_height": [
+      0.315,
+      0.125
+    ],
+    "TFR_colorbar_x": [
+      0.407,
+      0.887
+    ],
+    "E_first_x": 0.085,
+    "E_step_x": 0.2265,
+    "E_width": 0.17,
+    "E_y_height": [
+      0.045,
+      0.15
+    ],
+    "pie_aspect": "equal"
   }
 }

@@ -84,7 +84,7 @@
   ],
   "latex_validation": "Structure checked; TeX engine unavailable. Native figure PDF independently rasterized.",
   "visual_review": "PNG and independently rasterized PDF inspected; stacked legend is inside the first subplot, with no data curve occlusion.",
-  "markdown_sha256": "fd961ae68afb4fddb4a80af0b561d451c1ebac0b336fbbca7bb8c848cb324d92",
+  "markdown_sha256": "2bd3f618df04e51ed84102bb23d74eadd922f79706770f394f28fe06b855b86f",
   "independent_zip_extraction": true,
   "zip_files": 56,
   "S6_clinical_onset_verified_from_original_EDF": true,
@@ -176,34 +176,31 @@
   ],
   "concurrent_S6_update_preserved": true,
   "visual_review_S5": "TA red / TB blue with lightened, desaturated fills (alpha 0.96) and matching dark outlines; readable on dark and bright inferno regions. Contact markers remain on top.",
-  "visual_review_S6": "Full PNG, focused A/B PNG and independently rasterized A/B PDF inspected. A/B headers and panel letters align with C/D. All three A frequency labels are two-line; pie percentages stay inside sectors; no text is clipped or overlapping.",
+  "visual_review_S6": "Complete PNG, focused A/B PNG and independently rasterized full PDF inspected. Upper/lower visible column edges align; the enlarged pie remains circular. Equal-width C/D spectrograms retain both colorbars; the four E plots have clear tick labels and legends.",
   "S6_latest_render_revision": {
     "updated": "2026-11-03",
-    "version": "aligned_ab_low_band_frequency_20261103",
+    "version": "balanced_column_widths_20261103",
     "status": "PASS_AGENT_VALIDATION_PENDING_AUTHOR_VISUAL_REVIEW",
-    "A_title_left_aligned_with_C": true,
-    "B_title_left_aligned_with_D": true,
-    "A_B_header_font_pt": 22,
-    "A_B_letters_aligned_with_C_D": true,
-    "A_bar_axes_left_shift_figure_fraction": 0.045,
-    "A_low_bands_two_lines": [
-      "Low bands",
-      "1–13 Hz"
+    "alignment_offsets_mm": {
+      "A_C_left": 0.2575277777777842,
+      "A_C_right": 0.2724197037036863,
+      "B_D_left": 0.1285692970797095,
+      "B_D_right": -1.0104966666667006
+    },
+    "alignment_tolerance_mm": 4,
+    "pie_width_height_px": [
+      337.5677189948484,
+      337.5675767552548
     ],
-    "low_frequency_classification_source": "scripts/plot_topic5_early_spectral_phenotypes.py:classify_simple_state",
-    "classification_and_counts_unchanged": true,
+    "equal_C_D_raw_TFR_widths": true,
+    "E_adjacent_time_tick_labels_clear": true,
     "input_data_and_captions_unchanged": true,
-    "C_D_E_pixels_unchanged": true,
-    "unchanged_B_standalone_E_TFR_exports_retained": true,
-    "changed_png_bbox_xyxy": [
-      53,
-      25,
-      3205,
-      655
-    ],
-    "PDF_label_and_canvas_bounds_verified": true,
+    "cohort_examples_patient_counts_and_display_scales_unchanged": true,
+    "both_TFR_colorbars_retained": true,
+    "four_E_legends_fit_without_curve_or_onset_occlusion": true,
+    "PDF_text_within_canvas": true,
     "human_visual_review": "PENDING",
-    "agent_visual_review": "Full PNG, focused A/B PNG and independently rasterized A/B PDF inspected. A/B headers and panel letters align with C/D. All three A frequency labels are two-line; pie percentages stay inside sectors; no text is clipped or overlapping."
+    "agent_visual_review": "Complete PNG, focused A/B PNG and independently rasterized full PDF inspected. Upper/lower visible column edges align; the enlarged pie remains circular. Equal-width C/D spectrograms retain both colorbars; the four E plots have clear tick labels and legends."
   },
   "S6_caption_sources_and_copies_match": true,
   "S5_patients": [

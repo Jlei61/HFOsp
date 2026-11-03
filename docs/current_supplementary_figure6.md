@@ -1,13 +1,13 @@
 # 当前 Supplementary Figure 6
 
-2026-11-03 更新。当前补图 S6 为**发作早期频谱特征与能量频带的选择**，资产 `early_seizure_spectral_features`，布局 `aligned_ab_low_band_frequency_20261103`。当前版本记录见 [current_version.json](../results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json)，状态仍为 `PENDING_AUTHOR_VISUAL_REVIEW`。
+2026-11-03 更新。当前补图 S6 为**发作早期频谱特征与能量频带的选择**，资产 `early_seizure_spectral_features`，布局 `balanced_column_widths_20261103`。当前版本记录见 [current_version.json](../results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json)，状态仍为 `PENDING_AUTHOR_VISUAL_REVIEW`。
 
 ## 本次修改
 
 - **A：** 23 名患者、324 次发作的类型分布；Broadband 与 Gamma 的名称、读出频段分行显示，分别为 1–150 Hz 和 30–80 Hz。低频类型的图内名称缩短为 Low bands，分类与 7 次发作（2.2%）保持不变。Low bands 下方补充 1–13 Hz；A 的标题和内容左移收紧，A/B 的标题字号、字母位置分别与 C/D 对齐。
-- **B：** 用 E20 全部 17 次已分类发作的患者内饼图替换原 B。Broadband 与 Gamma 各 6 次（35.3%），Other 为 5 次（29.4%）；百分比完整位于扇区内，类型与发作数分行。B 饼图与图例左移，缩短二者间距。
-- **C、D：** 保留 Y15/SZ3（D3）和 E20/SZ8（HRB1）的原始脑电及时频示例，D 的显示名称改为 Gamma。C、D 各有独立的 TFR (dB) 色条，范围均为 −14 至 14 dB；左侧色条与右图频率轴文字留有间距。
-- **E：** 四个频带子图各有自己的图例，图内左上角竖排、12 号字、紧凑白底。蓝色为 Y15/SZ3 Broadband，绿色为 E20/SZ8 Gamma；曲线、起始虚线及 0–10 s 区域均未被遮挡。
+- **B：** 用 E20 全部 17 次已分类发作的患者内饼图替换原 B。Broadband 与 Gamma 各 6 次（35.3%），Other 为 5 次（29.4%）；百分比完整位于扇区内，类型与发作数分行。B 饼图等比例放大并保持圆形，图例延伸至与 D 相同的右边界。
+- **C、D：** 保留 Y15/SZ3（D3）和 E20/SZ8（HRB1）的原始脑电及时频示例，D 的显示名称改为 Gamma。C、D 各有独立的 TFR (dB) 色条，范围均为 −14 至 14 dB；左侧色条与右图频率轴文字留有间距。C/D 按相同宽度收窄，A/C、B/D 分别按实际内容的左右边界对齐。
+- **E：** 四个频带子图各有自己的图例，图内左上角竖排、12 号字、紧凑白底。蓝色为 Y15/SZ3 Broadband，绿色为 E20/SZ8 Gamma；曲线、起始虚线及 0–10 s 区域均未被遮挡。E 四个子图重新等间距排布，适配收窄后的整图。
 
 图内及中英文图注统一使用 Gamma；原分类字段 `gamma_nonbroadband`、缓存中的 `Gamma-dominant` 和分类标准保留原义。B 支持两类发作在 E20 内共存且占比最高，分母包含 Other；不将这一个患者的比例推广至全队列。
 
