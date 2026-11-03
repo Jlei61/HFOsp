@@ -137,7 +137,7 @@ def main():
  plt.rcParams.update({'font.family':'DejaVu Sans','font.size':20,'axes.labelsize':22,'xtick.labelsize':18,'ytick.labelsize':18,'pdf.fonttype':42,'axes.spines.top':False,'axes.spines.right':False})
  fig=plt.figure(figsize=(18,12.7),facecolor='white')
  # A. Directly labelled cohort distribution.
- ax=fig.add_axes([.20,.81,.25,.14]);order=['broadband_1_150','gamma_nonbroadband','low_frequency_only','other'];labels=['','','Low-frequency only','Other'];cc=[COLORS['Broadband'],COLORS['Gamma-dominant'],'#A5A5A5','#D4D4D4']
+ ax=fig.add_axes([.20,.81,.25,.14]);order=['broadband_1_150','gamma_nonbroadband','low_frequency_only','other'];labels=['','','Low bands','Other'];cc=[COLORS['Broadband'],COLORS['Gamma-dominant'],'#A5A5A5','#D4D4D4']
  data=counts.set_index('phenotype');nums=[int(data.loc[k,'n_seizures']) for k in order];fractions=np.array(nums)/324
  ax.barh(np.arange(4),fractions*100,color=cc,height=.58);ax.set_yticks(range(4),labels);ax.invert_yaxis();ax.set_xlim(0,50);ax.set_xticks([0,20,40]);ax.set_xlabel('Seizures (%)',fontsize=20,labelpad=2)
  ax.tick_params(axis='y',length=0,pad=8,labelsize=18)
@@ -213,6 +213,7 @@ def main():
  metadata['display_label_mapping']=DISPLAY_LABELS
  metadata['panels']['A']='Cohort spectral phenotype distribution with broadband 1-150 Hz and gamma 30-80 Hz readout bands'
  metadata['panel_A_band_labels_hz']={'Broadband':[1,150],'Gamma':[30,80]}
+ metadata['panel_A_display_label_mapping']={'low_frequency_only':'Low bands'}
  metadata['pie_typography']={'title_pt':20,'legend_pt':18,'percentage_pt':14,'composite_checks':composite_pie_checks,'standalone_checks':standalone_pie_checks}
  metadata['label_display']={'A':'Type on first line; readout band on smaller grey second line','B':'Type on first line; seizure count on smaller grey second line','secondary_text_pt':14}
  metadata['within_patient_distribution']=patient

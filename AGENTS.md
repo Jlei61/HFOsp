@@ -1,5 +1,5 @@
 <!-- CURRENT_SUPPLEMENTARY_FIGURE6_20261103 -->
-> **当前 Supplementary Figure 6（2026-11-03 修改）：** 先读 [当前 S6](docs/current_supplementary_figure6.md) 与 `results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json`。A 为类型与读出频段分行；B 为 E20 全部 17 次发作的患者内饼图；C/D 保留 Y15/SZ3、E20/SZ8，各自配有 −14 至 14 dB 的 TFR 色条；E 四个子图各在左上角竖排 12 号字图例；图内及图注统一显示 `Gamma`。当前布局 `dual_tfr_colorbars_20261103`，待作者目视检查。已同步 Supplementary 检查报告与中英文图注，后续同步入口见当前 S6。共享机器旧 worktree 以主目录此入口为准；多频带空间相关为 S7，不得按旧 S6 编号覆盖本图。
+> **当前 Supplementary Figure 6（2026-11-03 修改）：** 先读 [当前 S6](docs/current_supplementary_figure6.md) 与 `results/paper-ready-figure/supplementary_onset_spectral_features/current_version.json`。A 为类型与读出频段分行，低频类型显示为 Low bands；B 为 E20 全部 17 次发作的患者内饼图；C/D 保留 Y15/SZ3、E20/SZ8，各自配有 −14 至 14 dB 的 TFR 色条；E 四个子图各在左上角竖排 12 号字图例；图内及图注统一显示 `Gamma`。当前布局 `dual_tfr_colorbars_20261103`，待作者目视检查。已同步 Supplementary 检查报告与中英文图注，后续同步入口见当前 S6。共享机器旧 worktree 以主目录此入口为准；多频带空间相关为 S7，不得按旧 S6 编号覆盖本图。
 <!-- /CURRENT_SUPPLEMENTARY_FIGURE6_20261103 -->
 
 <!-- ADAPTATION_NOTATION_20261102 -->

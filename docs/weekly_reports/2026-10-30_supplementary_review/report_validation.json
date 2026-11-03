@@ -84,7 +84,7 @@
   ],
   "latex_validation": "Structure checked; TeX engine unavailable. Native figure PDF independently rasterized.",
   "visual_review": "PNG and independently rasterized PDF inspected; stacked legend is inside the first subplot, with no data curve occlusion.",
-  "markdown_sha256": "89ae490437ed5762f8a32874ed06faf4ebb90994f35383eac281489f5330414e",
+  "markdown_sha256": "45dbf61d440af46a5065230f666ea4f39713c6f01458889ceecc5ea63b1e3d6b",
   "independent_zip_extraction": true,
   "zip_files": 56,
   "S6_clinical_onset_verified_from_original_EDF": true,
@@ -384,5 +384,26 @@
     "TB": "blue"
   },
   "S5_all_trajectories_and_frame_data_unchanged": true,
-  "S5_style_update_validation": "Native PNG and focused crops plus independent PDF raster inspected. Ten red TA arrows and ten blue TB arrows verified; numerical trajectory metadata identical to previous version. Prior 100 native regression checks retained; this style-only edit adds no scientific calculation."
+  "S5_style_update_validation": "Native PNG and focused crops plus independent PDF raster inspected. Ten red TA arrows and ten blue TB arrows verified; numerical trajectory metadata identical to previous version. Prior 100 native regression checks retained; this style-only edit adds no scientific calculation.",
+  "S6_latest_label_revision": {
+    "updated": "2026-11-03",
+    "version": "a_low_bands_20261103",
+    "panel": "A",
+    "old_display_label": "Low-frequency only",
+    "new_display_label": "Low bands",
+    "unchanged_classification_field": "low_frequency_only",
+    "n_seizures": 7,
+    "classification_and_counts_unchanged": true,
+    "source_data_and_captions_unchanged": true,
+    "B_C_D_E_pixels_unchanged": true,
+    "changed_png_bbox_xyxy": [
+      169,
+      353,
+      700,
+      406
+    ],
+    "PNG_and_PDF_label_verified": true,
+    "human_visual_review": "PENDING",
+    "agent_visual_review": "A/B PNG and independently rasterized PDF inspected; Low bands fits on one line and matches the requested wording."
+  }
 }
